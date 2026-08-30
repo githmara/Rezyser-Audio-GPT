@@ -1,0 +1,74 @@
+name: Sync Dev Release (Skrocona procedura wydawnicza)
+
+# Skrocona procedura wydawnicza dla zmian DEV-TOOLS-ONLY (wzorzec od v18.6,
+# uzyty m.in. w v18.22.0 i v18.24.0): dopisany dev-tooling ladowal dotad
+# w opublikowanym wydaniu recznie — maintainer przesuwal tag i wklejal
+# zaktualizowana sekcje RELEASE_NOTES.md do body Release'u.
+#
+# Trigger: workflow_dispatch z inputem `potwierdz=tak` (szyba bezpieczenstwa,
+# tak samo jak w `draft-release.yml`). Bot wykonuje:
+#   1. Odczyt VERSION i sprawdzenie, ze tag v<wersja> ISTNIEJE na origin
+#      (tworzenie nowego wydania to `draft-release.yml`, nie ten workflow).
+#   2. Sprawdzenie, ze HEAD to `main` zgodny z origin/main oraz ze wydanie
+#      dla tagu jest OPUBLIKOWANE (draft ma wlasna droge: upload + Publish).
+#   3. BRAMKE dev-tools-only: domkniecie importow z `main.py` policzone AST-em
+#      kontra pliki zmienione miedzy tagiem a HEAD. Zmiana w runtime, w VERSION,
+#      `requirements.txt`, `*.spec`, `installer.iss`, `dictionaries/` albo
+#      `docs/` = ODMOWA bez obejscia (asset instalatora zostaje z poprzedniego
+#      builda, wiec przesuniety tag klamalby o zawartosci wlasnego `.exe`).
+#   4. Wyciecie sekcji `## <wersja>` z RELEASE_NOTES.md — TYM SAMYM skryptem,
+#      ktorego uzywa `draft-release.yml` (`.github/scripts/release_notes_sekcja.py`).
+#   5. Force-push tagu na HEAD (TAG-ONLY — jedyny dozwolony wyjatek od zakazu
+#      force-pusha) i synchronizacje body Release'u.
+#
+# Czego workflow NIE robi: nie buduje EXE, nie rusza assetow, nie bumpuje
+# VERSION. Jesli którakolwiek z tych rzeczy jest potrzebna, to znaczy, ze zmiana
+# nie jest dev-tools-only i idzie pelna procedura.
+
+on:
+  workflow_dispatch:
+    inputs:
+      potwierdz:
+        description: 'Wpisz „tak" (bez cudzyslowow), zeby przesunac tag na HEAD i zsynchronizowac body Release z RELEASE_NOTES.md. Inny tekst = no-op.'
+        required: true
+        default: 'nie'
+
+# Dwa rownolegle biegi walczylyby o ten sam tag (force-push kontra force-push),
+# a przerwanie w polowie zostawiloby przesuniety tag z niezsynchronizowanym
+# body. Kolejkujemy zamiast anulowac.
+concurrency:
+  group: sync-dev-release
+  cancel-in-progress: false
+
+jobs:
+  sync_release:
+    runs-on: ubuntu-latest
+    permissions:
+      # contents: write — force-push tagu (git push --force refs/tags/...)
+      # oraz `gh release edit` (zmiana body istniejacego wydania).
+      contents: write
+
+    steps:
+      - name: Pobranie kodu repozytorium (pelna historia + tagi)
+        uses: actions/checkout@v5
+        # fetch-depth: 0 — bramka dev-tools-only liczy `git diff tag..HEAD`,
+        # wiec potrzebuje historii az do commitu wydawniczego. fetch-tags
+        # explicit dla jasnosci (default w v5): bez tagow nie ma czego przesuwac.
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Konfiguracja srodowiska Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Walidacja, bramka dev-tools-only, przesuniecie tagu i sync body
+        # UWAGA: user-input NIE idzie przez argv ani przez interpolacje `${{ }}`
+        # w `run:` — skrypt czyta go z os.environ. Ta sama pulapka shellu, ktora
+        # omija `issue_intake_sami.py` (word-splitting na cudzyslowach).
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          POTWIERDZENIE: ${{ github.event.inputs.potwierdz }}
+        run: python .github/scripts/sync_dev_release.py

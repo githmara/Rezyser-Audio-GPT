@@ -56,20 +56,16 @@ from typing import Any
 
 import yaml
 
+import dev_konsola
+
 
 # ---------------------------------------------------------------------------
 # STDOUT UTF-8 (fix dla Windowsa — cp1250 nie umie emoji jak ✅ ⚠️ ℹ️ ❌)
 # ---------------------------------------------------------------------------
-# Ten sam wzorzec co w `buduj_wydanie.py`. Bez niego `print("✅ ...")` wywala
-# UnicodeEncodeError w natywnym CMD (dziedziczy lokalną cp1250 zamiast UTF-8),
-# zanim cokolwiek innego zdąży się zalogować. Python 3.7+ ma `reconfigure()`;
-# w starszych wersjach po prostu idziemy dalej.
-if sys.platform == "win32":
-    for strumien in (sys.stdout, sys.stderr):
-        try:
-            strumien.reconfigure(encoding="utf-8")
-        except (AttributeError, OSError):
-            pass
+# Bez tego `print("✅ ...")` wywala UnicodeEncodeError w natywnym CMD (dziedziczy
+# lokalną cp1250 zamiast UTF-8), zanim cokolwiek innego zdąży się zalogować.
+# Od v18.25 jedna implementacja dla wszystkich dev-tooli → `dev_konsola`.
+dev_konsola.skonfiguruj_stdout()
 
 
 # ---------------------------------------------------------------------------

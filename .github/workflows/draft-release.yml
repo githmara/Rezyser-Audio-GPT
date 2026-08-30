@@ -90,37 +90,13 @@ jobs:
       - name: Wytnij sekcje `## <wersja>` z RELEASE_NOTES.md
         env:
           WERSJA: ${{ steps.wersja.outputs.wersja }}
-        # Inline Python heredoc — regex lookahead na nastepny naglowek
-        # `## ` lub EOF (struktura RELEASE_NOTES.md od v15.2.5).
-        run: |
-          python3 - <<'PY'
-          import pathlib, re, os, sys
-          wersja = os.environ["WERSJA"]
-          t = pathlib.Path("RELEASE_NOTES.md").read_text(encoding="utf-8")
-          # Wzorzec: "## <wersja> — patch release ..." (od v15.2.6+) LUB
-          # "## <wersja> ..." (kompatybilne wstecznie z wczesniejszymi formatami).
-          # Konczy sie zaraz przed nastepnym "## " (nastepna sekcja wersji)
-          # ALBO na koncu pliku (\Z) — bez tej alternatywy sekcja bedaca
-          # ostatnia w pliku nie zostalaby znaleziona wcale (v18.9).
-          escaped = re.escape(wersja)
-          pattern = rf"(## {escaped}(?:\s+—|\s+\W).*?)(?=\n## |\Z)"
-          m = re.search(pattern, t, re.DOTALL)
-          if not m:
-              sys.stderr.write(
-                  f"::error::Sekcja `## {wersja}` nie znaleziona w "
-                  f"RELEASE_NOTES.md. Dopisz pelna sekcje wersji (## <wersja> — "
-                  f"patch release ...) przed odpaleniem workflow.\n"
-              )
-              sys.exit(2)
-          tresc = m.group(1).rstrip()
-          # Usun koncowy separator sekcji `---` (nalezy MIEDZY sekcje, nie do
-          # tresci) — inaczej body Release (a wiec i changelog w DialogAktualizacji)
-          # konczy sie nieeleganckimi myslnikami.
-          tresc = re.sub(r"\n+-{3,}[ \t]*$", "", tresc).rstrip() + "\n"
-          out = pathlib.Path("/tmp/release_notes.md")
-          out.write_text(tresc, encoding="utf-8")
-          print(f"OK: {len(tresc)} znakow z sekcji ## {wersja} zapisanych w {out}")
-          PY
+        # Logika (regex z wymaganym separatorem po numerze wersji, lookahead na
+        # nastepny naglowek `## ` lub EOF, obciecie separatora `---`) mieszkala
+        # tu inline do v18.24. Wyjechala do `.github/scripts/release_notes_sekcja.py`,
+        # gdy `sync-dev-release.yml` napisal ja od nowa i zgubil OBIE wpisane tu
+        # lekcje — w tym pulapke prefiksu numeru wersji (dla `18.2` goly wzorzec
+        # dopasowuje naglowek `## 18.24.0`). Jedno miejsce, dwa workflowy.
+        run: python .github/scripts/release_notes_sekcja.py /tmp/release_notes.md
 
       - name: Utworz tag i wypchnij na origin
         env:

@@ -21,9 +21,11 @@ systemowego tłumacza, walidacji silnikiem. To jest wiedza o materiale — żyje
 w narzędziu (`_tryby.py`, `_opowiesci.py`, `_ui.py`, `_docs.py`), bo tylko ono
 wie, co w jego plikach jest kontraktem, a co prozą.
 
-Moduł jest DEV-ONLY. Zależy od `ruamel.yaml` (round-trip) i — leniwie, wewnątrz
-funkcji — od `anthropic`, `dotenv` oraz `audyt_leakow`. Nie importuje silnika
-aplikacji ani `sciezki`: chodzi wyłącznie ze źródła, jak `przeglad_tlumaczen`
+Moduł jest DEV-ONLY. Zależy od `ruamel.yaml` (round-trip), lekkiego rodzeństwa
+bez zależności (`dev_konsola`, `przeglad_tlumaczen`, `tlumacz_bramki`) oraz —
+leniwie, wewnątrz funkcji — od `anthropic`, `dotenv` i `audyt_leakow`. Z silnika
+aplikacji bierze WYŁĄCZNIE `core_llm` (wiedza o samplingu modeli, v18.24);
+`sciezki` nie dotyka wcale — chodzi ze źródła, jak `przeglad_tlumaczen`
 i `build_release`.
 
 Konwencja katalogu słowników: KAŻDA funkcja czytająca dysk dostaje `dict_dir`
@@ -36,7 +38,6 @@ from __future__ import annotations
 import json
 import os
 import re
-import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -45,6 +46,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.scalarstring import LiteralScalarString
 
 import core_llm as cl
+import dev_konsola
 import przeglad_tlumaczen
 import tlumacz_bramki
 
@@ -52,20 +54,12 @@ import tlumacz_bramki
 # ---------------------------------------------------------------------------
 # STDOUT UTF-8 (cmd.exe vs cp1250)
 # ---------------------------------------------------------------------------
-def skonfiguruj_stdout() -> None:
-    """Przełącza stdout/stderr na UTF-8 na Windows (fail-soft).
-
-    Logi narzędzi cytują treści z dziewięciu paczek językowych — bez tego
-    pierwszy islandzki znak w komunikacie wywraca cały przebieg
-    ``UnicodeEncodeError`` w konsoli cp1250.
-    """
-    if sys.platform != "win32":
-        return
-    for strumien in (sys.stdout, sys.stderr):
-        try:
-            strumien.reconfigure(encoding="utf-8")   # type: ignore[union-attr]
-        except (AttributeError, OSError):
-            pass
+# Re-eksport z `dev_konsola` (v18.25): implementacja przeniosła się do modułu
+# bez zależności, bo tę samą konfigurację powtarzało siedem dev-tooli — także te
+# spoza rodziny (`build_release`, `audyt_leakow`), które nie mają powodu ciągnąć
+# ruamel ani `core_llm`. Nazwa zostaje w rdzeniu, bo czterech braci woła
+# `tlumacz_rdzen.skonfiguruj_stdout()` i nie ma sensu ruszać ich importów.
+skonfiguruj_stdout = dev_konsola.skonfiguruj_stdout
 
 
 # ---------------------------------------------------------------------------
@@ -159,9 +153,10 @@ def zainicjuj_klienta_anthropic(root: Path) -> Any:
     """Zwraca klienta `anthropic.Anthropic` z kluczem z `golden_key.env`.
 
     Structured outputs (`output_config`) są dziś dostępne wyłącznie przez surowe
-    SDK Anthropic, dlatego czterej bracia korzystający z rdzenia NIE idą przez
-    `core_llm` i nie honorują `LLM_PROVIDER`. Koszt jest świadomy, ale od v18.24
-    przestaje być MILCZĄCY — patrz `tlumacz_bramki.ostrzez_o_kontrakcie_providera`.
+    SDK Anthropic, dlatego pięciu braci korzystających z rdzenia (przepisy, akcenty,
+    Opowieści, Poliglota i — od v18.25 — UI) NIE idzie przez `core_llm` i nie
+    honoruje `LLM_PROVIDER`. Koszt jest świadomy, ale od v18.24 przestaje być
+    MILCZĄCY — patrz `tlumacz_bramki.ostrzez_o_kontrakcie_providera`.
     """
     try:
         import anthropic
@@ -210,6 +205,10 @@ def wywolaj_llm(
     Args:
         system: gotowy prompt systemowy narzędzia (rdzeń go NIE buduje — wiedza
             o materiale należy do narzędzia).
+        pozycje: trójki `(id, kind, source)`. `kind` = rodzaj materiału wewnątrz
+            pliku (pole / komentarz / prompt), interpretowany przez prompt
+            systemowy narzędzia. Narzędzie o materiale JEDNORODNYM podaje pusty
+            `kind` i wtedy pole nie wchodzi do payloadu (builder UI).
         wskazowka_limitu: tekst dopisywany do komunikatu przy uderzeniu w
             `max_tokens` (np. „zmniejsz BATCH_MAX_ZNAKOW (obecnie 12 000)").
         kontekst_paczki: terminologia JUŻ UŻYWANA w paczce docelowej
@@ -247,8 +246,15 @@ def wywolaj_llm(
     for nazwa_pola, wartosc in (pola_payloadu or {}).items():
         if wartosc:
             payload[nazwa_pola] = wartosc
+    # `kind` opisuje RODZAJ materiału w obrębie jednego pliku (pole vs komentarz,
+    # etykieta vs prompt) — prompty systemowe braci uczą model, co z tą etykietą
+    # zrobić. Builder UI ma materiał jednorodny (wartość z `ui.yaml`) i podaje
+    # rodzaj pusty; wtedy pola NIE wysyłamy, bo `"kind": ""` byłoby dla modelu
+    # szumem — a zapytanie UI zostaje kształtem, jaki miało przed konsolidacją.
     payload["items"] = [
-        {"id": i, "kind": rodzaj, "source": src} for i, rodzaj, src in pozycje
+        ({"id": i, "kind": rodzaj, "source": src} if rodzaj
+         else {"id": i, "source": src})
+        for i, rodzaj, src in pozycje
     ]
 
     kwargs: dict[str, Any] = dict(

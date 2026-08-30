@@ -10,6 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import dev_konsola
 import generuj_dokumentacje
 
 
@@ -20,14 +21,8 @@ import generuj_dokumentacje
 # Python domyślnie używa kodowania cp1250 dla stdout — a to NIE umie znaków
 # z płaszczyzny astralnej Unicode (emoji U+1F5xx). print("🔍 ...") wywala
 # wtedy UnicodeEncodeError zanim w ogóle zdążymy wypisać cokolwiek innego.
-# Wymuszamy UTF-8 przed pierwszym printem. Python 3.7+ ma reconfigure(); w
-# starszych wersjach po prostu idziemy dalej.
-if sys.platform == "win32":
-    for strumien in (sys.stdout, sys.stderr):
-        try:
-            strumien.reconfigure(encoding="utf-8")
-        except (AttributeError, OSError):
-            pass
+# Od v18.25 jedna implementacja dla wszystkich dev-tooli → `dev_konsola`.
+dev_konsola.skonfiguruj_stdout()
 
 
 # =============================================================================

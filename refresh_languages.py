@@ -37,18 +37,15 @@ from __future__ import annotations
 
 import argparse
 import re
-import sys
 from pathlib import Path
 
 import yaml
 
+import dev_konsola
+
 # STDOUT UTF-8 (natywne nazwy: cyrylica, 中文, Þ/Æ — cmd.exe domyślnie cp1250).
-if sys.platform == "win32":
-    for _strumien in (sys.stdout, sys.stderr):
-        try:
-            _strumien.reconfigure(encoding="utf-8")
-        except (AttributeError, OSError):
-            pass
+# Wspólna implementacja dev-tooli od v18.25 → `dev_konsola`.
+dev_konsola.skonfiguruj_stdout()
 
 ROOT = Path(__file__).resolve().parent
 DICT_DIR = ROOT / "dictionaries"

@@ -84,18 +84,14 @@ import yaml
 import core_llm as cl
 import przeglad_tlumaczen
 import tlumacz_bramki
+import tlumacz_rdzen
 from tlumacz_ai import sciezka_cache_tlumaczenia, tlumacz_dlugi_tekst
 
 
 # ---------------------------------------------------------------------------
-# STDOUT UTF-8 (spójnie z `generuj_dokumentacje.py` — cmd.exe vs cp1250)
+# STDOUT UTF-8 (wspólna implementacja dev-tooli od v18.25 → `dev_konsola`)
 # ---------------------------------------------------------------------------
-if sys.platform == "win32":
-    for strumien in (sys.stdout, sys.stderr):
-        try:
-            strumien.reconfigure(encoding="utf-8")
-        except (AttributeError, OSError):
-            pass
+tlumacz_rdzen.skonfiguruj_stdout()
 
 
 # ---------------------------------------------------------------------------
@@ -115,10 +111,13 @@ KOD_ZRODLOWY = "pl"
 # nowego YAML-a do paczki PL zaowocuje automatycznym tłumaczeniem we wszystkich
 # językach docelowych przy najbliższym ``--wszystkie`` (bez zmian w kodzie).
 
-# Regex placeholdera — 1:1 jak w `generuj_dokumentacje.py`, żeby siatka
-# {klucz.zagniezdzony} była definiowana w jednym kanonicznym miejscu
-# semantycznym (jak go poszerzymy tam, poszerzamy i tu).
-PLACEHOLDER_REGEX = re.compile(r"\{([a-zA-Z_][a-zA-Z0-9_.]*)\}")
+# Regex placeholdera — od v18.25 z rdzenia rodziny (wcześniej trzy identyczne
+# kopie: rdzeń, `_ui.py` i tu). Definicja jest ta sama, co w
+# `generuj_dokumentacje.PLACEHOLDER_REGEX`, ale TAMTA pozostaje osobna świadomie:
+# generator docsów nie należy do rodziny tłumaczy i rozwija placeholdery do HTML-a
+# na własnym kontrakcie. Jeśli poszerzysz siatkę `{klucz.zagniezdzony}`, poszerz
+# ją w obu miejscach.
+PLACEHOLDER_REGEX = tlumacz_rdzen.PLACEHOLDER_REGEX
 
 # Tokeny zamrożone. Unicode brackety ⟦ ⟧ (U+27E6, U+27E7) — nie kolidują
 # z treścią (nie występują w manualu ani w żadnym naturalnym języku),
@@ -138,39 +137,11 @@ TOKEN_REGEX = re.compile(r"⟦(\d+)⟧")
 #
 # Nazwa = `jezyk_docelowy` podawany modelowi ("Translate ... into **{jezyk_docelowy}**").
 # Bazowy prompt jest po angielsku, więc nazwa polska („fiński") i natywna („Suomi")
-# działają identycznie. `_FALLBACK_JEZYKOW` = ostatnia deska ratunku, gdy pliku
-# rejestru brak (np. świeży checkout przed pierwszym refresh) — 8 języków z v17.x.
-_REJESTR_JEZYKOW = ROOT / "jezyki_docelowe.yaml"
-_FALLBACK_JEZYKOW: dict[str, str] = {
-    "en": "angielski", "fi": "fiński", "ru": "rosyjski", "is": "islandzki",
-    "it": "włoski", "de": "niemiecki", "fr": "francuski", "es": "hiszpański",
-}
-
-
-def _wczytaj_mape_jezykow() -> dict[str, str]:
-    """Wczytuje rejestr ISO→nazwa z `jezyki_docelowe.yaml` (fallback: wbudowane 8).
-
-    Filtruje wpisy nie-stringowe i język źródłowy `pl` (gdyby ktoś go dopisał) —
-    `pl` jest źródłem, nie celem tłumaczenia.
-    """
-    if not _REJESTR_JEZYKOW.is_file():
-        return dict(_FALLBACK_JEZYKOW)
-    try:
-        with open(_REJESTR_JEZYKOW, "r", encoding="utf-8") as fh:
-            dane = yaml.safe_load(fh)
-    except (OSError, yaml.YAMLError):
-        return dict(_FALLBACK_JEZYKOW)
-    if not isinstance(dane, dict):
-        return dict(_FALLBACK_JEZYKOW)
-    mapa = {
-        str(k): str(v)
-        for k, v in dane.items()
-        if isinstance(k, str) and isinstance(v, str) and k != KOD_ZRODLOWY
-    }
-    return mapa or dict(_FALLBACK_JEZYKOW)
-
-
-MAPA_JEZYKOW: dict[str, str] = _wczytaj_mape_jezykow()
+# działają identycznie. Wbudowany fallback ośmiu języków v17.x
+# (`tlumacz_rdzen.FALLBACK_JEZYKOW`) = ostatnia deska ratunku, gdy pliku rejestru
+# brak (np. świeży checkout przed pierwszym refresh). Od v18.25 samo wczytywanie
+# żyje w rdzeniu rodziny — tu został wybór języka źródłowego.
+MAPA_JEZYKOW: dict[str, str] = tlumacz_rdzen.wczytaj_mape_jezykow(ROOT, KOD_ZRODLOWY)
 
 
 # ---------------------------------------------------------------------------
@@ -1282,8 +1253,8 @@ def _rodzenstwo_audytu() -> tuple[Any, Any]:
     """Leniwy import dwóch braci: tylko audyt potrzebuje silnika Poligloty.
 
     Ścieżka tłumacząca nie płaci za `core_poliglota` (docx, num2words) ani za
-    `ruamel` — dokładnie tym samym argumentem, co lazy import `natywna_nazwa`
-    w :func:`main`.
+    `ruamel` — a od v18.25 nie płaci wcale, bo natywną nazwę języka bierze
+    z `tlumacz_rdzen` zamiast z silnika Poligloty.
     """
     import buduj_wielojezyczne_akcenty as bwa
     import buduj_wielojezyczne_poliglota as bwp
@@ -1732,6 +1703,17 @@ def _parsuj_argumenty() -> argparse.Namespace:
         default="",
         help="Path for the full markdown audit report (used with --audyt).",
     )
+    # Wzorzec z `build_release.py`: jedna flaga zdejmująca JEDEN
+    # human-in-the-loop, bez wyłączania czegokolwiek innego.
+    parser.add_argument(
+        "-y", "--yes",
+        action="store_true",
+        help="Skip the interactive confirmation shown when LLM_PROVIDER="
+             "openai_compat sends this run to a non-Anthropic endpoint. Nothing "
+             "else changes: the provider contract, the gates and the draft "
+             "workflow stay exactly as they are. Use case: CI/CD or automation by "
+             "an agent, where there is nobody to answer the prompt.",
+    )
     args = parser.parse_args()
     if args.audyt and (args.klucz or args.skip_existing or args.dry_run
                        or args.finalizuj):
@@ -1802,8 +1784,15 @@ def _wybierz_jezyki(args: argparse.Namespace) -> list[str]:
     return kody
 
 
-def _zainicjuj_klienta() -> Any:
+def _zainicjuj_klienta(*, potwierdz: bool = True) -> Any:
     """Buduje klienta LLM (`core_llm`) z `golden_key.env`.
+
+    Args:
+        potwierdz: gdy ``True`` (domyślnie) i środowisko wskazuje endpoint
+            OpenAI-compatible, przebieg wymaga potwierdzenia od człowieka
+            (`tlumacz_bramki.ostrzez_o_kontrakcie_providera`). `-y/--yes` ustawia
+            ``False`` i pomija wywołanie w całości — flagę dodaje się świadomie,
+            więc ostrzeżenie nie ma już nikogo ostrzegać.
 
     Od v18.4 provider-agnostic: domyślnie Anthropic Claude (`ANTHROPIC_API_KEY`,
     `sk-ant-`), a przy `LLM_PROVIDER=openai_compat` dowolny endpoint zgodny z OpenAI.
@@ -1827,7 +1816,8 @@ def _zainicjuj_klienta() -> Any:
     except ImportError:
         pass   # python-dotenv jest w requirements; fallback i tak ma sens
 
-    tlumacz_bramki.ostrzez_o_kontrakcie_providera(honoruje=True)
+    if potwierdz:
+        tlumacz_bramki.ostrzez_o_kontrakcie_providera(honoruje=True)
 
     klient = cl.zbuduj_klienta(cl.wczytaj_konfiguracje())
     if klient is None:
@@ -1922,12 +1912,7 @@ def main() -> int:
         print(f"✅ Finalized: {zmienione} | ⏭️ already canonical: {nie_drafty} | ⚠️ missing file: {braki}")
         return 0
 
-    klient: Any = None if args.dry_run else _zainicjuj_klienta()
-
-    # 13.4: import lazy — `core_poliglota` dorzuca docx/num2words. Skrypt
-    # uruchamiany w czystym kontekście CLI nie powinien płacić za to przy
-    # imporcie modułu, tylko gdy faktycznie idzie tłumaczyć.
-    from core_poliglota import natywna_nazwa
+    klient: Any = None if args.dry_run else _zainicjuj_klienta(potwierdz=not args.yes)
 
     sukcesy: list[str] = []
     porazki: list[str] = []
@@ -1944,7 +1929,9 @@ def main() -> int:
 
     for kod in kody:
         nazwa_pl = MAPA_JEZYKOW[kod]
-        nazwa_natywna = natywna_nazwa(kod)
+        # Natywna nazwa („Suomi" zamiast „fiński") z rdzenia rodziny — do v18.24
+        # ciągnął ją tu lazy import `core_poliglota` razem z docx/num2words.
+        nazwa_natywna = tlumacz_rdzen.natywna_nazwa(DICT_DIR, kod)
         print(f"\n========== {kod.upper()} ({nazwa_pl} / {nazwa_natywna}) ==========")
         wszystko_ok = True
         for nazwa_pliku, id_szablonu, sekcje_pl in szablony:

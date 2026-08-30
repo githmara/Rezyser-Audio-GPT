@@ -28,13 +28,14 @@ Architektura (decyzja 13.1 — Etap 2):
      (zob. `_PROMPT_SYSTEMOWY`). Tokenizacja `&` byłaby błędem —
      model nie miałby jak przesunąć ampersanda na sensowną literę.
 
-  4. Liście trafiają do Anthropic Messages API (`messages.create`) w
-     porcjach po `BATCH_SIZE`, ze STRUKTURALNYM wyjściem
-     `output_config={"format": {"type": "json_schema", "schema": SCHEMA_TLUMACZENIA}}`
+  4. Liście trafiają do Anthropic Messages API w porcjach po `BATCH_SIZE`,
+     ze STRUKTURALNYM wyjściem (`output_config` + `tlumacz_rdzen.SCHEMA_TLUMACZENIA`)
      — gwarancja mocniejsza niż OpenAI `json_object` (wymusza schemat
      `{"translations": [{"id", "target"}]}`, nie tylko poprawny JSON).
      Ucięcie odpowiedzi (`stop_reason == "max_tokens"`) przerywa CAŁY
-     batch (sygnał: zmniejsz `BATCH_SIZE`).
+     batch (sygnał: zmniejsz `BATCH_SIZE`). Samo wywołanie od v18.25 należy
+     do `tlumacz_rdzen` — ten builder wynalazł structured outputs dla całej
+     rodziny i był ostatnim, który trzymał ich prywatną kopię.
 
   5. WALIDACJE per-liść (przed iniekcją):
        * Multiset tokenów `⟦P\\d+⟧` i `⟦S\\d+⟧` w `tgt` musi być
@@ -64,8 +65,6 @@ from __future__ import annotations
 
 import argparse
 import io
-import json
-import os
 import re
 import sys
 from collections import Counter
@@ -74,20 +73,15 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
-import core_llm as cl
 import przeglad_tlumaczen
 import tlumacz_bramki
+import tlumacz_rdzen
 
 
 # ---------------------------------------------------------------------------
-# STDOUT UTF-8 (spójnie z resztą skryptów buildowych — cmd.exe vs cp1250)
+# STDOUT UTF-8 (wspólna implementacja dev-tooli od v18.25 → `dev_konsola`)
 # ---------------------------------------------------------------------------
-if sys.platform == "win32":
-    for strumien in (sys.stdout, sys.stderr):
-        try:
-            strumien.reconfigure(encoding="utf-8")
-        except (AttributeError, OSError):
-            pass
+tlumacz_rdzen.skonfiguruj_stdout()
 
 
 # ---------------------------------------------------------------------------
@@ -111,43 +105,15 @@ KOD_ZRODLOWY = "pl"
 BATCH_SIZE = 80
 MAX_TOKENS_OUT = 16_000
 
-# Tłumaczenie to odwzorowanie, nie wyprowadzanie — sampling zerujemy (bliźniacza
-# stała `tlumacz_rdzen.TEMPERATURA_TLUMACZENIA`; scalenie należy do konsolidacji
-# `ui`/`docs` na rdzeń). Wartość jest NIEDOMYŚLNA, więc część modeli odrzuca ją
-# kodem 400 — kogo pominąć bez próby, rozstrzyga `core_llm.honoruje_temperature`.
-TEMPERATURA_TLUMACZENIA = 0.0
-
-# Schemat structured-outputs (Anthropic `output_config.format`). Gwarantuje kształt
-# odpowiedzi na poziomie API (mocniej niż OpenAI `json_object`). Ograniczenia JSON
-# Schema strukturalnych wyjść: brak min/maxLength, każdy obiekt z
-# `additionalProperties: false`. `id`+`target` 1:1 z payloadem `items`.
-SCHEMA_TLUMACZENIA = {
-    "type": "object",
-    "properties": {
-        "translations": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "integer"},
-                    "target": {"type": "string"},
-                },
-                "required": ["id", "target"],
-                "additionalProperties": False,
-            },
-        },
-    },
-    "required": ["translations"],
-    "additionalProperties": False,
-}
-
 
 # ---------------------------------------------------------------------------
 # Tokenizacja — dwa typy markerów
 # ---------------------------------------------------------------------------
-# Placeholder dynamiczny `{nazwa_parametru}` — semantyka tożsama z
-# `buduj_wielojezyczne_docs.py` (`PLACEHOLDER_REGEX` tam vs. tu).
-PLACEHOLDER_REGEX = re.compile(r"\{([a-zA-Z_][a-zA-Z0-9_.]*)\}")
+# Placeholder dynamiczny `{nazwa_parametru}` — jedna definicja dla całej rodziny
+# (v18.25; wcześniej trzy identyczne kopie: rdzeń, tu i `_docs.py`). Alias, nie
+# import nazwy, bo w tym module występuje w kilku miejscach — ten sam zabieg co
+# u brata od przepisów Reżysera.
+PLACEHOLDER_REGEX = tlumacz_rdzen.PLACEHOLDER_REGEX
 
 # Skrót klawiszowy wxPython w etykietach menu: tabulator + modyfikator(y) +
 # klawisz, np. `\tCtrl+1`, `\tAlt+F4`, `\tCtrl+Shift+P`. wxPython parsuje
@@ -167,73 +133,14 @@ TOKEN_PARITY_REGEX = re.compile(r"⟦([PS]\d+)⟧")
 # ---------------------------------------------------------------------------
 # Mapa języków docelowych — ładowana z `jezyki_docelowe.yaml` (od 2026-06-16)
 # ---------------------------------------------------------------------------
-# WSPÓLNY rejestr z `buduj_wielojezyczne_docs.py` (single source): oba siostrzane
-# narzędzia czytają TEN SAM plik `jezyki_docelowe.yaml` (root repo), utrzymywany
-# przez dev tool `refresh_languages.py`. Kontrybutor dodaje język raz (wrzuć
-# `dictionaries/<kod>/` + refresh) i działa zarówno dla UI, jak i dla docs — bez
-# edycji Pythona. `_FALLBACK_JEZYKOW` = safety net, gdy pliku brak (świeży checkout
-# przed pierwszym refresh). Czyta przez ruamel (ten sam YAML co reszta narzędzia).
-_REJESTR_JEZYKOW = ROOT / "jezyki_docelowe.yaml"
-_FALLBACK_JEZYKOW: dict[str, str] = {
-    "en": "angielski", "fi": "fiński", "ru": "rosyjski", "is": "islandzki",
-    "it": "włoski", "de": "niemiecki", "fr": "francuski", "es": "hiszpański",
-}
-
-
-def _wczytaj_mape_jezykow() -> dict[str, str]:
-    """Wczytuje rejestr ISO→nazwa z `jezyki_docelowe.yaml` (fallback: wbudowane 8).
-
-    Single source spójny z `buduj_wielojezyczne_docs.py`. Filtruje wpisy
-    nie-stringowe i język źródłowy `pl` (źródło, nie cel tłumaczenia).
-    """
-    if not _REJESTR_JEZYKOW.is_file():
-        return dict(_FALLBACK_JEZYKOW)
-    try:
-        with open(_REJESTR_JEZYKOW, "r", encoding="utf-8") as fh:
-            dane = YAML(typ="safe").load(fh)
-    except Exception:  # noqa: BLE001 — fail-soft: zły/niedostępny rejestr → fallback
-        return dict(_FALLBACK_JEZYKOW)
-    if not isinstance(dane, dict):
-        return dict(_FALLBACK_JEZYKOW)
-    mapa = {
-        str(k): str(v)
-        for k, v in dane.items()
-        if isinstance(k, str) and isinstance(v, str) and k != KOD_ZRODLOWY
-    }
-    return mapa or dict(_FALLBACK_JEZYKOW)
-
-
-MAPA_JEZYKOW: dict[str, str] = _wczytaj_mape_jezykow()
-
-
-# ---------------------------------------------------------------------------
-# Natywna nazwa języka docelowego (do promptu — zamiast polskiego „fiński")
-# ---------------------------------------------------------------------------
-# Separator natywnej nazwy w `etykieta` (np. „Suomi – foneettiset perusteet”).
-# Tolerujemy en-dash / em-dash / zwykły myślnik z otaczającymi spacjami.
-_RE_SEP_ETYKIETY = re.compile(r"\s+[–—-]\s+")
-
-
-def _natywna_nazwa(kod: str) -> str:
-    """Natywna nazwa języka z `dictionaries/<kod>/podstawy.yaml::etykieta`.
-
-    Bierze prefiks przed separatorem ` – ` (jak `core_poliglota.natywna_nazwa`
-    i `refresh_languages.natywna_nazwa`, ale samowystarczalnie). Fallback na sam
-    kod ISO. Powód użycia: prompt podaje cel NATYWNIE („Suomi"/„中文") zamiast
-    po polsku („fiński") — jedna z kotwic PL zidentyfikowanych w audycie.
-    """
-    p = DICT_DIR / kod / "podstawy.yaml"
-    try:
-        with open(p, "r", encoding="utf-8") as fh:
-            dane = YAML(typ="safe").load(fh)
-    except Exception:  # noqa: BLE001 — fail-soft: brak/zły podstawy.yaml → kod ISO
-        return kod
-    etyk = (dane or {}).get("etykieta", "") if isinstance(dane, dict) else ""
-    if isinstance(etyk, str) and etyk.strip():
-        nazwa = _RE_SEP_ETYKIETY.split(etyk.strip(), maxsplit=1)[0].strip()
-        if nazwa:
-            return nazwa
-    return kod
+# WSPÓLNY rejestr z resztą rodziny (single source): wszystkie narzędzia czytają
+# TEN SAM plik `jezyki_docelowe.yaml` (root repo), utrzymywany przez dev tool
+# `refresh_languages.py`. Kontrybutor dodaje język raz (wrzuć `dictionaries/<kod>/`
+# + refresh) i działa dla UI, docs i przepisów — bez edycji Pythona. Wbudowany
+# fallback ośmiu języków (`tlumacz_rdzen.FALLBACK_JEZYKOW`) ratuje świeży checkout
+# przed pierwszym refresh. Od v18.25 wczytywanie żyje w rdzeniu — tu został sam
+# wybór języka źródłowego.
+MAPA_JEZYKOW: dict[str, str] = tlumacz_rdzen.wczytaj_mape_jezykow(ROOT, KOD_ZRODLOWY)
 
 
 # ---------------------------------------------------------------------------
@@ -247,7 +154,7 @@ def _natywna_nazwa(kod: str) -> str:
 # „German/Russian/Spanish/Italian IT-jargon calques"). Stąd EN framing + blok
 # reguł naturalności (których PL-prompt w ogóle nie miał) + cel podany natywnie.
 # Słowo "JSON" w prompcie nieobowiązkowe na Claude (structured outputs egzekwuje
-# schemat `SCHEMA_TLUMACZENIA` na poziomie API), ale zostaje dla czytelności.
+# `tlumacz_rdzen.SCHEMA_TLUMACZENIA` na poziomie API), ale zostaje dla czytelności.
 def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str, *, persona_hint: bool = False) -> str:
     # Warunkowy blok „głos person" wstrzykiwany TYLKO gdy bieżący chunk zawiera
     # liście `bot.*` (komunikaty bohaterek obiegu zgłoszeń). Bez niego model
@@ -489,39 +396,7 @@ def waliduj_liscia(
 
 
 # ---------------------------------------------------------------------------
-# Inicjalizacja klienta Anthropic (kopia 1:1 z buduj_wielojezyczne_docs.py)
-# ---------------------------------------------------------------------------
-def _zainicjuj_klienta_anthropic() -> Any:
-    try:
-        import anthropic
-    except ImportError as exc:
-        raise SystemExit(
-            "❌ Missing `anthropic` module. Install (project venv):\n"
-            "   .venv/Scripts/pip install anthropic"
-        ) from exc
-
-    try:
-        from dotenv import load_dotenv
-        env_path = ROOT / "golden_key.env"
-        if env_path.is_file():
-            load_dotenv(env_path)
-    except ImportError:
-        pass
-
-    tlumacz_bramki.ostrzez_o_kontrakcie_providera(honoruje=False)
-
-    klucz = os.environ.get("ANTHROPIC_API_KEY")
-    if not klucz or not klucz.startswith("sk-ant-"):
-        raise SystemExit(
-            "❌ Missing or invalid ANTHROPIC_API_KEY.\n"
-            "   Check `golden_key.env` in the project directory (the same file\n"
-            "   used by the GUI — System Check in Director mode)."
-        )
-    return anthropic.Anthropic(api_key=klucz)
-
-
-# ---------------------------------------------------------------------------
-# Wywołanie LLM (chunk, Anthropic structured outputs — output_config json_schema)
+# Wywołanie LLM (chunk) — cienka warstwa nad `tlumacz_rdzen`
 # ---------------------------------------------------------------------------
 def wywolaj_llm(
     klient: Any,
@@ -534,131 +409,32 @@ def wywolaj_llm(
 ) -> dict[int, str]:
     """Wysyła JEDEN chunk, zwraca mapę id → tgt.
 
-    Structured outputs (`output_config.format` ze :data:`SCHEMA_TLUMACZENIA`)
-    gwarantują kształt `{"translations": [{"id", "target"}]}` na poziomie API —
-    mocniej niż OpenAI `json_object`. Walidacje semantyczne (parity markerów, `&`)
-    robimy dalej, po naszej stronie.
+    Od v18.25 samo wywołanie (klient, structured outputs, degradacja `temperature`,
+    parsowanie `id`→`target`) należy do :func:`tlumacz_rdzen.wywolaj_llm` — ten
+    builder był OSTATNIM, który miał własną, bliźniaczą kopię tej maszynerii, choć
+    to z niego wzięliśmy dla całej rodziny wzorzec structured outputs. Tutaj zostaje
+    wyłącznie wiedza o MATERIALE: prompt systemowy UI (z warunkowym blokiem person),
+    limit wyjścia i podpowiedź, co zrobić po ucięciu.
 
-    Rzuca `RuntimeError` przy nieparowalnej odpowiedzi lub strukturze, której nie
-    umiemy zinterpretować — wyżej (w `tlumacz_jezyk`) złapane jako MIĘKKI błąd
-    danego języka, reszta języków leci dalej. NATOMIAST ucięcie limitem wyjścia
-    (`stop_reason == "max_tokens"`) rzuca `SystemExit` — przerywa CAŁY batch (nie
-    łapie go `except RuntimeError`/`except Exception`), bo to sygnał konfiguracyjny
-    „zmniejsz BATCH_SIZE", nie wpadka pojedynczego języka.
+    Kontrakt błędów dziedziczymy z rdzenia: ``RuntimeError`` = wpadka tego chunku
+    (wyżej, w `tlumacz_jezyk`, złapana jako miękki błąd języka — reszta języków
+    leci dalej), ``SystemExit`` = sygnał konfiguracyjny dla CAŁEGO przebiegu
+    (ucięta odpowiedź = niekompletny JSON → zmniejsz `BATCH_SIZE`).
+
+    Liście UI nie mają „rodzaju" (jeden materiał: wartość z `ui.yaml`), więc do
+    rdzenia idą z pustym polem `kind` — a ono, będąc puste, nie wchodzi do payloadu.
+    Zapytanie zostaje tym samym kształtem, jaki ten builder wysyłał do v18.24.
     """
-    # Klucze payloadu po ANGIELSKU (audyt 2026-06-16) — kolejna kotwica PL
-    # usunięta. Surowy model widzi teraz EN prompt + EN klucze; jedynym polskim
-    # elementem są same stringi `source` (czyli to, co MA tłumaczyć).
-    payload = {
-        "target_language": nazwa_celu,
-        "items": [{"id": i, "source": s} for i, s in liscie_tok],
-    }
-
-    kwargs: dict[str, Any] = dict(
+    return tlumacz_rdzen.wywolaj_llm(
+        klient,
         model=model,
-        max_tokens=MAX_TOKENS_OUT,
-        thinking={"type": "disabled"},
         system=_PROMPT_SYSTEMOWY(nazwa_celu, kod, persona_hint=persona_hint),
-        messages=[{
-            "role": "user",
-            "content": (
-                "Here is the JSON with items to translate. Return JSON with a "
-                "`translations` field.\n\n"
-                + json.dumps(payload, ensure_ascii=False, indent=2)
-            ),
-        }],
-        output_config={
-            "format": {"type": "json_schema", "schema": SCHEMA_TLUMACZENIA},
-        },
+        nazwa_celu=nazwa_celu,
+        kod=kod,
+        pozycje=[(i, "", s) for i, s in liscie_tok],
+        max_tokens=MAX_TOKENS_OUT,
+        wskazowka_limitu=f"Reduce BATCH_SIZE (currently {BATCH_SIZE}) and run again.",
     )
-    # Od Claude Sonnet 5 (i Opus 4.7+/Fable 5) niedomyślna `temperature` zwraca 400
-    # zamiast być zignorowana — złapane żywo 2026-07-01 przy migracji domyślnego
-    # modelu. TEN skrypt ma WŁASNEGO klienta, poza `core_llm.wywolaj_llm`, ale od
-    # v18.24 dzieli z runtimem wiedzę o tym, KTO temperatury nie honoruje
-    # (`core_llm`: baseline + trwały autocache). Do v18.23 degradacja była czysto
-    # reaktywna, więc przy `claude-sonnet-5` — czyli domyślnie — każdy chunk każdego
-    # języka płacił jałowym round-tripem 400. Dla deterministycznego tłumaczenia i
-    # tak liczy się głównie structured output; `temperature=0` była dokładką.
-    if cl.honoruje_temperature(model, TEMPERATURA_TLUMACZENIA):
-        kwargs["temperature"] = TEMPERATURA_TLUMACZENIA
-    try:
-        resp = klient.messages.create(**kwargs)
-    except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO odrzucenie `temperature`
-        # Siatka dla modelu spoza baseline'u (`--model`): zdejmij, zapamiętaj,
-        # ponów. Zapamiętanie sprawia, że płacimy za tę naukę RAZ, nie co chunk.
-        if "temperature" not in kwargs or not cl.czy_odrzucono_temperature(exc):
-            raise
-        cl.zapamietaj_odrzucenie_temperatury(model)
-        kwargs.pop("temperature")
-        resp = klient.messages.create(**kwargs)
-
-    # Ucięcie limitem wyjścia → JSON niekompletny. PRZERYWAMY CAŁY batch przez
-    # SystemExit (NIE RuntimeError): `except RuntimeError` w pętli per-chunk/jezyk
-    # by to schował, a to jest sygnał dla całego przebiegu (zmniejsz BATCH_SIZE).
-    if getattr(resp, "stop_reason", None) == "max_tokens":
-        raise SystemExit(
-            f"❌ {kod}: model hit the max_tokens={MAX_TOKENS_OUT} limit — response "
-            f"truncated, JSON incomplete. Reduce BATCH_SIZE (currently {BATCH_SIZE}) "
-            f"and run again. Aborted the ENTIRE batch."
-        )
-
-    surowa = "".join(
-        b.text for b in resp.content if getattr(b, "type", None) == "text"
-    )
-    try:
-        dane = json.loads(surowa)
-    except json.JSONDecodeError as exc:
-        raise RuntimeError(
-            f"Odpowiedź LLM nie jest poprawnym JSON: {exc}\n"
-            f"Pierwsze 200 znaków: {surowa[:200]!r}"
-        ) from exc
-
-    # Tolerancja drobnych wariacji nazwy korzenia: `translations` (nowy, EN),
-    # `tlumaczenia` (wstecz, sprzed audytu 2026-06-16), lub bezpośrednio
-    # lista/słownik na top-levelu.
-    arr: Any
-    if isinstance(dane, dict):
-        arr = (
-            dane.get("translations")
-            or dane.get("tlumaczenia")
-            or dane.get("results")
-            or dane
-        )
-    else:
-        arr = dane
-
-    mapa_tgt: dict[int, str] = {}
-    if isinstance(arr, list):
-        for item in arr:
-            if not isinstance(item, dict):
-                continue
-            if "id" not in item:
-                continue
-            # `target` (nowy, EN) z tolerancją `tgt` (wstecz).
-            wartosc = item.get("target", item.get("tgt"))
-            if wartosc is None:
-                continue
-            try:
-                mapa_tgt[int(item["id"])] = str(wartosc)
-            except (TypeError, ValueError):
-                continue
-    elif isinstance(arr, dict):
-        # Wariant degradacyjny: `{"0": "...", "1": "..."}`
-        for k, v in arr.items():
-            if not isinstance(v, str):
-                continue
-            try:
-                mapa_tgt[int(k)] = v
-            except (TypeError, ValueError):
-                continue
-
-    if not mapa_tgt:
-        raise RuntimeError(
-            f"Nie udało się sparsować żadnego id→tgt z odpowiedzi.\n"
-            f"Pierwsze 400 znaków surowej: {surowa[:400]!r}"
-        )
-
-    return mapa_tgt
 
 
 # ---------------------------------------------------------------------------
@@ -834,7 +610,7 @@ def tlumacz_jezyk(
     mapa_tgt: dict[int, str] = {}
     # Cel podawany modelowi NATYWNIE (audyt 2026-06-16) — „Suomi"/„中文" zamiast
     # polskiego „fiński"; `nazwa_pl` zostaje tylko do logu konsoli dewelopera.
-    nazwa_cel = _natywna_nazwa(kod)
+    nazwa_cel = tlumacz_rdzen.natywna_nazwa(DICT_DIR, kod)
     print(f"🌍 {kod}: {model} (cel: {nazwa_cel}), {n_chunkow} chunków po max {BATCH_SIZE} liści...")
     for nr, start in enumerate(range(0, total, BATCH_SIZE), start=1):
         chunk = liscie_tok[start:start + BATCH_SIZE]
@@ -1131,7 +907,9 @@ def main() -> int:
             f"Istniejące pliki ui.yaml zostaną zaktualizowane w miejscu."
         )
 
-    klient: Any = None if args.dry_run else _zainicjuj_klienta_anthropic()
+    klient: Any = (
+        None if args.dry_run else tlumacz_rdzen.zainicjuj_klienta_anthropic(ROOT)
+    )
 
     sukcesy: list[str] = []
     porazki: list[str] = []

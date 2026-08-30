@@ -47,15 +47,12 @@ from pathlib import Path
 
 import yaml
 
+import dev_konsola
+
 # ---------------------------------------------------------------------------
-# STDOUT UTF-8 (spójnie z generuj_dokumentacje.py / buduj_wielojezyczne_docs.py)
+# STDOUT UTF-8 (wspólna implementacja dev-tooli od v18.25 → `dev_konsola`)
 # ---------------------------------------------------------------------------
-if sys.platform == "win32":
-    for _strumien in (sys.stdout, sys.stderr):
-        try:
-            _strumien.reconfigure(encoding="utf-8")
-        except (AttributeError, OSError):
-            pass
+dev_konsola.skonfiguruj_stdout()
 
 ROOT = Path(__file__).resolve().parent
 DICT_DIR = ROOT / "dictionaries"
@@ -672,7 +669,7 @@ DEV_TOOLE = {
     # `tlumacz_ai.py` NOSI ten sam prefiks, ale dev-toolem NIE JEST — chodzi
     # w runtime za GUI Poligloty, więc polski hard-kod jest tam realnym leakiem
     # i plik MUSI zostać skanowany.
-    "tlumacz_bramki.py", "tlumacz_rdzen.py",
+    "tlumacz_bramki.py", "tlumacz_rdzen.py", "dev_konsola.py",
     "test_core_updater.py",
 }
 

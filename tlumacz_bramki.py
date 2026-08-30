@@ -22,9 +22,11 @@ Zawartość:
   * :func:`waliduj_odcisk` — porównanie odcisków, z rozdziałem na naruszenia TWARDE
     (szkielet) i MIĘKKIE (objętość); każdy konsument sam decyduje, co blokuje zapis,
   * :func:`wyglada_jak_prompt` — heurystyka „ta wartość jest promptem, nie etykietą",
-    dla narzędzi, w których prompty są mniejszością (`_ui.py`).
+    dla narzędzi, w których prompty są mniejszością (`_ui.py`),
+  * :func:`ostrzez_o_kontrakcie_providera` — kontrakt `LLM_PROVIDER` w rodzinie
+    (v18.24), od v18.25 z potwierdzeniem na ścieżce honorującej przełącznik.
 
-Moduł jest DEV-ONLY i celowo **bez zależności** (sam `re`) — dokładnie jak
+Moduł jest DEV-ONLY i celowo **bez zależności** (sam `os` i `re`) — dokładnie jak
 `przeglad_tlumaczen.py`. Nie importuj tu silnika ani `lingua`: bramki muszą działać
 także u kontrybutora po `git clone`, bez zainstalowanych extras.
 """
@@ -264,9 +266,19 @@ def wyglada_jak_prompt(tekst: str, sciezka_klucza: str = "") -> bool:
 #
 # Do v18.23 asymetria była MILCZĄCA: `CONTRIBUTING.md` zapraszał do ustawienia
 # `LLM_PROVIDER=openai_compat`, po czym pięć narzędzi z sześciu ignorowało ten
-# wpis i żądało `ANTHROPIC_API_KEY`, nie tłumacząc dlaczego. Poniższe ostrzeżenia
-# zamieniają milczenie w zdanie i NIC nie blokują — `docs` na cudzym endpoincie
-# działa i ma działać dalej.
+# wpis i żądało `ANTHROPIC_API_KEY`, nie tłumacząc dlaczego. Poniższe komunikaty
+# zamieniają milczenie w zdanie — `docs` na cudzym endpoincie działa i ma działać
+# dalej.
+#
+# v18.25: na ścieżce HONORUJĄCEJ przełącznik sam `print` okazał się za słaby.
+# Ostrzeżenie pada RAZ, na starcie, a potem leci kilkanaście minut chatteru
+# postępu (chunk po chunku, język po języku) — zanim recenzent siada do draftu,
+# pięć akapitów o cenie tej ścieżki jest dawno wyprzewijane. Dlatego, wzorem
+# `build_release.py` przed kompilacją instalatora, żądamy tu potwierdzenia: to
+# jedyne miejsce w rodzinie, gdzie przebieg wydaje pieniądze na CUDZYM endpoincie
+# i produkuje draft, którego API nie sprawdziło pod kątem kształtu. Flaga
+# `-y/--yes` (builder docsów) pomija wywołanie w całości — kto ją podaje, ten
+# kontrakt już zna.
 PROVIDER_COMPAT = "openai_compat"
 
 
@@ -279,12 +291,38 @@ def wybrano_endpoint_obcy() -> bool:
     return os.environ.get("LLM_PROVIDER", "").strip().lower() == PROVIDER_COMPAT
 
 
+def _potwierdz_endpoint_obcy() -> None:
+    """Pyta o zgodę na przebieg przez obcy endpoint. Brak zgody = koniec przebiegu.
+
+    Wzorzec 1:1 z `build_release._parsuj_argumenty`/`main` (`y`/`t`, gdzie `t` to
+    historyczny alias „tak"). Sesja nieinteraktywna to NIE odmowa, tylko brak
+    kogokolwiek, kto mógłby odpowiedzieć — mówimy wtedy wprost, że służy do tego
+    `-y`, zamiast wywracać się `EOFError`.
+    """
+    try:
+        odp = input("Continue on this endpoint? (y/n): ").strip().lower()
+    except EOFError:
+        raise SystemExit(
+            "❌ Non-interactive session — nobody can confirm the compat endpoint.\n"
+            "   Pass -y/--yes to accept the contract above up front, or unset\n"
+            "   LLM_PROVIDER to translate through Anthropic."
+        ) from None
+    if odp not in ("y", "t"):   # `t` kept as alias — historical tak/nie habit
+        print("Run aborted.")
+        raise SystemExit(0)
+
+
 def ostrzez_o_kontrakcie_providera(*, honoruje: bool) -> None:
-    """Wypisuje ostrzeżenie, gdy wybrano compat. Cisza, gdy provider domyślny.
+    """Wypisuje kontrakt providera, gdy wybrano compat. Cisza, gdy domyślny.
 
     Args:
         honoruje: czy TO narzędzie faktycznie pójdzie na wskazany endpoint
             (``True`` wyłącznie w `buduj_wielojezyczne_docs.py`).
+
+    Na ścieżce honorującej (``honoruje=True``) funkcja dodatkowo ŻĄDA
+    potwierdzenia i przy odmowie kończy przebieg (``SystemExit``) — patrz
+    komentarz sekcji. Na ścieżce ignorującej przełącznik zostaje sam komunikat:
+    nie ma tam czego potwierdzać, bo narzędzie i tak pójdzie do Anthropica.
     """
     if not wybrano_endpoint_obcy():
         return
@@ -300,6 +338,7 @@ def ostrzez_o_kontrakcie_providera(*, honoruje: bool) -> None:
             "        fluent nonsense). The gates check structure, not truth.\n"
             "    Read the draft with extra care before `--finalizuj`."
         )
+        _potwierdz_endpoint_obcy()
         return
     print(
         "⚠️  LLM_PROVIDER=openai_compat is set, but this tool IGNORES it and talks\n"
