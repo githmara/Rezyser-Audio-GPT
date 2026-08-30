@@ -685,8 +685,8 @@ def utnij_prefix_z_wyniku(wynik: str) -> str:
         linie.pop(0)
         zdjete += 1
     if zdjete:
-        print(f"⚠️  Model PRZETŁUMACZYŁ blok instrukcji technicznej zamiast go "
-              f"usunąć — zdjęto {zdjete} wiodące linie markera.")
+        print(f"⚠️  The model TRANSLATED the technical instruction block instead "
+              f"of removing it — stripped {zdjete} leading marker line(s).")
     return "\n".join(linie).lstrip()
 
 
@@ -1832,11 +1832,11 @@ def _zainicjuj_klienta() -> Any:
     klient = cl.zbuduj_klienta(cl.wczytaj_konfiguracje())
     if klient is None:
         raise SystemExit(
-            "❌ Brak prawidłowej konfiguracji LLM w `golden_key.env`.\n"
-            "   Anthropic (domyślnie): ustaw ANTHROPIC_API_KEY (sk-ant-…).\n"
+            "❌ No valid LLM configuration in `golden_key.env`.\n"
+            "   Anthropic (default): set ANTHROPIC_API_KEY (sk-ant-…).\n"
             "   OpenAI-compat: LLM_PROVIDER=openai_compat + LLM_BASE_URL\n"
             "   + OPENAI_API_KEY + LLM_MODEL.\n"
-            "   Ten sam plik, którego używa GUI (System Check w trybie Reżysera)."
+            "   The same file the GUI uses (System Check in Director mode)."
         )
     return klient
 
@@ -1846,8 +1846,8 @@ def _tryb_audytu(args: argparse.Namespace) -> int:
     kody = [k.strip() for k in args.jezyki.split(",") if k.strip()]
     nieznane = [k for k in kody if k not in KODY_AUDYTU]
     if nieznane:
-        print(f"❌ Nieznane kody paczek: {', '.join(nieznane)}.\n"
-              f"   Dozwolone: {', '.join(KODY_AUDYTU)}.")
+        print(f"❌ Unknown pack codes: {', '.join(nieznane)}.\n"
+              f"   Allowed: {', '.join(KODY_AUDYTU)}.")
         return 2
     try:
         wszystkie = wczytaj_szablony_pl()

@@ -1092,8 +1092,8 @@ def _wywolaj(
         pozycje=pozycje,
         max_tokens=MAX_TOKENS_OUT,
         wskazowka_limitu=(
-            f"Zmniejsz BATCH_MAX_ZNAKOW (obecnie {BATCH_MAX_ZNAKOW}) "
-            f"i uruchom ponownie."
+            f"Reduce BATCH_MAX_ZNAKOW (currently {BATCH_MAX_ZNAKOW}) "
+            f"and run again."
         ),
         kontekst_paczki=kontekst,
     )

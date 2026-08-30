@@ -1083,7 +1083,7 @@ def main() -> int:
                 print(f"⏭️  {kod}/{NAZWA_UI}: brak markera draftu — pomijam (już kanoniczny).")
             else:
                 braki += 1
-                print(f"⚠️  {kod}/{NAZWA_UI}: plik nie istnieje — pomijam.")
+                print(f"⚠️  {kod}/{NAZWA_UI}: the file does not exist — skipping.")
         print("\n========== SUMMARY (--finalizuj) ==========")
         print(f"✅ Finalized: {zmienione} | ⏭️ already canonical: {nie_drafty} | ⚠️ file missing: {braki}")
         return 0

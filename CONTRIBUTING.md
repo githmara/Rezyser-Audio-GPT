@@ -11,6 +11,17 @@ tools follow one rule: **anything that tells you what a tool does, how to run it
 or why it failed is in English.** Routine progress chatter may still appear in
 Polish — use the emoji and the English error/summary lines to navigate it.
 
+Concretely, these are English: `--help` texts (including `metavar`), every `❌`
+and `⚠️` line, the `====` banner of a result block and the verdict lines under it.
+These may stay Polish: per-item progress (`🌍 fi/manual.yaml …`, `✅ fi/manual.yaml:
+OK`, `⏭️ skipping`, `ℹ️ 14 units`) and code comments. `audyt_leakow.py
+--bramka-kontrakt` checks the first group and warns on a regression; it never
+blocks a build, and it deliberately ignores the second group, because a verdict
+`✅` and a progress `✅` cannot be told apart mechanically. Polish **code
+identifiers** quoted inside an English sentence (flag names such as
+`--tylko-walidacja`, file names such as `finski.yaml`, constants such as
+`KLASY_POL`) are correct and are masked by the gate rather than reported.
+
 ## Emoji status legend (canonical)
 
 Every dev tool uses the same status emoji. Read them first:
@@ -80,7 +91,7 @@ for full usage (help text is in English).
 | `buduj_wielojezyczne_poliglota.py` | Batch-translates the **Polyglot** rules (`<code>/szyfry/*.yaml` plus the three cleanup tools in `<code>/akcenty/`) pl → others. Same draft → review → `-f` workflow and `--tylko-walidacja` (no API). Two things are special: worked examples in `opis` are COMPUTED by the real engine and injected into the prompt (the model never does the arithmetic), and LANGUAGE DATA (vowel sets, abbreviation tables, hissing pattern, Caesar shift range, ISO code) is never rewritten in an existing pack — for a new one the tool derives what is computable and asks the model once for the rest. |
 | `buduj_wielojezyczne_akcenty.py` | Audits and derives the **accent pairs** (`<code>/akcenty/<accent>.yaml`). Not a translator: an accent file is a phonetic rule for one ordered pair (language of the text → language of the synthesizer), so `de/akcenty/finski.yaml` shares nothing with `pl/akcenty/finski.yaml` but its target. `--audyt` (default, no API) is the only check that compares all 72 pairs against each other and against the real engine: file contract, dead rules — including rules the diacritic pre-pass silently eats — sequential shadowing, case parity, script coverage, and every worked example in `opis` recomputed by the engine. `--nowy-jezyk <code>` derives the pairs a new language is missing, in both directions, and never overwrites a pair that already exists; `--replay <pack>/<accent>` re-derives an existing pair against its hand-written original and restores it afterwards. |
 | `tlumacz_rdzen.py`, `tlumacz_bramki.py` | Shared engine room of the five autotranslators above — API client and structured-output call, literal freezing, YAML comment surgery, round-trip dumping, draft banners (`_rdzen`), plus the anti-"meta instruction skip" prompt block and the structural fingerprint gate (`_bramki`). Dev-only, no engine imports; edit here rather than copying code into a fifth tool. |
-| `audyt_leakow.py` | Leak detector and release **gate**: `--bramka` (docs + `ui.yaml`), `--bramka-py` (Polish hard-coded strings in `*.py`). Both compare against a committed baseline; regenerate with `--zapisz-baseline[-py]` only after reviewing the diff. Needs the optional `lingua` dependency — without it the gate is skipped with a warning, never blocked. |
+| `audyt_leakow.py` | Leak detector and release **gate**: `--bramka` (docs + `ui.yaml`), `--bramka-py` (Polish hard-coded strings in `*.py`), `--bramka-kontrakt` (the language contract below, in the dev tools themselves — **warning only, never blocks**). All three compare against a committed baseline; regenerate with `--zapisz-baseline[-py|-kontrakt]` only after reviewing the diff. Needs the optional `lingua` dependency — without it the gate is skipped with a warning, never blocked. |
 | `refresh_languages.py` | Syncs the target-language registry (`jezyki_docelowe.yaml`) with the `dictionaries/<code>/` folders. Run after adding/removing a language. `--strict` for a CI guard. |
 | `build_release.py` | Builds the PyInstaller release and the Inno Setup installer. |
 

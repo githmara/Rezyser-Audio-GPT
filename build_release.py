@@ -876,10 +876,10 @@ def _parsuj_argumenty() -> argparse.Namespace:
         "-y", "--yes",
         action="store_true",
         help="Skip the interactive 'Build X? (y/n):' prompt and proceed "
-             "directly to compilation. Świadoma decyzja — wszystkie inne "
-             "walidacje (runtime/, VERSION, ISCC w PATH, refuse-overwrite) "
-             "zostają aktywne, pomijamy tylko ostatni human-in-the-loop. "
-             "Use case: CI/CD lub automatyzacja przez agenta.",
+             "directly to compilation. A deliberate choice — every other "
+             "validation (runtime/, VERSION, ISCC on PATH, refuse-overwrite) "
+             "stays active; only the last human-in-the-loop step is skipped. "
+             "Use case: CI/CD or automation by an agent.",
     )
     grupa_cleanup = parser.add_mutually_exclusive_group()
     grupa_cleanup.add_argument(
@@ -1176,6 +1176,26 @@ def main(args: argparse.Namespace | None = None) -> None:
             sys.exit(1)
         else:
             print(f"✅ No hard-codes beyond the baseline ({audyt_leakow.BASELINE_PY_PATH.name}).\n")
+
+        # 6b'. CONTRIBUTING language contract in the dev tools (v18.24) — argparse
+        # texts and ❌/⚠️ lines that a non-Polish contributor has to read. This one
+        # is deliberately NON-FATAL: it guards the barrier to entry, not the
+        # correctness of the package, and a Polish help text ships nothing broken
+        # to the end user (dev tools are not in the bundle at all). Printed as a
+        # reminder so the regression is noticed at release time rather than by a
+        # contributor months later — which is exactly how the 60 helps accumulated.
+        print("🔍 Contract gate: scanning dev tools for Polish CLI text and ❌/⚠️ lines...")
+        wynik_kontrakt = audyt_leakow.bramka_kontraktu()
+        if wynik_kontrakt.pominieto:
+            print(f"⚠️  Contract gate skipped: {wynik_kontrakt.powod_pominiecia}.\n")
+        elif not wynik_kontrakt.czysto:
+            ile = sum(len(v) for v in wynik_kontrakt.nowe.values())
+            print(f"⚠️  {ile} contract violation(s) ABOVE the baseline in "
+                  f"{len(wynik_kontrakt.nowe)} file(s) — NOT blocking the build.")
+            print("   Run `python audyt_leakow.py --bramka-kontrakt` for the list.\n")
+        else:
+            print(f"✅ Dev-tool contract clean "
+                  f"({audyt_leakow.BASELINE_KONTRAKT_PATH.name}).\n")
 
     # 6c. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
     _weryfikuj_flagi_debug()

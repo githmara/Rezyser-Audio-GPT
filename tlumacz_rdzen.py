@@ -296,10 +296,10 @@ def wywolaj_llm(
 
     if getattr(resp, "stop_reason", None) == "max_tokens":
         raise SystemExit(
-            f"❌ {kod}: model uderzył w limit max_tokens={max_tokens} — odpowiedź "
-            f"ucięta, JSON niekompletny. "
-            + (wskazowka_limitu or "Zmniejsz rozmiar chunku i uruchom ponownie.")
-            + " Przerwano CAŁY przebieg."
+            f"❌ {kod}: the model hit the max_tokens={max_tokens} limit — the "
+            f"response is truncated and the JSON incomplete. "
+            + (wskazowka_limitu or "Reduce the chunk size and run again.")
+            + " Aborted the ENTIRE run."
         )
 
     surowa = "".join(
@@ -806,10 +806,9 @@ def wczytaj_orakuly(
                 continue          # paczka nie ma tego pliku — nie jest orakułem
             if przeglad_tlumaczen.czy_plik_jest_draftem(plik):
                 if not dopusc_drafty:
-                    print(f"⚠️  {kod}/{nazwa}: paczka odniesienia jest jeszcze "
-                          f"DRAFTEM — nie używam jej jako orakułu kotwic "
-                          f"(najpierw recenzja i --finalizuj, albo "
-                          f"--orakul-drafty).")
+                    print(f"⚠️  {kod}/{nazwa}: the reference pack is still a DRAFT "
+                          f"— not using it as the anchor oracle (review and "
+                          f"--finalizuj first, or pass --orakul-drafty).")
                     continue
                 print(f"ℹ️  {kod}/{nazwa}: DRAFT dopuszczony jako orakuł kotwic "
                       f"(--orakul-drafty).")
@@ -850,7 +849,7 @@ def zbierz_leaki(
                 if leaki:
                     per_sekcja[j.opis()] = leaki
         except Exception as exc:  # noqa: BLE001 — appendix to wygoda, nie bramka
-            print(f"⚠️  audyt_leakow pominięty dla {kod}/{nazwa_pliku}: {exc}")
+            print(f"⚠️  audyt_leakow skipped for {kod}/{nazwa_pliku}: {exc}")
             continue
         if per_sekcja:
             wynik[(kod, nazwa_pliku)] = per_sekcja

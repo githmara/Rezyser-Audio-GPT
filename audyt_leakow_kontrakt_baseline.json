@@ -1,0 +1,14 @@
+{
+  "buduj_wielojezyczne_docs.py": [
+    "baner|znak-PL:ęłśźż|# ============================================================================= # {…} # # Plik wygenerowany automatyczni"
+  ],
+  "buduj_wielojezyczne_ui.py": [
+    "baner|znak-PL:ĄąęŁłśźż|# ============================================================================= # {…} # # Plik wygenerowany automatyczni"
+  ],
+  "build_release.py": [
+    "cli:description|znak-PL:ż|Build the release Installer EXE for Reżyser Audio GPT. Reads VERSION (single source of truth), regenerates docs/*.html, "
+  ],
+  "przeglad_tlumaczen.py": [
+    "baner|znak-PL:ż|# # Keep 1:1 (do NOT translate): placeholders {key}, file/folder names # (skrypty/, opowiesci/, runtime/), extensions, t"
+  ]
+}

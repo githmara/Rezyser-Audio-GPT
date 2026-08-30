@@ -660,8 +660,8 @@ def wygeneruj_dane_jezyka(
         kod=kod,
         pozycje=pozycje,
         max_tokens=2_000,
-        wskazowka_limitu="Pytania o dane języka są krótkie — jeśli limit padł, "
-                         "sprawdź, czy model nie zaczął komentować.",
+        wskazowka_limitu="The language-data questions are short — if the limit was "
+                         "hit, check whether the model started commenting.",
     )
     litery_alfabetu = {z.lower() for z in alfabet}
     dane: dict[str, Any] = {}
@@ -1641,8 +1641,8 @@ def _wywolaj(
         pozycje=pozycje,
         max_tokens=MAX_TOKENS_OUT,
         wskazowka_limitu=(
-            f"Zmniejsz BATCH_MAX_ZNAKOW (obecnie {BATCH_MAX_ZNAKOW}) "
-            f"i uruchom ponownie."),
+            f"Reduce BATCH_MAX_ZNAKOW (currently {BATCH_MAX_ZNAKOW}) "
+            f"and run again."),
         kontekst_paczki=kontekst,
         pola_payloadu=pola_payloadu,
     )

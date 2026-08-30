@@ -1472,8 +1472,8 @@ def generuj_pare(
                 klient, model=model, system=system,
                 nazwa_celu=nazwa_celu, kod=iso_celu, pozycje=pozycje,
                 max_tokens=MAX_TOKENS_OUT,
-                wskazowka_limitu="Tabela reguł jest krótka — jeśli limit padł, "
-                                 "model prawdopodobnie zaczął komentować.",
+                wskazowka_limitu="The rule table is short — if the limit was hit, the "
+                                 "model most likely started commenting.",
                 kontekst_paczki=kontekst or None, pola_payloadu=pola_proby,
                 myslenie=True)
         except RuntimeError as exc:

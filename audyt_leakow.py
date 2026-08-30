@@ -503,6 +503,8 @@ def leaki_canon_dla_jezyka(kod: str) -> dict[str, list[str]]:
 BASELINE_PATH = ROOT / "audyt_leakow_baseline.json"
 # Skan źródeł `.py` to INNA powierzchnia (kod, nie tłumaczenia) → własny baseline.
 BASELINE_PY_PATH = ROOT / "audyt_leakow_py_baseline.json"
+# Kontrakt CONTRIBUTING w dev-toolach (v18.24) — TRZECIA powierzchnia, własny plik.
+BASELINE_KONTRAKT_PATH = ROOT / "audyt_leakow_kontrakt_baseline.json"
 
 # Powód lingua niesie ZMIENNY float pewności („lingua:PL 0.98") — normalizujemy
 # go do „lingua:PL", inaczej drobne wahanie modelu rozjeżdżałoby baseline. Inne
@@ -935,6 +937,162 @@ def zbierz_leaki_py(root: Path = ROOT) -> dict[str, list[str]]:
     return {k: sorted(v) for k, v in wynik.items()}
 
 
+# ---------------------------------------------------------------------------
+# BRAMKA KONTRAKTU CONTRIBUTING w dev-toolach (v18.24)
+# ---------------------------------------------------------------------------
+# `czy_dev_tool()` wyłącza CAŁĄ rodzinę dev-tooli ze skanu hard-kodów — słusznie,
+# bo ich polski `print` postępu jest świadomy i dozwolony. Ale ten sam wyłącznik
+# przez wydania ukrywał 60 polskich helpów CLI i ~118 polskich linii ❌/⚠️, wbrew
+# `CONTRIBUTING.md` („anything that tells you what a tool does, how to run it, or
+# why it failed is in English"). Ta bramka patrzy WYŁĄCZNIE na kategorie objęte
+# kontraktem, więc nie wraca do pilnowania chatteru:
+#
+#   * teksty argparse: `help=`, `description=`, `epilog=`, `metavar=`,
+#   * literały z `❌` albo `⚠️` (legenda emoji: error / warning),
+#   * banery `==========` (nagłówki bloków werdyktu).
+#
+# CELOWO NIEOBJĘTE: linie `✅`/`⏭️`/`ℹ️`. Werdykt („✅ Success: 3/8") i chatter
+# („✅ fi/plik.yaml: OK") są mechanicznie NIEROZRÓŻNIALNE, a kontrakt dopuszcza
+# polski chatter — bramka, która by je zrównała, produkowałaby fałszywe alarmy
+# w liczbie, po której nikt by jej nie czytał. Werdykty pilnuje przegląd, nie skan.
+#
+# Bramka jest OSTRZEGAJĄCA (exit 0 nawet przy nadwyżce). Nowy polski help to
+# usterka kosmetyczna, nie zepsuta paczka — blokowanie builda byłoby nieproporcjonalne.
+_KWARGI_CLI = {"help", "description", "epilog", "metavar"}
+
+# Dev-toole POZA kontraktem — narzędzia, których kontrybutor nie uruchomi.
+# `odpowiedz_lokalnie.py` wymaga zalogowanego `gh` CLI maintainera i domyka
+# issue jego głosem; dla kogokolwiek innego jest martwe, więc jego polskie
+# helpy nie są barierą wejścia. Whitelista, nie baseline — decyzja o roli
+# pliku, nie snapshot jego treści (ten sam argument, co przy `DEV_TOOLE`).
+POZA_KONTRAKTEM = {"odpowiedz_lokalnie.py"}
+
+# Repozytorium jest polskojęzyczne, więc angielskie zdanie dev-toola RUTYNOWO
+# cytuje polskie IDENTYFIKATORY: nazwy flag (`--tylko-walidacja`), nazwy plików
+# (`finski,rosyjski`), stałe (`KLASY_POL`, `BATCH_MAX_ZNAKOW`). Bez zamaskowania
+# ich `lingua` orzeka „POLISH" o zdaniu w rodzaju „========== SUMMARY
+# (--finalizuj) ==========" i baseline puchnie od wpisów, w których nie ma nic
+# do naprawienia — a wtedy nikt go nie czyta i realny regres przechodzi.
+# Maskujemy WYŁĄCZNIE w tym skanie; `_sygnal_pl` zostaje nietknięty, bo od jego
+# zachowania zależą dwa istniejące baseline'y.
+_RE_MASKA_IDENTYFIKATOROW = re.compile(
+    r"`[^`]*`"                      # `literał techniczny` / `--flaga` / ścieżka
+    r"|--?[a-z][a-z0-9-]*"          # --tylko-walidacja, -f
+    r"|\b[A-Z][A-Z0-9_]{3,}\b"      # KLASY_POL, BATCH_MAX_ZNAKOW
+    r"|\b\w+\.(?:yaml|py|json|env|txt|html|md)\b"   # nazwa_pliku.yaml
+)
+
+
+def _literaly_kontraktu(sciezka: Path, detektor=None) -> list[LeakPy]:
+    """Polskie literały łamiące kontrakt CONTRIBUTING w JEDNYM dev-toolu.
+
+    Różnica wobec :func:`_analizuj_plik`, poza zawężeniem do kategorii: ten skan
+    ZAGLĄDA DO ZAGNIEŻDŻEŃ f-stringów. Pomijamy tylko literalne segmenty samego
+    f-stringa (rodzic = ``JoinedStr``), a nie wszystko pod ``FormattedValue`` —
+    bo `buduj_wielojezyczne_docs` trzymał polskie „❌ Błędów:" właśnie tam,
+    w zagnieżdżonym f-stringu wewnątrz wyrażenia warunkowego, i pierwszy przebieg
+    sprzątania v18.24 je z tego powodu przeoczył.
+    """
+    try:
+        zrodlo = sciezka.read_text(encoding="utf-8")
+        drzewo = ast.parse(zrodlo, filename=str(sciezka))
+    except (OSError, SyntaxError):
+        return []
+
+    for rodzic in ast.walk(drzewo):
+        for dziecko in ast.iter_child_nodes(rodzic):
+            dziecko._parent = rodzic  # type: ignore[attr-defined]
+
+    docstringi: set[int] = set()
+    for w in ast.walk(drzewo):
+        if isinstance(w, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            ciało = getattr(w, "body", [])
+            if (ciało and isinstance(ciało[0], ast.Expr)
+                    and isinstance(ciało[0].value, ast.Constant)
+                    and isinstance(ciało[0].value.value, str)):
+                docstringi.add(id(ciało[0].value))
+
+    trafienia: list[LeakPy] = []
+    for w in ast.walk(drzewo):
+        if isinstance(w, ast.JoinedStr):
+            wezel: ast.AST = w
+        elif isinstance(w, ast.Constant) and isinstance(w.value, str):
+            if id(w) in docstringi:
+                continue
+            # Segmenty literalne f-stringa raportuje sam `JoinedStr` (jako całość).
+            if isinstance(getattr(w, "_parent", None), ast.JoinedStr):
+                continue
+            wezel = w
+        else:
+            continue
+
+        tekst = _tekst_literalu(wezel)
+        if not tekst:
+            continue
+        kwarg, _klucze, _func = _kontekst_wezla(wezel)
+        if kwarg in _KWARGI_CLI:
+            kategoria = f"cli:{kwarg}"
+        elif "❌" in tekst:
+            kategoria = "blad"
+        elif "⚠️" in tekst:
+            kategoria = "ostrzezenie"
+        elif "=====" in tekst:
+            kategoria = "baner"
+        else:
+            continue
+        powod = _sygnal_pl(_RE_MASKA_IDENTYFIKATOROW.sub(" ", tekst), detektor)
+        if not powod:
+            continue
+        trafienia.append(LeakPy(
+            plik=sciezka.name,
+            linia=getattr(wezel, "lineno", 0),
+            poziom=kategoria,
+            powod=powod,
+            kontekst=(kwarg + "=") if kwarg else "print",
+            tekst=" ".join(tekst.split())[:120],
+        ))
+    return trafienia
+
+
+def skanuj_kontrakt(root: Path = ROOT) -> list[LeakPy]:
+    """Skan kontraktu po dev-toolach — czyli po plikach, które `--bramka-py` POMIJA."""
+    detektor = _detektor_pl_en()
+    trafienia: list[LeakPy] = []
+    for sciezka in sorted(root.glob("*.py")):
+        if not czy_dev_tool(sciezka.name) or sciezka.name in POZA_KONTRAKTEM:
+            continue
+        trafienia.extend(_literaly_kontraktu(sciezka, detektor))
+    return trafienia
+
+
+def zbierz_leaki_kontraktu(root: Path = ROOT) -> dict[str, list[str]]:
+    """Skan kontraktu jako `{"<plik>": ["<kategoria>|<powod_norm>|<tekst>", ...]}`.
+
+    Klucz = nazwa pliku (bez numeru linii — odporny na przesunięcia), wartość =
+    multiset wpisów. Ten sam kanon co :func:`zbierz_leaki_py`.
+    """
+    wynik: dict[str, list[str]] = {}
+    for t in skanuj_kontrakt(root):
+        wynik.setdefault(t.plik, []).append(
+            f"{t.poziom}|{_normalizuj_powod(t.powod)}|{t.tekst}")
+    return {k: sorted(v) for k, v in wynik.items()}
+
+
+def bramka_kontraktu() -> WynikBramki:
+    """Bramka kontraktu CONTRIBUTING względem `audyt_leakow_kontrakt_baseline.json`.
+
+    Łagodna degradacja bez `lingua` (jak pozostałe bramki). Wołający traktuje
+    nadwyżkę jako OSTRZEŻENIE — patrz komentarz sekcji.
+    """
+    try:
+        aktualne = zbierz_leaki_kontraktu()
+    except ImportError as exc:
+        return WynikBramki(True, {}, True, f"lingua not available ({exc})")
+    nowe = roznica_wzgledem_baseline(
+        aktualne, wczytaj_baseline(BASELINE_KONTRAKT_PATH))
+    return WynikBramki(not nowe, nowe, False, "")
+
+
 def bramka_py() -> WynikBramki:
     """Bramka skanu źródeł `.py` względem `audyt_leakow_py_baseline.json`.
 
@@ -985,7 +1143,7 @@ def _main_py() -> int:
             print(f"   {flaga} L{l.linia} [{l.kontekst}] ({l.powod}): {l.tekst}")
         print()
 
-    print(f"========== RAZEM: {likely} LIKELY + {possible} POSSIBLE ==========")
+    print(f"========== TOTAL: {likely} LIKELY + {possible} POSSIBLE ==========")
     return 1
 
 
@@ -1018,6 +1176,18 @@ def main() -> int:
     grupa.add_argument("--zapisz-baseline-py", dest="zapisz_baseline_py", action="store_true",
                        help="Regenerate the `.py` baseline from the current source scan. "
                             f"Overwrites {BASELINE_PY_PATH.name} — review the diff before committing.")
+    grupa.add_argument("--bramka-kontrakt", dest="bramka_kontrakt", action="store_true",
+                       help="WARNING-ONLY gate on the CONTRIBUTING language contract in the "
+                            "dev tools (argparse help/description/epilog/metavar, ❌/⚠️ lines "
+                            f"and `====` banners) against {BASELINE_KONTRAKT_PATH.name}. "
+                            "Always exits 0 — a Polish help text is cosmetic, not a broken "
+                            "pack. Polish progress chatter is allowed and NOT checked.")
+    grupa.add_argument("--zapisz-baseline-kontrakt", dest="zapisz_baseline_kontrakt",
+                       action="store_true",
+                       help="Regenerate the contract baseline from the current scan (use it "
+                            "for legitimate exceptions, e.g. Polish CODE IDENTIFIERS quoted "
+                            f"inside a message). Overwrites {BASELINE_KONTRAKT_PATH.name} — "
+                            "review the diff before committing.")
     parser.add_argument("--szczegoly", action="store_true",
                         help="Print every leaking line (default: a counter per section).")
     parser.add_argument("--prog", type=float, default=0.70,
@@ -1026,6 +1196,43 @@ def main() -> int:
 
     if args.py:
         return _main_py()
+
+    if args.zapisz_baseline_kontrakt:
+        try:
+            aktualne = zbierz_leaki_kontraktu()
+        except ImportError as exc:
+            print(f"❌ Cannot build the contract baseline — `lingua` is missing ({exc}).")
+            return 2
+        zapisz_baseline(aktualne, BASELINE_KONTRAKT_PATH)
+        ile = sum(len(v) for v in aktualne.values())
+        print(f"✅ Saved the contract baseline: {ile} hit(s) in {len(aktualne)} file(s) → "
+              f"{BASELINE_KONTRAKT_PATH.name}. Review the diff before committing.")
+        return 0
+
+    if args.bramka_kontrakt:
+        wynik = bramka_kontraktu()
+        print("\n========== CONTRIBUTING CONTRACT GATE (dev tools) ==========")
+        if wynik.pominieto:
+            print(f"⚠️  Gate skipped: {wynik.powod_pominiecia}. "
+                  "Install `lingua` to run it (maintainer/CI).")
+            return 0
+        if wynik.czysto:
+            print(f"✅ No Polish CLI text or ❌/⚠️ line above the baseline "
+                  f"({BASELINE_KONTRAKT_PATH.name}).")
+            print("============================================================")
+            return 0
+        ile = sum(len(v) for v in wynik.nowe.values())
+        print(f"⚠️  {ile} contract violation(s) ABOVE the baseline in "
+              f"{len(wynik.nowe)} file(s):")
+        for klucz, powody in sorted(wynik.nowe.items()):
+            for p in powody:
+                print(f"  • {klucz}: {p}")
+        print("Fix: write the line in English (CONTRIBUTING: anything saying what a "
+              "tool does, how to run it, or why it failed). If the Polish fragment is "
+              "a CODE IDENTIFIER quoted inside the message — regenerate the baseline: "
+              f"`python {Path(__file__).name} --zapisz-baseline-kontrakt`.")
+        print("============================================================")
+        return 0   # OSTRZEŻENIE, nie bramka blokująca — patrz komentarz sekcji
 
     if args.zapisz_baseline_py:
         try:
@@ -1137,7 +1344,7 @@ def main() -> int:
             print("  ✅ czysto")
         suma_leakow += leakow_jez
 
-    print(f"\n========== RAZEM: {suma_leakow} leak(ów) w {len(kody)} języku/ach ==========")
+    print(f"\n========== TOTAL: {suma_leakow} leak(s) in {len(kody)} language(s) ==========")
     return 1 if suma_leakow else 0
 
 
