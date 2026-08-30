@@ -307,8 +307,8 @@ _POWODY_ODRZUCENIA = ("safety", "brak_informacji", "niejednoznacznosc", "inne")
 # PUBLICZNE API TEJ SEKCJI (v18.24): `honoruje_temperature`,
 # `czy_odrzucono_temperature`, `zapamietaj_odrzucenie_temperatury` — i tylko ta
 # trójka; `_co_odrzucono` ma jednego konsumenta (drabinę niżej) i zostaje
-# prywatne. Nie uprywatniać reszty z powrotem — poza
-# runtimem korzysta z nich RODZINA AUTOTŁUMACZY, która ma własnych klientów
+# prywatne. Nie uprywatniać tej trójki z powrotem: poza runtimem korzysta
+# z niej RODZINA AUTOTŁUMACZY, która ma własnych klientów
 # Anthropic (`tlumacz_rdzen`, `buduj_wielojezyczne_ui`) i bez tego płaciła
 # jałowym round-tripem 400 przy KAŻDYM chunku: wszystkie sześć narzędzi jedzie
 # domyślnie na `claude-sonnet-5`, a tłumaczenie wysyła `temperature=0.0`
