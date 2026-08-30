@@ -1693,7 +1693,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
         "-k", "--klucz",
         type=str,
         default=None,
-        metavar="KLUCZ[,KLUCZ...]",
+        metavar="KEY[,KEY...]",
         help="Translate ONLY the listed section keys (e.g. `krok_5_vocalizer,krok_5_alarm_nvda_2026`), "
              "the rest of the file stays from the existing translation. "
              "Requires the target `<kod>/gui/dokumentacja/<plik>.yaml` to already exist IN THE NEW SCHEMA "

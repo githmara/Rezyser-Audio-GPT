@@ -1700,7 +1700,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
         help="Zapisz pełny raport markdown do pliku (terminal dostaje "
              "podsumowanie).")
     parser.add_argument(
-        "--nowy-jezyk", type=str, default="", metavar="KOD",
+        "--nowy-jezyk", type=str, default="", metavar="CODE",
         help="Wygeneruj brakujące pary akcentowe dla NOWEGO języka. Nigdy nie "
              "nadpisuje pary, która już istnieje.")
     parser.add_argument(
@@ -1715,7 +1715,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
         help="Ścieżka generująca bez API: pokaż, co i z jakim payloadem poszłoby "
              "do modelu.")
     parser.add_argument(
-        "--replay", type=str, default="", metavar="PACZKA/AKCENT",
+        "--replay", type=str, default="", metavar="PACK/ACCENT",
         help="Test bojowy ścieżki generującej na ISTNIEJĄCEJ parze: wyprowadza "
              "ją od nowa, porównuje ze wzorcem i PRZYWRACA wzorzec. Draft "
              "zostaje w `skrypty/` (nigdy w `dictionaries/`).")

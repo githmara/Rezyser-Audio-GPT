@@ -1030,7 +1030,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
         "-k", "--klucz",
         type=str,
         default=None,
-        metavar="KLUCZ[,KLUCZ...]",
+        metavar="KEY[,KEY...]",
         help="Translate ONLY the given keys (dotted-path), leaving the rest of the file unchanged. "
              "You can pass multiple comma-separated keys: "
              "`manager.kreator_jezyk_bazowy_etykieta_hint,manager.kreator_blad_nazwa_jezyka`. "

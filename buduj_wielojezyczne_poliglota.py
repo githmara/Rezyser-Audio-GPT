@@ -2178,7 +2178,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
         "--model", default=MODEL_DOMYSLNY,
         help=f"Model Anthropic do tłumaczenia (domyślnie: {MODEL_DOMYSLNY}).")
     parser.add_argument(
-        "--kotwica", type=str, default="", metavar="LITERAŁ[,LITERAŁ...]",
+        "--kotwica", type=str, default="", metavar="LITERAL[,LITERAL...]",
         help="Dodatkowe literały wymuszone jako kotwice (zamrażane bez pytania "
              "orakułu). UWAGA: nie wymuszaj terminu, który w JĘZYKU DOCELOWYM "
              "jest wyrazem rodzimym — zamrożony mianownik blokuje odmianę.")

@@ -276,8 +276,8 @@ def _kotwice_z_silnika() -> tuple[str, ...]:
     try:
         import rezyser_ai
     except Exception as exc:  # noqa: BLE001 — dev-tool ma działać też bez silnika
-        print(f"⚠️  Nie mogę zaimportować `rezyser_ai` ({exc}) — kotwice walidatora "
-              f"karty publikacyjnej opieram tylko na heurystyce + orakule.")
+        print(f"⚠️  Cannot import `rezyser_ai` ({exc}) — publication-card validator "
+              f"anchors now rest on the heuristic + oracle alone.")
         return ()
     return tuple(
         getattr(rezyser_ai, nazwa)
@@ -738,10 +738,10 @@ def zbierz_jednostki_pol(drzewo: Any, sciezka_opisowa: str) -> list[Jednostka]:
     nieznane = [k for k in drzewo.keys() if str(k) not in KLASY_POL]
     if nieznane:
         raise SystemExit(
-            f"❌ {sciezka_opisowa}: nieznane pola przepisu: {nieznane}.\n"
-            f"   Dopisz każde do KLASY_POL w buduj_wielojezyczne_tryby.py "
-            f"(techniczne / etykieta / prompt / mapa / sufiks / pochodna) — "
-            f"tłumacz nie zgaduje, czy pole się lokalizuje."
+            f"❌ {sciezka_opisowa}: unknown recipe fields: {nieznane}.\n"
+            f"   Add each one to KLASY_POL in buduj_wielojezyczne_tryby.py "
+            f"(techniczne / etykieta / prompt / mapa / sufiks / pochodna) — the "
+            f"translator does not guess whether a field gets localized."
         )
 
     licznik = 0
@@ -1083,7 +1083,7 @@ def waliduj_silnikiem(
                 bledy.append(
                     f"crosscheck baz referencyjnych zerwany — dostępne bazowe: {bazowe}")
     except ImportError as exc:
-        print(f"⚠️  {kod}/{nazwa_pliku}: pomijam kontrolę kompletności paczki ({exc}).")
+        print(f"⚠️  {kod}/{nazwa_pliku}: skipping the pack completeness check ({exc}).")
 
     return bledy
 
@@ -1143,7 +1143,7 @@ def tlumacz_plik(
         tekst_zrodla = fh.read()
     drzewo_pl = yaml_io.load(tekst_zrodla)
     if not isinstance(drzewo_pl, dict):
-        print(f"❌ {zrodlo}: plik nie parsuje się do mapy YAML.")
+        print(f"❌ {zrodlo}: the file does not parse into a YAML mapping.")
         return False, []
     dane_pl = {str(k): drzewo_pl[k] for k in drzewo_pl.keys()}
 
@@ -1189,10 +1189,10 @@ def tlumacz_plik(
         [j.zrodlo for j in jednostki], odniesienia, kotwice_extra)
     if not odniesienia:
         print(
-            f"⚠️  {kod}/{nazwa_pliku}: żadna inna paczka nie ma tego przepisu — "
-            f"orakuł kotwic nieaktywny, zamrażam WSZYSTKICH {len(kotwice)} "
-            f"kandydatów. Recenzent musi sprawdzić, czy któryś nie powinien "
-            f"zostać przetłumaczony."
+            f"⚠️  {kod}/{nazwa_pliku}: no other pack has this recipe — the anchor "
+            f"oracle is inactive, freezing ALL {len(kotwice)} candidates. The "
+            f"reviewer must check whether any of them should have been "
+            f"translated instead."
         )
     else:
         print(f"🔎 {kod}/{nazwa_pliku}: orakuł kotwic = jednomyślność paczek "
@@ -1232,13 +1232,13 @@ def tlumacz_plik(
         try:
             mapa_tgt.update(wywolaj_llm(klient, model, nazwa_cel, kod, pozycje))
         except RuntimeError as exc:
-            print(f"❌ {kod}/{nazwa_pliku}: błąd LLM w chunku {nr}/{len(chunki)} — {exc}")
+            print(f"❌ {kod}/{nazwa_pliku}: LLM error in chunk {nr}/{len(chunki)} — {exc}")
             return False, []
 
     brakujace = {j.id for j in jednostki} - set(mapa_tgt)
     if brakujace:
-        print(f"❌ {kod}/{nazwa_pliku}: model pominął id {sorted(brakujace)[:20]} "
-              f"(razem {len(brakujace)}). NIE zapisuję.")
+        print(f"❌ {kod}/{nazwa_pliku}: the model skipped id {sorted(brakujace)[:20]} "
+              f"(total {len(brakujace)}). NOT saving.")
         return False, []
 
     # --- Bramki per jednostka + jednorazowy retry ----------------------------
@@ -1250,14 +1250,14 @@ def tlumacz_plik(
             porazki.append((j, problemy))
 
     if porazki:
-        print(f"⚠️  {kod}/{nazwa_pliku}: {len(porazki)} jednostek do powtórki…")
+        print(f"⚠️  {kod}/{nazwa_pliku}: {len(porazki)} units queued for a retry…")
         for j, problemy in porazki[:6]:
             print(f"     [{j.id}] {j.opis()}: {problemy[0]}")
         do_retry = [(j.id, j.rodzaj, j.zrodlo_tok) for j, _ in porazki]
         try:
             retry = wywolaj_llm(klient, model, nazwa_cel, kod, do_retry)
         except RuntimeError as exc:
-            print(f"❌ {kod}/{nazwa_pliku}: powtórka nieudana — {exc}")
+            print(f"❌ {kod}/{nazwa_pliku}: the retry failed — {exc}")
             return False, []
         zamowione = {j.id for j, _ in porazki}
         porazki_v2: list[tuple[Jednostka, list[str]]] = []
@@ -1269,11 +1269,11 @@ def tlumacz_plik(
                 porazki_v2.append((j, problemy))
         nieproszone = set(retry) - zamowione
         if nieproszone:
-            print(f"⚠️  {kod}: powtórka zwróciła {len(nieproszone)} nieproszonych id "
-                  f"— ignoruję: {sorted(nieproszone)[:10]}")
+            print(f"⚠️  {kod}: the retry returned {len(nieproszone)} unrequested id "
+                  f"— ignoring: {sorted(nieproszone)[:10]}")
         if porazki_v2:
-            print(f"❌ {kod}/{nazwa_pliku}: po powtórce {len(porazki_v2)} jednostek "
-                  f"wciąż nie przechodzi bramek. NIE zapisuję.")
+            print(f"❌ {kod}/{nazwa_pliku}: after the retry {len(porazki_v2)} units "
+                  f"still fail the gates. NOT saving.")
             for j, problemy in porazki_v2[:10]:
                 print(f"     [{j.id}] {j.opis()} ({j.rodzaj})")
                 for diag in problemy[:4]:
@@ -1331,9 +1331,9 @@ def tlumacz_plik(
     bloki_cel = bloki_komentarzy(dump_cel, pomin_naglowek=False)
     koncowe_cel = komentarze_koncowe(dump_cel)
     if len(bloki_cel) != len(bloki_pl) or len(koncowe_cel) != len(koncowe_pl):
-        print(f"❌ {kod}/{nazwa_pliku}: layout komentarzy rozjechał się między "
-              f"dumpem PL i celu ({len(bloki_pl)}→{len(bloki_cel)} bloków, "
-              f"{len(koncowe_pl)}→{len(koncowe_cel)} końcowych). NIE zapisuję.")
+        print(f"❌ {kod}/{nazwa_pliku}: the comment layout drifted between the PL "
+              f"and target dumps ({len(bloki_pl)}→{len(bloki_cel)} blocks, "
+              f"{len(koncowe_pl)}→{len(koncowe_cel)} trailing). NOT saving.")
         return False, []
 
     tlum_bloki = {j.adres[1]: j.cel for j in jednostki if j.adres[0] == "komentarz"}
@@ -1345,8 +1345,8 @@ def tlumacz_plik(
     for idx in range(len(bloki_cel) - 1, -1, -1):
         blok_cel, blok_pl = bloki_cel[idx], bloki_pl[idx]
         if blok_cel["tresc"] != blok_pl["tresc"]:
-            print(f"❌ {kod}/{nazwa_pliku}: blok komentarza #{idx} w dumpie celu nie "
-                  f"jest identyczny z PL — przerywam (ryzyko wstawienia nie tam).")
+            print(f"❌ {kod}/{nazwa_pliku}: comment block #{idx} in the target dump is "
+                  f"not identical to PL — aborting (risk of inserting it in the wrong place).")
             return False, []
         if idx not in tlum_bloki:
             continue
@@ -1364,8 +1364,8 @@ def tlumacz_plik(
             # Kolejność wpisów się rozjechała — zostawiamy komentarz PL zamiast
             # wstawić tłumaczenie w niewłaściwą linię (komentarz to dokumentacja,
             # nie kontrakt: degradacja jest tu tańsza niż utrata pliku).
-            print(f"⚠️  {kod}/{nazwa_pliku}: komentarz końcowy #{idx} nie zgadza się "
-                  f"z PL — zostawiam polski.")
+            print(f"⚠️  {kod}/{nazwa_pliku}: trailing comment #{idx} does not match "
+                  f"PL — leaving the Polish one in place.")
             continue
         linie[wpis["linia"]] = (
             f"{wpis['przed']}{wpis['odstep']}# {tlum_koncowe[idx].strip()}")
@@ -1381,8 +1381,8 @@ def tlumacz_plik(
 
     bledy = waliduj_silnikiem(kod, nazwa_pliku, dane_pl, kotwice)
     if bledy:
-        print(f"❌ {kod}/{nazwa_pliku}: walidacja silnikiem odrzuciła plik "
-              f"({len(bledy)} błąd/y):")
+        print(f"❌ {kod}/{nazwa_pliku}: engine validation rejected the file "
+              f"({len(bledy)} error(s)):")
         for b in bledy[:12]:
             print(f"     • {b}")
         if kopia is None:
@@ -1411,13 +1411,13 @@ def _przepisy_zrodlowe() -> list[str]:
     """Nazwy plików przepisów w paczce PL (bez `baza.yaml`), alfabetycznie."""
     folder = DICT_DIR / KOD_ZRODLOWY / FOLDER_REZYSER
     if not folder.is_dir():
-        raise SystemExit(f"❌ Brak folderu źródłowego: {folder}")
+        raise SystemExit(f"❌ Missing source folder: {folder}")
     nazwy = [
         p.name for p in sorted(folder.glob("*.yaml"))
         if p.name not in PLIKI_POMIJANE
     ]
     if not nazwy:
-        raise SystemExit(f"❌ Folder {folder} nie zawiera żadnego przepisu.")
+        raise SystemExit(f"❌ Folder {folder} contains no recipe.")
     return nazwy
 
 
@@ -1436,8 +1436,8 @@ def _filtruj_przepisy(wszystkie: list[str], wybor_csv: str) -> list[str]:
     nieznane = sorted(wybrane - set(wszystkie))
     if nieznane:
         raise SystemExit(
-            f"❌ Nieznane przepisy: {nieznane}.\n"
-            f"   Dostępne w dictionaries/{KOD_ZRODLOWY}/{FOLDER_REZYSER}/: {wszystkie}"
+            f"❌ Unknown recipes: {nieznane}.\n"
+            f"   Available in dictionaries/{KOD_ZRODLOWY}/{FOLDER_REZYSER}/: {wszystkie}"
         )
     return [n for n in wszystkie if n in wybrane]
 
@@ -1445,67 +1445,67 @@ def _filtruj_przepisy(wszystkie: list[str], wybor_csv: str) -> list[str]:
 def _parsuj_argumenty() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Batchowy autotłumacz przepisów Reżysera "
-            f"(dictionaries/<kod>/rezyser/*.yaml) na języki: {', '.join(MAPA_JEZYKOW)}. "
-            "Round-trip ruamel (komentarze i block-scalary zachowane), zamrażanie "
-            "placeholderów i kotwic, bramka odcisku struktury promptów, walidacja "
-            "silnikiem po zapisie."
+            "Batch auto-translator for the Director recipes "
+            f"(dictionaries/<code>/rezyser/*.yaml) into: {', '.join(MAPA_JEZYKOW)}. "
+            "ruamel round-trip (comments and block scalars preserved), placeholder "
+            "and anchor freezing, prompt structure-fingerprint gate, engine "
+            "validation after saving."
         ),
     )
     grupa = parser.add_mutually_exclusive_group(required=True)
     grupa.add_argument(
         "-l", "--jezyki", type=str, default="",
-        help=f"CSV kodów ISO (np. `de,fi`). Dozwolone: {', '.join(MAPA_JEZYKOW)}.")
+        help=f"CSV of ISO codes (e.g. `de,fi`). Allowed: {', '.join(MAPA_JEZYKOW)}.")
     grupa.add_argument(
         "-a", "--wszystkie", action="store_true",
-        help=f"Wszystkie języki docelowe ({', '.join(MAPA_JEZYKOW)}).")
+        help=f"All target languages ({', '.join(MAPA_JEZYKOW)}).")
     parser.add_argument(
         "-p", "--przepisy", type=str, default="",
-        help="CSV nazw przepisów (np. `postprod_publikacja` albo "
-             "`tryb_burza.yaml`). Puste = wszystkie z paczki PL. `baza.yaml` "
-             "jest zawsze pomijany (tagi-kotwice identyczne we wszystkich paczkach).")
+        help="CSV of recipe names (e.g. `postprod_publikacja` or "
+             "`tryb_burza.yaml`). Empty = every recipe in the PL pack. `baza.yaml` "
+             "is always skipped (its anchor tags are identical in every pack).")
     parser.add_argument(
         "--slowniki", type=str, default="",
-        help="Ścieżka do katalogu `dictionaries` INNEGO niż repo — np. paczki "
-             "zainstalowanej aplikacji, w której żyją prywatne przepisy usera "
-             "(user-data, w repo ich nie ma). Domyślnie katalog repo.")
+        help="Path to a `dictionaries` directory OTHER than the repo one — e.g. the "
+             "pack of an installed application, where the user's private recipes "
+             "live (user data, absent from the repo). Defaults to the repo directory.")
     parser.add_argument(
         "--skip-existing", action="store_true",
-        help="Pomiń pary (język, przepis), dla których plik docelowy już istnieje.")
+        help="Skip (language, recipe) pairs whose target file already exists.")
     parser.add_argument(
         "--dry-run", action="store_true",
-        help="Sam podział na jednostki, kotwice i tokeny. Zero wywołań API.")
+        help="Only the split into units, anchors and tokens. No API calls.")
     parser.add_argument(
         "--model", default=MODEL_DOMYSLNY,
-        help=f"Model Anthropic do tłumaczenia (domyślnie: {MODEL_DOMYSLNY}).")
+        help=f"Anthropic model used for the translation (default: {MODEL_DOMYSLNY}).")
     parser.add_argument(
-        "--kotwica", type=str, default="", metavar="LITERAŁ[,LITERAŁ...]",
-        help="Dodatkowe literały wymuszone jako kotwice (zamrażane bez pytania "
-             "orakułu). Przydatne, gdy przepisu nie ma jeszcze w paczce "
-             "odniesienia `en` — np. nazwy własne prywatnego świata. UWAGA: NIE "
-             "wymuszaj terminu, który w JĘZYKU DOCELOWYM jest wyrazem rodzimym "
-             "(np. `suomenruotsalaiset` przy tłumaczeniu na fiński). Zamrożony "
-             "mianownik blokuje odmianę i utrwala tautologiczny gloss, a po "
-             "ręcznej poprawce recenzenta `--tylko-walidacja` zgłosi zgubioną "
-             "kotwicę — wtedy po prostu pomiń ten literał w kolejnym wywołaniu.")
+        "--kotwica", type=str, default="", metavar="LITERAL[,LITERAL...]",
+        help="Extra literals forced as anchors (frozen without asking the oracle). "
+             "Useful when the recipe is not in the `en` reference pack yet — e.g. "
+             "proper nouns of a private world. CAUTION: do NOT force a term that "
+             "is a native word in the TARGET language (e.g. `suomenruotsalaiset` "
+             "when translating into Finnish). A frozen nominative blocks inflection "
+             "and cements a tautological gloss, and once the reviewer fixes it by "
+             "hand, `--tylko-walidacja` reports a lost anchor — simply drop that "
+             "literal from the next run.")
     parser.add_argument(
         "--orakul-drafty", action="store_true",
-        help="Dopuść paczki-DRAFTY jako orakuł kotwic. Potrzebne, gdy przepis "
-             "właśnie rozpropagowano na N języków (wszystkie są draftami) i teraz "
-             "dostrajasz do nich paczkę BAZOWĄ — jednomyślność N draftów jest "
-             "wtedy lepszym arbitrem niż tryb zachowawczy, który zamroziłby także "
-             "polskie zwroty do przetłumaczenia.")
+        help="Allow DRAFT packs to act as the anchor oracle. Needed when a recipe has "
+             "just been propagated to N languages (all of them drafts) and you are "
+             "now tuning the BASE pack against them — unanimity across N drafts is "
+             "a better arbiter than the conservative mode, which would also freeze "
+             "the Polish phrases that still need translating.")
     parser.add_argument(
         "--tylko-walidacja", action="store_true",
-        help="Zero API: dla wybranych języków/przepisów uruchamia samą WALIDACJĘ "
-             "SILNIKIEM istniejących plików docelowych (pola techniczne, "
-             "placeholdery, kotwice, kompletność paczki). Uruchamiaj po każdym "
-             "upgrade aplikacji, gdy pracujesz na `--slowniki` instalacji.")
+        help="No API: for the chosen languages/recipes runs ENGINE VALIDATION alone "
+             "over the existing target files (technical fields, placeholders, "
+             "anchors, pack completeness). Run it after every application upgrade "
+             "when you work against an installation via `--slowniki`.")
     parser.add_argument(
         "-f", "--finalizuj", action="store_true",
-        help="Zero API: zdejmuje baner DRAFTU z wybranych plików, zostawiając "
-             "treść (z ręcznymi poprawkami recenzenta) i przetłumaczony nagłówek "
-             "autorski. To właściwy krok po akceptacji przeglądu.")
+        help="No API: strips the DRAFT banner from the chosen files, keeping the "
+             "content (including the reviewer's manual fixes) and the translated "
+             "author header. This is the right step once the review is accepted.")
     args = parser.parse_args()
     tryby_lokalne = sum(bool(x) for x in (args.finalizuj, args.tylko_walidacja))
     if tryby_lokalne and (args.skip_existing or args.dry_run):
@@ -1523,8 +1523,8 @@ def _wybierz_jezyki(args: argparse.Namespace) -> list[str]:
     nieznane = [k for k in kody if k not in MAPA_JEZYKOW]
     if nieznane:
         raise SystemExit(
-            f"❌ Nieznane kody języków: {', '.join(nieznane)}.\n"
-            f"   Dozwolone: {', '.join(MAPA_JEZYKOW)}."
+            f"❌ Unknown language codes: {', '.join(nieznane)}.\n"
+            f"   Allowed: {', '.join(MAPA_JEZYKOW)}."
         )
     return kody
 
@@ -1536,7 +1536,7 @@ def main() -> int:
     if args.slowniki:
         DICT_DIR = Path(os.path.expandvars(args.slowniki)).expanduser().resolve()
         if not DICT_DIR.is_dir():
-            print(f"❌ --slowniki: {DICT_DIR} nie jest katalogiem.")
+            print(f"❌ --slowniki: {DICT_DIR} is not a directory.")
             return 2
         print(f"📁 Katalog słowników: {DICT_DIR} (poza repo — tryb user-data).")
 
@@ -1552,7 +1552,7 @@ def main() -> int:
                 cel = DICT_DIR / kod / FOLDER_REZYSER / nazwa
                 if not cel.is_file():
                     braki += 1
-                    print(f"⚠️  {kod}/{nazwa}: plik nie istnieje — pomijam.")
+                    print(f"⚠️  {kod}/{nazwa}: the file does not exist — skipping.")
                     continue
                 tresc, zdjeto = zdejmij_baner_draftu(cel.read_text(encoding="utf-8"))
                 if not zdjeto:
@@ -1563,8 +1563,8 @@ def main() -> int:
                 zmienione += 1
                 print(f"✅ {kod}/{nazwa}: baner draftu zdjęty (treść nietknięta).")
         print("\n========== PODSUMOWANIE (--finalizuj) ==========")
-        print(f"✅ sfinalizowane: {zmienione} | ⏭️ już finalne: {nie_drafty} "
-              f"| ⚠️ brak pliku: {braki}")
+        print(f"✅ finalized: {zmienione} | ⏭️ already final: {nie_drafty} "
+              f"| ⚠️ file missing: {braki}")
         return 0
 
     if args.tylko_walidacja:
@@ -1581,7 +1581,7 @@ def main() -> int:
             extra = tuple(k.strip() for k in args.kotwica.split(",") if k.strip())
             for kod in kody:
                 if not (DICT_DIR / kod / FOLDER_REZYSER / nazwa).is_file():
-                    print(f"⚠️  {kod}/{nazwa}: brak pliku docelowego — pomijam.")
+                    print(f"⚠️  {kod}/{nazwa}: no target file — skipping.")
                     continue
                 # Kotwice liczone per język: walidowana paczka nie jest orakułem
                 # dla samej siebie (inaczej każdy jej literał byłby „kotwicą").
@@ -1591,14 +1591,14 @@ def main() -> int:
                 bledy = waliduj_silnikiem(kod, nazwa, dane_pl, kotwice)
                 wszystkie_bledy += len(bledy)
                 if bledy:
-                    print(f"❌ {kod}/{nazwa}: {len(bledy)} błąd/y")
+                    print(f"❌ {kod}/{nazwa}: {len(bledy)} error(s)")
                     for b in bledy[:12]:
                         print(f"     • {b}")
                 else:
                     print(f"✅ {kod}/{nazwa}: OK")
         print("\n========== PODSUMOWANIE (--tylko-walidacja) ==========")
         print("✅ Bez zastrzeżeń." if not wszystkie_bledy
-              else f"❌ Łącznie {wszystkie_bledy} błąd/ów.")
+              else f"❌ {wszystkie_bledy} error(s) in total.")
         return 1 if wszystkie_bledy else 0
 
     # --- Tłumaczenie ---------------------------------------------------------
@@ -1615,8 +1615,8 @@ def main() -> int:
     orakuly = wczytaj_orakuly(przepisy, dopusc_drafty=args.orakul_drafty)
     braki_orakulow = [n for n, t in orakuly.items() if not t]
     if braki_orakulow:
-        print(f"⚠️  Żadna paczka odniesienia nie ma: {braki_orakulow} — dla tych "
-              f"plików orakuł kotwic jest nieaktywny (tryb zachowawczy).")
+        print(f"⚠️  No reference pack has: {braki_orakulow} — for those files the "
+              f"anchor oracle is inactive (conservative mode).")
 
     for kod in kody:
         print(f"\n========== {kod.upper()} "
@@ -1654,7 +1654,7 @@ def main() -> int:
     print("\n========== PODSUMOWANIE ==========")
     print(f"✅ Sukces: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
     if porazki:
-        print(f"❌ Porażki (≥1 przepis nieudany): {', '.join(porazki)}")
+        print(f"❌ Failures (≥1 recipe failed): {', '.join(porazki)}")
         return 1
     return 0
 
