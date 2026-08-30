@@ -30,6 +30,7 @@ także u kontrybutora po `git clone`, bez zainstalowanych extras.
 """
 from __future__ import annotations
 
+import os
 import re
 
 
@@ -248,3 +249,63 @@ def wyglada_jak_prompt(tekst: str, sciezka_klucza: str = "") -> bool:
         return False
     ma_szkielet = bool(_RE_NAGLOWEK_MD.search(tekst) or _RE_PUNKT_NUMEROWANY.search(tekst))
     return ma_szkielet or len(tekst) >= _MIN_ZNAKOW_PROMPTU
+
+
+# ---------------------------------------------------------------------------
+# KONTRAKT PROVIDERA (v18.24)
+# ---------------------------------------------------------------------------
+# `LLM_PROVIDER` w `golden_key.env` jest przełącznikiem GLOBALNYM, ale w rodzinie
+# honoruje go WYŁĄCZNIE `buduj_wielojezyczne_docs.py` — i to nie z wyboru, tylko
+# przez różnicę protokołu. `docs` tłumaczy długą PROZĘ silnikiem runtime'u
+# (`tlumacz_ai.tlumacz_dlugi_tekst`: tekst wchodzi, tekst wychodzi), więc jedzie
+# przez provider-agnostyczny `core_llm`. Pozostała piątka tłumaczy LISTY POZYCJI
+# (`{id, kind, source}` → `{id, target}`), czyli kontrakt egzekwowany przez
+# `output_config.format` Anthropica — a tego gałąź compat wysłać nie umie.
+#
+# Do v18.23 asymetria była MILCZĄCA: `CONTRIBUTING.md` zapraszał do ustawienia
+# `LLM_PROVIDER=openai_compat`, po czym pięć narzędzi z sześciu ignorowało ten
+# wpis i żądało `ANTHROPIC_API_KEY`, nie tłumacząc dlaczego. Poniższe ostrzeżenia
+# zamieniają milczenie w zdanie i NIC nie blokują — `docs` na cudzym endpoincie
+# działa i ma działać dalej.
+PROVIDER_COMPAT = "openai_compat"
+
+
+def wybrano_endpoint_obcy() -> bool:
+    """Czy środowisko wskazuje endpoint OpenAI-compatible.
+
+    Wołający ładuje `golden_key.env` PRZED tym wywołaniem (tak samo, jak przed
+    odczytem klucza) — moduł jest bez zależności i sam `dotenv` nie dotyka.
+    """
+    return os.environ.get("LLM_PROVIDER", "").strip().lower() == PROVIDER_COMPAT
+
+
+def ostrzez_o_kontrakcie_providera(*, honoruje: bool) -> None:
+    """Wypisuje ostrzeżenie, gdy wybrano compat. Cisza, gdy provider domyślny.
+
+    Args:
+        honoruje: czy TO narzędzie faktycznie pójdzie na wskazany endpoint
+            (``True`` wyłącznie w `buduj_wielojezyczne_docs.py`).
+    """
+    if not wybrano_endpoint_obcy():
+        return
+    if honoruje:
+        print(
+            "⚠️  LLM_PROVIDER=openai_compat — this is the ONLY translator in the\n"
+            "    family that honors the switch. Two things to know BEFORE you\n"
+            "    review the draft:\n"
+            "      * no structured outputs on this path — the response shape is\n"
+            "        enforced only by the checks in this tool, not by the API;\n"
+            "      * the prompts are tuned for Claude, and a weaker model degrades\n"
+            "        content quality in ways no gate can catch (invented sections,\n"
+            "        fluent nonsense). The gates check structure, not truth.\n"
+            "    Read the draft with extra care before `--finalizuj`."
+        )
+        return
+    print(
+        "⚠️  LLM_PROVIDER=openai_compat is set, but this tool IGNORES it and talks\n"
+        "    to Anthropic directly — so it still needs ANTHROPIC_API_KEY.\n"
+        "    Dev-tooling contract: only buduj_wielojezyczne_docs.py honors the\n"
+        "    switch, because it translates prose through the runtime engine. The\n"
+        "    other translators exchange item lists whose shape is enforced by\n"
+        "    Anthropic structured outputs, which the compat branch cannot send."
+    )

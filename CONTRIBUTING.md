@@ -43,10 +43,27 @@ auto-activated in plain Bash):
 ```
 
 AI-backed tooling reads keys from **`golden_key.env`** in the repo root
-(git-ignored). Set at least `ANTHROPIC_API_KEY` (`sk-ant-…`). Since v18.4 you may
-instead point the engine at any OpenAI-compatible endpoint with
+(git-ignored). Set `ANTHROPIC_API_KEY` (`sk-ant-…`) — for the dev tooling this is
+not optional, see the contract below. Since v18.4 the **application at runtime**
+can instead be pointed at any OpenAI-compatible endpoint with
 `LLM_PROVIDER=openai_compat` + `LLM_BASE_URL` + `OPENAI_API_KEY` + `LLM_MODEL`
 (Claude stays the recommended quality baseline — prompts are tuned for it).
+
+**Provider contract for the dev tooling.** `LLM_PROVIDER` is a global switch, but
+in the translator family exactly one tool honors it: `buduj_wielojezyczne_docs.py`.
+That is a consequence of protocol, not preference. The docs tool translates long
+*prose* through the same engine the shipped app uses (text in, text out), so it
+rides the provider-agnostic layer for free. Every other translator exchanges
+*item lists* (`{id, source}` → `{id, target}`) whose shape is enforced by Anthropic
+structured outputs — something the OpenAI-compatible branch cannot send today. So:
+
+* the other translators **ignore** `LLM_PROVIDER` and need `ANTHROPIC_API_KEY`
+  regardless of what you set (they say so on startup rather than failing silently);
+* on the docs tool, a compat endpoint works but is **not** shape-checked by the API,
+  and the prompts are tuned for Claude — read that draft with extra care;
+* none of this affects the audit and validation modes (`--audyt`,
+  `--tylko-walidacja`, `audyt_leakow.py`), which need **no key at all**. If you are
+  reviewing packs rather than generating them, you can work without any API access.
 
 ## Developer tools you may need
 

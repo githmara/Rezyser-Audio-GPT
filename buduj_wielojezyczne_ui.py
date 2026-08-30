@@ -508,6 +508,8 @@ def _zainicjuj_klienta_anthropic() -> Any:
     except ImportError:
         pass
 
+    tlumacz_bramki.ostrzez_o_kontrakcie_providera(honoruje=False)
+
     klucz = os.environ.get("ANTHROPIC_API_KEY")
     if not klucz or not klucz.startswith("sk-ant-"):
         raise SystemExit(

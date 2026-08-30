@@ -14,11 +14,21 @@ pyinstaller
 # markdown — render szablonów docs (Markdown → HTML) w generuj_dokumentacje.py
 # (dev/build-time; runtime .exe go nie importuje, więc nie trafia do bundla).
 markdown
-# openai — NIE jest używany przez runtime aplikacji (cały silnik AI = Anthropic Claude
-# Sonnet 4.6, end-user potrzebuje tylko ANTHROPIC_API_KEY; PyInstaller nie wciąga openai
-# do .exe, bo żaden frozen-moduł go nie importuje). Pozostaje jednak ŻYWĄ zależnością
-# projektu: dyspozytorski workflow GitHub Actions „Sami" (intake zgłoszeń,
-# .github/scripts/issue_intake_sami.py) woła gpt-4o-mini. Workflow instaluje go też jawnie
-# w issue-intake.yml; ten wpis jest dla JAWNOŚCI (jedyny żywy konsument OpenAI w repo) oraz
-# dla lokalnego uruchomienia/debugowania bota intake. Patrz CLAUDE.md pkt 7.
+# openai — dwaj konsumenci, obaj żywi:
+#   1. RUNTIME aplikacji, od v18.4: wybór dostawcy AI. Przy
+#      `LLM_PROVIDER=openai_compat` (README, manual KROK 2B) `core_llm.zbuduj_klienta`
+#      buduje klienta tym SDK, więc `openai` JEST w bundlu PyInstallera.
+#   2. Dyspozytorski workflow GitHub Actions „Sami" (intake zgłoszeń,
+#      .github/scripts/issue_intake_sami.py) — woła gpt-4o-mini. Workflow instaluje
+#      go też jawnie w issue-intake.yml; wpis tutaj służy lokalnemu debugowaniu bota.
+#
+# SPROSTOWANIE (v18.24, zmierzone): poprzednia wersja tego komentarza — oraz nota
+# v18.4 w RELEASE_NOTES — twierdziły, że „PyInstaller nie wciąga openai do .exe, bo
+# żaden frozen-moduł go nie importuje". To było prawdą DOKŁADNIE między v18.2.1
+# a v18.4.0. Import w `core_llm.zbuduj_klienta` jest leniwy (wewnątrz funkcji), ale
+# PyInstaller analizuje statycznie także importy w ciele funkcji: `PYZ-00.toc`
+# ostatniego builda ma 2098 wpisów `openai.*` (dla porównania `anthropic`: 1972).
+# Nie jest to defekt — funkcja wyboru dostawcy tego SDK wymaga; kłamał tylko opis.
+# Domyślny end-user nadal potrzebuje JEDNEGO klucza (`ANTHROPIC_API_KEY`).
+# Patrz CLAUDE.md pkt 7.
 openai

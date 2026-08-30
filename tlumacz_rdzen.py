@@ -46,6 +46,7 @@ from ruamel.yaml.scalarstring import LiteralScalarString
 
 import core_llm as cl
 import przeglad_tlumaczen
+import tlumacz_bramki
 
 
 # ---------------------------------------------------------------------------
@@ -158,8 +159,9 @@ def zainicjuj_klienta_anthropic(root: Path) -> Any:
     """Zwraca klienta `anthropic.Anthropic` z kluczem z `golden_key.env`.
 
     Structured outputs (`output_config`) są dziś dostępne wyłącznie przez surowe
-    SDK Anthropic, dlatego rodzina autotłumaczy NIE idzie przez `core_llm`.
-    Świadomy koszt: dev-tooling nie obsługuje `LLM_PROVIDER=openai_compat`.
+    SDK Anthropic, dlatego czterej bracia korzystający z rdzenia NIE idą przez
+    `core_llm` i nie honorują `LLM_PROVIDER`. Koszt jest świadomy, ale od v18.24
+    przestaje być MILCZĄCY — patrz `tlumacz_bramki.ostrzez_o_kontrakcie_providera`.
     """
     try:
         import anthropic
@@ -177,12 +179,14 @@ def zainicjuj_klienta_anthropic(root: Path) -> Any:
     except ImportError:
         pass
 
+    tlumacz_bramki.ostrzez_o_kontrakcie_providera(honoruje=False)
+
     klucz = os.environ.get("ANTHROPIC_API_KEY")
     if not klucz or not klucz.startswith("sk-ant-"):
         raise SystemExit(
-            "❌ Brak prawidłowego ANTHROPIC_API_KEY.\n"
-            f"   Sprawdź `{NAZWA_PLIKU_KLUCZA}` w katalogu projektu (ten sam plik,\n"
-            "   którego używa GUI — System Check w trybie Reżysera)."
+            "❌ Missing or invalid ANTHROPIC_API_KEY.\n"
+            f"   Check `{NAZWA_PLIKU_KLUCZA}` in the project directory (the same\n"
+            "   file the GUI uses — System Check in Director mode)."
         )
     return anthropic.Anthropic(api_key=klucz)
 

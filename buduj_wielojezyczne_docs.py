@@ -1808,6 +1808,12 @@ def _zainicjuj_klienta() -> Any:
     Od v18.4 provider-agnostic: domyślnie Anthropic Claude (`ANTHROPIC_API_KEY`,
     `sk-ant-`), a przy `LLM_PROVIDER=openai_compat` dowolny endpoint zgodny z OpenAI.
     Ten sam silnik co Poliglota runtime (`tlumacz_ai` wymaga `core_llm.KlientLLM`).
+
+    **To JEDYNE narzędzie rodziny honorujące `LLM_PROVIDER`** — nie z wyboru, lecz
+    przez protokół: tłumaczymy tu długą PROZĘ (tekst→tekst), więc nie ma schematu,
+    który trzeba by wysłać przez `output_config`. Pozostała piątka wymienia listy
+    pozycji i zostaje przy Anthropicu. Kontrakt i cena tej ścieżki (brak structured
+    outputs, prompty strojone pod Claude) → `tlumacz_bramki.PROVIDER_COMPAT`.
     """
     # Ładujemy `golden_key.env` z roota projektu — ten sam plik, którego
     # używa GUI (`gui_poliglota.py`, `gui_rezyser.py`, `main.py`).
@@ -1820,6 +1826,8 @@ def _zainicjuj_klienta() -> Any:
             load_dotenv(env_path)
     except ImportError:
         pass   # python-dotenv jest w requirements; fallback i tak ma sens
+
+    tlumacz_bramki.ostrzez_o_kontrakcie_providera(honoruje=True)
 
     klient = cl.zbuduj_klienta(cl.wczytaj_konfiguracje())
     if klient is None:
