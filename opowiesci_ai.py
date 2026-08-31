@@ -766,8 +766,9 @@ def generuj_ture(
             # outputs tam nie ma). Potem granica parsowania: zdejmujemy dyskryminator,
             # żeby walidacja i mapowanie widziały kształt sprzed v18.23.
             dane = json.loads(cl.napraw_luzny_json(surowa))
-            odmowa, dane, _powod = cl.rozpakuj_dyskryminator(dane)
+            odmowa, dane, powod = cl.rozpakuj_dyskryminator(dane)
             if odmowa:
+                cl.zaloguj_odmowe(powod, "tura")
                 return WynikTury(
                     narracja="", wybory=[], postacie_aktywne=[],
                     stan={}, meta={}, surowy_json=surowa, odrzucone=True,

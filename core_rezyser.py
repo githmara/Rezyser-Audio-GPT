@@ -1379,8 +1379,20 @@ class ProjektRezysera:
 
         ``nazwa`` (v18.13) kieruje zapis do meta innego projektu niż otwarty —
         wtedy ``full_story`` NIE jest sensownym źródłem, więc przy braku
-        ``content`` anchor wychodzi pusty (rekoncyliacja spadnie na fallback
-        znakowy, zachowanie bezpieczne).
+        ``content`` anchor wychodzi pusty.
+
+        **Pusty anchor = brak przyrostowości, NIE fallback znakowy.** Wcześniejsza
+        wersja tego docstringu obiecywała „fallback znakowy" — takiego fallbacku
+        w ścieżce rekoncyliacji nie ma (``_koncowka_po_znakach``/:data:`MAX_TAIL_ZN`
+        należą do WCZYTANIA projektu). Faktyczne zachowanie:
+        :func:`wytnij_od_anchora` z pustym anchorem zwraca CAŁY ``content``, więc
+        streszczenie powstaje od zera — nic nie ginie, ale payload rośnie liniowo
+        z długością projektu. Dotyczy to każdego projektu bez ani jednego
+        nagłówka struktury (:func:`_znajdz_naglowki` zwraca wtedy pustą listę);
+        tryby prozatorskie numerują rozdziały, więc w praktyce trafia tu ciągła
+        proza pisana ręcznie. Pola ``marker_typ``/``marker_numer``/
+        ``dlugosc_full_story_przy_streszczeniu`` są zapisywane na przyszłość —
+        dziś czytamy WYŁĄCZNIE ``marker_naglowek_tekst``.
         """
         cel = nazwa or self.nazwa_pliku
         if content is not None:

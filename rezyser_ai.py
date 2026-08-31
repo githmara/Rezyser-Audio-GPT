@@ -682,8 +682,9 @@ def generuj_burze(
             dane = json.loads(cl.napraw_luzny_json(surowy_text))
             # Granica parsowania: zdejmujemy dyskryminator, żeby walidacja i całe
             # dalsze mapowanie widziały DOKŁADNIE kształt sprzed v18.23.
-            odmowa, dane, _powod = cl.rozpakuj_dyskryminator(dane)
+            odmowa, dane, powod = cl.rozpakuj_dyskryminator(dane)
             if odmowa:
+                cl.zaloguj_odmowe(powod, "burza")
                 return WynikBurzy(
                     odrzucone=True,
                     uzyty_sufiks=sufiks_nazwa,
@@ -957,8 +958,9 @@ def generuj_skrypt(
 
         try:
             dane = json.loads(cl.napraw_luzny_json(surowy_text))
-            odmowa, dane, _powod = cl.rozpakuj_dyskryminator(dane)
+            odmowa, dane, powod = cl.rozpakuj_dyskryminator(dane)
             if odmowa:
+                cl.zaloguj_odmowe(powod, "skrypt")
                 return WynikSkryptu(
                     odrzucone=True,
                     uzyty_sufiks=sufiks_nazwa,

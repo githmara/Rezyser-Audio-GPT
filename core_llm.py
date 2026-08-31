@@ -569,7 +569,10 @@ def schemat_z_dyskryminatorem(schema: dict, tag_odrzucenia: str) -> dict:
         tylko właściwą, schematem kanonicznym.
       * **nietrywialny sentinel** (``typ`` + ``odrzucenie`` wymagane) — zmniejsza
         bias modelu w stronę „tańszej gałęzi" przy długich promptach twórczych.
-      * ``powod`` wpada wprost do diagnostyki (model wypełnia go bez proszenia).
+      * ``powod`` model wypełnia bez proszenia; wołający oddaje go do konsoli
+        dewelopera przez :func:`zaloguj_odmowe`. Do ``error_log.txt`` NIE trafia:
+        odmowa jest obsłużoną ścieżką, nie awarią, a plik ten użytkownik
+        załącza do zgłoszeń i nie chcemy go rozcieńczać nie-błędami.
 
     ``description`` pól jest po ANGIELSKU i NIE jest tłumaczone — dokładnie jak
     klucze payloadu w ``buduj_wielojezyczne_ui`` („kolejna kotwica PL usunięta",
@@ -658,6 +661,29 @@ def rozpakuj_dyskryminator(dane: Any) -> tuple[bool, Any, str]:
     powod = str(dane.get("powod") or "")
     okrojone = {k: v for k, v in dane.items() if k not in ("typ", "odrzucenie", "powod")}
     return typ == TYP_ODRZUCENIE, okrojone, powod
+
+
+def zaloguj_odmowe(powod: str, gdzie: str) -> None:
+    """Oddaje kategorię odmowy do konsoli dewelopera (nic więcej).
+
+    Trzeci element krotki z :func:`rozpakuj_dyskryminator` był dotąd porzucany
+    we wszystkich trzech wołaniach (``_powod``), mimo że schemat prosi model
+    o jego wypełnienie, a docstring :func:`schemat_z_dyskryminatorem` obiecywał
+    „diagnostykę". Ta funkcja domyka obietnicę najmniejszym możliwym kosztem.
+
+    Świadomie NIE piszemy do ``error_log.txt``: odmowa ma własną, łagodną
+    ścieżkę w GUI (stan projektu nietknięty), a plik diagnostyczny użytkownik
+    załącza do publicznego zgłoszenia — wpisy o nie-awariach rozcieńczałyby go.
+    ``gdzie`` to identyfikator trybu (``"burza"``/``"skrypt"``/``"tura"``), żeby
+    log rozróżniał ścieżki bez zaglądania w stack.
+
+    Kategoria pochodzi z zamkniętego zbioru :data:`_POWODY_ODRZUCENIA`, więc
+    nie może przenieść ani znaku prozy użytkownika. Nieznaną wartość (model
+    zignorował ``enum``) wypisujemy jako ``"?"`` — nie wpuszczamy do logu
+    dowolnego stringu od modelu.
+    """
+    kategoria = powod if powod in _POWODY_ODRZUCENIA else "?"
+    _dev_log(f"{gdzie}: model odmówił wykonania (powod={kategoria})")
 
 
 # ---------------------------------------------------------------------------

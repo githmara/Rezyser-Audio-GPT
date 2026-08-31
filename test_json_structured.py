@@ -197,6 +197,37 @@ def test_rozpakuj_rozpoznaje_odmowe():
     assert odmowa and powod == "safety"
 
 
+def _przechwyc_dev_log(funkcja) -> str:
+    """Zwraca to, co `funkcja` wypisala przez `core_llm._dev_log`."""
+    import io
+
+    bufor, stary = io.StringIO(), sys.stdout
+    sys.stdout = bufor
+    try:
+        funkcja()
+    finally:
+        sys.stdout = stary
+    return bufor.getvalue()
+
+
+def test_powod_odmowy_trafia_do_logu_dewelopera():
+    # 18.24.1: `powod` byl porzucany we wszystkich trzech wolaniach
+    # (`odmowa, dane, _powod = ...`), mimo obietnicy w docstringu schematu.
+    wynik = _przechwyc_dev_log(lambda: cl.zaloguj_odmowe("safety", "burza"))
+    assert "burza" in wynik and "safety" in wynik
+
+
+def test_log_odmowy_nie_wpuszcza_dowolnego_stringu_od_modelu():
+    # Log jest z zalozenia NIETRESCIOWY (idzie do publicznego zgloszenia), a
+    # `powod` wypelnia model - wiec wartosc spoza `enum` degraduje do "?".
+    # Wartosc testowa po ANGIELSKU celowo: polska proza w zrodle `.py` podnosi
+    # bramke `--bramka-py` (POSSIBLE|lingua:PL), a test niczego nie traci -
+    # sprawdza filtrowanie, nie jezyk.
+    wynik = _przechwyc_dev_log(
+        lambda: cl.zaloguj_odmowe("the elevator scene felt wrong to me", "tura"))
+    assert "powod=?" in wynik and "elevator" not in wynik
+
+
 def test_rozpakuj_przepuszcza_odpowiedz_bez_typu():
     # Galaz `openai_compat` nie ma structured outputs - stare zachowanie zostaje.
     odmowa, dane, _ = cl.rozpakuj_dyskryminator({"opcje": []})
