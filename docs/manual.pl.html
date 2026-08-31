@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 18.24.1 – Wersja Wydawnicza)</title>
+<title>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 18.24.2 – Wersja Wydawnicza)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 18.24.1 – Wersja Wydawnicza)</h1>
+<h1>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 18.24.2 – Wersja Wydawnicza)</h1>
 <p>Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).</p>
 <p>Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota), narzędzia do budowania struktury pliku (Architekt Audiobooków), Managera Reguł (od wersji 13.0 — bez Pythona dodasz nowy akcent, szyfr lub tryb twórczy, patrz KROK 7b poniżej) oraz — od wersji 15.0 — modułu Opowieści (interaktywna fikcja drugoosobowa generowana przez AI, czytana przez TTS lub czytnik ekranu, opisana osobnym manualem tales.pl.html). Wszystkie pięć narzędzi dostępnych jest w jednym oknie programu, przełączanym przyciskami na pasku lub skrótami klawiaturowymi Ctrl+1..Ctrl+5.</p>
 <h2>KROK 1: Pierwsze uruchomienie (Cross-Platform)</h2>
@@ -345,7 +345,8 @@ Zapytacie pewnie, czy syntezator będzie umiał odmieniać tak znormalizowane li
 - Przycisk „📝  Otwórz w edytorze tekstu" — otwiera zaznaczony plik w domyślnym Notatniku systemu. Edytujesz, zapisujesz, klikasz „🔄  Odśwież drzewo" i gotowe.<br>
 - Przycisk „📋  Duplikuj wybrany plik" — najszybsza droga do nowego akcentu: bierzesz istniejący plik (np. finski.yaml), podajesz nową nazwę (np. szwedzki), Manager tworzy kopię z komentarzem „zmień pola etykieta i opis" i otwiera ją w edytorze.<br>
 - Przycisk „➕  Nowy plik reguł…" — kreator z wyborem typu (akcent, szyfr, tryb Reżysera, nowy język bazowy, szyfr algorytmiczny). Dla zwykłych przypadków (akcent, szyfr typu „zamiana liter") kreator tworzy gotowy do edycji szablon YAML. Dla przypadków wymagających programisty (nowy język bazowy, algorytm typu „mieszanie środka słów") kreator generuje prompt dla chatbota AI — wklejasz do ChatGPT, dostajesz gotowy plik YAML, zapisujesz w dictionaries/ i gotowe.</p>
-<p>Praktyczne zastosowanie: Chcesz dodać akcent szwedzki? Otwórz Manager Reguł, wybierz dictionaries/pl/akcenty/finski.yaml, kliknij „Duplikuj", nazwij plik szwedzki, zmień w nim pole etykieta na "Szwedzki (Alva / Oskar)", kod iso na sv, zmień kilka reguł zamiany i zapisz. Wróć na Stronę główną i uruchom aplikację ponownie. Nowy akcent pojawi się w menu Poligloty (w Trybie Reżysera) i — jeśli dodasz go do Księgi Świata postaci („[Marek] - ma akcent szwedzki") — również w automatycznym wykrywaniu akcentów Reżysera.</p>
+<p>Praktyczne zastosowanie: Chcesz dodać akcent szwedzki? Otwórz Manager Reguł, wybierz dictionaries/pl/akcenty/finski.yaml, kliknij „Duplikuj", nazwij plik szwedzki, zmień w nim pole etykieta na "Szwedzki (Alva / Oskar)", kod iso na sv, zmień kilka reguł zamiany i zapisz. Wróć do Managera Reguł i kliknij „🔄  Odśwież drzewo" — bez zamykania aplikacji. Nowy akcent pojawi się w menu Poligloty (w Trybie Reżysera) i — jeśli dodasz go do Księgi Świata postaci („[Marek] - ma akcent szwedzki") — również w automatycznym wykrywaniu akcentów Reżysera.</p>
+<p>Gdy plik ma błąd: silnik musi pominąć regułę, której nie rozumie — inaczej aplikacja wywróciłaby się w połowie pracy. Do wersji 18.24.1 taki plik znikał w milczeniu: tryb przestawał się pokazywać na liście, akcent wypadał z menu Poligloty i nic nie mówiło, dlaczego. Od wersji 18.24.2 powód pominięcia dostajesz wprost: po kliknięciu „🔄  Odśwież drzewo" Manager Reguł pokazuje raport (a gdy wszystko jest w porządku — krótkie potwierdzenie), a to samo okno zapala się przy wejściu do narzędzia, którego reguła dotyczy. Raport podaje ścieżkę pliku, przyczynę zapisaną zwykłym językiem i szczegóły techniczne — przy błędzie składni dwie liczby wskazują linię i znak w linii, więc wiesz, gdzie w Notatniku szukać literówki.</p>
 <p>Gdzie szukać dalszej dokumentacji folderu dictionaries/:<br>
 - Plik <code>docs/dictionaries.pl.html</code> (dostępny w paczce dla end-userów z zakładki Releases) — krótki, prostym językiem opis każdego podfolderu, 6 gotowych szyfrów, 8 gotowych akcentów oraz pomysły, co można zrobić samodzielnie, bez znajomości Pythona.<br>
 - Plik <code>dictionaries/README.md</code> (dostępny tylko przy klonowaniu repozytorium z GitHuba — paczki wydaniowe filtrują pliki .md) — szczegółowa dokumentacja techniczna formatu YAML z przykładami, listami pól, zasadami pipeline'u, regex-ami. Ten dokument adresowany jest do lingwistów znających podstawy programowania oraz do deweloperów.</p>

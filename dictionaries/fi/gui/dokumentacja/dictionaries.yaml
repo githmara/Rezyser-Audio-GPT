@@ -240,45 +240,67 @@ tresc:
     ## Kuinka aloittaa leikki — kolme vaikeustasoa
     -------------------------------------------
   poziom_1_dostroj: |
-    ## TASO 1 — olemassa olevan aksentin hienosäätö
+    Seuraava teksti sisältää merkkejä: kaksinkertaisiin matemaattisiin
+    kulmasulkeisiin (merkit U+27E6 ja U+27E7) suljettu luku. Nämä ovat
+    jäädytettyjä ohjelmallisia paikkamerkkejä. Kopioi ne vastaukseen
+    KIRJAIMELLISESTI, merkki merkiltä — älä muuta numeroita, älä muuta
+    sulkeita, älä käännä. Jokaisen merkin on esiinnyttävä vastauksessa
+    täsmälleen yhtä monta kertaa kuin alkuperäisessä (ylätason skripti
+    tarkistaa parillisuuden lopuksi). ÄLÄ lisää mitään merkkejä, joita
+    alkuperäisessä ei ole.
+    [OHJEEN LOPPU — KÄÄNNÖS ALKAA ALLA]
 
-    Kuvittele, että sovelluksen ranskalainen aksentti muuttaa "sz" "sh":ksi,
-    mutta mielestäsi ranskalainen sanoisi mieluummin "sch" tai "ch". Ei ongelmaa.
+    ## TASO 1 — olemassa olevan aksentin hieno säätö
 
-    1. Käynnistä sovellus ja siirry Sääntöjen Hallintaan (Ctrl+4 tai neljäs
-       painike palkissa).
-    2. Laajenna tiedostopuu vasemmalla "pl" → "aksentit" ja klikkaa
+    Kuvittele, että sovelluksen ranskalainen aksentti muuttaa "sz":n muotoon
+    "sh", mutta sinun mielestäsi ranskalainen sanoisi todennäköisemmin
+    "sch" tai "ch". Ei mitään ongelmaa.
+
+    1. Käynnistä sovellus ja siirry Sääntöjen Hallintaan (näppäin Ctrl+4 tai
+       neljäs painike työkalupalkissa).
+    2. Vasemmalla olevassa tiedostopuussa avaa "pl" → "akcenty" ja napsauta
        "francuski.yaml".
-    3. Klikkaa "Avaa tekstieditorissa" -painiketta. Tiedosto avautuu Windowsin
-       Muistiossa (tai oletustekstieditorissasi).
-    4. Selaa alas kohtaan "korvaukset:". Etsi rivi, jossa on malli "sz" ja
-       muuta "korvaus" -arvo haluamaksesi.
+    3. Napsauta painiketta "{manager.btn_otworz_label}". Tiedosto avautuu
+       Windowsin Muistioon (tai oletustekstieditoriisi).
+    4. Vieritä alas kohtaan "zamiany:". Etsi rivi, jossa on kuvio "sz", ja
+       muuta "zamiana"-arvo haluamaksesi.
     5. Tallenna tiedosto (Ctrl+S), sulje editori.
-    6. Palaa Sääntöjen Hallintaan ja klikkaa "Päivitä puu", sulje sitten
-       sovellus ja käynnistä se uudelleen. Muutoksesi on jo toiminnassa.
+    6. Palaa Sääntöjen Hallintaan ja napsauta "{manager.btn_odswiez_label}". Säännöt
+       latautuvat uudelleen — muutoksesi on jo voimassa, sovellusta ei tarvitse sulkea.
+       Jos tiedostossa on syntaksivirhe, Hallinta näyttää välittömästi raportin
+       virheen rivinumerolla.
   poziom_2_duplikacja: |
+    Seuraava teksti sisältää merkkejä: luku kaksinkertaisten matemaattisten
+    sulkeiden sisällä (merkit U+27E6 ja U+27E7). Nämä ovat jäädytettyjä
+    ohjelmallisia paikanpitäjiä. Kopioi ne vastaukseen KIRJAIMELLISESTI,
+    merkki merkiltä — älä muuta numeroita, älä muuta sulkeita, älä käännä.
+    Joka markkerin on esiinnyttävä vastauksessa täsmälleen yhtä monta
+    kertaa kuin alkuperäisessä (yliordinettu skripti tarkistaa parillisuuden
+    lopussa). ÄLÄ lisää mitään markkereita, joita alkuperäisessä ei ole.
+    [OHJEEN LOPPU — KÄÄNNÖS ALKAA ALLA]
+
     ## TASO 2 — uuden aksentin lisääminen kopioimalla
 
     Haluatko lisätä ruotsalaisen tai tanskalaisen aksentin? Aloita
-    lähimmästä olemassa olevasta.
+    kopioimalla mahdollisimman läheistä olemassa olevaa aksenttia.
 
-    1. Sääntöjen Hallinnassa valitse esimerkiksi "finski.yaml" (suomi on
-       lähellä ruotsia foneettisesti) ja klikkaa "Kopioi valittu tiedosto".
-    2. Hallinta kysyy uutta nimeä — kirjoita esimerkiksi "ruotsalainen"
-       (pienillä kirjaimilla, ilman välilyöntejä, ilman suomenkielisiä
-       merkkejä).
-    3. Uusi tiedosto avautuu editorissa. Muuta kentät:
-          - "etiketti" — se, mitä näet sovelluksen valikossa, esim.
-            "Ruotsalainen (Alva / Oskar — OneCore/Vocalizer)"
-          - "kuvaus" — lyhyt kuvaus itsellesi tulevaisuutta varten
+    1. Valitse Sääntömanagerissa esim. "finski.yaml" (suomi on foneettisesti
+       lähellä ruotsia) ja napsauta "{manager.btn_duplikuj_label}".
+    2. Manageri kysyy uutta nimeä — kirjoita esim. "szwedzki" (pienin
+       kirjaimin, ei välilyöntejä, ei puolalaisia erikoismerkkejä).
+    3. Uusi tiedosto avautuu editorissa. Muuta kenttiä:
+          - "etykieta" — se, minkä näet sovelluksen valikossa, esim.
+            "Ruotsi (Alva / Oskar — OneCore/Vocalizer)"
+          - "opis" — lyhyt kuvaus itsellesi tulevaisuutta varten
           - "iso" — kaksikirjaiminen kielikoodi, ruotsille "sv"
-    4. Säädä "zamiany"-listaa ruotsalaiselle foneettisuudelle (esim.
-       lisää "å → o", "ö → ö", poista tai muuta ne, jotka ovat erityisiä
-       suomelle).
-    5. Tallenna ja käynnistä sovellus uudelleen. Uusi ruotsalainen ilmestyy
-       Polyglootin aksenttivalikkoon (ja jos lisäät Maailmankirjaan hahmon
-       tagilla "[Marek] - puhuu ruotsalaisella aksentilla", Ohjaaja tunnistaa
-       sen automaattisesti ja soveltaa sitä hänen dialogeihinsa).
+    4. Säädä "zamian"-lista (korvaukset) vastaamaan ruotsin fonetiikkaa
+       (esim. lisää "å → o", "ö → ö", poista tai muuta ne, jotka ovat
+       ominaisia nimenomaan suomelle).
+    5. Tallenna tiedosto ja napsauta Sääntömanagerissa "{manager.btn_odswiez_label}"
+       — sovellusta sulkematta. Uusi ruotsalainen aksentti ilmestyy
+       Polyglotin aksenttivalikkoon (ja jos lisäät Maailmankirjan hahmolle
+       tagin "[Marek] - hänellä on ruotsalainen aksentti", myös Ohjaaja tunnistaa sen
+       automaattisesti ja soveltaa sitä hänen dialogeihinsa).
   poziom_3_cos_nowego: |
     ## TASO 3 — täysin uuden luominen
 

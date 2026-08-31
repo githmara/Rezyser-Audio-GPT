@@ -209,13 +209,15 @@ tresc:
        quarto pulsante sulla barra).
     2. Nell'albero dei file a sinistra espandi "pl" → "akcenty" e fai clic su
        "francuski.yaml".
-    3. Fai clic sul pulsante "Apri nell'editor di testo". Il file si aprirà nel
+    3. Fai clic sul pulsante "{manager.btn_otworz_label}". Il file si aprirà nel
        Blocco note di Windows (o nel tuo editor di testo predefinito).
     4. Scorri verso il basso fino alla sezione "zamiany:". Trova la riga con il
        modello "sz" e cambia il valore "zamiana" con quello che preferisci.
     5. Salva il file (Ctrl+S), chiudi l'editor.
-    6. Torna al Gestore Regole e fai clic su "Aggiorna albero", quindi
-       chiudi e riavvia l'applicazione. La tua modifica è già attiva.
+    6. Torna al Gestore Regole e fai clic su "{manager.btn_odswiez_label}". Le
+       regole vengono ricaricate — la tua modifica è già attiva, senza chiudere
+       l'applicazione. Se il file contiene un errore di sintassi, il Gestore
+       mostra subito un rapporto con il numero di riga.
   poziom_2_duplikacja: |
     ## LIVELLO 2 — aggiungere un nuovo accento tramite duplicazione
 
@@ -223,7 +225,7 @@ tresc:
     esistente.
 
     1. Nel Gestore Regole seleziona ad esempio "finski.yaml" (il finlandese
-       è foneticamente vicino allo svedese) e fai clic su "Duplica file selezionato".
+       è foneticamente vicino allo svedese) e fai clic su "{manager.btn_duplikuj_label}".
     2. Il Gestore chiederà un nuovo nome — inserisci ad esempio "szwedzki" (in
        minuscolo, senza spazi, senza caratteri polacchi).
     3. Il nuovo file si aprirà nell'editor. Cambia i campi:
@@ -234,10 +236,11 @@ tresc:
     4. Regola l'elenco delle "zamiany" secondo la fonetica svedese (ad esempio,
        aggiungi "å → o", "ö → ö", rimuovi o modifica quelle specifiche per il
        finlandese).
-    5. Salva, torna alla Pagina principale, fai clic su "🔄 Aggiorna accenti del
-       Regista da YAML" e riavvia l'applicazione. Il nuovo svedese apparirà nel
+    5. Salva il file e, nel Gestore Regole, fai clic su
+       "{manager.btn_odswiez_label}" — senza chiudere l'applicazione. Il nuovo
+       svedese apparirà nel
        menu degli accenti di Poliglotta (e se aggiungi al Libro del Mondo il tag
-       "[Marek] - ha accento svedese", anche il Regista lo riconoscerà
+       "[Marek] - ha l'accento svedese", anche il Regista lo riconoscerà
        automaticamente e lo applicherà ai suoi dialoghi).
   poziom_3_cos_nowego: |
     ## LIVELLO 3 — creare qualcosa di completamente nuovo

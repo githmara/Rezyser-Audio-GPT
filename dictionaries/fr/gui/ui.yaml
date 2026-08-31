@@ -931,10 +931,11 @@ manager:
   btn_usun_tooltip: "Supprime le fichier YAML sélectionné du disque (avec confirmation). L'opération est irréversible — réfléchissez-y à deux fois."
   btn_odswiez_label: "🔄  Ac&tualiser l'arborescence"
   btn_odswiez_name: "Bouton Actualiser l'arborescence des fichiers"
-  btn_odswiez_tooltip: "Recharge l'arborescence depuis le disque — utilisez si vous avez modifié les fichiers manuellement dans l'Explorateur ou après une sauvegarde dans l'éditeur de texte."
+  btn_odswiez_tooltip: "Recharge l'arborescence depuis le disque et recharge les règles depuis le début – à utiliser après avoir enregistré un fichier dans l'éditeur de texte. Affichera un rapport si le moteur a dû ignorer un fichier ; la correction s'applique sans fermer l'application."
   info_stopka: |-
-    Après avoir créé un nouveau fichier, redémarrez l'application –
-    les nouvelles règles seront détectées automatiquement.
+    Après avoir créé, modifié ou supprimé un fichier, actualisez l'arborescence avec le bouton
+    ci-dessus – les règles seront rechargées sans fermer l'application. La nouvelle langue
+    de l'interface n'apparaîtra dans le menu qu'après un redémarrage.
   # Otwarcie w edytorze
   plik_wne_tytul: "Impossible d'ouvrir le fichier"
   plik_wne_tresc: |-
@@ -1423,3 +1424,22 @@ bot:
     brak_emaila: Aucune adresse e-mail n'a été trouvée dans le contenu — merci de bien vouloir la compléter.
     pauza: La mise à jour du patch Tiflotecnia Voices est en cours. Je laisse ce ticket ouvert et reviendrai avec un lien à jour dès que j'aurai terminé — vous n'avez rien à faire.
   sami_comment: "Ciao ! 🌞 Sami du Sud a repéré ton signalement et est partie en trombe avec le prompt technique vers le Centre. Le concepteur de l'application s'en occupera sous peu — et lorsque la correction arrivera dans la dernière version, l'une de mes collègues du Nord passera par ici : Lumi, Vieno ou Katla. À presto !\n— Sami"
+diag:
+  tytul: Règles ignorées
+  wstep: "Les fichiers de règles suivants (ou certains de leurs fragments) ont été ignorés par le moteur.\nC'est pourquoi les modes IA, les outils de postproduction ou les modèles\nde départ correspondants n'apparaissent pas dans l'application."
+  szczegol: '   Détails techniques : {szczegol}'
+  wpis: 📄 {plik}
+  stopka: "Comment corriger : dans le Gestionnaire de règles, sélectionnez le fichier dans la liste et ouvrez-le\ndans un éditeur de texte, corrigez l'endroit indiqué et enregistrez. Ensuite, actualisez l'arborescence\ndu Gestionnaire de règles – les règles seront rechargées, sans fermer l'application –\net revenez à l'outil.\nSi vous ne savez pas quoi corriger, ouvrez ce même fichier dans une autre langue et comparez\nles deux, ou restaurez le pack de règles par défaut en réinstallant l'application\n(vos projets et jeux resteront intacts)."
+  brak_zastrzezen: Tous les fichiers de règles ont été chargés sans problème.
+  brak_zastrzezen_tytul: Règles vérifiées
+  powod:
+    parse: "Impossible de lire le fichier – syntaxe YAML invalide. Le fichier a été\nentièrement ignoré. Les deux nombres dans les détails indiquent l'emplacement de l'erreur :\nle numéro de ligne et le numéro de caractère sur cette ligne."
+    brak_pol: "Il manque au fichier des champs sans lesquels le moteur ne peut pas reconnaître la règle (ils sont listés\ndans les détails). Le fichier a été ignoré."
+    kategoria: "Le champ « kategoria » a une valeur inconnue du moteur – impossible de déterminer si le fichier\ndécrit un mode IA ou un outil de postproduction. Le fichier a été ignoré."
+    zakres: "Le champ « zakres » a une valeur en dehors de l'ensemble autorisé, et c'est de cette valeur que dépend\nla méthode de traitement du texte (chapitre par chapitre ou en une seule fois).\nL'outil a été ignoré pour éviter qu'il ne fonctionne autrement que prévu."
+    sufiks: "Le champ « sufiks_pliku_wyniku » contient des caractères non autorisés dans un nom de fichier,\ndonc le résultat n'aurait nulle part où être enregistré. L'outil a été ignoré."
+    pole: "Un champ a une valeur du mauvais type – le plus souvent du texte là où\nle moteur attend un nombre, ou une liste là où il faudrait un ensemble de paires.\nLe fichier a été ignoré."
+    duplikat: "Un autre fichier dans le même dossier possède déjà cet identifiant. Le moteur\na chargé cet autre fichier (indiqué dans les détails) et a ignoré celui-ci – deux règles\nayant le même identifiant seraient indiscernables."
+    rola: "Le champ « rola » a une valeur inconnue et a été ignoré. Le fichier lui-même fonctionne,\nmais l'outil n'aura pas le comportement associé à ce rôle."
+    klucz: "Il manque au fichier une clé requise par le moteur (elle est indiquée\ndans les détails). Cette partie de la recette ne fonctionnera pas tant que la clé\nn'aura pas été remise en place."
+    wpis: "Une entrée à l'intérieur du fichier est incomplète (indiquée dans les détails)\net a été ignorée. Les autres entrées de ce fichier fonctionnent normalement."

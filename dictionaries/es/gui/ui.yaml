@@ -936,10 +936,11 @@ manager:
   btn_usun_tooltip: "Elimina el archivo YAML seleccionado del disco (con confirmación). La operación es irreversible – piénsalo dos veces."
   btn_odswiez_label: "🔄  A&ctualizar árbol"
   btn_odswiez_name: "Botón Actualizar árbol de archivos"
-  btn_odswiez_tooltip: "Recarga el árbol desde el disco – úsalo si cambiaste archivos manualmente en el Explorador o después de guardar en el editor de texto."
+  btn_odswiez_tooltip: "Recarga el árbol desde el disco y vuelve a cargar las reglas; úsalo después de guardar el archivo en el editor de texto. Mostrará un informe si el motor tuvo que omitir algún archivo; la corrección funciona sin cerrar la aplicación."
   info_stopka: |-
-    Después de crear un nuevo archivo, reinicia la aplicación –
-    las nuevas reglas se detectarán automáticamente.
+    Después de crear, modificar o eliminar un archivo, actualiza el árbol con el botón
+    de arriba: las reglas se volverán a cargar sin necesidad de cerrar la aplicación. El nuevo idioma
+    de la interfaz aparecerá en el menú solo después de reiniciar.
   # Otwarcie w edytorze
   plik_wne_tytul: "No se puede abrir el archivo"
   plik_wne_tresc: |-
@@ -1430,3 +1431,22 @@ bot:
     brak_emaila: No encontré ninguna dirección de correo electrónico en el contenido — por favor, añádela.
     pauza: Actualmente se está actualizando el patch de Tiflotecnia Voices. Dejo esta incidencia abierta y volveré con el enlace actualizado en cuanto termine — no necesitas hacer nada.
   sami_comment: "¡Ciao! 🌞 Sami del Sur ha visto tu reporte y ha salido disparada con el prompt técnico hacia el Centro. El diseñador de la aplicación se ocupará en breve — y cuando la corrección llegue a la última versión, aparecerá por aquí una de mis colegas del Norte: Lumi, Vieno o Katla. ¡A presto!\n— Sami"
+diag:
+  tytul: Reglas omitidas
+  wstep: "Los siguientes archivos de reglas (o fragmentos de ellos) fueron omitidos por el motor.\nPor eso los modos de IA, herramientas de posproducción o plantillas iniciales\ncorrespondientes no aparecen en la aplicación."
+  szczegol: '   Detalles técnicos: {szczegol}'
+  wpis: 📄 {plik}
+  stopka: "Cómo solucionarlo: en el Gestor de Reglas, selecciona el archivo en la lista y ábrelo\nen el editor de texto, corrige el lugar indicado y guarda los cambios. Después actualiza el árbol\nen el Gestor de Reglas –las reglas se volverán a cargar sin cerrar la aplicación–\ny vuelve a la herramienta.\nSi no sabes qué corregir, abre el mismo archivo en otro idioma y compara\nambos, o restaura el paquete de reglas predeterminado reinstalando la aplicación\n(tus proyectos y juegos permanecerán intactos)."
+  brak_zastrzezen: Todos los archivos de reglas se cargaron sin problemas.
+  brak_zastrzezen_tytul: Reglas verificadas
+  powod:
+    parse: "No se pudo leer el archivo: sintaxis YAML incorrecta. El archivo fue\nomitido por completo. Los dos números en los detalles indican el lugar del error:\nel número de línea y el número de carácter en esa línea."
+    brak_pol: "Al archivo le faltan campos sin los cuales el motor no puede reconocer la regla (están indicados\nen los detalles). El archivo fue omitido."
+    kategoria: "El campo «kategoria» tiene un valor que el motor no reconoce; no se sabe si el archivo\ndescribe un modo de IA o una herramienta de posproducción. El archivo fue omitido."
+    zakres: "El campo «zakres» tiene un valor fuera del conjunto permitido, y de él depende\nla forma de procesar el texto (capítulo por capítulo o todo de una vez).\nLa herramienta fue omitida para evitar que funcione de forma distinta a la esperada."
+    sufiks: "El campo «sufiks_pliku_wyniku» contiene caracteres no permitidos en un nombre de archivo,\npor lo que el resultado no tendría dónde guardarse. La herramienta fue omitida."
+    pole: "Alguno de los campos tiene un valor del tipo incorrecto; lo más común es texto donde\nel motor espera un número, o una lista donde debería haber un conjunto de pares.\nEl archivo fue omitido."
+    duplikat: "Otro archivo en la misma carpeta ya tiene el mismo identificador. El motor\ncargó aquel (se indica en los detalles) y omitió este; dos reglas\ncon un mismo identificador serían indistinguibles."
+    rola: "El campo «rola» tiene un valor desconocido y fue ignorado. El archivo en sí funciona,\npero la herramienta no recibirá el comportamiento asignado a ese rol."
+    klucz: "Al archivo le falta una clave requerida por el motor (se indica\nen los detalles). Esta parte de la receta no funcionará hasta que la clave vuelva\na su lugar."
+    wpis: "Una entrada dentro del archivo está incompleta (indicada en los detalles)\ny fue omitida. Las demás entradas de este archivo funcionan con normalidad."

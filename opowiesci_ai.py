@@ -51,9 +51,29 @@ from bledy_ai import BladDlugosciOdpowiedzi, BladOdrzuceniaAI, BladStrukturyJSON
 # tag w surowym tekście `/visualize` bez importu `przepisy_rezysera`.
 from przepisy_rezysera import (  # noqa: F401  (re-eksport dla gui_opowiesci)
     KLAUZULA_ODRZUCENIA_DOMYSLNA,
+    POWOD_KLUCZ,
+    POWOD_PARSE,
+    POWOD_WPIS,
     TAG_ODRZUCENIA_AI,
+    opis_bledu_yaml,
     wykryto_odrzucenie,
+    zglos_pominiecie,
 )
+
+
+def _dev_log(komunikat: str) -> None:
+    """Strażowany ``print`` na konsolę dewelopera (packaged: stdout None → milczy).
+
+    Wzorzec ``core_llm._dev_log``. Do v18.24.1 diagnostyka loadera przepisów
+    Opowieści szła przez ``sys.stderr.write``, a w buildzie ``--windowed``
+    ``sys.stderr`` jest ``None`` — komunikat przepadał (albo, przy gołym
+    ``write``, wywracał wywołanie ``AttributeError``).
+    """
+    try:
+        if sys.stdout is not None:
+            print(f"[opowiesci_ai] {komunikat}", file=sys.stdout)
+    except Exception:  # noqa: BLE001 — log nigdy nie może ubić wywołania
+        pass
 
 # =============================================================================
 # Stałe konfiguracyjne
@@ -395,26 +415,46 @@ def _zaladuj_przepis(jezyk: str, nazwa: str) -> dict[str, Any]:
     (np. po zmianie języka w GUI), albo restart aplikacji.
 
     15.3 zmiana: fallback z PL na EN. Powód w bloku komentarza powyżej.
-    Aktywacja fallbacku emituje WARN na stderr — pomaga maintainerom
+    Aktywacja fallbacku emituje WARN na konsolę dewelopera — pomaga maintainerom
     lokalizować nieuzupełnione paczki językowe (cisza znaczy że stuba
     nikt nie zauważy, dopóki gracz nie zgłosi obcojęzycznych odpowiedzi
     AI w grze, którą myślał że gra w swoim języku).
+
+    v18.24.2: **błąd składni YAML zachowuje się jak brak pliku** — plik zepsuty
+    w Managerze Reguł spada na paczkę `en` zamiast wywalać wyjątkiem konstruktor
+    panelu Opowieści (zmierzone: niezamknięty cudzysłów w `zaczatki.yaml` →
+    `ScannerError` z `_build_ui` → panel trwale niedostępny, bo `main` zniszczył
+    już poprzedni). Powód pominięcia trafia do wspólnego rejestru
+    (`przepisy_rezysera.zglos_pominiecie`), więc gracz zobaczy go w dialogu
+    diagnostycznym. Gdy padną OBA pliki (język i `en`) — dopiero wtedy wyjątek,
+    bo bez prompta systemowego nie ma czym karmić modelu.
     """
-    sciezka = ROOT_DICT / jezyk / "opowiesci" / f"{nazwa}.yaml"
-    if not sciezka.exists() and jezyk != "en":
-        sys.stderr.write(
-            f"[opowiesci_ai] WARN: brak `{jezyk}/opowiesci/{nazwa}.yaml` — "
-            f"fallback do `en/opowiesci/{nazwa}.yaml`. "
-            f"Czy paczka `{jezyk}` jest kompletna?\n"
-        )
-        sciezka = ROOT_DICT / "en" / "opowiesci" / f"{nazwa}.yaml"
-    if not sciezka.exists():
-        raise FileNotFoundError(
-            f"Brak przepisu opowieści `{nazwa}.yaml` ani w `{jezyk}/opowiesci/` "
-            f"ani w `en/opowiesci/` (fallback). Czy folder dictionaries jest kompletny?"
-        )
-    with open(sciezka, "r", encoding="utf-8") as fh:
-        return _pyyaml.safe_load(fh) or {}
+    kandydaci = [jezyk] if jezyk == "en" else [jezyk, "en"]
+    powody: list[str] = []
+    for kod in kandydaci:
+        sciezka = ROOT_DICT / kod / "opowiesci" / f"{nazwa}.yaml"
+        if not sciezka.exists():
+            if kod != "en":
+                _dev_log(
+                    f"brak {kod}/opowiesci/{nazwa}.yaml — fallback do "
+                    f"en/opowiesci/{nazwa}.yaml (paczka {kod} niekompletna?)"
+                )
+            powody.append(f"{sciezka}: brak pliku")
+            continue
+        try:
+            with open(sciezka, "r", encoding="utf-8") as fh:
+                dane = _pyyaml.safe_load(fh)
+        except Exception as exc:  # noqa: BLE001 — YAMLError / OSError / Unicode
+            opis = opis_bledu_yaml(exc)
+            zglos_pominiecie(str(sciezka), POWOD_PARSE, opis)
+            powody.append(f"{sciezka}: {opis}")
+            continue
+        return dane or {}
+    # Treść wyjątku jest CELOWO techniczna i bez porady: wpada do komunikatu
+    # błędu AI w panelu, a ten musi działać w dziewięciu językach. Poradę „co
+    # zrobić" dostaje gracz z dialogu diagnostycznego (`diag.*`, zlokalizowany),
+    # który zapala się z tego samego rejestru powodów.
+    raise FileNotFoundError(f"opowiesci/{nazwa}.yaml: {'; '.join(powody)}")
 
 
 def _zbuduj_prompt_systemowy(tryb: int, jezyk: str = "pl", zasady_swiata: str = "") -> str:
@@ -456,16 +496,73 @@ def _zbuduj_prompt_systemowy(tryb: int, jezyk: str = "pl", zasady_swiata: str = 
 
     if tryb == TRYB_BURZA:
         # Visualize stoi na własnych nogach — bez bazy narracyjnej.
-        baza_prompt = _zaladuj_przepis(jezyk, "tryb_burza")["prompt_systemowy"]
+        baza_prompt = _prompt_systemowy(jezyk, "tryb_burza")
         return baza_prompt + zasady_blok + KLAUZULA_ODRZUCENIA_DOMYSLNA
 
-    baza   = _zaladuj_przepis(jezyk, "baza")["prompt_systemowy"]
-    addon  = _zaladuj_przepis(jezyk, nazwa)["prompt_systemowy"]
+    baza   = _prompt_systemowy(jezyk, "baza")
+    addon  = _prompt_systemowy(jezyk, nazwa)
     # v17.11.1: klauzula odrzucenia ZAWSZE na samym końcu (po addonie trybu i
     # po blokach zasad świata) — gracz wpisuje free-text, więc LLM musi mieć
     # jednoznaczną furtkę odmowy z markerem `[ODRZUCENIE_AI]` (wykrywanym przed
     # walidacją JSON w `generuj_ture`), zamiast generować nie-JSON / łamać się.
     return baza + zasady_blok + "\n\n" + addon + KLAUZULA_ODRZUCENIA_DOMYSLNA
+
+
+def _prompt_systemowy(jezyk: str, nazwa: str) -> str:
+    """Czyta `prompt_systemowy` z przepisu z fallbackiem lang→en (v18.24.2).
+
+    Do v18.24.1 trzy wywołania w :func:`_zbuduj_prompt_systemowy` sięgały po ten
+    klucz INDEKSEM (`[...]`), więc usunięcie go w Managerze Reguł kończyło się
+    surowym ``KeyError: 'prompt_systemowy'`` w wątku tła — worker GUI to łapie,
+    ale gracz widział komunikat bez nazwy pliku i bez wskazówki. Teraz brak
+    klucza w paczce języka spada na `en` (jak przy braku całego pliku, patrz
+    :func:`_zaladuj_przepis`) i zgłasza powód do wspólnego rejestru
+    diagnostycznego; wyjątek zostaje tylko dla przypadku „nie ma nigdzie",
+    bo bez prompta systemowego nie ma czym karmić modelu.
+    """
+    for kod in ([jezyk] if jezyk == "en" else [jezyk, "en"]):
+        val = _zaladuj_przepis(kod, nazwa).get("prompt_systemowy")
+        if isinstance(val, str) and val.strip():
+            return val
+        zglos_pominiecie(
+            str(ROOT_DICT / kod / "opowiesci" / f"{nazwa}.yaml"),
+            POWOD_KLUCZ, "prompt_systemowy",
+        )
+    # Jak wyżej: technicznie, bez polskiej porady — lokalizowany opis i wskazówka
+    # naprawy idą kanałem diagnostycznym (`diag.powod.klucz`).
+    raise KeyError(
+        f"opowiesci/{nazwa}.yaml: prompt_systemowy ({jezyk}, en)"
+    )
+
+
+def zaczatki(jezyk: str) -> dict[str, dict]:
+    """Zwraca WYŁĄCZNIE używalne zaczątki Quick Start z ``opowiesci/zaczatki.yaml``.
+
+    Walidacja siedzi w silniku (nie w panelu), bo pytają o nią DWA miejsca:
+    ``gui_opowiesci`` przy budowie listy presetów i skan diagnostyczny Managera
+    Reguł. Gdy walidacja żyła tylko w panelu, Manager mówił „wczytane bez
+    zastrzeżeń" o pliku z niekompletnym wpisem (zmierzone na własnym teście
+    v18.24.2).
+
+    Wpis bez ``etykieta`` pomijamy pojedynczo — reszta presetów działa, a powód
+    trafia do wspólnego rejestru diagnostycznego. Zepsuty plik w całości
+    (składnia) obsługuje :func:`_zaladuj_przepis`; tutaj wyjątek propaguje, żeby
+    wywołujący zdecydował (panel: pusta lista presetów, skan: wpis w raporcie).
+    """
+    sciezka = str(ROOT_DICT / jezyk / "opowiesci" / "zaczatki.yaml")
+    surowe = _zaladuj_przepis(jezyk, "zaczatki").get("zaczatki")
+    if not isinstance(surowe, dict):
+        zglos_pominiecie(sciezka, POWOD_KLUCZ, "zaczatki")
+        return {}
+
+    uzywalne: dict[str, dict] = {}
+    for klucz, wpis in surowe.items():
+        etykieta = wpis.get("etykieta") if isinstance(wpis, dict) else None
+        if not etykieta:
+            zglos_pominiecie(sciezka, POWOD_WPIS, f"zaczatki.{klucz}: etykieta")
+            continue
+        uzywalne[str(klucz)] = wpis
+    return uzywalne
 
 
 def _parametr_z_yaml(jezyk: str, nazwa: str, klucz: str, default: Any) -> Any:

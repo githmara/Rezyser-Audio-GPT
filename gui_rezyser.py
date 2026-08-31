@@ -52,6 +52,7 @@ import core_llm as cl
 import core_rezyser as cr
 import core_tokeny as ct
 import core_screen_reader as csr
+import gui_diagnostyka as gd
 import przepisy_rezysera as pr
 import sciezki
 import rezyser_ai as rai
@@ -242,6 +243,12 @@ class RezyserPanel(wx.Panel):
 
         # NVDA odczyta opis narzędzia jako pierwsze po otwarciu panelu
         wx.CallAfter(self._description.SetFocus)
+
+        # v18.24.2: powody pominięcia przepisów zebrane przy budowie listy
+        # trybów/postprodukcji. Bez tego dialogu user, który zepsuł YAML
+        # w Managerze Reguł, widział tylko brak opcji w RadioBoxie albo brak
+        # przycisku postprodukcji — komunikat szedł na nieistniejący `stderr`.
+        gd.pokaz_raport_raz(self)
 
     # ------------------------------------------------------------------
     # Helper: wskazuje przepis dla aktualnie zaznaczonego trybu w RadioBox

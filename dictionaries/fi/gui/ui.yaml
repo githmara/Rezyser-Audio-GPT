@@ -934,10 +934,11 @@ manager:
   btn_usun_tooltip: "Poistaa valitun YAML-tiedoston levyltä (vahvistuksella). Toiminto on peruuttamaton – mieti kahdesti."
   btn_odswiez_label: "🔄  Päi&vitä puu"
   btn_odswiez_name: "Painike Päivitä tiedostopuu"
-  btn_odswiez_tooltip: "Lataa puu uudelleen levyltä – käytä, jos muutit tiedostoja manuaalisesti Explorerissa tai tallennuksen jälkeen tekstieditorissa."
+  btn_odswiez_tooltip: "Lataa puurakenteen uudelleen levyltä ja lukee säännöt alusta – käytä tätä tallennettuasi tiedoston tekstieditorissa. Näyttää raportin, jos moottorin oli pakko ohittaa jokin tiedosto; korjaus toimii ilman sovelluksen sulkemista."
   info_stopka: |-
-    Kun olet luonut uuden tiedoston, käynnistä sovellus uudelleen –
-    uudet säännöt havaitaan automaattisesti.
+    Kun olet luonut, muokannut tai poistanut tiedoston, päivitä puurakenne yllä olevalla painikkeella –
+    säännöt ladataan uudelleen ilman sovelluksen sulkemista. Uusi käyttöliittymän kieli
+    tulee näkyviin valikkoon vasta sovelluksen uudelleenkäynnistyksen jälkeen.
   # Otwarcie w edytorze
   plik_wne_tytul: "Tiedostoa ei voi avata"
   plik_wne_tresc: |-
@@ -1426,3 +1427,22 @@ bot:
     brak_emaila: En löytänyt sähköpostiosoitetta viestistä — lisää se, kiitos.
     pauza: Tiflotecnia Voices -patchia päivitetään parhaillaan. Jätän tämän tiketin auki ja palaan ajantasaisella linkillä heti kun olen valmis — sinun ei tarvitse tehdä mitään.
   sami_comment: "Ciao! 🌞 Etelän Sami huomasi ilmoituksesi ja sujahti teknisen kehotuksen kanssa Keskukseen. Sovelluksen suunnittelija paneutuu siihen pian — ja kun korjaus saapuu uusimpaan julkaisuun, täällä piipahtaa joku Pohjolan kollegoistani: Lumi, Vieno tai Katla. A presto!\n— Sami"
+diag:
+  tytul: Ohitetut säännöt
+  wstep: "Moottori on ohittanut seuraavat sääntötiedostot (tai niiden osat).\nTästä syystä niitä vastaavat tekoälytilat, jälkituotantotyökalut tai\nvalmiit pohjat eivät näy sovelluksessa."
+  szczegol: '   Tekniset tiedot: {szczegol}'
+  wpis: 📄 {plik}
+  stopka: "Miten korjata tämä: valitse tiedosto Sääntöjen hallinnan luettelosta ja avaa se\ntekstieditorissa, korjaa ilmoitettu kohta ja tallenna. Päivitä sen jälkeen puurakenne\nSääntöjen hallinnassa – säännöt ladataan uudelleen sovellusta sulkematta –\nja palaa työkaluun.\nJos et tiedä, mitä korjata, avaa sama tiedosto toisella kielellä ja vertaile\nniitä keskenään, tai palauta oletussääntöpaketti asentamalla sovellus uudelleen\n(projektisi ja pelisi säilyvät koskemattomina)."
+  brak_zastrzezen: Kaikki sääntötiedostot ladattiin ilman huomautuksia.
+  brak_zastrzezen_tytul: Säännöt tarkistettu
+  powod:
+    parse: "Tiedostoa ei voitu lukea – virheellinen YAML-syntaksi. Tiedosto ohitettiin\nkokonaan. Tietojen kaksi lukua osoittavat virheen sijainnin: rivinumeron\nja merkin numeron kyseisellä rivillä."
+    brak_pol: "Tiedostosta puuttuu kenttiä, joita ilman moottori ei tunnista sääntöä\n(ne on lueteltu tiedoissa). Tiedosto ohitettiin."
+    kategoria: "Kentällä ”kategoria” on arvo, jota moottori ei tunnista – ei tiedetä, kuvaako\ntiedosto tekoälytilaa vai jälkituotantotyökalua. Tiedosto ohitettiin."
+    zakres: "Kentällä ”zakres” (laajuus) on arvo, joka ei kuulu sallittuun joukkoon, ja\nsiitä riippuu tekstin käsittelytapa (luku kerrallaan vai koko teksti kerralla).\nTyökalu ohitettiin, jotta se ei toimisi tarkoituksesta poikkeavalla tavalla."
+    sufiks: "Kenttä ”sufiks_pliku_wyniku” sisältää merkkejä, jotka eivät ole sallittuja\ntiedostonimessä, joten tulokselle ei olisi mihin tallentua. Työkalu ohitettiin."
+    pole: "Jollakin kentällä on väärän tyyppinen arvo – useimmiten tekstiä siellä,\nmissä moottori odottaa lukua, tai luettelo siellä, missä pitäisi olla\npariarvojen joukko. Tiedosto ohitettiin."
+    duplikat: "Toisella tiedostolla samassa kansiossa on jo sama tunniste. Moottori latasi\ntuon toisen tiedoston (se on ilmoitettu tiedoissa) ja ohitti tämän – kahta\nsamalla tunnisteella olevaa sääntöä ei voisi erottaa toisistaan."
+    rola: "Kentällä ”rola” (rooli) on tuntematon arvo, ja se on jätetty huomiotta.\nTiedosto itsessään toimii, mutta työkalu ei saa tähän rooliin liitettyä\ntoimintatapaa."
+    klucz: "Tiedostosta puuttuu moottorin vaatima avain (se on lueteltu tiedoissa).\nTämä osa ohjeistuksesta ei toimi, ennen kuin avain palautetaan paikalleen."
+    wpis: "Yksi tiedoston sisäinen merkintä on puutteellinen (osoitettu tiedoissa)\nja se ohitettiin. Muut tämän tiedoston merkinnät toimivat normaalisti."

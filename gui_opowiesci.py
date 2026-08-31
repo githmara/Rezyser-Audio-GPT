@@ -42,6 +42,7 @@ import wx
 
 import core_llm as cl
 import core_tokeny as ct
+import gui_diagnostyka as gd
 import opowiesci_ai as oai
 import sciezki
 import bledy_ai
@@ -264,6 +265,11 @@ class OpowiesciPanel(wx.Panel):
         # NVDA odczyta opis modułu jako pierwsze po wejściu na panel
         wx.CallAfter(self._description.SetFocus)
 
+        # v18.24.2: jeśli budowa panelu pominęła wadliwe reguły (zepsuty
+        # `zaczatki.yaml`, niekompletny wpis), powiedz o tym GRACZOWI — dotąd
+        # powód szedł na `sys.stderr`, którego w buildzie `--windowed` nie ma.
+        gd.pokaz_raport_raz(self)
+
     # ==================================================================
     # KOMPOZER UI
     # ==================================================================
@@ -331,6 +337,63 @@ class OpowiesciPanel(wx.Panel):
             border=BORDER,
         )
         return sizer
+
+    # ------------------------------------------------------------------
+    # Quick Start: zaczątki z YAML — z guardem na plik zepsuty przez usera
+    # ------------------------------------------------------------------
+    def _wczytaj_zaczatki(self) -> dict[str, dict]:
+        """Zwraca używalne zaczątki (``opowiesci_ai.zaczatki``) — bez wyjątku.
+
+        v18.24.2 (guard klasy „wadliwy YAML nie może ubić panelu", ta sama, którą
+        v18.9 zamknęło dla Reżysera). Zmierzone przed poprawką: niezamknięty
+        cudzysłów w pliku → ``ScannerError`` prosto z ``_build_ui``, a zaczątek
+        bez pola ``etykieta`` → ``KeyError: 'etykieta'``. Oba wywalały KONSTRUKTOR
+        panelu, czyli — bo ``main._pokaz_narzedzie`` niszczy poprzedni panel przed
+        zbudowaniem nowego — zostawiały okno bez zawartości i crash dialog.
+
+        Sama walidacja wpisów mieszka w silniku (współdzielona ze skanem Managera
+        Reguł); tutaj zostaje wyłącznie decyzja panelu: przy pliku zepsutym
+        w obu paczkach Quick Start zwija się do samego „własna gra", a panel
+        otwiera się normalnie.
+        """
+        jezyk = aktualny_jezyk()
+        try:
+            return oai.zaczatki(jezyk)
+        except Exception as exc:                                    # noqa: BLE001
+            # Powód (składnia) zgłosił już `_zaladuj_przepis`; tu łapiemy
+            # przypadek „padły OBA pliki" (język i fallback `en`).
+            oai.zglos_pominiecie(
+                str(oai.ROOT_DICT / jezyk / "opowiesci" / "zaczatki.yaml"),
+                oai.POWOD_PARSE, str(exc).replace("\n", " "),
+            )
+            return {}
+
+    def _tryb_presetu(self, preset: dict) -> int:
+        """Tryb gry zapisany w zaczątku, z tolerancją na literówkę lingwisty.
+
+        ``tryb_domyslny: trzy`` (albo puste pole) dawało do v18.24.1 ``ValueError``
+        z handlera „Nowa gra" — czyli crash dialog w miejscu, gdzie wystarczy
+        zostać przy trybie wybranym w RadioBoxie. Nieznaną wartość zgłaszamy do
+        rejestru diagnostycznego i wracamy do wyboru gracza.
+        """
+        surowe = preset.get("tryb_domyslny")
+        try:
+            tryb = int(surowe)
+        except (TypeError, ValueError):
+            if surowe is not None:
+                oai.zglos_pominiecie(
+                    str(oai.ROOT_DICT / aktualny_jezyk() / "opowiesci" / "zaczatki.yaml"),
+                    oai.POWOD_WPIS, f"tryb_domyslny={surowe!r}",
+                )
+            return self._aktualny_tryb_int()
+        if tryb not in self._MAPA_TRYB_RB_NA_INT:
+            oai.zglos_pominiecie(
+                str(oai.ROOT_DICT / aktualny_jezyk() / "opowiesci" / "zaczatki.yaml"),
+                oai.POWOD_WPIS,
+                f"tryb_domyslny={tryb} ∉ {set(self._MAPA_TRYB_RB_NA_INT)}",
+            )
+            return self._aktualny_tryb_int()
+        return tryb
 
     # ------------------------------------------------------------------
     # BLOK B — Pasek pliku gry: nazwa + Nowa gra / Wczytaj / Zapisz
@@ -427,13 +490,15 @@ class OpowiesciPanel(wx.Panel):
         # Loading z YAML zamiast hardkodowanej listy: lingwista dorabiając
         # nowy zaczatek nie musi dotykać Pythona, tylko `zaczatki.yaml`.
         # ``_klucze_zaczatkow`` przechowuje kolejność (Choice używa indeksów).
-        # v15.1: zaczątki ładowane z UI lang (fallback do PL przez `_zaladuj_przepis`).
-        zaczatki_dict = oai._zaladuj_przepis(aktualny_jezyk(), "zaczatki").get("zaczatki", {})
+        # v15.1: zaczątki ładowane z UI lang (fallback do EN przez `_zaladuj_przepis`).
+        # v18.24.2: przez guard — patrz `_wczytaj_zaczatki`.
+        zaczatki_dict = self._wczytaj_zaczatki()
         # Kolejność z YAML zachowana (Python 3.7+ dict insertion-order).
         self._klucze_zaczatkow: list[str] = list(zaczatki_dict.keys())
+        self._zaczatki: dict[str, dict] = zaczatki_dict
         # Pierwsza pozycja to „własna gra" (brak presetu, tryb z RadioBox-a).
         opcje_choice = [t("opowiesci.quick_start_wlasna")] + [
-            zaczatki_dict[k]["etykieta"] for k in self._klucze_zaczatkow
+            str(zaczatki_dict[k]["etykieta"]) for k in self._klucze_zaczatkow
         ]
 
         # P5 (v17.4): referencja na labelu zachowana (`_lbl_quick_start`) —
@@ -1427,9 +1492,13 @@ class OpowiesciPanel(wx.Panel):
         idx_zaczatek = self._choice_zaczatek.GetSelection()
         if idx_zaczatek > 0:
             klucz = self._klucze_zaczatkow[idx_zaczatek - 1]
-            preset = oai._zaladuj_przepis(aktualny_jezyk(), "zaczatki")["zaczatki"][klucz]
-            seed_swiata = preset.get("seed_swiata", "").strip()
-            tryb_preset = int(preset.get("tryb_domyslny", self._aktualny_tryb_int()))
+            # v18.24.2: preset bierzemy z listy zbudowanej przez `_wczytaj_zaczatki`
+            # (te same wpisy, które trafiły do Choice), zamiast ponownie indeksować
+            # surowy YAML — plik mógł zniknąć albo zostać zepsuty po zbudowaniu
+            # panelu, a wyjątek tutaj leci z handlera zdarzeń, czyli w crash dialog.
+            preset = self._zaczatki.get(klucz, {})
+            seed_swiata = str(preset.get("seed_swiata") or "").strip()
+            tryb_preset = self._tryb_presetu(preset)
             self._ustaw_rb_z_trybu(tryb_preset)
 
         tryb = self._aktualny_tryb_int()

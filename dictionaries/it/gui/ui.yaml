@@ -936,10 +936,11 @@ manager:
   btn_usun_tooltip: "Elimina il file YAML selezionato dal disco (con conferma). L'operazione è irreversibile – pensaci due volte."
   btn_odswiez_label: "🔄  A&ggiorna albero"
   btn_odswiez_name: "Pulsante Aggiorna albero file"
-  btn_odswiez_tooltip: "Ricarica l'albero dal disco – usa se hai modificato i file manualmente nell'Esplora file o dopo il salvataggio nell'editor di testo."
+  btn_odswiez_tooltip: "Ricarica l'albero dal disco e carica di nuovo le regole – usalo dopo aver salvato il file nell'editor di testo. Mostrerà un rapporto se il motore ha dovuto ignorare qualche file; la correzione ha effetto senza chiudere l'applicazione."
   info_stopka: |-
-    Dopo aver creato un nuovo file, riavvia l'applicazione –
-    le nuove regole verranno rilevate automaticamente.
+    Dopo aver creato, modificato o eliminato un file, aggiorna l'albero con il pulsante
+    sopra: le regole verranno ricaricate senza chiudere l'applicazione. La nuova lingua
+    dell'interfaccia comparirà nel menu solo dopo il riavvio.
   # Otwarcie w edytorze
   plik_wne_tytul: "Impossibile aprire il file"
   plik_wne_tresc: |-
@@ -1428,3 +1429,22 @@ bot:
     brak_emaila: Non ho trovato alcun indirizzo email nel testo — ti chiedo di aggiungerlo.
     pauza: È in corso l'aggiornamento del patch Tiflotecnia Voices. Lascio questa segnalazione aperta e tornerò con il link aggiornato non appena avrò finito — non devi fare nulla.
   sami_comment: "Ciao! 🌞 Sami dal Sud ha avvistato la tua segnalazione ed è sfrecciata con il prompt tecnico verso il Centro. Il progettista dell'app se ne occuperà a breve — e quando la correzione arriverà nell'ultima versione, qui passerà una delle mie colleghe del Nord: Lumi, Vieno o Katla. A presto!\n— Sami"
+diag:
+  tytul: Regole ignorate
+  wstep: "I seguenti file di regole (o parti di essi) sono stati ignorati dal motore.\nPer questo motivo le relative modalità AI, gli strumenti di post-produzione\no i modelli predefiniti non compaiono nell'applicazione."
+  szczegol: '   Dettagli tecnici: {szczegol}'
+  wpis: 📄 {plik}
+  stopka: "Come risolvere: nel Gestore Regole seleziona il file dall'elenco e aprilo\nnell'editor di testo, correggi il punto indicato e salva. Poi aggiorna l'albero\nnel Gestore Regole – le regole verranno ricaricate senza chiudere l'applicazione –\ne torna allo strumento.\nSe non sai cosa correggere, apri lo stesso file in un'altra lingua e confronta\ni due, oppure ripristina il pacchetto di regole predefinito reinstallando l'applicazione\n(i tuoi progetti e le tue partite resteranno intatti)."
+  brak_zastrzezen: Tutti i file di regole sono stati caricati senza problemi.
+  brak_zastrzezen_tytul: Regole verificate
+  powod:
+    parse: "Impossibile leggere il file – sintassi YAML non valida. Il file è stato\nignorato interamente. I due numeri nei dettagli indicano il punto\ndell'errore: il numero di riga e il numero di carattere in quella riga."
+    brak_pol: "Nel file mancano dei campi senza i quali il motore non può riconoscere\nla regola (sono elencati nei dettagli). Il file è stato ignorato."
+    kategoria: "Il campo «kategoria» ha un valore che il motore non riconosce – non è\nchiaro se il file descriva una modalità AI o uno strumento di post-produzione.\nIl file è stato ignorato."
+    zakres: "Il campo «zakres» ha un valore fuori dall'insieme consentito, e da esso\ndipende il modo in cui viene elaborato il testo (capitolo per capitolo\no tutto insieme). Lo strumento è stato ignorato per evitare che funzionasse\nin modo diverso da quanto previsto."
+    sufiks: "Il campo «sufiks_pliku_wyniku» contiene caratteri non consentiti\nnel nome di un file, quindi il risultato non avrebbe dove essere salvato.\nLo strumento è stato ignorato."
+    pole: "Uno dei campi ha un valore del tipo sbagliato – solitamente testo dove\nil motore si aspetta un numero, oppure un elenco dove dovrebbe esserci\nun insieme di coppie. Il file è stato ignorato."
+    duplikat: "Un altro file nella stessa cartella ha già lo stesso identificatore.\nIl motore ha caricato quello (indicato nei dettagli) e ha ignorato questo –\ndue regole con lo stesso identificatore sarebbero indistinguibili."
+    rola: "Il campo «rola» ha un valore sconosciuto ed è stato ignorato. Il file\nfunziona comunque, ma lo strumento non riceverà il comportamento associato\na quel ruolo."
+    klucz: "Nel file manca una chiave richiesta dal motore (è elencata nei dettagli).\nQuesta parte della procedura non funzionerà finché la chiave non verrà\nripristinata."
+    wpis: "Una voce all'interno del file è incompleta (indicata nei dettagli)\ned è stata ignorata. Le altre voci di questo file funzionano normalmente."

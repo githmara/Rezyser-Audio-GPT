@@ -44,6 +44,66 @@ common:
   informacja_tytul: "Information"
 
 # -----------------------------------------------------------------------------
+# DIAG – raport pominiętych reguł (gui_diagnostyka.py, od v18.24.2)
+# -----------------------------------------------------------------------------
+diag:
+  tytul: "Skipped Rules"
+  wstep: |-
+    The engine skipped the rule files listed below (or parts of them). That is
+    why the matching AI modes, post-production tools or ready-made story seeds
+    do not appear in the application.
+  szczegol: "   Technical details: {szczegol}"
+  wpis: "📄 {plik}"
+  stopka: |-
+    How to fix it: in the Rule Manager select the file in the list and open it
+    in your text editor, correct the place indicated above and save. Then
+    refresh the tree in the Rule Manager – the rules are reloaded without
+    closing the application – and return to the tool.
+    If you are not sure what to correct, open the same file in another language
+    and compare the two, or restore the default rule package by reinstalling the
+    application (your projects and games stay untouched).
+  brak_zastrzezen: "All rule files were loaded without any objections."
+  brak_zastrzezen_tytul: "Rules Checked"
+  powod:
+    parse: |-
+       The file could not be read – its YAML syntax is invalid. The whole file
+       was skipped. The two numbers in the details point to the location of the
+       error: the line number and the character number within that line.
+    brak_pol: |-
+       The file is missing the fields the engine needs to recognise a rule (they
+       are listed in the details). The file was skipped.
+    kategoria: |-
+       The “kategoria” field holds a value the engine does not know – there is no
+       way to tell whether the file describes an AI mode or a post-production
+       tool. The file was skipped.
+    zakres: |-
+       The “zakres” field holds a value outside the allowed set, and that field
+       decides how the text is processed (chapter by chapter or all at once). The
+       tool was skipped so that it would not work differently than you intend.
+    sufiks: |-
+       The “sufiks_pliku_wyniku” field contains characters that a file name
+       cannot hold, so the result would have nowhere to be saved. The tool was
+       skipped.
+    pole: |-
+       One of the fields holds a value of the wrong kind – most often text where
+       the engine expects a number, or a list where a set of pairs belongs. The
+       file was skipped.
+    duplikat: |-
+       Another file in the same folder already uses this identifier. The engine
+       loaded that one (it is named in the details) and skipped this one – two
+       rules sharing a single identifier would be indistinguishable.
+    rola: |-
+       The “rola” field holds an unknown value and was ignored. The file itself
+       works, but the tool will not receive the behaviour assigned to that role.
+    klucz: |-
+       The file is missing a key required by the engine (it is listed in the
+       details). That part of the recipe will not work until the key is back
+       in place.
+    wpis: |-
+       One entry inside the file is incomplete (it is named in the details) and
+       was skipped. The remaining entries from that file work normally.
+
+# -----------------------------------------------------------------------------
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
 main:
@@ -935,10 +995,11 @@ manager:
   btn_usun_tooltip: "Deletes the selected YAML file from the disk (with confirmation). The operation is irreversible – think twice."
   btn_odswiez_label: "🔄  Re&fresh tree"
   btn_odswiez_name: "Button Refresh file tree"
-  btn_odswiez_tooltip: "Reloads the tree from the disk – use if you changed files manually in Explorer or after saving in a text editor."
+  btn_odswiez_tooltip: "Reloads the tree from the disk and re-reads the rules – use it after saving a file in your text editor. It shows a report if the engine had to skip any file; the fix takes effect without closing the application."
   info_stopka: |-
-    After creating a new file, restart the application –
-    the new rules will be detected automatically.
+    After creating, correcting or deleting a file, refresh the tree with the
+    button above – the rules are reloaded without closing the application.
+    A new interface language appears in the menu only after a restart.
   # Otwarcie w edytorze
   plik_wne_tytul: "Cannot open file"
   plik_wne_tresc: |-

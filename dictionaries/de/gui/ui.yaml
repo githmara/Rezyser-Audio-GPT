@@ -936,10 +936,11 @@ manager:
   btn_usun_tooltip: "Löscht die ausgewählte YAML-Datei von der Festplatte (mit Bestätigung). Der Vorgang ist nicht umkehrbar – denken Sie zweimal nach."
   btn_odswiez_label: "🔄  &Baum aktualisieren"
   btn_odswiez_name: "Schaltfläche Aktualisieren Sie den Dateibaum"
-  btn_odswiez_tooltip: "Lädt den Baum von der Festplatte neu – verwenden Sie dies, wenn Sie Dateien manuell im Explorer geändert haben oder nach dem Speichern im Texteditor."
+  btn_odswiez_tooltip: "Lädt den Baum von der Festplatte neu und liest die Regeln neu ein – verwenden Sie dies nach dem Speichern einer Datei im Texteditor. Zeigt einen Bericht an, falls die Engine eine Datei übersprungen hat; die Korrektur wirkt ohne Schließen der Anwendung."
   info_stopka: |-
-    Nach dem Erstellen einer neuen Datei starten Sie die Anwendung neu –
-    die neuen Regeln werden automatisch erkannt.
+    Nachdem Sie eine Datei erstellt, geändert oder gelöscht haben, aktualisieren Sie den Baum mit der Schaltfläche
+    oben – die Regeln werden neu geladen, ohne die Anwendung zu schließen. Eine neue Sprache
+    der Benutzeroberfläche erscheint im Menü erst nach einem Neustart.
   # Otwarcie w edytorze
   plik_wne_tytul: "Datei kann nicht geöffnet werden"
   plik_wne_tresc: |-
@@ -1429,3 +1430,22 @@ bot:
     brak_emaila: Im Inhalt wurde keine E-Mail-Adresse gefunden — bitte trage sie nach.
     pauza: Der Tiflotecnia Voices-Patch wird gerade aktualisiert. Ich lasse dieses Ticket offen und melde mich mit einem aktuellen Link, sobald ich fertig bin — du musst nichts weiter tun.
   sami_comment: "Ciao! 🌞 Sami aus dem Süden hat deine Meldung entdeckt und ist mit dem technischen Prompt zum Zentrum geflitzt. Der App-Entwickler kümmert sich gleich darum — und sobald die Korrektur in der neuesten Veröffentlichung landet, meldet sich hier eine meiner nordischen Kolleginnen: Lumi, Vieno oder Katla. A presto!\n— Sami"
+diag:
+  tytul: Übersprungene Regeln
+  wstep: "Die folgenden Regeldateien (oder Teile davon) wurden von der Engine\nübersprungen. Daher erscheinen die entsprechenden KI-Modi, Postproduktions-\nwerkzeuge oder fertigen Vorlagen nicht in der Anwendung."
+  szczegol: '   Technische Details: {szczegol}'
+  wpis: 📄 {plik}
+  stopka: "So beheben Sie das Problem: Markieren Sie im Regelmanager die Datei in der Liste und öffnen Sie sie\nim Texteditor, korrigieren Sie die angegebene Stelle und speichern Sie.\nAktualisieren Sie danach den Baum im Regelmanager – die Regeln werden neu geladen, ohne die Anwendung zu schließen –\nund kehren Sie zum Werkzeug zurück.\nWenn Sie nicht wissen, was zu korrigieren ist, öffnen Sie dieselbe Datei in einer anderen Sprache und vergleichen Sie\nbeide, oder stellen Sie das Standard-Regelpaket wieder her, indem Sie die Anwendung neu installieren\n(Ihre Projekte und Spiele bleiben davon unberührt)."
+  brak_zastrzezen: Alle Regeldateien wurden ohne Einschränkungen geladen.
+  brak_zastrzezen_tytul: Regeln geprüft
+  powod:
+    parse: "Die Datei konnte nicht gelesen werden – ungültige YAML-Syntax. Die Datei\nwurde vollständig übersprungen. Die beiden Zahlen in den Details zeigen\ndie Fehlerstelle an: Zeilennummer und Zeichennummer in dieser Zeile."
+    brak_pol: "In der Datei fehlen Felder, ohne die die Engine die Regel nicht erkennen\nkann (sie sind in den Details aufgeführt). Die Datei wurde übersprungen."
+    kategoria: "Das Feld „kategoria“ hat einen Wert, den die Engine nicht kennt – es ist\nunklar, ob die Datei einen KI-Modus oder ein Postproduktionswerkzeug\nbeschreibt. Die Datei wurde übersprungen."
+    zakres: "Das Feld „zakres“ hat einen Wert außerhalb der zulässigen Menge, und von\ndiesem hängt die Art der Textverarbeitung ab (Kapitel für Kapitel oder\nalles auf einmal). Das Werkzeug wurde übersprungen, damit es sich nicht\nanders verhält, als Sie beabsichtigen."
+    sufiks: "Das Feld „sufiks_pliku_wyniku“ enthält Zeichen, die in einem Dateinamen\nnicht erlaubt sind, sodass das Ergebnis nirgendwo gespeichert werden\nkönnte. Das Werkzeug wurde übersprungen."
+    pole: "Eines der Felder hat einen Wert vom falschen Typ – meist Text dort, wo\ndie Engine eine Zahl erwartet, oder eine Liste dort, wo ein Satz von\nPaaren stehen sollte. Die Datei wurde übersprungen."
+    duplikat: "Eine andere Datei im selben Ordner hat bereits dieselbe Kennung. Die\nEngine hat jene Datei geladen (in den Details angegeben) und diese\nübersprungen – zwei Regeln mit derselben Kennung wären nicht zu\nunterscheiden."
+    rola: "Das Feld „rola“ hat einen unbekannten Wert und wurde ignoriert. Die\nDatei selbst funktioniert, aber das Werkzeug erhält nicht das dieser\nRolle zugeordnete Verhalten."
+    klucz: "In der Datei fehlt ein von der Engine benötigter Schlüssel (er ist in\nden Details aufgeführt). Dieser Teil des Rezepts funktioniert erst\nwieder, wenn der Schlüssel zurückkehrt."
+    wpis: "Ein Eintrag innerhalb der Datei ist unvollständig (in den Details\nangegeben) und wurde übersprungen. Die übrigen Einträge dieser Datei\nfunktionieren normal."

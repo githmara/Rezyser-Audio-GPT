@@ -239,43 +239,46 @@ tresc:
     ## How to Start Playing — Three Levels of Difficulty
     -------------------------------------------------
   poziom_1_dostroj: |
-    ## LEVEL 1 — minor tuning of an existing accent
+    ## LEVEL 1 — minor fine-tuning of an existing accent
 
-    Imagine the application's French accent changes "sz" to "sh", but you
-    think a French person would rather say "sch" or "ch". No problem.
+    Imagine that the app's French accent turns "sz" into "sh", but
+    you feel that a Frenchman would more likely say "sch" or "ch". No problem at all.
 
-    1. Launch the application and go to the Rule Manager (Ctrl+4 key or the
-       fourth button on the bar).
+    1. Launch the application and go to the Rule Manager (Ctrl+4 key
+       or the fourth button on the toolbar).
     2. In the file tree on the left, expand "pl" → "akcenty" and click
        "francuski.yaml".
-    3. Click the "Open in text editor" button. The file will open in Windows
-       Notepad (or your default text editor).
-    4. Scroll down to the "zamiany:" section. Find the line with the pattern
-       "sz" and change the "zamiana" value to what suits you.
+    3. Click the "{manager.btn_otworz_label}" button. The file will open in
+       Windows Notepad (or your default text editor).
+    4. Scroll down to the "zamiany:" section. Find the line with the pattern "sz" and
+       change the "zamiana" value to whatever suits you.
     5. Save the file (Ctrl+S), close the editor.
-    6. Return to the Rule Manager and click "Refresh tree", then close and
-       restart the application. Your change is already working.
+    6. Go back to the Rule Manager and click "{manager.btn_odswiez_label}". The rules
+       will reload — your change is already active, with no need to restart the application.
+       If the file has a syntax error, the Manager will immediately show a report with the line number.
   poziom_2_duplikacja: |
     ## LEVEL 2 — adding a new accent by duplication
 
-    Want to add a Swedish or Danish accent? Start with the most similar
+    Want to add a Swedish or Danish accent? Start from the most similar
     existing one.
 
-    1. In the Rule Manager, select e.g., "finski.yaml" (Finnish is
-       phonetically close to Swedish) and click "Duplicate selected file".
-    2. The manager will ask for a new name — enter e.g., "szwedzki" (lowercase,
-       no spaces, no Polish characters).
+    1. In the Rule Manager, select e.g. "finski.yaml" (Finnish is
+       phonetically close to Swedish) and click "{manager.btn_duplikuj_label}".
+    2. The Manager will ask for a new name — type e.g. "szwedzki" (lowercase,
+       no spaces, no Polish diacritics).
     3. The new file will open in the editor. Change the fields:
-          - "label" — what you'll see in the application menu, e.g.,
+          - "etykieta" — what you'll see in the app menu, e.g.
             "Swedish (Alva / Oskar — OneCore/Vocalizer)"
-          - "description" — a short description for yourself for the future
-          - "iso" — two-letter language code, for Swedish "sv"
-    4. Tune the "zamiany" list for Swedish phonetics (e.g., add "å → o",
-       "ö → ö", remove or change those specific to Finnish).
-    5. Save and restart the application. The new Swedish will appear
-       in the Polyglot accent menu (and if you add to the World Book
-       characters the tag "[Marek] - has a Swedish accent", the Director
-       will also recognize it automatically and apply it to her dialogues).
+          - "opis" — a short description for your own future reference
+          - "iso" — the two-letter language code, for Swedish "sv"
+    4. Adjust the "zamiany" (replacements) list to Swedish phonetics (e.g. add
+       "å → o", "ö → ö", remove or change the ones specific to Finnish).
+    5. Save the file, then in the Rule Manager click "{manager.btn_odswiez_label}"
+       — without closing the application. The new Swedish option will appear in
+       the Polyglot's accent menu (and if you add the tag
+       "[Marek] - has a Swedish accent" to a
+       character in the World Book, the Director will also recognize it
+       automatically and apply it to her dialogues).
   poziom_3_cos_nowego: |
     ## LEVEL 3 — creating something completely new
 

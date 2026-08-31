@@ -157,33 +157,47 @@ potente se atiene rigurosamente a las reglas del mundo (algo clave en el modo<br
 Mal menor, donde cada opción debe ser realmente desfavorable).</p>
 <h2>Cómo empezar a divertirse — tres niveles de dificultad</h2>
 <hr>
-<h2>NIVEL 1 — ajuste menor de un acento existente</h2>
-<p>Imagina que el acento francés de la aplicación cambia "sz" a "sh", pero tú crees que un francés probablemente diría "sch" o "ch". No hay problema.</p>
+<p>El siguiente texto contiene marcadores: un número encerrado entre dobles corchetes matemáticos (caracteres U+27E6 y U+27E7). Son marcadores de posición congelados del programa. Cópialos en la respuesta LITERALMENTE, carácter por carácter — no cambies los dígitos, no cambies los corchetes, no traduzcas. Cada marcador debe aparecer en la respuesta exactamente el mismo número de veces que en el original (un script superior verifica la paridad al finalizar). NO añadas ningún marcador que no esté en el original.<br>
+[FIN DE LA INSTRUCCIÓN — LA TRADUCCIÓN COMIENZA A CONTINUACIÓN]</p>
+<h2>NIVEL 1 — ajuste fino de un acento existente</h2>
+<p>Imagina que el acento francés de la aplicación convierte "sz" en "sh", pero<br>
+tú crees que un francés diría más bien "sch" o "ch". No hay ningún problema.</p>
 <ol>
-<li>Inicia la aplicación y ve al Gestor de Reglas (tecla Ctrl+4 o el cuarto botón en la barra).</li>
-<li>En el árbol de archivos a la izquierda, expande "pl" → "akcenty" y haz clic en "francuski.yaml".</li>
-<li>Haz clic en el botón "Abrir en editor de texto". El archivo se abrirá en el Bloc de notas de Windows (o en tu editor de texto predeterminado).</li>
-<li>Desplázate hacia abajo hasta la sección "zamiany:". Encuentra la línea con el patrón "sz" y cambia el valor "zamiana" a lo que te convenga.</li>
+<li>Abre la aplicación y ve al Gestor de Reglas (tecla Ctrl+4 o el<br>
+   cuarto botón de la barra de herramientas).</li>
+<li>En el árbol de archivos de la izquierda, despliega "pl" → "akcenty" y haz clic en<br>
+   "francuski.yaml".</li>
+<li>Haz clic en el botón "📝  Abrir en editor de texto". El archivo se abrirá en<br>
+   el Bloc de notas de Windows (o tu editor de texto predeterminado).</li>
+<li>Desplázate hacia abajo hasta la sección "zamiany:". Busca la línea con el patrón "sz" y<br>
+   cambia el valor "zamiana" por el que prefieras.</li>
 <li>Guarda el archivo (Ctrl+S), cierra el editor.</li>
-<li>Vuelve al Gestor de Reglas y haz clic en "Actualizar árbol", luego cierra y reinicia la aplicación. Tu cambio ya está en efecto.</li>
+<li>Vuelve al Gestor de Reglas y haz clic en "🔄  Actualizar árbol". Las reglas<br>
+   se recargarán desde cero — tu cambio ya está en vigor, sin necesidad de cerrar la aplicación.<br>
+   Si el archivo tiene un error de sintaxis, el Gestor mostrará de inmediato un informe con el número de línea.</li>
 </ol>
-<h2>NIVEL 2 — agregar un nuevo acento mediante duplicación</h2>
-<p>¿Quieres agregar un acento sueco o danés? Comienza con el más similar existente.</p>
+<h2>POZIOM 2 — añadir un nuevo acento por duplicación</h2>
+<p>¿Quieres añadir el acento sueco o danés? Empieza por el más<br>
+parecido de los ya existentes.</p>
 <ol>
-<li>
-<p>En el Gestor de Reglas, selecciona, por ejemplo, "finski.yaml" (el finlandés está cerca del sueco fonéticamente) y haz clic en "Duplicar archivo seleccionado".</p>
-</li>
-<li>
-<p>El Administrador te pedirá un nuevo nombre: ingresa, por ejemplo, "szwedzki" (en minúsculas, sin espacios, sin caracteres polacos).</p>
-</li>
+<li>En el Gestor de Reglas selecciona, por ejemplo, "finski.yaml" (el finés<br>
+   está fonéticamente cerca del sueco) y haz clic en "📋  Duplicar archivo seleccionado".</li>
+<li>El Gestor te pedirá un nuevo nombre — escribe, por ejemplo, "szwedzki"<br>
+   (en minúsculas, sin espacios, sin caracteres polacos).</li>
 <li>El nuevo archivo se abrirá en el editor. Cambia los campos:<ul>
-<li>"etykieta": lo que verás en el menú de la aplicación, por ejemplo, "Szwedzki (Alva / Oskar — OneCore/Vocalizer)"</li>
-<li>"opis": breve descripción para ti en el futuro</li>
-<li>"iso": código de idioma de dos letras, para sueco "sv"</li>
+<li>"etykieta" — lo que verás en el menú de la aplicación, por ejemplo<br>
+    "Sueco (Alva / Oskar — OneCore/Vocalizer)"</li>
+<li>"opis" — una breve descripción para ti mismo, de cara al futuro</li>
+<li>"iso" — el código de idioma de dos letras, para el sueco "sv"</li>
 </ul>
 </li>
-<li>Ajusta la lista de "zamiany" a la fonética sueca (por ejemplo, agrega "å → o", "ö → ö", elimina o cambia las que son específicas del finlandés).</li>
-<li>Guarda y reinicia la aplicación. El nuevo sueco aparecerá en el menú de acentos de Políglota (y si agregas al Libro del Mundo un personaje con la etiqueta "[Marek] - ma akcent szwedzki", el Director también lo reconocerá automáticamente y lo aplicará a sus diálogos).</li>
+<li>Ajusta la lista de "zamian" a la fonética sueca (por ejemplo, añade "å → o",<br>
+   "ö → ö", elimina o modifica las que sean específicas del finés).</li>
+<li>Guarda el archivo y, en el Gestor de Reglas, haz clic en "🔄  Actualizar árbol"<br>
+   — sin cerrar la aplicación. El nuevo sueco aparecerá en<br>
+   el menú de acentos del Políglota (y si añades al Libro del Mundo del personaje<br>
+   la etiqueta "[Marek] - tiene acento sueco", el Director también lo reconocerá<br>
+   automáticamente y lo aplicará a sus diálogos).</li>
 </ol>
 <h2>NIVEL 3 — crear algo completamente nuevo</h2>
 <p>¿Quieres jerga escolar? ¿El idioma de los caballeros antiguos? ¿Lenguaje enredado? ¿Cifrado de padres ante los niños?</p>

@@ -32,6 +32,7 @@ import re
 import wx
 
 import core_poliglota
+import gui_diagnostyka as gd
 import manager_regul_szablony as mrs
 import sciezki
 from i18n import aktualny_jezyk, t
@@ -478,7 +479,21 @@ class ManagerRegulPanel(wx.Panel):
         _otworz_w_edytorze_tekstu(self, sciezka)
 
     def _on_odswiez(self, _event: wx.Event) -> None:
+        """Przeładowuje drzewo ORAZ reguły w silniku, i raportuje wynik (v18.24.2).
+
+        Trzy rzeczy naraz, bo z punktu widzenia użytkownika to jedna czynność
+        („poprawiłem plik, sprawdź"):
+
+        1. drzewo z dysku (jak dotąd — plik mógł powstać albo zniknąć);
+        2. **cache przepisów** — do v18.24.1 nikt w runtime nie wołał
+           ``pr.wyczysc_cache()``, więc poprawka wymagała restartu aplikacji,
+           o czym nic użytkownikowi nie mówiło. Teraz wystarczy wrócić do
+           Reżysera / Opowieści: panel powstaje na nowo i czyta świeżą treść;
+        3. raport pominiętych reguł — z odpowiedzią także wtedy, gdy wszystko
+           jest w porządku (użytkownik nacisnął przycisk, żeby się dowiedzieć).
+        """
         self._zaladuj_drzewo()
+        gd.pokaz_raport_lub_potwierdzenie(self, gd.przeskanuj_reguly())
 
     # ------------------------------------------------------------------
     # Duplikowanie pliku

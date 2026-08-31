@@ -41,6 +41,7 @@ import bledy_ai
 import core_llm as cl
 import core_poliglota
 import core_tokeny as ct
+import gui_diagnostyka as gd
 import i18n
 import sciezki
 import tlumacz_ai
@@ -134,6 +135,11 @@ class PoliglotaPanel(wx.Panel):
         self._refresh_mode_ui()
 
         wx.CallAfter(self._description.SetFocus)
+
+        # v18.24.2: akcent albo szyfr zepsuty w edytorze tekstu znikał z list
+        # powyżej bez słowa wyjaśnienia (loader zwracał pusty słownik, a jego
+        # `print` w buildzie `--windowed` nie ma gdzie trafić).
+        gd.pokaz_raport_raz(self)
 
     # ------------------------------------------------------------------
     # Inicjowanie klienta Anthropic (Claude) — konsolidacja v18.x, Opcja A

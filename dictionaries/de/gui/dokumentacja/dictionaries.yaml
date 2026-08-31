@@ -246,43 +246,44 @@ tresc:
   poziom_1_dostroj: |
     ## STUFE 1 — Feinabstimmung eines bestehenden Akzents
 
-    Stellen Sie sich vor, der französische Akzent der Anwendung ersetzt "sch"
-    durch "sh", aber Sie meinen, ein Franzose würde eher "ch" sagen. Kein Problem.
+    Stellen Sie sich vor, der französische Akzent der Anwendung wandelt „sz" in „sh" um, aber
+    Sie sind der Meinung, ein Franzose würde eher „sch" oder „ch" sagen. Kein Problem.
 
-    1. Starten Sie die Anwendung und gehen Sie zum Regelmanager (Taste Ctrl+4
-       oder die vierte Schaltfläche in der Leiste).
-    2. Klappen Sie im Dateibaum links "de" → "akcenty" auf und klicken Sie
-       auf "francuski.yaml".
-    3. Klicken Sie auf die Schaltfläche "In Texteditor öffnen". Die Datei
-       öffnet sich im Windows-Notepad (oder Ihrem Standard-Texteditor).
-    4. Scrollen Sie nach unten zum Abschnitt "zamiany:". Suchen Sie die Zeile
-       mit dem gesuchten Muster und ändern Sie den Wert "zamiana" auf das,
-       was Ihnen passt.
-    5. Speichern Sie die Datei (Ctrl+S) und schließen Sie den Editor.
-    6. Kehren Sie zum Regelmanager zurück und klicken Sie auf "Baum aktualisieren",
-       dann schließen und starten Sie die Anwendung neu. Ihre Änderung wirkt.
+    1. Starten Sie die Anwendung und wechseln Sie zum Regel-Manager (Taste Strg+4 oder
+       die vierte Schaltfläche in der Werkzeugleiste).
+    2. Klappen Sie im Dateibaum links "pl" → "akcenty" auf und klicken Sie auf
+       "francuski.yaml".
+    3. Klicken Sie auf die Schaltfläche „{manager.btn_otworz_label}". Die Datei öffnet sich im
+       Windows-Editor (oder Ihrem Standard-Texteditor).
+    4. Scrollen Sie nach unten zum Abschnitt "zamiany:". Suchen Sie die Zeile mit dem Muster "sz" und
+       ändern Sie den Wert "zamiana" auf das, was Ihnen passt.
+    5. Speichern Sie die Datei (Strg+S), schließen Sie den Editor.
+    6. Kehren Sie zum Regel-Manager zurück und klicken Sie auf „{manager.btn_odswiez_label}". Die Regeln
+       werden neu geladen — Ihre Änderung ist sofort aktiv, ohne die Anwendung zu schließen.
+       Falls die Datei einen Syntaxfehler enthält, zeigt der Manager sofort einen Bericht mit der Zeilennummer an.
   poziom_2_duplikacja: |
-    ## STUFE 2 — Einen neuen Akzent durch Duplizierung hinzufügen
+    ## STUFE 2 — Hinzufügen eines neuen Akzents durch Duplikation
 
-    Möchten Sie einen schwedischen oder dänischen Akzent hinzufügen? Beginnen
-    Sie mit dem phonetisch ähnlichsten vorhandenen.
+    Möchten Sie einen schwedischen oder dänischen Akzent hinzufügen? Beginnen Sie
+    mit dem ähnlichsten bereits vorhandenen Akzent.
 
-    1. Markieren Sie im Regelmanager z.B. "finski.yaml" (Finnisch ist phonetisch
-       dem Schwedischen ähnlich) und klicken Sie auf "Ausgewählte Datei
-       duplizieren".
-    2. Der Manager fragt nach einem neuen Namen — geben Sie z.B. "schwedisch"
-       ein (Kleinbuchstaben, ohne Leerzeichen).
+    1. Markieren Sie im Regel-Manager z. B. "finski.yaml" (Finnisch ist
+       phonetisch dem Schwedischen nahe) und klicken Sie auf "{manager.btn_duplikuj_label}".
+    2. Der Manager fragt nach dem neuen Namen — geben Sie z. B. "szwedzki" ein
+       (Kleinbuchstaben, ohne Leerzeichen, ohne polnische Sonderzeichen).
     3. Die neue Datei öffnet sich im Editor. Ändern Sie die Felder:
-          - "etykieta" — was Sie im Anwendungsmenü sehen, z.B.
+          - "etykieta" — das, was Sie im Anwendungsmenü sehen werden, z. B.
             "Schwedisch (Alva / Oskar — OneCore/Vocalizer)"
-          - "opis" — kurze Beschreibung für die Zukunft
-          - "iso" — zweistelliger Sprachcode, für Schwedisch "sv"
-    4. Passen Sie die "zamiany"-Liste an die schwedische Phonetik an
-       (z.B. "å → o", löschen oder ändern Sie die finnischen Spezifika).
-    5. Speichern und Anwendung neu starten. Das neue Schwedisch
-       erscheint im Polyglott-Akzentmenü (und wenn Sie im Weltbuch des Projekts
-       den Tag "[Marek] — hat schwedischen Akzent" hinzufügen, erkennt der
-       Regisseur ihn automatisch und wendet ihn auf Dialoge dieser Figur an).
+          - "opis" — eine kurze Beschreibung für sich selbst, für die Zukunft
+          - "iso" — der zweibuchstabige Sprachcode, für Schwedisch "sv"
+    4. Passen Sie die Liste der "zamian" (Ersetzungen) an die schwedische
+       Phonetik an (fügen Sie z. B. "å → o", "ö → ö" hinzu, entfernen oder
+       ändern Sie die Einträge, die spezifisch für das Finnische sind).
+    5. Speichern Sie die Datei und klicken Sie im Regel-Manager auf "{manager.btn_odswiez_label}"
+       — ohne die Anwendung zu schließen. Das neue Schwedisch erscheint im
+       Akzentmenü des Polyglotten (und wenn Sie im Weltenbuch der Figur den
+       Tag "[Marek] - hat einen schwedischen Akzent" hinzufügen, erkennt der Regisseur
+       dies ebenfalls automatisch und wendet ihn auf ihre Dialoge an).
   poziom_3_cos_nowego: |
     ## STUFE 3 — Etwas völlig Neues erschaffen
 

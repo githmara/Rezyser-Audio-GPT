@@ -189,45 +189,55 @@ Claude Sonnet 5) — un modèle plus puissant respecte rigoureusement les règle
 (essentiel dans le mode Le moindre mal, où chaque option doit être réellement défavorable).</p>
 <h2>Comment commencer à s'amuser — trois niveaux de difficulté</h2>
 <hr>
-<h2>NIVEAU 1 — petits ajustements d'un accent existant</h2>
-<p>Imaginez que l'accent anglais de l'application remplace « ch » par « sh », mais<br>
-vous pensez qu'un Anglais dirait plutôt « tch ». Aucun problème.</p>
+<p>Le texte ci-dessous contient des marqueurs : un nombre placé entre doubles<br>
+crochets mathématiques (caractères U+27E6 et U+27E7). Ce sont des<br>
+espaces réservés (placeholders) programmatiques figés. Copiez-les dans la<br>
+réponse LITTÉRALEMENT, caractère pour caractère — ne modifiez pas les<br>
+chiffres, ne modifiez pas les crochets, ne les traduisez pas. Chaque<br>
+marqueur doit apparaître dans la réponse exactement le même nombre de<br>
+fois que dans l'original (un script parent vérifie la parité une fois<br>
+terminé). N'ajoutez AUCUN marqueur absent de l'original.<br>
+[FIN DE L'INSTRUCTION — LA TRADUCTION COMMENCE CI-DESSOUS]</p>
+<h2>NIVEAU 1 — ajustement fin d'un accent existant</h2>
+<p>Imaginez que l'accent français de l'application transforme « sz » en « sh », mais<br>
+que vous pensez qu'un Français dirait plutôt « sch » ou « ch ». Aucun problème.</p>
 <ol>
-<li>Lancez l'application et allez dans le Gestionnaire de Règles (touche Ctrl+4 ou<br>
-   quatrième bouton de la barre).</li>
-<li>Dans l'arborescence de fichiers à gauche, développez « fr » → « akcenty » et cliquez sur<br>
-   « angielski.yaml ».</li>
-<li>Cliquez sur le bouton « Ouvrir dans l'éditeur de texte ». Le fichier s'ouvrira dans le<br>
-   Bloc-notes Windows (ou votre éditeur de texte par défaut).</li>
-<li>Faites défiler vers le bas jusqu'à la section « zamiany: ». Trouvez la ligne avec le<br>
-   motif « ch » et changez la valeur « zamiana » avec celle qui vous convient.</li>
-<li>Sauvegardez le fichier (Ctrl+S), fermez l'éditeur.</li>
-<li>Retournez au Gestionnaire de Règles et cliquez sur « Actualiser l'arborescence », puis<br>
-   fermez et relancez l'application. Votre modification est déjà active.</li>
+<li>Lancez l'application et accédez au Gestionnaire de Règles (touche Ctrl+4 ou<br>
+   le quatrième bouton de la barre d'outils).</li>
+<li>Dans l'arborescence de fichiers à gauche, déployez « pl » → « akcenty » et cliquez sur<br>
+   « francuski.yaml ».</li>
+<li>Cliquez sur le bouton « 📝  Ouvrir dans l'éditeur de texte ». Le fichier s'ouvrira dans<br>
+   le Bloc-notes Windows (ou votre éditeur de texte par défaut).</li>
+<li>Faites défiler vers le bas jusqu'à la section « zamiany: ». Trouvez la ligne avec le motif « sz » et<br>
+   modifiez la valeur « zamiana » selon ce qui vous convient.</li>
+<li>Enregistrez le fichier (Ctrl+S), fermez l'éditeur.</li>
+<li>Retournez au Gestionnaire de Règles et cliquez sur « 🔄  Actualiser l'arborescence ». Les règles<br>
+   se rechargeront — votre modification est déjà active, sans fermer l'application.<br>
+   Si le fichier contient une erreur de syntaxe, le Gestionnaire affichera immédiatement un rapport avec le numéro de ligne.</li>
 </ol>
-<h2>NIVEAU 2 — ajouter un nouvel accent par duplication</h2>
-<p>Vous voulez ajouter un accent suédois ou danois ? Commencez par celui qui ressemble<br>
-le plus à un existant.</p>
+<h2>POZIOM 2 — ajout d'un nouvel accent par duplication</h2>
+<p>Vous voulez ajouter un accent suédois ou danois ? Commencez par le plus<br>
+proche des accents déjà existants.</p>
 <ol>
 <li>Dans le Gestionnaire de Règles, sélectionnez par exemple « finski.yaml » (le finnois<br>
-   est phonétiquement proche du suédois) et cliquez sur « Dupliquer le fichier sélectionné ».</li>
-<li>Le Gestionnaire demandera un nouveau nom — saisissez par exemple « szwedzki » (en<br>
-   minuscules, sans espaces, sans diacritiques).</li>
+   est phonétiquement proche du suédois) et cliquez sur « 📋  Dupliquer le fichier sélectionné ».</li>
+<li>Le Gestionnaire vous demandera un nouveau nom — saisissez par exemple « szwedzki »<br>
+   (en minuscules, sans espaces, sans caractères polonais).</li>
 <li>Le nouveau fichier s'ouvrira dans l'éditeur. Modifiez les champs :<ul>
-<li>« etykieta » — ce que vous verrez dans le menu de l'application, par exemple<br>
+<li>« etykieta » — ce que vous verrez dans le menu de l'application, par ex.<br>
     « Suédois (Alva / Oskar — OneCore/Vocalizer) »</li>
-<li>« opis » — courte description pour vous-même pour l'avenir</li>
-<li>« iso » — code de langue à deux lettres, pour le suédois « sv »</li>
+<li>« opis » — une brève description pour vous-même, à titre de mémo</li>
+<li>« iso » — le code de langue à deux lettres, pour le suédois « sv »</li>
 </ul>
 </li>
-<li>Ajustez la liste des « zamiany » à la phonétique suédoise (par exemple,<br>
-   ajoutez « å → o », « ö → ö », supprimez ou modifiez celles spécifiques au<br>
-   finnois).</li>
-<li>Sauvegardez, retournez à la Page d'accueil, cliquez sur « 🔄 Actualiser les accents du<br>
-   Réalisateur depuis YAML » et relancez l'application. Le nouveau suédois apparaîtra dans le<br>
-   menu des accents de Polyglotte (et si vous ajoutez à la Bible du Monde la balise<br>
-   « [Marek] - a un accent suédois », le Réalisateur le reconnaîtra<br>
-   automatiquement et l'appliquera à ses dialogues).</li>
+<li>Ajustez la liste des « zamiany » (substitutions) à la phonétique suédoise<br>
+   (par ex. ajoutez « å → o », « ö → ö », supprimez ou modifiez celles qui sont<br>
+   spécifiques au finnois).</li>
+<li>Enregistrez le fichier, puis dans le Gestionnaire de Règles cliquez sur « 🔄  Actualiser l'arborescence »<br>
+   — sans fermer l'application. Le nouvel accent suédois apparaîtra dans<br>
+   le menu des accents du Polyglotte (et si vous ajoutez au Livre du Monde du personnage<br>
+   le tag « [Marek] - a un accent suédois », le Réalisateur le<br>
+   reconnaîtra également automatiquement et l'appliquera à ses dialogues).</li>
 </ol>
 <h2>NIVEAU 3 — créer quelque chose de complètement nouveau</h2>
 <p>Vous voulez un argot scolaire ? La langue des chevaliers anciens ? Un langage<br>

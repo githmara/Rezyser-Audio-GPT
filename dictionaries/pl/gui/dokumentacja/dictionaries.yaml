@@ -245,13 +245,14 @@ tresc:
        czwarty przycisk na pasku).
     2. W drzewie plików po lewej rozwiń "pl" → "akcenty" i kliknij
        "francuski.yaml".
-    3. Kliknij przycisk "Otwórz w edytorze tekstu". Plik otworzy się w
+    3. Kliknij przycisk "{manager.btn_otworz_label}". Plik otworzy się w
        Notatniku Windows (lub Twoim domyślnym edytorze tekstu).
     4. Przewiń w dół do sekcji "zamiany:". Znajdź linię z wzorcem "sz" i
        zmień wartość "zamiana" na to, co Ci pasuje.
     5. Zapisz plik (Ctrl+S), zamknij edytor.
-    6. Wróć do Managera Reguł i kliknij "Odśwież drzewo", a potem zamknij
-       i uruchom aplikację ponownie. Twoja zmiana już działa.
+    6. Wróć do Managera Reguł i kliknij "{manager.btn_odswiez_label}". Reguły
+       wczytają się od nowa — Twoja zmiana już działa, bez zamykania aplikacji.
+       Jeśli plik ma błąd składni, Manager od razu pokaże raport z numerem linii.
   poziom_2_duplikacja: |
     ## POZIOM 2 — dodanie nowego akcentu przez duplikację
 
@@ -259,7 +260,7 @@ tresc:
     podobnego istniejącego.
 
     1. W Managerze Reguł zaznacz np. "finski.yaml" (fiński jest blisko
-       szwedzkiego fonetycznie) i kliknij "Duplikuj wybrany plik".
+       szwedzkiego fonetycznie) i kliknij "{manager.btn_duplikuj_label}".
     2. Manager zapyta o nową nazwę — wpisz np. "szwedzki" (małymi literami,
        bez spacji, bez polskich znaków).
     3. Nowy plik otworzy się w edytorze. Zmień pola:
@@ -269,7 +270,8 @@ tresc:
           - "iso" — dwuliterowy kod języka, dla szwedzkiego "sv"
     4. Dostrój listę "zamian" pod fonetykę szwedzką (np. dodaj "å → o",
        "ö → ö", usuń albo zmień te, które są specyficzne dla fińskiego).
-    5. Zapisz i uruchom aplikację ponownie. Nowy szwedzki pojawi się w
+    5. Zapisz plik, a w Managerze Reguł kliknij "{manager.btn_odswiez_label}"
+       — bez zamykania aplikacji. Nowy szwedzki pojawi się w
        menu akcentów Poligloty (a jeśli dodasz do Księgi Świata postaci
        tag "[Marek] - ma akcent szwedzki", to Reżyser też go rozpozna
        automatycznie i zastosuje do jej dialogów).

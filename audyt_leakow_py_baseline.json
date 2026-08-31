@@ -16,14 +16,10 @@
   "core_poliglota.py": [
     "POSSIBLE|lingua:PL|Nieznany tryb: „{…}”. Oczekiwano „Rezyser” lub „Szyfrant”.",
     "POSSIBLE|lingua:PL|Parametr `wariant` jest wymagany.",
-    "POSSIBLE|lingua:PL|[core_poliglota] Brak pliku podstaw dla jezyka {…}: {…}",
-    "POSSIBLE|lingua:PL|[core_poliglota] WARN {…}: {…} potencjalnych petli sekwencyjnego str.replace -> {…}{…}. Jesli celowe (rozpad dwuznaku w ",
     "POSSIBLE|znak-PL:ĄąĘę|aeiouyąęóAEIOUYĄĘÓ",
     "POSSIBLE|znak-PL:ĄĆĘŁŃŚŹŻ|AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ",
     "POSSIBLE|znak-PL:ĄĘ|AEIYUĄĘÓ",
-    "POSSIBLE|znak-PL:ąę|[core_poliglota] Pole lingua: '{…}' w dictionaries/{…}/podstawy.yaml nie jest znaną nazwą `lingua.Language` — język pomi",
     "POSSIBLE|znak-PL:ąę|aeiyuąęó",
-    "POSSIBLE|znak-PL:ął|[core_poliglota] Błąd wczytywania {…}: {…}",
     "POSSIBLE|znak-PL:ę|Nie znaleziono wariantu „{…}” dla trybu „{…}” i języka „{…}”.",
     "POSSIBLE|znak-PL:ę|Nieznany algorytm szyfru: „{…}” (plik dictionaries/{…}/szyfry/{…}.yaml). Dostępne: {…}",
     "POSSIBLE|znak-PL:ę|Nieznany algorytm szyfru: „{…}”. Dostępne: {…}",
@@ -92,16 +88,13 @@
   "opowiesci_ai.py": [
     "POSSIBLE|lingua:PL|(narracja zsynchronizowana z dysku)",
     "POSSIBLE|lingua:PL|(streszczenie poprzednich tur)",
-    "POSSIBLE|lingua:PL|[opowiesci_ai] WARN: brak `{…}/opowiesci/{…}.yaml` — fallback do `en/opowiesci/{…}.yaml`. Czy paczka `{…}` jest kompletn",
-    "POSSIBLE|znak-PL:ę|Odkorkuj fiolkę",
-    "POSSIBLE|znak-PL:ś|Brak przepisu opowieści `{…}.yaml` ani w `{…}/opowiesci/` ani w `en/opowiesci/` (fallback). Czy folder dictionaries jest"
+    "POSSIBLE|lingua:PL|opowiesci/{…}.yaml: prompt_systemowy ({…}, en)",
+    "POSSIBLE|lingua:PL|zaczatki.{…}: etykieta",
+    "POSSIBLE|znak-PL:ę|Odkorkuj fiolkę"
   ],
   "przepisy_rezysera.py": [
-    "POSSIBLE|lingua:PL|⚠️ przepisy_rezysera: nieznana rola={…} w {…} — pole zignorowane (dozwolone: {…}).",
-    "POSSIBLE|znak-PL:ćę|⚠️ przepisy_rezysera: duplikat id={…} (kategoria {…}) w {…} — plik pominięty (id musi być unikalne w kategorii).",
-    "POSSIBLE|znak-PL:ę|⚠️ przepisy_rezysera: niedozwolone znaki w sufiks_pliku_wyniku={…} w {…} — plik pominięty (zakazane: {…}).",
-    "POSSIBLE|znak-PL:ę|⚠️ przepisy_rezysera: nieznany zakres={…} w {…} — plik pominięty (dozwolone: {…} / {…} / {…}).",
-    "POSSIBLE|znak-PL:ęłśź|⚠️ przepisy_rezysera: nieprawidłowe pole w {…} ({…}) — plik pominięty (sprawdź typy wartości w YAML-u)."
+    "POSSIBLE|lingua:PL|id, etykieta, kategoria",
+    "POSSIBLE|lingua:PL|sufiks_pliku_wyniku={…} | {…}"
   ],
   "refresh_languages.py": [
     "POSSIBLE|lingua:PL|➖ USUWAM (brak folderu/podstawy):",

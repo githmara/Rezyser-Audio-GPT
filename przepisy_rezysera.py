@@ -51,6 +51,7 @@ from __future__ import annotations
 
 import os
 import sys
+import threading
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -369,6 +370,124 @@ class PrzepisRezysera:
 
 
 # =============================================================================
+# Rejestr pominiętych plików (v18.24.2) — diagnostyka dla użytkownika paczki
+# =============================================================================
+# Do v18.24.1 loader mówił „dlaczego pominąłem twój plik" wyłącznie przez
+# ``print(..., file=sys.stderr)``. W buildzie ``--windowed`` ``sys.stderr`` jest
+# ``None``, a ``print`` z takim celem sięga po ``sys.stdout`` (też ``None``)
+# i MILCZY — kto zepsuł przepis w Managerze Reguł, widział tylko brak opcji
+# w RadioBoxie albo brak przycisku postprodukcji. Najgorsza była szósta ścieżka,
+# niema także w trybie dev: błąd składni YAML wracał z ``_wczytaj_yaml`` jako
+# pusty słownik, więc przepis znikał bez ANI JEDNEJ linii komunikatu.
+#
+# Rozwiązanie: powody pominięcia zbieramy STRUKTURALNIE (kod powodu + dane
+# techniczne), a tekst dla użytkownika składa warstwa GUI przez ``i18n``
+# (``gui_diagnostyka``). Ten moduł pozostaje wx-free i i18n-free — kody powodów
+# są jego kontraktem, nie zdaniami do przetłumaczenia.
+POWOD_PARSE     = "parse"       # pliku nie da się sparsować (składnia YAML)
+POWOD_BRAK_POL  = "brak_pol"    # brak wymaganych `id` / `etykieta` / `kategoria`
+POWOD_KATEGORIA = "kategoria"   # `kategoria:` poza zbiorem rozumianym przez silnik
+POWOD_ZAKRES    = "zakres"      # `zakres:` poza zbiorem (postprodukcja)
+POWOD_SUFIKS    = "sufiks"      # niedozwolone znaki w `sufiks_pliku_wyniku`
+POWOD_POLE      = "pole"        # zły typ/wartość pola (TypeError/ValueError)
+POWOD_DUPLIKAT  = "duplikat"    # dwa pliki o tym samym `id` w jednej kategorii
+POWOD_ROLA      = "rola"        # nieznana `rola:` — pole zignorowane, plik działa
+POWOD_KLUCZ     = "klucz"       # brak klucza wymaganego przez silnik (Opowieści)
+POWOD_WPIS      = "wpis"        # wadliwy wpis WEWNĄTRZ pliku (np. zaczątek)
+
+
+@dataclass(frozen=True)
+class PominietyPlik:
+    """Jeden powód, dla którego silnik pominął plik reguł (albo jego fragment).
+
+    Args:
+        sciezka:  Pełna ścieżka pliku — użytkownik musi wiedzieć, co otworzyć
+                  w Managerze Reguł.
+        powod:    Kod ``POWOD_*`` (klucz i18n składany w ``gui_diagnostyka``).
+        szczegol: Dane techniczne dla dewelopera/lingwisty (numer linii, nazwa
+                  pola, dozwolone wartości). Celowo NIE tłumaczone — to cytat
+                  z pliku albo z wyjątku, jak ``{tresc_bledu}`` w innych
+                  komunikatach.
+    """
+
+    sciezka: str
+    powod: str
+    szczegol: str = ""
+
+
+# Kolejność zgłoszeń zachowana (użytkownik czyta raport plik po pliku), ale bez
+# duplikatów: ten sam plik wczytywany dla dwóch języków albo dwa razy w jednej
+# sesji nie może rozdmuchać raportu. Lock, bo loadery wołają wątki tła AI
+# (`rezyser_ai`, worker Opowieści) równolegle z wątkiem GUI — bez niego wyścig
+# na „sprawdź i dopisz" wpuszczałby ten sam powód do raportu dwa razy.
+_POMINIETE: list[PominietyPlik] = []
+_LOCK_POMINIETE = threading.Lock()
+
+
+def _dev_log(komunikat: str) -> None:
+    """Strażowany ``print`` na konsolę dewelopera (packaged: stdout None → milczy).
+
+    Wzorzec ``core_llm._dev_log`` / ``core_rezyser._dev_log_runtime`` — w paczce
+    release aplikacja chodzi bez konsoli, a goły ``print`` mógłby ubić proces.
+    Rejestr powyżej jest kanałem dla UŻYTKOWNIKA, ten log — dla dewelopera,
+    który uruchamia aplikację ze źródła i chce zobaczyć powód od razu.
+    """
+    try:
+        if sys.stdout is not None:
+            print(f"[przepisy_rezysera] {komunikat}", file=sys.stdout)
+    except Exception:  # noqa: BLE001 — log nigdy nie może ubić wywołania
+        pass
+
+
+def zglos_pominiecie(sciezka: str, powod: str, szczegol: str = "") -> None:
+    """Zapisuje powód pominięcia do rejestru i na konsolę dewelopera.
+
+    Wołane przez loadery danych edytowalnych przez użytkownika — ten moduł oraz
+    ``opowiesci_ai`` (import z tego miejsca, żeby oba panele raportowały jednym
+    kanałem). Idempotentne: ta sama trójka (ścieżka, powód, szczegół) nie
+    dopisuje się dwa razy.
+    """
+    wpis = PominietyPlik(sciezka=sciezka, powod=powod, szczegol=szczegol)
+    with _LOCK_POMINIETE:
+        if wpis in _POMINIETE:
+            return
+        _POMINIETE.append(wpis)
+    _dev_log(f"{powod}: {sciezka} ({szczegol})" if szczegol
+             else f"{powod}: {sciezka}")
+
+
+def _zgloszono_blad_parsera(sciezka: str) -> bool:
+    """Czy dla tego pliku zgłoszono już błąd składni?
+
+    Plik, którego parser nie zrozumiał, wraca z :func:`_wczytaj_yaml` jako pusty
+    słownik — a dalszy filtr „brak wymaganych pól" widziałby wtedy TEN SAM plik
+    drugi raz i dopisywał userowi mylący, wtórny powód. Przyczyna jest jedna
+    (składnia), więc raport ma o niej mówić jednym wpisem.
+    """
+    with _LOCK_POMINIETE:
+        return any(
+            w.sciezka == sciezka and w.powod == POWOD_PARSE for w in _POMINIETE
+        )
+
+
+def pominiete_pliki() -> tuple[PominietyPlik, ...]:
+    """Zwraca wszystkie zebrane powody pominięcia (pusta krotka = czysto).
+
+    Rejestr wypełnia się LENIWIE, w miarę wczytywania paczek — panel woła tę
+    funkcję po zbudowaniu swojej listy trybów/przepisów, więc widzi powody
+    dotyczące dokładnie tych plików, które próbował wczytać.
+    """
+    with _LOCK_POMINIETE:
+        return tuple(_POMINIETE)
+
+
+def wyczysc_pominiecia() -> None:
+    """Zapomina zebrane powody (wołane razem z czyszczeniem cache przepisów)."""
+    with _LOCK_POMINIETE:
+        _POMINIETE.clear()
+
+
+# =============================================================================
 # Cache wczytanych przepisów
 # =============================================================================
 # Klucz: język ("pl"). Wartość: lista przepisów w kolejności z dysku.
@@ -410,20 +529,40 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
 
     Zwraca ``None`` dla YAML-i bez wymaganych pól (``id``, ``etykieta``,
     ``kategoria``) lub dla YAML-i technicznych (``kategoria: oczyszczenie``),
-    których nie chcemy pokazywać w liście trybów.
+    których nie chcemy pokazywać w liście trybów. Każde odrzucenie zgłasza powód
+    do rejestru (:func:`zglos_pominiecie`) — z jednym wyjątkiem: pliku wspólnego
+    ``baza.yaml``, który LEGALNIE nie jest przepisem (brak ``id``) i musi
+    przechodzić przez ten filtr po cichu, żeby nie straszyć użytkownika
+    „pominięciem" pliku, który działa poprawnie.
     """
-    if not isinstance(data, dict):
+    if not isinstance(data, dict) or not data:
+        # Pusty słownik = plik pusty albo nie do sparsowania. Drugi przypadek
+        # zaraportował już `_wczytaj_yaml` (z numerem linii), pierwszy zgłaszamy
+        # tutaj — tylko dla plików, które mają być przepisami.
+        if not _czy_plik_wspolny(sciezka) and not _zgloszono_blad_parsera(sciezka):
+            zglos_pominiecie(sciezka, POWOD_BRAK_POL, "id, etykieta, kategoria")
         return None
 
     id_ = data.get("id")
     etykieta = data.get("etykieta")
     kategoria = data.get("kategoria")
     if not id_ or not etykieta or not kategoria:
+        if not _czy_plik_wspolny(sciezka):
+            brakujace = ", ".join(
+                nazwa for nazwa, wartosc in (
+                    ("id", id_), ("etykieta", etykieta), ("kategoria", kategoria))
+                if not wartosc
+            )
+            zglos_pominiecie(sciezka, POWOD_BRAK_POL, brakujace)
         return None
 
     # Pomijamy kategorie pomocnicze, które mogłyby wylądować w tym samym
     # folderze przez pomyłkę (np. cudze YAML-e).
     if kategoria not in (KATEGORIA_TRYB, KATEGORIA_POSTPROD):
+        zglos_pominiecie(
+            sciezka, POWOD_KATEGORIA,
+            f"kategoria={kategoria!r} ≠ {KATEGORIA_TRYB!r} / {KATEGORIA_POSTPROD!r}",
+        )
         return None
 
     # Format wyjścia steruje dispatchem w gui_rezyser. Jeśli YAML nie ma pola
@@ -456,11 +595,10 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
         zakres = _ZAKRES_LEGACY.get(str(id_), ZAKRES_CALOSC)
     if kategoria == KATEGORIA_POSTPROD and zakres not in (
             ZAKRES_PER_ROZDZIAL, ZAKRES_CALOSC, ZAKRES_REKONCYLIACJA):
-        print(
-            f"⚠️  przepisy_rezysera: nieznany zakres={zakres!r} w {sciezka} "
-            f"— plik pominięty (dozwolone: {ZAKRES_PER_ROZDZIAL!r} / "
-            f"{ZAKRES_CALOSC!r} / {ZAKRES_REKONCYLIACJA!r}).",
-            file=sys.stderr,
+        zglos_pominiecie(
+            sciezka, POWOD_ZAKRES,
+            f"zakres={zakres!r} ∉ {{{ZAKRES_PER_ROZDZIAL!r}, "
+            f"{ZAKRES_CALOSC!r}, {ZAKRES_REKONCYLIACJA!r}}}",
         )
         return None
 
@@ -481,10 +619,9 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     # może przekierować przetwarzania w złe miejsce — inaczej niż `zakres`.
     rola = str(data.get("rola") or "").strip().lower()
     if rola and rola != ROLA_PAMIEC_DLUGOTRWALA:
-        print(
-            f"⚠️  przepisy_rezysera: nieznana rola={rola!r} w {sciezka} — pole "
-            f"zignorowane (dozwolone: {ROLA_PAMIEC_DLUGOTRWALA!r}).",
-            file=sys.stderr,
+        zglos_pominiecie(
+            sciezka, POWOD_ROLA,
+            f"rola={rola!r} ≠ {ROLA_PAMIEC_DLUGOTRWALA!r}",
         )
         rola = ""
 
@@ -497,11 +634,13 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
         # wartość zamiast pomijać plik: user dostaje działające narzędzie.
         sufiks_pliku_wyniku = SUFIKS_STRESZCZENIA_DOMYSLNY
     if any(z in sufiks_pliku_wyniku for z in _ZNAKI_ZAKAZANE_SUFIKSU):
-        print(
-            f"⚠️  przepisy_rezysera: niedozwolone znaki w sufiks_pliku_wyniku="
-            f"{sufiks_pliku_wyniku!r} w {sciezka} — plik pominięty "
-            f"(zakazane: {_ZNAKI_ZAKAZANE_SUFIKSU}).",
-            file=sys.stderr,
+        # Szczegół bez ani jednego słowa (wartość pola | lista zakazanych znaków):
+        # to samo zdanie ma czytać user w każdym z dziewięciu języków, a co znaczy
+        # ten zapis, mówi zlokalizowany `diag.powod.sufiks`.
+        zglos_pominiecie(
+            sciezka, POWOD_SUFIKS,
+            f"sufiks_pliku_wyniku={sufiks_pliku_wyniku!r} | "
+            f"{' '.join(_ZNAKI_ZAKAZANE_SUFIKSU)}",
         )
         return None
 
@@ -571,11 +710,7 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
             limit_znakow_opisu=max(0, int(data.get("limit_znakow_opisu") or 0)),
         )
     except (TypeError, ValueError, AttributeError) as exc:
-        print(
-            f"⚠️  przepisy_rezysera: nieprawidłowe pole w {sciezka} ({exc}) "
-            f"— plik pominięty (sprawdź typy wartości w YAML-u).",
-            file=sys.stderr,
-        )
+        zglos_pominiecie(sciezka, POWOD_POLE, str(exc))
         return None
 
 
@@ -594,12 +729,63 @@ def _lista_str(surowe: Any) -> list[str]:
     return [str(x).strip() for x in surowe if str(x).strip()]
 
 
+def _czy_plik_wspolny(sciezka: str) -> bool:
+    """Czy ścieżka wskazuje plik wspólny ``baza.yaml`` (LEGALNIE nie-przepis)?
+
+    Wydzielone, bo dwa filtry braku pól w :func:`_yaml_to_przepis` muszą go
+    przepuszczać bez zgłaszania pominięcia — patrz docstring tamtej funkcji.
+    """
+    return os.path.splitext(os.path.basename(sciezka))[0].lower() == NAZWA_BAZY
+
+
+def opis_bledu_yaml(exc: Exception) -> str:
+    """Zamienia wyjątek parsera na jednolinijkowy opis z numerem linii.
+
+    Publiczne, bo ten sam format opisu potrzebuje loader Opowieści
+    (``opowiesci_ai._zaladuj_przepis``) — raport diagnostyczny jest wspólny dla
+    obu narzędzi, więc i opis błędu ma wyglądać identycznie.
+
+    Surowy ``str(yaml.YAMLError)`` to cztery linie z powtórzoną pełną ścieżką
+    pliku — w dialogu diagnostycznym liczy się to, CZEGO parser nie zrozumiał
+    i GDZIE. Numer linii/kolumny liczymy od 1 (pyyaml indeksuje od 0), bo user
+    otworzy plik w edytorze tekstu.
+
+    Pozycję zapisujemy w konwencji kompilatorów (``linia:kolumna:``) — bez słów,
+    więc opis jest ten sam we wszystkich dziewięciu językach interfejsu i nie
+    wnosi polskiego hard-kodu do komunikatu widzianego przez użytkownika.
+    Znaczenie liczb wyjaśnia klucz i18n ``diag.powod.parse``. Sam komunikat
+    parsera zostaje w oryginale (cytat z biblioteki, jak ``{tresc_bledu}``).
+    """
+    problem = getattr(exc, "problem", "") or ""
+    marker = getattr(exc, "problem_mark", None)
+    if marker is not None:
+        pozycja = f"{marker.line + 1}:{marker.column + 1}"
+        return f"{pozycja}: {problem}" if problem else pozycja
+    return problem or str(exc).replace("\n", " ")
+
+
 def _wczytaj_yaml(sciezka: str) -> dict:
-    """Bezpiecznie wczytuje plik YAML (zwraca pusty dict przy błędzie)."""
+    """Bezpiecznie wczytuje plik YAML (zwraca pusty dict przy błędzie).
+
+    v18.24.2: błąd SKŁADNI przestał być cichy. Do v18.24.1 ``except Exception``
+    zwracał tu ``{}``, a ``_yaml_to_przepis`` odrzucał taki plik w pierwszym
+    ``if`` — przepis znikał z GUI bez ani jednej linii komunikatu, nawet na
+    konsoli dewelopera (to była najgorsza z sześciu ścieżek pominięcia).
+    Teraz powód ląduje w rejestrze razem z numerem linii, a użytkownik dostaje
+    go w dialogu diagnostycznym. ``OSError`` (plik zniknął, brak uprawnień)
+    raportujemy osobnym szczegółem — objaw jest ten sam, przyczyna inna.
+    """
     try:
         with open(sciezka, "r", encoding="utf-8") as fh:
             data = yaml.safe_load(fh)
-    except Exception:
+    except yaml.YAMLError as exc:
+        zglos_pominiecie(sciezka, POWOD_PARSE, opis_bledu_yaml(exc))
+        return {}
+    except OSError as exc:
+        zglos_pominiecie(sciezka, POWOD_PARSE, str(exc))
+        return {}
+    except Exception as exc:  # noqa: BLE001 — np. UnicodeDecodeError
+        zglos_pominiecie(sciezka, POWOD_PARSE, str(exc).replace("\n", " "))
         return {}
     return data if isinstance(data, dict) else {}
 
@@ -652,7 +838,10 @@ def _zaladuj_wszystkie(jezyk: str) -> list[PrzepisRezysera]:
     przepisy: list[PrzepisRezysera] = []
 
     if os.path.isdir(folder):
-        widziane_id: set[tuple[str, str]] = set()
+        # v18.24.2: mapa (nie set) — raport duplikatu ma powiedzieć, KTÓRY plik
+        # zajął identyfikator, inaczej user widzi „pominięto tryb_burza.yaml"
+        # i nie wie, że winna jest jego własna kopia sortująca się wcześniej.
+        widziane_id: dict[tuple[str, str], str] = {}
         for nazwa_pliku in sorted(os.listdir(folder)):
             if not nazwa_pliku.lower().endswith((".yaml", ".yml")):
                 continue
@@ -671,14 +860,13 @@ def _zaladuj_wszystkie(jezyk: str) -> list[PrzepisRezysera]:
             # (`zaladuj_przepis(kategoria=...)`, `struktura_dla_id`, listy).
             klucz_id = (przepis.kategoria, przepis.id)
             if klucz_id in widziane_id:
-                print(
-                    f"⚠️  przepisy_rezysera: duplikat id={przepis.id!r} "
-                    f"(kategoria {przepis.kategoria!r}) w {sciezka} — plik "
-                    f"pominięty (id musi być unikalne w kategorii).",
-                    file=sys.stderr,
+                zglos_pominiecie(
+                    sciezka, POWOD_DUPLIKAT,
+                    f"id={przepis.id!r}, kategoria={przepis.kategoria!r} "
+                    f"← {os.path.basename(widziane_id[klucz_id])}",
                 )
                 continue
-            widziane_id.add(klucz_id)
+            widziane_id[klucz_id] = sciezka
             przepisy.append(przepis)
 
     przepisy.sort(key=lambda p: (p.kategoria, p.kolejnosc, p.id))
@@ -924,6 +1112,10 @@ def wyczysc_cache() -> None:
     global _CACHE_SUFIKSY_GLOBALNE
     _CACHE_PRZEPISOW.clear()
     _CACHE_BAZA.clear()
+    # v18.24.2: powody pominięcia są pochodną wczytania — po wyczyszczeniu cache
+    # policzą się od nowa ze świeżej treści plików. Bez tego raport pokazywałby
+    # błąd, który user właśnie naprawił (albo gubił nowy, o tej samej trójce).
+    wyczysc_pominiecia()
     # v18.14: unia sufiksów jest pochodną przepisów — po edycji
     # `sufiks_pliku_wyniku` w Managerze Reguł musi być przeliczona, inaczej filtr
     # listy projektów zostałby przy starej nazwie pliku wyniku.

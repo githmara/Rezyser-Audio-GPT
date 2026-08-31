@@ -51,6 +51,7 @@ from __future__ import annotations
 import os
 import random
 import re
+import sys
 from typing import Any, Callable
 
 import yaml
@@ -64,6 +65,10 @@ from docx.oxml.shared import OxmlElement
 from num2words import num2words
 
 import sciezki
+# v18.24.2: wspólny rejestr powodów pominięcia pliku reguł (patrz
+# `gui_diagnostyka`). Import jest jednokierunkowy i bez ryzyka cyklu —
+# `przepisy_rezysera` ciągnie tylko `os`/`sys`/`yaml`/`sciezki`.
+from przepisy_rezysera import POWOD_PARSE, opis_bledu_yaml, zglos_pominiecie
 
 # 13.5: detekcja języka oparta na ``lingua-language-detector``.
 # Lingua jest deterministyczna z założenia (operuje na n-gramowych modelach
@@ -331,8 +336,8 @@ def _ostrzez_o_lancuchu_zamian(zamiany: list[dict], kontekst: str) -> None:
         return
     podglad = "; ".join(trafienia[:3])
     reszta = f" (+{len(trafienia) - 3} kolejnych)" if len(trafienia) > 3 else ""
-    print(
-        f"[core_poliglota] WARN {kontekst}: {len(trafienia)} potencjalnych "
+    _dev_log(
+        f"WARN {kontekst}: {len(trafienia)} potencjalnych "
         f"petli sekwencyjnego str.replace -> {podglad}{reszta}. "
         f"Jesli celowe (rozpad dwuznaku w pipeline) - zignoruj; jesli niezamierzone "
         f"(klasyk: ñ->nj przed j->x daje nx) - zamien TARGET pierwszy, SOURCE potem."
@@ -352,15 +357,57 @@ def _usun_polskie_znaki(tekst: str, podstawy: dict) -> str:
 # Ładowanie plików YAML
 # =============================================================================
 
+def _dev_log(komunikat: str) -> None:
+    """Strażowany ``print`` na konsolę dewelopera (wzorzec ``core_llm._dev_log``).
+
+    v18.24.2: goły ``print`` w tym module milczał w buildzie ``--windowed``
+    (``sys.stdout`` jest tam ``None``, a ``print`` z takim celem nic nie robi),
+    więc diagnostyka i tak nie docierała — a przy stdout ZAMKNIĘTYM mogła rzucić
+    ``ValueError`` z loadera danych. Guard usuwa oba ryzyka; kanałem dla
+    UŻYTKOWNIKA jest rejestr pominięć (:mod:`gui_diagnostyka`).
+    """
+    try:
+        if sys.stdout is not None:
+            print(f"[core_poliglota] {komunikat}", file=sys.stdout)
+    except Exception:  # noqa: BLE001 — log nigdy nie może ubić wywołania
+        pass
+
+
 def _zaladuj_yaml(sciezka: str) -> dict:
-    """Wczytuje pojedynczy plik YAML i zwraca słownik (lub ``{}``)."""
+    """Wczytuje pojedynczy plik YAML i zwraca słownik (lub ``{}``).
+
+    v18.24.2: błąd składni trafia do wspólnego rejestru pominięć, bo
+    ``akcenty/`` i ``szyfry/`` to pliki, które Manager Reguł sam wystawia
+    użytkownikowi do edycji w edytorze tekstu. Bez tego akcent albo szyfr
+    znikał z listy Poligloty bez ani jednego słowa wyjaśnienia (w paczce
+    ``--windowed`` konsoli nie ma), a raport „reguły sprawdzone" w Managerze
+    Reguł obejmowałby tylko część kategorii, które ten Manager pokazuje.
+    """
     try:
         with open(sciezka, "r", encoding="utf-8") as fh:
             data = yaml.safe_load(fh)
-    except Exception as exc:  # noqa: BLE001
-        print(f"[core_poliglota] Błąd wczytywania {sciezka}: {exc}")
+    except yaml.YAMLError as exc:
+        zglos_pominiecie(sciezka, POWOD_PARSE, opis_bledu_yaml(exc))
         return {}
+    except Exception as exc:  # noqa: BLE001 — OSError / UnicodeDecodeError
+        zglos_pominiecie(sciezka, POWOD_PARSE, str(exc).replace("\n", " "))
+        return {}
+    # Plik sparsowany, ale pusty (albo nie-słownikowy) świadomie NIE dostaje
+    # wpisu: nie umiemy tu wskazać brakującego pola (akcent bierze `id`
+    # i `etykieta` z nazwy pliku), a zmyślona nazwa w raporcie byłaby myląca.
     return data if isinstance(data, dict) else {}
+
+
+def wyczysc_cache() -> None:
+    """Zapomina wczytane podstawy i warianty (akcenty/szyfry).
+
+    Odpowiednik ``przepisy_rezysera.wyczysc_cache`` — wołany przez „Odśwież"
+    w Managerze Reguł (v18.24.2), żeby poprawka pliku akcentu albo szyfru
+    działała bez zamykania aplikacji. Rejestr powodów pominięcia czyści
+    ``przepisy_rezysera``, bo jest wspólny dla wszystkich loaderów.
+    """
+    _CACHE_PODSTAWY.clear()
+    _CACHE_WARIANTOW.clear()
 
 
 def _zaladuj_podstawy(jezyk: str) -> dict:
@@ -370,7 +417,7 @@ def _zaladuj_podstawy(jezyk: str) -> dict:
 
     sciezka = os.path.join(DICTIONARIES_DIR, jezyk, "podstawy.yaml")
     if not os.path.exists(sciezka):
-        print(f"[core_poliglota] Brak pliku podstaw dla jezyka {jezyk}: {sciezka}")
+        _dev_log(f"Brak pliku podstaw dla jezyka {jezyk}: {sciezka}")
         _CACHE_PODSTAWY[jezyk] = {}
         return _CACHE_PODSTAWY[jezyk]
 
@@ -755,9 +802,9 @@ def _zbuduj_mapowanie_lingua() -> dict[str, Any]:
         # KeyError na każdym imporcie modułu — defensywnie pomijamy.
         kandydat = getattr(_LinguaLanguage, nazwa_enuma, None)
         if kandydat is None:
-            print(f"[core_poliglota] Pole lingua: '{wartosc}' w "
-                  f"dictionaries/{kod}/podstawy.yaml nie jest znaną nazwą "
-                  f"`lingua.Language` — język pomijany w detektorze.")
+            _dev_log(f"Pole lingua: '{wartosc}' w "
+                     f"dictionaries/{kod}/podstawy.yaml nie jest znaną nazwą "
+                     f"`lingua.Language` — język pomijany w detektorze.")
             continue
         mapa[kod] = kandydat
 

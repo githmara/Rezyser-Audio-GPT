@@ -199,45 +199,56 @@ tresc:
     ## Comment commencer à s'amuser — trois niveaux de difficulté
     ----------------------------------------------------------
   poziom_1_dostroj: |
-    ## NIVEAU 1 — petits ajustements d'un accent existant
+    Le texte ci-dessous contient des marqueurs : un nombre placé entre doubles
+    crochets mathématiques (caractères U+27E6 et U+27E7). Ce sont des
+    espaces réservés (placeholders) programmatiques figés. Copiez-les dans la
+    réponse LITTÉRALEMENT, caractère pour caractère — ne modifiez pas les
+    chiffres, ne modifiez pas les crochets, ne les traduisez pas. Chaque
+    marqueur doit apparaître dans la réponse exactement le même nombre de
+    fois que dans l'original (un script parent vérifie la parité une fois
+    terminé). N'ajoutez AUCUN marqueur absent de l'original.
+    [FIN DE L'INSTRUCTION — LA TRADUCTION COMMENCE CI-DESSOUS]
 
-    Imaginez que l'accent anglais de l'application remplace « ch » par « sh », mais
-    vous pensez qu'un Anglais dirait plutôt « tch ». Aucun problème.
+    ## NIVEAU 1 — ajustement fin d'un accent existant
 
-    1. Lancez l'application et allez dans le Gestionnaire de Règles (touche Ctrl+4 ou
-       quatrième bouton de la barre).
-    2. Dans l'arborescence de fichiers à gauche, développez « fr » → « akcenty » et cliquez sur
-       « angielski.yaml ».
-    3. Cliquez sur le bouton « Ouvrir dans l'éditeur de texte ». Le fichier s'ouvrira dans le
-       Bloc-notes Windows (ou votre éditeur de texte par défaut).
-    4. Faites défiler vers le bas jusqu'à la section « zamiany: ». Trouvez la ligne avec le
-       motif « ch » et changez la valeur « zamiana » avec celle qui vous convient.
-    5. Sauvegardez le fichier (Ctrl+S), fermez l'éditeur.
-    6. Retournez au Gestionnaire de Règles et cliquez sur « Actualiser l'arborescence », puis
-       fermez et relancez l'application. Votre modification est déjà active.
+    Imaginez que l'accent français de l'application transforme « sz » en « sh », mais
+    que vous pensez qu'un Français dirait plutôt « sch » ou « ch ». Aucun problème.
+
+    1. Lancez l'application et accédez au Gestionnaire de Règles (touche Ctrl+4 ou
+       le quatrième bouton de la barre d'outils).
+    2. Dans l'arborescence de fichiers à gauche, déployez « pl » → « akcenty » et cliquez sur
+       « francuski.yaml ».
+    3. Cliquez sur le bouton « {manager.btn_otworz_label} ». Le fichier s'ouvrira dans
+       le Bloc-notes Windows (ou votre éditeur de texte par défaut).
+    4. Faites défiler vers le bas jusqu'à la section « zamiany: ». Trouvez la ligne avec le motif « sz » et
+       modifiez la valeur « zamiana » selon ce qui vous convient.
+    5. Enregistrez le fichier (Ctrl+S), fermez l'éditeur.
+    6. Retournez au Gestionnaire de Règles et cliquez sur « {manager.btn_odswiez_label} ». Les règles
+       se rechargeront — votre modification est déjà active, sans fermer l'application.
+       Si le fichier contient une erreur de syntaxe, le Gestionnaire affichera immédiatement un rapport avec le numéro de ligne.
   poziom_2_duplikacja: |
-    ## NIVEAU 2 — ajouter un nouvel accent par duplication
+    ## POZIOM 2 — ajout d'un nouvel accent par duplication
 
-    Vous voulez ajouter un accent suédois ou danois ? Commencez par celui qui ressemble
-    le plus à un existant.
+    Vous voulez ajouter un accent suédois ou danois ? Commencez par le plus
+    proche des accents déjà existants.
 
     1. Dans le Gestionnaire de Règles, sélectionnez par exemple « finski.yaml » (le finnois
-       est phonétiquement proche du suédois) et cliquez sur « Dupliquer le fichier sélectionné ».
-    2. Le Gestionnaire demandera un nouveau nom — saisissez par exemple « szwedzki » (en
-       minuscules, sans espaces, sans diacritiques).
+       est phonétiquement proche du suédois) et cliquez sur « {manager.btn_duplikuj_label} ».
+    2. Le Gestionnaire vous demandera un nouveau nom — saisissez par exemple « szwedzki »
+       (en minuscules, sans espaces, sans caractères polonais).
     3. Le nouveau fichier s'ouvrira dans l'éditeur. Modifiez les champs :
-          - « etykieta » — ce que vous verrez dans le menu de l'application, par exemple
+          - « etykieta » — ce que vous verrez dans le menu de l'application, par ex.
             « Suédois (Alva / Oskar — OneCore/Vocalizer) »
-          - « opis » — courte description pour vous-même pour l'avenir
-          - « iso » — code de langue à deux lettres, pour le suédois « sv »
-    4. Ajustez la liste des « zamiany » à la phonétique suédoise (par exemple,
-       ajoutez « å → o », « ö → ö », supprimez ou modifiez celles spécifiques au
-       finnois).
-    5. Sauvegardez, retournez à la Page d'accueil, cliquez sur « 🔄 Actualiser les accents du
-       Réalisateur depuis YAML » et relancez l'application. Le nouveau suédois apparaîtra dans le
-       menu des accents de Polyglotte (et si vous ajoutez à la Bible du Monde la balise
-       « [Marek] - a un accent suédois », le Réalisateur le reconnaîtra
-       automatiquement et l'appliquera à ses dialogues).
+          - « opis » — une brève description pour vous-même, à titre de mémo
+          - « iso » — le code de langue à deux lettres, pour le suédois « sv »
+    4. Ajustez la liste des « zamiany » (substitutions) à la phonétique suédoise
+       (par ex. ajoutez « å → o », « ö → ö », supprimez ou modifiez celles qui sont
+       spécifiques au finnois).
+    5. Enregistrez le fichier, puis dans le Gestionnaire de Règles cliquez sur « {manager.btn_odswiez_label} »
+       — sans fermer l'application. Le nouvel accent suédois apparaîtra dans
+       le menu des accents du Polyglotte (et si vous ajoutez au Livre du Monde du personnage
+       le tag « [Marek] - a un accent suédois », le Réalisateur le
+       reconnaîtra également automatiquement et l'appliquera à ses dialogues).
   poziom_3_cos_nowego: |
     ## NIVEAU 3 — créer quelque chose de complètement nouveau
 

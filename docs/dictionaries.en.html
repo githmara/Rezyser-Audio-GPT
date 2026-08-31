@@ -229,43 +229,46 @@ recommended) — a stronger model rigorously sticks to the world's rules<br>
 (crucial in Lesser Evil mode, where every option must be genuinely unfavorable).</p>
 <h2>How to Start Playing — Three Levels of Difficulty</h2>
 <hr>
-<h2>LEVEL 1 — minor tuning of an existing accent</h2>
-<p>Imagine the application's French accent changes "sz" to "sh", but you<br>
-think a French person would rather say "sch" or "ch". No problem.</p>
+<h2>LEVEL 1 — minor fine-tuning of an existing accent</h2>
+<p>Imagine that the app's French accent turns "sz" into "sh", but<br>
+you feel that a Frenchman would more likely say "sch" or "ch". No problem at all.</p>
 <ol>
-<li>Launch the application and go to the Rule Manager (Ctrl+4 key or the<br>
-   fourth button on the bar).</li>
+<li>Launch the application and go to the Rule Manager (Ctrl+4 key<br>
+   or the fourth button on the toolbar).</li>
 <li>In the file tree on the left, expand "pl" → "akcenty" and click<br>
    "francuski.yaml".</li>
-<li>Click the "Open in text editor" button. The file will open in Windows<br>
-   Notepad (or your default text editor).</li>
-<li>Scroll down to the "zamiany:" section. Find the line with the pattern<br>
-   "sz" and change the "zamiana" value to what suits you.</li>
+<li>Click the "📝  Open in text editor" button. The file will open in<br>
+   Windows Notepad (or your default text editor).</li>
+<li>Scroll down to the "zamiany:" section. Find the line with the pattern "sz" and<br>
+   change the "zamiana" value to whatever suits you.</li>
 <li>Save the file (Ctrl+S), close the editor.</li>
-<li>Return to the Rule Manager and click "Refresh tree", then close and<br>
-   restart the application. Your change is already working.</li>
+<li>Go back to the Rule Manager and click "🔄  Refresh tree". The rules<br>
+   will reload — your change is already active, with no need to restart the application.<br>
+   If the file has a syntax error, the Manager will immediately show a report with the line number.</li>
 </ol>
 <h2>LEVEL 2 — adding a new accent by duplication</h2>
-<p>Want to add a Swedish or Danish accent? Start with the most similar<br>
+<p>Want to add a Swedish or Danish accent? Start from the most similar<br>
 existing one.</p>
 <ol>
-<li>In the Rule Manager, select e.g., "finski.yaml" (Finnish is<br>
-   phonetically close to Swedish) and click "Duplicate selected file".</li>
-<li>The manager will ask for a new name — enter e.g., "szwedzki" (lowercase,<br>
-   no spaces, no Polish characters).</li>
+<li>In the Rule Manager, select e.g. "finski.yaml" (Finnish is<br>
+   phonetically close to Swedish) and click "📋  Duplicate selected file".</li>
+<li>The Manager will ask for a new name — type e.g. "szwedzki" (lowercase,<br>
+   no spaces, no Polish diacritics).</li>
 <li>The new file will open in the editor. Change the fields:<ul>
-<li>"label" — what you'll see in the application menu, e.g.,<br>
+<li>"etykieta" — what you'll see in the app menu, e.g.<br>
     "Swedish (Alva / Oskar — OneCore/Vocalizer)"</li>
-<li>"description" — a short description for yourself for the future</li>
-<li>"iso" — two-letter language code, for Swedish "sv"</li>
+<li>"opis" — a short description for your own future reference</li>
+<li>"iso" — the two-letter language code, for Swedish "sv"</li>
 </ul>
 </li>
-<li>Tune the "zamiany" list for Swedish phonetics (e.g., add "å → o",<br>
-   "ö → ö", remove or change those specific to Finnish).</li>
-<li>Save and restart the application. The new Swedish will appear<br>
-   in the Polyglot accent menu (and if you add to the World Book<br>
-   characters the tag "[Marek] - has a Swedish accent", the Director<br>
-   will also recognize it automatically and apply it to her dialogues).</li>
+<li>Adjust the "zamiany" (replacements) list to Swedish phonetics (e.g. add<br>
+   "å → o", "ö → ö", remove or change the ones specific to Finnish).</li>
+<li>Save the file, then in the Rule Manager click "🔄  Refresh tree"<br>
+   — without closing the application. The new Swedish option will appear in<br>
+   the Polyglot's accent menu (and if you add the tag<br>
+   "[Marek] - has a Swedish accent" to a<br>
+   character in the World Book, the Director will also recognize it<br>
+   automatically and apply it to her dialogues).</li>
 </ol>
 <h2>LEVEL 3 — creating something completely new</h2>
 <p>Want school slang? Ancient knights' language? Gibberish? Parent cipher<br>

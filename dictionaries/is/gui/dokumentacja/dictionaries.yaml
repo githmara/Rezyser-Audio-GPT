@@ -155,31 +155,41 @@ tresc:
     ## Hvernig á að byrja að leika sér — þrjú erfiðleikastig
     -------------------------------------------
   poziom_1_dostroj: |
-    ## STIG 1 — smávægileg stilling á núverandi hreim
+    ## STIG 1 — smávægileg fínstilling á fyrirliggjandi hreim
 
-    Ímyndaðu þér að franski hreimurinn í forritinu breyti "sz" í "sh", en þú telur að Frakki myndi frekar segja "sch" eða "ch". Engin vandamál.
+    Ímyndaðu þér að franski hreimurinn í forritinu breyti „sz" í „sh", en
+    þér finnst að Frakki myndi frekar segja „sch" eða „ch". Ekkert mál.
 
-    1. Ræstu forritið og farðu í Reglustjóra (Ctrl+4 eða fjórði hnappurinn á stikunni).
-    2. Í skráatrénu til vinstri, stækkaðu "pl" → "akcenty" og smelltu á "francuski.yaml".
-    3. Smelltu á "Opna í textaritli". Skráin opnast í Notepad Windows (eða þínum sjálfgefna textaritli).
-    4. Skrunaðu niður í "zamiany:" kaflann. Finndu línuna með mynstrinu "sz" og breyttu "zamiana" gildinu í það sem þér hentar.
+    1. Ræstu forritið og farðu í Reglustjórann (lykilborðssamsetning Ctrl+4 eða
+       fjórði hnappurinn á tækjastikunni).
+    2. Í skráartrénu vinstra megin, opnaðu "pl" → "akcenty" og smelltu á
+       "francuski.yaml".
+    3. Smelltu á hnappinn "{manager.btn_otworz_label}". Skráin opnast í
+       Windows-glósubók (eða sjálfgefna textaritlinum þínum).
+    4. Skrunaðu niður að hlutanum "zamiany:". Finndu línuna með mynstrinu "sz" og
+       breyttu gildinu "zamiana" í það sem þér hentar.
     5. Vistaðu skrána (Ctrl+S), lokaðu ritlinum.
-    6. Farðu aftur í Reglustjóra og smelltu á "Endurnýja tré", lokaðu síðan og ræstu forritið aftur. Breytingin þín er nú virk.
+    6. Farðu aftur í Reglustjórann og smelltu á "{manager.btn_odswiez_label}". Reglurnar
+       munu endurhlaðast — breytingin þín virkar strax, án þess að loka forritinu.
+       Ef skráin inniheldur setningafræðivillu mun Reglustjórinn samstundis sýna skýrslu með línunúmeri.
   poziom_2_duplikacja: |
-    ## POFESSTIG 2 — bæta við nýjum hreim með því að afrita
+    ## STIG 2 — bæta við nýjum hreim með afritun
 
-    Viltu bæta við sænskum eða dönskum hreim? Byrjaðu á því að velja þann sem er líkastur þeim sem er til staðar.
+    Viltu bæta við sænskum eða dönskum hreim? Byrjaðu á þeim núverandi hreim sem er líkastur.
 
-    1. Í Reglustjóra, veldu t.d. "finski.yaml" (finnska er hljóðfræðilega nálægt sænsku) og smelltu á "Afrita valda skrá".
-    2. Stjórinn mun spyrja um nýtt nafn — sláðu inn t.d. "svenska" (með litlum stöfum, án bils, án séríslenskra stafa).
-    3. Nýja skráin opnast í ritli. Breyttu reitunum:
-          - "merki" — það sem þú sérð í forritavalmyndinni, t.d.
+    1. Í Reglustjóranum skaltu velja t.d. "finski.yaml" (finnska er hljóðfræðilega náskyld sænsku) og smella á "{manager.btn_duplikuj_label}".
+    2. Stjórnandinn mun spyrja um nýtt heiti — sláðu inn t.d. "szwedzki" (með litlum stöfum, án bila, án pólskra sértákna).
+    3. Nýja skráin opnast í ritlinum. Breyttu eftirfarandi reitum:
+          - "etykieta" (merking) — það sem þú munt sjá í valmynd forritsins, t.d.
             "Sænska (Alva / Oskar — OneCore/Vocalizer)"
-          - "lýsing" — stutt lýsing fyrir sjálfan þig til framtíðar
+          - "opis" (lýsing) — stutt lýsing fyrir sjálfan þig til framtíðar
           - "iso" — tveggja stafa tungumálakóði, fyrir sænsku "sv"
-    4. Aðlagaðu listann "zamiany" að sænskri hljóðfræði (t.d. bættu við "å → o",
-       "ö → ö", fjarlægðu eða breyttu þeim sem eru sértæk fyrir finnsku).
-    5. Vistaðu og endurræstu forritið. Nýja sænska mun birtast í hreimavalmynd Tungumálamanns (og ef þú bætir við í Heimsbók persónu merkimiðanum "[Marek] - hefur sænskan hreim", þá mun Leikstjórinn einnig þekkja það sjálfkrafa og nota það í samræðum hennar).
+    4. Stilltu listann "zamiany" (skiptingar) að sænskri hljóðfræði (t.d. bættu við "å → o", "ö → ö", fjarlægðu eða breyttu þeim atriðum sem eru sértæk fyrir finnsku).
+    5. Vistaðu skrána og smelltu á "{manager.btn_odswiez_label}" í Reglustjóranum
+       — án þess að loka forritinu. Nýja sænskan mun birtast í
+       hreimvalmynd Fjöltyngisins (og ef þú bætir við tagginu
+       "[Marek] - hefur sænskan hreim" í Heimsbók persónunnar, mun Leikstjórinn
+       einnig þekkja það sjálfkrafa og beita því á samtöl hennar).
   poziom_3_cos_nowego: |
     ## POFI 3 — að skapa eitthvað alveg nýtt
 

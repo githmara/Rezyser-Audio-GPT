@@ -936,10 +936,11 @@ manager:
   btn_usun_tooltip: "Eyðir valinni YAML skrá af diski (með staðfestingu). Aðgerð er óafturkræf – hugsaðu þig tvisvar um."
   btn_odswiez_label: "🔄  &Endurnýja tré"
   btn_odswiez_name: "Hnappur Endurnýja skráatré"
-  btn_odswiez_tooltip: "Endurhleður tréð af diski – notaðu ef þú breyttir skrám handvirkt í könnuð eða eftir vistun í textaritli."
+  btn_odswiez_tooltip: "Endurhleður tréð af diski og hleður reglunum inn að nýju – notaðu þetta eftir að hafa vistað skrá í textaritli. Sýnir skýrslu ef vélin þurfti að sleppa einhverri skrá; lagfæringin virkar án þess að loka forritinu."
   info_stopka: |-
-    Eftir að hafa búið til nýja skrá skaltu ræsa forritið aftur –
-    nýju reglurnar greinast sjálfkrafa.
+    Eftir að þú hefur búið til, breytt eða eytt skrá skaltu endurhlaða trénu með
+    hnappinum hér fyrir ofan – reglurnar hlaðast inn á nýtt, án þess að loka forritinu.
+    Nýtt viðmótsmál birtist í valmyndinni ekki fyrr en forritið hefur verið endurræst.
   # Otwarcie w edytorze
   plik_wne_tytul: "Ekki hægt að opna skrá"
   plik_wne_tresc: |-
@@ -1430,3 +1431,22 @@ bot:
     brak_emaila: Ég fann ekkert netfang í innihaldinu — vinsamlegast bættu því við.
     pauza: Uppfærsla á Tiflotecnia Voices patch er í gangi. Ég læt þetta mál vera opið og kem aftur með uppfærðan hlekk þegar ég er búinn — þú þarft ekki að gera neitt.
   sami_comment: "Ciao! 🌞 Sami að sunnan kom auga á tilkynningu þína og þaut af stað með tæknilegan leiðbeini til Miðstöðvarinnar. Hönnuður forritsins tekur á henni innan stundar — og þegar lagfæringin birtist í nýjustu útgáfu, mun ein af norrænu kollegum mínum kíkja við hér: Lumi, Vieno eða Katla. A presto!\n— Sami"
+diag:
+  tytul: Reglur sem var sleppt
+  wstep: "Eftirfarandi regluskrár (eða hluti þeirra) var sleppt af vélinni.\nÞess vegna birtast samsvarandi AI-hamir, eftirvinnslutól eða tilbúin\nupphöf ekki í forritinu."
+  szczegol: '   Tæknilegar upplýsingar: {szczegol}'
+  wpis: 📄 {plik}
+  stopka: "Hvernig á að laga: veldu skrána á listanum í reglustjóranum og opnaðu hana\ní textaritli, lagaðu tilgreinda staðinn og vistaðu. Endurnýjaðu síðan reglutréð\ní reglustjóranum – reglurnar hlaðast inn á ný, án þess að loka forritinu –\nog snúðu aftur í tólið.\nEf þú veist ekki hvað á að laga skaltu opna sömu skrá á öðru tungumáli og bera\nþær saman, eða endurheimta sjálfgefna reglupakkann með því að setja forritið\nupp á nýjan leik (verkefnin þín og leikirnir haldast óbreytt)."
+  brak_zastrzezen: Allar regluskrár voru hlaðnar inn án athugasemda.
+  brak_zastrzezen_tytul: Reglur athugaðar
+  powod:
+    parse: "Ekki tókst að lesa skrána – ógild YAML-málfræði. Skránni var\nsleppt í heild sinni. Tölurnar tvær í nánari upplýsingum sýna hvar villan er:\nlínunúmer og staf-númer í þeirri línu."
+    brak_pol: "Í skránni vantar reit sem vélin þarf til að þekkja regluna (þeir eru\ntaldir upp í nánari upplýsingum). Skránni var sleppt."
+    kategoria: "Reiturinn „kategoria“ hefur gildi sem vélin þekkir ekki – ekki er ljóst hvort\nskráin lýsir AI-ham eða eftirvinnslutóli. Skránni var sleppt."
+    zakres: "Reiturinn „zakres“ hefur gildi sem er ekki á meðal leyfðra gilda, en af því\nfer aðferðin við að vinna úr textanum (kafli fyrir kafla eða allt í einu).\nTólinu var sleppt til að tryggja að það hagi sér eins og þú ætlast til."
+    sufiks: "Reiturinn „sufiks_pliku_wyniku“ inniheldur stafi sem eru ekki leyfðir í\nskráarheiti, svo úttakið hefði hvergi getað vistast. Tólinu var sleppt."
+    pole: "Einhver reitur hefur gildi af rangri gerð – oftast texta þar sem vélin\nvæntir tölu, eða lista þar sem á að vera safn para. Skránni var sleppt."
+    duplikat: "Önnur skrá í sömu möppu hefur nú þegar sama auðkenni. Vélin\nhlóð þeirri skrá (hún er tilgreind í nánari upplýsingum) en sleppti þessari – tvær reglur\nmeð sama auðkenni yrðu ógreinanlegar."
+    rola: "Reiturinn „rola“ hefur óþekkt gildi og var hunsaður. Skráin sjálf virkar\nen tólið fær ekki hegðunina sem tengist því hlutverki."
+    klucz: "Í skránni vantar lykil sem vélin krefst (hann er tilgreindur\ní nánari upplýsingum). Þessi hluti uppskriftarinnar virkar ekki fyrr en lykillinn\nkemur aftur á sinn stað."
+    wpis: "Ein færsla inni í skránni er ófullkomin (tilgreind í nánari upplýsingum)\nog var henni sleppt. Aðrar færslur í þessari skrá virka eðlilega."

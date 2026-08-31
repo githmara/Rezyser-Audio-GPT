@@ -51,6 +51,68 @@ common:
   informacja_tytul:      "Informacja"
 
 # -----------------------------------------------------------------------------
+# DIAG – raport pominiętych reguł (gui_diagnostyka.py, od v18.24.2)
+# Silnik pomija wadliwy plik YAML, żeby nie wywrócić aplikacji, i zgłasza powód
+# strukturalnie (kod + dane techniczne). Te klucze zamieniają kod powodu na
+# zdanie dla użytkownika. Powody NIE mają placeholderów – dane techniczne idą
+# osobną linią (`szczegol`), więc tłumaczenie nie może zgubić żadnej zmiennej.
+# -----------------------------------------------------------------------------
+diag:
+  tytul:                 "Pominięte reguły"
+  wstep: |-
+    Poniższe pliki reguł (albo ich fragmenty) zostały pominięte przez silnik.
+    Dlatego odpowiadające im tryby AI, narzędzia postprodukcyjne albo gotowe
+    zaczątki nie pojawiają się w aplikacji.
+  szczegol:              "   Szczegóły techniczne: {szczegol}"
+  wpis:                  "📄 {plik}"
+  stopka: |-
+    Jak naprawić: w Managerze Reguł zaznacz plik na liście i otwórz go
+    w edytorze tekstu, popraw wskazane miejsce i zapisz. Potem odśwież drzewo
+    w Managerze Reguł – reguły wczytają się od nowa, bez zamykania aplikacji –
+    i wróć do narzędzia.
+    Jeśli nie wiesz, co poprawić, otwórz ten sam plik w innym języku i porównaj
+    oba, albo przywróć domyślny pakiet reguł, instalując aplikację ponownie
+    (twoje projekty i gry zostaną nietknięte).
+  brak_zastrzezen:       "Wszystkie pliki reguł zostały wczytane bez zastrzeżeń."
+  brak_zastrzezen_tytul: "Reguły sprawdzone"
+  powod:
+    parse: |-
+       Nie udało się odczytać pliku – niepoprawna składnia YAML. Plik został
+       pominięty w całości. Dwie liczby w szczegółach wskazują miejsce błędu:
+       numer linii i numer znaku w tej linii.
+    brak_pol: |-
+       W pliku brakuje pól, bez których silnik nie rozpozna reguły (są wypisane
+       w szczegółach). Plik został pominięty.
+    kategoria: |-
+       Pole „kategoria” ma wartość, której silnik nie zna – nie wiadomo, czy plik
+       opisuje tryb AI, czy narzędzie postprodukcyjne. Plik został pominięty.
+    zakres: |-
+       Pole „zakres” ma wartość spoza dozwolonego zbioru, a od niego zależy
+       sposób przetwarzania tekstu (rozdział po rozdziale czy całość naraz).
+       Narzędzie zostało pominięte, żeby nie zadziałało inaczej, niż zamierzasz.
+    sufiks: |-
+       Pole „sufiks_pliku_wyniku” zawiera znaki niedozwolone w nazwie pliku,
+       więc wynik nie miałby gdzie się zapisać. Narzędzie zostało pominięte.
+    pole: |-
+       Któreś pole ma wartość niewłaściwego rodzaju – najczęściej tekst tam,
+       gdzie silnik oczekuje liczby, albo lista tam, gdzie ma być zestaw par.
+       Plik został pominięty.
+    duplikat: |-
+       Inny plik w tym samym folderze ma już ten sam identyfikator. Silnik
+       wczytał tamten (jest wskazany w szczegółach), a ten pominął – dwie reguły
+       o jednym identyfikatorze byłyby nieodróżnialne.
+    rola: |-
+       Pole „rola” ma nieznaną wartość i zostało zignorowane. Sam plik działa,
+       ale narzędzie nie dostanie zachowania przypisanego do tej roli.
+    klucz: |-
+       W pliku brakuje klucza wymaganego przez silnik (jest wypisany
+       w szczegółach). Ta część przepisu nie zadziała, dopóki klucz nie wróci
+       na miejsce.
+    wpis: |-
+       Jeden wpis wewnątrz pliku jest niekompletny (wskazany w szczegółach)
+       i został pominięty. Pozostałe wpisy z tego pliku działają normalnie.
+
+# -----------------------------------------------------------------------------
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
 main:
@@ -1028,10 +1090,11 @@ manager:
   btn_usun_tooltip:      "Usuwa zaznaczony plik YAML z dysku (z potwierdzeniem). Operacja jest nieodwracalna – pomyśl dwa razy."
   btn_odswiez_label:     "🔄  O&dśwież drzewo"
   btn_odswiez_name:      "Przycisk Odśwież drzewo plików"
-  btn_odswiez_tooltip:   "Przeładowuje drzewo z dysku – użyj, jeśli zmieniłeś pliki ręcznie w Eksploratorze lub po zapisie w edytorze tekstu."
+  btn_odswiez_tooltip:   "Przeładowuje drzewo z dysku i wczytuje reguły od nowa – użyj po zapisie pliku w edytorze tekstu. Pokaże raport, jeśli silnik musiał któryś plik pominąć; poprawka działa bez zamykania aplikacji."
   info_stopka: |-
-    Po utworzeniu nowego pliku uruchom aplikację ponownie –
-    nowe reguły zostaną wykryte automatycznie.
+    Po utworzeniu, poprawieniu lub usunięciu pliku odśwież drzewo przyciskiem
+    powyżej – reguły wczytają się od nowa, bez zamykania aplikacji. Nowy język
+    interfejsu pojawi się w menu dopiero po ponownym uruchomieniu.
   # Otwarcie w edytorze
   plik_wne_tytul:        "Nie można otworzyć pliku"
   plik_wne_tresc: |-
