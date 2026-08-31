@@ -240,8 +240,10 @@ tresc:
        "{manager.btn_odswiez_label}" — senza chiudere l'applicazione. Il nuovo
        svedese apparirà nel
        menu degli accenti di Poliglotta (e se aggiungi al Libro del Mondo il tag
-       "[Marek] - ha l'accento svedese", anche il Regista lo riconoscerà
-       automaticamente e lo applicherà ai suoi dialoghi).
+       "[Marek] - ha l'accento szwedzki", anche il Regista lo riconoscerà
+       automaticamente e lo applicherà ai suoi dialoghi). Il nome del file
+       ("szwedzki") è anche la parola che il Regista cerca nel Libro del Mondo:
+       deve stare accanto alla parola "accento".
   poziom_3_cos_nowego: |
     ## LIVELLO 3 — creare qualcosa di completamente nuovo
 

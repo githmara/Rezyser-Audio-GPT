@@ -23,6 +23,7 @@ import sciezki
 import core_elevenlabs
 import core_poliglota
 import core_updater
+import gui_diagnostyka
 import i18n
 from gui_konwerter import KonwerterPanel
 from gui_manager_regul import ManagerRegulPanel
@@ -1527,8 +1528,13 @@ def main() -> None:
     #   3. i18n.ustaw_jezyk() ładuje `dictionaries/<kod>/gui/ui.yaml` do
     #      cache, dzięki czemu konstruktory paneli mogą wołać `t()` bez
     #      narzutu I/O w wątku GUI.
-    #   4. MainFrame() buduje okno na bazie już-aktywnego języka.
-    # Handler crashy instalujemy NAJPIERW — łapie też wyjątki z kroków 1-4
+    #   4. Alarm o zepsutym `ui.yaml` — PO wczytaniu paczek, PRZED zbudowaniem
+    #      okna (v18.25). Zepsuty plik tłumaczeń nie wywraca aplikacji: `t()`
+    #      spada na angielski, a gdy padł i angielski — na `[sekcja.klucz]`.
+    #      Do v18.24.2 nie mówiło o tym NIC, bo jedyny kanał komunikatów sam
+    #      potrzebuje tego pliku; alarm ma więc tekst twardy PL+EN.
+    #   5. MainFrame() buduje okno na bazie już-aktywnego języka.
+    # Handler crashy instalujemy NAJPIERW — łapie też wyjątki z kroków 1-5
     # (np. uszkodzona paczka dictionaries przy starcie), zanim w ogóle powstanie
     # okno. Dla crashy przed `wx.App` dialog leci natywnym MessageBoxem WinAPI.
     _zainstaluj_obsluge_bledow()
@@ -1536,6 +1542,7 @@ def main() -> None:
     app = wx.App(False)
     kod_jezyka = _wybierz_jezyk_startowy()
     i18n.ustaw_jezyk(kod_jezyka)
+    gui_diagnostyka.pokaz_alarm_ui(None, i18n.awarie_ui())
 
     frame = MainFrame()  # noqa: F841  (frame jest trzymany przez wx.App)
     app.MainLoop()

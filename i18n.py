@@ -39,12 +39,15 @@ Wczytanie przy starcie aplikacji:
 from __future__ import annotations
 
 import os
+import threading
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 import sciezki
+from przepisy_rezysera import opis_bledu_yaml
 
 
 # ---------------------------------------------------------------------------
@@ -84,6 +87,107 @@ _AKTUALNY_JEZYK: str = JEZYK_DOMYSLNY
 
 
 # ---------------------------------------------------------------------------
+# Rejestr awarii pliku tłumaczeń (v18.25)
+# ---------------------------------------------------------------------------
+# `dictionaries/<kod>/gui/ui.yaml` jest EDYTOWALNY przez użytkownika (Manager
+# Reguł otwiera go w systemowym edytorze), więc jego błąd składni to normalna,
+# spodziewana awaria — a do v18.24.2 była CAŁKOWICIE cicha: `_wczytaj_yaml`
+# zwracał `{}`, `t()` spadał na angielski, a przy zepsutym `en` cały interfejs
+# degradował do gołych `[sekcja.klucz]`. Bez ANI JEDNEJ informacji, dlaczego.
+#
+# Ten rejestr jest ODDZIELNY od `przepisy_rezysera._POMINIETE` (reguły silnika,
+# raportowane zdaniami z kluczy `diag.*`) i to nie duplikacja: powód pominięcia
+# REGUŁY można opowiedzieć przez `i18n`, a awarię samego `i18n` — nie. Zdania
+# o niej są twardym tekstem PL+EN w `gui_diagnostyka`, wzorem
+# `main._pokaz_dialog_crash`. Format opisu błędu składni bierzemy z
+# `przepisy_rezysera.opis_bledu_yaml`, żeby „4:1: found unexpected end of
+# stream" wyglądało identycznie w obu kanałach (import jednokierunkowy — tamten
+# moduł pozostaje i18n-free i wx-free).
+POWOD_PARSE  = "parse"    # błąd składni YAML (najczęstsza pomyłka w edytorze)
+POWOD_PUSTY  = "pusty"    # plik jest, ale nie zawiera mapy klucz → wartość
+POWOD_ODCZYT = "odczyt"   # OSError: brak uprawnień, plik zajęty, zły dysk
+
+
+@dataclass(frozen=True)
+class AwariaUI:
+    """Jedna paczka językowa, której pliku tłumaczeń nie da się użyć.
+
+    Args:
+        jezyk:    Kod ISO paczki (``"pl"``) — po nim widać, czy chodzi o język
+                  interfejsu, czy o angielski fallback.
+        sciezka:  Pełna ścieżka pliku — użytkownik ma go otworzyć i poprawić.
+        powod:    Kod ``POWOD_*``.
+        szczegol: Dane techniczne bez słów (pozycja błędu, komunikat parsera).
+                  Celowo NIE tłumaczone — to cytat z biblioteki.
+    """
+
+    jezyk: str
+    sciezka: str
+    powod: str
+    szczegol: str = ""
+
+
+# Lock, bo `t()` wołają też wątki tła (worker Reżysera/Opowieści komponuje
+# komunikaty), a `zaladuj` może wtedy wypełniać rejestr równolegle z GUI.
+_AWARIE: dict[str, AwariaUI] = {}
+_LOCK_AWARII = threading.Lock()
+
+
+def _zglos_awarie(jezyk: str, sciezka: Path, powod: str, szczegol: str) -> None:
+    """Zapisuje awarię pliku tłumaczeń (jedna, najświeższa, na język)."""
+    with _LOCK_AWARII:
+        _AWARIE[jezyk] = AwariaUI(
+            jezyk=jezyk, sciezka=str(sciezka), powod=powod, szczegol=szczegol,
+        )
+
+
+def _odwolaj_awarie(jezyk: str) -> None:
+    """Zapomina awarię tej paczki — plik wczytał się poprawnie (user poprawił)."""
+    with _LOCK_AWARII:
+        _AWARIE.pop(jezyk, None)
+
+
+def awarie_ui() -> tuple[AwariaUI, ...]:
+    """Zwraca zebrane awarie plików tłumaczeń (pusta krotka = czysto).
+
+    Rejestr wypełnia się LENIWIE, przy wczytywaniu paczek: po
+    :func:`ustaw_jezyk` zawiera więc dokładnie to, co aplikacja próbowała
+    wczytać na starcie (język interfejsu + angielski fallback).
+    """
+    with _LOCK_AWARII:
+        return tuple(_AWARIE[kod] for kod in sorted(_AWARIE))
+
+
+def sprawdz_pliki_ui(
+    jezyki: tuple[str, ...] | list[str] | None = None,
+) -> tuple[AwariaUI, ...]:
+    """Czyta wskazane pliki tłumaczeń z dysku od nowa i zwraca wszystkie awarie.
+
+    Świadomie NIE dotyka ``_CACHE``: gdyby kontrola podmieniała wczytane
+    tłumaczenia, zepsucie pliku degradowałoby DZIAŁAJĄCE okno w locie (etykiety
+    już zbudowanych paneli zostają, ale każdy kolejny ``t()`` spadałby na
+    angielski). Naprawa pliku tłumaczeń wymaga restartu aplikacji i komunikat
+    tak właśnie mówi — a ta funkcja tylko STAWIA diagnozę.
+
+    Args:
+        jezyki: Kody do sprawdzenia; ``None`` = aktywny język + angielski
+                fallback, czyli dokładnie te paczki, z których aplikacja bierze
+                napisy.
+
+    Returns:
+        Snapshot rejestru po kontroli (obejmuje też awarie zebrane wcześniej,
+        np. przy ``jezyk_override`` na paczkę innego języka).
+    """
+    if jezyki is None:
+        jezyki = [_AKTUALNY_JEZYK]
+        if _AKTUALNY_JEZYK != JEZYK_FALLBACK:
+            jezyki.append(JEZYK_FALLBACK)
+    for kod in jezyki:
+        _wczytaj_yaml(kod)
+    return awarie_ui()
+
+
+# ---------------------------------------------------------------------------
 # Ładowanie plików YAML
 # ---------------------------------------------------------------------------
 def _sciezka_ui(jezyk: str) -> Path:
@@ -92,23 +196,39 @@ def _sciezka_ui(jezyk: str) -> Path:
 
 
 def _wczytaj_yaml(jezyk: str) -> dict[str, Any]:
-    """Wczytuje surowy plik YAML. Nie rzuca wyjątków – zwraca ``{}`` przy awarii."""
+    """Wczytuje surowy plik YAML. Nie rzuca wyjątków – zwraca ``{}`` przy awarii.
+
+    v18.25: awaria pliku, który ISTNIEJE, ale nie daje się użyć, ląduje
+    w rejestrze :data:`_AWARIE` (patrz sekcja wyżej). BRAKU pliku celowo nie
+    zgłaszamy: dla nieobsługiwanego kodu języka (``jezyk_override`` z przepisu,
+    stub w ``dictionaries/``) to normalny stan, a brak pliku aktywnej paczki
+    odfiltrowuje już ``core_poliglota._jezyk_kompletny`` przed wyborem języka.
+    """
     sciezka = _sciezka_ui(jezyk)
     if not sciezka.is_file():
         return {}
     try:
         with open(sciezka, "r", encoding="utf-8") as fh:
             dane = yaml.safe_load(fh)
-    except (OSError, yaml.YAMLError):
+    except OSError as exc:
+        _zglos_awarie(jezyk, sciezka, POWOD_ODCZYT, str(exc))
         return {}
-    return dane if isinstance(dane, dict) else {}
+    except yaml.YAMLError as exc:
+        _zglos_awarie(jezyk, sciezka, POWOD_PARSE, opis_bledu_yaml(exc))
+        return {}
+    if not isinstance(dane, dict) or not dane:
+        _zglos_awarie(jezyk, sciezka, POWOD_PUSTY, type(dane).__name__)
+        return {}
+    _odwolaj_awarie(jezyk)
+    return dane
 
 
 def zaladuj(jezyk: str) -> dict[str, Any]:
     """Ładuje ``dictionaries/<jezyk>/gui/ui.yaml`` (z cache) i zwraca słownik.
 
     Jeśli plik nie istnieje lub jest pusty, zwraca ``{}`` – wtedy
-    :func:`t` zacznie korzystać z fallbacku na angielski (:data:`JEZYK_FALLBACK`).
+    :func:`t` zacznie korzystać z fallbacku na angielski (:data:`JEZYK_FALLBACK`),
+    a powód (gdy plik jest, lecz jest zepsuty) czeka w :func:`awarie_ui`.
     """
     if jezyk in _CACHE:
         return _CACHE[jezyk]
@@ -235,5 +355,12 @@ def dostepne_jezyki_ui() -> list[str]:
 
 
 def wyczysc_cache() -> None:
-    """Czyści cache – przydatne w testach i przy przeładowaniu tłumaczeń."""
+    """Czyści cache i rejestr awarii – przy przeładowaniu tłumaczeń i w testach.
+
+    Rejestr idzie razem z cache, bo oba opisują ten sam stan („co wiemy
+    o plikach na dysku"): po wyczyszczeniu kolejny ``t()`` czyta plik od nowa,
+    więc stara awaria byłaby nieaktualną diagnozą.
+    """
     _CACHE.clear()
+    with _LOCK_AWARII:
+        _AWARIE.clear()

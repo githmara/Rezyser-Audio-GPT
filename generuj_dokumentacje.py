@@ -349,6 +349,117 @@ def _renderuj_html(tresc_md: str, jezyk: str) -> str:
     )
 
 
+# ---------------------------------------------------------------------------
+# BRAMKA TAGÓW AKCENTU (od v18.25) — przykład, który user WPISUJE, musi działać
+# ---------------------------------------------------------------------------
+# Podręczniki uczą składni tagu Księgi Świata („[Marek] - ma akcent francuski").
+# Zmierzone przy okazji v18.25: przykład był MARTWY we wszystkich dziewięciu
+# paczkach — parser brał słowo z niewłaściwej strony wyzwalacza (pl/es/fr:
+# „ma"/„tiene"/„un"), albo cytat podawał NAZWĘ JĘZYKA w języku paczki
+# (en „swedish", de „schwedischen") zamiast identyfikatora pliku reguł, albo
+# słowo-wyzwalacz stało w formie nieobecnej w `slowo_akcent` (is „hreim").
+# Żadna dotychczasowa bramka tego nie widziała: cytat jest poprawnym językiem
+# docelowym i nie ma w nim ani polskich znaków, ani placeholderów.
+#
+# Ta bramka puszcza każdy cytat z docsów przez PRAWDZIWY parser Księgi Świata
+# i wymaga, żeby wyłuskana nazwa akcentu była identyfikatorem. Import silnika
+# jest lazy z łagodną degradacją (jak leak gate) — kontrybutor bez pełnego
+# dev-env dostaje notę, nie fałszywy błąd.
+
+# Cytaty w szablonach: "…", „…", « … ». Wnętrze bez znaków cudzysłowu, więc
+# dopasowanie kończy się na pierwszym zamknięciu.
+_RE_CYTAT = re.compile(r'["„«]\s*([^"„«»\n]{5,200}?)\s*["»]')
+
+# Identyfikatory akcentów, których podręcznik uczy dopiero UTWORZYĆ (POZIOM 2 —
+# duplikacja `finski.yaml`), więc pliku o tej nazwie nie ma jeszcze na dysku.
+# Bramka podstawia w ich miejsce akcent realnie obecny w tej paczce i puszcza
+# cytat przez silnik — sprawdza więc SKŁADNIĘ zapisu (czy słowo stoi po dobrej
+# stronie wyzwalacza), nie istnienie pliku, którego user dopiero utworzy.
+_ID_AKCENTOW_Z_INSTRUKCJI = ("szwedzki", "dunski")
+
+
+def _bramka_tagow_akcentu() -> dict[str, list[str]]:
+    """Sprawdza w szablonach docs każdy cytat wyglądający jak tag akcentu.
+
+    Kwalifikacja cytatu: zawiera nawias kwadratowy (tag mówcy) ORAZ
+    słowo-wyzwalacz z ``podstawy.yaml::slowo_akcent`` — z DOWOLNEJ paczki, nie
+    tylko tej sprawdzanej. Ta asymetria jest celowa: cytat, który został po
+    polsku („[Joana] akcent fiński" w paczce islandzkiej i rosyjskiej), nie
+    zawiera ani jednego wyzwalacza swojej paczki, więc kwalifikacja „tylko
+    własne słowa" przepuściłaby go w milczeniu — a to najczęstszy wariant tej
+    pomyłki. Parsujemy natomiast ZAWSZE w języku paczki, bo tak zrobi aplikacja.
+
+    Przykład jest zdrowy, gdy parser wyłuska nazwę i jest ona identyfikatorem
+    akcentu tej paczki (``czy_znany_akcent``). Identyfikatory z instrukcji
+    tworzenia nowego akcentu podmieniamy przed parsowaniem na akcent realnie
+    obecny w paczce — inaczej bramka zgłaszałaby własny podręcznik.
+
+    Returns:
+        ``{ścieżka_relatywna: [opisy znalezisk]}`` — pusty dict = czysto.
+        Pusty dict zwracamy też przy braku silnika (degradacja) — powód
+        raportuje ``waliduj`` osobno.
+    """
+    try:
+        import core_poliglota as cp                              # noqa: PLC0415
+        import core_rezyser as cr                                # noqa: PLC0415
+    except ImportError:
+        return {}
+
+    kody = sorted(
+        f.parent.parent.name
+        for f in DICT_DIR.glob(f"*/{FOLDER_GUI}/{FOLDER_DOKUMENTACJA}")
+    )
+    slowa_per_kod = {k: [w.lower() for w in cp.slowa_akcentu(k)] for k in kody}
+    wszystkie_slowa = {w for lista in slowa_per_kod.values() for w in lista}
+
+    def _zastepnik(kod: str) -> str | None:
+        """Pierwszy akcent realnie obecny w tej paczce (`finski`, `polski`…)."""
+        for cfg in cp.lista_wariantow(cp.TRYB_REZYSER, kod):
+            if cfg.get("kategoria") == "akcent" and cfg.get("id"):
+                return str(cfg["id"])
+        return None
+
+    znaleziska: dict[str, list[str]] = {}
+    for kod in kody:
+        folder = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA
+        slowa = slowa_per_kod[kod]
+        zastepnik = _zastepnik(kod)
+        for szablon in sorted(folder.glob("*.yaml")):
+            powody: list[str] = []
+            tresc = szablon.read_text(encoding="utf-8")
+            for cytat in _RE_CYTAT.findall(tresc):
+                if "[" not in cytat or "]" not in cytat:
+                    continue
+                if not any(w in cytat.lower() for w in wszystkie_slowa):
+                    continue
+                probka = cytat
+                if zastepnik:
+                    for id_instrukcji in _ID_AKCENTOW_Z_INSTRUKCJI:
+                        probka = re.sub(id_instrukcji, zastepnik, probka,
+                                        flags=re.IGNORECASE)
+                nazwy = [
+                    dane["nazwa"]
+                    for dane in cr.zbuduj_mape_akcentow(probka, kod).values()
+                    if dane["nazwa"]
+                ]
+                if not nazwy:
+                    powody.append(
+                        f"{cytat!r}: the parser extracts NO accent name "
+                        f"(trigger words for `{kod}`: {slowa})"
+                    )
+                    continue
+                zle = [n for n in nazwy if not cr.czy_znany_akcent(n, kod)]
+                if zle:
+                    powody.append(
+                        f"{cytat!r}: extracted {zle} — not an accent id of the "
+                        f"`{kod}` pack (the word next to the trigger must be a "
+                        f"RULE FILE name from `dictionaries/{kod}/akcenty/`)"
+                    )
+            if powody:
+                znaleziska[str(szablon.relative_to(ROOT))] = powody
+    return znaleziska
+
+
 def _obce_tagi_w_html(tekst_html: str) -> list[str]:
     """Zwraca posortowaną listę tagów spoza `_TAGI_DOZWOLONE` (bramka RAW-HTML)."""
     znalezione = {m.group(1).lower() for m in _TAG_REGEX.finditer(tekst_html)}
@@ -791,6 +902,12 @@ def waliduj() -> int:
     niekanonicznym nagłówkiem nie został wygenerowany (guard) — tu raportujemy
     go głośno i również zwracamy exit 1.
 
+    Od v18.25 dochodzi BRAMKA TAGÓW AKCENTU: każdy cytat z docsów wyglądający
+    jak tag Księgi Świata przechodzi przez prawdziwy parser akcentów
+    (`_bramka_tagow_akcentu`) — przykład, który użytkownik ma WPISAĆ, nie może
+    być martwy. Ta klasa błędu jest niewidoczna dla bramki leaków, bo cytat
+    jest poprawnym językiem docelowym.
+
     Od v18.5.3 dochodzi BRAMKA LEAKÓW (`audyt_leakow.bramka_docs`): skan szablonów
     docs pod kątem nieprzetłumaczonego polskiego tekstu względem zaakceptowanego
     baseline'u. Nowy/przesunięty leak (spoza baseline) → exit 1. Import jest LAZY
@@ -864,6 +981,26 @@ def waliduj() -> int:
               "(a code span renders it literally).")
     print("=================================================")
 
+    # Bramka tagów akcentu (od v18.25) — przykład, który użytkownik ma WPISAĆ
+    # do Księgi Świata, musi realnie działać w tej paczce.
+    tagi_wedlug_pliku = _bramka_tagow_akcentu()
+    print("\n========== ACCENT-TAG GATE (World Book examples) ==========")
+    if not tagi_wedlug_pliku:
+        print("✅ Every accent-tag example parses to a real accent id "
+              "(or the engine is unavailable — see the leak gate note below).")
+    else:
+        print(f"❌ Found dead accent-tag example(s) in "
+              f"{len(tagi_wedlug_pliku)} template(s):")
+        for nazwa, powody in sorted(tagi_wedlug_pliku.items()):
+            print(f"  • {nazwa}")
+            for powod in powody:
+                print(f"      - {powod}")
+        print("Fix: put the accent's FILE NAME (an identifier, e.g. `francuski`) "
+              "right next to a trigger word from that pack's "
+              "`podstawy.yaml::slowo_akcent`. Add the missing inflected form of "
+              "the trigger word to `slowo_akcent` if your language needs it.")
+    print("==========================================================")
+
     # Bramka leaków (od v18.5.3) — lazy import + łagodna degradacja, jak guard
     # nagłówka. Skanuje szablony docs vs baseline; nowy/przesunięty PL-leak = exit 1.
     leaki_blokujace = False
@@ -894,7 +1031,8 @@ def waliduj() -> int:
     print("==================================================")
 
     return 1 if (brakujace_wedlug_pliku or drafty_wedlug_pliku
-                 or leaki_blokujace or obce_tagi_wedlug_pliku) else 0
+                 or leaki_blokujace or obce_tagi_wedlug_pliku
+                 or tagi_wedlug_pliku) else 0
 
 
 # ---------------------------------------------------------------------------

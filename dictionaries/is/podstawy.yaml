@@ -137,8 +137,14 @@ alfabet: "AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ"
 # core_rezyser.zastosuj_akcenty_uniwersalne smíðar regex úr þessum lista
 # sem grípur orðasambönd "<orð> X" eða "X <orð>" (t.d. „íslenskur hreimur"
 # eða „hreimur íslenskur"). Öll atriði í lágstöfum — borið saman við
-# lágstafaða lýsingu.
+# lágstafaða lýsingu. Beygingarform eru NAUÐSYNLEG hér: eðlilegasta
+# íslenska setningin í Heimsbókinni er „hefur franskan hreim" (þolfall)
+# eða „með frönskum hreimi" (þágufall), og þáttarinn ber orðin saman
+# bókstaflega — nefnifallið „hreimur" eitt hefði aldrei fundist.
 # -----------------------------------------------------------------------------
 slowo_akcent:
   - "hreimur"
+  - "hreim"
+  - "hreimi"
   - "áhersla"
+  - "áherslu"

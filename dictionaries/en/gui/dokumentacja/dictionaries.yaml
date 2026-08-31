@@ -276,9 +276,11 @@ tresc:
     5. Save the file, then in the Rule Manager click "{manager.btn_odswiez_label}"
        — without closing the application. The new Swedish option will appear in
        the Polyglot's accent menu (and if you add the tag
-       "[Marek] - has a Swedish accent" to a
+       "[Marek] - has a szwedzki accent" to a
        character in the World Book, the Director will also recognize it
-       automatically and apply it to her dialogues).
+       automatically and apply it to her dialogues). The file name ("szwedzki")
+       doubles as the word the Director looks for in the World Book — it has to
+       stand next to the word "accent".
   poziom_3_cos_nowego: |
     ## LEVEL 3 — creating something completely new
 

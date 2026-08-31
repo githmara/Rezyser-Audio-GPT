@@ -282,8 +282,10 @@ tresc:
     5. Speichern Sie die Datei und klicken Sie im Regel-Manager auf "{manager.btn_odswiez_label}"
        — ohne die Anwendung zu schließen. Das neue Schwedisch erscheint im
        Akzentmenü des Polyglotten (und wenn Sie im Weltenbuch der Figur den
-       Tag "[Marek] - hat einen schwedischen Akzent" hinzufügen, erkennt der Regisseur
-       dies ebenfalls automatisch und wendet ihn auf ihre Dialoge an).
+       Tag "[Marek] - hat einen szwedzki Akzent" hinzufügen, erkennt der Regisseur
+       dies ebenfalls automatisch und wendet ihn auf ihre Dialoge an). Der
+       Dateiname ("szwedzki") ist gleichzeitig das Wort, das der Regisseur im
+       Weltenbuch sucht — es muss neben dem Wort "Akzent" stehen.
   poziom_3_cos_nowego: |
     ## STUFE 3 — Etwas völlig Neues erschaffen
 

@@ -247,8 +247,11 @@ tresc:
     5. Enregistrez le fichier, puis dans le Gestionnaire de Règles cliquez sur « {manager.btn_odswiez_label} »
        — sans fermer l'application. Le nouvel accent suédois apparaîtra dans
        le menu des accents du Polyglotte (et si vous ajoutez au Livre du Monde du personnage
-       le tag « [Marek] - a un accent suédois », le Réalisateur le
+       le tag « [Marek] - a un accent szwedzki », le Réalisateur le
        reconnaîtra également automatiquement et l'appliquera à ses dialogues).
+       Le nom du fichier (« szwedzki ») est aussi le mot que le Réalisateur
+       cherche dans le Livre du Monde — il doit se trouver à côté du mot
+       « accent ».
   poziom_3_cos_nowego: |
     ## NIVEAU 3 — créer quelque chose de complètement nouveau
 

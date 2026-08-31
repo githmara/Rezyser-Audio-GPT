@@ -274,7 +274,9 @@ tresc:
        — bez zamykania aplikacji. Nowy szwedzki pojawi się w
        menu akcentów Poligloty (a jeśli dodasz do Księgi Świata postaci
        tag "[Marek] - ma akcent szwedzki", to Reżyser też go rozpozna
-       automatycznie i zastosuje do jej dialogów).
+       automatycznie i zastosuje do jej dialogów). Nazwa pliku ("szwedzki")
+       jest zarazem słowem, którego Reżyser szuka w Księdze Świata — musi
+       stać obok słowa "akcent".
   poziom_3_cos_nowego: |
     ## POZIOM 3 — stworzenie czegoś zupełnie nowego
 

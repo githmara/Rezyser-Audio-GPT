@@ -207,8 +207,10 @@ tresc:
     5. Guarda el archivo y, en el Gestor de Reglas, haz clic en "{manager.btn_odswiez_label}"
        — sin cerrar la aplicación. El nuevo sueco aparecerá en
        el menú de acentos del Políglota (y si añades al Libro del Mundo del personaje
-       la etiqueta "[Marek] - tiene acento sueco", el Director también lo reconocerá
-       automáticamente y lo aplicará a sus diálogos).
+       la etiqueta "[Marek] - tiene acento szwedzki", el Director también lo reconocerá
+       automáticamente y lo aplicará a sus diálogos). El nombre del archivo
+       ("szwedzki") es a la vez la palabra que el Director busca en el Libro del
+       Mundo: tiene que estar junto a la palabra "acento".
   poziom_3_cos_nowego: |
     ## NIVEL 3 — crear algo completamente nuevo
 

@@ -33,6 +33,7 @@ import wx
 
 import core_poliglota
 import gui_diagnostyka as gd
+import i18n
 import manager_regul_szablony as mrs
 import sciezki
 from i18n import aktualny_jezyk, t
@@ -491,8 +492,18 @@ class ManagerRegulPanel(wx.Panel):
            Reżysera / Opowieści: panel powstaje na nowo i czyta świeżą treść;
         3. raport pominiętych reguł — z odpowiedzią także wtedy, gdy wszystko
            jest w porządku (użytkownik nacisnął przycisk, żeby się dowiedzieć).
+
+        v18.25 dokłada czwartą rzecz PRZED raportem: kontrolę pliku tłumaczeń
+        (``gui/ui.yaml``) tej paczki. Jest z tego samego drzewa i edytuje się go
+        tym samym przyciskiem „Edytuj", ale nie jest regułą silnika — jego błąd
+        odbiera aplikacji zdolność mówienia, więc dostaje własny, twardy alarm
+        PL+EN. Cache tłumaczeń zostaje NIETKNIĘTY (patrz
+        ``i18n.sprawdz_pliki_ui``): naprawa `ui.yaml` wymaga restartu i tak
+        właśnie mówi alarm — czyszczenie cache tylko zdegradowałoby napisy
+        w otwartym oknie.
         """
         self._zaladuj_drzewo()
+        gd.pokaz_alarm_ui(self, i18n.sprawdz_pliki_ui())
         gd.pokaz_raport_lub_potwierdzenie(self, gd.przeskanuj_reguly())
 
     # ------------------------------------------------------------------

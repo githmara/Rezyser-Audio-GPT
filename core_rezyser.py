@@ -523,6 +523,19 @@ def _usun_polskie(nazwa: str) -> str:
     return nazwa.strip()
 
 
+def czy_znany_akcent(nazwa: str, jezyk_projektu: str) -> bool:
+    """Czy ``nazwa`` wskazuje akcent, który ta paczka naprawdę potrafi nałożyć?
+
+    Kryterium jest to samo, którym posługuje się dispatch fonetyczny (v17.5):
+    istnieje ``dictionaries/<jezyk>/akcenty/<nazwa>.yaml`` o ``kategoria:
+    akcent``. Nazwy tych plików są IDENTYFIKATORAMI i we wszystkich paczkach
+    zostają polskie (``finski``, ``rosyjski``), więc to samo `id` użytkownik
+    wpisuje w Księdze Świata niezależnie od języka projektu.
+    """
+    cfg = wariant_po_id(TRYB_REZYSER, jezyk_projektu, _usun_polskie(nazwa))
+    return bool(cfg) and cfg.get("kategoria") == "akcent"
+
+
 def zbuduj_mape_akcentow(lore_text: str, jezyk_projektu: str = "pl") -> dict[str, dict]:
     """Parsuje Księgę Świata → ``{nazwa_postaci_lower: {"nazwa", "reguly"}}``.
 
@@ -534,9 +547,28 @@ def zbuduj_mape_akcentow(lore_text: str, jezyk_projektu: str = "pl") -> dict[str
     również generator wersji dla czytników ekranu (``core_screen_reader``) —
     potrzebuje wiedzieć, którzy mówcy mają akcent (i jaki), by owinąć ich kwestie
     w ``<span lang="…">``. Patrz [[reguly_architektury]].
+
+    v18.25 — SŁOWO PO WYZWALACZU LICZY SIĘ BARDZIEJ NIŻ SŁOWO PRZED NIM.
+    Do v18.24.2 brany był pierwszy match jednego, alternatywnego wzorca, więc
+    wygrywało najlewsze dopasowanie: „ma akcent francuski" dawało nazwę ``ma``
+    i akcent NIE był nakładany. Zmierzone na kanonicznym przykładzie
+    z podręcznika (``[Speaker 1: Marek] - ma akcent francuski``): tekst wracał
+    znak w znak nietknięty — a to najbardziej naturalny zapis po polsku,
+    hiszpańsku i francusku. Teraz sprawdzamy WSZYSTKICH kandydatów z obu stron
+    słowa-wyzwalacza i bierzemy pierwszego, który jest znanym akcentem tej
+    paczki (:func:`czy_znany_akcent`). Gdy żaden nie jest znany, wracamy do
+    dawnego wyniku (pierwsze dopasowanie): nierozpoznana nazwa nadal ma prawo
+    trafić do mapy, bo obok niej mogą stać reguły ad-hoc.
     """
     slowa = slowa_akcentu(jezyk_projektu)
     alt_slow = "|".join(re.escape(s) for s in slowa)
+    # Trzy wzorce z jednej listy słów: dwa zbierają kandydatów („po wyzwalaczu"
+    # i „przed wyzwalaczem"), złożony (zastany) rozstrzyga fallback. Osobne
+    # wzorce są konieczne, bo alternatywa KONSUMUJE słowo-wyzwalacz: w „ma
+    # akcent francuski" match „ma akcent" zjada „akcent", więc kolejne
+    # `finditer` nie zobaczyłoby już „akcent francuski".
+    wzorzec_po = re.compile(rf"(?:{alt_slow})\s+(\w+)", re.UNICODE)
+    wzorzec_przed = re.compile(rf"(\w+)\s+(?:{alt_slow})", re.UNICODE)
     wzorzec_akcentu = re.compile(
         rf"(?:{alt_slow})\s+(\w+)|(\w+)\s+(?:{alt_slow})",
         re.UNICODE,
@@ -546,17 +578,22 @@ def zbuduj_mape_akcentow(lore_text: str, jezyk_projektu: str = "pl") -> dict[str
         re.IGNORECASE | re.UNICODE,
     )
 
+    def _nazwa_akcentu(opis: str) -> str | None:
+        """Kandydaci z obu stron wyzwalacza → pierwszy ZNANY, inaczej zastany."""
+        for kandydat in wzorzec_po.findall(opis) + wzorzec_przed.findall(opis):
+            if czy_znany_akcent(kandydat, jezyk_projektu):
+                return kandydat
+        dopasowanie = wzorzec_akcentu.search(opis)
+        if not dopasowanie:
+            return None
+        return dopasowanie.group(1) or dopasowanie.group(2)
+
     akcenty_map: dict[str, dict] = {}
     postacie_bloki = re.split(r"\[([^:\]\-]+).*?\]", lore_text)
     for i in range(1, len(postacie_bloki), 2):
         imie = postacie_bloki[i].strip().lower()
         opis = postacie_bloki[i + 1].lower() if i + 1 < len(postacie_bloki) else ""
-        akcent_match = wzorzec_akcentu.search(opis)
-        nazwa_akcentu = (
-            (akcent_match.group(1) or akcent_match.group(2))
-            if akcent_match
-            else None
-        )
+        nazwa_akcentu = _nazwa_akcentu(opis)
         reguly_lore = wzorzec_regul_lore.findall(opis)
         if nazwa_akcentu or reguly_lore:
             akcenty_map[imie] = {"nazwa": nazwa_akcentu, "reguly": reguly_lore}
@@ -636,8 +673,9 @@ def zastosuj_akcenty_uniwersalne(
                         # projektu. Brak pliku → spadamy do reguł ad-hoc niżej,
                         # zamiast — jak dawny statyczny whitelist — oznaczać
                         # fragment jako zmodyfikowany mimo braku reguł fonetycznych.
-                        cfg_akc = wariant_po_id(TRYB_REZYSER, jezyk_projektu, znorm)
-                        if cfg_akc and cfg_akc.get("kategoria") == "akcent":
+                        # v18.25: to samo kryterium wybiera nazwę w parserze
+                        # Księgi (`czy_znany_akcent`) — jeden warunek, nie dwa.
+                        if czy_znany_akcent(znorm, jezyk_projektu):
                             dialog = zastosuj_reguly_fonetyczne(
                                 dialog, znorm, jezyk_projektu
                             )

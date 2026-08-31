@@ -299,8 +299,10 @@ tresc:
     5. Tallenna tiedosto ja napsauta Sääntömanagerissa "{manager.btn_odswiez_label}"
        — sovellusta sulkematta. Uusi ruotsalainen aksentti ilmestyy
        Polyglotin aksenttivalikkoon (ja jos lisäät Maailmankirjan hahmolle
-       tagin "[Marek] - hänellä on ruotsalainen aksentti", myös Ohjaaja tunnistaa sen
-       automaattisesti ja soveltaa sitä hänen dialogeihinsa).
+       tagin "[Marek] - hänellä on szwedzki aksentti", myös Ohjaaja tunnistaa sen
+       automaattisesti ja soveltaa sitä hänen dialogeihinsa). Tiedostonimi
+       ("szwedzki") on samalla se sana, jota Ohjaaja etsii Maailmankirjasta —
+       sen on oltava sanan "aksentti" vieressä.
   poziom_3_cos_nowego: |
     ## TASO 3 — täysin uuden luominen
 

@@ -188,8 +188,11 @@ tresc:
     5. Vistaðu skrána og smelltu á "{manager.btn_odswiez_label}" í Reglustjóranum
        — án þess að loka forritinu. Nýja sænskan mun birtast í
        hreimvalmynd Fjöltyngisins (og ef þú bætir við tagginu
-       "[Marek] - hefur sænskan hreim" í Heimsbók persónunnar, mun Leikstjórinn
-       einnig þekkja það sjálfkrafa og beita því á samtöl hennar).
+       "[Marek] - hefur szwedzki hreim" í Heimsbók persónunnar, mun Leikstjórinn
+       einnig þekkja það sjálfkrafa og beita því á samtöl hennar). Skráarheitið
+       ("szwedzki") er jafnframt orðið sem Leikstjórinn leitar að í
+       Heimsbókinni — það verður að standa við hlið orðsins "hreimur"
+       (í hvaða beygingarformi sem er).
   poziom_3_cos_nowego: |
     ## POFI 3 — að skapa eitthvað alveg nýtt
 

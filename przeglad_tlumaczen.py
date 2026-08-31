@@ -190,6 +190,48 @@ from PL/EN. Canon (de / es / fr / it / ru):
   `fullbúin` = feature-complete) says something slightly different from
   "publicly released"; it stays acceptable only because the product ships no
   visible beta channel to contrast with.
+
+## When the passage is IMPERATIVE (numbered steps, "click X, save, go back")
+
+Instructions behave differently from descriptive prose: the model starts
+reading them as addressed to itself. Every item below was observed in a real
+batch, and none of them is visible to the leak gate — the damage is written in
+correct target language.
+
+- SELF-DIRECTED INSTRUCTION PASTED INTO THE OUTPUT. The tool's own system
+  prompt can come back translated and embedded in the section — one batch put
+  a whole Italian block about the `⟦i⟧` markers plus "[FINE ISTRUZIONE — LA
+  TRADUZIONE INIZIA QUI SOTTO]" into `it/dictionaries.yaml`, twice, and again
+  on a retry. Grep EVERY pack (not only the ones a gate flagged) for
+  `FINE ISTRUZIONE|END OF INSTRUCTION|marker|marcatori`. If a retry repeats it,
+  finish that section by hand from the previous revision.
+- REFUSAL-SHAPED PREAMBLE. The section may open with an apology for not being
+  able to "execute" the instructions inside the text (`is`: "Fyrirgefðu, en ég
+  get ekki »framkvæmt« leiðbeiningar…") and then translate perfectly. Delete
+  the preamble, keep the translation.
+- NEVER QUOTE A GUI LABEL LITERALLY. "Keep 1:1" outranks translating, so a
+  Polish label quoted in the source walks into every pack untouched (observed:
+  `kliknij "Odśwież drzewo"` kept verbatim in fi, it and ru). Write the
+  placeholder instead — `{manager.btn_odswiez_label}` — and the generator
+  expands it per language, so the quote can never drift from the real button.
+- AN EXAMPLE THE USER HAS TO TYPE IS FUNCTIONAL, NOT PROSE. The World Book
+  accent tag is the canonical trap: the word next to the trigger must be the
+  accent's FILE NAME (`finski`, not "Finnish"/"finnischer"), the trigger word
+  must exist in that pack's `podstawy.yaml::slowo_akcent` (Icelandic needed the
+  inflected `hreim`, not just `hreimur`), and the accent must EXIST in that pack
+  — the native-parity rule means `fi` has no `finski` and `fr` has no
+  `francuski`. Since v18.25 a gate re-runs the real parser over every such quote
+  (`python generuj_dokumentacje.py --waliduj` → ACCENT-TAG GATE); it covers
+  accent tags ONLY, so every other copy-paste example (a mode trigger word, a
+  file name, a menu path, a cipher input) is still yours to verify by hand.
+- HEADINGS COUNT AS CONTENT when you retranslate a whole section. Compare the
+  first line against the other headings of the SAME pack (`git show
+  HEAD:<file>` gives you the pattern): a regenerated section likes to come back
+  with the Polish step word ("KROK 7b" instead of VAIHE / ÉTAPE / PASSO).
+- YAML FIELD NAMES STAY IN THE ORIGINAL — `kategoria`, `zakres`, `rola`,
+  `sufiks_pliku_wyniku`. One batch translated them in five packs
+  (`Ergebnisdatei_Suffix`, `sufijo_archivo_resultado`, `суффикс_файла_результата`).
+  They are identifiers the user edits in the Rules Manager, not words.
 """
 
 _CHECKLIST_DOCS = """\
