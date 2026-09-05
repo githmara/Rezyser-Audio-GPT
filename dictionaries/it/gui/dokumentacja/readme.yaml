@@ -83,7 +83,7 @@ tresc:
 
     Nonostante l'implementazione di rigorose direttive di sistema che impongono di interrompere l'azione nei momenti di tensione (cosiddetta direttiva Anti-Closure), i modelli LLM contemporanei possiedono una forte tendenza innata a "chiudere" le storie. Ciò si traduce in frequenti inserimenti di conclusioni indesiderate, morali o falsi "happy end", specialmente in Modalità Audiolibro Tradizionale.
 
-    Questa è una limitazione fondamentale dell'attuale generazione di intelligenza artificiale. Per questo motivo, l'applicazione salva i progetti in normali file di testo facili da modificare (`.txt`). Ciò richiede all'utente di assumere il ruolo di montatore umano — rimuovendo occasionalmente e manualmente le frasi "conclusive" generate dall'IA, poi sincronizzando la memoria con il file corretto tramite il pulsante "Aggiorna dal disco", e continuando il lavoro.
+    Questa è una limitazione fondamentale dell'attuale generazione di intelligenza artificiale. Per questo motivo, l'applicazione salva i progetti in normali file di testo facili da modificare (`.txt`). Ciò richiede all'utente di assumere il ruolo di montatore umano — rimuovendo occasionalmente e manualmente le frasi "conclusive" generate dall'IA, poi sincronizzando la memoria con il file corretto tramite il pulsante "{opowiesci.btn_odswiez_z_dysku_label}", e continuando il lavoro.
   instalacja_uzytkownicy: |
     ## Installazione e avvio
 

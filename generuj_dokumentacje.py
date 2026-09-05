@@ -51,6 +51,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -455,6 +456,429 @@ def _bramka_tagow_akcentu() -> dict[str, list[str]]:
                         f"`{kod}` pack (the word next to the trigger must be a "
                         f"RULE FILE name from `dictionaries/{kod}/akcenty/`)"
                     )
+            if powody:
+                znaleziska[str(szablon.relative_to(ROOT))] = powody
+    return znaleziska
+
+
+# --- Bramka cytatów etykiet GUI (od v18.26) --------------------------------
+# Klasa błędu: podręcznik cytuje etykietę przycisku / pozycji menu / tytuł
+# dialogu DOSŁOWNIE, zamiast placeholderem `{sekcja.klucz}`. Taki cytat jest
+# poprawnym językiem docelowym, więc bramka leaków go nie widzi, i wygląda
+# dobrze do pierwszej zmiany etykiety w `ui.yaml` — po niej podręcznik każe
+# klikać przycisk, którego w aplikacji nie ma. Precedens: trzy polskie
+# etykiety zostawione 1:1 w rosyjskiej paczce (v18.25.0).
+#
+# Kryterium: znormalizowany cytat równa się znormalizowanej wartości klucza
+# wyglądającego na STEROWANIE (przycisk, menu, etykieta pola) albo KOMUNIKAT
+# (tytuł dialogu, status). Normalizacja jest ta sama, którą generator robi
+# przy rozwijaniu placeholdera (`_normalizuj_etykiete`), więc naprawa
+# (literał → `{klucz}`) nie zmienia ani jednego znaku w `docs/*.html`.
+
+# Segment ścieżki klucza (`main.btn.rezyser`, `poliglota.rb_szyfrant`).
+_STEROWANIE_SEGMENT = ("btn", "lbl", "rb_", "chk", "cb_", "tab_", "menu")
+# Ogon klucza (`rezyser.el_btn_obsada_label`, `rezyser.btn_sr_name`).
+_STEROWANIE_OGON = ("_label", "_name")
+# Komunikaty: tytuł MessageBoxa i tekst statusu — user widzi je dosłownie.
+_KOMUNIKAT_OGON = ("_tytul",)
+_KOMUNIKAT_PREFIKS = ("status_",)
+# Gałęzie, których wartość TYLKO PRZYPADKIEM bywa równa cytatowi. Placeholder
+# byłby tu błędem merytorycznym, nie poprawą:
+#   * `nazwy_jezykow` — przetłumaczone nazwy języków; podręcznik cytuje
+#     IDENTYFIKATOR pliku (`szwedzki`), a placeholder dałby „Schwedisch";
+#   * `naglowek*` — słowa nagłówków SKRYPTU, które user wpisuje w tekst;
+#   * `nazwy_narzedzi` — pojęcia funkcjonalne („Reżyser", „Poliglota");
+#     literał jest tu ŚWIADOMY, tak mówi komentarz w nagłówku każdego szablonu.
+_NIE_ETYKIETY = (
+    "nazwy_jezykow", "filename_", "naglowek", "naglowki_",
+    "author_metadata", "nazwy_narzedzi", "kategoria",
+)
+# Krótsze wartości („OK", „Tak") zbiegają się ze zwykłymi słowami zdania.
+_MIN_ETYKIETA = 4
+# Ozdobny ogon etykiety: wielokropek przycisku otwierającego dialog i dwukropek
+# etykiety pola. Cytat bez niego to ta sama etykieta, tylko już rozjechana.
+#
+# POJEDYNCZEJ kropki tu NIE MA i mieć nie może: w angielskiej typografii kropka
+# końca zdania stoi WEWNĄTRZ cudzysłowu („a title such as "Error." NVDA will…"),
+# więc obcięcie jej sprawiłoby, że naprawa placeholderem zje kropkę i skleji dwa
+# zdania. Zamiast tego ujednolicamy zapis wielokropka (`...` → `…`).
+_OGON_OZDOBNY = "…: "
+
+
+def _rdzen_etykiety(tekst: str) -> str:
+    """Etykieta zredukowana do rdzenia: bez ozdób, bez wielkości liter.
+
+    Zdejmuje wiodące znaki niealfanumeryczne (emoji przycisku: „📋  Skopiuj do
+    schowka"), ozdobny ogon i wielkość liter. Bez tego kroku bramka widziała
+    tylko etykiety bez emoji — a pierwszy audyt pokazał, że 64 cytaty w dziewięciu
+    paczkach różnią się od etykiety wyłącznie wiodącym emoji, 13 wyłącznie
+    wielkością liter, i że wśród nich siedzą cytaty JUŻ MARTWE (niemieckie
+    „Architekten-Prompt für AI…" przy etykiecie „…für KI…").
+    """
+    rdzen = tekst.strip().replace("...", "…")
+    poczatek = 0
+    while poczatek < len(rdzen) and not rdzen[poczatek].isalnum():
+        poczatek += 1
+    return rdzen[poczatek:].rstrip(_OGON_OZDOBNY).casefold()
+
+
+def _liscie_ui(dane: Any, prefiks: str = "") -> Iterator[tuple[str, str]]:
+    """Wypłaszcza `ui.yaml` do par (ścieżka_klucza, wartość_stringowa).
+
+    Gałęzie LISTOWE pomijamy świadomie: `i18n._pobierz` i `PLACEHOLDER_REGEX`
+    nie znają indeksowania, więc propozycja `{klucz[0]}` byłaby placeholderem,
+    którego generator nie rozwinie — i to w milczeniu, bo klucza „brakującego"
+    też by nie zgłosił (regex nawet go nie dopasuje). Dziś jedyne listy
+    w `ui.yaml` to nagłówki scen Konwertera, ale bramka nie może zależeć od
+    tego, że nikt nigdy nie doda listy przycisków.
+    """
+    if isinstance(dane, dict):
+        for klucz, wartosc in dane.items():
+            yield from _liscie_ui(wartosc, f"{prefiks}{klucz}.")
+    elif isinstance(dane, str):
+        yield prefiks[:-1], dane
+
+
+def _czy_etykieta_gui(sciezka: str) -> bool:
+    """Czy klucz `ui.yaml` jest etykietą, którą user widzi i klika/czyta?"""
+    if any(galaz in sciezka for galaz in _NIE_ETYKIETY):
+        return False
+    segmenty = sciezka.split(".")
+    ogon = segmenty[-1]
+    if any(seg.startswith(_STEROWANIE_SEGMENT) for seg in segmenty):
+        return True
+    if any(znacznik in ogon for znacznik in _STEROWANIE_OGON):
+        return True
+    if any(ogon.endswith(znacznik) for znacznik in _KOMUNIKAT_OGON):
+        return True
+    return ogon.startswith(_KOMUNIKAT_PREFIKS)
+
+
+def _mapa_menu(kod: str) -> dict[str, list[str]]:
+    """Wartość pozycji menu → klucze `main.menu.*` tej paczki.
+
+    Osobno od `_mapa_etykiet_gui`, bo ścieżkę menu („Narzędzia → Konwerter")
+    docsy zapisują BEZ cudzysłowu — detektor cytatów jej nie widzi.
+    """
+    mapa: dict[str, list[str]] = {}
+    for sciezka, wartosc in _liscie_ui(_wczytaj_ui(kod)):
+        if not sciezka.startswith("main.menu."):
+            continue
+        etykieta = _normalizuj_etykiete(wartosc).strip()
+        if len(etykieta) >= _MIN_ETYKIETA:
+            mapa.setdefault(etykieta, []).append(sciezka)
+    return mapa
+
+
+def _mapa_etykiet_gui(kod: str) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    """Buduje dla paczki dwie mapy: wartość_etykiety → klucze `ui.yaml`.
+
+    Returns:
+        ``(dokladna, luzna)`` — pierwsza po normalizacji generatora (naprawa
+        placeholderem nie zmieni znaku w docs), druga po redukcji do rdzenia
+        (`_rdzen_etykiety`): cytat jest już rozjechany z etykietą, więc
+        placeholder go NAPRAWI, `docs/*.html` się zmieni i diff trzeba
+        przejrzeć.
+    """
+    dokladna: dict[str, list[str]] = {}
+    luzna: dict[str, list[str]] = {}
+    for sciezka, wartosc in _liscie_ui(_wczytaj_ui(kod)):
+        if "{" in wartosc or "\n" in wartosc or not _czy_etykieta_gui(sciezka):
+            continue
+        etykieta = _normalizuj_etykiete(wartosc).strip()
+        if len(etykieta) < _MIN_ETYKIETA:
+            continue
+        dokladna.setdefault(etykieta, []).append(sciezka)
+        rdzen = _rdzen_etykiety(etykieta)
+        if len(rdzen) >= _MIN_ETYKIETA and rdzen != etykieta:
+            luzna.setdefault(rdzen, []).append(sciezka)
+    return dokladna, luzna
+
+
+def _pojecia_funkcjonalne(kod: str) -> set[str]:
+    """Rdzenie nazw modułów („Reżyser", „Poliglota", „Opowieści").
+
+    Komentarz w nagłówku KAŻDEGO szablonu docsów zapisuje tę decyzję wprost:
+    w tekście narracyjnym nazwa modułu zostaje LITERAŁEM, bo to pojęcie
+    funkcjonalne, a nie napis na przycisku — tłumacz przekłada je tak, jak
+    przekłada „Director" / „Polyglot". Wartości te bywają identyczne
+    z pozycją menu (`main.menu.opowiesci`), więc bez tego wyjątku bramka
+    kazałaby placeholderować zdanie „podręcznik trybu Opowieści".
+    """
+    return {
+        _rdzen_etykiety(wartosc)
+        for sciezka, wartosc in _liscie_ui(_wczytaj_ui(kod))
+        if sciezka.startswith("main.nazwy_narzedzi.")
+    }
+
+
+# Świadome literały: cytat pasuje do etykiety aplikacji, ale zdanie mówi
+# o CZYMŚ INNYM. Klucz allowlisty to (wzorzec nazwy sekcji szablonu, ogon
+# klucza `ui.yaml`) — nazwa sekcji jest IDENTYFIKATOREM, więc jedna reguła
+# obsługuje wszystkie dziewięć paczek, mimo że sam cytat jest w każdej inny.
+_LITERALY_SWIADOME: tuple[tuple[str, str, str], ...] = (
+    ("krok_1_pierwsze_uruchomienie", "btn_przegladaj",
+     "Inno Setup installer's own Browse button, not the app's"),
+    ("instalacja_uzytkownicy", "btn_przegladaj",
+     "Inno Setup installer's own Browse button, not the app's"),
+    ("krok_5_tiflotecnia", "menu.narzedzia",
+     "NVDA's own Tools menu (add-on install path), not the app's"),
+)
+
+_RE_SEKCJA_SZABLONU = re.compile(r"^  ([a-z0-9_]+):")
+
+
+def _czy_komentarz_yaml(linia: str) -> bool:
+    """Czy linia jest komentarzem YAML (a NIE nagłówkiem Markdown w treści)?
+
+    Komentarze w szablonach docsów stoją w bloku nagłówkowym, na KOLUMNIE 0;
+    treść siedzi wcięta pod blokowym skalarem. Wcześniejsze `lstrip()`
+    wyrzucało z zasięgu bramek także 1017 markdownowych `## KROK …` — dziś
+    żaden z nich nie cytuje etykiety, ale to była stała martwa strefa.
+    """
+    return linia.startswith("#")
+# Ścieżka menu: „Narzędzia → Konwerter". Strzałka bez cudzysłowu, więc detektor
+# cytatów jej nie widzi, a to ten sam dług — nazwa pozycji menu na sztywno.
+# Do trzech słów z każdej strony strzałki (pozycje menu bywają dwuwyrazowe).
+_RE_MENU_PRZED = re.compile(r"([^\s→]+(?: [^\s→]+){0,2}) *→")
+_RE_MENU_PO = re.compile(r"→ *([^\s→]+(?: [^\s→]+){0,2})")
+
+
+def _segmenty_menu(linia: str, menu: dict[str, list[str]]) -> Iterator[tuple[int, str, list[str]]]:
+    """Zwraca (kolumna, tekst, klucze) dla nazw menu stojących przy strzałce.
+
+    Kandydatów skracamy słowo po słowie — od strony strzałki, bo to tam stoi
+    nazwa pozycji, a przed nią zwykle jeszcze proza („wybierając Narzędzia →").
+    Wynik jest deduplikowany po kolumnie: nazwa stojąca MIĘDZY dwiema
+    strzałkami („Narzędzia → Poliglota → …") pasuje do obu wzorców.
+    """
+    widziane: set[int] = set()
+    for wzorzec, od_konca in ((_RE_MENU_PRZED, True), (_RE_MENU_PO, False)):
+        for dopasowanie in wzorzec.finditer(linia):
+            slowa = dopasowanie.group(1).split(" ")
+            for ile in range(len(slowa), 0, -1):
+                kandydat = " ".join(slowa[-ile:] if od_konca else slowa[:ile])
+                klucze = menu.get(kandydat.strip(".,;:"))
+                if not klucze:
+                    continue
+                # `rfind` dla strony PRZED strzałką: nazwa stoi przy strzałce, a to
+                # samo słowo może wystąpić wcześniej w tym samym fragmencie.
+                grupa = dopasowanie.group(1)
+                przesuniecie = (grupa.rfind(kandydat) if od_konca
+                                else grupa.find(kandydat))
+                kolumna = dopasowanie.start(1) + przesuniecie
+                if kolumna not in widziane:
+                    widziane.add(kolumna)
+                    yield kolumna, kandydat, klucze
+                break
+
+
+def _czy_swiadomy_literal(sekcja: str, klucze: list[str]) -> str | None:
+    """Zwraca powód z allowlisty albo None, gdy cytat jest realnym długiem."""
+    for wzorzec, ogon, powod in _LITERALY_SWIADOME:
+        if wzorzec in sekcja and all(k.endswith(ogon) for k in klucze):
+            return powod
+    return None
+
+
+def _znajdz_cytaty_etykiet() -> list[dict[str, Any]]:
+    """Skanuje szablony docs pod kątem dosłownych cytatów etykiet GUI.
+
+    Skanuje SZABLONY (przed rozwinięciem placeholderów) — w wygenerowanym
+    `.html` literał i placeholder wyglądają identycznie, więc po fakcie tej
+    klasy błędu nie da się już rozpoznać. Linie komentarza YAML pomijamy:
+    nagłówek każdego szablonu cytuje etykiety w instrukcji DLA TŁUMACZA, a ta
+    do usera nie trafia.
+
+    Returns:
+        Lista rekordów ``{kod, plik, linia, kolumna, sekcja, cytat, klucze,
+        rozjazd}``. `kolumna` to pozycja cytatu W LINII (0-indeksowana, bez
+        znaku cudzysłowu) — dzięki niej narzędzie naprawcze podmienia DOKŁADNIE
+        to wystąpienie, a nie pierwsze takie samo słowo w zdaniu (ta pomyłka
+        raz już przeniosła placeholder na niecytowaną wzmiankę o menu).
+        `rozjazd=True` oznacza, że cytat różni się od etykiety ozdobnym ogonem,
+        czyli naprawa placeholderem ZMIENI wygenerowane docsy.
+        Rekordy z allowlisty (`_LITERALY_SWIADOME`) nie wchodzą na listę.
+    """
+    trafienia: list[dict[str, Any]] = []
+    for folder in sorted(DICT_DIR.glob(f"*/{FOLDER_GUI}/{FOLDER_DOKUMENTACJA}")):
+        kod = folder.parent.parent.name
+        dokladna, luzna = _mapa_etykiet_gui(kod)
+        menu = _mapa_menu(kod)
+        pojecia = _pojecia_funkcjonalne(kod)
+        for szablon in sorted(folder.glob("*.yaml")):
+            sekcja = ""
+            for nr, linia in enumerate(
+                    szablon.read_text(encoding="utf-8").splitlines(), start=1):
+                naglowek = _RE_SEKCJA_SZABLONU.match(linia)
+                if naglowek:
+                    sekcja = naglowek.group(1)
+                if _czy_komentarz_yaml(linia):
+                    continue
+                for dopasowanie in _RE_CYTAT.finditer(linia):
+                    cytat = dopasowanie.group(1)
+                    probka = _normalizuj_etykiete(cytat).strip()
+                    klucze = dokladna.get(probka)
+                    rozjazd = False
+                    if not klucze:
+                        klucze = luzna.get(_rdzen_etykiety(probka))
+                        rozjazd = True
+                    if (not klucze or _czy_swiadomy_literal(sekcja, klucze)
+                            or _rdzen_etykiety(probka) in pojecia):
+                        continue
+                    trafienia.append({
+                        "kod": kod,
+                        "plik": str(szablon.relative_to(ROOT)),
+                        "linia": nr,
+                        "kolumna": dopasowanie.start(1),
+                        "sekcja": sekcja,
+                        "cytat": cytat,
+                        "klucze": sorted(klucze),
+                        "rozjazd": rozjazd,
+                        "rodzaj": "cytat",
+                    })
+                for kolumna, tekst, klucze in _segmenty_menu(linia, menu):
+                    if _czy_swiadomy_literal(sekcja, klucze):
+                        continue
+                    trafienia.append({
+                        "kod": kod,
+                        "plik": str(szablon.relative_to(ROOT)),
+                        "linia": nr,
+                        "kolumna": kolumna,
+                        "sekcja": sekcja,
+                        "cytat": tekst,
+                        "klucze": sorted(klucze),
+                        "rozjazd": False,
+                        "rodzaj": "menu",
+                    })
+    return trafienia
+
+
+# Próg podobieństwa dla cytatów PRAWIE pasujących do etykiety. Zmierzony na
+# dziewięciu paczkach: 0.86 daje 52 trafienia, z czego większość to realnie
+# martwe cytaty (podręcznik obiecuje „Senden an KI", a przycisk mówi „Senden
+# an AI"), a resztę widać na pierwszy rzut oka („World Book" vs „No World
+# Book"). Niżej rośnie szum, wyżej klasa zaczyna znikać.
+_PROG_BLISKOSCI = 0.86
+_MIN_BLISKOSCI = 6
+
+
+def _znajdz_bliskie_cytaty() -> list[dict[str, Any]]:
+    """Cytaty, które PRAWIE są etykietą — klasa do ręki człowieka.
+
+    Bramka etykiet wymaga RÓWNOŚCI (po normalizacji), więc cytat rozjechany
+    o słowo albo formę fleksyjną jest dla niej niewidzialny — a to jest cytat
+    MARTWY: user szuka na ekranie przycisku, którego tam nie ma. Rozstrzygnięcie
+    wymaga jednak człowieka, bo w połowie przypadków to ETYKIETA jest gorsza od
+    cytatu (niemieckie `ui.yaml` mówi „Senden an AI", podręcznik poprawnie
+    „Senden an KI"). Dlatego OSTRZEŻENIE, nie blokada — wzorem uwag audytu par
+    przykładów.
+    """
+    import difflib                                                # noqa: PLC0415
+
+    trafienia: list[dict[str, Any]] = []
+    for folder in sorted(DICT_DIR.glob(f"*/{FOLDER_GUI}/{FOLDER_DOKUMENTACJA}")):
+        kod = folder.parent.parent.name
+        dokladna, luzna = _mapa_etykiet_gui(kod)
+        pojecia = _pojecia_funkcjonalne(kod)
+        rdzenie = {_rdzen_etykiety(k): v for k, v in dokladna.items()}
+        for szablon in sorted(folder.glob("*.yaml")):
+            for nr, linia in enumerate(
+                    szablon.read_text(encoding="utf-8").splitlines(), start=1):
+                if _czy_komentarz_yaml(linia):
+                    continue
+                for dopasowanie in _RE_CYTAT.finditer(linia):
+                    cytat = dopasowanie.group(1)
+                    rdzen = _rdzen_etykiety(
+                        _normalizuj_etykiete(cytat).strip())
+                    if (len(rdzen) < _MIN_BLISKOSCI or rdzen in rdzenie
+                            or rdzen in luzna or rdzen in pojecia):
+                        continue
+                    blisko = difflib.get_close_matches(
+                        rdzen, rdzenie.keys(), n=1, cutoff=_PROG_BLISKOSCI)
+                    if blisko:
+                        trafienia.append({
+                            "plik": str(szablon.relative_to(ROOT)),
+                            "linia": nr,
+                            "cytat": cytat,
+                            "etykieta": blisko[0],
+                            "klucze": rdzenie[blisko[0]],
+                        })
+    return trafienia
+
+
+def _bramka_cytatow_etykiet() -> dict[str, list[str]]:
+    """Formatuje znaleziska `_znajdz_cytaty_etykiet` dla raportu `waliduj`.
+
+    Returns:
+        ``{ścieżka_relatywna: [opisy znalezisk]}`` — pusty dict = czysto.
+    """
+    znaleziska: dict[str, list[str]] = {}
+    for t in _znajdz_cytaty_etykiet():
+        nota = ("" if not t["rozjazd"] else
+                " — the quote is ALREADY out of sync with the label "
+                "(decoration differs), so the placeholder will change the "
+                "rendered docs")
+        co = ("literal GUI label" if t["rodzaj"] == "cytat"
+              else "literal menu name in a menu path")
+        znaleziska.setdefault(t["plik"], []).append(
+            f"line {t['linia']} [{t['sekcja']}] {t['cytat']!r}: {co} — use "
+            f"{'/'.join('{' + k + '}' for k in t['klucze'])}{nota}"
+        )
+    return znaleziska
+
+
+# --- Bramka slash-komend Opowieści (od v18.26) -----------------------------
+# Ta sama klasa błędu co martwy tag akcentu (v18.25), tylko inny kanał wejścia:
+# komenda, którą gracz WPISUJE w pole akcji. Dispatcher `_DISPATCH_KOMEND` jest
+# JEDNOJĘZYCZNY z założenia (warianty PL + EN-fallback, aktywne niezależnie od
+# języka interfejsu), więc każde przetłumaczenie komendy w podręczniku tworzy
+# przykład, który nic nie robi. Tak powstały `/visualiza` (es) i `/визуализируй`
+# (ru) — glosy w nawiasie, które wyglądają jak druga, działająca komenda.
+#
+# Ukośnik musi być poprzedzony znakiem NIE-słownym, nie-kropką i nie-myślnikiem,
+# inaczej bramka zbierałaby ścieżki (`docs/manual`), alternatywy prozy
+# („Akt/Scena") i niemieckie zestawienia z myślnikiem („west-/südslawischen").
+# Klasa to LITERA UNICODE, nie `[a-z]`: pierwsza wersja wzorca przepuszczała
+# w milczeniu dokładnie ten wariant, którego bramka ma pilnować — fińskie
+# `/näytä`, islandzkie `/sýndu`, francuskie `/décris`.
+_RE_SLASH_KOMENDA = re.compile(
+    r"(?<![\w./-])/([^\W\d_][^\W\d_]{1,18})(?![\w/-])", re.IGNORECASE)
+
+
+def _bramka_slash_komend() -> dict[str, list[str]]:
+    """Sprawdza, czy każda `/komenda` z szablonów istnieje w dispatcherze.
+
+    Import panelu Opowieści jest lazy z łagodną degradacją (jak bramka tagów
+    akcentu): kontrybutor bez wxPythona dostaje pominięcie, nie fałszywy błąd.
+    Sam import nie tworzy okna ani `wx.App` — czytamy atrybut klasy.
+
+    Returns:
+        ``{ścieżka_relatywna: [opisy znalezisk]}`` — pusty dict = czysto.
+    """
+    try:
+        import gui_opowiesci                                    # noqa: PLC0415
+    except ImportError:
+        return {}
+    znane = set(gui_opowiesci.OpowiesciPanel._DISPATCH_KOMEND)
+
+    znaleziska: dict[str, list[str]] = {}
+    for folder in sorted(DICT_DIR.glob(f"*/{FOLDER_GUI}/{FOLDER_DOKUMENTACJA}")):
+        for szablon in sorted(folder.glob("*.yaml")):
+            powody: list[str] = []
+            for nr, linia in enumerate(
+                    szablon.read_text(encoding="utf-8").splitlines(), start=1):
+                if _czy_komentarz_yaml(linia):
+                    continue
+                for dopasowanie in _RE_SLASH_KOMENDA.finditer(linia):
+                    # Dispatcher woła `.lower()` na wejściu gracza, więc
+                    # `/Wizualizuj` DZIAŁA — porównujemy tak samo.
+                    komenda = ("/" + dopasowanie.group(1)).lower()
+                    if komenda not in znane:
+                        powody.append(
+                            f"line {nr}: `{komenda}` is not a Tales command — "
+                            f"the dispatcher only knows {sorted(znane)}"
+                        )
             if powody:
                 znaleziska[str(szablon.relative_to(ROOT))] = powody
     return znaleziska
@@ -908,6 +1332,17 @@ def waliduj() -> int:
     być martwy. Ta klasa błędu jest niewidoczna dla bramki leaków, bo cytat
     jest poprawnym językiem docelowym.
 
+    Od v18.26 dochodzą dwie bramki tej samej rodziny „przykład musi działać":
+    BRAMKA CYTATÓW ETYKIET (`_bramka_cytatow_etykiet`) — cytat równy etykiecie
+    z `ui.yaml` oraz nazwa pozycji menu w ścieżce „X → Y" muszą być
+    placeholderem, bo literał rozjeżdża się z aplikacją przy pierwszej zmianie
+    napisu; świadome wyjątki (przycisk instalatora, menu NVDA) trzyma
+    `_LITERALY_SWIADOME`. Oraz BRAMKA SLASH-KOMEND (`_bramka_slash_komend`) —
+    komenda cytowana w podręczniku musi istnieć w dispatcherze Opowieści.
+    Dochodzi też BRAMKA PAR PRZYKŁADÓW: audyt `buduj_wielojezyczne_docs`
+    (od v18.20) przeliczający pary „X → Y" prawdziwymi szyframi i akcentami
+    wchodzi TUTAJ, bo osobne narzędzie trzeba było pamiętać uruchomić.
+
     Od v18.5.3 dochodzi BRAMKA LEAKÓW (`audyt_leakow.bramka_docs`): skan szablonów
     docs pod kątem nieprzetłumaczonego polskiego tekstu względem zaakceptowanego
     baseline'u. Nowy/przesunięty leak (spoza baseline) → exit 1. Import jest LAZY
@@ -1001,6 +1436,91 @@ def waliduj() -> int:
               "the trigger word to `slowo_akcent` if your language needs it.")
     print("==========================================================")
 
+    # Bramka cytatów etykiet (od v18.26) — etykieta cytowana dosłownie rozjedzie
+    # się z aplikacją przy pierwszej zmianie napisu w `ui.yaml`.
+    etykiety_wedlug_pliku = _bramka_cytatow_etykiet()
+    print("\n========== GUI-LABEL GATE (quoted labels vs ui.yaml) ==========")
+    if not etykiety_wedlug_pliku:
+        print("✅ Every quoted GUI label goes through a {placeholder}.")
+    else:
+        print(f"❌ Found literally quoted GUI label(s) in "
+              f"{len(etykiety_wedlug_pliku)} template(s):")
+        for nazwa, powody in sorted(etykiety_wedlug_pliku.items()):
+            print(f"  • {nazwa}")
+            for powod in powody:
+                print(f"      - {powod}")
+        print("Fix: replace the literal with the `{sekcja.klucz}` placeholder "
+              "of that label. If the quote is deliberately NOT the app's label "
+              "(e.g. the installer's own button), add a (section, key-tail) "
+              "entry to `_LITERALY_SWIADOME` with the reason.")
+    # Klasa OSTRZEGAJĄCA: cytat prawie równy etykiecie. Nie blokuje, bo
+    # rozstrzygnięcie („poprawić cytat czy etykietę?") należy do człowieka.
+    bliskie = _znajdz_bliskie_cytaty()
+    if bliskie:
+        print(f"⚠️  {len(bliskie)} quote(s) ALMOST equal to a label — a quote "
+              f"that misses by one word is a DEAD quote (the user looks for a "
+              f"button that is not there). Decide per case whether the QUOTE "
+              f"or the LABEL is the wrong one:")
+        for t in bliskie:
+            print(f"      - {t['plik']}:{t['linia']} {t['cytat']!r} ≈ "
+                  f"{t['etykieta']!r} ({'/'.join(t['klucze'])})")
+    print("===============================================================")
+
+    # Bramka slash-komend (od v18.26) — komenda przetłumaczona w podręczniku
+    # nie istnieje w dispatcherze, więc gracz wpisuje ją w próżnię.
+    komendy_wedlug_pliku = _bramka_slash_komend()
+    print("\n========== SLASH-COMMAND GATE (Tales commands) ==========")
+    if not komendy_wedlug_pliku:
+        print("✅ Every /command cited in the docs exists in the dispatcher "
+              "(or wxPython is unavailable — the gate degrades silently).")
+    else:
+        print(f"❌ Found unknown /command(s) in "
+              f"{len(komendy_wedlug_pliku)} template(s):")
+        for nazwa, powody in sorted(komendy_wedlug_pliku.items()):
+            print(f"  • {nazwa}")
+            for powod in powody:
+                print(f"      - {powod}")
+        print("Fix: the dispatcher is single-language BY DESIGN (PL + EN "
+              "fallback). Keep the real command and translate only its "
+              "ARGUMENT, the way the `de`/`is`/`it` packs do.")
+    print("=========================================================")
+
+    # Bramka par przykładów (od v18.26 W TEJ ŚCIEŻCE; sam audyt od v18.20).
+    # `buduj_wielojezyczne_docs --audyt` istniał, ale osobno — trzeba było
+    # PAMIĘTAĆ, żeby go uruchomić, więc „wejście szyfru" figurowało w długu
+    # jako sprawdzane ręcznie. Tu blokują tylko BŁĘDY; uwagi (proza cytuje
+    # inne narzędzie przez kontrast) zostają uwagami, jak w oryginale.
+    pary_blokujace = False
+    print("\n========== EXAMPLE-PAIR GATE (cipher / accent examples) ==========")
+    try:
+        import buduj_wielojezyczne_docs                          # noqa: PLC0415
+    except ImportError:
+        print("ℹ️  buduj_wielojezyczne_docs not available — example-pair gate "
+              "skipped (degraded context, e.g. a clone without the dev toolchain).")
+    else:
+        znaleziska_par, staty = buduj_wielojezyczne_docs.audytuj_przyklady(
+            None, None)
+        bledy = [z for z in znaleziska_par if z.blad]
+        uwagi = len(znaleziska_par) - len(bledy)
+        # Pokrycie wypisujemy tak jak samodzielne narzędzie: audyt liczy tylko
+        # pary, które silnik UMIE przeliczyć, więc milcząco obcięty zasięg
+        # wyglądałby dokładnie jak zielona bramka.
+        poza = sum(staty.get("poza_zakresem", {}).values())
+        if not bledy:
+            print(f"✅ Every `X → Y` example the engine can recompute matches "
+                  f"the engine ({staty.get('w_zakresie', '?')} pair(s) in "
+                  f"scope, {poza} out, {uwagi} note(s) for a human to read).")
+        else:
+            pary_blokujace = True
+            print(f"❌ Found {len(bledy)} example pair(s) the engine "
+                  f"contradicts:")
+            for z in bledy:
+                print(f"      - {z}")
+            print("Fix: recompute the example against the rule file it "
+                  "illustrates, or point the prose at the operation that "
+                  "really produces that output.")
+    print("==================================================================")
+
     # Bramka leaków (od v18.5.3) — lazy import + łagodna degradacja, jak guard
     # nagłówka. Skanuje szablony docs vs baseline; nowy/przesunięty PL-leak = exit 1.
     leaki_blokujace = False
@@ -1032,7 +1552,8 @@ def waliduj() -> int:
 
     return 1 if (brakujace_wedlug_pliku or drafty_wedlug_pliku
                  or leaki_blokujace or obce_tagi_wedlug_pliku
-                 or tagi_wedlug_pliku) else 0
+                 or tagi_wedlug_pliku or etykiety_wedlug_pliku
+                 or komendy_wedlug_pliku or pary_blokujace) else 0
 
 
 # ---------------------------------------------------------------------------

@@ -258,7 +258,7 @@ tresc:
     Vous voulez un argot scolaire ? La langue des chevaliers anciens ? Un langage
     cryptique ? Un chiffrement pour les parents devant les enfants ?
 
-    1. Dans le Gestionnaire de Règles, cliquez sur « Nouveau fichier de règles… ».
+    1. Dans le Gestionnaire de Règles, cliquez sur « {manager.btn_nowy_label} ».
     2. Choisissez le type (accent, chiffrement de substitution, mode Réalisateur,
        nouvelle langue de base, chiffrement algorithmique). Pour les cas courants,
        l'application créera immédiatement un modèle YAML prêt — vous le modifiez

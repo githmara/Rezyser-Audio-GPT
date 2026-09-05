@@ -283,7 +283,7 @@ tresc:
     Chcesz gwarę szkolną? Język starożytnych rycerzy? Mowę trawę? Szyfr
     rodziców przed dziećmi?
 
-    1. W Managerze Reguł kliknij "Nowy plik reguł…".
+    1. W Managerze Reguł kliknij "{manager.btn_nowy_label}".
     2. Wybierz typ (akcent, szyfr zamian, tryb Reżysera, nowy język bazowy,
        szyfr algorytmiczny). Dla zwykłych przypadków aplikacja utworzy od
        razu gotowy szablon YAML — edytujesz go jak w poziomie 2.

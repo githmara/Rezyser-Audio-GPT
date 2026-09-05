@@ -46,11 +46,32 @@ setup_dev.bat
 ./setup_dev.sh
 ```
 
-Always invoke the project interpreter explicitly (the venv is **not**
-auto-activated in plain Bash):
+Then activate the environment once per terminal and use plain `python`:
+
+```sh
+source .venv/Scripts/activate     # Git Bash on Windows
+.venv\Scripts\Activate.ps1        # PowerShell
+source .venv/bin/activate         # Linux / macOS
+python <script>.py
+```
+
+The activation lasts until you close that terminal. In VS Code you usually get it
+for free: if you created the environment with **Python: Create Environment** (or
+selected the interpreter) and left terminal auto-activation on, every new
+integrated terminal starts activated — check for the `(.venv)` prefix in the
+prompt.
+
+Without activation, `python` resolves to whatever interpreter is first on your
+`PATH`, and the failure is misleading rather than obvious: a system Python will
+get through the imports it happens to have and then stop at the first one it does
+not (`ModuleNotFoundError: No module named 'tiktoken'`), which reads like a
+missing dependency instead of the wrong interpreter. So if you skip activation —
+or work from a tool that starts a **fresh shell for every command**, which is
+what automated agents do — call the interpreter by path instead:
 
 ```sh
 .venv/Scripts/python <script>.py        # Windows venv layout
+.venv/bin/python <script>.py            # Linux / macOS layout
 ```
 
 AI-backed tooling reads keys from **`golden_key.env`** in the repo root
@@ -82,8 +103,8 @@ structured outputs — something the OpenAI-compatible branch cannot send today.
 
 ## Developer tools you may need
 
-Run any of these from the repo root with `.venv/Scripts/python`. Pass `--help`
-for full usage (help text is in English).
+Run any of these from the repo root, with the environment active (see Setup).
+Pass `--help` for full usage (help text is in English).
 
 | Tool | What it does |
 |------|--------------|

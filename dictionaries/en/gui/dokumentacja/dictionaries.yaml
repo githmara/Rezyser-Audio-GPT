@@ -287,7 +287,7 @@ tresc:
     Want school slang? Ancient knights' language? Gibberish? Parent cipher
     before children?
 
-    1. In the Rule Manager, click "New rule file…".
+    1. In the Rule Manager, click "{manager.btn_nowy_label}".
     2. Choose the type (accent, substitution cipher, Director mode, new base
        language, algorithmic cipher). For ordinary cases, the application
        will immediately create a ready YAML template — you edit it as in

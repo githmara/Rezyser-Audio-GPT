@@ -309,7 +309,7 @@ tresc:
     Haluatko kouluslangin? Muinaisten ritarien kielen? Ruohopuheen? Vanhempien
     salakielen lapsilta?
 
-    1. Sääntöjen Hallinnassa klikkaa "Uusi sääntötiedosto…".
+    1. Sääntöjen Hallinnassa klikkaa "{manager.btn_nowy_label}".
     2. Valitse tyyppi (aksentti, korvaussalaus, Ohjaaja-tila, uusi
        peruskieli, algoritminen salaus). Tavallisissa tapauksissa sovellus
        luo heti valmiin YAML-mallin — muokkaat sitä kuten tasolla 2.

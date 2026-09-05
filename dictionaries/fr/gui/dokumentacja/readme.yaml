@@ -83,7 +83,7 @@ tresc:
 
     Malgré l'implémentation de directives systémiques rigoureuses visant à couper les actions aux moments de tension (dite directive Anti-Closure), les modèles LLM contemporains possèdent une forte tendance innée à « clore » les histoires. Cela se traduit souvent par l'insertion de conclusions indésirables, de morales ou de faux « happy ends », en particulier en Mode Livre Audio Traditionnel.
 
-    C'est une limitation fondamentale de la génération actuelle d'intelligence artificielle. Pour cette raison, l'application enregistre les projets dans des fichiers texte ordinaires, faciles à éditer (`.txt`). Cela nécessite que l'utilisateur assume le rôle de monteur vivant — en supprimant occasionnellement et manuellement les phrases « de clôture » générées par l'IA, puis en synchronisant la mémoire avec le fichier corrigé via le bouton « Actualiser depuis le disque », et en poursuivant le travail.
+    C'est une limitation fondamentale de la génération actuelle d'intelligence artificielle. Pour cette raison, l'application enregistre les projets dans des fichiers texte ordinaires, faciles à éditer (`.txt`). Cela nécessite que l'utilisateur assume le rôle de monteur vivant — en supprimant occasionnellement et manuellement les phrases « de clôture » générées par l'IA, puis en synchronisant la mémoire avec le fichier corrigé via le bouton « {opowiesci.btn_odswiez_z_dysku_label} », et en poursuivant le travail.
   instalacja_uzytkownicy: |
     ## Installation et démarrage
 

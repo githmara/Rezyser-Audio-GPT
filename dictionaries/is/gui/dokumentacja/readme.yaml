@@ -83,7 +83,7 @@ tresc:
 
     Þrátt fyrir innleiðingu strangra kerfisleiðbeininga sem krefjast þess að stöðva aðgerðir á spennustundum (svokölluð Anti-Closure leiðbeining), hafa nútíma LLM módel sterka, meðfædda tilhneigingu til að „loka" sögum. Þetta leiðir oft til óæskilegra niðurstaðna, siðferðis eða falskra „hamingjusamra enda", sérstaklega í Hefðbundnum Hljóðbókaham.
 
-    Þetta er grundvallartakmörkun núverandi kynslóðar gervigreindar. Af þessum sökum geymir forritið verkefni í venjulegum, auðveldum til að breyta textaskrám (`.txt`). Þetta krefst þess að notandinn taki á sig hlutverk lifandi klippara — að fjarlægja handvirkt síðustu, „loka" setningar sem AI hefur búið til, og samstilla síðan minnið við leiðréttu skrána með hnappnum „Endurhlaða af diski", og halda vinnunni áfram.
+    Þetta er grundvallartakmörkun núverandi kynslóðar gervigreindar. Af þessum sökum geymir forritið verkefni í venjulegum, auðveldum til að breyta textaskrám (`.txt`). Þetta krefst þess að notandinn taki á sig hlutverk lifandi klippara — að fjarlægja handvirkt síðustu, „loka" setningar sem AI hefur búið til, og samstilla síðan minnið við leiðréttu skrána með hnappnum „{opowiesci.btn_odswiez_z_dysku_label}", og halda vinnunni áfram.
   instalacja_uzytkownicy: |
     ## Uppsetning og ræsing
 

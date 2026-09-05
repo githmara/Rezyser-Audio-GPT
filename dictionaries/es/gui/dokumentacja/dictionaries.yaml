@@ -216,7 +216,7 @@ tresc:
 
     ¿Quieres jerga escolar? ¿El idioma de los caballeros antiguos? ¿Lenguaje enredado? ¿Cifrado de padres ante los niños?
 
-    1. En el Gestor de Reglas, haz clic en "Nuevo archivo de reglas…".
+    1. En el Gestor de Reglas, haz clic en "{manager.btn_nowy_label}".
     2. Elige el tipo (acento, cifrado de sustitución, modo Director, nuevo idioma base, cifrado algorítmico). Para casos simples, la aplicación creará inmediatamente una plantilla YAML lista: la editas como en el nivel 2.
     3. Para casos más difíciles (algoritmos como "mezcla de finales" o un nuevo idioma base completo), el Administrador te mostrará un prompt listo para pegar en ChatGPT o Claude. La IA generará un archivo YAML completo, solo tienes que copiarlo a la carpeta. No necesitas saber programar: solo saber copiar y pegar.
   pomysly: |

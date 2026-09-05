@@ -26,9 +26,10 @@ Wymagane zmienne środowiskowe (wstrzykiwane przez sekcję ``env:`` w YAML):
                             dodania komentarza Sami na issue po wysyłce maila
     GITHUB_REPOSITORY       owner/repo (auto z runtime'u GH Actions)
 
-Fallback: jeśli OpenAI zawiedzie (brak kredytów, 401/429, timeout) — wysyłamy
-oryginalną treść zgłoszenia z notatką, że Sami chwilowo nie pomogła w
-przeredagowaniu.
+Fallback: jeśli OpenAI zawiedzie (brak kredytów, 401/429, timeout) — w miejsce
+promptu ląduje notatka, że Sami chwilowo nie pomogła w przeredagowaniu, wraz
+z odnośnikiem do sekcji „ORYGINALNY TEKST ZGŁOSZENIA (do weryfikacji)”, którą
+mail niesie bezwarunkowo (i tylko ona ma inline'owaną treść załączników).
 """
 
 from __future__ import annotations
@@ -347,21 +348,22 @@ def _przeredaguj_z_openai(
 ) -> tuple[str, bool]:
     """Zwraca (tekst_promptu, czy_użyto_LLM).
 
-    Fallback: jeśli klucza brak / API zawiedzie — zwracamy oryginalny tekst
-    z nagłówkiem i flagą ``False``.
+    Fallback: jeśli klucza brak / API zawiedzie — zwracamy krótką notatkę
+    odsyłającą do sekcji weryfikacyjnej maila i flagę ``False``.
     """
     klucz = os.environ.get("OPENAI_API_KEY", "").strip()
     if not klucz:
         sys.stderr.write(
-            "[!] Brak OPENAI_API_KEY — wysyłam oryginalną treść zgłoszenia.\n"
+            "[!] Brak OPENAI_API_KEY — w miejsce promptu wysyłam sam odnośnik "
+            "do sekcji weryfikacyjnej.\n"
         )
-        return _fallback(title, body, labels), False
+        return _fallback(), False
 
     try:
         from openai import OpenAI
     except ImportError as exc:
         sys.stderr.write(f"[!] openai SDK nie zainstalowane: {exc}\n")
-        return _fallback(title, body, labels), False
+        return _fallback(), False
 
     try:
         klient = OpenAI(api_key=klucz)
@@ -383,22 +385,28 @@ def _przeredaguj_z_openai(
         tresc = (odp.choices[0].message.content or "").strip()
         if not tresc:
             sys.stderr.write("[!] OpenAI zwróciło pustą odpowiedź — fallback.\n")
-            return _fallback(title, body, labels), False
+            return _fallback(), False
         return tresc, True
     except Exception as exc:  # noqa: BLE001
         sys.stderr.write(f"[!] OpenAI API zawiodło: {exc}\n")
-        return _fallback(title, body, labels), False
+        return _fallback(), False
 
 
-def _fallback(title: str, body: str, labels: list[str]) -> str:
+def _fallback() -> str:
+    """Namiastka promptu przy awarii LLM — sam odnośnik, BEZ treści zgłoszenia.
+
+    Świadomie nie powtarza tytułu / etykiet / body: mail niesie sekcję
+    „ORYGINALNY TEKST ZGŁOSZENIA (do weryfikacji)” BEZWARUNKOWO, wraz
+    z inline'owaną treścią załączników, więc powielanie jej tutaj dawało ten
+    sam tekst dwa razy w jednym mailu — akurat w trybie, w którym Centrum
+    czyta najuważniej, bo promptu nie ma.
+    """
     return (
         "## Cel\n"
-        "(Sami chwilowo nie pomogła z przeredagowaniem — wysyłam oryginalną "
-        "treść zgłoszenia. Maintainer doprecyzuje ręcznie.)\n\n"
-        f"## Tytuł oryginalny\n{title}\n\n"
-        f"## Etykiety\n{', '.join(labels) or '(brak)'}\n\n"
-        "## Oryginalna treść\n"
-        f"{body}"
+        "(Sami chwilowo nie pomogła z przeredagowaniem — promptu nie ma. "
+        "Sprawdź oryginalną treść zgłoszenia w sekcji „ORYGINALNY TEKST "
+        "ZGŁOSZENIA (do weryfikacji)” poniżej: jest tam pełne body oraz "
+        "treść załączników, jeśli jakieś były. Maintainer doprecyzuje ręcznie.)"
     )
 
 

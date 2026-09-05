@@ -214,6 +214,26 @@ correct target language.
   `kliknij "Odśwież drzewo"` kept verbatim in fi, it and ru). Write the
   placeholder instead — `{manager.btn_odswiez_label}` — and the generator
   expands it per language, so the quote can never drift from the real button.
+  Since v18.26 a gate enforces this (`--waliduj` → GUI-LABEL GATE): it compares
+  every quote AND every menu name next to a "→" arrow against that pack's
+  `ui.yaml`, so a translated-but-hard-coded label is caught too, not just a
+  Polish one. Two exceptions are legitimate and live in `_LITERALY_SWIADOME`
+  keyed by (template section, key tail): the INSTALLER's own Browse button and
+  NVDA's own Tools menu are not our labels — quoting them is correct, and
+  placeholdering them would print our label in a sentence about someone else's
+  window. If you add such a case, add the reason with it.
+- A QUOTE THAT MISSES BY ONE WORD IS ALSO DEAD, and the gate can only WARN
+  about it (it prints "quote(s) ALMOST equal to a label"). Read that list every
+  release: half of those cases are the manual being RIGHT and the label being
+  wrong (`de/ui.yaml` says "Senden an AI" where the manual says "Senden an KI";
+  `it` "Invia all'AI", `fr` "pour AI"), the other half are inflection
+  („Ný leikur" vs the real „Nýr leikur"). Fixing the label is a `ui.yaml`
+  change in nine packs, so decide which side is wrong BEFORE you touch either.
+- DO NOT let a placeholder swallow sentence punctuation. In English typography
+  the full stop lives INSIDE the quotes (`a title such as "Error." NVDA will…`),
+  so a quote of a label plus a period is not the label. The gate deliberately
+  ignores a trailing single dot for this reason — one earlier revision did not,
+  and the fix glued two sentences together.
 - AN EXAMPLE THE USER HAS TO TYPE IS FUNCTIONAL, NOT PROSE. The World Book
   accent tag is the canonical trap: the word next to the trigger must be the
   accent's FILE NAME (`finski`, not "Finnish"/"finnischer"), the trigger word
@@ -221,9 +241,21 @@ correct target language.
   inflected `hreim`, not just `hreimur`), and the accent must EXIST in that pack
   — the native-parity rule means `fi` has no `finski` and `fr` has no
   `francuski`. Since v18.25 a gate re-runs the real parser over every such quote
-  (`python generuj_dokumentacje.py --waliduj` → ACCENT-TAG GATE); it covers
-  accent tags ONLY, so every other copy-paste example (a mode trigger word, a
-  file name, a menu path, a cipher input) is still yours to verify by hand.
+  (`python generuj_dokumentacje.py --waliduj` → ACCENT-TAG GATE). Since v18.26
+  the same command covers three more channels of the SAME class: menu paths
+  (GUI-LABEL GATE), Tales `/commands` against the real dispatcher
+  (SLASH-COMMAND GATE) and every `X → Y` cipher/accent pair recomputed by the
+  engine (EXAMPLE-PAIR GATE, moved in from `buduj_wielojezyczne_docs --audyt`,
+  which you had to remember to run). What is STILL yours to verify by hand:
+  file and folder names the user types, keyboard shortcuts, and anything the
+  engine cannot recompute.
+- A TRANSLATED COMMAND IS A DEAD COMMAND. The Tales dispatcher is
+  single-language BY DESIGN (Polish plus an always-on English fallback), so a
+  localized slash command does nothing. Two packs shipped one as a helpful
+  gloss in parentheses — `es` "(/visualiza cómo es el guardia)" and `ru`
+  "(/визуализируй, как выглядит страж)" — next to the real `/wizualizuj`.
+  Follow `de`/`is`/`it`: keep the real command, translate only its ARGUMENT
+  („/wizualizuj wie der Wächter aussieht").
 - HEADINGS COUNT AS CONTENT when you retranslate a whole section. Compare the
   first line against the other headings of the SAME pack (`git show
   HEAD:<file>` gives you the pattern): a regenerated section likes to come back

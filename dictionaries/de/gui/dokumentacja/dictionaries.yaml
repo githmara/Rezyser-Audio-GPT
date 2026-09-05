@@ -292,7 +292,7 @@ tresc:
     Schulhofsprache? Sprache der antiken Ritter? Elterngeheimsprache vor den
     Kindern?
 
-    1. Klicken Sie im Regelmanager auf "Neue Regeldatei…".
+    1. Klicken Sie im Regelmanager auf "{manager.btn_nowy_label}".
     2. Wählen Sie den Typ (Akzent, Ersetzungschiffre, Regisseur-Modus, neue
        Basissprache, algorithmische Chiffre). Für einfache Fälle erstellt die
        Anwendung sofort eine bearbeitbare YAML-Vorlage — Sie bearbeiten sie

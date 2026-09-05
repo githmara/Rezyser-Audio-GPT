@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Módulo de Historias Interactivas (18.25.0 – Versión de Lanzamiento)</title>
+<title>Reżyser Audio GPT — Módulo de Historias Interactivas (18.26.0 – Versión de Lanzamiento)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Módulo de Historias Interactivas (18.25.0 – Versión de Lanzamiento)</h1>
+<h1>Reżyser Audio GPT — Módulo de Historias Interactivas (18.26.0 – Versión de Lanzamiento)</h1>
 <p>El segundo modo principal de la aplicación junto al Director — esta vez te conviertes en el jugador de una historia generada dinámicamente en lugar de su autor. La inteligencia artificial narra en segunda persona del singular ("Caminas por un bosque brumoso, sientes el olor de las hojas mojadas..."), y tú decides el siguiente movimiento — escribiendo cualquier acción en texto libre o eligiendo una de las opciones numeradas.</p>
 <p>El módulo fue diseñado desde el principio pensando en jugadores ciegos — la narración se lee linealmente con un lector de pantalla (NVDA) o un motor TTS, las elecciones dinámicas se presentan como botones con descripciones de voz, cada turno terminado se señala con el sonido de una campana y el enfoque se transfiere automáticamente al texto recién generado.</p>
 <p>Abres el panel con el botón "📖  Historias" en la barra de herramientas o con el atajo de teclado Ctrl+5.</p>
@@ -57,7 +57,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 <p>/zapisz, /save — fuerza un guardado manual del estado del juego. El autoguardado funciona después de cada turno, así que este comando sirve principalmente para tener seguridad antes de cerrar la aplicación.</p>
 <p>/wczytaj, /load — abre el diálogo de selección de partida con la lista de nombres disponibles (desde v15.2.3, en lugar del diálogo de archivos del sistema, se muestra una lista directa de todas tus partidas guardadas). NVDA lee la lista de forma natural, y el jugador invidente no necesita navegar por el diálogo de archivos del sistema. Tras elegir el nombre de la partida, se restauran el modo y la narración completa — puedes continuar desde el turno en el que lo dejaste. El botón "Cargar" tiene un comportamiento idéntico.</p>
 <p>El motor narrativo de todos los modos de Historias utiliza un único modelo compartido (por defecto y recomendado, Anthropic Claude Sonnet 5; desde v18.4 un usuario avanzado puede indicar su propio endpoint compatible con OpenAI — ver el manual principal, PASO 2B). Un modelo más potente se apega rigurosamente a las reglas del mundo — esto es especialmente importante en el modo Mal menor, donde cada opción debe seguir siendo realmente desfavorable.</p>
-<p>/wizualizuj <code>&lt;opis&gt;</code>, /visualize <code>&lt;opis&gt;</code> — descripción multisensorial de la escena actual. No cambia el estado del juego, no propone elecciones — el motor narrativo utiliza los cinco sentidos (vista, oído, olfato, tacto, gusto) para mostrar la escena con mayor profundidad. El resultado aparece en un diálogo aparte y NO se añade a la narración. Ejemplo: «/wizualizuj jak wygląda strażnik» («/visualiza cómo es el guardia») o «/wizualizuj zapach kawiarni» («/visualiza el olor de la cafetería»).</p>
+<p>/wizualizuj <code>&lt;opis&gt;</code>, /visualize <code>&lt;opis&gt;</code> — descripción multisensorial de la escena actual. No cambia el estado del juego, no propone elecciones — el motor narrativo utiliza los cinco sentidos (vista, oído, olfato, tacto, gusto) para mostrar la escena con mayor profundidad. El resultado aparece en un diálogo aparte y NO se añade a la narración. Ejemplo: «/wizualizuj cómo es el guardia» o «/wizualizuj el olor de la cafetería».</p>
 <p>/pomoc, /help — muestra una ventana de diálogo con la lista de todos los comandos disponibles. El diálogo es de solo lectura y compatible con NVDA — el campo de texto recibe el foco automáticamente, y el lector de pantalla lee de inmediato toda la lista sin necesidad de navegar.</p>
 <p>/koniec, /quit — cierra la aplicación (tras el autoguardado del turno en curso).</p>
 <h2>PASO 6: Tus archivos — dónde encontrarás la narración terminada</h2>

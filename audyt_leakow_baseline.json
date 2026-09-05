@@ -97,9 +97,6 @@
   "es/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
   ],
-  "es/tales.yaml/krok_5_slash_komendy": [
-    "znak-PL:ąż"
-  ],
   "es/ui.yaml/manager.typ.tryb_rezysera.opis": [
     "lingua:PL"
   ],
@@ -290,9 +287,6 @@
   ],
   "ru/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
-  ],
-  "ru/tales.yaml/krok_5_slash_komendy": [
-    "znak-PL:ąż"
   ],
   "ru/ui.yaml/rezyser.txt_nazwa_pliku_hint": [
     "lingua:PL"
