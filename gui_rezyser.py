@@ -2303,11 +2303,18 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     # Pomocnicza metoda zapisu do pliku projektu
     # ------------------------------------------------------------------
-    def _dopisz_do_pliku(self, nazwa: str, content: str, mode: str = "a") -> None:
+    def _dopisz_odpowiedz(self, nazwa: str, tekst: str) -> None:
+        """Utrwala fragment: pamięć + plik przez silnik, błąd → dialog.
+
+        Do v18.26.0 panel miał tu WŁASNĄ kopię składania (`full_story +=
+        "\n\n"` i zapis `tekst + "\n\n"`), więc reguła pustych linii żyła
+        w dwóch miejscach — a użytkownik dostawał wersję z panelu, nie
+        z silnika. Jedna implementacja: `ProjektRezysera._doklej_blok`.
+        """
         if self._projekt.nazwa_pliku != nazwa:
             self._projekt.nazwa_pliku = nazwa
         try:
-            self._projekt.dopisz_do_pliku_historii(content, mode=mode)
+            self._projekt.dopisz_odpowiedz_ai(tekst)
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 t("rezyser.blad_zapisu_do_pliku", tresc_bledu=str(exc)),
@@ -2588,13 +2595,8 @@ class RezyserPanel(wx.Panel):
         self, response_text: str, nazwa: str, ostrzezenie: str = "",
     ) -> None:
         self._zwolnij_workera()
-        if self.full_story:
-            self.full_story += "\n\n" + response_text
-        else:
-            self.full_story = response_text
+        self._dopisz_odpowiedz(nazwa, response_text)
         self._txt_full_story.SetValue(self.full_story)
-        self._dopisz_do_pliku(nazwa, response_text + "\n\n")
-        self.last_response = response_text
         # Pierwsza udana wysyłka produkcyjna utrwala tryb zapisu. Dotychczas
         # `.mode` powstawał tylko przez kliknięcie Akt/Scena/Rozdział, więc
         # gracze wysyłający tekst bez wstawiania struktury (typowe dla

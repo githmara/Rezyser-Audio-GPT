@@ -1130,6 +1130,12 @@ def main(args: argparse.Namespace | None = None) -> None:
               "Install `lingua` for the full release gate.\n")
     else:
         wynik_leak = audyt_leakow.bramka_docs()
+        # Paczka poza `lingua` (język, którego detektor nie zna) jest skanowana
+        # z węższym zestawem klas. Wydanie NIE jest blokowane — ale przemilczenie
+        # tego przy zielonej bramce byłoby obietnicą pokrycia, którego nie ma.
+        for kod, powod in sorted(wynik_leak.pokrycie_obnizone.items()):
+            print(f"⚠️  Leak gate, reduced coverage for `{kod}`: {powod}. "
+                  f"Class A (whole-line drift) is NOT checked for this pack.")
         if wynik_leak.pominieto:
             print(f"⚠️  Leak gate skipped: {wynik_leak.powod_pominiecia}. "
                   "Install `lingua` for the full release gate.\n")
@@ -1179,7 +1185,8 @@ def main(args: argparse.Namespace | None = None) -> None:
         # to the end user (dev tools are not in the bundle at all). Printed as a
         # reminder so the regression is noticed at release time rather than by a
         # contributor months later — which is exactly how the 60 helps accumulated.
-        print("🔍 Contract gate: scanning dev tools for Polish CLI text and ❌/⚠️ lines...")
+        print("🔍 Contract gate: scanning dev tools for Polish CLI text, ❌/⚠️ lines "
+              "and abort messages...")
         wynik_kontrakt = audyt_leakow.bramka_kontraktu()
         if wynik_kontrakt.pominieto:
             print(f"⚠️  Contract gate skipped: {wynik_kontrakt.powod_pominiecia}.\n")

@@ -328,6 +328,45 @@ def _ostatni_uzyteczny_naglowek(
     return None
 
 
+# ---------------------------------------------------------------------------
+# Puste linie w pliku projektu — JEDNA reguła (v18.26.1)
+# ---------------------------------------------------------------------------
+# Plik `skrypty/<nazwa>.txt` powstaje z BLOKÓW dopisywanych po kolei: nagłówek
+# struktury (Prolog/Rozdział/Akt/Scena/Epilog) albo fragment zwrócony przez
+# model. Do v18.26.0 każdy z nich nosił własną obwódkę `\n\n`, a fragment
+# jeszcze `\n\n` na końcu — więc obwódki się SUMOWAŁY. Zmierzony plik po dwóch
+# generacjach w trybie Audiobook: 17 linii, z tego 11 PUSTYCH; dwie puste na
+# samym początku, trzy z rzędu przed każdym nagłówkiem, a proza modelu (akapity
+# oddzielone pustą linią) dawała stały rytm „linia tekstu — pusta — linia".
+#
+# Dlaczego to jest problem DOSTĘPNOŚCI, a nie estetyki: czytnik ekranu czyta
+# plik linia po linii, a dłuższa seria pustych linii jest nieodróżnialna od
+# końca pliku — użytkownik, który wrócił do projektu po dniu i nie pamięta,
+# ile ma rozdziałów, nie ma czym zweryfikować, czy to koniec, czy przerwa.
+#
+# Reguła: plik to bloki rozdzielone DOKŁADNIE jedną pustą linią, bez pustej
+# linii na początku, bez ciągów pustych linii wewnątrz bloku. Separator
+# wyliczamy przy dopisywaniu z KOŃCÓWKI tego, co już jest (`_doklej_blok`),
+# zamiast wpisywać go na sztywno w każdy blok — tylko wtedy suma bloków nie
+# zależy od kolejności klikania. Tryb Skrypt renderuje własnym `renderuj_skrypt`
+# ze schematu JSON i nie przechodził tędy, dlatego był wolny od tego objawu.
+#
+# Świadomie NIE ruszamy plików WYNIKOWYCH postprodukcji (karta publikacyjna,
+# streszczenie): to osobne artefakty o własnej strukturze, w których pusta
+# linia rozdziela sekcje dokumentu, a nie akapity prozy.
+_RE_CIAG_PUSTYCH = re.compile(r"\n[ \t]*\n(?:[ \t]*\n)*")
+
+
+def znormalizuj_blok(tekst: str) -> str:
+    """Blok gotowy do dopisania: bez obwódki i bez pustych linii wewnątrz.
+
+    Zwija KAŻDY ciąg co najmniej dwóch złamań wiersza (także z samymi spacjami
+    czy tabulatorami w środku) do jednego. Akapity prozy zostają więc osobnymi
+    liniami — sąsiadującymi, nie przetykanymi pustą.
+    """
+    return _RE_CIAG_PUSTYCH.sub("\n", tekst.strip())
+
+
 def _koncowka_po_znakach(tekst: str, max_zn: int = MAX_TAIL_ZN) -> str:
     """Ostatnie ~``max_zn`` znaków ``tekst``, snapnięte do granicy akapitu, by
     przywrócona końcówka nie zaczynała się w środku zdania.
@@ -1798,33 +1837,54 @@ class ProjektRezysera:
     # „Wstawiono: …".
     # ------------------------------------------------------------------
 
+    def _doklej_blok(self, blok: str) -> None:
+        """Dopisuje blok do ``full_story`` i do pliku, pilnując pustych linii.
+
+        Separator wyliczany z końcówki historii: pierwszy blok idzie bez
+        prefiksu, każdy następny poprzedza DOKŁADNIE jedna pusta linia — także
+        wtedy, gdy plik pochodzi z wcześniejszej wersji i ma na końcu ciąg
+        pustych linii (wtedy nie dokładamy nic, ale i nic nie usuwamy: cudzej
+        treści nie przepisujemy pod nowy kanon bez wiedzy użytkownika).
+        Każdy blok kończy się jednym złamaniem wiersza, więc plik nie ma ani
+        pustej linii na końcu, ani „sklejonych" bloków.
+        """
+        blok = znormalizuj_blok(blok)
+        if not blok:
+            return
+        ogon = self.full_story
+        if not ogon:
+            do_zapisu = f"{blok}\n"
+        else:
+            juz_ma = len(ogon) - len(ogon.rstrip("\n"))
+            do_zapisu = "\n" * max(0, 2 - juz_ma) + f"{blok}\n"
+        self.full_story = ogon + do_zapisu
+        self.dopisz_do_pliku_historii(do_zapisu)
+
     def wstaw_prolog(self, *, naglowek: str = "Prolog") -> str:
         """Wstawia nagłówek prologu na początek historii (nadpisując plik)."""
         self._wymagaj_nazwy()
-        header = f"{naglowek}\n\n"
-        self.full_story += header
         # Tryb "w" – Prolog zaczyna historię od zera. Gdyby plik zawierał
         # resztki z poprzedniej sesji (test zmian, zepsuty zapis), byłyby
         # teraz niszczone. Tak samo robił oryginalny kod w gui_rezyser.
-        self.dopisz_do_pliku_historii(header, mode="w")
+        # GUI dopuszcza Prolog TYLKO przy pustej historii (`prolog_on`), więc
+        # zerowanie pamięci nie może tu zgubić cudzej treści.
+        self.full_story = ""
+        self.dopisz_do_pliku_historii("", mode="w")
+        self._doklej_blok(naglowek)
         return naglowek
 
     def wstaw_epilog(self, *, naglowek: str = "Epilog") -> str:
         """Wstawia nagłówek epilogu na koniec historii. Po nim dalszy zapis jest blokowany."""
         self._wymagaj_nazwy()
-        header = f"\n\n{naglowek}\n\n"
-        self.full_story += header
-        self.dopisz_do_pliku_historii(header)
+        self._doklej_blok(naglowek)
         return naglowek
 
     def wstaw_rozdzial(self, *, naglowek_bazowy: str = "Rozdział") -> str:
         """Wstawia nagłówek kolejnego rozdziału (Audiobook) i inkrementuje licznik."""
         self._wymagaj_nazwy()
         naglowek = f"{naglowek_bazowy} {self.chapter_counter}"
-        content = f"\n\n{naglowek}\n\n"
-        self.full_story += content
         self.chapter_counter += 1
-        self.dopisz_do_pliku_historii(content)
+        self._doklej_blok(naglowek)
         return naglowek
 
     def wstaw_akt(
@@ -1842,21 +1902,20 @@ class ProjektRezysera:
         self._wymagaj_nazwy()
         akt = f"{naglowek_akt} {self.akt_counter}"
         scena = f"{naglowek_scena} 1"
-        content = f"\n\n{akt}\n\n{scena}\n\n"
-        self.full_story += content
         self.akt_counter += 1
         self.scena_counter = 2
-        self.dopisz_do_pliku_historii(content)
+        # Dwa osobne bloki, żeby akt i scena były rozdzielone tą samą jedną
+        # pustą linią co wszystko inne (wcześniej: własna obwódka `\n\n`).
+        self._doklej_blok(akt)
+        self._doklej_blok(scena)
         return akt, scena
 
     def wstaw_scena(self, *, naglowek_bazowy: str = "Scena") -> str:
         """Wstawia kolejny nagłówek sceny w bieżącym Akcie."""
         self._wymagaj_nazwy()
         scena = f"{naglowek_bazowy} {self.scena_counter}"
-        content = f"\n\n{scena}\n\n"
-        self.full_story += content
         self.scena_counter += 1
-        self.dopisz_do_pliku_historii(content)
+        self._doklej_blok(scena)
         return scena
 
     # ------------------------------------------------------------------
@@ -1870,13 +1929,8 @@ class ProjektRezysera:
         dla celów diagnostycznych.
         """
         self._wymagaj_nazwy()
-        if self.full_story:
-            self.full_story += "\n\n" + tekst
-        else:
-            self.full_story = tekst
         self.last_response = tekst
-        # Oddzielny blok akapitem, jak w oryginale.
-        self.dopisz_do_pliku_historii(tekst + "\n\n")
+        self._doklej_blok(tekst)
 
     def twardy_reset(self) -> None:
         """Całkowicie zapomina o projekcie. Pliki na dysku zostają nietknięte."""

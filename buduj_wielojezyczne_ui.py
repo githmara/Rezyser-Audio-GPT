@@ -282,7 +282,7 @@ def ustaw_po_sciezce(node: Any, sciezka: str, nowa_wartosc: str) -> None:
     # Rozkład path-a na segmenty: "a.b[0].c" → ["a", "b", "[0]", "c"]
     segmenty = re.findall(r"[^.\[\]]+|\[\d+\]", sciezka)
     if not segmenty:
-        raise ValueError(f"Pusta ścieżka: {sciezka!r}")
+        raise ValueError(f"Empty path: {sciezka!r}")
     for seg in segmenty[:-1]:
         if seg.startswith("[") and seg.endswith("]"):
             node = node[int(seg[1:-1])]

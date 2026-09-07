@@ -111,6 +111,14 @@ diag:
     wpis: |-
        Jeden wpis wewnątrz pliku jest niekompletny (wskazany w szczegółach)
        i został pominięty. Pozostałe wpisy z tego pliku działają normalnie.
+    lingua: |-
+       Pole „lingua” w pliku podstaw mówi aplikacji, po jakiej nazwie rozpoznawać
+       ten język w tekście mieszanym, a wpisana wartość nie jest żadną z nazw,
+       które zna wbudowany detektor. Jeśli w szczegółach jest propozycja, wpisz ją
+       w miejsce dotychczasowej wartości. Jeśli propozycji nie ma, tego języka
+       detektor najpewniej nie obsługuje – paczka działa wtedy normalnie, ale nie
+       będzie rozpoznawana po samej treści: w Poligloci wybierz ją z listy i włącz
+       wymuszenie jednego języka dla całego dokumentu.
 
 # -----------------------------------------------------------------------------
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)

@@ -750,7 +750,8 @@ def zbuduj_yaml_wynikowy(
                 cialo += linia + "\n"
         return naglowek + cialo
 
-    raise TypeError(f"`tresc` musi być stringiem albo dict-em, dostałem {type(tresc).__name__}")
+    raise TypeError(
+        f"`tresc` must be a string or a dict, got {type(tresc).__name__}")
 
 
 # ---------------------------------------------------------------------------

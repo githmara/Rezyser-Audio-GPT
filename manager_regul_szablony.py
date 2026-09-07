@@ -1287,8 +1287,9 @@ def szablon_podstawy(kod_jezyka: str, etykieta_jezyka: str) -> str:
 #
 #  Sections required by the engine (`core_poliglota._jezyk_kompletny`):
 #    1. lingua          – the `lingua.Language` enum name for the detector
-#                         (POLISH/GERMAN/FRENCH/...). List:
+#                         (POLISH/GERMAN/FRENCH/...). Full list:
 #                         https://github.com/pemistahl/lingua-py
+#                         Not every language is there — see the field below.
 #    2. polskie_znaki   – mapping of the „{kod_jezyka}" language diacritics
 #                         to ASCII letters (used by `usun_polskie_znaki:
 #                         true` in accents).
@@ -1306,8 +1307,14 @@ def szablon_podstawy(kod_jezyka: str, etykieta_jezyka: str) -> str:
 id: podstawy
 jezyk: {kod_jezyka}
 # The `lingua.Language` enum name (uppercase, no prefix).
-# Leaving it out drops the language from the detector — it can be chosen
-# manually in the GUI, but mixed fragments will not be recognized.
+# The detector knows 75 languages (lingua 2.1.1) and no more: if yours is not
+# among them — Faroese, Maltese, Luxembourgish, Khmer, Lao and others are not —
+# comment this field out instead of guessing a name. A name the detector does
+# not know has exactly the same effect as no field at all, only quieter.
+# Either way the pack works: the language is simply never recognized FROM THE
+# TEXT, so in Polyglot you pick it from the list and turn on forcing a single
+# language for the whole document. If you mistype the name, the application
+# tells you in "Skipped rules" and suggests the closest valid ones.
 lingua: <FILL_IN_ENUM_NAME_E_G_GERMAN>
 # The label MUST be 100% in the native language {natywna}.
 # Models from the deployed packs: PL: „Polski – podstawy fonetyczne"; DE:
@@ -1392,13 +1399,21 @@ presence/absence of diacritics such as ä/ö/ç/ß).
 # STRUCTURE REQUIREMENTS (engine)
 1. **`id: podstawy`** and **`jezyk: {kod_jezyka}`** — identifying fields.
 2. **`lingua:`** — the `lingua.Language` enum name in UPPERCASE English,
-   without prefix. List (74 languages):
+   without prefix. List (75 languages in lingua 2.1.1):
    https://github.com/pemistahl/lingua-py.
    Most common: POLISH, ENGLISH, GERMAN, FRENCH, SPANISH, PORTUGUESE,
    ITALIAN, RUSSIAN, FINNISH, ICELANDIC, JAPANESE, CHINESE.
+   Do NOT guess this name. Four traps where the obvious guess is not an enum
+   name at all: NORWEGIAN (the enum has BOKMAL and NYNORSK, no umbrella name),
+   SLOVENIAN (it is SLOVENE), FLEMISH (it is DUTCH), FILIPINO (it is TAGALOG).
+   And some languages are genuinely absent — Faroese, Maltese, Luxembourgish,
+   Khmer, Lao, Nepali, Kurdish, Amharic among them.
    If the language is missing, write `# BRAK_W_LINGUA` in a comment above
-   the field and leave the field commented out (the engine falls back to
-   manual selection).
+   the field and leave the field commented out. Say so in your answer as well,
+   plainly, instead of substituting a related language: a wrong name and a
+   missing field have the SAME effect on the engine (the pack stays out of
+   automatic detection and is selected manually in Polyglot), but a wrong name
+   also makes the pack look correctly configured to whoever reads it next.
 3. **`polskie_znaki:`** — a list of `{{ wzor, zamiana }}` pairs describing
    the diacritics of language {kod_jezyka} → ASCII. Each diacritic in both
    variants: lower + upper. Letters that grow under `.upper()` (e.g. ß→SS)

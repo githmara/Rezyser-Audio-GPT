@@ -38,12 +38,15 @@ from __future__ import annotations
 
 import argparse
 import ast
+import difflib
 import json
 import re
 import sys
+import unicodedata
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any, NoReturn
 
 import yaml
 
@@ -66,45 +69,96 @@ KOD_ZRODLOWY = "pl"
 # i `bot_i18n.mapa_iso_na_lingua` (lekka kopia: ten dev-tool celowo trzyma deps
 # wąsko — sam `yaml` + lazy `lingua`, bez ciągnięcia silnika z docx/num2words).
 # Mapowanie na enum robione lazy w `_zbuduj_detektor` (string → getattr).
-def _skanuj_lingua_z_podstaw() -> dict[str, str]:
-    """{kod ISO: NAZWA_ENUMA} z podstawy.yaml::lingua (pomija źródłowe pl).
+# ---------------------------------------------------------------------------
+# Wspólne wczytanie YAML — cisza jest tu zakazana (v18.9, rozszerzone v18.26.1)
+# ---------------------------------------------------------------------------
+def _padnij_na_pliku(plik: Path, powod: str) -> NoReturn:
+    """Jednolity komunikat fatalny: tego pliku NIE zeskanowaliśmy.
 
-    Paczka z `podstawy.yaml`, która NIE mapuje się na lingua (brak pola,
-    literówka `lingva:`, nieparsowalny YAML), jest błędem FATALNYM, a nie
-    powodem do cichego pominięcia (v18.9). Wcześniej taka paczka po prostu
-    wypadała z `KODY_DOCELOWE` — bramka leaków przestawała ją skanować i
-    raportowała „czysto", mimo że nikt jej nie sprawdził.
+    Jedno zdanie dla wszystkich powierzchni, bo wniosek jest zawsze ten sam —
+    bramka nie ma prawa zameldować „czysto" o pliku, którego nie przeczytała.
+    """
+    raise SystemExit(
+        f"❌ audyt_leakow: cannot scan {plik} ({powod}) — a scan of this file "
+        f"would be falsely \"clean\"."
+    )
+
+
+def _wczytaj_yaml_lub_padnij(plik: Path, *, oczekiwany: type = dict):
+    """Parsuje YAML i sprawdza TYP korzenia; każde odstępstwo = błąd FATALNY.
+
+    Jedna implementacja dla WSZYSTKICH powierzchni YAML skanu (v18.26). Reguła
+    powstała w v18.9 dla szablonów docs: zwrócenie ``{}`` dawało bramce „zero
+    sekcji = zero leaków = czysto", czyli zielone światło dla pliku, którego
+    nikt nie zeskanował. `ui.yaml` został wtedy przy cichym ``return {}`` w
+    DWÓCH miejscach (`leaki_ui_per_klucz`, `leaki_canon_dla_jezyka`) — ta sama
+    fałszywa czystość, tylko dla stringów GUI.
+
+    KSZTAŁT jest drugą połową tej samej reguły (v18.26.1) i bez niego łata z
+    v18.9 była niepełna: plik, który PARSUJE SIĘ poprawnie, ale nie do mapy
+    (lista, goły skalar, `null` po wykasowaniu treści), wracał przez `if not
+    isinstance(dane, dict): return {}` — czyli znowu jako „czysto". Skan
+    przyjmuje konkretne schematy (mapa z kluczem `tresc`, mapa kluczy GUI),
+    więc niezgodność ze schematem jest błędem pliku, nie powodem do ciszy.
+
+    Brak pliku sprawdza WOŁAJĄCY (nie każda paczka ma każdy szablon → legalnie
+    pusty wynik), bo tylko on wie, co znaczy brak jego pliku.
+    """
+    try:
+        dane = yaml.safe_load(plik.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as exc:
+        _padnij_na_pliku(plik, f"unreadable: {exc}")
+    if not isinstance(dane, oczekiwany):
+        _padnij_na_pliku(
+            plik,
+            f"the file parses as {type(dane).__name__}, "
+            f"but the scan expects {oczekiwany.__name__}",
+        )
+    return dane
+
+
+def _skanuj_lingua_z_podstaw() -> dict[str, str]:
+    """{kod ISO: DEKLAROWANA_NAZWA} z podstawy.yaml::lingua (bez źródłowego pl).
+
+    Nieczytelny albo niebędący mapą `podstawy.yaml` = błąd FATALNY
+    (:func:`_wczytaj_yaml_lub_padnij`): paczka, której nie umiemy przeczytać,
+    nie może po cichu wypaść z zasięgu bramki (v18.9).
+
+    Brak pola `lingua:` NIE jest tu jednak błędem od v18.26.1 i to jest zmiana
+    wobec v18.9. Paczka bez pola zostaje w :data:`KODY_DOCELOWE` — czyli nadal
+    jest skanowana — tylko z OBNIŻONYM POKRYCIEM (patrz :func:`detektor_dla`).
+    Powód: język, którego `lingua` po prostu nie obsługuje (faroeski, maltański,
+    luksemburski, khmerski…), jest legalnym dziesiątym językiem tego projektu,
+    a stary twardy stop zamieniał go w ścianę — `--waliduj` i `build_release`
+    padały, więc takiej paczki nie dało się nawet zbudować. Sedno gwarancji
+    z v18.9 zostaje nienaruszone: NIC nie wypada ze skanu po cichu.
+
+    Sama NAZWA nie jest tu weryfikowana, bo `lingua` importuje się leniwie
+    (moduł działa bez niej, degradując bramkę) — weryfikuje ją
+    :func:`detektor_dla` przy pierwszym użyciu.
     """
     if not DICT_DIR.is_dir():
         return {}
     wynik: dict[str, str] = {}
-    problemy: list[str] = []
     for p in sorted(DICT_DIR.iterdir()):
         if not p.is_dir() or p.name == KOD_ZRODLOWY:
             continue
         plik = p / "podstawy.yaml"
         if not plik.is_file():
             continue   # folder bez podstawy.yaml to nie paczka językowa
-        try:
-            dane = yaml.safe_load(plik.read_text(encoding="utf-8"))
-        except (OSError, yaml.YAMLError) as exc:
-            problemy.append(f"{p.name}: podstawy.yaml nieczytelny ({exc})")
-            continue
-        wartosc = dane.get("lingua") if isinstance(dane, dict) else None
-        if isinstance(wartosc, str) and wartosc.strip():
-            wynik[p.name] = wartosc.strip().upper()
-        else:
-            problemy.append(f"{p.name}: brak pola `lingua:` w podstawy.yaml")
-    if problemy:
-        raise SystemExit(
-            "❌ audyt_leakow: language packs with no lingua mapping — the leak "
-            "gate would SKIP them:\n  - " + "\n  - ".join(problemy)
-        )
+        wartosc = _wczytaj_yaml_lub_padnij(plik).get("lingua")
+        wynik[p.name] = wartosc.strip().upper() if isinstance(wartosc, str) else ""
     return wynik
 
 
 _NAZWA_LINGUA = _skanuj_lingua_z_podstaw()
 KODY_DOCELOWE = sorted(_NAZWA_LINGUA)
+
+# Paczki o OBNIŻONYM POKRYCIU: {kod: powód po angielsku}. Wypełniane leniwie
+# przez `detektor_dla`, wypisywane przez bramkę i CLI — milczenie o mniejszym
+# pokryciu byłoby tą samą wadą co milczenie o pominiętym pliku, tylko subtelniejszą.
+_POKRYCIE_OBNIZONE: dict[str, str] = {}
+_DETEKTORY: dict[str, Any] = {}
 
 # ---------------------------------------------------------------------------
 # Whitelista — maskowana PRZED detekcją lingua (inaczej false-positives)
@@ -194,17 +248,85 @@ def _maskuj_whiteliste(linia: str) -> str:
     return txt
 
 
-def _zbuduj_detektor(kod: str):
-    """Buduje lingua-detektor ograniczony do {target, POLISH, ENGLISH}.
+# Rozjazdy NAZEWNICTWA (nie literówki): lekka KOPIA mapy z
+# `core_poliglota._LINGUA_ALIASY`, świadomie duplikowana — ten dev-tool trzyma
+# zależności wąsko (yaml + lazy lingua) i nie ciągnie silnika z docx/num2words,
+# dokładnie jak `bot_i18n.mapa_iso_na_lingua`. Runtime jest źródłem prawdy;
+# tutaj mapa służy wyłącznie podpowiedzi w komunikacie bramki.
+_ALIASY_LINGUA: dict[str, tuple[str, ...]] = {
+    "NORWEGIAN": ("BOKMAL", "NYNORSK"),
+    "SLOVENIAN": ("SLOVENE",),
+    "FLEMISH": ("DUTCH",),
+    "FILIPINO": ("TAGALOG",),
+    "MANDARIN": ("CHINESE",),
+    "FARSI": ("PERSIAN",),
+    "MOLDOVAN": ("ROMANIAN",),
+    "BRAZILIAN": ("PORTUGUESE",),
+}
 
-    Restrykcja kandydatów drastycznie tnie szum (model nie zgaduje czeskiego
-    czy chorwackiego dla krótkich islandzkich linii). Import lazy.
+
+def _podpowiedz_nazwe(nazwa: str) -> list[str]:
+    """Nazwy enuma, które autor paczki prawdopodobnie miał na myśli (może być pusta).
+
+    Filtr pierwszej litery przy `difflib` nie jest ozdobą — bez niego
+    „NORWEGIAN" dostaje podpowiedź „GEORGIAN" (zmierzone na lingua 2.1.1),
+    a podpowiedź semantycznie absurdalna jest gorsza niż jej brak.
     """
+    from lingua import Language
+
+    kandydaci = [n for n in _ALIASY_LINGUA.get(nazwa, ())
+                 if getattr(Language, n, None) is not None]
+    if kandydaci:
+        return kandydaci
+    wszystkie = [n for n in dir(Language) if n.isupper()]
+    return [n for n in difflib.get_close_matches(nazwa, wszystkie, n=3, cutoff=0.7)
+            if n[:1] == nazwa[:1]]
+
+
+def detektor_dla(kod: str):
+    """Detektor lingua dla paczki albo ``None`` przy OBNIŻONYM POKRYCIU (memoizowane).
+
+    Detektor jest ograniczony do {target, POLISH, ENGLISH} — restrykcja
+    kandydatów drastycznie tnie szum (model nie zgaduje czeskiego czy
+    chorwackiego dla krótkich islandzkich linii). Import lazy.
+
+    ``None`` wraca w dwóch wypadkach, oba zapisywane w
+    :data:`_POKRYCIE_OBNIZONE` z powodem po angielsku:
+      * paczka nie deklaruje pola `lingua:` — świadoma decyzja autora paczki,
+        której `lingua` nie obsługuje,
+      * deklarowana nazwa nie istnieje w enumie `lingua.Language` — literówka
+        albo rozjazd nazewnictwa (`NORWEGIAN` to w lingui `BOKMAL`/`NYNORSK`).
+    Do v18.26.0 ten drugi przypadek kończył się GOŁYM ``AttributeError`` z
+    `getattr`, a `bramka_docs` łapie tylko `ImportError` — więc traceback
+    przewracał `--waliduj` i cały `build_release`.
+
+    Klasa A detektora (dryf całej linii) jest wtedy poza pokryciem, ale klasy B
+    i B' (kuratorskie PL-terminy, polskie znaki) działają dalej — one nie
+    potrzebują modelu językowego. Świadomie NIE budujemy detektora
+    {POLISH, ENGLISH} bez języka docelowego: lingua musi wybrać jedną z dwóch
+    etykiet, więc każda linia faroeska czy khmerska wracałaby jako POLISH
+    z wysoką pewnością i bramka utonęłaby w fałszywych alarmach.
+    """
+    if kod in _DETEKTORY:
+        return _DETEKTORY[kod]
     from lingua import Language, LanguageDetectorBuilder
 
-    nazwy = {_NAZWA_LINGUA[kod], "POLISH", "ENGLISH"}
-    jezyki = [getattr(Language, n) for n in nazwy]
-    return LanguageDetectorBuilder.from_languages(*jezyki).build()
+    nazwa = _NAZWA_LINGUA.get(kod, "")
+    if not nazwa:
+        _POKRYCIE_OBNIZONE[kod] = "no `lingua:` field in podstawy.yaml"
+        _DETEKTORY[kod] = None
+        return None
+    if getattr(Language, nazwa, None) is None:
+        propozycje = _podpowiedz_nazwe(nazwa)
+        _POKRYCIE_OBNIZONE[kod] = (
+            f"`lingua: {nazwa}` is not a name known to lingua"
+            + (f" — did you mean: {', '.join(propozycje)}?" if propozycje else "")
+        )
+        _DETEKTORY[kod] = None
+        return None
+    jezyki = [getattr(Language, n) for n in {nazwa, "POLISH", "ENGLISH"}]
+    _DETEKTORY[kod] = LanguageDetectorBuilder.from_languages(*jezyki).build()
+    return _DETEKTORY[kod]
 
 
 def wykryj_leaki_w_tekscie(
@@ -228,7 +350,7 @@ def wykryj_leaki_w_tekscie(
     if kod == KOD_ZRODLOWY:
         return []
     if detektor is None:
-        detektor = _zbuduj_detektor(kod)
+        detektor = detektor_dla(kod)
 
     leaki: list[Leak] = []
     for nr, linia in enumerate(tekst.split("\n"), start=1):
@@ -239,7 +361,9 @@ def wykryj_leaki_w_tekscie(
         # --- Klasa A: dryf całej linii (lingua na zamaskowanej treści) ---
         zamaskowana = _maskuj_whiteliste(surowa)
         litery = sum(ch.isalpha() for ch in zamaskowana)
-        if litery >= _MIN_LITER_LINGUA:
+        # `detektor is None` = paczka o obniżonym pokryciu (język poza lingua):
+        # klasa A wypada, klasy B/B' niżej działają bez modelu językowego.
+        if detektor is not None and litery >= _MIN_LITER_LINGUA:
             cv = detektor.compute_language_confidence_values(zamaskowana)
             if cv:
                 top = cv[0]
@@ -277,32 +401,38 @@ def wykryj_leaki_w_tekscie(
 
 
 def _wczytaj_sekcje_docelowe(kod: str, nazwa_pliku: str) -> dict[str, str]:
-    """Wczytuje `tresc` z docelowego YAML jako dict sekcji (lub {} gdy brak).
+    """Wczytuje `tresc` z docelowego YAML jako dict sekcji (lub {} gdy brak pliku).
 
-    Brak pliku = legalnie pusty wynik (nie każda paczka ma każdy szablon), ale
-    plik ISTNIEJĄCY i nieczytelny to błąd FATALNY (v18.9): zwrócenie ``{}``
-    dawało bramce „zero sekcji = zero leaków = czysto", czyli zielone światło
-    dla pliku, którego nikt nie zeskanował.
+    Nieczytelny plik, korzeń niebędący mapą, brak klucza `tresc:` i sekcja, która
+    nie jest tekstem — wszystko to błędy FATALNE (v18.26.1). Każdy z tych czterech
+    stanów kończył się wcześniej cichym ``return {}``, czyli bramką meldującą
+    „czysto" o pliku, z którego nie zeskanowała ANI JEDNEJ litery. Schemat jest
+    tu wąski i znany (mapa z `tresc:` jako tekst albo mapa sekcji-tekstów), więc
+    odstępstwo od niego jest usterką pliku, nie sytuacją do przemilczenia.
+
+    Jedyny legalny pusty wynik: BRAK PLIKU (nie każda paczka ma każdy szablon).
     """
     plik = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / nazwa_pliku
     if not plik.is_file():
         return {}
-    try:
-        with open(plik, "r", encoding="utf-8") as fh:
-            dane = yaml.safe_load(fh)
-    except (OSError, yaml.YAMLError) as exc:
-        raise SystemExit(
-            f"❌ audyt_leakow: cannot read {plik} ({exc}) — a scan of this file "
-            f"would be falsely \"clean\"."
-        ) from exc
-    if not isinstance(dane, dict):
-        return {}
-    tresc = dane.get("tresc")
+    tresc = _wczytaj_yaml_lub_padnij(plik).get("tresc")
     if isinstance(tresc, str):
-        return {"_legacy": tresc}
-    if isinstance(tresc, dict):
-        return {k: v for k, v in tresc.items() if isinstance(v, str)}
-    return {}
+        return {"_legacy": tresc}       # schemat sprzed rozbicia na sekcje
+    if tresc is None:
+        _padnij_na_pliku(plik, "no `tresc:` key — nothing would be scanned")
+    if not isinstance(tresc, dict):
+        _padnij_na_pliku(
+            plik,
+            f"`tresc:` is {type(tresc).__name__}, but the scan expects text "
+            f"or a mapping of sections",
+        )
+    nietekstowe = sorted(str(k) for k, v in tresc.items() if not isinstance(v, str))
+    if nietekstowe:
+        _padnij_na_pliku(
+            plik,
+            f"section(s) under `tresc:` that are not text: {', '.join(nietekstowe)}",
+        )
+    return dict(tresc)
 
 
 def leaki_per_sekcja(
@@ -318,7 +448,7 @@ def leaki_per_sekcja(
     listujący konkretne niedotłumaczone fragmenty per sekcja.
     """
     if detektor is None:
-        detektor = _zbuduj_detektor(kod)
+        detektor = detektor_dla(kod)
     wynik: dict[str, list[Leak]] = {}
     for klucz, tresc in _wczytaj_sekcje_docelowe(kod, nazwa_pliku).items():
         leaki = wykryj_leaki_w_tekscie(tresc, kod, detektor, prog_lingua=prog_lingua)
@@ -368,6 +498,18 @@ def _splaszcz_ui(dane, prefiks: str = "") -> dict[str, str]:
     return wynik
 
 
+def _wczytaj_ui(kod: str) -> dict[str, str]:
+    """Spłaszczony `ui.yaml` paczki: `{klucz.kropkowany: wartosc}`.
+
+    Brak pliku → {} (paczka-zalążek bez GUI). Plik nieczytelny → błąd fatalny
+    (`_wczytaj_yaml_lub_padnij`), nie ciche „czysto".
+    """
+    sciezka = DICT_DIR / kod / FOLDER_GUI / NAZWA_UI
+    if not sciezka.is_file():
+        return {}
+    return _splaszcz_ui(_wczytaj_yaml_lub_padnij(sciezka))
+
+
 def leaki_ui_per_klucz(
     kod: str,
     detektor=None,
@@ -380,16 +522,9 @@ def leaki_ui_per_klucz(
     ui.yaml (komunikat/etykieta), nie sekcja manuala. Skanuje tylko sekcje z leakami.
     """
     if detektor is None:
-        detektor = _zbuduj_detektor(kod)
-    sciezka = DICT_DIR / kod / FOLDER_GUI / NAZWA_UI
-    if not sciezka.is_file():
-        return {}
-    try:
-        dane = yaml.safe_load(sciezka.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError):
-        return {}
+        detektor = detektor_dla(kod)
     wynik: dict[str, list[Leak]] = {}
-    for klucz, wartosc in _splaszcz_ui(dane).items():
+    for klucz, wartosc in _wczytaj_ui(kod).items():
         leaki = wykryj_leaki_w_tekscie(wartosc, kod, detektor, prog_lingua=prog_lingua)
         if leaki:
             wynik[klucz] = leaki
@@ -463,17 +598,126 @@ def leaki_canon_dla_jezyka(kod: str) -> dict[str, list[str]]:
             powody = _canon_powody(rx, warianty, tresc)
             if powody:
                 wynik[f"{kod}/{nazwa_pliku}/{klucz}"] = powody
-    sciezka = DICT_DIR / kod / FOLDER_GUI / NAZWA_UI
-    if sciezka.is_file():
-        try:
-            dane = yaml.safe_load(sciezka.read_text(encoding="utf-8"))
-        except (OSError, yaml.YAMLError):
-            dane = None
-        if dane is not None:
-            for klucz, wartosc in _splaszcz_ui(dane).items():
-                powody = _canon_powody(rx, warianty, wartosc)
-                if powody:
-                    wynik[f"{kod}/{NAZWA_UI}/{klucz}"] = powody
+    for klucz, wartosc in _wczytaj_ui(kod).items():
+        powody = _canon_powody(rx, warianty, wartosc)
+        if powody:
+            wynik[f"{kod}/{NAZWA_UI}/{klucz}"] = powody
+    return wynik
+
+
+# ===========================================================================
+# TOOL-NAME GATE — polska nazwa narzędzia w obcym `ui.yaml` (od v18.26.1)
+# ===========================================================================
+# Canon-check wyżej jest KURATORSKI (mapa `DRIFT_VARIANTS`), więc widzi tylko
+# udokumentowane klasy dryfu. Test bojowy przy v18.26.1 pokazał, gdzie ma dziurę:
+# jeden autotłumaczony klucz `diag.powod.lingua` wrócił z polską nazwą Poligloty
+# w PIĘCIU paczkach, a dotychczasowe bramki złapały TRZY. Przeszły dwie odmiany,
+# które nie są dosłownym polskim terminem: fińskie „Poliglotissa" (polski rdzeń
+# + fińska końcówka inessivu) i islandzkie „Poliglot" (kanon `is` to w ogóle
+# rodzime „Tungumálamaður"). Ta klasa jest z definicji nieskończona — model
+# odmieni albo skróci nazwę na tyle sposobów, ile jest języków — więc kuratorska
+# lista wariantów nigdy jej nie domknie.
+#
+# Kryterium jest WYPROWADZONE, nie ręczne: rdzeń polskiej nazwy narzędzia
+# (`main.nazwy_narzedzi.*` w paczce `pl`) kontra kanon TEJ paczki. Paczka, której
+# własny kanon ma ten sam rdzeń, jest z definicji poza podejrzeniem — dlatego
+# hiszpańskie „Políglota" i włoskie „Poliglotta" nie generują szumu, a rosyjskie
+# „Полиглоте" (przypadek miejscownika własnego kanonu) tym bardziej.
+#
+# Trzy zawężenia, każde ZMIERZONE na całym drzewie (wersja bez nich: 1559 trafień):
+#   1. TYLKO `ui.yaml`. Proza podręczników legalnie cytuje polskie ścieżki
+#      i identyfikatory — jest nawet sekcja `krok_7b_polskie_nazewnictwo`, która
+#      polskie nazewnictwo OMAWIA. Objęcie docsów dawało 64 trafienia, w tym
+#      ~59 takich cytatów. W `ui.yaml` polska nazwa narzędzia jest zawsze błędem.
+#   2. Narzędzie `manager` POZA bramką: rdzeń „manager" to wyraz międzynarodowy,
+#      więc niemieckie/angielskie/fińskie zdanie o menedżerze plików trafiało
+#      w bramkę 131 razy. Ta jedna nazwa zostaje przy canon-checku i przeglądzie.
+#   3. Marka maskowana w DWÓCH formach — „Reżyser Audio GPT" i ASCII-owym
+#      „Rezyser Audio GPT" (tak nazywa się folder instalacji, więc pada w prozie
+#      i w komunikatach o ścieżkach).
+# Po tych zawężeniach: 5 trafień w całym drzewie = 5 realnych defektów, zero FP.
+_NARZEDZIA_PREFIKS = "main.nazwy_narzedzi."
+_NARZEDZIA_POZA_GATE = {"manager"}
+_MARKA_ASCII = "Rezyser Audio GPT"
+RE_SLOWO_NAZWY = re.compile(r"[^\W\d_]{4,}", re.UNICODE)
+
+
+def _zwin(tekst: str) -> str:
+    """Małe litery bez diakrytyki (`Políglota` → `poliglota`) — do porównań rdzeni."""
+    return "".join(
+        ch for ch in unicodedata.normalize("NFKD", tekst.lower())
+        if not unicodedata.combining(ch)
+    )
+
+
+def _kanony_narzedzi(kod: str) -> dict[str, str]:
+    """`{nazwa_narzedzia: kanon}` z `main.nazwy_narzedzi.*` paczki (lub {})."""
+    return {
+        klucz[len(_NARZEDZIA_PREFIKS):]: wartosc
+        for klucz, wartosc in _wczytaj_ui(kod).items()
+        if klucz.startswith(_NARZEDZIA_PREFIKS)
+    }
+
+
+def _rdzen_kanonu(nazwa: str) -> str:
+    """Rdzeń nazwy: najdłuższe słowo, zwinięte, bez końcowej samogłoski.
+
+    „Poliglota" → `poliglot` (żeby złapać „Poliglotissa"/„Poliglot"), „Manager
+    Reguł" → `manager`, „Reżyser" → `rezyser`. Końcówkę ścinamy, bo model odmienia
+    nazwę wg gramatyki celu — a prefiks jest niezmienny.
+    """
+    slowa = re.findall(r"[^\W\d_]+", nazwa, re.UNICODE)
+    if not slowa:
+        return ""
+    rdzen = _zwin(max(slowa, key=len))
+    return rdzen[:-1] if rdzen[-1:] in "aeiouy" else rdzen
+
+
+def _rdzenie_zrodlowe() -> dict[str, str]:
+    """`{nazwa_narzedzia: rdzeń_polskiego_kanonu}` w zasięgu bramki (cache)."""
+    global _RDZENIE_CACHE
+    if _RDZENIE_CACHE is None:
+        _RDZENIE_CACHE = {
+            narzedzie: rdzen
+            for narzedzie, kanon in _kanony_narzedzi(KOD_ZRODLOWY).items()
+            if narzedzie not in _NARZEDZIA_POZA_GATE
+            and len(rdzen := _rdzen_kanonu(kanon)) >= 5
+        }
+    return _RDZENIE_CACHE
+
+
+_RDZENIE_CACHE: dict[str, str] | None = None
+
+
+def leaki_narzedzi_dla_jezyka(kod: str) -> dict[str, list[str]]:
+    """`{"<kod>/ui.yaml/<klucz>": ["narzedzie:<słowo>→<kanon>"]}` dla jednej paczki.
+
+    Klucz identyczny z canon-checkiem, więc powody scalają się w jednym wpisie
+    baseline'u (jedna wartość mogła obrazić kanon na dwa sposoby).
+    """
+    rdzenie = _rdzenie_zrodlowe()
+    if not rdzenie:
+        return {}
+    wlasne = {n: _zwin(k) for n, k in _kanony_narzedzi(kod).items()}
+    wynik: dict[str, list[str]] = {}
+    for klucz, tekst in _wczytaj_ui(kod).items():
+        maskowany = _maskuj_whiteliste(tekst)
+        for wariant in (MARKA, _MARKA_ASCII):
+            maskowany = maskowany.replace(wariant, " ")
+        powody: list[str] = []
+        for dopasowanie in RE_SLOWO_NAZWY.finditer(maskowany):
+            slowo = _zwin(dopasowanie.group(0))
+            for narzedzie, rdzen in rdzenie.items():
+                if not slowo.startswith(rdzen):
+                    continue
+                if wlasne.get(narzedzie, "").startswith(rdzen):
+                    break      # własny kanon paczki ma ten sam rdzeń — nie leak
+                powody.append(
+                    f"narzedzie:{dopasowanie.group(0)}→"
+                    f"{_kanony_narzedzi(kod).get(narzedzie, '?')}")
+                break
+        if powody:
+            wynik[f"{kod}/{NAZWA_UI}/{klucz}"] = sorted(powody)
     return wynik
 
 
@@ -538,7 +782,7 @@ def zbierz_wszystkie_leaki(
         kody = list(KODY_DOCELOWE)
     wynik: dict[str, list[str]] = {}
     for kod in kody:
-        detektor = _zbuduj_detektor(kod)
+        detektor = detektor_dla(kod)
         # (1) Szablony docs: dictionaries/<kod>/gui/dokumentacja/*.yaml
         for nazwa_pliku in _szablony_docelowe(kod):
             per_sekcja = leaki_per_sekcja(kod, nazwa_pliku, detektor, prog_lingua=prog_lingua)
@@ -553,6 +797,10 @@ def zbierz_wszystkie_leaki(
         # Scala powody w TEN SAM klucz co PL-leak (jedna wartość mogła mieć oba) —
         # multiset-różnica w bramce działa wtedy poprawnie na połączonej liście.
         for klucz, powody in leaki_canon_dla_jezyka(kod).items():
+            wynik[klucz] = sorted(wynik.get(klucz, []) + powody)
+        # (4) TOOL-NAME GATE (od v18.26.1): polski rdzeń nazwy narzędzia w obcym
+        # `ui.yaml` — klasa, której kuratorski canon-check nie domyka.
+        for klucz, powody in leaki_narzedzi_dla_jezyka(kod).items():
             wynik[klucz] = sorted(wynik.get(klucz, []) + powody)
     return wynik
 
@@ -614,6 +862,25 @@ class WynikBramki:
     nowe: dict[str, list[str]]   # {"<kod>/<plik>/<sekcja>": [powod_norm]} ponad baseline
     pominieto: bool              # True = bramki nie udało się uruchomić (np. brak lingua)
     powod_pominiecia: str        # krótki opis EN, gdy `pominieto`
+    # {kod: powód EN} paczek przeskanowanych z OBNIŻONYM pokryciem (język poza
+    # lingua). Zielona bramka przy niepustym słowniku znaczy „czysto, ale nie
+    # wszędzie tak samo dokładnie" i wołający MUSI to powiedzieć na głos.
+    pokrycie_obnizone: dict[str, str] = field(default_factory=dict)
+
+
+def _opis_pokrycia(pokrycie_obnizone: dict[str, str]) -> str:
+    """„ (8/8 packs at full coverage)" albo „ (7/8 …, 1 reduced)" — do linii ✅.
+
+    Zielona bramka bez tej informacji kłamie przez przemilczenie: przy paczce
+    poza `lingua` nie sprawdziliśmy klasy A, a wygląda to identycznie jak pełny,
+    czysty przebieg.
+    """
+    ile = len(KODY_DOCELOWE)
+    obnizone = len(pokrycie_obnizone)
+    if not obnizone:
+        return f" ({ile}/{ile} packs at full coverage)"
+    return (f" ({ile - obnizone}/{ile} packs at full coverage, "
+            f"{obnizone} reduced)")
 
 
 def bramka_docs(*, prog_lingua: float = 0.70) -> WynikBramki:
@@ -629,7 +896,7 @@ def bramka_docs(*, prog_lingua: float = 0.70) -> WynikBramki:
     except ImportError as exc:
         return WynikBramki(True, {}, True, f"lingua not available ({exc})")
     nowe = roznica_wzgledem_baseline(aktualne, wczytaj_baseline())
-    return WynikBramki(not nowe, nowe, False, "")
+    return WynikBramki(not nowe, nowe, False, "", dict(_POKRYCIE_OBNIZONE))
 
 
 # ===========================================================================
@@ -670,7 +937,6 @@ DEV_TOOLE = {
     # w runtime za GUI Poligloty, więc polski hard-kod jest tam realnym leakiem
     # i plik MUSI zostać skanowany.
     "tlumacz_bramki.py", "tlumacz_rdzen.py", "dev_konsola.py",
-    "test_core_updater.py",
 }
 
 # Prefiks rodziny autotłumaczy. Każdy `buduj_wielojezyczne_*.py` jest z definicji
@@ -684,10 +950,24 @@ DEV_TOOLE = {
 # — mają być wykluczeni w chwili powstania, bez pamiętania o tej liście.
 PREFIKS_AUTOTLUMACZY = "buduj_wielojezyczne_"
 
+# Testy regresyjne. Nie wchodzą do bundla, nie mają powierzchni user-facing,
+# a ich FIXTURE'Y są z natury polskie (proza projektu, nazwy nagłówków), bo
+# taki materiał sprawdzają — zob. `test_puste_linie_rezysera.py`. Reguła
+# prefiksowa, a nie kolejna nazwa na liście `DEV_TOOLE` (gdzie do v18.26.1
+# stał sam `test_core_updater.py`), bo to samo powtórzyłoby się przy KAŻDYM
+# następnym teście: dokładnie ten wzorzec, po którym prefiks dostała rodzina
+# autotłumaczy. Bramka KONTRAKTU obejmuje te pliki dalej (dev-tool nią jest),
+# ale one nie mają ani argparse, ani linii ❌/⚠️, więc nic tam nie zgłasza.
+PREFIKS_TESTOW = "test_"
+
 
 def czy_dev_tool(nazwa_pliku: str) -> bool:
     """Czy ten plik `.py` jest dev-toolem wyłączonym ze skanu hard-kodów?"""
-    return nazwa_pliku in DEV_TOOLE or nazwa_pliku.startswith(PREFIKS_AUTOTLUMACZY)
+    return (
+        nazwa_pliku in DEV_TOOLE
+        or nazwa_pliku.startswith(PREFIKS_AUTOTLUMACZY)
+        or nazwa_pliku.startswith(PREFIKS_TESTOW)
+    )
 
 # Metody wx (i pochodne), których string-argument widzi user wprost.
 SINKI_USER_FACING = {
@@ -749,12 +1029,23 @@ def _detektor_pl_en():
     ).build()
 
 
-def _sygnal_pl(tekst: str, detektor=None, *, prog_lingua: float = 0.70) -> str:
+def _sygnal_pl(
+    tekst: str,
+    detektor=None,
+    *,
+    prog_lingua: float = 0.70,
+    min_liter: int = _MIN_LITER_LINGUA,
+) -> str:
     """Zwraca krótki powód, gdy tekst wygląda na polski; inaczej ''.
 
     Trzy warstwy (jak docs-detektor): znaki diakrytyczne → kuratorskie słowa →
     `lingua` dla dłuższych literałów (łapie diacritic-free PL typu „Blok 1/2
     odzyskany z pliku zapisu", którego dwie pierwsze warstwy przepuszczają).
+
+    `min_liter` schodzi z domyślnych 16 tylko dla kategorii `fatal` bramki
+    kontraktu (krótkie powody porażki po zamaskowaniu identyfikatorów) — patrz
+    pomiar w komentarzu sekcji BRAMKA KONTRAKTU. Domyślna wartość jest kanonem
+    dwóch istniejących baseline'ów i NIE wolno jej ruszać.
     """
     znaki = RE_PL_ZNAKI.findall(tekst)
     if znaki:
@@ -769,7 +1060,7 @@ def _sygnal_pl(tekst: str, detektor=None, *, prog_lingua: float = 0.70) -> str:
         # które lingua myli z polskim (np. „ai_ostrzezenie_iso").
         if " " not in czysty.strip():
             return ""
-        if sum(ch.isalpha() for ch in czysty) >= _MIN_LITER_LINGUA:
+        if sum(ch.isalpha() for ch in czysty) >= min_liter:
             cv = detektor.compute_language_confidence_values(czysty)
             if cv and cv[0].language.name == "POLISH" and cv[0].value >= prog_lingua:
                 return f"lingua:PL {cv[0].value:.2f}"
@@ -831,13 +1122,35 @@ def _kontekst_wezla(node: ast.AST) -> tuple[str | None, set[str], str]:
     return kwarg, klucze, func
 
 
+def _parsuj_zrodlo(sciezka: Path) -> ast.Module:
+    """Parsuje `.py` do AST albo PADA — plik bez AST to fałszywe „czysto" (v18.26).
+
+    Ta sama reguła co dla YAML (:func:`_wczytaj_yaml_lub_padnij`), tylko dla
+    drugiej powierzchni. Do v18.26 oba skany źródeł robiły `except (OSError,
+    SyntaxError): return []`, więc plik z literówką składniową wypadał ze skanu
+    hard-kodów I z bramki kontraktu, a bramki meldowały „czysto" o pliku,
+    którego nikt nie przeczytał. Argument „kontrybutor przecież uruchomi kod
+    i zobaczy traceback" przestał wystarczać, gdy runtime (v18.24.2/v18.25.0)
+    przestał milczeć o zepsutym YAML-u: narzędzia dewelopera trzymają ten sam
+    standard co aplikacja.
+
+    Świadomie FATALNIE, a nie ostrzeżeniem: `SyntaxError` w pliku `.py` w korzeniu
+    repo to albo zepsuty moduł aplikacji (build i tak padnie), albo cudzy plik
+    roboczy, który nie powinien tam leżeć — komunikat mówi jedno i drugie.
+    """
+    try:
+        return ast.parse(sciezka.read_text(encoding="utf-8"), filename=str(sciezka))
+    except (OSError, SyntaxError) as exc:
+        raise SystemExit(
+            f"❌ audyt_leakow: cannot parse {sciezka} ({exc}) — a scan of this file "
+            f"would be falsely \"clean\". Fix the file or move it out of the "
+            f"repository root."
+        ) from exc
+
+
 def _analizuj_plik(sciezka: Path, detektor=None) -> list[LeakPy]:
     """Skanuje jeden plik `.py` pod kątem PL-string-literałów (poza docstring/komentarz)."""
-    try:
-        zrodlo = sciezka.read_text(encoding="utf-8")
-        drzewo = ast.parse(zrodlo, filename=str(sciezka))
-    except (OSError, SyntaxError):
-        return []
+    drzewo = _parsuj_zrodlo(sciezka)
 
     # Wskaźniki na rodzica (AST ich nie trzyma) — potrzebne do klasyfikacji.
     for rodzic in ast.walk(drzewo):
@@ -946,7 +1259,36 @@ def zbierz_leaki_py(root: Path = ROOT) -> dict[str, list[str]]:
 #
 #   * teksty argparse: `help=`, `description=`, `epilog=`, `metavar=`,
 #   * literały z `❌` albo `⚠️` (legenda emoji: error / warning),
-#   * banery `==========` (nagłówki bloków werdyktu).
+#   * banery `==========` (nagłówki bloków werdyktu),
+#   * literały docierające do `raise` — kategoria `fatal`, od v18.26.
+#
+# KATEGORIA `fatal` i dlaczego akurat taka (v18.26). Bramka przepuściła własny
+# plik: `_skanuj_lingua_z_podstaw` zbierał POLSKIE powody („podstawy.yaml
+# nieczytelny") do listy i doklejał je do ANGIELSKIEGO komunikatu fatalnego —
+# czyli „why it failed" po polsku, w literale bez ❌ i bez `help=`, więc dla
+# trzech dotychczasowych kategorii niewidoczny. Zmierzone kandydatury na
+# kryterium (cała rodzina dev-tooli, `lingua` na żywo):
+#   * „literał w wywołaniu-sinku (`append`/`print`)" → 82 trafienia,
+#   * „literał w liście wstrzykiwanej do komunikatu z ❌/⚠️" → 61 trafień
+# — w obu wypadkach niemal wyłącznie świadome polskie ZNALEZISKA autotłumaczy
+# (`buduj_wielojezyczne_*` raportują nimi rozjazdy paczek maintainerowi). Taki
+# baseline nikt by nie czytał, dokładnie jak przy `✅`/`ℹ️` wyżej. Zawężenie do
+# komunikatu FATALNEGO daje 6 trafień w całym drzewie, w tym oba realne defekty
+# — i jest zgodne z kontraktem wprost: wyjątek, który przerywa narzędzie, MÓWI
+# kontrybutorowi, dlaczego padło.
+#
+# Dlaczego ta kategoria ma WŁASNY próg liter (`_MIN_LITER_FATAL`), a nie własną
+# maskę — i to jest wynik drugiego pomiaru, który wywrócił pierwszą wersję tej
+# bramki. Powód porażki jest z natury krótki, a maska identyfikatorów zjada mu
+# połowę objętości („podstawy.yaml" i `` `lingua:` `` to nazwa pliku i nazwa
+# pola), więc oba realne literały spadały z 22 i 19 liter do 11 i 9 — pod próg
+# 16 — i bramka zostawała zielona. Pierwsza próba (skan BEZ maski dla tej jednej
+# kategorii) załatała to pozornie: zaczęła zgłaszać także POPRAWIONE, angielskie
+# wersje tych samych zdań (`lingua` widzi „unreadable podstawy.yaml" jako POLISH
+# 0.76), bo maska istnieje właśnie po to. Zmierzone na tych czterech zdaniach po
+# masce: PL 1.00 / 0.86 przy 11 i 9 literach, EN 0.99 / 0.90 przy 10 i 9 —
+# `lingua` rozdziela je czysto, brakowało jej tylko prawa głosu przy krótkim
+# tekście. Stąd: maska jak wszędzie, próg liter 8 wyłącznie tutaj.
 #
 # CELOWO NIEOBJĘTE: linie `✅`/`⏭️`/`ℹ️`. Werdykt („✅ Success: 3/8") i chatter
 # („✅ fi/plik.yaml: OK") są mechanicznie NIEROZRÓŻNIALNE, a kontrakt dopuszcza
@@ -957,6 +1299,10 @@ def zbierz_leaki_py(root: Path = ROOT) -> dict[str, list[str]]:
 # usterka kosmetyczna, nie zepsuta paczka — blokowanie builda byłoby nieproporcjonalne.
 _KWARGI_CLI = {"help", "description", "epilog", "metavar"}
 
+# Próg liter dla kategorii `fatal` (zamiast `_MIN_LITER_LINGUA` = 16). Zmierzony,
+# nie dobrany „na oko" — uzasadnienie w komentarzu sekcji wyżej.
+_MIN_LITER_FATAL = 8
+
 # Dev-toole POZA kontraktem — narzędzia, których kontrybutor nie uruchomi.
 # `odpowiedz_lokalnie.py` wymaga zalogowanego `gh` CLI maintainera i domyka
 # issue jego głosem; dla kogokolwiek innego jest martwe, więc jego polskie
@@ -966,7 +1312,10 @@ POZA_KONTRAKTEM = {"odpowiedz_lokalnie.py"}
 
 # Repozytorium jest polskojęzyczne, więc angielskie zdanie dev-toola RUTYNOWO
 # cytuje polskie IDENTYFIKATORY: nazwy flag (`--tylko-walidacja`), nazwy plików
-# (`finski,rosyjski`), stałe (`KLASY_POL`, `BATCH_MAX_ZNAKOW`). Bez zamaskowania
+# (`finski,rosyjski`), stałe (`KLASY_POL`, `BATCH_MAX_ZNAKOW`) i nazwy klas
+# w CamelCase (`BladStrukturyJSON` — dopisane w v18.26.1, gdy objęcie testów
+# regułą prefiksową pokazało angielskie zdanie „BladStrukturyJSON was not
+# raised" zgłoszone jako polskie). Bez zamaskowania
 # ich `lingua` orzeka „POLISH" o zdaniu w rodzaju „========== SUMMARY
 # (--finalizuj) ==========" i baseline puchnie od wpisów, w których nie ma nic
 # do naprawienia — a wtedy nikt go nie czyta i realny regres przechodzi.
@@ -976,8 +1325,55 @@ _RE_MASKA_IDENTYFIKATOROW = re.compile(
     r"`[^`]*`"                      # `literał techniczny` / `--flaga` / ścieżka
     r"|--?[a-z][a-z0-9-]*"          # --tylko-walidacja, -f
     r"|\b[A-Z][A-Z0-9_]{3,}\b"      # KLASY_POL, BATCH_MAX_ZNAKOW
+    r"|\b[A-Z][a-z0-9]+(?:[A-Z][A-Za-z0-9]*)+\b"      # BladStrukturyJSON, PominietyPlik
     r"|\b\w+\.(?:yaml|py|json|env|txt|html|md)\b"   # nazwa_pliku.yaml
 )
+
+
+def _literaly_fatalne(drzewo: ast.Module) -> set[int]:
+    """`id()` literałów, których treść trafia do komunikatu przerywającego pracę.
+
+    Dwie drogi (druga jest tą, którą wpuściliśmy własny defekt):
+      1. WPROST — literał w wyrażeniu `raise ...` (dowolnie zagnieżdżony, więc
+         łapie też `raise SystemExit("a" + "b")` i f-stringi). Skanowane w całym
+         drzewie, bo `raise` bywa i na poziomie modułu.
+      2. PRZEZ NOŚNIK — `problemy.append("powód")`, gdzie `problemy` pojawia się
+         w `raise` TEJ SAMEJ funkcji (`"\n  - ".join(problemy)`). Dopasowanie po
+         NAZWIE, bez śledzenia przepływu: to lejek over-reportujący, jak cały ten
+         moduł, a nadwyżkę wchłania baseline. Świadomie per FUNKCJA, nie per plik
+         — `problemy` to w tej rodzinie najczęstsza nazwa listy diagnostyk, więc
+         zasięg pliku zrównałby ze sobą nośnik komunikatu fatalnego i zwykły
+         rejestr znalezisk, który nigdzie nie jest rzucany.
+    """
+    fatalne: set[int] = set()
+    for wezel in ast.walk(drzewo):
+        if isinstance(wezel, ast.Raise) and wezel.exc is not None:
+            for w in ast.walk(wezel.exc):
+                if isinstance(w, (ast.Constant, ast.JoinedStr)):
+                    fatalne.add(id(w))
+
+    for zakres in ast.walk(drzewo):
+        if not isinstance(zakres, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        nosniki: set[str] = {
+            n.id
+            for rzut in ast.walk(zakres)
+            if isinstance(rzut, ast.Raise) and rzut.exc is not None
+            for n in ast.walk(rzut.exc) if isinstance(n, ast.Name)
+        }
+        if not nosniki:
+            continue
+        for wezel in ast.walk(zakres):
+            if (isinstance(wezel, ast.Call)
+                    and isinstance(wezel.func, ast.Attribute)
+                    and wezel.func.attr in ("append", "extend")
+                    and isinstance(wezel.func.value, ast.Name)
+                    and wezel.func.value.id in nosniki):
+                for arg in wezel.args:
+                    for w in ast.walk(arg):
+                        if isinstance(w, (ast.Constant, ast.JoinedStr)):
+                            fatalne.add(id(w))
+    return fatalne
 
 
 def _literaly_kontraktu(sciezka: Path, detektor=None) -> list[LeakPy]:
@@ -990,11 +1386,7 @@ def _literaly_kontraktu(sciezka: Path, detektor=None) -> list[LeakPy]:
     w zagnieżdżonym f-stringu wewnątrz wyrażenia warunkowego, i pierwszy przebieg
     sprzątania v18.24 je z tego powodu przeoczył.
     """
-    try:
-        zrodlo = sciezka.read_text(encoding="utf-8")
-        drzewo = ast.parse(zrodlo, filename=str(sciezka))
-    except (OSError, SyntaxError):
-        return []
+    drzewo = _parsuj_zrodlo(sciezka)
 
     for rodzic in ast.walk(drzewo):
         for dziecko in ast.iter_child_nodes(rodzic):
@@ -1008,6 +1400,8 @@ def _literaly_kontraktu(sciezka: Path, detektor=None) -> list[LeakPy]:
                     and isinstance(ciało[0].value, ast.Constant)
                     and isinstance(ciało[0].value.value, str)):
                 docstringi.add(id(ciało[0].value))
+
+    fatalne = _literaly_fatalne(drzewo)
 
     trafienia: list[LeakPy] = []
     for w in ast.walk(drzewo):
@@ -1035,9 +1429,13 @@ def _literaly_kontraktu(sciezka: Path, detektor=None) -> list[LeakPy]:
             kategoria = "ostrzezenie"
         elif "=====" in tekst:
             kategoria = "baner"
+        elif id(wezel) in fatalne:
+            kategoria = "fatal"
         else:
             continue
-        powod = _sygnal_pl(_RE_MASKA_IDENTYFIKATOROW.sub(" ", tekst), detektor)
+        powod = _sygnal_pl(
+            _RE_MASKA_IDENTYFIKATOROW.sub(" ", tekst), detektor,
+            min_liter=_MIN_LITER_FATAL if kategoria == "fatal" else _MIN_LITER_LINGUA)
         if not powod:
             continue
         trafienia.append(LeakPy(
@@ -1175,8 +1573,9 @@ def main() -> int:
                             f"Overwrites {BASELINE_PY_PATH.name} — review the diff before committing.")
     grupa.add_argument("--bramka-kontrakt", dest="bramka_kontrakt", action="store_true",
                        help="WARNING-ONLY gate on the CONTRIBUTING language contract in the "
-                            "dev tools (argparse help/description/epilog/metavar, ❌/⚠️ lines "
-                            f"and `====` banners) against {BASELINE_KONTRAKT_PATH.name}. "
+                            "dev tools (argparse help/description/epilog/metavar, ❌/⚠️ lines, "
+                            "`====` banners and the message of an aborting `raise`) "
+                            f"against {BASELINE_KONTRAKT_PATH.name}. "
                             "Always exits 0 — a Polish help text is cosmetic, not a broken "
                             "pack. Polish progress chatter is allowed and NOT checked.")
     grupa.add_argument("--zapisz-baseline-kontrakt", dest="zapisz_baseline_kontrakt",
@@ -1214,7 +1613,7 @@ def main() -> int:
                   "Install `lingua` to run it (maintainer/CI).")
             return 0
         if wynik.czysto:
-            print(f"✅ No Polish CLI text or ❌/⚠️ line above the baseline "
+            print(f"✅ No Polish CLI text, ❌/⚠️ line or abort message above the baseline "
                   f"({BASELINE_KONTRAKT_PATH.name}).")
             print("============================================================")
             return 0
@@ -1284,8 +1683,13 @@ def main() -> int:
             print(f"⚠️  Gate skipped: {wynik.powod_pominiecia}. "
                   "Install `lingua` to run it (maintainer/CI).")
             return 0
+        for kod, powod in sorted(wynik.pokrycie_obnizone.items()):
+            print(f"⚠️  {kod}: outside `lingua` ({powod}) — scanned with the "
+                  f"character/term layers only. Class A (whole-line drift) is "
+                  f"NOT checked for this pack.")
         if wynik.czysto:
-            print(f"✅ No leaks above the baseline ({BASELINE_PATH.name}).")
+            print(f"✅ No leaks above the baseline ({BASELINE_PATH.name})"
+                  f"{_opis_pokrycia(wynik.pokrycie_obnizone)}.")
             return 0
         ile = sum(len(v) for v in wynik.nowe.values())
         print(f"❌ {ile} leak(s) ABOVE the baseline in {len(wynik.nowe)} section(s) "
@@ -1309,7 +1713,7 @@ def main() -> int:
 
     suma_leakow = 0
     for kod in kody:
-        detektor = _zbuduj_detektor(kod)
+        detektor = detektor_dla(kod)
         print(f"\n========== {kod.upper()} ==========")
         leakow_jez = 0
         for nazwa_pliku in _szablony_docelowe(kod):

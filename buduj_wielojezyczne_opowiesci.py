@@ -633,14 +633,14 @@ def zbierz_jednostki_pol(
             klasa = KLASA_KONTENER
         if isinstance(wezel, dict):
             if kroki and klasa != KLASA_KONTENER:
-                nieznane.append(".".join(str(k) for k in kroki) + " (mapa, a nie tekst)")
+                nieznane.append(".".join(str(k) for k in kroki) + " (a map, not text)")
                 return
             for klucz in list(wezel.keys()):
                 zejdz(wezel[klucz], kroki + (str(klucz),))
             return
         if isinstance(wezel, list):
             if klasa != KLASA_KONTENER:
-                nieznane.append(".".join(str(k) for k in kroki) + " (lista, a nie tekst)")
+                nieznane.append(".".join(str(k) for k in kroki) + " (a list, not text)")
                 return
             for idx in range(len(wezel)):
                 zejdz(wezel[idx], kroki + (idx,))

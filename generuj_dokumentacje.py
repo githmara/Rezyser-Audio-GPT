@@ -1532,12 +1532,16 @@ def waliduj() -> int:
               "(degraded context, e.g. a fresh clone without the dev toolchain).")
     else:
         wynik = audyt_leakow.bramka_docs()
+        for kod, powod in sorted(wynik.pokrycie_obnizone.items()):
+            print(f"⚠️  Reduced coverage for `{kod}`: {powod}. Class A "
+                  f"(whole-line drift) is NOT checked for this pack.")
         if wynik.pominieto:
             print(f"ℹ️  Leak gate skipped: {wynik.powod_pominiecia}. "
                   "Install `lingua` to run it (maintainer/CI).")
         elif wynik.czysto:
             print("✅ No Polish-text leaks beyond the accepted baseline "
-                  f"({audyt_leakow.BASELINE_PATH.name}).")
+                  f"({audyt_leakow.BASELINE_PATH.name})"
+                  f"{audyt_leakow._opis_pokrycia(wynik.pokrycie_obnizone)}.")
         else:
             leaki_blokujace = True
             ile = sum(len(v) for v in wynik.nowe.values())

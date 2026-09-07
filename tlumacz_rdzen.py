@@ -315,8 +315,8 @@ def wywolaj_llm(
         dane = json.loads(surowa)
     except json.JSONDecodeError as exc:
         raise RuntimeError(
-            f"Odpowiedź LLM nie jest poprawnym JSON: {exc}\n"
-            f"Pierwsze 200 znaków: {surowa[:200]!r}"
+            f"The LLM response is not valid JSON: {exc}\n"
+            f"First 200 characters: {surowa[:200]!r}"
         ) from exc
 
     arr: Any = dane.get("translations") if isinstance(dane, dict) else dane
@@ -334,8 +334,8 @@ def wywolaj_llm(
                 continue
     if not mapa:
         raise RuntimeError(
-            f"Nie udało się sparsować żadnego id→target.\n"
-            f"Pierwsze 400 znaków surowej odpowiedzi: {surowa[:400]!r}"
+            f"Could not parse a single id→target pair.\n"
+            f"First 400 characters of the raw response: {surowa[:400]!r}"
         )
     return mapa
 

@@ -102,6 +102,14 @@ diag:
     wpis: |-
        One entry inside the file is incomplete (it is named in the details) and
        was skipped. The remaining entries from that file work normally.
+    lingua: |-
+       The “lingua” field in the base file tells the application which name to use when
+       recognising this language in mixed text, and the value entered is not one of the
+       names the built-in detector knows. If the details offer a suggestion, enter it in
+       place of the current value. If there is no suggestion, the detector most likely
+       does not support this language – the pack still works normally, but it will not be
+       recognised from its content alone: pick it from the list in the Polyglot module and
+       turn on forcing a single language for the whole document.
 
 # -----------------------------------------------------------------------------
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)

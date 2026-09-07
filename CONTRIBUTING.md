@@ -12,7 +12,9 @@ or why it failed is in English.** Routine progress chatter may still appear in
 Polish — use the emoji and the English error/summary lines to navigate it.
 
 Concretely, these are English: `--help` texts (including `metavar`), every `❌`
-and `⚠️` line, the `====` banner of a result block and the verdict lines under it.
+and `⚠️` line, the `====` banner of a result block and the verdict lines under it,
+and the message of an exception that aborts a tool — including the reasons a tool
+collects into a list that its abort message then joins.
 These may stay Polish: per-item progress (`🌍 fi/manual.yaml …`, `✅ fi/manual.yaml:
 OK`, `⏭️ skipping`, `ℹ️ 14 units`) and code comments. `audyt_leakow.py
 --bramka-kontrakt` checks the first group and warns on a regression; it never
@@ -20,7 +22,9 @@ blocks a build, and it deliberately ignores the second group, because a verdict
 `✅` and a progress `✅` cannot be told apart mechanically. Polish **code
 identifiers** quoted inside an English sentence (flag names such as
 `--tylko-walidacja`, file names such as `finski.yaml`, constants such as
-`KLASY_POL`) are correct and are masked by the gate rather than reported.
+`KLASY_POL`) are correct and are masked by the gate rather than reported. An abort
+message is usually one short phrase, so after that masking the gate needs fewer
+letters before it asks `lingua` for a verdict there than it does elsewhere.
 
 ## Emoji status legend (canonical)
 
@@ -146,6 +150,41 @@ Pass `--help` for full usage (help text is in English).
    the gates are mechanical and none of them can hear.
 6. Review the drafts, finalize with `-f`, then regenerate docs with
    `python generuj_dokumentacje.py -v`.
+
+### Automatic detection only covers the languages `lingua` knows
+
+Polyglot detects the language **per paragraph** and applies that language's pack
+to each fragment separately. The detector is `lingua-language-detector`, bundled
+inside the release, and it knows 75 languages (2.1.1) — no more. Each pack
+declares its own name for it in `podstawy.yaml`:
+
+```yaml
+lingua: ICELANDIC     # an enum name from lingua.Language, not a free-text label
+```
+
+If your language is not one of the 75 — Faroese, Maltese, Luxembourgish, Khmer,
+Lao, Nepali, Kurdish and Amharic are among the absent ones — **leave the field
+commented out and say so in the pull request.** Nothing else about the pack
+changes: accents, ciphers, Director modes, Tales and the interface all work. The
+one thing that stops working is recognition from the text itself, so in Polyglot
+the user picks your language from the list and ticks "force one language for the
+whole document"; a document mixing your language with another one is then
+processed as if it were monolingual.
+
+Do not guess the name instead. Four traps where the obvious guess is not an enum
+name at all: `NORWEGIAN` (the enum has `BOKMAL` and `NYNORSK`, with no umbrella
+name), `SLOVENIAN` (it is `SLOVENE`), `FLEMISH` (it is `DUTCH`), `FILIPINO` (it
+is `TAGALOG`). A name the detector does not know has exactly the same effect as
+no field — the pack drops out of detection — but it also makes the pack look
+correctly configured. Since 18.26.1 the application no longer keeps that to
+itself: the "Skipped rules" report names the file, quotes the value and suggests
+the closest valid names.
+
+There is one consequence for the dev tools too. The docs leak gate builds its
+detector from the same field, so a pack outside `lingua` is scanned with the
+character and curated-term layers only — class A (a whole line drifting back to
+Polish) is not checked there. The gate prints which packs are in that state and
+how many are at full coverage, and it does not block the build.
 
 ### Writing systems the engine handles today — and the ones to ask about first
 

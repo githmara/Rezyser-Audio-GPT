@@ -48,6 +48,7 @@ nowych plików w kodzie – wystarczy wrzucić YAML i uruchomić aplikację.
 
 from __future__ import annotations
 
+import difflib
 import os
 import random
 import re
@@ -68,7 +69,12 @@ import sciezki
 # v18.24.2: wspólny rejestr powodów pominięcia pliku reguł (patrz
 # `gui_diagnostyka`). Import jest jednokierunkowy i bez ryzyka cyklu —
 # `przepisy_rezysera` ciągnie tylko `os`/`sys`/`yaml`/`sciezki`.
-from przepisy_rezysera import POWOD_PARSE, opis_bledu_yaml, zglos_pominiecie
+from przepisy_rezysera import (
+    POWOD_LINGUA,
+    POWOD_PARSE,
+    opis_bledu_yaml,
+    zglos_pominiecie,
+)
 
 # 13.5: detekcja języka oparta na ``lingua-language-detector``.
 # Lingua jest deterministyczna z założenia (operuje na n-gramowych modelach
@@ -405,9 +411,26 @@ def wyczysc_cache() -> None:
     w Managerze Reguł (v18.24.2), żeby poprawka pliku akcentu albo szyfru
     działała bez zamykania aplikacji. Rejestr powodów pominięcia czyści
     ``przepisy_rezysera``, bo jest wspólny dla wszystkich loaderów.
+
+    Od v18.26.1 zeruje TAKŻE mapowanie i singleton detektora ``lingua``.
+    Wcześniej „Odśwież" nie dotykało ani jednego, ani drugiego, więc obietnica
+    „naprawa bez restartu" nie obejmowała detekcji języka: paczka DODANA
+    w Managerze Reguł nie wchodziła do detektora do zamknięcia aplikacji,
+    a poprawiona wartość ``lingua:`` (np. ``NORWEGIAN`` → ``BOKMAL``) nadal
+    była tą błędną — przy czym NIC tego użytkownikowi nie mówiło.
+
+    Budowa detektora ładuje modele n-gramowe i jest kosztowna, ale ta funkcja
+    chodzi wyłącznie z jawnej akcji użytkownika (jedyny wołający to
+    ``gui_diagnostyka.przeskanuj_reguly``), więc koszt jest zamierzony. Worker
+    w tle, który trzyma referencję do starego detektora, dokończy nią pracę —
+    obiekt jest niemutowalny, a kolejne wywołanie zbuduje świeży.
     """
+    global _LINGUA_MAPOWANIE_CACHE, _LINGUA_DETEKTOR, _LINGUA_DETEKTOR_BLD_FAILED
     _CACHE_PODSTAWY.clear()
     _CACHE_WARIANTOW.clear()
+    _LINGUA_MAPOWANIE_CACHE = None
+    _LINGUA_DETEKTOR = None
+    _LINGUA_DETEKTOR_BLD_FAILED = False
 
 
 def _zaladuj_podstawy(jezyk: str) -> dict:
@@ -770,6 +793,56 @@ _MIN_TEKST_DLA_DETEKCJI = 20
 
 _LINGUA_MAPOWANIE_CACHE: dict[str, Any] | None = None
 
+# Nazwy, które człowiek wpisuje odruchowo, a których enum ``lingua.Language``
+# NIE ZNA, choć sam język obsługuje pod inną nazwą. To nie literówki (te łapie
+# `difflib` niżej), a rozjazdy NAZEWNICTWA — i najgroźniejsza klasa, bo paczka
+# wygląda na poprawną: „norweski" w lingua istnieje wyłącznie jako dwa odrębne
+# standardy pisane, a „flamandzki" jako niderlandzki.
+_LINGUA_ALIASY: dict[str, tuple[str, ...]] = {
+    "NORWEGIAN": ("BOKMAL", "NYNORSK"),
+    "SLOVENIAN": ("SLOVENE",),
+    "FLEMISH": ("DUTCH",),
+    "FILIPINO": ("TAGALOG",),
+    "MANDARIN": ("CHINESE",),
+    "FARSI": ("PERSIAN",),
+    "MOLDOVAN": ("ROMANIAN",),
+    "BRAZILIAN": ("PORTUGUESE",),
+}
+
+
+def _podpowiedz_nazwe_lingua(wartosc: str) -> list[str]:
+    """Nazwy enuma, które user prawdopodobnie miał na myśli (może być pusta).
+
+    Dwa źródła, w tej kolejności: kuratorska mapa :data:`_LINGUA_ALIASY`
+    (rozjazd nazewnictwa) i ``difflib`` (literówka). Kandydaci z obu źródeł
+    są weryfikowani przez ``hasattr``, żeby zmiana enuma w nowszej wersji
+    lingua nie zaczęła produkować martwych podpowiedzi.
+
+    Wynik ``difflib`` jest DODATKOWO filtrowany po pierwszej literze i to nie
+    jest ozdoba — zmierzone na wersji 2.1.1: bez tego filtra „NORWEGIAN"
+    dostaje podpowiedź „GEORGIAN", a „FLEMISH" (przy luźniejszym progu)
+    „POLISH". Podpowiedź semantycznie absurdalna jest gorsza niż jej brak, bo
+    użytkownik nie ma jak jej zweryfikować. Filtr zachowuje przy tym WSZYSTKIE
+    trafienia prawdziwe (POLSIH→POLISH, GERMEN→GERMAN, ICELANDIAN→ICELANDIC,
+    SLOVENIAN→SLOVENE).
+    """
+    if _LinguaLanguage is None:
+        return []
+    nazwa = wartosc.strip().upper()
+    kandydaci: list[str] = [
+        n for n in _LINGUA_ALIASY.get(nazwa, ())
+        if getattr(_LinguaLanguage, n, None) is not None
+    ]
+    if kandydaci:
+        return kandydaci
+    if not nazwa[:1].isalpha():
+        return []
+    wszystkie = [n for n in dir(_LinguaLanguage) if n.isupper()]
+    return [
+        n for n in difflib.get_close_matches(nazwa, wszystkie, n=3, cutoff=0.7)
+        if n[:1] == nazwa[:1]
+    ]
+
 
 def _zbuduj_mapowanie_lingua() -> dict[str, Any]:
     """Skanuje ``dictionaries/<kod>/podstawy.yaml`` i zwraca mapę ISO → ``Language``.
@@ -779,6 +852,13 @@ def _zbuduj_mapowanie_lingua() -> dict[str, Any]:
     wersji ``lingua-language-detector`` (np. literówka, nowsze enum-y, jeszcze
     nieobsługiwany przez paczkę). Wynik jest cache'owany — pierwszy skan
     woła się przy budowie detektora, kolejne wywołania są O(1).
+
+    Te dwa pominięcia różnią się jednak stopniem winy i od v18.26.1 różnią się
+    też widocznością. BRAK pola to świadoma decyzja autora paczki, której
+    `lingua` nie obsługuje (szablon Managera Reguł każe wtedy pole
+    zakomentować) — zostaje ciche. Wartość, której detektor NIE ZNA, jest
+    usterką i trafia do rejestru `PominietyPlik`, czyli do raportu, który
+    użytkownik zobaczy — razem z podpowiedzią najbliższych poprawnych nazw.
 
     Wynik ``{}`` (np. brak ``lingua-py`` w środowisku albo żaden
     ``podstawy.yaml`` nie ma pola ``lingua``) prowadzi do całkowitego wyłączenia
@@ -802,14 +882,42 @@ def _zbuduj_mapowanie_lingua() -> dict[str, Any]:
         # KeyError na każdym imporcie modułu — defensywnie pomijamy.
         kandydat = getattr(_LinguaLanguage, nazwa_enuma, None)
         if kandydat is None:
-            _dev_log(f"Pole lingua: '{wartosc}' w "
-                     f"dictionaries/{kod}/podstawy.yaml nie jest znaną nazwą "
-                     f"`lingua.Language` — język pomijany w detektorze.")
+            # Do v18.26.0 szedł tu wyłącznie `_dev_log`, czyli konsola
+            # dewelopera — w paczce release NIEISTNIEJĄCA. Użytkownik, który
+            # dodał język Managerem Reguł i wpisał nazwę nieznaną detektorowi,
+            # nie dostawał ŻADNEGO sygnału: paczka po prostu nie brała udziału
+            # w detekcji. Rejestr `PominietyPlik` (v18.24.2) jest tym kanałem.
+            podpowiedzi = _podpowiedz_nazwe_lingua(wartosc)
+            szczegol = f"lingua: {wartosc.strip()}"
+            if podpowiedzi:
+                szczegol += " -> " + ", ".join(podpowiedzi)
+            zglos_pominiecie(
+                os.path.join(DICTIONARIES_DIR, kod, "podstawy.yaml"),
+                POWOD_LINGUA,
+                szczegol,
+            )
             continue
         mapa[kod] = kandydat
 
     _LINGUA_MAPOWANIE_CACHE = mapa
     return _LINGUA_MAPOWANIE_CACHE
+
+
+def jezyki_w_detekcji() -> list[str]:
+    """Kody ISO paczek, które BIORĄ UDZIAŁ w automatycznej detekcji języka.
+
+    Publiczne wejście dla diagnostyki (``gui_diagnostyka.przeskanuj_reguly``):
+    wywołanie wymusza skan WSZYSTKICH paczek, więc rejestr powodów dowiaduje
+    się o niezmapowanym polu ``lingua:`` niezależnie od tego, w które narzędzia
+    użytkownik zdążył wejść. Różnica wobec reguł Reżysera jest tu istotna:
+    tamte są per język interfejsu, a detektor jest JEDEN dla całej aplikacji,
+    więc pytanie „czy moje pliki są dobre" musi obejmować każdą paczkę.
+
+    Paczka poza wynikiem nadal działa — traci tylko rozpoznawanie po treści
+    (język wybiera się wtedy w Poligloci ręcznie, z wymuszeniem na cały
+    dokument).
+    """
+    return sorted(_zbuduj_mapowanie_lingua())
 
 
 def _zbuduj_mapowanie_lingua_to_iso() -> dict[str, str]:

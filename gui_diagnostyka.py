@@ -66,6 +66,12 @@ def przeskanuj_reguly(jezyk: str | None = None) -> tuple[pr.PominietyPlik, ...]:
     jezyk_ui != "en"``). Bezwarunkowy skan ``en`` byłby szumem: użytkownik
     z polskim interfejsem czyta polskie przepisy i nie ma powodu dowiadywać się
     o literówce w pliku, którego aplikacja u niego nie tknie.
+
+    Jedna klasa wyłamuje się z tej zasady i dlatego ma tu osobne wywołanie:
+    detektor języka jest JEDEN dla całej aplikacji, więc pole ``lingua:``
+    sprawdzamy w KAŻDEJ paczce (v18.26.1). Inaczej użytkownik z polskim
+    interfejsem, który właśnie dodał dziesiąty język, nie dowiedziałby się, że
+    jego nowa paczka wypadła z rozpoznawania po treści.
     """
     jezyk = jezyk or aktualny_jezyk()
     pr.wyczysc_cache()
@@ -78,6 +84,7 @@ def przeskanuj_reguly(jezyk: str | None = None) -> tuple[pr.PominietyPlik, ...]:
     _skanuj_paczke(jezyk)
     if jezyk != "en" and not pr.lista_trybow(jezyk):
         _skanuj_paczke("en")
+    cp.jezyki_w_detekcji()      # patrz docstring: klasa GLOBALNA, nie per paczka
     return pr.pominiete_pliki()
 
 
