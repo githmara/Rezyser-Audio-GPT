@@ -1286,7 +1286,7 @@ manager:
     akcent_oczyszczenie:
       etykieta: "Akcent czyszczący (preprocessor, bez fonetyki)"
       opis: |-
-        Plik w <jezyk>/akcenty/<id>.yaml z `kategoria: oczyszczenie`. Czyści tekst pod TTS (usuwa bełkot, normalizuje liczby) BEZ zmiany fonetyki. iso == jezyk_bazowy. Manager tworzy szablon (gotowy wzorzec) + prompt do tłumaczenia etykiety/opisu na natywny.
+        Plik w <jezyk>/akcenty/<id>.yaml z `kategoria: oczyszczenie`. Czyści tekst pod TTS (usuwa nawiasowe didaskalia i znaczniki zapisu, normalizuje liczby) BEZ zmiany fonetyki. iso == jezyk_bazowy. Manager tworzy szablon (gotowy wzorzec) + prompt do tłumaczenia etykiety/opisu na natywny.
     akcent_naprawiacz:
       etykieta: "Naprawiacz tagów (wstrzykuje ISO do HTML/DOCX)"
       opis: |-

@@ -256,7 +256,7 @@ kategoria: akcent
 kolejnosc: 100
 
 # --- Processing pipeline (true/false) ---
-# czysc_tekst_tts        – removes gibberish („khh", asterisks, hashtags)
+# czysc_tekst_tts        – removes parenthetical asides, markup, dot runs
 # normalizuj_liczby      – turns digits into words (per {natywna_baza} grammar)
 # usun_polskie_znaki     – strips the base-language ({jezyk_bazowy}) diacritics per
 #                          the map in `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki`
@@ -423,7 +423,7 @@ etykieta: "{etykieta}"
 opis: |
   <FILL NATIVELY in {natywna_baza}: 2-4 sentences explaining that this
   „accent" applies no phonetics and only runs TTS cleaning (removes
-  gibberish like „khh", asterisks, hashtags, dots) {"and turns digits into words" if not bez_liczb else "(WITHOUT number normalization — useful for books with many dates/numbers)"}.>
+  parenthetical director's notes, asterisks, hashtags, dot runs) {"and turns digits into words" if not bez_liczb else "(WITHOUT number normalization — useful for books with many dates/numbers)"}.>
 iso: {jezyk_bazowy}
 kategoria: oczyszczenie
 kolejnosc: 20
@@ -431,6 +431,10 @@ czysc_tekst_tts: true
 normalizuj_liczby: {normalizuj_liczby}
 usun_polskie_znaki: false
 skleja_pojedyncze_litery: false
+# `zamiany:` stays empty in every shipped package. The engine cleans by
+# SHAPE only (markup, parenthetical asides, punctuation) and carries no
+# word list for any language — if THIS language needs a filler phrase
+# cut, add it here as a rule with `regex: true` and an empty `zamiana`.
 zamiany: []
 """
 

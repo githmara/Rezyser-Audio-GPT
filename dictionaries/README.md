@@ -89,13 +89,24 @@ Każdy plik akcentu może włączyć lub wyłączyć cztery etapy przetwarzania:
 
 | Flaga                          | Co robi                                                       |
 |--------------------------------|---------------------------------------------------------------|
-| `czysc_tekst_tts`              | usuwa bełkot typu „khh”, „ahh”, pojedyncze gwiazdki, hashtagi |
+| `czysc_tekst_tts`              | usuwa nawiasowe didaskalia, gwiazdki, hashtagi, nagromadzenie kropek |
 | `normalizuj_liczby`            | zamienia cyfry na słowa (np. `123` → `sto dwadzieścia trzy`)  |
 | `usun_polskie_znaki`           | ą→on, ę→en, ł→l, ó→u, ś→s, ć→c, ń→n, ż→z, ź→z                 |
 | `zamiany`                      | właściwe reguły fonetyczne danego akcentu                     |
 | `skleja_pojedyncze_litery`     | scala wiszące pojedyncze litery (np. „w y s o k i” → „wysoki”)|
 
 Etapy wykonywane są w takiej kolejności, w jakiej stoją w tabeli.
+
+**`czysc_tekst_tts` czyści po KSZTAŁCIE, nie po słowach.** Silnik usuwa
+znaczniki zapisu (gwiazdki, `=`, hashtagi nagłówków), didaskalia w nawiasach
+okrągłych (ASCII i pełnej szerokości) oraz porządkuje interpunkcję —
+i **nie ma listy słów dla żadnego języka**. Do 18.26.1 miał zaszyte w kodzie
+polskie frazy i listę wykrzykników `khh/pff/ahh`; dla rosyjskiego i fińskiego
+były one bezczynne, a islandzkiemu kasowały autorskie „Pff,” z dialogu.
+Jeśli TWÓJ język potrzebuje wycięcia konkretnej frazy, dopisz ją jako regułę
+w `zamiany:` swojego pliku `oczyszczenie*.yaml` (`regex: true` i puste
+`zamiana`) — decyduje autor paczki, nie silnik. Niezmiennika pilnuje
+`test_oczyszczanie_tts.py` w korzeniu repozytorium.
 
 ## Format listy zamian
 

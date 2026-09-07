@@ -1100,7 +1100,7 @@ manager:
     akcent_oczyszczenie:
       etykieta: "Puhdistusaksentti (esikäsittelijä, ilman fonetiikkaa)"
       opis: |-
-        Tiedosto <jezyk>/akcenty/<id>.yaml, jossa `kategoria: oczyszczenie`. Puhdistaa tekstin TTS:lle (poistaa sekavuuden, normalisoi numerot) ILMAN fonetiikan muutosta. iso == jezyk_bazowy. Manager luo mallin (valmis malli) + kehotteen etiketin/kuvauksen kääntämiseksi äidinkielelle.
+        Tiedosto <jezyk>/akcenty/<id>.yaml, jossa `kategoria: oczyszczenie`. Puhdistaa tekstin TTS:lle (poistaa sulkeissa olevat didaskaliat ja merkinnät, normalisoi numerot) ILMAN fonetiikan muutosta. iso == jezyk_bazowy. Manager luo mallin (valmis malli) + kehotteen etiketin/kuvauksen kääntämiseksi äidinkielelle.
     akcent_naprawiacz:
       etykieta: "Tunnisteiden korjaaja (injektoi ISO:n HTML/DOCX:ään)"
       opis: |-

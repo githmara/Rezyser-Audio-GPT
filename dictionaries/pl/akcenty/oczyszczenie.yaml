@@ -6,7 +6,7 @@ id: oczyszczenie
 etykieta: "Żaden (Czyszczenie Z normalizacją liczb)"
 opis: |
   Nie nakłada akcentu fonetycznego. Uruchamia wyłącznie procedurę
-  oczyszczania tekstu pod syntezator mowy (usuwa bełkot typu „khh”,
+  oczyszczania tekstu pod syntezator mowy (usuwa nawiasowe didaskalia,
   gwiazdki, hashtagi, nagromadzenie kropek) oraz zamienia cyfry na słowa
   (np. „123” → „sto dwadzieścia trzy”).
 iso: pl

@@ -1102,7 +1102,7 @@ manager:
     akcent_oczyszczenie:
       etykieta: "Hreinsunarhreimur (forvinnsla, án hljóðfræði)"
       opis: |-
-        Skrá í <jezyk>/akcenty/<id>.yaml með `kategoria: oczyszczenie`. Hreinsar texta fyrir TTS (fjarlægir bull, eðlilegar tölur) ÁN þess að breyta hljóðfræði. iso == jezyk_bazowy. Stjórnandi býr til sniðmát (tilbúið mynstur) + prompt til að þýða merki/lýsingu á móðurmálið.
+        Skrá í <jezyk>/akcenty/<id>.yaml með `kategoria: oczyszczenie`. Hreinsar texta fyrir TTS (fjarlægir leikstjórnarleiðbeiningar í sviga og sniðmerki, umbreytir tölum í orð) ÁN þess að breyta hljóðfræði. iso == jezyk_bazowy. Stjórnandi býr til sniðmát (tilbúið mynstur) + prompt til að þýða merki/lýsingu á móðurmálið.
     akcent_naprawiacz:
       etykieta: "Merkingarviðgerð (sprautar ISO í HTML/DOCX)"
       opis: |-

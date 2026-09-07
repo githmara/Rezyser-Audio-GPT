@@ -7,7 +7,7 @@ id: oczyszczenie
 etykieta: "Nessuno (Pulizia CON normalizzazione numeri)"
 opis: |
   Non applica alcun accento fonetico. Esegue solo la procedura di pulizia
-  del testo per i sintetizzatori vocali (rimuove riempitivi come "khh",
+  del testo per i sintetizzatori vocali (rimuove le didascalie tra parentesi,
   asterischi, hashtag, sequenze di punti) e converte le cifre in parole
   (es. "123" → "centoventitre").
 iso: it

@@ -5,8 +5,8 @@ id: oczyszczenie
 etykieta: "Kein Akzent (Bereinigung MIT Zahlennormalisierung)"
 opis: |
   Wendet keinen phonetischen Akzent an. Führt nur die Textbereinigung für
-  Sprachsynthesizer durch (entfernt Füllwörter wie „khh", Sternchen, Hashtags,
-  Punktfolgen) und wandelt Ziffern in Wörter um
+  Sprachsynthesizer durch (entfernt Regieanweisungen in Klammern,
+  Sternchen, Hashtags, Punktfolgen) und wandelt Ziffern in Wörter um
   (z.B. „123" → „einhundertdreiundzwanzig").
 iso: de
 kategoria: oczyszczenie

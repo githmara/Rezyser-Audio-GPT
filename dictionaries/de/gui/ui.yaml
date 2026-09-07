@@ -1102,7 +1102,7 @@ manager:
     akcent_oczyszczenie:
       etykieta: "Reinigungsakzent (Preprozessor, ohne Phonetik)"
       opis: |-
-        Datei in <jezyk>/akcenty/<id>.yaml mit `kategoria: oczyszczenie`. Reinigt den Text für TTS (entfernt Kauderwelsch, normalisiert Zahlen) OHNE die Phonetik zu ändern. iso == jezyk_bazowy. Der Manager erstellt eine Vorlage (fertiges Muster) + Prompt zur Übersetzung des Labels/Beschreibung ins Native.
+        Datei in <jezyk>/akcenty/<id>.yaml mit `kategoria: oczyszczenie`. Reinigt den Text für TTS (entfernt Regieanweisungen in Klammern und Auszeichnungen, normalisiert Zahlen) OHNE die Phonetik zu ändern. iso == jezyk_bazowy. Der Manager erstellt eine Vorlage (fertiges Muster) + Prompt zur Übersetzung des Labels/Beschreibung ins Native.
     akcent_naprawiacz:
       etykieta: "Tag-Reparatur (injiziert ISO in HTML/DOCX)"
       opis: |-

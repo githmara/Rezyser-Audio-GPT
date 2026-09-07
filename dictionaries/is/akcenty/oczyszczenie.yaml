@@ -7,8 +7,8 @@ id: oczyszczenie
 etykieta: "Engin (Hreinsun MEÐ tölu-normalíseringu)"
 opis: |
   Beitir engum hljóðfræðilegum hreim. Keyrir aðeins texta-hreinsun
-  fyrir talhermir (fjarlægir uppfyllingarhljóð eins og „khh", stjörnur,
-  hashmerki, runur af punktum) og umbreytir tölum í orð (t.d. „123" →
+  fyrir talhermir (fjarlægir leikstjórnarleiðbeiningar í sviga,
+  stjörnur, hashmerki, runur af punktum) og umbreytir tölum í orð (t.d. „123" →
   „eitt hundrað tuttugu og þrír").
 iso: is
 kategoria: oczyszczenie

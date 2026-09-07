@@ -155,28 +155,77 @@ def sklej_pojedyncze_litery(tekst: str) -> str:
     return re.sub(r"(?i)\b[a-z](?:\s+[a-z]\b)+(?!\w)", _sklej, tekst)
 
 
+# Didaskalia nawiasowe usuwamy po KSZTAŁCIE (para nawiasów), nigdy po treści:
+# rodzina ASCII ``()`` i pełnej szerokości ``（）`` (pismo CJK), żeby przyszła
+# paczka nie potrzebowała linijki Pythona. Treść dopasowania nie przekracza
+# PUSTEJ linii, więc twardo zawijany nawias łapie się cały, ale sierocy „("
+# nie zje dwóch akapitów (zmierzone przed 18.27: akapit z otwarciem nawiasu,
+# pusta linia, drugi akapit z domknięciem — całość schodziła do jednego
+# zdania). Nawiasy OTWIERAJĄCE są wyłączone z treści: dopasowanie startuje od
+# najgłębszego otwarcia, więc niedomknięty nawias nie pochłania prozy w drodze
+# do następnego domknięcia.
+_RE_DIDASKALIA = re.compile(
+    r"[(（](?:[^()（）\n]|\n(?!\s*\n))*[)）]"
+)
+
+# Wielokropek typograficzny: cała higiena kropek niżej jest zapisana na ASCII,
+# a „…" (U+2026) sypią i książki, i model. Zwijamy go przed regułami kropek,
+# żeby te same reguły objęły oba zapisy.
+_WIELOKROPEK = "…"
+
+
+def _usun_didaskalia(tekst: str) -> str:
+    """Usuwa nawiasowe didaskalia, także zagnieżdżone, do punktu stałego.
+
+    Jeden przebieg zostawiłby po „(mówi (cicho))" resztkę „(mówi )" — czyli
+    słowo, które syntezator PRZECZYTA. Powtarzamy więc podstawienie, dopóki
+    coś ubywa; limit iteracji chroni przed patologicznym wejściem. Tekst bez
+    domknięcia nie daje trafienia, więc pętla kończy się od razu.
+    """
+    for _ in range(10):
+        nowy = _RE_DIDASKALIA.sub("", tekst)
+        if nowy == tekst:
+            break
+        tekst = nowy
+    return tekst
+
+
 def oczysc_tekst_tts(tekst: str, z_normalizacja: bool = True,
                      jezyk: str = "pl") -> str:
     """Oczyszcza tekst pod syntezator mowy (TTS).
 
-    Usuwa:
-      * bełkot onomatopeiczny („khh”, „pff”, „ahh”, …),
-      * gwiazdki, znaki `=`, znaczniki Markdown (nagłówki),
-      * nawiasy kwadratowe z przypisami reżyserskimi,
-      * wielokrotne kropki i spacje,
-      * frazy typu „z wplecionymi wdechami” (artefakty gpt-4).
+    Etapy — wszystkie poza pierwszym są NIEZALEŻNE od języka wejścia:
+      1. (opcjonalnie) normalizacja liczb w języku ``jezyk`` — jedyny etap
+         językowy, por. :func:`normalizuj_liczby`;
+      2. znaczniki zapisu: gwiazdki, znaki ``=``, hashtagi nagłówków
+         Markdown (składnia zapisu nie ma języka);
+      3. nawiasowe didaskalia (:func:`_usun_didaskalia`);
+      4. higiena interpunkcji: wielokropki (ASCII i „…"), osierocone
+         przecinki, wielokrotne spacje.
 
-    Jeśli ``z_normalizacja`` jest prawdziwe – dodatkowo zamienia cyfry
-    na słowa w języku ``jezyk`` (por. :func:`normalizuj_liczby`).
+    Nawiasów KWADRATOWYCH nie tyka — tam żyją tagi mówców (``[Anna]``)
+    i audio-tagi ElevenLabs (``[whispers]``). Dawny docstring obiecywał ich
+    usuwanie, czego ten kod nigdy nie robił (i nie może).
+
+    18.27: z etapów wypadły reguły zależne od polszczyzny — lista wykrzykników
+    (``khh|hh|pff|ahh|ehh``) i frazy „z wplecionymi wdechami" (artefakty
+    gpt-4, których model w trybie teatru czytanego już nie produkuje).
+    Zmierzone: dla ``ru`` („Кхх", „Пфф") i ``fi`` („Öhh") były no-opem, a dla
+    ``is`` szkodliwe — kasowały autorskie „Pff," i „Ahh," z dialogu, bo te
+    przypadkiem stoją w liście ASCII. Lista wykrzykników per język byłaby
+    długiem bez końca, a wejściem Poligloty jest DOWOLNY plik z dysku, gdzie
+    taki dźwięk bywa treścią autora, nie artefaktem. Paczka, która chce wyciąć
+    własną frazę, robi to danymi: ``zamiany:`` w ``akcenty/oczyszczenie*.yaml``
+    przyjmuje ``regex: true`` z pustą ``zamiana``. Niezmiennika pilnuje
+    ``test_oczyszczanie_tts.py`` (bramki: G1 — brak literału językowego
+    w ścieżce czyszczenia, G2 — symetria wyniku między paczkami).
     """
     if z_normalizacja:
         tekst = normalizuj_liczby(tekst, jezyk)
     tekst = re.sub(r"[\*=]+", "", tekst)
     tekst = re.sub(r"^#+\s*", "", tekst, flags=re.MULTILINE)
-    tekst = re.sub(r"\([^)]*\)", "", tekst)
-    tekst = re.sub(r"\b(khh|hh|pff|ahh|ehh)\b[\.\s]*", "... ", tekst, flags=re.IGNORECASE)
-    tekst = re.sub(r"(?i)[,\s]*z\s*wplecionymi\s*wdechami", "", tekst)
-    tekst = re.sub(r"(?i)[,\s]*z\s*wdech(em|ami)", "", tekst)
+    tekst = _usun_didaskalia(tekst)
+    tekst = tekst.replace(_WIELOKROPEK, "...")
     tekst = re.sub(r"^\s*,\s*", "", tekst, flags=re.MULTILINE)
     tekst = re.sub(r"([!\?\.])\s*,\s*", r"\1 ", tekst)
     tekst = re.sub(r",\s*\.\.\.", "...", tekst)

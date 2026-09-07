@@ -6,8 +6,8 @@ id: oczyszczenie
 etykieta: "Sans accent (Nettoyage AVEC normalisation des nombres)"
 opis: |
   N'applique aucun accent phonétique. Effectue uniquement le nettoyage du
-  texte pour le synthétiseur vocal (supprime les onomatopées de remplissage
-  comme « euh », les astérisques, les hashtags, les séries de points) et
+  texte pour le synthétiseur vocal (supprime les didascalies entre
+  parenthèses, les astérisques, les hashtags, les séries de points) et
   convertit les chiffres en mots (par ex. « 123 » → « cent vingt-trois »).
 iso: fr
 kategoria: oczyszczenie
