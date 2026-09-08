@@ -1229,13 +1229,16 @@ def main(args: argparse.Namespace | None = None) -> None:
                     print(f"      • {nazwa}: {p}")
             sys.exit(1)
 
-    # 6b'''. FOUNDATIONS gate (v18.29.0) — `jezyki_lingua.KANON` is a MIRROR of the
-    # `lingua.Language` enum, and a mirror nobody checks goes stale in silence: a
-    # `pip install -U lingua-language-detector` that adds a language makes the canon
-    # answer "this language is outside the detector" about a language the detector
-    # DOES support. This gate has NO baseline on purpose — the canon either mirrors
-    # the library 1:1 or it is broken. Degrades gracefully without `lingua`.
-    print("🔍 Foundations gate: verifying the lingua canon is a 1:1 mirror...")
+    # 6b'''. FOUNDATIONS gate (v18.29.0) — two things nobody was checking. First,
+    # `jezyki_lingua.KANON` is a MIRROR of the `lingua.Language` enum, and a mirror
+    # nobody checks goes stale in silence: a `pip install -U
+    # lingua-language-detector` that adds a language makes the canon answer "this
+    # language is outside the detector" about a language the detector DOES support.
+    # Second, the content of every `dictionaries/<code>/podstawy.yaml`: `alfabet`
+    # feeds the Caesar cipher and `polskie_znaki` is the pre-pass of EVERY accent in
+    # the pack, so an error there fails quietly and everywhere at once. This gate has
+    # NO baseline on purpose. Degrades gracefully without `lingua`.
+    print("🔍 Foundations gate: lingua canon mirror + podstawy.yaml of every pack...")
     try:
         import audyt_podstaw
     except ImportError as exc:
@@ -1246,13 +1249,17 @@ def main(args: argparse.Namespace | None = None) -> None:
             print(f"⚠️  Foundations gate SKIPPED: {wynik_podstawy.powod_pominiecia}.\n")
         elif wynik_podstawy.czysto:
             print(f"✅ Lingua canon mirrors the installed library "
-                  f"({len(audyt_podstaw.jezyki_lingua.KANON)} languages).\n")
+                  f"({len(audyt_podstaw.jezyki_lingua.KANON)} languages) and all "
+                  f"{len(audyt_podstaw.paczki())} pack foundation file(s) are "
+                  f"clean.\n")
         else:
             ile = sum(len(v) for v in wynik_podstawy.nowe.values())
             print(f"❌ FATAL: {ile} defect(s) in the language-pack foundations "
                   f"— refusing to build.")
             print("The canon is a MIRROR of the library enum, so the library always "
-                  "wins: fix `jezyki_lingua.KANON`. Run "
+                  "wins there: fix `jezyki_lingua.KANON`. A `podstawy.yaml` hit is a "
+                  "defect in that pack — its `alfabet` feeds the Caesar cipher and "
+                  "`polskie_znaki` is the pre-pass of every accent it has. Run "
                   "`python audyt_podstaw.py` for the full report.")
             for zakres, powody in sorted(wynik_podstawy.nowe.items()):
                 for p in powody:
