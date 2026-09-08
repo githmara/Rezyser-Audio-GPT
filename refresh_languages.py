@@ -13,8 +13,10 @@ gdy dispatch akcentów stał się dynamiczny) zdejmuje tę barierę:
   1. Kontrybutor wrzuca paczkę `dictionaries/<kod>/` (z `podstawy.yaml`).
   2. Uruchamia `python refresh_languages.py`.
   3. Narzędzie aktualizuje `jezyki_docelowe.yaml`:
-       * DODAJE języki obecne na dysku, a brakujące w rejestrze
-         (nazwa = natywna `etykieta` z `podstawy.yaml`),
+       * DODAJE języki obecne na dysku, a brakujące w rejestrze (nazwa =
+         polska nazwa języka z kanonu `jezyki_lingua.py`; dla języka poza
+         kanonem — natywna `etykieta` z `podstawy.yaml` plus głośna nota,
+         dlaczego to nie jest nazwa polska),
        * USUWA wpisy, których folder/`podstawy.yaml` już nie istnieje
          (auto-sprzątanie po skasowaniu paczki),
        * ZACHOWUJE istniejące wpisy bez zmian — w tym ręcznie dopieszczone
@@ -50,6 +52,7 @@ from pathlib import Path
 
 import dev_konsola
 import dev_yaml
+import jezyki_lingua
 
 # STDOUT UTF-8 (natywne nazwy: cyrylica, 中文, Þ/Æ — cmd.exe domyślnie cp1250).
 # Wspólna implementacja dev-tooli od v18.25 → `dev_konsola`.
@@ -75,7 +78,8 @@ NAGLOWEK = """\
 # Ten plik jest UTRZYMYWANY przez `refresh_languages.py` (dev tool) — kontrybutor
 # dodający nowy język NIE edytuje Pythona: wrzuca `dictionaries/<kod>/` (z
 # `podstawy.yaml`), uruchamia `python refresh_languages.py`, a narzędzie:
-#   * DODAJE nowe paczki (nazwa = natywna `etykieta` z podstawy.yaml),
+#   * DODAJE nowe paczki (nazwa = polska nazwa języka z kanonu
+#     `jezyki_lingua.py`, a poza kanonem — natywna `etykieta` z podstawy.yaml),
 #   * USUWA wpisy, których folder/podstawy.yaml już nie ma,
 #   * ZACHOWUJE istniejące wpisy (w tym ręcznie dopieszczone nazwy — możesz
 #     zmienić „Chinese" na „简体中文" itp., refresh tego nie nadpisze).
@@ -86,6 +90,38 @@ NAGLOWEK = """\
 # (wartości) możesz zmieniać dowolnie.
 # =============================================================================
 """
+
+
+def nazwa_dla_rejestru(kod: str) -> tuple[str, str]:
+    """Nazwa nowego wpisu rejestru + NOTA po angielsku (pusta = bez uwag).
+
+    Do v18.28.0 nowy wpis dostawał zawsze nazwę NATYWNĄ (`sv: Svenska`) i był
+    to defekt z konsekwencją poza tym plikiem: `buduj_wielojezyczne_akcenty`
+    czytał ten sam rejestr, OCZEKUJĄC polskiej nazwy, więc dla dziesiątego
+    języka nazwałby pliki akcentów `svenska.yaml` zamiast `szwedzki.yaml`.
+    Nazwa pliku akcentu ma od v18.29.0 własne źródło (kanon → patrz
+    `buduj_wielojezyczne_akcenty.rozstrzygnij_nazwe_pliku`), a rejestr
+    dostaje wartość spójną z ośmioma zastanymi wpisami: polską nazwę języka
+    z :mod:`jezyki_lingua`.
+
+    Dla języka POZA kanonem Lingui polskiej nazwy nie ma skąd wziąć bez
+    pytania modelu, a rejestr jest plikiem, który człowiek i tak dopieszcza
+    ręcznie (refresh nie nadpisuje wartości). Wpisujemy więc endonim i mówimy
+    GŁOŚNO, dlaczego to nie jest polska nazwa — cichy endonim w kolumnie
+    polskich nazw wyglądałby na decyzję redakcyjną, a jest brakiem danych.
+    """
+    z_kanonu = jezyki_lingua.nazwa_polska(kod)
+    if z_kanonu:
+        return z_kanonu, ""
+    endonim = natywna_nazwa(kod)
+    return endonim, (
+        f"`{kod}` is outside the lingua canon (`jezyki_lingua.py`), so the "
+        f"Polish name of this language is unknown here — the endonym „{endonim}” "
+        f"went in instead. The docs autotranslator gets this value as the TARGET "
+        f"LANGUAGE NAME and its prompt is English, so a native name works; edit "
+        f"the value by hand if you prefer the Polish one (refresh never "
+        f"overwrites existing values)."
+    )
 
 
 def natywna_nazwa(kod: str) -> str:
@@ -163,8 +199,11 @@ def main() -> int:
     do_usuniecia = sorted(zarejestrowane - obecne)
 
     nowy = {k: v for k, v in rejestr.items() if k in obecne}  # usuń znikłe
+    noty: list[str] = []
     for kod in do_dodania:
-        nowy[kod] = natywna_nazwa(kod)                        # dodaj nowe (natywna nazwa)
+        nowy[kod], nota = nazwa_dla_rejestru(kod)             # kanon → endonim
+        if nota:
+            noty.append(nota)
 
     if not REJESTR.is_file():
         print(f"ℹ️  {REJESTR.name} does not exist yet — building it from scratch "
@@ -174,6 +213,8 @@ def main() -> int:
     print(f"📒 W rejestrze przed synchronizacją:  {sorted(zarejestrowane)}")
     if do_dodania:
         print("➕ DODAJĘ: " + ", ".join(f"{k} → „{nowy[k]}”" for k in do_dodania))
+    for nota in noty:
+        print(f"⚠️  {nota}")
     if do_usuniecia:
         print("➖ USUWAM (brak folderu/podstawy): " + ", ".join(do_usuniecia))
     if not do_dodania and not do_usuniecia:

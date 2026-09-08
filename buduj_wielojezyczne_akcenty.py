@@ -106,6 +106,7 @@ from pathlib import Path
 from typing import Any
 
 import dev_yaml
+import jezyki_lingua
 import przeglad_tlumaczen
 import tlumacz_bramki
 import tlumacz_rdzen
@@ -1059,6 +1060,136 @@ def _mapa_akcentow(pary: dict[tuple[str, str], dict]) -> dict[str, str]:
     return {kod: akc for akc, kod in konsensus_iso(pary).items()}
 
 
+# Pozycja payloadu dla zadania „polska nazwa języka" — jedno pytanie, jedna
+# odpowiedź (kontrakt `id → target` jak w `_pytania_pary`).
+_ID_NAZWA_PL = 0
+
+
+def _PROMPT_NAZWY_PL(kod: str, endonim: str) -> tuple[str, list[tuple[int, str, str]]]:
+    """Prompt systemowy + pozycja dla nazwy języka POZA kanonem Lingui.
+
+    Pytamy WYŁĄCZNIE o język, którego nie zna `jezyki_lingua.KANON` — dla 75
+    języków detektora odpowiedź jest w kanonie i pytanie modelu byłoby
+    zapraszaniem halucynacji tam, gdzie mamy fakt.
+
+    Kluczowa instrukcja: model ma podać nazwę TRADYCYJNĄ, a nie zmuszony
+    przymiotnik (decyzja maintainera 2026-09-08). Polszczyzna dla większości
+    języków ma przymiotnik (`szwedzki`), ale dla części używa samej nazwy
+    (`hindi`, `suahili`, `joruba`) i wymuszony przymiotnik od takiej nazwy
+    byłby tworem, którego nikt nie napisze w Księdze Świata. Odpowiedź jest
+    IDENTYFIKATOREM pliku, więc kontrakt jest wąski: jedno słowo, małymi
+    literami, bez cudzysłowów i bez komentarza — a wołający i tak sprawdza,
+    czy zeszło foldem do samych ASCII-liter.
+    """
+    system = (
+        "# Role\n"
+        "You name languages in Polish for a data file of a desktop "
+        "accessibility application. The name you return becomes a FILE NAME "
+        "(identifier) shared by every language pack, so it must be one word.\n\n"
+        "# Rules\n"
+        "1. Give the name Polish TRADITIONALLY uses for that language. Where "
+        "Polish has an adjective, use it (Swedish → `szwedzki`, Croatian → "
+        "`chorwacki`). Where Polish has no established adjective, use the bare "
+        "language name (Hindi → `hindi`, Swahili → `suahili`, Yoruba → "
+        "`joruba`). NEVER invent an adjective from a name that Polish does not "
+        "inflect that way.\n"
+        "2. One word, lowercase, Polish spelling with its diacritics.\n"
+        "3. No quotes, no explanation, no alternatives, no punctuation.\n"
+        "4. If you do not know the language, answer with exactly `NIE_WIEM` — "
+        "a guess here silently names a file that every pack will inherit."
+    )
+    pozycje = [(
+        _ID_NAZWA_PL, "polish_language_name",
+        f"The Polish name of the language with ISO 639-1 code `{kod}`"
+        + (f", whose speakers call it „{endonim}”" if endonim else "")
+        + ". Answer with the single word only."
+    )]
+    return system, pozycje
+
+
+def _nazwa_pl_z_modelu(klient: Any, kod: str, *, model: str) -> str:
+    """Pyta model o polską nazwę języka `kod`; ``""`` gdy odpowiedź nie przechodzi.
+
+    Walidacja jest po stronie WOŁAJĄCEGO promptu, nie po stronie modelu, bo
+    odpowiedź staje się nazwą pliku dziedziczoną przez wszystkie paczki: musi
+    być jednym słowem, które fold `nazwa_pliku_akcentu` sprowadza do samych
+    ASCII-liter. Cokolwiek innego (zdanie, `NIE_WIEM`, nazwa z nawiasem)
+    odrzucamy z głośną notą — lepiej pominąć kierunek `do-nowego` niż nazwać
+    pliki czymś, czego użytkownik nie wpisze w Księdze Świata.
+    """
+    endonim = tlumacz_rdzen.natywna_nazwa(DICT_DIR, kod)
+    system, pozycje = _PROMPT_NAZWY_PL(kod, endonim if endonim != kod else "")
+    try:
+        odpowiedzi = tlumacz_rdzen.wywolaj_llm(
+            klient, model=model, system=system,
+            nazwa_celu=endonim or kod, kod=kod, pozycje=pozycje,
+            max_tokens=200,
+            wskazowka_limitu="The answer is a single word — a hit limit means the "
+                             "model started explaining itself.",
+            myslenie=False)
+    except RuntimeError as exc:
+        print(f"❌ {kod}: LLM error while asking for the Polish language name — {exc}")
+        return ""
+    surowa = (odpowiedzi.get(_ID_NAZWA_PL, "") or "").strip().strip('"„”\'.')
+    if not surowa or surowa == "NIE_WIEM":
+        print(f"⚠️  {kod}: the model does not know a Polish name for this language "
+              f"(answered „{surowa or 'nothing'}”).")
+        return ""
+    if len(surowa.split()) != 1:
+        print(f"⚠️  {kod}: the model answered with more than one word "
+              f"(„{surowa}”) — an accent file name must be a single identifier.")
+        return ""
+    nazwa = surowa.lower()
+    forma = nazwa_pliku_akcentu(nazwa)
+    if not forma.isascii() or not forma.isalpha():
+        print(f"⚠️  {kod}: „{nazwa}” folds to „{forma}”, which is not a plain "
+              f"ASCII-letter file name.")
+        return ""
+    return nazwa
+
+
+def rozstrzygnij_nazwe_pliku(
+    kod: str, pary: dict[tuple[str, str], dict], *,
+    klient: Any = None, model: str = "",
+) -> tuple[str, str]:
+    """Nazwa pliku akcentu dla języka `kod` + ŹRÓDŁO tej nazwy (do raportu).
+
+    Kolejność rozstrzygania jest ustalona i nieprzypadkowa (v18.29.0):
+
+      1. **konsensus istniejących par** — jeśli którakolwiek paczka ma już
+         akcent celujący w ten ISO, jego nazwa pliku JEST nazwą tego języka
+         w tym repozytorium. Zgoda dziewięciu paczek bije każdy inny argument
+         i gwarantuje determinizm kolejnych przebiegów.
+      2. **kanon Lingui** (`jezyki_lingua.nazwa_polska`) — fakt, nie zgadywanie,
+         dla wszystkich 75 języków detektora.
+      3. **zadanie dla modelu** — wyłącznie dla języka POZA kanonem.
+
+    Do v18.28.0 źródłem był `jezyki_docelowe.yaml`, a to był DEFEKT: rejestr
+    dostaje od `refresh_languages` nazwę NATYWNĄ (`sv: Svenska`), więc dziesiąty
+    język nazwałby pliki `svenska.yaml` zamiast `szwedzki.yaml`. Dziś było to
+    nieszkodliwe tylko dlatego, że wszystkie dziewięć zastanych wpisów to
+    polskie nazwy z czasów, gdy rejestr wypełniał człowiek.
+
+    Zwraca ``("", "brak")``, gdy nazwy nie udało się ustalić — wołający pomija
+    wtedy kierunek `do-nowego` i mówi o tym na głos.
+    """
+    konsensus = _mapa_akcentow(pary).get(kod, "")
+    if konsensus:
+        return konsensus, "konsensus istniejących par"
+    z_kanonu = jezyki_lingua.nazwa_polska(kod)
+    if z_kanonu:
+        return nazwa_pliku_akcentu(z_kanonu), f"kanon Lingui („{z_kanonu}”)"
+    print(f"ℹ️  {kod}: language outside the lingua canon — asking the model for its "
+          f"traditional Polish name (no repository source knows it).")
+    if klient is None:
+        print(f"⚠️  {kod}: no LLM client (dry run?) — cannot resolve the Polish name.")
+        return "", "brak"
+    z_modelu = _nazwa_pl_z_modelu(klient, kod, model=model)
+    if not z_modelu:
+        return "", "brak"
+    return nazwa_pliku_akcentu(z_modelu), f"model („{z_modelu}”)"
+
+
 def glosy_konsensusu(pary: dict[tuple[str, str], dict], akcent: str) -> list[str]:
     """Nazwy głosów TTS wymieniane w etykietach tego akcentu w innych paczkach.
 
@@ -1534,9 +1665,16 @@ def generuj_nowy_jezyk(args: argparse.Namespace) -> int:
               f"derive the accents.")
         return 2
 
-    mapa_jezykow = tlumacz_rdzen.wczytaj_mape_jezykow(ROOT, KOD_ZRODLOWY)
-    nazwa_polska = mapa_jezykow.get(kod, "")
-    plik_nowego = nazwa_pliku_akcentu(nazwa_polska) if nazwa_polska else ""
+    # Klient powstaje PRZED rozstrzygnięciem nazwy pliku, bo dla języka poza
+    # kanonem Lingui nazwę podaje model (a dla 75 języków kanonu klient nie
+    # jest do tego potrzebny — wystarczy fakt z `jezyki_lingua`).
+    klient = (None if args.dry_run
+              else tlumacz_rdzen.zainicjuj_klienta_anthropic(ROOT))
+    plik_nowego, zrodlo_nazwy = rozstrzygnij_nazwe_pliku(
+        kod, pary, klient=klient, model=args.model)
+    if plik_nowego:
+        print(f"🏷️  {kod}: nazwa pliku akcentu = `{plik_nowego}.yaml` "
+              f"(źródło: {zrodlo_nazwy}).")
 
     zadania: list[tuple[str, str, str]] = []       # (paczka, akcent, iso_celu)
     if args.kierunek in ("oba", "z-nowego"):
@@ -1545,9 +1683,10 @@ def generuj_nowy_jezyk(args: argparse.Namespace) -> int:
                 zadania.append((kod, nazwa_akcentu, iso_celu))
     if args.kierunek in ("oba", "do-nowego"):
         if not plik_nowego:
-            print(f"⚠️  {kod}: no entry in `jezyki_docelowe.yaml`, so the Polish "
-                  f"name of this language is unknown — skipping the `do-nowego` "
-                  f"direction. Run `refresh_languages.py` and try again.")
+            print(f"⚠️  {kod}: the Polish name of this language could not be "
+                  f"resolved (existing pairs, the lingua canon and the model all "
+                  f"came back empty) — skipping the `do-nowego` direction. Add the "
+                  f"first `{kod}` pair by hand and the consensus will name the rest.")
         else:
             for paczka in sorted({p for p, _ in pary} | {kod}):
                 if paczka != kod:
@@ -1561,8 +1700,6 @@ def generuj_nowy_jezyk(args: argparse.Namespace) -> int:
         print("✅ Wszystkie pary tego języka już istnieją — nic do zrobienia.")
         return 0
 
-    klient = (None if args.dry_run
-              else tlumacz_rdzen.zainicjuj_klienta_anthropic(ROOT))
     wytworzone: list[tuple[str, str]] = []
     porazki: list[str] = []
     for paczka, akcent, iso_celu in braki:

@@ -35,6 +35,7 @@ import sys
 import yaml
 
 import i18n
+import jezyki_lingua
 import sciezki
 from przepisy_rezysera import (
     POWOD_KSZTALT,
@@ -246,6 +247,85 @@ def _natywna_nazwa_jezyka(kod: str) -> str:
         if nazwa:
             return nazwa
     return kod
+
+
+def _blok_lingua(kod_jezyka: str) -> str:
+    """Komentarz + pole ``lingua:`` do szablonu ``podstawy.yaml``, z kanonu.
+
+    Od v18.29.0 o granicy detektora nie musi już wiedzieć człowiek: dla języka
+    z :data:`jezyki_lingua.KANON` szablon przychodzi WYPEŁNIONY właściwą nazwą
+    enuma, a dla języka poza kanonem — z polem zakomentowanym i wyjaśnieniem
+    dlaczego. Zdejmuje to z autora paczki cztery pułapki nazewnicze
+    (``NORWEGIAN`` → ``BOKMAL``/``NYNORSK``, ``SLOVENIAN`` → ``SLOVENE``,
+    ``FLEMISH`` → ``DUTCH``, ``FILIPINO`` → ``TAGALOG``), w których wpisana
+    „oczywista" nazwa daje paczkę wyglądającą na poprawnie skonfigurowaną,
+    a w rzeczywistości wypadającą z detekcji.
+    """
+    nazwa = jezyki_lingua.nazwa_enuma(kod_jezyka)
+    if nazwa:
+        return (
+            "# The `lingua.Language` enum name for the language detector — "
+            "ALREADY FILLED IN\n"
+            "# from the canonical list of the 75 languages the detector knows "
+            "(`jezyki_lingua.py`,\n"
+            "# checked 1:1 against the installed library by "
+            "`audyt_podstaw.py --bramka`). Do NOT\n"
+            "# replace it with a name that looks more obvious: NORWEGIAN is "
+            "BOKMAL or NYNORSK,\n"
+            "# SLOVENIAN is SLOVENE, FLEMISH is DUTCH, FILIPINO is TAGALOG.\n"
+            f"lingua: {nazwa}"
+        )
+    return (
+        f"# The detector does NOT support this language: ISO `{kod_jezyka}` is "
+        f"not among the 75\n"
+        "# languages of `lingua` (Faroese, Maltese, Luxembourgish, Khmer, Lao "
+        "and others are\n"
+        "# absent too), so the field STAYS COMMENTED OUT — that is the correct "
+        "state, not a gap\n"
+        "# to fill. Do not substitute a related language: a wrong name has the "
+        "same effect as\n"
+        "# no field (the pack is never recognized FROM THE TEXT and you pick it "
+        "by hand in\n"
+        "# Polyglot, with forcing for the whole document), but it also makes "
+        "the pack LOOK\n"
+        "# correctly configured to whoever reads it next.\n"
+        "# lingua: <THE DETECTOR DOES NOT SUPPORT THIS LANGUAGE — LEAVE THIS "
+        "LINE COMMENTED OUT>"
+    )
+
+
+def _wskazowka_lingua(kod_jezyka: str) -> str:
+    """Punkt o polu ``lingua:`` w promptcie nowego języka bazowego (z kanonu).
+
+    Prompt i szablon muszą mówić JEDNYM głosem, inaczej agent „poprawia"
+    wypełnione pole na nazwę z własnej pamięci — a to dokładnie ta klasa
+    wpadki, którą kanon likwiduje. Dlatego oba wyprowadzają treść z tego
+    samego źródła (:mod:`jezyki_lingua`), a nie z dwóch opisów tej samej
+    reguły.
+    """
+    nazwa = jezyki_lingua.nazwa_enuma(kod_jezyka)
+    if nazwa:
+        return (
+            f"2. **`lingua:`** — ALREADY SET to `{nazwa}` in the template, taken "
+            f"from the canonical list of the 75 languages the detector knows "
+            f"(`jezyki_lingua.py`, verified 1:1 against the installed library). "
+            f"Leave it exactly as it is: do not \"double-check\" it against your "
+            f"own memory of the enum and do not swap it for a name that looks "
+            f"more natural. Four names people reach for do not exist in the enum "
+            f"at all — NORWEGIAN (it is BOKMAL or NYNORSK), SLOVENIAN (SLOVENE), "
+            f"FLEMISH (DUTCH), FILIPINO (TAGALOG)."
+        )
+    return (
+        f"2. **`lingua:`** — the detector does NOT support this language: ISO "
+        f"`{kod_jezyka}` is absent from lingua's 75 (so are Faroese, Maltese, "
+        f"Luxembourgish, Khmer, Lao and more). The template therefore keeps the "
+        f"field COMMENTED OUT and that is the correct final state. Leave it "
+        f"commented out and say so plainly in your reply instead of substituting "
+        f"a related language: a wrong name and a missing field have the SAME "
+        f"effect on the engine (the pack stays out of automatic detection and is "
+        f"selected by hand in Polyglot), but a wrong name also makes the pack "
+        f"look correctly configured to whoever reads it next."
+    )
 
 
 def _paczki_referencyjne(jezyk_bazowy: str) -> str:
@@ -1318,6 +1398,7 @@ the message fields (`etykieta_fragment_zbyt_krotki`,
 # =============================================================================
 def szablon_podstawy(kod_jezyka: str, etykieta_jezyka: str) -> str:
     natywna = _natywna_nazwa_jezyka(kod_jezyka)
+    blok_lingua = _blok_lingua(kod_jezyka)
     return f"""# =============================================================================
 #  <FILL NATIVELY: file header in {natywna}, e.g. for DE:
 #  „GRUNDLAGEN DER DEUTSCHEN SPRACHE"; for IT: „FONDAMENTI DELLA LINGUA ITALIANA">
@@ -1327,10 +1408,11 @@ def szablon_podstawy(kod_jezyka: str, etykieta_jezyka: str) -> str:
 #  limited to filling in the sections below.
 #
 #  Sections required by the engine (`core_poliglota._jezyk_kompletny`):
-#    1. lingua          – the `lingua.Language` enum name for the detector
-#                         (POLISH/GERMAN/FRENCH/...). Full list:
-#                         https://github.com/pemistahl/lingua-py
-#                         Not every language is there — see the field below.
+#    1. lingua          – the `lingua.Language` enum name for the detector.
+#                         ALREADY DECIDED for you from the canonical list of
+#                         the 75 languages the detector knows: either filled
+#                         in below, or commented out because this language is
+#                         genuinely absent from `lingua`. Leave it as it is.
 #    2. polskie_znaki   – mapping of the „{kod_jezyka}" language diacritics
 #                         to ASCII letters (used by `usun_polskie_znaki:
 #                         true` in accents).
@@ -1347,16 +1429,7 @@ def szablon_podstawy(kod_jezyka: str, etykieta_jezyka: str) -> str:
 
 id: podstawy
 jezyk: {kod_jezyka}
-# The `lingua.Language` enum name (uppercase, no prefix).
-# The detector knows 75 languages (lingua 2.1.1) and no more: if yours is not
-# among them — Faroese, Maltese, Luxembourgish, Khmer, Lao and others are not —
-# comment this field out instead of guessing a name. A name the detector does
-# not know has exactly the same effect as no field at all, only quieter.
-# Either way the pack works: the language is simply never recognized FROM THE
-# TEXT, so in Polyglot you pick it from the list and turn on forcing a single
-# language for the whole document. If you mistype the name, the application
-# tells you in "Skipped rules" and suggests the closest valid ones.
-lingua: <FILL_IN_ENUM_NAME_E_G_GERMAN>
+{blok_lingua}
 # The label MUST be 100% in the native language {natywna}.
 # Models from the deployed packs: PL: „Polski – podstawy fonetyczne"; DE:
 # „Deutsch – phonetische Grundlagen"; IT: „Italiano – fondamenti
@@ -1406,6 +1479,7 @@ slowo_akcent:
 def prompt_jezyk_bazowy(kod_jezyka: str, etykieta_jezyka: str) -> str:
     natywna = _natywna_nazwa_jezyka(kod_jezyka)
     inne_paczki = _paczki_referencyjne(kod_jezyka)
+    wskazowka_lingua = _wskazowka_lingua(kod_jezyka)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project (wxPython + Anthropic). You have tools: Read, Write, Edit, Glob, Grep,
@@ -1439,22 +1513,7 @@ presence/absence of diacritics such as ä/ö/ç/ß).
 
 # STRUCTURE REQUIREMENTS (engine)
 1. **`id: podstawy`** and **`jezyk: {kod_jezyka}`** — identifying fields.
-2. **`lingua:`** — the `lingua.Language` enum name in UPPERCASE English,
-   without prefix. List (75 languages in lingua 2.1.1):
-   https://github.com/pemistahl/lingua-py.
-   Most common: POLISH, ENGLISH, GERMAN, FRENCH, SPANISH, PORTUGUESE,
-   ITALIAN, RUSSIAN, FINNISH, ICELANDIC, JAPANESE, CHINESE.
-   Do NOT guess this name. Four traps where the obvious guess is not an enum
-   name at all: NORWEGIAN (the enum has BOKMAL and NYNORSK, no umbrella name),
-   SLOVENIAN (it is SLOVENE), FLEMISH (it is DUTCH), FILIPINO (it is TAGALOG).
-   And some languages are genuinely absent — Faroese, Maltese, Luxembourgish,
-   Khmer, Lao, Nepali, Kurdish, Amharic among them.
-   If the language is missing, write `# BRAK_W_LINGUA` in a comment above
-   the field and leave the field commented out. Say so in your answer as well,
-   plainly, instead of substituting a related language: a wrong name and a
-   missing field have the SAME effect on the engine (the pack stays out of
-   automatic detection and is selected manually in Polyglot), but a wrong name
-   also makes the pack look correctly configured to whoever reads it next.
+{wskazowka_lingua}
 3. **`polskie_znaki:`** — a list of `{{ wzor, zamiana }}` pairs describing
    the diacritics of language {kod_jezyka} → ASCII. Each diacritic in both
    variants: lower + upper. Letters that grow under `.upper()` (e.g. ß→SS)

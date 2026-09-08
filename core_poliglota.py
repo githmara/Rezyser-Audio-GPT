@@ -65,6 +65,7 @@ from docx.oxml.shared import OxmlElement
 
 from num2words import num2words
 
+import jezyki_lingua
 import sciezki
 # v18.24.2: wspólny rejestr powodów pominięcia pliku reguł (patrz
 # `gui_diagnostyka`). Import jest jednokierunkowy i bez ryzyka cyklu —
@@ -867,13 +868,22 @@ _LINGUA_ALIASY: dict[str, tuple[str, ...]] = {
 }
 
 
-def _podpowiedz_nazwe_lingua(wartosc: str) -> list[str]:
+def _podpowiedz_nazwe_lingua(wartosc: str, kod: str = "") -> list[str]:
     """Nazwy enuma, które user prawdopodobnie miał na myśli (może być pusta).
 
-    Dwa źródła, w tej kolejności: kuratorska mapa :data:`_LINGUA_ALIASY`
-    (rozjazd nazewnictwa) i ``difflib`` (literówka). Kandydaci z obu źródeł
-    są weryfikowani przez ``hasattr``, żeby zmiana enuma w nowszej wersji
-    lingua nie zaczęła produkować martwych podpowiedzi.
+    TRZY źródła, w tej kolejności. Pierwszym jest od v18.29.0 KANON po kodzie
+    ISO folderu (:mod:`jezyki_lingua`) i to nie jest kolejna heurystyka:
+    folder nazywa się ``sv``, więc jedyną poprawną wartością pola jest
+    ``SWEDISH``. Podpowiedź przestaje być zgadywaniem podobieństwa nazw i staje
+    się odpowiedzią — a użytkownik Managera Reguł, który wpisał ``NORWEGIAN``
+    w folderze ``nb``, dostaje ``BOKMAL`` zamiast trzech kandydatów do
+    samodzielnej weryfikacji.
+
+    Dopiero dla folderu POZA kanonem (kod, którego detektor nie zna, albo
+    nietypowa nazwa folderu) zostają dwa dawne źródła: kuratorska mapa
+    :data:`_LINGUA_ALIASY` (rozjazd nazewnictwa) i ``difflib`` (literówka).
+    Kandydaci z obu są weryfikowani przez ``hasattr``, żeby zmiana enuma
+    w nowszej wersji lingua nie zaczęła produkować martwych podpowiedzi.
 
     Wynik ``difflib`` jest DODATKOWO filtrowany po pierwszej literze i to nie
     jest ozdoba — zmierzone na wersji 2.1.1: bez tego filtra „NORWEGIAN"
@@ -886,6 +896,9 @@ def _podpowiedz_nazwe_lingua(wartosc: str) -> list[str]:
     if _LinguaLanguage is None:
         return []
     nazwa = wartosc.strip().upper()
+    z_kanonu = jezyki_lingua.nazwa_enuma(kod) if kod else None
+    if z_kanonu and z_kanonu != nazwa:
+        return [z_kanonu]
     kandydaci: list[str] = [
         n for n in _LINGUA_ALIASY.get(nazwa, ())
         if getattr(_LinguaLanguage, n, None) is not None
@@ -944,7 +957,7 @@ def _zbuduj_mapowanie_lingua() -> dict[str, Any]:
             # dodał język Managerem Reguł i wpisał nazwę nieznaną detektorowi,
             # nie dostawał ŻADNEGO sygnału: paczka po prostu nie brała udziału
             # w detekcji. Rejestr `PominietyPlik` (v18.24.2) jest tym kanałem.
-            podpowiedzi = _podpowiedz_nazwe_lingua(wartosc)
+            podpowiedzi = _podpowiedz_nazwe_lingua(wartosc, kod)
             szczegol = f"lingua: {wartosc.strip()}"
             if podpowiedzi:
                 szczegol += " -> " + ", ".join(podpowiedzi)

@@ -51,6 +51,7 @@ from typing import Any, NoReturn
 import yaml
 
 import dev_konsola
+import jezyki_lingua
 
 # ---------------------------------------------------------------------------
 # STDOUT UTF-8 (wspólna implementacja dev-tooli od v18.25 → `dev_konsola`)
@@ -265,8 +266,14 @@ _ALIASY_LINGUA: dict[str, tuple[str, ...]] = {
 }
 
 
-def _podpowiedz_nazwe(nazwa: str) -> list[str]:
+def _podpowiedz_nazwe(nazwa: str, kod: str = "") -> list[str]:
     """Nazwy enuma, które autor paczki prawdopodobnie miał na myśli (może być pusta).
+
+    Od v18.29.0 pierwszym źródłem jest KANON po kodzie ISO folderu
+    (`jezyki_lingua`): folder nazywa się `sv`, więc poprawna nazwa to
+    `SWEDISH` — i jest to fakt, a nie kandydat z heurystyki. Dopiero dla
+    folderu poza kanonem wracamy do dawnej pary: kuratorska mapa rozjazdów
+    nazewnictwa i `difflib` na literówki.
 
     Filtr pierwszej litery przy `difflib` nie jest ozdobą — bez niego
     „NORWEGIAN" dostaje podpowiedź „GEORGIAN" (zmierzone na lingua 2.1.1),
@@ -274,6 +281,9 @@ def _podpowiedz_nazwe(nazwa: str) -> list[str]:
     """
     from lingua import Language
 
+    z_kanonu = jezyki_lingua.nazwa_enuma(kod) if kod else None
+    if z_kanonu and z_kanonu != nazwa:
+        return [z_kanonu]
     kandydaci = [n for n in _ALIASY_LINGUA.get(nazwa, ())
                  if getattr(Language, n, None) is not None]
     if kandydaci:
@@ -292,8 +302,12 @@ def detektor_dla(kod: str):
 
     ``None`` wraca w dwóch wypadkach, oba zapisywane w
     :data:`_POKRYCIE_OBNIZONE` z powodem po angielsku:
-      * paczka nie deklaruje pola `lingua:` — świadoma decyzja autora paczki,
-        której `lingua` nie obsługuje,
+      * paczka nie deklaruje pola `lingua:` — a to od v18.29.0 są DWA różne
+        powody, rozstrzygane kanonem po kodzie ISO folderu
+        (`jezyki_lingua.nazwa_enuma`): język poza `lingua` (brak pola jest
+        poprawnym stanem paczki) albo język, który `lingua` obsługuje (brak
+        pola jest USTERKĄ i powód mówi to wprost, razem z nazwą do wpisania).
+        Do v18.28.0 oba dostawały jedno zdanie „no `lingua:` field",
       * deklarowana nazwa nie istnieje w enumie `lingua.Language` — literówka
         albo rozjazd nazewnictwa (`NORWEGIAN` to w lingui `BOKMAL`/`NYNORSK`).
     Do v18.26.0 ten drugi przypadek kończył się GOŁYM ``AttributeError`` z
@@ -313,11 +327,22 @@ def detektor_dla(kod: str):
 
     nazwa = _NAZWA_LINGUA.get(kod, "")
     if not nazwa:
-        _POKRYCIE_OBNIZONE[kod] = "no `lingua:` field in podstawy.yaml"
+        # v18.29.0: brak pola znaczy DWIE różne rzeczy i do v18.28.0 bramka
+        # meldowała jedno i to samo zdanie o obu. Kanon rozstrzyga to
+        # deterministycznie, po kodzie ISO folderu.
+        oczekiwana = jezyki_lingua.nazwa_enuma(kod)
+        _POKRYCIE_OBNIZONE[kod] = (
+            f"no `lingua:` field in podstawy.yaml, although lingua DOES support "
+            f"this language — the pack should declare `lingua: {oczekiwana}` "
+            f"(DEFECT, not a limitation)"
+            if oczekiwana else
+            "no `lingua:` field in podstawy.yaml — lingua does not support this "
+            "language at all, so this is the correct state of the pack"
+        )
         _DETEKTORY[kod] = None
         return None
     if getattr(Language, nazwa, None) is None:
-        propozycje = _podpowiedz_nazwe(nazwa)
+        propozycje = _podpowiedz_nazwe(nazwa, kod)
         _POKRYCIE_OBNIZONE[kod] = (
             f"`lingua: {nazwa}` is not a name known to lingua"
             + (f" — did you mean: {', '.join(propozycje)}?" if propozycje else "")
