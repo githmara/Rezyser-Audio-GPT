@@ -47,6 +47,7 @@ from ruamel.yaml.scalarstring import LiteralScalarString
 
 import core_llm as cl
 import dev_konsola
+import dev_yaml
 import przeglad_tlumaczen
 import tlumacz_bramki
 
@@ -67,9 +68,20 @@ skonfiguruj_stdout = dev_konsola.skonfiguruj_stdout
 # ---------------------------------------------------------------------------
 NAZWA_REJESTRU = "jezyki_docelowe.yaml"
 
-# Wbudowany fallback z v17.x — używany, gdy rejestru nie ma albo jest zepsuty.
-# Kontrybutor dodaje język edytując YAML, nie Pythona; zepsuty YAML nie może
-# jednak zatrzymać narzędzia w połowie propagacji.
+# Nazwa do komunikatów fatalnych + parser rodziny. `ruamel` w trybie `safe`,
+# a nie `pyyaml`, bo tak te pliki czytali wszyscy bracia od v18.25 i różnica
+# YAML 1.1/1.2 (`yes` jako bool kontra napis) nie ma prawa zmienić się przy
+# okazji łatania ciszy.
+NARZEDZIE = "tlumacz_rdzen"
+_PARSER_YAML = dev_yaml.parser_ruamel_safe()
+
+# Wbudowany fallback z v17.x — od v18.28.0 WYŁĄCZNIE dla BRAKU pliku rejestru
+# (świeży checkout przed pierwszym `refresh_languages.py`), i to z głośnym
+# ostrzeżeniem. Do v18.27.0 obejmował także rejestr ZEPSUTY, a to była cicha
+# zmiana ZASIĘGU całej rodziny: `MAPA_JEZYKOW` wyznacza dozwolone `--jezyki`
+# i listę dla `--wszystkie`, więc jeden zły znak w YAML-u cofał wszystkich
+# pięciu braci do ośmiu języków z v17.x — dziesiąta paczka wypadała z propagacji
+# bez ani jednego słowa, a raport meldował sukces „dla wszystkich języków".
 FALLBACK_JEZYKOW: dict[str, str] = {
     "en": "angielski", "fi": "fiński", "ru": "rosyjski", "is": "islandzki",
     "it": "włoski", "de": "niemiecki", "fr": "francuski", "es": "hiszpański",
@@ -77,39 +89,49 @@ FALLBACK_JEZYKOW: dict[str, str] = {
 
 
 def wczytaj_mape_jezykow(root: Path, kod_zrodlowy: str = "pl") -> dict[str, str]:
-    """Wczytuje `jezyki_docelowe.yaml` jako ISO→nazwa (bez języka źródłowego)."""
+    """Wczytuje `jezyki_docelowe.yaml` jako ISO→nazwa (bez języka źródłowego).
+
+    Rejestr wyznacza ZASIĘG rodziny, więc zepsuty plik przerywa pracę zamiast
+    po cichu wracać do wbudowanego fallbacku (`dev_yaml`, v18.28.0 — powód przy
+    :data:`FALLBACK_JEZYKOW`). Wołane na poziomie MODUŁU u pięciu braci, więc
+    `SystemExit` pada od razu przy imporcie, przed pierwszym callem do API.
+    """
     rejestr = root / NAZWA_REJESTRU
-    if not rejestr.is_file():
-        return dict(FALLBACK_JEZYKOW)
-    try:
-        with open(rejestr, "r", encoding="utf-8") as fh:
-            dane = YAML(typ="safe").load(fh)
-    except Exception:  # noqa: BLE001 — fail-soft: zły rejestr → fallback
-        return dict(FALLBACK_JEZYKOW)
-    if not isinstance(dane, dict):
+    dane = dev_yaml.wczytaj_jesli_jest(
+        rejestr, narzedzie=NARZEDZIE, parser=_PARSER_YAML)
+    if dane is None:
+        print(f"⚠️  {NAZWA_REJESTRU} not found next to the tool ({root}) — falling "
+              f"back to the {len(FALLBACK_JEZYKOW)} built-in target languages. "
+              f"Run `python refresh_languages.py` to rebuild the registry.")
         return dict(FALLBACK_JEZYKOW)
     mapa = {
         str(k): str(v)
         for k, v in dane.items()
         if isinstance(k, str) and isinstance(v, str) and k != kod_zrodlowy
     }
-    return mapa or dict(FALLBACK_JEZYKOW)
+    if not mapa:
+        dev_yaml.padnij_na_pliku(
+            rejestr, "the registry lists no target language (only the source "
+                     "language, or no `code: name` entry at all)",
+            narzedzie=NARZEDZIE)
+    return mapa
 
 
 def natywna_nazwa(dict_dir: Path, kod: str) -> str:
     """Natywna nazwa języka z `dictionaries/<kod>/podstawy.yaml::etykieta`.
 
     Cel podajemy modelowi NATYWNIE („Suomi" zamiast polskiego „fiński") —
-    kotwica PL usunięta w audycie buildera UI 2026-06-16. Fail-soft: brak
-    lub zły `podstawy.yaml` → kod ISO (nazwa jest podpowiedzią, nie kontraktem).
+    kotwica PL usunięta w audycie buildera UI 2026-06-16. BRAK pliku degraduje
+    do kodu ISO (paczka-stub, nazwa jest podpowiedzią, nie kontraktem), ale plik
+    ISTNIEJĄCY i zepsuty przerywa pracę: podpowiedź wzięta z pliku, którego nikt
+    nie sparsował, to ta sama fałszywa czystość co pusty wynik skanu (`dev_yaml`).
     """
     plik = dict_dir / kod / "podstawy.yaml"
-    try:
-        with open(plik, "r", encoding="utf-8") as fh:
-            dane = YAML(typ="safe").load(fh)
-    except Exception:  # noqa: BLE001
+    dane = dev_yaml.wczytaj_jesli_jest(
+        plik, narzedzie=NARZEDZIE, parser=_PARSER_YAML)
+    if dane is None:
         return kod
-    etyk = (dane or {}).get("etykieta", "") if isinstance(dane, dict) else ""
+    etyk = dane.get("etykieta", "")
     if isinstance(etyk, str) and etyk.strip():
         nazwa = re.split(r"\s+[–—-]\s+", etyk.strip(), maxsplit=1)[0].strip()
         if nazwa:

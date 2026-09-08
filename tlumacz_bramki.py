@@ -208,6 +208,51 @@ def waliduj_odcisk(
 
 
 # ---------------------------------------------------------------------------
+# ZŁAMANIA LINII — struktura, której odcisk NIE pilnuje (v18.28.0)
+# ---------------------------------------------------------------------------
+# Odcisk struktury wyżej traktuje liczbę linii jako naruszenie MIĘKKIE i słusznie:
+# proza po niemiecku bywa dłuższa, więc ±1 linia to szum. Ta bramka pyta o coś
+# innego — czy podział na linie w ogóle PRZEŻYŁ tłumaczenie.
+#
+# Klasa zmierzona DWA RAZY na tym samym materiale. v18.26.1 (`diag.powod.lingua`):
+# `de`/`fi`/`fr` wróciły jako jeden akapit zamiast siedmiu linii. v18.28.0
+# (`diag.powod.ksztalt`): to samo w `fi`/`is`/`ru` — 300+ znaków w jednej linii
+# przy źródle złamanym co ~72 znaki. Za każdym razem ruamel zapisał taki tekst
+# jako skalar w POJEDYNCZYCH cudzysłowach, gdzie escape `\n` nawet nie działa,
+# więc ręczna poprawka wymaga zmiany stylu skalara, nie dopisania znaku.
+#
+# Dlaczego to nie jest kosmetyka: Konstytucja wymaga zachowania `\n` w długich
+# komunikatach, bo od nich zależy zawijanie tekstu — a zawijanie jest sprawą
+# DOSTĘPNOŚCI (czytnik ekranu i użytkownik z lupą dostają jedną linię 300 znaków
+# tam, gdzie polski oryginał ma pięć czytelnych). Kryterium jest ostre i tanie:
+# kolaps do ZERA złamań przy źródle wielolinijkowym.
+#
+# Progi: źródło 3+ linii → kolaps BLOKUJE (idzie przez retry, model sam się
+# poprawia). Źródło 2-linijkowe → tylko ostrzeżenie, bo język zwięźlejszy od
+# polskiego może legalnie zmieścić się w jednej linii i wymuszanie retry byłoby
+# walką z materiałem.
+_MIN_ZLAMAN_BLOKUJACYCH = 2
+
+
+def waliduj_zlamania_linii(src: str, tgt: str) -> tuple[list[str], list[str]]:
+    """Czy podział na linie przeżył tłumaczenie? → ``(twarde, miekkie)``.
+
+    Args:
+        src: Wartość źródłowa (PL), po tokenizacji albo przed — bez różnicy,
+            tokeny nie zawierają złamań.
+        tgt: Wartość zwrócona przez model.
+    """
+    zlamania_src = src.count("\n")
+    if zlamania_src == 0 or tgt.count("\n") > 0:
+        return [], []
+    opis = (f"podział na linie zniknął — liczba linii źródła: {zlamania_src + 1}, "
+            f"tłumaczenie jest jedną linią {len(tgt)} znaków")
+    if zlamania_src >= _MIN_ZLAMAN_BLOKUJACYCH:
+        return [opis], []
+    return [], [opis]
+
+
+# ---------------------------------------------------------------------------
 # HEURYSTYKA „to jest prompt, nie etykieta"
 # ---------------------------------------------------------------------------
 # Dla narzędzi, w których prompty są mniejszością wśród wartości (`ui.yaml`:

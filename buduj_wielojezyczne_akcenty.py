@@ -105,8 +105,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
-from ruamel.yaml import YAML
-
+import dev_yaml
 import przeglad_tlumaczen
 import tlumacz_bramki
 import tlumacz_rdzen
@@ -185,18 +184,26 @@ class Znalezisko:
 # ---------------------------------------------------------------------------
 # WCZYTYWANIE MATERIAŁU
 # ---------------------------------------------------------------------------
-def _yaml_safe() -> YAML:
-    return YAML(typ="safe")
+# Nazwa narzędzia + parser do wspólnego loadera `dev_yaml` (standard „zero
+# ciszy", v18.28.0). Zepsuty plik NIE jest już oddawany bramce G1 jako pusty
+# dict: G1 raportowała wtedy „brak `id`/`iso`/`kategoria`", czyli objaw zamiast
+# przyczyny, i to o pliku, którego parser nawet nie zrozumiał.
+NARZEDZIE = "buduj_wielojezyczne_akcenty"
+_PARSER_YAML = dev_yaml.parser_ruamel_safe()
 
 
 def wczytaj_pare(paczka: str, akcent: str) -> dict:
-    """Surowy dict jednej pary akcentowej (pusty, gdy pliku nie ma / zły YAML)."""
+    """Surowy dict jednej pary akcentowej (pusty TYLKO gdy pliku nie ma).
+
+    Zepsuty albo nie-mapowy plik przerywa audyt (`dev_yaml`): 72 pary są
+    materiałem porównawczym dla siebie nawzajem (konsensus `iso`, precedensy,
+    parytet wielkości liter), więc para wczytana jako pusta cicho fałszuje
+    WSZYSTKIE bramki, nie tylko własną.
+    """
     plik = DICT_DIR / paczka / FOLDER / f"{akcent}.yaml"
-    try:
-        dane = _yaml_safe().load(plik.read_text(encoding="utf-8"))
-    except Exception:  # noqa: BLE001 — zepsuty plik zgłosi G1
-        return {}
-    return dane if isinstance(dane, dict) else {}
+    dane = dev_yaml.wczytaj_jesli_jest(
+        plik, narzedzie=NARZEDZIE, parser=_PARSER_YAML)
+    return dane if dane is not None else {}
 
 
 def pary_akcentowe() -> dict[tuple[str, str], dict]:
@@ -214,13 +221,16 @@ def pary_akcentowe() -> dict[tuple[str, str], dict]:
 
 
 def podstawy_paczki(kod: str) -> dict:
-    """`dictionaries/<kod>/podstawy.yaml` (pusty przy braku/błędzie)."""
-    try:
-        dane = _yaml_safe().load(
-            (DICT_DIR / kod / "podstawy.yaml").read_text(encoding="utf-8"))
-    except Exception:  # noqa: BLE001
-        return {}
-    return dane if isinstance(dane, dict) else {}
+    """`dictionaries/<kod>/podstawy.yaml` (pusty TYLKO przy braku pliku).
+
+    Brak pliku jest legalny (`--nowy-jezyk` sprawdza tym, czy paczka już
+    istnieje), zepsuty plik — nie: z tego pliku bierze się tablica pre-passu
+    i alfabet, na których stoją bramki G5 i G9.
+    """
+    dane = dev_yaml.wczytaj_jesli_jest(
+        DICT_DIR / kod / "podstawy.yaml", narzedzie=NARZEDZIE,
+        parser=_PARSER_YAML)
+    return dane if dane is not None else {}
 
 
 def konsensus_iso(pary: dict[tuple[str, str], dict]) -> dict[str, str]:

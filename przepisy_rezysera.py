@@ -385,6 +385,7 @@ class PrzepisRezysera:
 # (``gui_diagnostyka``). Ten moduł pozostaje wx-free i i18n-free — kody powodów
 # są jego kontraktem, nie zdaniami do przetłumaczenia.
 POWOD_PARSE     = "parse"       # pliku nie da się sparsować (składnia YAML)
+POWOD_KSZTALT   = "ksztalt"     # plik parsuje się, ale nie do mapy (skalar/lista/null)
 POWOD_BRAK_POL  = "brak_pol"    # brak wymaganych `id` / `etykieta` / `kategoria`
 POWOD_KATEGORIA = "kategoria"   # `kategoria:` poza zbiorem rozumianym przez silnik
 POWOD_ZAKRES    = "zakres"      # `zakres:` poza zbiorem (postprodukcja)
@@ -458,16 +459,18 @@ def zglos_pominiecie(sciezka: str, powod: str, szczegol: str = "") -> None:
 
 
 def _zgloszono_blad_parsera(sciezka: str) -> bool:
-    """Czy dla tego pliku zgłoszono już błąd składni?
+    """Czy dla tego pliku zgłoszono już błąd składni albo złego kształtu korzenia?
 
     Plik, którego parser nie zrozumiał, wraca z :func:`_wczytaj_yaml` jako pusty
     słownik — a dalszy filtr „brak wymaganych pól" widziałby wtedy TEN SAM plik
     drugi raz i dopisywał userowi mylący, wtórny powód. Przyczyna jest jedna
-    (składnia), więc raport ma o niej mówić jednym wpisem.
+    (składnia albo kształt korzenia, od v18.28.0), więc raport ma o niej mówić
+    jednym wpisem.
     """
     with _LOCK_POMINIETE:
         return any(
-            w.sciezka == sciezka and w.powod == POWOD_PARSE for w in _POMINIETE
+            w.sciezka == sciezka and w.powod in (POWOD_PARSE, POWOD_KSZTALT)
+            for w in _POMINIETE
         )
 
 
@@ -775,6 +778,13 @@ def _wczytaj_yaml(sciezka: str) -> dict:
     Teraz powód ląduje w rejestrze razem z numerem linii, a użytkownik dostaje
     go w dialogu diagnostycznym. ``OSError`` (plik zniknął, brak uprawnień)
     raportujemy osobnym szczegółem — objaw jest ten sam, przyczyna inna.
+
+    v18.28.0 domyka DRUGĄ połowę tej samej reguły: plik, który PARSUJE SIĘ
+    poprawnie, ale nie do mapy (goły skalar po wykasowaniu treści, lista,
+    ``null``), przestaje wracać jako cichy ``{}``. Kształt korzenia jest
+    kontraktem pliku reguł dokładnie tak samo jak jego składnia, a objaw był
+    identyczny: przepis znikał z GUI, a raport mówił najwyżej o „brakujących
+    polach" — czyli o objawie, nie o przyczynie.
     """
     try:
         with open(sciezka, "r", encoding="utf-8") as fh:
@@ -788,7 +798,10 @@ def _wczytaj_yaml(sciezka: str) -> dict:
     except Exception as exc:  # noqa: BLE001 — np. UnicodeDecodeError
         zglos_pominiecie(sciezka, POWOD_PARSE, str(exc).replace("\n", " "))
         return {}
-    return data if isinstance(data, dict) else {}
+    if not isinstance(data, dict):
+        zglos_pominiecie(sciezka, POWOD_KSZTALT, type(data).__name__)
+        return {}
+    return data
 
 
 # =============================================================================
@@ -804,11 +817,18 @@ _CACHE_BAZA: dict[str, dict] = {}
 
 
 def _zaladuj_baze(jezyk: str) -> dict:
-    """Wczytuje ``dictionaries/<jezyk>/rezyser/baza.yaml`` (cache, ``{}`` gdy brak)."""
+    """Wczytuje ``dictionaries/<jezyk>/rezyser/baza.yaml`` (cache, ``{}`` gdy brak).
+
+    BRAK pliku sprawdzamy TUTAJ, przed wejściem do loadera (v18.28.0): paczka
+    bez ``baza.yaml`` jest stanem przewidzianym (:func:`tekst_bazy` degraduje
+    wtedy lang→en→literał), a loader raportuje każdy nieudany odczyt jako powód
+    pominięcia — więc bez tego warunku użytkownik dostawał w dialogu
+    diagnostycznym wpis „niepoprawna składnia YAML" o pliku, którego nie ma.
+    """
     if jezyk in _CACHE_BAZA:
         return _CACHE_BAZA[jezyk]
     sciezka = os.path.join(DICTIONARIES_DIR, jezyk, FOLDER_REZYSER, f"{NAZWA_BAZY}.yaml")
-    dane = _wczytaj_yaml(sciezka)
+    dane = _wczytaj_yaml(sciezka) if os.path.exists(sciezka) else {}
     _CACHE_BAZA[jezyk] = dane
     return dane
 

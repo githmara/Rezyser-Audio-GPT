@@ -98,8 +98,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from ruamel.yaml import YAML
-
+import dev_yaml
 import przeglad_tlumaczen
 import tlumacz_bramki
 import tlumacz_rdzen
@@ -149,6 +148,13 @@ MODEL_DOMYSLNY = "claude-sonnet-5"
 
 MAPA_JEZYKOW: dict[str, str] = tlumacz_rdzen.wczytaj_mape_jezykow(
     ROOT, KOD_ZRODLOWY)
+
+# Nazwa narzędzia + parser wspólnego loadera `dev_yaml` (standard „zero ciszy",
+# v18.28.0). Wszystkie pięć loaderów tego pliku czytało dotąd zepsuty plik jako
+# pusty — a dane paczki są tu KONTEKSTEM dla modelu i ORAKUŁEM dla bramek, więc
+# cisza kończyła się polskim precedensem w promptcie albo bramką bez materiału.
+NARZEDZIE = "buduj_wielojezyczne_poliglota"
+_PARSER_YAML = dev_yaml.parser_ruamel_safe()
 
 
 def _natywna_nazwa(kod: str) -> str:
@@ -406,14 +412,9 @@ def wartosci_danych_z_celu(kod: str, folder: str, nazwa: str) -> dict[str, Any]:
     realizacja decyzji „w istniejącej paczce danych języka NIE TYKAMY": wracają
     do wyniku dokładnie takie, jakie były, choćby model dostał je w kontekście.
     """
-    plik = DICT_DIR / kod / folder / nazwa
-    if not plik.is_file():
-        return {}
-    try:
-        dane = YAML(typ="safe").load(plik.read_text(encoding="utf-8"))
-    except Exception:  # noqa: BLE001 — zepsuty cel obsłuży walidacja silnikiem
-        return {}
-    if not isinstance(dane, dict):
+    dane = dev_yaml.wczytaj_jesli_jest(
+        DICT_DIR / kod / folder / nazwa, narzedzie=NARZEDZIE, parser=_PARSER_YAML)
+    if dane is None:
         return {}
     return {k: v for k, v in dane.items() if klasa_pola(str(k)) == KLASA_DANE}
 
@@ -424,12 +425,10 @@ def _podstawy_paczki(kod: str) -> dict:
     Czytamy sami, bez silnika: narzędzie musi działać u kontrybutora bez
     `python-docx`, a potrzebny jest z tego pliku wyłącznie `alfabet`.
     """
-    plik = DICT_DIR / kod / "podstawy.yaml"
-    try:
-        dane = YAML(typ="safe").load(plik.read_text(encoding="utf-8"))
-    except Exception:  # noqa: BLE001
-        return {}
-    return dane if isinstance(dane, dict) else {}
+    dane = dev_yaml.wczytaj_jesli_jest(
+        DICT_DIR / kod / "podstawy.yaml", narzedzie=NARZEDZIE,
+        parser=_PARSER_YAML)
+    return dane if dane is not None else {}
 
 
 def _pusta(wartosc: Any) -> bool:
@@ -1486,14 +1485,9 @@ def kontekst_paczki(kod: str, folder: str, nazwa: str) -> dict[str, str]:
     listę wyboru z dokumentacją. Drugim jest sam poprzedni `opis` — model widzi
     z niego, jakiego słowa paczka używa na „szyfr", „akcent" czy „czytnik ekranu".
     """
-    plik = DICT_DIR / kod / folder / nazwa
-    if not plik.is_file():
-        return {}
-    try:
-        dane = YAML(typ="safe").load(plik.read_text(encoding="utf-8"))
-    except Exception:  # noqa: BLE001 — wskazówka to wygoda, nie bramka
-        return {}
-    if not isinstance(dane, dict):
+    dane = dev_yaml.wczytaj_jesli_jest(
+        DICT_DIR / kod / folder / nazwa, narzedzie=NARZEDZIE, parser=_PARSER_YAML)
+    if dane is None:
         return {}
     wynik: dict[str, str] = {}
     for pole, nazwa_w_payloadzie in (("etykieta", "label"),
@@ -1555,10 +1549,8 @@ def slowa_przykladowe(
         return [], uwagi
     plik = DICT_DIR / kod / folder / nazwa
     if plik.is_file():
-        try:
-            dane = YAML(typ="safe").load(plik.read_text(encoding="utf-8"))
-        except Exception:  # noqa: BLE001
-            dane = None
+        dane = dev_yaml.wczytaj_lub_padnij(
+            plik, narzedzie=NARZEDZIE, parser=_PARSER_YAML)
         if isinstance(dane, dict):
             z_celu = [s for s, _ in pary_z_opisu(str(dane.get("opis", "")))]
             if z_celu:
@@ -1739,13 +1731,9 @@ def _precedens_pustego_kroku(
         if kandydat == kod:
             continue
         plik = DICT_DIR / kandydat / folder / nazwa
-        if not plik.is_file():
-            continue
-        try:
-            dane = YAML(typ="safe").load(plik.read_text(encoding="utf-8"))
-        except Exception:  # noqa: BLE001
-            continue
-        if not isinstance(dane, dict):
+        dane = dev_yaml.wczytaj_jesli_jest(
+            plik, narzedzie=NARZEDZIE, parser=_PARSER_YAML)
+        if dane is None:
             continue
         if any(not _pusta(dane.get(pole)) for pole in POLA_ZEROWANE_DLA_NOWEJ):
             continue

@@ -1199,6 +1199,36 @@ def main(args: argparse.Namespace | None = None) -> None:
             print(f"✅ Dev-tool contract clean "
                   f"({audyt_leakow.BASELINE_KONTRAKT_PATH.name}).\n")
 
+    # 6b''. YAML silence gate (v18.28.0) — a file the code could not parse (or
+    # parsed into a bare scalar / list / null) must never disappear without a
+    # word: in a dev tool that means a FATAL, in the runtime an entry in the
+    # skipped-rules registry. This gate is OUTSIDE the `audyt_leakow` block on
+    # purpose: it needs neither `lingua` nor the network, so it runs for every
+    # contributor, and its baseline is EMPTY — any hit is a regression.
+    print("🔍 Silence gate: scanning *.py for silently skipped YAML files...")
+    try:
+        import audyt_ciszy
+    except ImportError as exc:
+        print(f"⚠️  audyt_ciszy not available ({exc}) — silence gate SKIPPED.\n")
+    else:
+        wynik_cisza = audyt_ciszy.bramka()
+        if wynik_cisza.czysto:
+            print(f"✅ No silently skipped YAML file beyond the baseline "
+                  f"({audyt_ciszy.BASELINE_PATH.name}).\n")
+        else:
+            ile = sum(len(v) for v in wynik_cisza.nowe.values())
+            print(f"❌ FATAL: {ile} silently skipped YAML file(s) ABOVE the "
+                  f"baseline in {len(wynik_cisza.nowe)} file(s) — refusing to build.")
+            print("In a dev tool make it fatal (`dev_yaml.wczytaj_lub_padnij`); in "
+                  "the runtime report the reason to the registry "
+                  "(`przepisy_rezysera.zglos_pominiecie`). If the empty result is "
+                  "genuinely legitimate, regenerate the baseline with "
+                  "`python audyt_ciszy.py --zapisz-baseline` and commit the diff.")
+            for nazwa, powody in sorted(wynik_cisza.nowe.items()):
+                for p in powody:
+                    print(f"      • {nazwa}: {p}")
+            sys.exit(1)
+
     # 6c. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
     _weryfikuj_flagi_debug()
 

@@ -23,9 +23,18 @@ gdy dispatch akcentów stał się dynamiczny) zdejmuje tę barierę:
 
 Język źródłowy `pl` jest celowo pomijany (to źródło, nie cel tłumaczenia).
 
-Narzędzie jest SAMOWYSTARCZALNE — czyta YAML-e wprost (tylko `pyyaml`), nie
-importuje silnika (`core_poliglota` ciągnie `python-docx`), więc działa nawet
+Narzędzie jest SAMOWYSTARCZALNE — czyta YAML-e wprost (`pyyaml` przez
+`dev_yaml`), nie importuje silnika (`core_poliglota` ciągnie `python-docx`), więc działa nawet
 w okrojonym środowisku kontrybutora.
+
+ZEPSUTY PLIK = STOP (standard `dev_yaml`, od v18.28.0). Do v18.27.0 oba loadery
+tego narzędzia miały cichy `return`, a przy pliku rejestru był to defekt z
+utratą danych: nieczytelny `jezyki_docelowe.yaml` wracał jako `{}`, więc każdy
+język wyglądał na „do dodania" i narzędzie NADPISYWAŁO plik nazwami z
+`podstawy.yaml` — wraz z ręcznie dopieszczonymi wartościami, których obiecuje
+nie ruszać. Dziś nieczytelny albo niebędący mapą rejestr przerywa pracę i mówi,
+co poprawić; BRAK pliku zostaje stanem normalnym (pierwszy przebieg), ale
+narzędzie o nim głośno melduje.
 
 Użycie:
   python refresh_languages.py            # synchronizuj + zapisz + raport
@@ -39,14 +48,14 @@ import argparse
 import re
 from pathlib import Path
 
-import yaml
-
 import dev_konsola
+import dev_yaml
 
 # STDOUT UTF-8 (natywne nazwy: cyrylica, 中文, Þ/Æ — cmd.exe domyślnie cp1250).
 # Wspólna implementacja dev-tooli od v18.25 → `dev_konsola`.
 dev_konsola.skonfiguruj_stdout()
 
+NARZEDZIE = "refresh_languages"
 ROOT = Path(__file__).resolve().parent
 DICT_DIR = ROOT / "dictionaries"
 REJESTR = ROOT / "jezyki_docelowe.yaml"
@@ -83,14 +92,17 @@ def natywna_nazwa(kod: str) -> str:
     """Natywna nazwa języka z `dictionaries/<kod>/podstawy.yaml::etykieta`.
 
     Bierze prefiks przed separatorem ` – ` (jak `core_poliglota.natywna_nazwa`,
-    ale samowystarczalnie). Fallback na sam kod ISO, gdy brak etykiety.
+    ale samowystarczalnie). Fallback na sam kod ISO, gdy pole `etykieta` jest
+    puste — to jedyna dopuszczalna cichość w tej funkcji, bo świeża paczka
+    legalnie jeszcze go nie ma i marker do uzupełnienia wpisze człowiek.
+
+    Sam PLIK musi się jednak dać przeczytać: `skanuj_jezyki` wybrało ten kod
+    właśnie po jego obecności, więc plik nieczytelny albo niebędący mapą to
+    zepsuta paczka, nie „język bez nazwy" (`dev_yaml`).
     """
-    p = DICT_DIR / kod / "podstawy.yaml"
-    try:
-        dane = yaml.safe_load(p.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError):
-        return kod
-    etyk = (dane or {}).get("etykieta", "") if isinstance(dane, dict) else ""
+    dane = dev_yaml.wczytaj_lub_padnij(
+        DICT_DIR / kod / "podstawy.yaml", narzedzie=NARZEDZIE)
+    etyk = dane.get("etykieta", "")
     if isinstance(etyk, str) and etyk.strip():
         nazwa = _RE_SEPARATOR_ETYKIETY.split(etyk.strip(), maxsplit=1)[0].strip()
         if nazwa:
@@ -101,7 +113,10 @@ def natywna_nazwa(kod: str) -> str:
 def skanuj_jezyki() -> list[str]:
     """Kody języków obecnych na dysku (folder z `podstawy.yaml`, poza `pl`)."""
     if not DICT_DIR.is_dir():
-        return []
+        raise SystemExit(
+            f"❌ {NARZEDZIE}: no `dictionaries/` folder next to this script "
+            f"({DICT_DIR}) — the registry would be emptied of every language."
+        )
     kody = []
     for p in sorted(DICT_DIR.iterdir()):
         if p.is_dir() and p.name != KOD_ZRODLOWY and (p / "podstawy.yaml").is_file():
@@ -110,14 +125,14 @@ def skanuj_jezyki() -> list[str]:
 
 
 def wczytaj_rejestr() -> dict[str, str]:
-    """Wczytuje istniejący `jezyki_docelowe.yaml` (pusty dict, gdy brak/zły)."""
-    if not REJESTR.is_file():
-        return {}
-    try:
-        dane = yaml.safe_load(REJESTR.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError):
-        return {}
-    if not isinstance(dane, dict):
+    """Wczytuje istniejący `jezyki_docelowe.yaml` (pusty dict TYLKO gdy brak pliku).
+
+    Nieczytelny albo niebędący mapą rejestr przerywa pracę (`dev_yaml`), bo
+    inaczej narzędzie skasowałoby ręcznie dopieszczone nazwy — patrz docstring
+    modułu. Brak pliku to normalny pierwszy przebieg; woła o nim `main`.
+    """
+    dane = dev_yaml.wczytaj_jesli_jest(REJESTR, narzedzie=NARZEDZIE)
+    if dane is None:
         return {}
     return {str(k): str(v) for k, v in dane.items() if isinstance(k, str)}
 
@@ -150,6 +165,10 @@ def main() -> int:
     nowy = {k: v for k, v in rejestr.items() if k in obecne}  # usuń znikłe
     for kod in do_dodania:
         nowy[kod] = natywna_nazwa(kod)                        # dodaj nowe (natywna nazwa)
+
+    if not REJESTR.is_file():
+        print(f"ℹ️  {REJESTR.name} does not exist yet — building it from scratch "
+              f"(first run).")
 
     print(f"📁 Na dysku (dictionaries/, poza pl): {sorted(obecne)}")
     print(f"📒 W rejestrze przed synchronizacją:  {sorted(zarejestrowane)}")

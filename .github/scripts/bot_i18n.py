@@ -67,14 +67,32 @@ def _jezyki_z_podstawami() -> list[str]:
 
 
 def _pole_lingua(kod: str) -> str | None:
-    """Wartość pola `lingua:` z `<kod>/podstawy.yaml` (UPPER) lub None."""
+    """Wartość pola `lingua:` z `<kod>/podstawy.yaml` (UPPER) lub None.
+
+    Plik zepsuty albo niebędący mapą (goły skalar, lista) NIE wypada tu po
+    cichu — trafia na `stderr`, dokładnie jak nieznana nazwa enuma niżej
+    (standard „zero ciszy", v18.28.0). Bot świadomie NIE pada: to jedyne
+    miejsce tego standardu, gdzie kosztem twardego stopu byłoby zgłoszenie
+    użytkownika BEZ odpowiedzi, a nie zepsuty build. Zepsutą paczkę i tak
+    zatrzymują bramki wydania, więc tutaj wystarczy głośna degradacja
+    (język wykryty gorzej, odpowiedź nadal wychodzi).
+    """
     sciezka = _DICT_DIR / kod / "podstawy.yaml"
     try:
         with open(sciezka, "r", encoding="utf-8") as fh:
             dane = yaml.safe_load(fh)
-    except (OSError, yaml.YAMLError):
+    except (OSError, yaml.YAMLError) as exc:
+        sys.stderr.write(
+            f"[bot_i18n] dictionaries/{kod}/podstawy.yaml is unreadable "
+            f"({' '.join(str(exc).split())}) — skipping this pack in the detector.\n"
+        )
         return None
     if not isinstance(dane, dict):
+        sys.stderr.write(
+            f"[bot_i18n] dictionaries/{kod}/podstawy.yaml parses as "
+            f"{type(dane).__name__}, not a mapping — skipping this pack in the "
+            f"detector.\n"
+        )
         return None
     wartosc = dane.get("lingua")
     if isinstance(wartosc, str) and wartosc.strip():

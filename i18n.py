@@ -210,8 +210,12 @@ def _wczytaj_yaml(jezyk: str) -> dict[str, Any]:
     try:
         with open(sciezka, "r", encoding="utf-8") as fh:
             dane = yaml.safe_load(fh)
-    except OSError as exc:
-        _zglos_awarie(jezyk, sciezka, POWOD_ODCZYT, str(exc))
+    except (OSError, UnicodeDecodeError) as exc:
+        # `UnicodeDecodeError` (plik tłumaczeń zapisany jako ANSI/UTF-16)
+        # jest podklasą `ValueError`, więc do v18.27.0 wymykał się temu
+        # handlerowi i wywracał START aplikacji — czyli dokładnie tę awarię,
+        # dla której powstał rejestr `_AWARIE` (audyt v18.28.0).
+        _zglos_awarie(jezyk, sciezka, POWOD_ODCZYT, str(exc).replace("\n", " "))
         return {}
     except yaml.YAMLError as exc:
         _zglos_awarie(jezyk, sciezka, POWOD_PARSE, opis_bledu_yaml(exc))

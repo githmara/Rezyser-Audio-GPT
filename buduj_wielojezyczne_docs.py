@@ -82,6 +82,7 @@ from typing import Any
 import yaml
 
 import core_llm as cl
+import dev_yaml
 import przeglad_tlumaczen
 import tlumacz_bramki
 import tlumacz_rdzen
@@ -142,6 +143,11 @@ TOKEN_REGEX = re.compile(r"⟦(\d+)⟧")
 # brak (np. świeży checkout przed pierwszym refresh). Od v18.25 samo wczytywanie
 # żyje w rdzeniu rodziny — tu został wybór języka źródłowego.
 MAPA_JEZYKOW: dict[str, str] = tlumacz_rdzen.wczytaj_mape_jezykow(ROOT, KOD_ZRODLOWY)
+
+# Nazwa narzędzia do komunikatów fatalnych wspólnego loadera (standard „zero
+# ciszy" w dev-toolach, v18.28.0). Parser zostaje `pyyaml` — tym czyta ten
+# builder od początku i tym czyta silnik.
+NARZEDZIE = "buduj_wielojezyczne_docs"
 
 
 # ---------------------------------------------------------------------------
@@ -834,14 +840,8 @@ def wczytaj_istniejacy_docelowy(plik_docelowy: Path) -> dict[str, str] | None:
     przypadku (klucz PL nie istnieje w docelowym), więc wywołujący musi
     poradzić sobie z fallback-iem (najczęściej: retłumacz cały plik bez --klucz).
     """
-    if not plik_docelowy.is_file():
-        return None
-    try:
-        with open(plik_docelowy, "r", encoding="utf-8") as fh:
-            dane = yaml.safe_load(fh)
-    except (OSError, yaml.YAMLError):
-        return None
-    if not isinstance(dane, dict):
+    dane = dev_yaml.wczytaj_jesli_jest(plik_docelowy, narzedzie=NARZEDZIE)
+    if dane is None:
         return None
     tresc = dane.get("tresc")
     if isinstance(tresc, str):
@@ -1309,11 +1309,7 @@ def nazwy_operacji_pl(bwa: Any) -> dict[str, tuple[str, str]]:
         for plik in sorted(katalog.glob("*.yaml")):
             if plik.name in bwa.NARZEDZIA_AKCENTOW:
                 continue
-            try:
-                with open(plik, "r", encoding="utf-8") as fh:
-                    dane = yaml.safe_load(fh) or {}
-            except (OSError, yaml.YAMLError):
-                continue
+            dane = dev_yaml.wczytaj_lub_padnij(plik, narzedzie=NARZEDZIE)
             glowa = str(dane.get("etykieta") or "").split("(")[0]
             kandydaci = [czlon.strip() for czlon in glowa.split("/")]
             kandydaci.append(plik.stem)
@@ -1348,14 +1344,15 @@ def _operacje_punktow_pl(
 
 
 def _wczytaj_regule(kod: str, folder: str, nazwa: str) -> dict:
-    """`dictionaries/<kod>/<folder>/<nazwa>.yaml` (pusty dict przy braku)."""
+    """`dictionaries/<kod>/<folder>/<nazwa>.yaml` (pusty dict TYLKO przy braku).
+
+    Brak pliku jest legalny (paczka może nie mieć danego akcentu), zepsuty —
+    nie: bramka przykładów przelicza z tego pliku regułę SILNIKIEM, więc pusty
+    dict znaczyłby „nie ma czego sprawdzić", czyli fałszywe „czysto" (`dev_yaml`).
+    """
     plik = DICT_DIR / kod / folder / f"{nazwa}.yaml"
-    try:
-        with open(plik, "r", encoding="utf-8") as fh:
-            dane = yaml.safe_load(fh)
-    except (OSError, yaml.YAMLError):
-        return {}
-    return dane if isinstance(dane, dict) else {}
+    dane = dev_yaml.wczytaj_jesli_jest(plik, narzedzie=NARZEDZIE)
+    return dane if dane is not None else {}
 
 
 def _operacja_zgodna(

@@ -69,6 +69,12 @@ diag:
        The file could not be read – its YAML syntax is invalid. The whole file
        was skipped. The two numbers in the details point to the location of the
        error: the line number and the character number within that line.
+    ksztalt: |-
+       The file can be read, but there is no rule in it: instead of a set of
+       “name: value” fields it holds plain text, a list or nothing at all (the
+       details show what the engine found). The usual cause is deleting too many
+       lines, or indenting the whole content under a single dash. The whole file
+       was skipped.
     brak_pol: |-
        The file is missing the fields the engine needs to recognise a rule (they
        are listed in the details). The file was skipped.

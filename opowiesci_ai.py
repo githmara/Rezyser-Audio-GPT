@@ -52,6 +52,7 @@ from bledy_ai import BladDlugosciOdpowiedzi, BladOdrzuceniaAI, BladStrukturyJSON
 from przepisy_rezysera import (  # noqa: F401  (re-eksport dla gui_opowiesci)
     KLAUZULA_ODRZUCENIA_DOMYSLNA,
     POWOD_KLUCZ,
+    POWOD_KSZTALT,
     POWOD_PARSE,
     POWOD_WPIS,
     TAG_ODRZUCENIA_AI,
@@ -428,6 +429,14 @@ def _zaladuj_przepis(jezyk: str, nazwa: str) -> dict[str, Any]:
     (`przepisy_rezysera.zglos_pominiecie`), więc gracz zobaczy go w dialogu
     diagnostycznym. Gdy padną OBA pliki (język i `en`) — dopiero wtedy wyjątek,
     bo bez prompta systemowego nie ma czym karmić modelu.
+
+    v18.28.0: **kształt korzenia zachowuje się teraz identycznie jak składnia.**
+    Do v18.27.0 funkcja kończyła się `return dane or {}`, a to dla pliku
+    zredukowanego do GOŁEGO SKALARA (jedna linijka tekstu, np. po nieudanej
+    edycji) było wyrażeniem PRAWDZIWYM — więc oddawała stringa tam, gdzie
+    wołający robi `.get(...)`, i panel wywracał się na `AttributeError` zamiast
+    spaść na paczkę `en`. Nie cisza, a crash klasy z v18.9. Pusty plik (`null`)
+    wracał jako `{}` i milczał.
     """
     kandydaci = [jezyk] if jezyk == "en" else [jezyk, "en"]
     powody: list[str] = []
@@ -449,7 +458,11 @@ def _zaladuj_przepis(jezyk: str, nazwa: str) -> dict[str, Any]:
             zglos_pominiecie(str(sciezka), POWOD_PARSE, opis)
             powody.append(f"{sciezka}: {opis}")
             continue
-        return dane or {}
+        if not isinstance(dane, dict):
+            zglos_pominiecie(str(sciezka), POWOD_KSZTALT, type(dane).__name__)
+            powody.append(f"{sciezka}: root is {type(dane).__name__}, not a mapping")
+            continue
+        return dane
     # Treść wyjątku jest CELOWO techniczna i bez porady: wpada do komunikatu
     # błędu AI w panelu, a ten musi działać w dziewięciu językach. Poradę „co
     # zrobić" dostaje gracz z dialogu diagnostycznego (`diag.*`, zlokalizowany),

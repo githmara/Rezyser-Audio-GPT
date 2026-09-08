@@ -58,6 +58,7 @@ from typing import Any
 import yaml
 
 import dev_konsola
+import dev_yaml
 
 
 # ---------------------------------------------------------------------------
@@ -73,6 +74,7 @@ dev_konsola.skonfiguruj_stdout()
 # Stałe ścieżek (wszystko względem katalogu, w którym leży ten skrypt)
 # ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parent
+NARZEDZIE = "generuj_dokumentacje"
 DICT_DIR = ROOT / "dictionaries"
 DOCS_DIR = ROOT / "docs"
 
@@ -907,16 +909,17 @@ AKCELERATOR_REGEX = re.compile(r"&([^\W\d_])", flags=re.UNICODE)
 # Wczytywanie UI i szablonów dokumentacji
 # ---------------------------------------------------------------------------
 def _wczytaj_yaml(sciezka: Path) -> dict[str, Any]:
-    """Wczytuje plik YAML jako dict. Zwraca {} przy awarii (nie rzuca)."""
-    if not sciezka.is_file():
-        return {}
-    try:
-        with open(sciezka, "r", encoding="utf-8") as fh:
-            dane = yaml.safe_load(fh)
-    except (OSError, yaml.YAMLError) as exc:
-        print(f"⚠️  Failed to load {sciezka}: {exc}")
-        return {}
-    return dane if isinstance(dane, dict) else {}
+    """Wczytuje plik YAML jako dict; {} TYLKO gdy pliku nie ma.
+
+    Plik zepsuty albo niebędący mapą przerywa generator (`dev_yaml`, v18.28.0).
+    Do v18.27.0 błąd odczytu kończył się ostrzeżeniem i pustym słownikiem, a
+    niezgodny KSZTAŁT korzenia — samym pustym słownikiem: renderowany podręcznik
+    tracił wtedy treść, a bramki `--waliduj` meldowały „czysto" o pliku, którego
+    nikt nie sparsował. `build_release` woła ten generator w procesie, więc stop
+    tutaj zatrzymuje też build — i to jest zamierzone.
+    """
+    dane = dev_yaml.wczytaj_jesli_jest(sciezka, narzedzie=NARZEDZIE)
+    return dane if dane is not None else {}
 
 
 def _wczytaj_ui(jezyk: str) -> dict[str, Any]:

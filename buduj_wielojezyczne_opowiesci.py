@@ -95,6 +95,7 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
+import dev_yaml
 import przeglad_tlumaczen
 import tlumacz_bramki
 import tlumacz_rdzen
@@ -135,6 +136,12 @@ MODEL_DOMYSLNY = "claude-sonnet-5"
 
 MAPA_JEZYKOW: dict[str, str] = tlumacz_rdzen.wczytaj_mape_jezykow(
     ROOT, KOD_ZRODLOWY)
+
+# Nazwa narzędzia + parser wspólnego loadera `dev_yaml` (standard „zero ciszy",
+# v18.28.0). Kontekst paczki jest materiałem PROMPTU, więc plik wczytany jako
+# pusty nie jest „brakiem wskazówki" — to wskazówka podmieniona na polską.
+NARZEDZIE = "buduj_wielojezyczne_opowiesci"
+_PARSER_YAML = dev_yaml.parser_ruamel_safe()
 
 
 def _natywna_nazwa(kod: str) -> str:
@@ -1052,14 +1059,10 @@ def kontekst_paczki(
     `farangur`). Ziarno-przykład jest najtańszym możliwym słownikiem: pokazuje
     te słowa w naturalnym zdaniu i w odpowiednim przypadku.
     """
-    plik = DICT_DIR / kod / FOLDER_OPOWIESCI / nazwa_pliku
-    if not plik.is_file():
-        return {}
-    try:
-        dane = YAML(typ="safe").load(plik.read_text(encoding="utf-8"))
-    except Exception:  # noqa: BLE001 — fail-soft: wskazówka to wygoda, nie bramka
-        return {}
-    if not isinstance(dane, dict):
+    dane = dev_yaml.wczytaj_jesli_jest(
+        DICT_DIR / kod / FOLDER_OPOWIESCI / nazwa_pliku,
+        narzedzie=NARZEDZIE, parser=_PARSER_YAML)
+    if dane is None:
         return {}
     wynik: dict[str, str] = {}
     etykieta = dane.get("etykieta")

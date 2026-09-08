@@ -70,6 +70,7 @@ import sciezki
 # `gui_diagnostyka`). Import jest jednokierunkowy i bez ryzyka cyklu —
 # `przepisy_rezysera` ciągnie tylko `os`/`sys`/`yaml`/`sciezki`.
 from przepisy_rezysera import (
+    POWOD_KSZTALT,
     POWOD_LINGUA,
     POWOD_PARSE,
     opis_bledu_yaml,
@@ -447,10 +448,17 @@ def _zaladuj_yaml(sciezka: str) -> dict:
     except Exception as exc:  # noqa: BLE001 — OSError / UnicodeDecodeError
         zglos_pominiecie(sciezka, POWOD_PARSE, str(exc).replace("\n", " "))
         return {}
-    # Plik sparsowany, ale pusty (albo nie-słownikowy) świadomie NIE dostaje
-    # wpisu: nie umiemy tu wskazać brakującego pola (akcent bierze `id`
-    # i `etykieta` z nazwy pliku), a zmyślona nazwa w raporcie byłaby myląca.
-    return data if isinstance(data, dict) else {}
+    # Plik PUSTY (``null`` po wykasowaniu treści) i plik sparsowany do czegoś
+    # innego niż mapa (goły skalar, lista) dostają od v18.28.0 wpis o KSZTAŁCIE.
+    # Do v18.27.0 obie te ścieżki wracały jako ciche ``{}``, z argumentem „nie
+    # umiemy wskazać brakującego pola" — a to był argument za milczeniem o
+    # SZCZEGÓLE, nie za milczeniem o pominięciu: akcent albo szyfr znikał
+    # z listy Poligloty, choć w Managerze Reguł plik był widoczny i wyglądał na
+    # sprawny. Szczegół podajemy uczciwie techniczny (typ korzenia).
+    if not isinstance(data, dict):
+        zglos_pominiecie(sciezka, POWOD_KSZTALT, type(data).__name__)
+        return {}
+    return data
 
 
 def wyczysc_cache() -> None:

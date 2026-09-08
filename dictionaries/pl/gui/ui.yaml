@@ -80,6 +80,12 @@ diag:
        Nie udało się odczytać pliku – niepoprawna składnia YAML. Plik został
        pominięty w całości. Dwie liczby w szczegółach wskazują miejsce błędu:
        numer linii i numer znaku w tej linii.
+    ksztalt: |-
+       Plik daje się odczytać, ale nie ma w nim reguły: zamiast zestawu pól
+       „nazwa: wartość” został goły tekst, lista albo nic (w szczegółach jest
+       to, co zobaczył silnik). Najczęstsza przyczyna to skasowanie zbyt wielu
+       linii albo wcięcie całej treści pod jeden myślnik. Plik został pominięty
+       w całości.
     brak_pol: |-
        W pliku brakuje pól, bez których silnik nie rozpozna reguły (są wypisane
        w szczegółach). Plik został pominięty.

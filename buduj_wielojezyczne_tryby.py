@@ -112,8 +112,7 @@ import unicodedata
 from pathlib import Path
 from typing import Any
 
-from ruamel.yaml import YAML
-
+import dev_yaml
 import przeglad_tlumaczen
 import tlumacz_bramki
 import tlumacz_rdzen
@@ -169,6 +168,11 @@ SCHEMA_TLUMACZENIA = tlumacz_rdzen.SCHEMA_TLUMACZENIA
 # język bez dotykania Pythona). Implementacja w `tlumacz_rdzen` (v18.17).
 MAPA_JEZYKOW: dict[str, str] = tlumacz_rdzen.wczytaj_mape_jezykow(
     ROOT, KOD_ZRODLOWY)
+
+# Nazwa narzędzia + parser wspólnego loadera `dev_yaml` (standard „zero ciszy",
+# v18.28.0).
+NARZEDZIE = "buduj_wielojezyczne_tryby"
+_PARSER_YAML = dev_yaml.parser_ruamel_safe()
 
 
 def _natywna_nazwa(kod: str) -> str:
@@ -449,12 +453,9 @@ def naglowki_struktury(kod: str) -> dict[str, str]:
     (wołający degraduje: zostawia regex PL i mówi o tym w logu).
     """
     plik = DICT_DIR / kod / FOLDER_GUI / NAZWA_UI
-    try:
-        with open(plik, "r", encoding="utf-8") as fh:
-            dane = YAML(typ="safe").load(fh)
-    except Exception:  # noqa: BLE001 — brak/zły ui.yaml → degradacja u wołającego
-        return {}
-    sekcja = (dane or {}).get("rezyser") if isinstance(dane, dict) else None
+    dane = dev_yaml.wczytaj_jesli_jest(
+        plik, narzedzie=NARZEDZIE, parser=_PARSER_YAML)
+    sekcja = dane.get("rezyser") if dane is not None else None
     if not isinstance(sekcja, dict):
         return {}
     return {
@@ -530,12 +531,9 @@ def jezyk_odpowiedzi_paczki(kod: str) -> str | None:
     for plik in sorted(folder.glob("*.yaml")):
         if plik.name in PLIKI_POMIJANE:
             continue
-        try:
-            with open(plik, "r", encoding="utf-8") as fh:
-                dane = YAML(typ="safe").load(fh)
-        except Exception:  # noqa: BLE001 — uszkodzony plik obcej paczki pomijamy
-            continue
-        wartosc = (dane or {}).get("jezyk_odpowiedzi") if isinstance(dane, dict) else None
+        dane = dev_yaml.wczytaj_lub_padnij(
+            plik, narzedzie=NARZEDZIE, parser=_PARSER_YAML)
+        wartosc = dane.get("jezyk_odpowiedzi")
         if isinstance(wartosc, str) and wartosc.strip():
             return wartosc.strip()
     return None

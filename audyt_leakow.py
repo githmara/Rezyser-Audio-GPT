@@ -937,6 +937,10 @@ DEV_TOOLE = {
     # w runtime za GUI Poligloty, więc polski hard-kod jest tam realnym leakiem
     # i plik MUSI zostać skanowany.
     "tlumacz_bramki.py", "tlumacz_rdzen.py", "dev_konsola.py",
+    # v18.28.0: bramka ciszy YAML + wspólny loader dev-tooli (standard „zero
+    # ciszy"). Ta sama klasa co `dev_konsola.py` — moduły bez powierzchni
+    # user-facing, wołane wyłącznie ze źródła.
+    "audyt_ciszy.py", "dev_yaml.py",
 }
 
 # Prefiks rodziny autotłumaczy. Każdy `buduj_wielojezyczne_*.py` jest z definicji

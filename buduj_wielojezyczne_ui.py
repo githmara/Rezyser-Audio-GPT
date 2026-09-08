@@ -392,6 +392,14 @@ def waliduj_liscia(
         problemy += twarde
         ostrzezenia += miekkie
 
+    # Kolaps podziału na linie (v18.28.0) — sprawdzane dla KAŻDEGO liścia, nie
+    # tylko promptopodobnego: klasa wyszła dwa razy na krótkich komunikatach
+    # diagnostycznych (`diag.powod.lingua` w v18.26.1, `diag.powod.ksztalt`
+    # w v18.28.0), których heurystyka „to jest prompt" celowo nie obejmuje.
+    twarde_linie, miekkie_linie = tlumacz_bramki.waliduj_zlamania_linii(src_tok, tgt)
+    problemy += twarde_linie
+    ostrzezenia += miekkie_linie
+
     return (len(problemy) == 0), problemy, ostrzezenia
 
 

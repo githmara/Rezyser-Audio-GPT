@@ -21,6 +21,12 @@ import core_elevenlabs
 import core_poliglota
 import sciezki
 from i18n import t
+from przepisy_rezysera import (
+    POWOD_KSZTALT,
+    POWOD_PARSE,
+    opis_bledu_yaml,
+    zglos_pominiecie,
+)
 
 
 # Co ile tur konwerter wstawia nagłówek H1 „Scena N" (cięcie rozdziału w
@@ -80,10 +86,28 @@ def _slowa_kluczowe_konwertera() -> dict[str, frozenset[str]]:
         ui_path = jezyk_dir / "gui" / "ui.yaml"
         if not ui_path.is_file():
             continue
+        # Zepsuta paczka NIE wypada tu po cichu (v18.28.0). Skutek jest realny
+        # i niewidoczny dla użytkownika: konwerter przestaje rozpoznawać
+        # nagłówki tur/rozdziałów w tym języku, więc plik z gry zamienia się
+        # w jeden ciąg tekstu bez spisu treści — a wszystko wygląda na sprawne.
+        # Kanałem jest wspólny rejestr pominięć (dialog „Pominięte reguły"),
+        # nie alarm `i18n`: ten mówi o napisach AKTYWNEJ paczki, a tu chodzi
+        # o unię słów ze WSZYSTKICH paczek, niezależną od języka interfejsu.
         try:
             with open(ui_path, "r", encoding="utf-8") as fh:
-                dane = yaml.safe_load(fh) or {}
-        except (OSError, yaml.YAMLError):
+                dane = yaml.safe_load(fh)
+        except (OSError, yaml.YAMLError) as exc:
+            zglos_pominiecie(str(ui_path), POWOD_PARSE, opis_bledu_yaml(exc))
+            continue
+        except UnicodeDecodeError as exc:
+            # Osobna gałąź, bo `UnicodeDecodeError` jest podklasą `ValueError`,
+            # nie `OSError`. Ta funkcja chodzi z handlera konwersji przez
+            # `_regex_tury()`, więc niezłapany wyjątek przewracał konwersję
+            # zamiast trafić do rejestru (audyt v18.28.0).
+            zglos_pominiecie(str(ui_path), POWOD_PARSE, str(exc).replace("\n", " "))
+            continue
+        if not isinstance(dane, dict):
+            zglos_pominiecie(str(ui_path), POWOD_KSZTALT, type(dane).__name__)
             continue
         opowiesci = dane.get("opowiesci") or {}
         fmt = opowiesci.get("tura_naglowek_format")

@@ -36,6 +36,12 @@ import yaml
 
 import i18n
 import sciezki
+from przepisy_rezysera import (
+    POWOD_KSZTALT,
+    POWOD_PARSE,
+    opis_bledu_yaml,
+    zglos_pominiecie,
+)
 
 
 # =============================================================================
@@ -134,12 +140,43 @@ _RE_SEPARATOR_ETYKIETY = re.compile(r"\s+[–—-]\s+")
 
 
 def _wczytaj_yaml(sciezka) -> dict:
-    """Bezpiecznie wczytuje plik YAML jako dict (pusty dict, gdy brak/zły)."""
+    """Wczytuje plik YAML jako dict; pusty dict przy braku pliku ALBO awarii.
+
+    Awaria nie jest jednak cicha (v18.28.0): powód idzie do wspólnego rejestru
+    pominięć, czyli tam, gdzie użytkownik już szuka odpowiedzi na „dlaczego to
+    nie działa". Bez tego szablon dla AI dostawał marker
+    ``<FILL NATIVELY…>`` w miejscu danych, które NA DYSKU SĄ — tylko w pliku,
+    którego parser nie zrozumiał. Wykonawca (agent albo lingwista) wypełniał
+    wtedy pole od zera, mając obok siebie poprawną, zrecenzowaną wartość.
+
+    Twardego stopu tu NIE MA, bo to ścieżka GUI: Manager Reguł ma zbudować
+    szablon także wtedy, gdy jedna z dziewięciu paczek jest w remoncie.
+
+    BRAK pliku jest tu stanem NORMALNYM i celowo NIE trafia do rejestru:
+    kreator nowego języka bazowego czyta dane paczki, której jeszcze nie ma
+    (`_natywna_nazwa_jezyka` degraduje wtedy do kodu ISO), a wpis „niepoprawna
+    składnia YAML" o nieistniejącym pliku byłby dla użytkownika komunikatem
+    wprost fałszywym — złapane audytem v18.28.0, w tym samym wydaniu, które tę
+    ścieżkę rozgadało.
+    """
+    if not sciezka.is_file():
+        return {}
     try:
         dane = yaml.safe_load(sciezka.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError):
+    except (OSError, UnicodeDecodeError) as exc:
+        # Plik JEST, ale nie da się go odczytać (uprawnienia, zły zapis
+        # znakowy). `UnicodeDecodeError` to podklasa `ValueError`, więc nie
+        # wpada do `OSError` — bez tego przewracał budowanie szablonu wbrew
+        # obietnicy z docstringa wyżej.
+        zglos_pominiecie(str(sciezka), POWOD_PARSE, str(exc).replace("\n", " "))
         return {}
-    return dane if isinstance(dane, dict) else {}
+    except yaml.YAMLError as exc:
+        zglos_pominiecie(str(sciezka), POWOD_PARSE, opis_bledu_yaml(exc))
+        return {}
+    if not isinstance(dane, dict):
+        zglos_pominiecie(str(sciezka), POWOD_KSZTALT, type(dane).__name__)
+        return {}
+    return dane
 
 
 def _pliki_rezyser(kod: str) -> list:
