@@ -1127,7 +1127,12 @@ def _nazwa_pl_z_modelu(klient: Any, kod: str, *, model: str) -> str:
             wskazowka_limitu="The answer is a single word — a hit limit means the "
                              "model started explaining itself.",
             myslenie=False)
-    except RuntimeError as exc:
+    except (RuntimeError, SystemExit) as exc:
+        # Rdzeń rodziny sygnalizuje wpadkę chunku `RuntimeError`, a uciętą
+        # odpowiedź / niekompletny JSON — `SystemExit`. Tu liczymy się z obiema:
+        # ta funkcja podaje `max_tokens=200` i własną `wskazowka_limitu`, więc
+        # uderzenie w limit jest przewidziane, a ma pominąć kierunek
+        # `do-nowego`, nie zabić całego przebiegu (audyt 2026-09-08, N2).
         print(f"❌ {kod}: LLM error while asking for the Polish language name — {exc}")
         return ""
     surowa = (odpowiedzi.get(_ID_NAZWA_PL, "") or "").strip().strip('"„”\'.')
@@ -1148,9 +1153,34 @@ def _nazwa_pl_z_modelu(klient: Any, kod: str, *, model: str) -> str:
     return nazwa
 
 
+def _kolizja_nazwy(kod: str, forma: str,
+                   pary: dict[tuple[str, str], dict]) -> str:
+    """Opis kolizji nazwy pliku `forma` z INNYM językiem albo ``""``.
+
+    Nazwa pliku akcentu jest identyfikatorem wspólnym dla wszystkich paczek, więc
+    dwa języki o jednej nazwie to nie kosmetyka: plik `de/akcenty/niemiecki.yaml`
+    z `iso: xx` jest jednocześnie niemieckim akcentem paczki niemieckiej,
+    rozbija jednomyślność `konsensus_iso` (orakuł całej rodziny) i sprawia, że
+    pozostałe paczki zostają pominięte jako „para już istnieje".
+
+    Sprawdzamy DWA rejestry, bo kolizja bywa też przyszła: nazwy plików LEŻĄCE
+    na dysku (`konsensus_iso`) oraz cały kanon (nazwa wolna dziś, ale zajęta
+    w chwili dodania tamtego języka). Znalezisko audytu H1 z 2026-09-08.
+    """
+    for nazwa_pliku, iso in konsensus_iso(pary).items():
+        if nazwa_pliku == forma and iso != kod:
+            return (f"accent files named `{forma}.yaml` already exist on disk and "
+                    f"the packs agree they mean ISO `{iso}`")
+    for iso, (_, nazwa_pl) in jezyki_lingua.KANON.items():
+        if iso != kod and nazwa_pliku_akcentu(nazwa_pl) == forma:
+            return (f"„{nazwa_pl}” is the canonical Polish name of ISO `{iso}`, so "
+                    f"`{forma}.yaml` is that language's file name")
+    return ""
+
+
 def rozstrzygnij_nazwe_pliku(
     kod: str, pary: dict[tuple[str, str], dict], *,
-    klient: Any = None, model: str = "",
+    klient_fabryka: Any = None, model: str = "",
 ) -> tuple[str, str]:
     """Nazwa pliku akcentu dla języka `kod` + ŹRÓDŁO tej nazwy (do raportu).
 
@@ -1170,6 +1200,11 @@ def rozstrzygnij_nazwe_pliku(
     nieszkodliwe tylko dlatego, że wszystkie dziewięć zastanych wpisów to
     polskie nazwy z czasów, gdy rejestr wypełniał człowiek.
 
+    Klienta LLM dostajemy jako FABRYKĘ, a nie gotowy obiekt, bo dwa pierwsze
+    źródła go nie potrzebują: dla języka z kanonu (75 z 75 języków detektora)
+    budowanie klienta byłoby żądaniem klucza API za nic — a przy jego braku
+    `zainicjuj_klienta_anthropic` kończy pracę `SystemExit` (audyt 2026-09-08, N1).
+
     Zwraca ``("", "brak")``, gdy nazwy nie udało się ustalić — wołający pomija
     wtedy kierunek `do-nowego` i mówi o tym na głos.
     """
@@ -1181,13 +1216,20 @@ def rozstrzygnij_nazwe_pliku(
         return nazwa_pliku_akcentu(z_kanonu), f"kanon Lingui („{z_kanonu}”)"
     print(f"ℹ️  {kod}: language outside the lingua canon — asking the model for its "
           f"traditional Polish name (no repository source knows it).")
+    klient = klient_fabryka() if klient_fabryka is not None else None
     if klient is None:
         print(f"⚠️  {kod}: no LLM client (dry run?) — cannot resolve the Polish name.")
         return "", "brak"
     z_modelu = _nazwa_pl_z_modelu(klient, kod, model=model)
     if not z_modelu:
         return "", "brak"
-    return nazwa_pliku_akcentu(z_modelu), f"model („{z_modelu}”)"
+    forma = nazwa_pliku_akcentu(z_modelu)
+    kolizja = _kolizja_nazwy(kod, forma, pary)
+    if kolizja:
+        print(f"⚠️  {kod}: the model answered „{z_modelu}”, but {kolizja} — refusing "
+              f"to name a second language's files that way.")
+        return "", "brak"
+    return forma, f"model („{z_modelu}”)"
 
 
 def glosy_konsensusu(pary: dict[tuple[str, str], dict], akcent: str) -> list[str]:
@@ -1665,13 +1707,21 @@ def generuj_nowy_jezyk(args: argparse.Namespace) -> int:
               f"derive the accents.")
         return 2
 
-    # Klient powstaje PRZED rozstrzygnięciem nazwy pliku, bo dla języka poza
-    # kanonem Lingui nazwę podaje model (a dla 75 języków kanonu klient nie
-    # jest do tego potrzebny — wystarczy fakt z `jezyki_lingua`).
-    klient = (None if args.dry_run
-              else tlumacz_rdzen.zainicjuj_klienta_anthropic(ROOT))
+    # Klient LLM powstaje LENIWIE, przy pierwszym realnym użyciu. Rozstrzygnięcie
+    # nazwy pliku bierze go tylko dla języka POZA kanonem Lingui, a przebieg,
+    # który kończy się na „nic do zrobienia", nie bierze go wcale — inaczej
+    # `--nowy-jezyk` żądałby klucza API tam, gdzie do v18.28.0 nie był potrzebny.
+    _klient: list[Any] = []
+
+    def klient_fabryka() -> Any:
+        if args.dry_run:
+            return None
+        if not _klient:
+            _klient.append(tlumacz_rdzen.zainicjuj_klienta_anthropic(ROOT))
+        return _klient[0]
+
     plik_nowego, zrodlo_nazwy = rozstrzygnij_nazwe_pliku(
-        kod, pary, klient=klient, model=args.model)
+        kod, pary, klient_fabryka=klient_fabryka, model=args.model)
     if plik_nowego:
         print(f"🏷️  {kod}: nazwa pliku akcentu = `{plik_nowego}.yaml` "
               f"(źródło: {zrodlo_nazwy}).")
@@ -1700,6 +1750,7 @@ def generuj_nowy_jezyk(args: argparse.Namespace) -> int:
         print("✅ Wszystkie pary tego języka już istnieją — nic do zrobienia.")
         return 0
 
+    klient = klient_fabryka()
     wytworzone: list[tuple[str, str]] = []
     porazki: list[str] = []
     for paczka, akcent, iso_celu in braki:

@@ -75,12 +75,21 @@ from pathlib import Path
 import audyt_leakow as al
 import buduj_wielojezyczne_akcenty as bwa
 import dev_konsola
+import dev_yaml
 import jezyki_lingua
 import refresh_languages as rl
 
 dev_konsola.skonfiguruj_stdout()
 
+NARZEDZIE = "audyt_podstaw"
 ROOT = Path(__file__).resolve().parent
+
+# Degradacje, które trafiły się w OSTATNIM przebiegu: część bramki, której nie
+# dało się wykonać, i dlaczego (po angielsku). Wypełniane przez `zbierz`,
+# meldowane przez bramkę i CLI — milczenie o niewykonanej połowie kontroli
+# byłoby tą samą fałszywą czystością, przed którą stoi cały standard „zero
+# ciszy" (v18.28.0).
+_NOTY_DEGRADACJI: list[str] = []
 
 # Klucz raportu i baseline-podobnej mapy `WynikBramki.nowe`. Kanon jest JEDNYM
 # bytem (nie plikiem per język), więc wszystkie jego trafienia lądują pod jedną
@@ -198,6 +207,19 @@ def paczki() -> list[str]:
                   if p.is_dir() and (p / "podstawy.yaml").is_file())
 
 
+def wczytaj_podstawy(kod: str) -> dict:
+    """`dictionaries/<kod>/podstawy.yaml` — zepsuty plik = FATAL TEGO narzędzia.
+
+    Wspólny loader `dev_yaml` (standard „zero ciszy"), ale wołany z WŁASNĄ nazwą
+    narzędzia: `paczki()` wybrało ten kod właśnie po obecności pliku, więc plik
+    nieczytelny albo niebędący mapą to zepsuta paczka, a nie „paczka bez uwag".
+    Do audytu 2026-09-08 (N5) bramka używała loadera z
+    `buduj_wielojezyczne_akcenty`, więc fatal podpisywał się cudzą nazwą.
+    """
+    return dev_yaml.wczytaj_lub_padnij(
+        bwa.DICT_DIR / kod / "podstawy.yaml", narzedzie=NARZEDZIE)
+
+
 def _sprawdz_lingua(kod: str, dane: dict, dodaj) -> None:
     """Pole `lingua:` skonfrontowane z kanonem i kodem ISO FOLDERA."""
     wartosc = dane.get("lingua")
@@ -304,13 +326,22 @@ def _sprawdz_znaki(kod: str, dane: dict, dodaj) -> None:
     for wzor in sorted(set(wzory)):
         if len(wzor) != 1 or wzor.lower() == wzor.upper():
             continue
-        # `ß` jest tu poprawnym wyjątkiem, nie brakiem: jego `.upper()` to „SS",
-        # więc wariantu wielkoliterowego JAKO LITERY nie ma. Wszystkie dziewięć
-        # wydanych paczek ma dokładnie ten jeden niesparowany wzór (pomiar
-        # 2026-09-08) i bramka nie ma prawa nazwać tego usterką.
-        if len(wzor.upper()) > 1:
+        # Litera, której druga wielkość jest DŁUŻSZA niż jeden znak, nie ma
+        # jednoznakowego bliźniaka i mieć nie może: `ß`.upper() = „SS",
+        # a tureckie `İ`.lower() = „i̇" (i + U+0307). Oba kierunki, bo audyt
+        # 2026-09-08 (S2) złapał fałszywy alarm dokładnie na tym lustrzanym
+        # przypadku — a `tr` i `az` są w kanonie, więc to najbliższy realny
+        # kandydat na dziesiątą paczkę, nie hipoteza.
+        if len(wzor.upper()) > 1 or len(wzor.lower()) > 1:
             continue
         blizniak = wzor.upper() if wzor == wzor.lower() else wzor.lower()
+        # Bliźniak, który JEST czystym ASCII, nie potrzebuje reguły pre-passu —
+        # transliterować nie ma czego. Turecka bezkropkowa `ı` transliteruje się
+        # do `i`, ale jej wielka forma to zwykłe `I`, więc żądanie wpisu `I → I`
+        # produkowałoby regułę tożsamościową, na którą ta sama bramka słusznie
+        # krzyczy klasą `znaki-tozsamosc` (audyt 2026-09-08, S2).
+        if blizniak.isascii():
+            continue
         if blizniak not in wzory:
             dodaj("znaki-bez-pary",
                   f"`{wzor}` has no `{blizniak}` counterpart — the pre-pass is "
@@ -337,7 +368,17 @@ def _sprawdz_slowo_akcent(kod: str, dane: dict, pary: dict, dodaj) -> None:
     akcenty = sorted(a for (p, a) in pary if p == kod)
     if not akcenty:
         return   # paczka bez par akcentowych: nie ma czym sondować, to nie usterka
-    import core_rezyser as cr
+    try:
+        import core_rezyser as cr
+    except ImportError as exc:
+        # Silnik ciągnie `python-docx`/`num2words`, więc w okrojonym środowisku
+        # kontrybutora sonda może się nie dać uruchomić. Reszta klas działa
+        # dalej, ale bramka MUSI powiedzieć, czego nie sprawdziła.
+        nota = (f"accent trigger words not re-run through the engine "
+                f"(core_rezyser unavailable: {exc})")
+        if nota not in _NOTY_DEGRADACJI:
+            _NOTY_DEGRADACJI.append(nota)
+        return
 
     bwa.ustaw_silnik()
     # Sondujemy akcentem, który SILNIK uznaje za akcent — inaczej zielona sonda
@@ -390,9 +431,10 @@ def _sprawdz_etykieta(kod: str, dane: dict, dodaj) -> None:
               "no `etykieta` (the pack has no name to show, and the tools have "
               "no native language name to hand the model)")
         return
-    # Endonim wyłuskuje TA SAMA funkcja, której używa `refresh_languages`
-    # (jedno źródło separatora, zamiast drugiej kopii tego samego regexu).
-    endonim = rl.natywna_nazwa(kod)
+    # Endonim rozcina TA SAMA reguła, której używa `refresh_languages` (jedno
+    # źródło separatora), ale na JUŻ WCZYTANYCH danych — inaczej fatal o zepsutym
+    # pliku podpisywałby się nazwą tamtego narzędzia (audyt 2026-09-08, N5).
+    endonim = rl.endonim_z_etykiety(etykieta)
     if endonim == etykieta.strip():
         dodaj("etykieta-separator",
               f"`etykieta` has no ` – ` separator, so the whole string „"
@@ -411,7 +453,7 @@ def sprawdz_paczki() -> list[Znalezisko]:
     pary = bwa.pary_akcentowe()
     znaleziska: list[Znalezisko] = []
     for kod in paczki():
-        dane = bwa.podstawy_paczki(kod)
+        dane = wczytaj_podstawy(kod)
 
         def dodaj(klasa: str, szczegol: str, _kod: str = kod) -> None:
             znaleziska.append(Znalezisko(f"dictionaries/{_kod}/podstawy.yaml",
@@ -433,26 +475,47 @@ def sprawdz_paczki() -> list[Znalezisko]:
     return znaleziska
 
 
-def zbierz() -> dict[str, list[str]]:
-    """Trafienia jako `{"<zakres>": ["<klasa>|<szczegol>", …]}` — kanon raportu."""
+def zbierz(*, tylko_kanon: bool = False) -> dict[str, list[str]]:
+    """Trafienia jako `{"<zakres>": ["<klasa>|<szczegol>", …]}` — kanon raportu.
+
+    Degradacja jest ROZDZIELONA na dwie części i to jest poprawka po audycie
+    2026-09-08 (S1). Brak `lingui` w środowisku unieruchamia WYŁĄCZNIE część 1
+    (lustro kanonu wobec biblioteki); część 2 nie tyka biblioteki — jej orakułem
+    jest czysto pythonowy `jezyki_lingua.KANON` — więc jedzie dalej. Do
+    poprawki jedno `except ImportError` wyciszało całą bramkę, czyli
+    kontrybutor bez pełnego dev-env nie dostawał ŻADNEJ kontroli podstaw.
+    """
+    _NOTY_DEGRADACJI.clear()
+    znaleziska: list[Znalezisko] = []
+    try:
+        znaleziska += sprawdz_kanon()
+    except ImportError as exc:
+        _NOTY_DEGRADACJI.append(
+            f"canon mirror NOT checked against the library (lingua not "
+            f"available: {exc})")
+    if not tylko_kanon:
+        znaleziska += sprawdz_paczki()
     wynik: dict[str, list[str]] = {}
-    for z in sprawdz_kanon() + sprawdz_paczki():
+    for z in znaleziska:
         wynik.setdefault(z.zakres, []).append(f"{z.klasa}|{z.szczegol}")
     return {k: sorted(v) for k, v in wynik.items()}
 
 
-def bramka() -> al.WynikBramki:
+def bramka(*, tylko_kanon: bool = False) -> al.WynikBramki:
     """Bramka podstaw. BEZ baseline'u — każde trafienie blokuje.
 
     Zwraca ten sam typ, co pozostałe bramki rodziny (`al.WynikBramki`), więc
-    `build_release` konsumuje ją tym samym wzorcem: `pominieto` = bramki nie
-    udało się uruchomić (brak `lingui`), `czysto` = kanon jest lustrem.
+    `build_release` konsumuje ją tym samym wzorcem — z jedną różnicą, którą
+    wołający musi znać: `pominieto` zostaje ``False``, bo część 2 wykonuje się
+    ZAWSZE, a `powod_pominiecia` niesie wtedy listę tego, czego mimo to nie
+    sprawdzono (brak `lingui`, brak silnika dla sondy wyzwalaczy). Niepusty
+    powód przy `czysto=True` znaczy „czysto, ale nie wszędzie tak samo
+    dokładnie" i wołający MUSI to powiedzieć na głos — wzorzec
+    `WynikBramki.pokrycie_obnizone` z bramki leaków.
     """
-    try:
-        aktualne = zbierz()
-    except ImportError as exc:
-        return al.WynikBramki(True, {}, True, f"lingua not available ({exc})")
-    return al.WynikBramki(not aktualne, aktualne, False, "")
+    aktualne = zbierz(tylko_kanon=tylko_kanon)
+    return al.WynikBramki(not aktualne, aktualne, False,
+                          "; ".join(_NOTY_DEGRADACJI))
 
 
 # ---------------------------------------------------------------------------
@@ -482,17 +545,21 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.bramka:
-        wynik = bramka()
+        wynik = bramka(tylko_kanon=args.tylko_kanon)
         print("========== FOUNDATIONS GATE (lingua canon + podstawy.yaml) ==========")
-        if wynik.pominieto:
-            print(f"⚠️  Gate SKIPPED: {wynik.powod_pominiecia}. Install "
-                  f"`lingua-language-detector` to run it.")
-            print("=====================================================================")
-            return 0
+        # Niepusty powód przy zielonej bramce = „czysto, ale czegoś nie
+        # sprawdziliśmy". Mówimy to ZAWSZE, nie tylko przy trafieniach.
+        if wynik.powod_pominiecia:
+            print(f"⚠️  Reduced coverage: {wynik.powod_pominiecia}.")
         if wynik.czysto:
-            print(f"✅ KANON mirrors the installed lingua 1:1 "
-                  f"({len(jezyki_lingua.KANON)} languages) and all "
-                  f"{len(paczki())} pack foundation file(s) are clean.")
+            if "canon mirror NOT checked" in wynik.powod_pominiecia:
+                czesc_1 = "canon mirror not verified"
+            else:
+                czesc_1 = (f"KANON mirrors the installed lingua 1:1 "
+                           f"({len(jezyki_lingua.KANON)} languages)")
+            czesc_2 = ("part 2 skipped (--tylko-kanon)" if args.tylko_kanon
+                       else f"all {len(paczki())} pack foundation file(s) are clean")
+            print(f"✅ {czesc_1}; {czesc_2}.")
             print("=====================================================================")
             return 0
         ile = sum(len(v) for v in wynik.nowe.values())
@@ -501,25 +568,36 @@ def main() -> int:
             for p in powody:
                 klasa, _, szczegol = p.partition("|")
                 print(f"  • {zakres} [{klasa}]: {szczegol}")
-        print("Fix: `jezyki_lingua.KANON` is a MIRROR of the library enum, so the "
-              "library always wins there. A `podstawy.yaml` hit is a defect in that "
-              "pack: the `alfabet` feeds the Caesar cipher and `polskie_znaki` is "
-              "the pre-pass of EVERY accent in the pack, so both fail quietly and "
-              "everywhere at once.")
+        # Rada naprawcza tylko dla tych zakresów, które REALNIE dostały
+        # trafienie — inaczej bramka mówi o kanonie także przy usterce paczki
+        # (audyt 2026-09-08, N5).
+        if ZAKRES_KANON in wynik.nowe:
+            print("Fix (canon): `jezyki_lingua.KANON` is a MIRROR of the library "
+                  "enum, so the library always wins — edit the canon, not the "
+                  "expectation.")
+        if any(z != ZAKRES_KANON for z in wynik.nowe):
+            print("Fix (pack): the `alfabet` feeds the Caesar cipher and "
+                  "`polskie_znaki` is the pre-pass of EVERY accent in the pack, so "
+                  "a defect there fails quietly and everywhere at once.")
         print("=====================================================================")
         return 1
 
+    znaleziska: list[Znalezisko] = []
+    print(f"🔎 Kanon Lingui: {len(jezyki_lingua.KANON)} wpisów w "
+          f"`jezyki_lingua.KANON`.")
     try:
         znaleziska = sprawdz_kanon()
     except ImportError as exc:
-        print(f"⚠️  `lingua` not available ({exc}) — there is nothing to compare "
-              f"the canon against. Install `lingua-language-detector`.")
-        return 0
-    print(f"🔎 Kanon Lingui: {len(jezyki_lingua.KANON)} wpisów w "
-          f"`jezyki_lingua.KANON`.")
-    if not znaleziska:
-        print("✅ Kanon jest lustrem zainstalowanej biblioteki 1:1 "
-              "(kody, nazwy enumów, unikalne nazwy plików akcentów).")
+        # Brak biblioteki unieruchamia TYLKO część 1 — część 2 leci dalej
+        # (audyt 2026-09-08, S1). Dawniej `return 0` w tym miejscu zabierał
+        # kontrybutorowi bez pełnego dev-env całą kontrolę podstaw paczki.
+        print(f"⚠️  `lingua` not available ({exc}) — the canon has nothing to be "
+              f"compared against (install `lingua-language-detector`). The "
+              f"per-pack checks below do NOT need it and run anyway.")
+    else:
+        if not znaleziska:
+            print("✅ Kanon jest lustrem zainstalowanej biblioteki 1:1 "
+                  "(kody, nazwy enumów, unikalne nazwy plików akcentów).")
     if not args.tylko_kanon:
         kody = paczki()
         poza = [k for k in kody if not jezyki_lingua.czy_w_lingua(k)]
@@ -527,7 +605,10 @@ def main() -> int:
         if poza:
             print(f"ℹ️  Poza kanonem Lingui (brak pola `lingua:` jest tam stanem "
                   f"poprawnym): {', '.join(poza)}.")
+        _NOTY_DEGRADACJI.clear()
         z_paczek = sprawdz_paczki()
+        for nota in _NOTY_DEGRADACJI:
+            print(f"⚠️  Reduced coverage: {nota}.")
         if not z_paczek:
             print("✅ Podstawy wszystkich paczek bez uwag (pole `lingua`, alfabet, "
                   "pre-pass, wyzwalacze akcentu przeliczone parserem, endonim).")

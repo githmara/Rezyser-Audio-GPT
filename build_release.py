@@ -1245,9 +1245,14 @@ def main(args: argparse.Namespace | None = None) -> None:
         print(f"⚠️  audyt_podstaw not available ({exc}) — foundations gate SKIPPED.\n")
     else:
         wynik_podstawy = audyt_podstaw.bramka()
-        if wynik_podstawy.pominieto:
-            print(f"⚠️  Foundations gate SKIPPED: {wynik_podstawy.powod_pominiecia}.\n")
-        elif wynik_podstawy.czysto:
+        # Ta bramka nie „pomija się" w całości: bez `lingua` odpada tylko część
+        # porównująca kanon z biblioteką, a kontrole treści paczek jadą dalej.
+        # Niepusty powód = „czysto, ale nie wszystko sprawdzone" i musi być
+        # powiedziany na głos, także przy zielonym wyniku.
+        if wynik_podstawy.powod_pominiecia:
+            print(f"⚠️  Foundations gate ran with REDUCED coverage: "
+                  f"{wynik_podstawy.powod_pominiecia}.")
+        if wynik_podstawy.czysto:
             print(f"✅ Lingua canon mirrors the installed library "
                   f"({len(audyt_podstaw.jezyki_lingua.KANON)} languages) and all "
                   f"{len(audyt_podstaw.paczki())} pack foundation file(s) are "

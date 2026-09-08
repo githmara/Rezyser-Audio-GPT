@@ -124,6 +124,20 @@ def nazwa_dla_rejestru(kod: str) -> tuple[str, str]:
     )
 
 
+def endonim_z_etykiety(etykieta: object) -> str:
+    """Prefiks `etykieta` przed separatorem ` – ` albo ``""``.
+
+    Wydzielone z :func:`natywna_nazwa` w v18.29.0, żeby bramka podstaw
+    (`audyt_podstaw`) rozcinała etykietę TĄ SAMĄ regułą, a nie drugą kopią
+    regexu separatora. Czysta funkcja na łańcuchu — nie dotyka dysku, więc
+    wołający może ją użyć na już wczytanych danych i sam odpowiada za to,
+    skąd je wziął.
+    """
+    if not isinstance(etykieta, str) or not etykieta.strip():
+        return ""
+    return _RE_SEPARATOR_ETYKIETY.split(etykieta.strip(), maxsplit=1)[0].strip()
+
+
 def natywna_nazwa(kod: str) -> str:
     """Natywna nazwa języka z `dictionaries/<kod>/podstawy.yaml::etykieta`.
 
@@ -138,12 +152,7 @@ def natywna_nazwa(kod: str) -> str:
     """
     dane = dev_yaml.wczytaj_lub_padnij(
         DICT_DIR / kod / "podstawy.yaml", narzedzie=NARZEDZIE)
-    etyk = dane.get("etykieta", "")
-    if isinstance(etyk, str) and etyk.strip():
-        nazwa = _RE_SEPARATOR_ETYKIETY.split(etyk.strip(), maxsplit=1)[0].strip()
-        if nazwa:
-            return nazwa
-    return kod
+    return endonim_z_etykiety(dane.get("etykieta", "")) or kod
 
 
 def skanuj_jezyki() -> list[str]:

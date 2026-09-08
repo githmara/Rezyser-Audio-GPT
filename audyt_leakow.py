@@ -282,7 +282,11 @@ def _podpowiedz_nazwe(nazwa: str, kod: str = "") -> list[str]:
     from lingua import Language
 
     z_kanonu = jezyki_lingua.nazwa_enuma(kod) if kod else None
-    if z_kanonu and z_kanonu != nazwa:
+    # `getattr` obowiązuje też kandydata z kanonu — kanon jest lustrem
+    # STATYCZNYM, a po aktualizacji biblioteki bez przebiegu
+    # `audyt_podstaw --bramka` mógłby podpowiadać martwą nazwę (audyt N4).
+    if (z_kanonu and z_kanonu != nazwa
+            and getattr(Language, z_kanonu, None) is not None):
         return [z_kanonu]
     kandydaci = [n for n in _ALIASY_LINGUA.get(nazwa, ())
                  if getattr(Language, n, None) is not None]

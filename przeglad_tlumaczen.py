@@ -532,6 +532,15 @@ disjoint, because one rewrites German spelling and the other Polish. Never
 - `iso` IS THE CODE OF THE SYNTHESIZER's LANGUAGE, not of the text. It drives the
   `lang` tag of the output file, so a wrong value makes a screen reader read the
   result with the wrong voice.
+- THE FILE NAME IS AN IDENTIFIER SHARED BY EVERY PACK, and for a language the
+  `lingua` detector does not know it comes from the MODEL (`jezyki_lingua.py`
+  answers for the other 75). Check that the name it chose is the traditional
+  Polish name of THAT language and belongs to no other: two languages under one
+  file name silently break the `iso` consensus that the whole
+  `buduj_wielojezyczne_*` family treats as its oracle, and the extra pairs are
+  then skipped as "already exist". The tool refuses a name already taken on disk
+  or reserved by the canon, but it cannot tell whether a FREE name is the right
+  word — that judgement is yours.
 """
 
 

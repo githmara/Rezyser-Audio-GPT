@@ -897,7 +897,12 @@ def _podpowiedz_nazwe_lingua(wartosc: str, kod: str = "") -> list[str]:
         return []
     nazwa = wartosc.strip().upper()
     z_kanonu = jezyki_lingua.nazwa_enuma(kod) if kod else None
-    if z_kanonu and z_kanonu != nazwa:
+    # `getattr` obowiązuje TAKŻE kandydata z kanonu: kanon jest lustrem enuma,
+    # ale lustrem STATYCZNYM, więc po aktualizacji biblioteki u kogoś, kto nie
+    # odpalił `audyt_podstaw --bramka`, mógłby podpowiadać martwą nazwę
+    # (audyt 2026-09-08, N4).
+    if (z_kanonu and z_kanonu != nazwa
+            and getattr(_LinguaLanguage, z_kanonu, None) is not None):
         return [z_kanonu]
     kandydaci: list[str] = [
         n for n in _LINGUA_ALIASY.get(nazwa, ())
