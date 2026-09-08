@@ -68,6 +68,33 @@
   "gui_rezyser.py": [
     "POSSIBLE|lingua:PL|cr.WynikRekoncyliacji | None"
   ],
+  "jezyki_lingua.py": [
+    "POSSIBLE|znak-PL:ę|węgierski",
+    "POSSIBLE|znak-PL:ł|białoruski",
+    "POSSIBLE|znak-PL:ł|bułgarski",
+    "POSSIBLE|znak-PL:ł|słowacki",
+    "POSSIBLE|znak-PL:ł|włoski",
+    "POSSIBLE|znak-PL:ł|łotewski",
+    "POSSIBLE|znak-PL:łń|słoweński",
+    "POSSIBLE|znak-PL:łń|łaciński",
+    "POSSIBLE|znak-PL:ń|albański",
+    "POSSIBLE|znak-PL:ń|chiński",
+    "POSSIBLE|znak-PL:ń|duński",
+    "POSSIBLE|znak-PL:ń|estoński",
+    "POSSIBLE|znak-PL:ń|fiński",
+    "POSSIBLE|znak-PL:ń|gruziński",
+    "POSSIBLE|znak-PL:ń|hiszpański",
+    "POSSIBLE|znak-PL:ń|japoński",
+    "POSSIBLE|znak-PL:ń|kataloński",
+    "POSSIBLE|znak-PL:ń|koreański",
+    "POSSIBLE|znak-PL:ń|macedoński",
+    "POSSIBLE|znak-PL:ń|ormiański",
+    "POSSIBLE|znak-PL:ń|rumuński",
+    "POSSIBLE|znak-PL:ń|ukraiński",
+    "POSSIBLE|znak-PL:ś|bośniacki",
+    "POSSIBLE|znak-PL:ż|gudżaracki",
+    "POSSIBLE|znak-PL:ż|pendżabski"
+  ],
   "main.py": [
     "POSSIBLE|znak-PL:ĄćŁłśż|Szczegóły zapisaliśmy w pliku: {…} Pomóż go naprawić: utwórz nowe zgłoszenie (Issue) na GitHubie i ZAŁĄCZ ten plik (albo",
     "POSSIBLE|znak-PL:ąćłż|Aplikacja napotkała nieoczekiwany błąd i może działać niestabilnie. {…} ------------------------------------------------",
@@ -76,7 +103,6 @@
     "POSSIBLE|znak-PL:Ż|=== REŻYSER AUDIO GPT — CRASH REPORT ==="
   ],
   "manager_regul_szablony.py": [
-    "POSSIBLE|lingua:PL|# ----------------------------------------------------------------------------- # <FILL NATIVELY in {…}: file header, e.",
     "POSSIBLE|znak-PL:ĄŁłśźż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi",
     "POSSIBLE|znak-PL:ąćęłńśźż|# ============================================================================= # <FILL NATIVELY: file header in {…}, e.",
     "POSSIBLE|znak-PL:ąłż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project (wxPython + Anthropic). You have ",
@@ -119,9 +145,5 @@
     "POSSIBLE|znak-PL:Ń|[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:",
     "POSSIBLE|znak-PL:Ń|[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:",
     "POSSIBLE|znak-PL:ń|You map a natural-language description of a language (often given in a locative or otherwise inflected form, in any lang"
-  ],
-  "test_json_structured.py": [
-    "POSSIBLE|lingua:PL|BladStrukturyJSON was not raised",
-    "POSSIBLE|lingua:PL|BladStrukturyJSON was not raised"
   ]
 }

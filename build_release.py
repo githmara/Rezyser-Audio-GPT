@@ -1229,6 +1229,37 @@ def main(args: argparse.Namespace | None = None) -> None:
                     print(f"      • {nazwa}: {p}")
             sys.exit(1)
 
+    # 6b'''. FOUNDATIONS gate (v18.29.0) — `jezyki_lingua.KANON` is a MIRROR of the
+    # `lingua.Language` enum, and a mirror nobody checks goes stale in silence: a
+    # `pip install -U lingua-language-detector` that adds a language makes the canon
+    # answer "this language is outside the detector" about a language the detector
+    # DOES support. This gate has NO baseline on purpose — the canon either mirrors
+    # the library 1:1 or it is broken. Degrades gracefully without `lingua`.
+    print("🔍 Foundations gate: verifying the lingua canon is a 1:1 mirror...")
+    try:
+        import audyt_podstaw
+    except ImportError as exc:
+        print(f"⚠️  audyt_podstaw not available ({exc}) — foundations gate SKIPPED.\n")
+    else:
+        wynik_podstawy = audyt_podstaw.bramka()
+        if wynik_podstawy.pominieto:
+            print(f"⚠️  Foundations gate SKIPPED: {wynik_podstawy.powod_pominiecia}.\n")
+        elif wynik_podstawy.czysto:
+            print(f"✅ Lingua canon mirrors the installed library "
+                  f"({len(audyt_podstaw.jezyki_lingua.KANON)} languages).\n")
+        else:
+            ile = sum(len(v) for v in wynik_podstawy.nowe.values())
+            print(f"❌ FATAL: {ile} defect(s) in the language-pack foundations "
+                  f"— refusing to build.")
+            print("The canon is a MIRROR of the library enum, so the library always "
+                  "wins: fix `jezyki_lingua.KANON`. Run "
+                  "`python audyt_podstaw.py` for the full report.")
+            for zakres, powody in sorted(wynik_podstawy.nowe.items()):
+                for p in powody:
+                    klasa, _, szczegol = p.partition("|")
+                    print(f"      • {zakres} [{klasa}]: {szczegol}")
+            sys.exit(1)
+
     # 6c. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
     _weryfikuj_flagi_debug()
 

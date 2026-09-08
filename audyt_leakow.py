@@ -941,7 +941,22 @@ DEV_TOOLE = {
     # ciszy"). Ta sama klasa co `dev_konsola.py` — moduły bez powierzchni
     # user-facing, wołane wyłącznie ze źródła.
     "audyt_ciszy.py", "dev_yaml.py",
+    # v18.29.0: bramka podstaw paczki (kanon Lingui). Ta sama klasa co
+    # `audyt_ciszy.py` — dev-tool bez powierzchni user-facing, wołany wyłącznie
+    # ze źródła i z `build_release`.
+    "audyt_podstaw.py",
 }
+
+# `jezyki_lingua.py` CELOWO NIE JEST na liście wyżej i to jest decyzja, nie
+# przeoczenie. Moduł chodzi w RUNTIME (szablon Managera Reguł, podpowiedź
+# `POWOD_LINGUA`), więc musi zostać skanowany — a jego 75 polskich nazw języków
+# to lustro ZEWNĘTRZNEGO rejestru (enuma `lingua.Language`), czyli świadomy
+# hard-kod dokładnie tej klasy, o której mówi komunikat naprawczy bramki:
+# „If it is a DELIBERATE, by-design hard-code — regenerate the baseline".
+# Mieszkają więc w `audyt_leakow_py_baseline.json`, nie w whiteliście pliku.
+# Skutek uboczny jest pożądany: dopisanie języka do kanonu (po aktualizacji
+# `lingui`) wymaga regeneracji baseline'u, więc pokazuje się w diffie do
+# przeczytania — a nie znika w pliku zwolnionym ze skanu na zawsze.
 
 # Prefiks rodziny autotłumaczy. Każdy `buduj_wielojezyczne_*.py` jest z definicji
 # dev-only: chodzi wyłącznie ze źródła, u maintainera, i NIE wchodzi do bundla
