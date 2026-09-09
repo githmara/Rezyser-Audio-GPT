@@ -134,6 +134,11 @@ TRYB_SILNIKA = "Rezyser"      # `core_poliglota._FOLDER_DLA_TRYBU["Rezyser"] == 
 MODEL_DOMYSLNY = "claude-sonnet-5"
 MAX_TOKENS_OUT = 16_000
 
+# Limit mikrocallu o polską nazwę języka — świadomie CIASNY, bo pełni rolę
+# BRAMKI: odpowiedź dłuższa niż jedno słowo ma zostać ucięta, a nie wrócić.
+# Wyprowadzenie liczby (pomiar) → docstring `_nazwa_pl_z_modelu`.
+MAX_TOKENS_NAZWA_PL = 48
+
 
 # ---------------------------------------------------------------------------
 # KLASYFIKACJA PÓL
@@ -1116,6 +1121,21 @@ def _nazwa_pl_z_modelu(klient: Any, kod: str, *, model: str) -> str:
     ASCII-liter. Cokolwiek innego (zdanie, `NIE_WIEM`, nazwa z nawiasem)
     odrzucamy z głośną notą — lepiej pominąć kierunek `do-nowego` niż nazwać
     pliki czymś, czego użytkownik nie wpisze w Księdze Świata.
+
+    LIMIT TOKENÓW JEST TU BRAMKĄ, nie zabezpieczeniem (v18.30.0). Zmierzone na
+    `claude-sonnet-5` (structured outputs, `thinking=disabled`): poprawna
+    odpowiedź kosztuje 24–26 tokenów wyjścia — bo koperta JSON-a
+    (``{"translations":[{"id":0,"target":"…"}]}``) zjada ~18, a sama nazwa 2–6.
+    Dawny limit 200 dawał ~8× zapasu, więc dwa-trzy zdania tłumaczenia się
+    modelu wracały KOMPLETNE i poprawnym JSON-em: `stop_reason` nigdy nie
+    stawał się `max_tokens`, `SystemExit` nie miał jak paść, a odrzucenie
+    spadało na walidację `len(surowa.split()) != 1` niżej. Przy 48 (≈2×
+    zmierzone maksimum) jednowyrazowa nazwa mieści się z zapasem, a KAŻDA
+    odpowiedź z preambułą jest ucięta → niekompletny JSON → `SystemExit`
+    z `wskazowka_limitu` napisaną dokładnie pod ten scenariusz. Nie schodzimy
+    do 32 z mikrocallu ISO w `tlumacz_ai`: tamten zwraca goły tekst i koperty
+    nie płaci. **Ciasny limit jest bezpieczny WYŁĄCZNIE przy `myslenie=False`**
+    — patrz ostrzeżenie w `tlumacz_rdzen.wywolaj_llm`.
     """
     endonim = tlumacz_rdzen.natywna_nazwa(DICT_DIR, kod)
     system, pozycje = _PROMPT_NAZWY_PL(kod, endonim if endonim != kod else "")
@@ -1123,10 +1143,10 @@ def _nazwa_pl_z_modelu(klient: Any, kod: str, *, model: str) -> str:
         odpowiedzi = tlumacz_rdzen.wywolaj_llm(
             klient, model=model, system=system,
             nazwa_celu=endonim or kod, kod=kod, pozycje=pozycje,
-            max_tokens=200,
+            max_tokens=MAX_TOKENS_NAZWA_PL,
             wskazowka_limitu="The answer is a single word — a hit limit means the "
                              "model started explaining itself.",
-            myslenie=False)
+            myslenie=False, uciecie_mozna_pominac=True)
     except (RuntimeError, SystemExit) as exc:
         # Rdzeń rodziny sygnalizuje wpadkę chunku `RuntimeError`, a uciętą
         # odpowiedź / niekompletny JSON — `SystemExit`. Tu liczymy się z obiema:
@@ -1658,8 +1678,16 @@ def generuj_pare(
                 wskazowka_limitu="The rule table is short — if the limit was hit, the "
                                  "model most likely started commenting.",
                 kontekst_paczki=kontekst or None, pola_payloadu=pola_proby,
-                myslenie=True)
-        except RuntimeError as exc:
+                myslenie=True, uciecie_mozna_pominac=True)
+        except (RuntimeError, SystemExit) as exc:
+            # `SystemExit` z rdzenia = ucięta odpowiedź. Dla tego callu NIE jest
+            # to sygnał konfiguracyjny (własna `wskazowka_limitu` mówi wprost:
+            # tabela reguł jest krótka, więc uderzenie w limit znaczy, że model
+            # zaczął komentować) — a jednostką pracy jest PARA, którą wolno
+            # pominąć. Tym bardziej że to jedyny call rodziny z `myslenie=True`,
+            # więc myślenie adaptacyjne zjada mu ten sam budżet 16k co odpowiedzi
+            # (patrz `tlumacz_rdzen.wywolaj_llm`) — uderzenie w limit jest tu
+            # BARDZIEJ prawdopodobne niż u braci (v18.30.0).
             print(f"❌ {paczka}/{akcent}: LLM error — {exc}")
             return False
 

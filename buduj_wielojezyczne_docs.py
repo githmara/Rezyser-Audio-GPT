@@ -263,7 +263,7 @@ def _wygeneruj_skrotowce_llm(
         f"dotted abbreviations, give the closest common written shortenings anyway."
     )
     try:
-        surowa_raw, _stop = cl.wywolaj_llm(
+        surowa_raw, stop_reason = cl.wywolaj_llm(
             klient,
             model=model,
             system="",
@@ -277,6 +277,19 @@ def _wygeneruj_skrotowce_llm(
         print(f"⚠️  {kod}: LLM abbreviation generation failed ({exc}); "
               f"the Odwracacz block will be skipped (will retry in this run).")
         return None   # stan PRZEJŚCIOWY — nie wolno go zacementować w cache'u
+
+    # Ucięcie odpowiedzi (v18.30.0). `core_llm` niczego nie rzuca — zwraca
+    # `stop_reason`, a ten do v18.29.0 lądował w `_stop` i był wyrzucany. Parser
+    # niżej przyjmuje KAŻDĄ linię z `|`, więc ucięta ostatnia para
+    # („zzgl. | zusätzli") przechodziła jako poprawna i rozwinięcie-kaleka
+    # trafiało do podręcznika. Zapas jest tu spory (5 linii ≈ 70 tokenów przy
+    # limicie 256), więc traktujemy to jak awarię PRZEJŚCIOWĄ: `None` zamiast
+    # `[]`, czyli ponowna próba w kolejnej sekcji, bez cementowania w cache'u.
+    if stop_reason == "max_tokens":
+        print(f"⚠️  {kod}: the abbreviation list was TRUNCATED at max_tokens — "
+              f"discarding it (the last pair would be a fragment); "
+              f"the Odwracacz block will be skipped (will retry in this run).")
+        return None
 
     pary: list[tuple[str, str]] = []
     widziane: set[str] = set()

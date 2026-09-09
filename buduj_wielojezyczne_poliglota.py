@@ -661,6 +661,9 @@ def wygeneruj_dane_jezyka(
         max_tokens=2_000,
         wskazowka_limitu="The language-data questions are short — if the limit was "
                          "hit, check whether the model started commenting.",
+        # Limit nie jest tu sygnałem konfiguracyjnym (brak pokrętła), a jednostką
+        # pracy wołającego jest PACZKA — patrz `except` w `main` (v18.30.0).
+        uciecie_mozna_pominac=True,
     )
     litery_alfabetu = {z.lower() for z in alfabet}
     dane: dict[str, Any] = {}
@@ -2335,7 +2338,21 @@ def main() -> int:
                 continue
             print(f"🧪 {kod}: brak {len(braki_paczki)} reguł ({', '.join(braki_paczki)}) "
                   f"— pytam model o dane języka (jedno wywołanie).")
-            dane_llm, uwagi = wygeneruj_dane_jezyka(klient, kod, args.model, alfabet)
+            try:
+                dane_llm, uwagi = wygeneruj_dane_jezyka(
+                    klient, kod, args.model, alfabet)
+            except (RuntimeError, SystemExit) as exc:
+                # Rdzeń rodziny sygnalizuje wpadkę chunku `RuntimeError`, a uciętą
+                # odpowiedź — `SystemExit` (= „dalsza praca nie ma sensu"). Tu ma
+                # sens: jednostką pracy tej pętli jest JĘZYK, a `max_tokens=2 000`
+                # przy czterech krótkich pytaniach nie jest sygnałem konfiguracyjnym
+                # (nie ma pokrętła do przekręcenia) — znaczy, że model zaczął
+                # komentować. Pomijamy więc PACZKĘ, zamiast ubijać przebieg
+                # wielojęzyczny w połowie (v18.30.0).
+                print(f"❌ {kod}: LLM error while asking for the language data "
+                      f"— {exc}")
+                porazki.append(kod)
+                continue
             for uwaga in uwagi:
                 print(f"⚠️  {kod}: {uwaga}")
 

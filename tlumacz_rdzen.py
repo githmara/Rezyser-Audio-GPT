@@ -221,6 +221,7 @@ def wywolaj_llm(
     kontekst_paczki: dict[str, str] | None = None,
     pola_payloadu: dict[str, Any] | None = None,
     myslenie: bool = False,
+    uciecie_mozna_pominac: bool = False,
 ) -> dict[int, str]:
     """Wysyła jeden chunk `(id, kind, source)`. Zwraca mapę id → target.
 
@@ -256,11 +257,31 @@ def wywolaj_llm(
             `temperature` i tak kończy się 400 (degradacja niżej), a myślenie
             adaptacyjne jest domyślne — jawny `thinking` trzymamy, żeby
             intencja była widoczna w kodzie, nie w domyśle modelu.
+            **DRUGA UWAGA, mina limitu (v18.30.0): myślenie WSPÓŁDZIELI budżet
+            `max_tokens` z odpowiedzią.** Rdzeń — inaczej niż
+            `core_llm._anthropic`, które przy `thinking_budget` dokłada
+            `budget_tokens` PONAD limit wołającego — wysyła `max_tokens`
+            nietknięte. Ciasny limit (mikrocall-bramka, jak
+            `MAX_TOKENS_NAZWA_PL` u brata od akcentów) jest więc poprawny
+            WYŁĄCZNIE przy `myslenie=False`; z myśleniem uderzyłby w limit na
+            samym rozumowaniu, jeszcze przed pierwszym znakiem odpowiedzi.
+
+        uciecie_mozna_pominac: ``True`` zmienia wyłącznie ZDANIE KOŃCOWE
+            komunikatu o ucięciu — z „Aborted the ENTIRE run." na notę
+            o pominięciu tej jednostki pracy. Ustawia to wołający, który
+            `SystemExit` ŁAPIE i degraduje (mikrocall nazwy PL, dane języka,
+            para akcentowa): dla nich limit nie jest sygnałem konfiguracyjnym,
+            bo nie ma pokrętła do przekręcenia — uderzenie w niego znaczy, że
+            model zaczął komentować. Bez tej flagi rdzeń obiecywał w ich
+            logach przerwanie przebiegu, którego wołający właśnie NIE robił
+            (v18.30.0). Sam TYP wyjątku zostaje `SystemExit`, żeby wołający
+            bez `except` nadal padł — domyślna ostrożność się nie zmienia.
 
     Kontrakt błędów jest częścią API rdzenia i wszyscy bracia go dziedziczą:
     ``RuntimeError`` = wpadka TEGO chunku (wołający może ją złapać i lecieć
     dalej z pozostałymi językami), ``SystemExit`` = sygnał konfiguracyjny,
-    po którym dalsza praca nie ma sensu (ucięta odpowiedź = niekompletny JSON).
+    po którym dalsza praca nie ma sensu (ucięta odpowiedź = niekompletny JSON)
+    — CHYBA że wołający zadeklarował `uciecie_mozna_pominac`.
     """
     payload: dict[str, Any] = {"target_language": nazwa_celu}
     if kontekst_paczki:
@@ -327,7 +348,8 @@ def wywolaj_llm(
             f"❌ {kod}: the model hit the max_tokens={max_tokens} limit — the "
             f"response is truncated and the JSON incomplete. "
             + (wskazowka_limitu or "Reduce the chunk size and run again.")
-            + " Aborted the ENTIRE run."
+            + (" Skipping this unit of work." if uciecie_mozna_pominac
+               else " Aborted the ENTIRE run.")
         )
 
     surowa = "".join(
