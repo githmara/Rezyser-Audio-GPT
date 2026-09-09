@@ -17,6 +17,11 @@ od v18.6, użyty m.in. w v18.22.0 i v18.24.0):
   7. weryfikuje U ŹRÓDŁA oba twierdzenia, na których stoi cała procedura: tag
      na origin wskazuje HEAD, a opis wydania zgadza się z sekcją.
 
+LOKALNIE SKRYPT JEST WYŁĄCZNIE PREFLIGHTEM: kroki 1-4 (bramki stanu) i bramka
+dev-tools-only wykonują się normalnie, ale przed pierwszą operacją na origin
+stoi guard `strzez_operacji_na_origin` — poza runnerem Actions skrypt odmawia
+force-pusha tagu.
+
 Skrypt jest IDEMPOTENTNY — ponowne uruchomienie na zsynchronizowanym stanie
 nie robi nic poza weryfikacją. To celowe: gdyby padł między przesunięciem tagu
 a synchronizacją opisu (albo odwrotnie), właściwą reakcją jest po prostu
@@ -49,6 +54,20 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from release_notes_sekcja import BladSekcji, wytnij_sekcje  # noqa: E402
+
+# Preflight bywa odpalany z lokalnej konsoli, a ta na Windows potrafi mieć
+# stronę kodową bez znaków, których skrypt używa w logu (`→`). Zmierzone:
+# w Git Bashu (cp1250) przebieg wywracał się `UnicodeEncodeError` na kroku 6,
+# w PowerShellu (UTF-8) dojeżdżał dalej — czyli diagnostyka gasła zależnie od
+# tego, z czego ją uruchomiono. Ten sam fail-soft idiom co
+# `dev_konsola.skonfiguruj_stdout` (świadoma duplikacja czterech linii:
+# `.github/scripts/` nie importuje modułów z roota repo).
+if sys.platform == "win32":
+    for _strumien in (sys.stdout, sys.stderr):
+        try:
+            _strumien.reconfigure(encoding="utf-8")   # type: ignore[union-attr]
+        except (AttributeError, OSError):
+            pass
 
 ROOT = pathlib.Path(".")
 # Wycięta sekcja idzie do katalogu tymczasowego, nie do roota repo (wzorzec
@@ -197,6 +216,33 @@ def pliki_runtime_w_zakresie(tag: str) -> list[str]:
     return winowajcy
 
 
+def strzez_operacji_na_origin(tag: str) -> None:
+    """Odmawia wykonania części zmieniającej origin poza runnerem Actions.
+
+    Guard jest DEFENSYWNY, nie zabezpieczeniem — `GITHUB_ACTIONS` da się
+    ustawić ręcznie. Chodzi o przypadek realny: skrypt bywa odpalany lokalnie
+    „żeby zobaczyć, co pokażą bramki" (tak trafił tu `git config` bez
+    `--global`), a wtedy dojeżdża do operacji NIEODWRACALNEJ — force-pusha
+    tagu na opublikowanym wydaniu. Draft da się skasować albo poprawić przed
+    publikacją; przesunięty tag opublikowanego wydania to już rozjazd między
+    tym, co ludzie pobrali, a tym, na co wskazuje ref.
+
+    Kroki 1-6 (bramki i wycięcie sekcji) wykonują się lokalnie normalnie, więc
+    przebieg diagnostyczny nadal odpowiada na jedyne pytanie, które ma sens
+    zadać przed workflowem: czy ta zmiana w ogóle przejdzie.
+    """
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        return
+    # Bez prefiksu `::error::` — ta gałąź z definicji nie leci do loga Actions.
+    sys.exit(
+        f"Odmowa: bramki przeszły, ale ten przebieg NIE jest runnerem GitHub "
+        f"Actions (brak GITHUB_ACTIONS=true), a dalej idzie force-push tagu "
+        f"{tag} i edycja opublikowanego wydania na origin. Lokalnie ten skrypt "
+        f"jest wyłącznie preflightem. Właściwa droga: Actions → "
+        f"`sync-dev-release.yml` → Run workflow (potwierdz=tak)."
+    )
+
+
 def main() -> int:
     if os.environ.get("POTWIERDZENIE", "").strip() != "tak":
         print("[*] Input `potwierdz` nie jest równy 'tak' — no-op, nic nie zmieniam.")
@@ -306,11 +352,19 @@ def main() -> int:
     print(f"[*] Sekcja ## {wersja}: {len(body)} znaków → {PLIK_BODY}")
 
     # 7. Przesunięcie tagu (force-push TAG-ONLY, nigdy gałąź).
-    uruchom(["git", "config", "user.name", "github-actions[bot]"])
-    uruchom(
-        ["git", "config", "user.email",
-         "41898282+github-actions[bot]@users.noreply.github.com"]
-    )
+    #    Od tego miejsca w dół skrypt DZIAŁA NA ORIGIN — kroki 1-6 były czystą
+    #    diagnostyką, więc guard stoi dokładnie tutaj, a nie na wejściu do
+    #    `main()`: lokalny przebieg ma pełną wartość jako preflight bramek.
+    strzez_operacji_na_origin(tag)
+    # Tożsamości gita tu NIE ustawiamy i nie ma czego „remitygować": tag jest
+    # LEKKI (`git tag <tag> HEAD`), a lekki tag to sam ref — nie ma autora ani
+    # committera, więc `user.name`/`user.email` nie są do niego potrzebne. Do
+    # v18.30.1 stały tu dwa `git config` BEZ `--global`: na runnerze nieszkodliwe
+    # (klon jednorazowy), ale lokalny przebieg zapisywał tożsamość bota do
+    # `.git/config` klonu maintainera NA STAŁE — 13 kolejnych commitów wyszło
+    # spod `github-actions[bot]`. Gdyby tag miał kiedyś być anotowany, właściwą
+    # formą jest `git -c user.name=… -c user.email=… tag -a` (nic nie zostaje
+    # w konfiguracji).
     if stary_commit == head:
         print(f"[*] Tag {tag} już wskazuje HEAD ({head[:8]}) — pomijam przesunięcie.")
     else:

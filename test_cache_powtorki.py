@@ -2,7 +2,7 @@
 test_cache_powtorki.py - Regresja: cache wznawiania NIGDY nie udaje pracy,
 ktorej nie bylo (18.30.1).
 
-Trzy kontrakty, wszystkie zmierzone przez WYKONANIE (stub `core_llm.wywolaj_llm`,
+Cztery kontrakty, wszystkie zmierzone przez WYKONANIE (stub `core_llm.wywolaj_llm`,
 zero sieci, `runtime/` w katalogu tymczasowym):
 
   1. POWTORKA sekcji docs (`buduj_wielojezyczne_docs`) musi realnie dojechac do
@@ -21,6 +21,12 @@ zero sieci, `runtime/` w katalogu tymczasowym):
      brak" przy nieudanym kasowaniu zostawiala stara metryke i dopisywala bloki
      pod nia: cache stawal sie trwale nieuzywalny, a user placil za te bloki
      przy kazdym wznowieniu, bez slowa w logu.
+  4. ODCISK ZRODLA w metryce (18.31): cache o zgodnym podziale, ale z INNEJ
+     tresci zrodla, jest odrzucany - inaczej edycja pliku miedzy przebiegami
+     oddawala POPRZEDNI przeklad, o ile nie zmienila liczby blokow. Druga
+     polowa tego kontraktu jest rownie wazna: metryka BEZ pola `zrodlo` (plik
+     sprzed 18.31) musi byc TOLEROWANA, bo inaczej aktualizacja aplikacji
+     uniewaznia cache komus w polowie platnego tlumaczenia.
 
 Uruchom:  .venv/Scripts/python test_cache_powtorki.py
 """
@@ -106,6 +112,16 @@ def _blok_zrodla() -> str:
         model=tlumacz_ai._MODEL_TOKENIZER)
     assert len(bloki) == 1, f"oczekiwano jednego bloku, jest {len(bloki)}"
     return bloki[0]
+
+
+def _payload_sekcji() -> str:
+    """Tresc, jaka builder REALNIE podaje silnikowi (prefiks + stokenizowana)."""
+    tresc_tok, _mapa = bd.tokenizuj(TRESC_PL)
+    return bd.PREFIX_INSTRUKCJA + tresc_tok
+
+
+def _odcisk_sekcji() -> str:
+    return tlumacz_ai._odcisk_zrodla(_payload_sekcji())
 
 
 def _zasiej_cache(*, bloki_w_metryce: int = 1) -> str:
@@ -194,7 +210,8 @@ def test_zajety_cache_nie_zabiera_powtorki():
             # powtorki jest uzywalny dla nastepnego przebiegu.
             wiersze = _wiersze_cache(sciezka)
             assert wiersze[0] == {"meta": tlumacz_ai._WERSJA_CHUNKOWANIA,
-                                  "bloki": 1}, wiersze[0]
+                                  "bloki": 1,
+                                  "zrodlo": _odcisk_sekcji()}, wiersze[0]
             assert [w["id"] for w in wiersze[1:]] == [0], wiersze
 
 
@@ -289,8 +306,11 @@ def test_niezgodna_metryka_nadpisuje_naglowek_w_miejscu():
                 model_tlumacz="stub", zachowaj_cache=True)
         assert wynik is not None, "tlumaczenie nie moze padnac"
         wiersze = _wiersze_cache(sciezka)
+        # Tu silnik wolany jest BEZPOSREDNIO, wiec zrodlem jest samo `TRESC_PL`
+        # (bez prefiks-instrukcji, ktora doklada builder) — odcisk musi to znac.
         assert wiersze[0] == {"meta": tlumacz_ai._WERSJA_CHUNKOWANIA,
-                              "bloki": 1}, wiersze[0]
+                              "bloki": 1,
+                              "zrodlo": tlumacz_ai._odcisk_zrodla(TRESC_PL)},             wiersze[0]
         assert [w["id"] for w in wiersze[1:]] == [0], wiersze
 
 
@@ -337,6 +357,93 @@ def test_klucze_ostrzezenia_w_kazdej_paczce():
         if nieobecne:
             braki[paczka.name] = nieobecne
     assert not braki, braki
+
+
+# ---------------------------------------------------------------------------
+# 4. Odcisk zrodla w metryce (18.31)
+# ---------------------------------------------------------------------------
+# Cache'e w tym silniku przezywaja Z ZALOZENIA (przerwany przebieg zostawia
+# oplacone bloki, `zachowaj_cache=True` trzyma je miedzy sekcjami), wiec te
+# testy jada wlasnie tak: pierwszy przebieg ZOSTAWIA cache, drugi go zastaje.
+
+TRESC_EDYTOWANA = TRESC_PL.replace("Trzecie zdanie", "Trzecie zdanko")
+
+
+def _przebieg_silnika(katalog: str, tresc: str, nazwa: str = "odcisk"):
+    """Jedno wywolanie silnika, cache zostawiony na dysku (jak w builderze)."""
+    return tlumacz_ai.tlumacz_dlugi_tekst(
+        tresc=tresc, jezyk_docelowy=NAZWA_PL, klient=None,
+        runtime_dir=katalog, oryginalna_nazwa=nazwa,
+        model_tlumacz="stub", zachowaj_cache=True)
+
+
+def _sciezka_odcisku(katalog: str, nazwa: str = "odcisk") -> str:
+    return tlumacz_ai.sciezka_cache_tlumaczenia(katalog, nazwa, NAZWA_PL)
+
+
+def test_edytowane_zrodlo_nie_oddaje_starego_przekladu():
+    """Edycja zrodla miedzy przebiegami MUSI trafic do modelu.
+
+    Obie wersje daja te sama liczbe blokow (poprawka prozatorska), wiec do 18.31
+    metryka „wersja + bloki" pasowala idealnie i drugi przebieg oddawal przeklad
+    PIERWSZEJ wersji, nie placac za nic i nie mowiac nic.
+    """
+    with _srodowisko() as katalog:
+        assert len(tlumacz_ai._podziel_na_bloki(TRESC_EDYTOWANA)) ==             len(tlumacz_ai._podziel_na_bloki(TRESC_PL)) == 1,             "test ma sens tylko wtedy, gdy edycja NIE zmienia liczby blokow"
+        _przebieg_silnika(str(katalog), TRESC_PL)
+        assert _licznik["blok"] == 1, _licznik
+        wynik = _przebieg_silnika(str(katalog), TRESC_EDYTOWANA)
+        assert _licznik["blok"] == 2, "cache z innej tresci zabral przebieg"
+        assert "zdanko" in wynik.tekst, wynik.tekst
+        assert "Trzecie zdanie" not in wynik.tekst, wynik.tekst
+        metryka = _wiersze_cache(_sciezka_odcisku(str(katalog)))[0]
+        assert metryka["zrodlo"] == tlumacz_ai._odcisk_zrodla(TRESC_EDYTOWANA),             metryka
+
+
+def test_to_samo_zrodlo_wznawia_za_darmo():
+    """Kontrola przeciwna: bez edycji cache dalej dziala (zero nowych callow)."""
+    with _srodowisko() as katalog:
+        _przebieg_silnika(str(katalog), TRESC_PL)
+        assert _licznik["blok"] == 1, _licznik
+        wynik = _przebieg_silnika(str(katalog), TRESC_PL)
+        assert _licznik["blok"] == 1, "odcisk uniewaznil cache bez powodu"
+        assert wynik.tekst.strip(), wynik
+
+
+def test_metryka_bez_odcisku_jest_tolerowana():
+    """Plik sprzed 18.31 (metryka bez `zrodlo`) NADAL wznawia.
+
+    Druga polowa kontraktu: gdyby brak pola dyskwalifikowal cache, sama
+    aktualizacja aplikacji kasowalaby oplacony postep komus w polowie PLATNEGO
+    tlumaczenia. Tego samego bledu, tylko brutalniejszego, dotyczylby bump
+    `_WERSJA_CHUNKOWANIA`.
+    """
+    with _srodowisko() as katalog:
+        sciezka = _sciezka_odcisku(str(katalog))
+        with open(sciezka, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps({"meta": tlumacz_ai._WERSJA_CHUNKOWANIA,
+                                 "bloki": 1}) + "\n")
+            fh.write(json.dumps({"id": 0, "text": "PRZEKLAD SPRZED 18.31"}) + "\n")
+        wynik = _przebieg_silnika(str(katalog), TRESC_PL)
+        assert _licznik["blok"] == 0, "stary cache mial zostac uzyty"
+        assert wynik.tekst == "PRZEKLAD SPRZED 18.31", wynik.tekst
+
+
+def test_niezgodny_odcisk_odrzuca_caly_cache():
+    """Odcisk z innej tresci -> caly cache leci, metryka nadpisana biezaca."""
+    with _srodowisko() as katalog:
+        sciezka = _sciezka_odcisku(str(katalog))
+        with open(sciezka, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps({"meta": tlumacz_ai._WERSJA_CHUNKOWANIA,
+                                 "bloki": 1, "zrodlo": "0123456789abcdef"}) + "\n")
+            fh.write(json.dumps({"id": 0, "text": "PRZEKLAD OBCEGO ZRODLA"}) + "\n")
+        wynik = _przebieg_silnika(str(katalog), TRESC_PL)
+        assert _licznik["blok"] == 1, _licznik
+        assert "PRZEKLAD OBCEGO ZRODLA" not in wynik.tekst, wynik.tekst
+        wiersze = _wiersze_cache(sciezka)
+        assert wiersze[0] == {"meta": tlumacz_ai._WERSJA_CHUNKOWANIA, "bloki": 1,
+                              "zrodlo": tlumacz_ai._odcisk_zrodla(TRESC_PL)},             wiersze[0]
+        assert [w["id"] for w in wiersze[1:]] == [0], wiersze
 
 
 if __name__ == "__main__":

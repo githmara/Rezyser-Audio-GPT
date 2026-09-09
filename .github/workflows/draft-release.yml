@@ -101,9 +101,15 @@ jobs:
       - name: Utworz tag i wypchnij na origin
         env:
           TAG: ${{ steps.wersja.outputs.tag }}
+        # Bez `git config user.name/user.email` (usuniete w v18.31.0 i NIE
+        # remitygowane): tag jest LEKKI, czyli sam ref bez autora i committera,
+        # wiec tozsamosc nie jest do niego w ogole potrzebna. Tu, na runnerze,
+        # te dwie linie byly nieszkodliwe, ale ten sam wzorzec skopiowany do
+        # `sync_dev_release.py` (skrypt, ktory da sie uruchomic lokalnie) zapisal
+        # tozsamosc bota do `.git/config` klonu maintainera na stale — 13 commitow
+        # wyszlo spod `github-actions[bot]`. Gdyby tag mial kiedys byc anotowany,
+        # wlasciwa forma jest `git -c user.name=... -c user.email=... tag -a`.
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag "$TAG"
           git push origin "$TAG"
           HEAD_SHA=$(git rev-parse HEAD)

@@ -28,8 +28,9 @@ Szczegółowy przebieg:
      ``runtime/temp_<nazwa_bazowa>.jsonl``. Jeśli użytkownik przerwie
      tłumaczenie i ponownie je uruchomi z tym samym plikiem źródłowym,
      gotowe bloki są odtwarzane z tego pliku (oszczędność kredytów API).
-     Pierwsza linia pliku to metryka zgodności (wersja chunkowania +
-     liczba bloków) — cache z innego podziału jest odrzucany w całości.
+     Pierwsza linia pliku to metryka zgodności (wersja chunkowania,
+     liczba bloków i — od 18.31 — odcisk treści źródła) — cache z innego
+     podziału ALBO z innego tekstu jest odrzucany w całości.
   5. Na końcu wywoływana jest druga, krótka konsultacja (``model_iso``)
      w celu ustalenia kodu języka BCP-47 (dwuliterowy ISO 639-1,
      dla odmian regionalnych/pisma z podtagiem, np. ``pt-BR``, ``zh-Hans``).
@@ -44,6 +45,7 @@ tokenizer Claude'a; granice bloków bez zmian, więc bez bumpa wersji chunkowani
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -240,6 +242,23 @@ def _prompt_systemowy(jezyk_docelowy: str) -> str:
 _WERSJA_CHUNKOWANIA = 2
 
 
+def _odcisk_zrodla(tresc: str) -> str:
+    """Skrót treści źródła zapisywany w metryce cache'u (pole ``zrodlo``).
+
+    18.31. Wersja chunkowania i liczba bloków mówią, czy cache PASUJE do
+    bieżącego podziału — nie mówią, czy pochodzi z TEGO SAMEGO tekstu. A cache'e
+    przeżywają tu Z ZAŁOŻENIA (przerwany przebieg zostawia opłacone bloki;
+    ``zachowaj_cache=True`` trzyma je między sekcjami), więc edycja źródła MIĘDZY
+    przebiegami wznawiała się ze starego przekładu, o ile nie zmieniła liczby
+    bloków — a prozatorska poprawka zwykle jej nie zmienia. Skrót zamyka to
+    porównaniem TREŚCI.
+
+    16 znaków sha256 wystarcza: to detektor edycji, nie zabezpieczenie przed
+    celowym spreparowaniem pliku (cache leży w ``runtime/`` użytkownika).
+    """
+    return hashlib.sha256(tresc.encode("utf-8")).hexdigest()[:16]
+
+
 def _podziel_na_bloki(tekst: str, max_tokenow: int = 2_500,
                       model: str = _MODEL_TOKENIZER) -> list[str]:
     """Dzieli długi tekst na bloki ≤ ``max_tokenow`` tokenów, respektując linie.
@@ -326,7 +345,9 @@ def _bezpieczna_nazwa_pliku(tekst: str) -> str:
     źródłowego na dwa różne języki nie-łacińskie dzieliły JEDEN plik cache
     ``runtime/temp_*.jsonl`` (ta sama metryka wersja+bloki) → cache jednego
     języka był po cichu odtwarzany dla drugiego. Unicode-safe sanitizer
-    eliminuje i ograniczenie „tylko PL", i tę kolizję.
+    eliminuje i ograniczenie „tylko PL", i tę kolizję. Odcisk źródła w metryce
+    (18.31) NIE jest tu drugą siatką: w tym scenariuszu źródło jest dokładnie
+    to samo, różni się tylko język docelowy — rozstrzyga wyłącznie nazwa pliku.
     """
     oczyszczony = _RE_ZNAKI_ZAKAZANE.sub("", tekst)
     oczyszczony = re.sub(r"\s+", "_", oczyszczony.strip())
@@ -672,11 +693,15 @@ def tlumacz_dlugi_tekst(
     )
 
     # -------- Odzyskanie wcześniej opłaconych bloków ----------------------
-    # Pierwsza linia pliku zapisu to metryka {"meta": wersja, "bloki": n}.
+    # Pierwsza linia pliku zapisu to metryka
+    # {"meta": wersja, "bloki": n, "zrodlo": odcisk}.
     # Cache z innej wersji chunkowania (lub o innej liczbie bloków) ma
     # indeksy niekompatybilne z bieżącym podziałem — sklejenie go z nowymi
     # blokami dałoby tekst z dziurami/duplikatami, więc odrzucamy go w
-    # całości i tłumaczymy od zera.
+    # całości i tłumaczymy od zera. Cache o zgodnym podziale, ale z INNEJ
+    # treści źródła, jest gorszy: pasuje idealnie i po cichu oddaje poprzedni
+    # przekład — stąd `zrodlo` (18.31).
+    odcisk_zrodla = _odcisk_zrodla(tresc)
     wczytane: dict[int, str] = {}
     cache_uzywalny = False
     if os.path.exists(plik_temp):
@@ -695,10 +720,18 @@ def tlumacz_dlugi_tekst(
                 )
             return None
         metryka = wiersze[0] if wiersze and "meta" in wiersze[0] else None
+        # Porównanie odcisku MUSI tolerować metryki bez tego pola. Plik zapisany
+        # przed 18.31 nie ma `zrodlo` i nie da się o nim orzec nic złego — a
+        # odrzucenie go po samym braku pola unieważniłoby cache komuś w połowie
+        # PŁATNEGO tłumaczenia, przy zwykłej aktualizacji aplikacji. Bump
+        # `_WERSJA_CHUNKOWANIA` byłby tym samym błędem, tylko brutalniejszym.
+        # Pole dopisze się przy pierwszym przebiegu, który nie wznawia.
+        odcisk_w_cache = metryka.get("zrodlo") if metryka else None
         if (
             metryka
             and metryka.get("meta") == _WERSJA_CHUNKOWANIA
             and metryka.get("bloki") == len(bloki)
+            and (odcisk_w_cache is None or odcisk_w_cache == odcisk_zrodla)
         ):
             if on_postep:
                 on_postep(InfoPostepu(
@@ -723,7 +756,9 @@ def tlumacz_dlugi_tekst(
         # zapisywalnego cache'u nie ma zabezpieczenia opłaconego postępu.
         with open(plik_temp, "w", encoding="utf-8") as fh:
             fh.write(
-                json.dumps({"meta": _WERSJA_CHUNKOWANIA, "bloki": len(bloki)})
+                json.dumps({"meta": _WERSJA_CHUNKOWANIA,
+                            "bloki": len(bloki),
+                            "zrodlo": odcisk_zrodla})
                 + "\n"
             )
 
@@ -844,11 +879,14 @@ def tlumacz_dlugi_tekst(
     # `zachowaj_cache` = wołający zapisuje plik wynikowy dopiero po wielu
     # jednostkach i sam skasuje cache po udanym zapisie (patrz docstring).
     if not zachowaj_cache:
-        # Nie „best-effort i cisza": niezabrany cache jest MINĄ, nie śmieciem.
-        # Metryka zna wersję chunkowania i liczbę bloków, ale NIE treść źródła —
-        # więc kolejne tłumaczenie pliku o tej samej nazwie na ten sam język
-        # wznowiłoby się z niego i oddało POPRZEDNI przekład, gdyby edycja
-        # źródła nie zmieniła liczby bloków. `uniewaznij_cache_tlumaczenia` obcina plik,
+        # Nie „best-effort i cisza": niezabrany cache to nadal problem, o którym
+        # trzeba powiedzieć. Od 18.31 metryka zna też odcisk treści źródła, więc
+        # kolejne tłumaczenie POPRAWIONEGO pliku o tej samej nazwie odrzuci taki
+        # cache zamiast po cichu oddać poprzedni przekład — ale zostają dwie rysy:
+        # plik zapisany przed 18.31 nie ma tego pola (tolerowany z rozmysłem,
+        # patrz warunek wznowienia), a cache, którego nie da się ani skasować, ani
+        # obciąć, sygnalizuje realną blokadę na pliku, nie kosmetykę.
+        # `uniewaznij_cache_tlumaczenia` obcina plik,
         # gdy kasowanie pada (typowy na Windows zajęty uchwyt), i wtedy nie ma
         # o czym mówić; napis wraca tylko wtedy, gdy nie udało się NIC.
         powod = uniewaznij_cache_tlumaczenia(plik_temp)
