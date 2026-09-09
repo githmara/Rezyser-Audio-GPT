@@ -243,7 +243,8 @@
     "lingua:PL"
   ],
   "it/ui.yaml/manager.uwagi.postprodukcja": [
-    "lingua:PL"
+    "lingua:PL",
+    "znak-PL:ł"
   ],
   "it/ui.yaml/manager.uwagi.tryb_rezysera": [
     "lingua:PL"

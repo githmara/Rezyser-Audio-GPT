@@ -449,7 +449,7 @@ def bramka() -> al.WynikBramki:
     """Bramka ciszy względem `audyt_ciszy_baseline.json` (bez zależności od lingui)."""
     aktualne = zbierz()
     nowe = al.roznica_wzgledem_baseline(aktualne, al.wczytaj_baseline(BASELINE_PATH))
-    return al.WynikBramki(not nowe, nowe, False, "")
+    return al.WynikBramki(not nowe, nowe)
 
 
 # ---------------------------------------------------------------------------

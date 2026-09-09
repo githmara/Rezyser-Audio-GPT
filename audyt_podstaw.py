@@ -506,16 +506,16 @@ def bramka(*, tylko_kanon: bool = False) -> al.WynikBramki:
 
     Zwraca ten sam typ, co pozostałe bramki rodziny (`al.WynikBramki`), więc
     `build_release` konsumuje ją tym samym wzorcem — z jedną różnicą, którą
-    wołający musi znać: `pominieto` zostaje ``False``, bo część 2 wykonuje się
-    ZAWSZE, a `powod_pominiecia` niesie wtedy listę tego, czego mimo to nie
+    wołający musi znać: bramka nie ma stanu pominięcia, bo część 2 wykonuje się
+    ZAWSZE, a `degradacja` niesie wtedy listę tego, czego mimo to nie
     sprawdzono (brak `lingui`, brak silnika dla sondy wyzwalaczy). Niepusty
     powód przy `czysto=True` znaczy „czysto, ale nie wszędzie tak samo
     dokładnie" i wołający MUSI to powiedzieć na głos — wzorzec
     `WynikBramki.pokrycie_obnizone` z bramki leaków.
     """
     aktualne = zbierz(tylko_kanon=tylko_kanon)
-    return al.WynikBramki(not aktualne, aktualne, False,
-                          "; ".join(_NOTY_DEGRADACJI))
+    return al.WynikBramki(not aktualne, aktualne,
+                          degradacja="; ".join(_NOTY_DEGRADACJI))
 
 
 # ---------------------------------------------------------------------------
@@ -549,10 +549,10 @@ def main() -> int:
         print("========== FOUNDATIONS GATE (lingua canon + podstawy.yaml) ==========")
         # Niepusty powód przy zielonej bramce = „czysto, ale czegoś nie
         # sprawdziliśmy". Mówimy to ZAWSZE, nie tylko przy trafieniach.
-        if wynik.powod_pominiecia:
-            print(f"⚠️  Reduced coverage: {wynik.powod_pominiecia}.")
+        if wynik.degradacja:
+            print(f"⚠️  Reduced coverage: {wynik.degradacja}.")
         if wynik.czysto:
-            if "canon mirror NOT checked" in wynik.powod_pominiecia:
+            if "canon mirror NOT checked" in wynik.degradacja:
                 czesc_1 = "canon mirror not verified"
             else:
                 czesc_1 = (f"KANON mirrors the installed lingua 1:1 "

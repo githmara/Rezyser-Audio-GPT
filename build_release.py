@@ -1133,13 +1133,16 @@ def main(args: argparse.Namespace | None = None) -> None:
         # Paczka poza `lingua` (język, którego detektor nie zna) jest skanowana
         # z węższym zestawem klas. Wydanie NIE jest blokowane — ale przemilczenie
         # tego przy zielonej bramce byłoby obietnicą pokrycia, którego nie ma.
-        for kod, powod in sorted(wynik_leak.pokrycie_obnizone.items()):
-            print(f"⚠️  Leak gate, reduced coverage for `{kod}`: {powod}. "
-                  f"Class A (whole-line drift) is NOT checked for this pack.")
-        if wynik_leak.pominieto:
-            print(f"⚠️  Leak gate skipped: {wynik_leak.powod_pominiecia}. "
-                  "Install `lingua` for the full release gate.\n")
-        elif not wynik_leak.czysto:
+        # Brak `lingui` degraduje bramkę do klas kuratorskich (v18.30.0), NIE
+        # pomija jej — a przyczyna globalna zastępuje wyliczankę per paczka.
+        if wynik_leak.degradacja:
+            print(f"⚠️  Leak gate, reduced coverage: {wynik_leak.degradacja}. "
+                  "Install `lingua` for the full release gate.")
+        else:
+            for kod, powod in sorted(wynik_leak.pokrycie_obnizone.items()):
+                print(f"⚠️  Leak gate, reduced coverage for `{kod}`: {powod}. "
+                      f"Class A (whole-line drift) is NOT checked for this pack.")
+        if not wynik_leak.czysto:
             ile = sum(len(v) for v in wynik_leak.nowe.values())
             print(f"❌ FATAL: {ile} Polish-text leak(s) ABOVE the baseline in "
                   f"{len(wynik_leak.nowe)} section(s) — refusing to build.")
@@ -1161,10 +1164,10 @@ def main(args: argparse.Namespace | None = None) -> None:
         # FATAL. `audyt_leakow` already imported above; reuse it (still lazy/graceful).
         print("🔍 Source gate: scanning *.py for user/LLM-facing Polish hard-codes...")
         wynik_py = audyt_leakow.bramka_py()
-        if wynik_py.pominieto:
-            print(f"⚠️  Source gate skipped: {wynik_py.powod_pominiecia}. "
-                  "Install `lingua` for the full release gate.\n")
-        elif not wynik_py.czysto:
+        if wynik_py.degradacja:
+            print(f"⚠️  Source gate, reduced coverage: {wynik_py.degradacja}. "
+                  "Install `lingua` for the full release gate.")
+        if not wynik_py.czysto:
             ile = sum(len(v) for v in wynik_py.nowe.values())
             print(f"❌ FATAL: {ile} Polish hard-code(s) ABOVE the baseline in "
                   f"{len(wynik_py.nowe)} file(s) — refusing to build.")
@@ -1188,9 +1191,13 @@ def main(args: argparse.Namespace | None = None) -> None:
         print("🔍 Contract gate: scanning dev tools for Polish CLI text, ❌/⚠️ lines "
               "and abort messages...")
         wynik_kontrakt = audyt_leakow.bramka_kontraktu()
-        if wynik_kontrakt.pominieto:
-            print(f"⚠️  Contract gate skipped: {wynik_kontrakt.powod_pominiecia}.\n")
-        elif not wynik_kontrakt.czysto:
+        if wynik_kontrakt.degradacja:
+            # Bez modelu językowego wypada kategoria `fatal`, czyli ta, dla
+            # której ta bramka powstała — mówimy o tym wprost.
+            print(f"⚠️  Contract gate, reduced coverage: "
+                  f"{wynik_kontrakt.degradacja}. The `fatal` category relies "
+                  f"on it.")
+        if not wynik_kontrakt.czysto:
             ile = sum(len(v) for v in wynik_kontrakt.nowe.values())
             print(f"⚠️  {ile} contract violation(s) ABOVE the baseline in "
                   f"{len(wynik_kontrakt.nowe)} file(s) — NOT blocking the build.")
@@ -1249,9 +1256,9 @@ def main(args: argparse.Namespace | None = None) -> None:
         # porównująca kanon z biblioteką, a kontrole treści paczek jadą dalej.
         # Niepusty powód = „czysto, ale nie wszystko sprawdzone" i musi być
         # powiedziany na głos, także przy zielonym wyniku.
-        if wynik_podstawy.powod_pominiecia:
+        if wynik_podstawy.degradacja:
             print(f"⚠️  Foundations gate ran with REDUCED coverage: "
-                  f"{wynik_podstawy.powod_pominiecia}.")
+                  f"{wynik_podstawy.degradacja}.")
         if wynik_podstawy.czysto:
             print(f"✅ Lingua canon mirrors the installed library "
                   f"({len(audyt_podstaw.jezyki_lingua.KANON)} languages) and all "

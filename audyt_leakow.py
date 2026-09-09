@@ -161,6 +161,43 @@ KODY_DOCELOWE = sorted(_NAZWA_LINGUA)
 _POKRYCIE_OBNIZONE: dict[str, str] = {}
 _DETEKTORY: dict[str, Any] = {}
 
+# BRAK SAMEJ BIBLIOTEKI `lingua` (v18.30.0). Do v18.29.0 `ImportError` wychodził
+# ze skanu, a wszystkie trzy bramki odpowiadały `pominieto=True, czysto=True` —
+# czyli kontrybutor bez pełnego dev-env nie dostawał ŻADNEJ bramki, choć klasy
+# kuratorskie (terminy, znaki PL, kanon nazw, nazwy narzędzi) modelu językowego
+# nie potrzebują. Dziś brak biblioteki znaczy DOKŁADNIE to samo, co paczka poza
+# `lingua`, tylko dla wszystkich kodów naraz: klasa A wypada, reszta skanuje,
+# a bramka mówi o tym na głos. Wzorzec zapożyczony z `audyt_podstaw.bramka`
+# (v18.29.0): bramka nigdy nie jest pomijana, a pole `degradacja` niesie NOTĘ
+# DEGRADACJI — bramka, która się wykonała mniej dokładnie, to nie bramka
+# pominięta. Regeneracja baseline'u bez `lingui` pozostaje NIEWSPIERANA
+# (gałęzie `--zapisz-baseline*` dalej kończą `return 2`).
+POWOD_BEZ_LINGUI = (
+    "`lingua` is not installed — class A (whole-line drift) was NOT checked for "
+    "ANY pack; the character/term layers ran normally"
+)
+POWOD_BEZ_LINGUI_PY = (
+    "`lingua` is not installed — the language-model layer was NOT checked; only "
+    "the PL-character and curated-word layers ran"
+)
+_BRAK_LINGUI: bool = False
+
+
+def _lingua_lub_none() -> Any:
+    """Modul `lingua` albo ``None``, gdy go nie ma (zapamiętane w :data:`_BRAK_LINGUI`).
+
+    Jedno miejsce na ten import dla obu detektorów (docs i `.py`), bo obie
+    powierzchnie muszą degradować się identycznie — inaczej jedna bramka
+    milczałaby o tym, o czym druga mówi.
+    """
+    global _BRAK_LINGUI
+    try:
+        import lingua
+    except ImportError:
+        _BRAK_LINGUI = True
+        return None
+    return lingua
+
 # ---------------------------------------------------------------------------
 # Whitelista — maskowana PRZED detekcją lingua (inaczej false-positives)
 # ---------------------------------------------------------------------------
@@ -304,8 +341,12 @@ def detektor_dla(kod: str):
     kandydatów drastycznie tnie szum (model nie zgaduje czeskiego czy
     chorwackiego dla krótkich islandzkich linii). Import lazy.
 
-    ``None`` wraca w dwóch wypadkach, oba zapisywane w
+    ``None`` wraca w trzech wypadkach, wszystkie zapisywane w
     :data:`_POKRYCIE_OBNIZONE` z powodem po angielsku:
+      * **sama biblioteka `lingua` nie jest zainstalowana** (v18.30.0) — powód
+        wspólny dla wszystkich kodów, patrz :data:`POWOD_BEZ_LINGUI`. Do
+        v18.29.0 ten wypadek wychodził `ImportError`-em aż do bramki i kończył
+        się „gate skipped",
       * paczka nie deklaruje pola `lingua:` — a to od v18.29.0 są DWA różne
         powody, rozstrzygane kanonem po kodzie ISO folderu
         (`jezyki_lingua.nazwa_enuma`): język poza `lingua` (brak pola jest
@@ -327,7 +368,16 @@ def detektor_dla(kod: str):
     """
     if kod in _DETEKTORY:
         return _DETEKTORY[kod]
-    from lingua import Language, LanguageDetectorBuilder
+    lingua = _lingua_lub_none()
+    if lingua is None:
+        # Brak biblioteki — ten sam skutek co paczka poza `lingua`, tylko dla
+        # KAŻDEGO kodu. Powód wpisujemy per kod, żeby `_opis_pokrycia` policzył
+        # go tak samo jak każde inne obniżone pokrycie (v18.30.0).
+        _POKRYCIE_OBNIZONE[kod] = POWOD_BEZ_LINGUI
+        _DETEKTORY[kod] = None
+        return None
+    Language, LanguageDetectorBuilder = (
+        lingua.Language, lingua.LanguageDetectorBuilder)
 
     nazwa = _NAZWA_LINGUA.get(kod, "")
     if not nazwa:
@@ -373,6 +423,21 @@ def wykryj_leaki_w_tekscie(
       * B (kuratorskie terminy + znaki PL): skan na SUROWEJ (niezamaskowanej)
         linii — łapie osadzone nazwy modułów i diakrytykę.
 
+    Klasy są NIEZALEŻNE i obie mają prawo zgłosić tę samą linię (v18.30.0).
+    Do v18.29.0 trafienie klasy A robiło `continue` z notą „terminy w niej są
+    skutkiem, nie dorzucamy" — oszczędność szumu w raporcie, ale kosztem
+    niezmiennika: skan BEZ modelu językowego (paczka poza `lingua`, a od
+    v18.30.0 także brak samej biblioteki) przestawał być PODZBIOREM skanu
+    pełnego. Zmierzone na całym drzewie: linia
+    `it/ui.yaml::manager.uwagi.postprodukcja` (legalny literał
+    „Rozdział/Kapitel/Capitolo/Глава") wracała jako `lingua:PL` w skanie pełnym
+    (zbaselinowany fałszywy alarm) i jako `znak-PL:ł` w skanie zdegradowanym —
+    czyli jako trafienie PONAD baseline, więc czerwona bramka bez leaku.
+    Zdjęcie `continue` kosztowało DOKŁADNIE +1 wpis w baselinie (102 → 103)
+    i sprowadziło liczbę takich fałszywych alarmów do zera. Kolejność
+    zgłaszania zostaje (A przed B), więc recenzent nadal czyta dryf jako
+    przyczynę główną.
+
     `detektor` można podać z zewnątrz (reużycie między sekcjami — budowa
     detektora ładuje modele i jest kosztowna). Gdy None — budujemy lokalnie.
     """
@@ -390,8 +455,9 @@ def wykryj_leaki_w_tekscie(
         # --- Klasa A: dryf całej linii (lingua na zamaskowanej treści) ---
         zamaskowana = _maskuj_whiteliste(surowa)
         litery = sum(ch.isalpha() for ch in zamaskowana)
-        # `detektor is None` = paczka o obniżonym pokryciu (język poza lingua):
-        # klasa A wypada, klasy B/B' niżej działają bez modelu językowego.
+        # `detektor is None` = paczka o obniżonym pokryciu (język poza lingua)
+        # ALBO brak samej biblioteki: klasa A wypada, klasy B/B' niżej działają
+        # bez modelu językowego.
         if detektor is not None and litery >= _MIN_LITER_LINGUA:
             cv = detektor.compute_language_confidence_values(zamaskowana)
             if cv:
@@ -403,8 +469,6 @@ def wykryj_leaki_w_tekscie(
                         powod=f"lingua:PL {top.value:.2f}",
                         fragment=surowa[:160],
                     ))
-                    # Dryf całej linii — terminy w niej są skutkiem, nie dorzucamy.
-                    continue
 
         # --- Klasa B: osadzone PL-terminy (marka zdjęta, by „Reżyser Audio GPT"
         #     nie łapał się jako termin:Reżyser — standalone „Reżyser" zostaje) ---
@@ -803,9 +867,10 @@ def zbierz_wszystkie_leaki(
     (`zapisz_baseline`), jak i bieżącego skanu bramki (`bramka_docs`).
 
     Buduje detektor `lingua` raz na język (kosztowny — reużywany między plikami).
-    Rzuca `ImportError`, gdy `lingua` jest niedostępna — wołający (bramka) łapie
-    to i degraduje łagodnie (skip z ostrzeżeniem), spójnie z `core_poliglota`
-    lazy-importem w generatorze.
+    NIE rzuca `ImportError` przy braku biblioteki (v18.30.0): `detektor_dla`
+    zwraca wtedy ``None`` dla każdego kodu, klasa A wypada, a powód ląduje
+    w :data:`_POKRYCIE_OBNIZONE`. Skan wykonuje się zawsze — nie ma stanu
+    „bramka się nie odbyła".
     """
     if kody is None:
         kody = list(KODY_DOCELOWE)
@@ -886,11 +951,23 @@ def roznica_wzgledem_baseline(
 
 @dataclass
 class WynikBramki:
-    """Wynik bramki leaków dla docs (konsumowany przez waliduj() i build_release)."""
+    """Wynik bramki leaków dla docs (konsumowany przez waliduj() i build_release).
+
+    Do v18.29.0 pierwszym polem po wyniku było `pominieto` („bramki nie udało się
+    uruchomić") z `powod_pominiecia`. Oba ZNIKNĘŁY w v18.30.0, bo po degradacji
+    bramek na brak `lingui` NIC już nie ustawiało `pominieto=True` — cztery
+    gałęzie u wołających (`build_release` ×3, `generuj_dokumentacje`) stały się
+    martwym kodem, który obiecywał czytelnikowi nieistniejącą ścieżkę „gate
+    skipped". Zostaje jedno pole `degradacja`: bramka albo wykonała się w pełni
+    (pusty napis), albo mniej dokładnie i wtedy MÓWI, czego nie sprawdziła.
+    Niepusta `degradacja` przy `czysto=True` znaczy „czysto, ale nie wszędzie tak
+    samo dokładnie" i wołający MUSI to powiedzieć na głos — wzorzec ustalony
+    przez `audyt_podstaw.bramka` (v18.29.0), która nigdy nie miała stanu
+    „pominięta".
+    """
     czysto: bool                 # True = brak leaków ponad baseline
     nowe: dict[str, list[str]]   # {"<kod>/<plik>/<sekcja>": [powod_norm]} ponad baseline
-    pominieto: bool              # True = bramki nie udało się uruchomić (np. brak lingua)
-    powod_pominiecia: str        # krótki opis EN, gdy `pominieto`
+    degradacja: str = ""         # opis EN tego, czego skan NIE sprawdził (pusty = pełny)
     # {kod: powód EN} paczek przeskanowanych z OBNIŻONYM pokryciem (język poza
     # lingua). Zielona bramka przy niepustym słowniku znaczy „czysto, ale nie
     # wszędzie tak samo dokładnie" i wołający MUSI to powiedzieć na głos.
@@ -915,17 +992,19 @@ def _opis_pokrycia(pokrycie_obnizone: dict[str, str]) -> str:
 def bramka_docs(*, prog_lingua: float = 0.70) -> WynikBramki:
     """Uruchamia bramkę leaków na szablonach docs względem baseline'u.
 
-    Łagodna degradacja: gdy `lingua` jest niedostępna (kontrybutor bez pełnego
-    dev-env), zwraca `pominieto=True, czysto=True` — bramka się NIE wykonała, ale
-    NIE blokuje (analogia lazy-importu `core_poliglota` w generatorze). Maintainer
-    robiący kanoniczny release MA `lingua`, więc dostaje pełną bramkę.
+    Wykonuje się ZAWSZE (v18.30.0). Brak `lingui` (kontrybutor bez pełnego
+    dev-env) nie pomija już bramki — degraduje ją do klas kuratorskich dla
+    KAŻDEJ paczki, a powód wraca zarazem w `pokrycie_obnizone` (per kod, żeby
+    `_opis_pokrycia` policzył go jak każde inne obniżenie) i w
+    `degradacja` (jedno zdanie dla wołającego).
+    Maintainer robiący kanoniczny release MA `lingua`, więc dostaje pełną bramkę.
     """
-    try:
-        aktualne = zbierz_wszystkie_leaki(prog_lingua=prog_lingua)
-    except ImportError as exc:
-        return WynikBramki(True, {}, True, f"lingua not available ({exc})")
+    aktualne = zbierz_wszystkie_leaki(prog_lingua=prog_lingua)
     nowe = roznica_wzgledem_baseline(aktualne, wczytaj_baseline())
-    return WynikBramki(not nowe, nowe, False, "", dict(_POKRYCIE_OBNIZONE))
+    return WynikBramki(
+        not nowe, nowe,
+        degradacja=POWOD_BEZ_LINGUI if _BRAK_LINGUI else "",
+        pokrycie_obnizone=dict(_POKRYCIE_OBNIZONE))
 
 
 # ===========================================================================
@@ -1070,10 +1149,20 @@ def _detektor_pl_en():
     Skan `.py` nie ma „języka docelowego" jak docs — interesuje nas tylko, czy
     literał jest polski. Restrykcja do {POLISH, ENGLISH} tnie szum (większość
     literałów aplikacji to PL albo EN: prompty, detale błędów).
+
+    ``None`` bez biblioteki (v18.30.0). `_sygnal_pl` przyjmuje wtedy
+    ``detektor=None`` i schodzi do dwóch pierwszych warstw (znaki → kuratorskie
+    słowa), które są UPORZĄDKOWANE tak samo jak w pełnym skanie, więc wynik jest
+    jego ŚCISŁYM PODZBIOREM — zmierzone: 95 z 113 wpisów baseline'u `.py` i 4 z 4
+    baseline'u kontraktu odtwarzają się bez `lingui`, przy zerze trafień PONAD
+    baseline. Degradacja jest tu więc darmowa, w odróżnieniu od skanu docs, gdzie
+    wymagała zdjęcia `continue` (patrz `wykryj_leaki_w_tekscie`).
     """
-    from lingua import Language, LanguageDetectorBuilder
-    return LanguageDetectorBuilder.from_languages(
-        Language.POLISH, Language.ENGLISH,
+    lingua = _lingua_lub_none()
+    if lingua is None:
+        return None
+    return lingua.LanguageDetectorBuilder.from_languages(
+        lingua.Language.POLISH, lingua.Language.ENGLISH,
     ).build()
 
 
@@ -1285,8 +1374,9 @@ def zbierz_leaki_py(root: Path = ROOT) -> dict[str, list[str]]:
     Wartość = posortowany multiset wpisów kodujących poziom + znormalizowany powód
     + treść literału; treść w powodzie rozróżnia różne hard-kody w jednym pliku.
     Float pewności lingua znormalizowany (`_normalizuj_powod`), inaczej drobne
-    wahanie modelu rozjeżdżałoby baseline. Rzuca `ImportError` bez `lingua`
-    (wołający `bramka_py` łapie i degraduje łagodnie).
+    wahanie modelu rozjeżdżałoby baseline. Bez `lingui` NIE rzuca (v18.30.0) —
+    `_detektor_pl_en` zwraca ``None`` i skan schodzi do dwóch warstw
+    kuratorskich.
     """
     wynik: dict[str, list[str]] = {}
     for l in skanuj_zrodla_py(root):
@@ -1524,31 +1614,34 @@ def zbierz_leaki_kontraktu(root: Path = ROOT) -> dict[str, list[str]]:
 def bramka_kontraktu() -> WynikBramki:
     """Bramka kontraktu CONTRIBUTING względem `audyt_leakow_kontrakt_baseline.json`.
 
-    Łagodna degradacja bez `lingua` (jak pozostałe bramki). Wołający traktuje
-    nadwyżkę jako OSTRZEŻENIE — patrz komentarz sekcji.
+    Degraduje się bez `lingui` (v18.30.0), nie pomija — ale nota degradacji jest
+    tu WAŻNIEJSZA niż przy dwóch pozostałych bramkach i musi zostać wypisana:
+    kategoria `fatal`, dla której ta bramka dostała osobny, zmierzony próg liter
+    (:data:`_MIN_LITER_FATAL`), opiera się właśnie na modelu językowym — powody
+    porażki są krótkie i bez-diakrytyczne, więc dwie pierwsze warstwy ich nie
+    widzą. Wołający traktuje nadwyżkę jako OSTRZEŻENIE — patrz komentarz sekcji.
     """
-    try:
-        aktualne = zbierz_leaki_kontraktu()
-    except ImportError as exc:
-        return WynikBramki(True, {}, True, f"lingua not available ({exc})")
+    aktualne = zbierz_leaki_kontraktu()
     nowe = roznica_wzgledem_baseline(
         aktualne, wczytaj_baseline(BASELINE_KONTRAKT_PATH))
-    return WynikBramki(not nowe, nowe, False, "")
+    return WynikBramki(
+        not nowe, nowe,
+        degradacja=POWOD_BEZ_LINGUI_PY if _BRAK_LINGUI else "")
 
 
 def bramka_py() -> WynikBramki:
     """Bramka skanu źródeł `.py` względem `audyt_leakow_py_baseline.json`.
 
-    Łagodna degradacja bez `lingua` (jak `bramka_docs`): zwraca `pominieto=True,
-    czysto=True` — nie blokuje kontrybutora bez pełnego dev-env. `nowe` to wpisy
-    PONAD baseline (nowy hard-kod / przesunięty poziom-powód-tekst).
+    Degraduje się bez `lingui` do warstw znak-PL i słowo-PL (v18.30.0), nie
+    pomija — a degradacja jest tu DARMOWA, bo wynik pozostaje ścisłym podzbiorem
+    pełnego skanu (uzasadnienie i pomiar: :func:`_detektor_pl_en`). `nowe` to
+    wpisy PONAD baseline (nowy hard-kod / przesunięty poziom-powód-tekst).
     """
-    try:
-        aktualne = zbierz_leaki_py()
-    except ImportError as exc:
-        return WynikBramki(True, {}, True, f"lingua not available ({exc})")
+    aktualne = zbierz_leaki_py()
     nowe = roznica_wzgledem_baseline(aktualne, wczytaj_baseline(BASELINE_PY_PATH))
-    return WynikBramki(not nowe, nowe, False, "")
+    return WynikBramki(
+        not nowe, nowe,
+        degradacja=POWOD_BEZ_LINGUI_PY if _BRAK_LINGUI else "")
 
 
 # ---------------------------------------------------------------------------
@@ -1641,12 +1734,22 @@ def main() -> int:
     if args.py:
         return _main_py()
 
+    # REGENERACJA BASELINE'U BEZ `LINGUI` POZOSTAJE NIEWSPIERANA (v18.30.0).
+    # Od tego wydania skany degradują się zamiast rzucać `ImportError`, więc te
+    # trzy gałęzie straciły to, co łapały — bez jawnego sprawdzenia zapisałyby
+    # baseline UBOŻSZY o całą klasę A / warstwę modelu językowego, po cichu,
+    # a następny pełny przebieg zameldowałby tę różnicę jako NOWE leaki.
+    if (args.zapisz_baseline or args.zapisz_baseline_py
+            or args.zapisz_baseline_kontrakt) and _lingua_lub_none() is None:
+        print("❌ Cannot regenerate a baseline — `lingua` is not installed. The scan "
+              "would run without the language-model layer and the baseline would be "
+              "silently poorer than the one the full gate compares against.\n"
+              "   Install it (project venv): .venv/Scripts/pip install "
+              "lingua-language-detector")
+        return 2
+
     if args.zapisz_baseline_kontrakt:
-        try:
-            aktualne = zbierz_leaki_kontraktu()
-        except ImportError as exc:
-            print(f"❌ Cannot build the contract baseline — `lingua` is missing ({exc}).")
-            return 2
+        aktualne = zbierz_leaki_kontraktu()
         zapisz_baseline(aktualne, BASELINE_KONTRAKT_PATH)
         ile = sum(len(v) for v in aktualne.values())
         print(f"✅ Saved the contract baseline: {ile} hit(s) in {len(aktualne)} file(s) → "
@@ -1656,10 +1759,13 @@ def main() -> int:
     if args.bramka_kontrakt:
         wynik = bramka_kontraktu()
         print("\n========== CONTRIBUTING CONTRACT GATE (dev tools) ==========")
-        if wynik.pominieto:
-            print(f"⚠️  Gate skipped: {wynik.powod_pominiecia}. "
-                  "Install `lingua` to run it (maintainer/CI).")
-            return 0
+        if wynik.degradacja:
+            # Nota degradacji jest tu istotniejsza niż przy dwóch pozostałych
+            # bramkach: bez modelu językowego wypada kategoria `fatal`, czyli ta,
+            # dla której ta bramka powstała.
+            print(f"⚠️  Reduced coverage: {wynik.degradacja}. The `fatal` "
+                  f"category (short, diacritic-free failure reasons) relies on it "
+                  f"— install `lingua` for the full gate.")
         if wynik.czysto:
             print(f"✅ No Polish CLI text, ❌/⚠️ line or abort message above the baseline "
                   f"({BASELINE_KONTRAKT_PATH.name}).")
@@ -1679,11 +1785,7 @@ def main() -> int:
         return 0   # OSTRZEŻENIE, nie bramka blokująca — patrz komentarz sekcji
 
     if args.zapisz_baseline_py:
-        try:
-            aktualne = zbierz_leaki_py()
-        except ImportError as exc:
-            print(f"❌ Cannot build the `.py` baseline — `lingua` is missing ({exc}).")
-            return 2
+        aktualne = zbierz_leaki_py()
         zapisz_baseline(aktualne, BASELINE_PY_PATH)
         ile = sum(len(v) for v in aktualne.values())
         print(f"✅ Saved the `.py` baseline: {ile} hit(s) in {len(aktualne)} file(s) → "
@@ -1693,10 +1795,9 @@ def main() -> int:
     if args.bramka_py:
         wynik = bramka_py()
         print("========== HARD-CODED PL GATE `.py` (vs baseline) ==========")
-        if wynik.pominieto:
-            print(f"⚠️  Gate skipped: {wynik.powod_pominiecia}. "
-                  "Install `lingua` to run it (maintainer/CI).")
-            return 0
+        if wynik.degradacja:
+            print(f"⚠️  Reduced coverage: {wynik.degradacja}. "
+                  "Install `lingua` for the full gate (maintainer/CI).")
         if wynik.czysto:
             print(f"✅ No hard-coded strings above the baseline ({BASELINE_PY_PATH.name}).")
             return 0
@@ -1713,11 +1814,7 @@ def main() -> int:
         return 1
 
     if args.zapisz_baseline:
-        try:
-            aktualne = zbierz_wszystkie_leaki(prog_lingua=args.prog)
-        except ImportError as exc:
-            print(f"❌ Cannot build the baseline — `lingua` is missing ({exc}).")
-            return 2
+        aktualne = zbierz_wszystkie_leaki(prog_lingua=args.prog)
         zapisz_baseline(aktualne)
         ile = sum(len(v) for v in aktualne.values())
         print(f"✅ Saved the baseline: {ile} hit(s) in {len(aktualne)} section(s) → "
@@ -1727,14 +1824,17 @@ def main() -> int:
     if args.bramka:
         wynik = bramka_docs(prog_lingua=args.prog)
         print("========== DOCS LEAK GATE (vs baseline) ==========")
-        if wynik.pominieto:
-            print(f"⚠️  Gate skipped: {wynik.powod_pominiecia}. "
-                  "Install `lingua` to run it (maintainer/CI).")
-            return 0
-        for kod, powod in sorted(wynik.pokrycie_obnizone.items()):
-            print(f"⚠️  {kod}: outside `lingua` ({powod}) — scanned with the "
-                  f"character/term layers only. Class A (whole-line drift) is "
-                  f"NOT checked for this pack.")
+        # Przyczyna GLOBALNA (brak biblioteki) zastępuje wyliczankę per paczka:
+        # niosą tę samą informację, a osiem identycznych akapitów to szum, po
+        # którym nikt nie czyta ostrzeżeń. Licznik `_opis_pokrycia` zostaje.
+        if wynik.degradacja:
+            print(f"⚠️  Reduced coverage: {wynik.degradacja}. "
+                  "Install `lingua` for the full gate (maintainer/CI).")
+        else:
+            for kod, powod in sorted(wynik.pokrycie_obnizone.items()):
+                print(f"⚠️  {kod}: outside `lingua` ({powod}) — scanned with the "
+                      f"character/term layers only. Class A (whole-line drift) is "
+                      f"NOT checked for this pack.")
         if wynik.czysto:
             print(f"✅ No leaks above the baseline ({BASELINE_PATH.name})"
                   f"{_opis_pokrycia(wynik.pokrycie_obnizone)}.")
