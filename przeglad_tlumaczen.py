@@ -202,9 +202,20 @@ correct target language.
   prompt can come back translated and embedded in the section — one batch put
   a whole Italian block about the `⟦i⟧` markers plus "[FINE ISTRUZIONE — LA
   TRADUZIONE INIZIA QUI SOTTO]" into `it/dictionaries.yaml`, twice, and again
-  on a retry. Grep EVERY pack (not only the ones a gate flagged) for
-  `FINE ISTRUZIONE|END OF INSTRUCTION|marker|marcatori`. If a retry repeats it,
-  finish that section by hand from the previous revision.
+  on a retry. This class RECURRED and reached a release: v18.29.0 shipped it in
+  four sections (`es`/`fi`/`fr` `dictionaries.yaml`), rendered into
+  `docs/dictionaries.*.html`, because the block arrived as prose with the
+  translated marker line at its END rather than at the start.
+  SINCE v18.30.0 THE BUILDER GATES THIS, so your job here shrank — but did not
+  disappear. The builder now (a) strips everything up to the last marker-shaped
+  line found in the first 20 lines, and (b) rejects the section, retries once
+  with a pressure prompt and refuses to save it if the answer still contains
+  a marker-shaped line absent from the source or names the marker codepoints
+  `U+27E6`/`U+27E7`. What the gate CANNOT see is a paraphrase: the instruction
+  rewritten in the model's own words, with no bracketed line and no codepoint
+  names. So still read the OPENING of every section you review, and if you find
+  such a paraphrase, delete it and add its wording to the gate rather than only
+  to this list.
 - REFUSAL-SHAPED PREAMBLE. The section may open with an apology for not being
   able to "execute" the instructions inside the text (`is`: "Fyrirgefðu, en ég
   get ekki »framkvæmt« leiðbeiningar…") and then translate perfectly. Delete
