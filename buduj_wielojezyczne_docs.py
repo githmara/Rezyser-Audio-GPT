@@ -72,7 +72,6 @@ Moduł NIE zależy od wxPython — uruchamialny w CLI / CI bez inicjalizacji GUI
 from __future__ import annotations
 
 import argparse
-import os
 import re
 import sys
 from collections import Counter
@@ -86,7 +85,8 @@ import dev_yaml
 import przeglad_tlumaczen
 import tlumacz_bramki
 import tlumacz_rdzen
-from tlumacz_ai import sciezka_cache_tlumaczenia, tlumacz_dlugi_tekst
+from tlumacz_ai import (sciezka_cache_tlumaczenia, tlumacz_dlugi_tekst,
+                        uniewaznij_cache_tlumaczenia)
 
 
 # ---------------------------------------------------------------------------
@@ -1070,14 +1070,28 @@ def _tlumacz_pojedyncza_sekcje(
         prompt_proby = prompt_dodatkowy
         if zarzuty:
             prompt_proby += _doklejka_nacisku(zarzuty, len(tresc_tok))
-            # Cache pierwszej próby jest ODRZUCONY, więc musi zniknąć: przy
-            # `zachowaj_cache=True` wznowienie oddałoby po prostu tę samą,
-            # zakwestionowaną treść i powtórka byłaby no-opem.
-            try:
-                os.remove(sciezka_cache_tlumaczenia(
-                    str(RUNTIME_DIR), cache_key, nazwa_pl))
-            except OSError:
-                pass
+            # Cache pierwszej próby jest ODRZUCONY, więc musi przestać być
+            # używalny: przy `zachowaj_cache=True` wznowienie oddałoby po prostu
+            # tę samą, zakwestionowaną treść, doklejka nacisku nie dotarłaby do
+            # modelu i „powtórka" byłaby no-opem (zmierzone: 0 wywołań bloku,
+            # 0 promptów z naciskiem — `test_cache_powtorki.py`). Unieważnienie
+            # jest więc WARUNKIEM powtórki, nie sprzątaniem, i dlatego jego
+            # porażki nie wolno przemilczeć: dawny `except OSError: pass`
+            # kończył się logiem „still rejected after the retry" o powtórce,
+            # której nigdy nie było.
+            sciezka_cache = sciezka_cache_tlumaczenia(
+                str(RUNTIME_DIR), cache_key, nazwa_pl)
+            blad_cache = uniewaznij_cache_tlumaczenia(sciezka_cache)
+            if blad_cache:
+                print(f"❌  {kod}/{nazwa_pliku}{sufiks}: the retry CANNOT run — "
+                      f"the rejected resume-cache could not be invalidated, so "
+                      f"the engine would replay the SAME rejected text instead "
+                      f"of translating again.\n"
+                      f"     {blad_cache}\n"
+                      f"     Release the file (an editor or antivirus may hold "
+                      f"it), delete it and re-run this section:\n"
+                      f"     {sciezka_cache}")
+                return False, None
             print(f"🔁  {kod}/{nazwa_pliku}{sufiks}: powtórka z "
                   f"{len(zarzuty)} zarzutami…")
 
@@ -1289,10 +1303,17 @@ def tlumacz_szablon(
         sciezka_cache = sciezka_cache_tlumaczenia(
             str(RUNTIME_DIR), _cache_key_sekcji(rdzen, klucz_sekcji, kod), nazwa_pl,
         )
-        try:
-            os.remove(sciezka_cache)
-        except OSError:
-            pass   # brak pliku = nic do sprzątania (np. sekcja z cache'u wznowiona)
+        # Brak pliku = nic do unieważniania (np. sekcja wznowiona z cache'u) i
+        # milczy. Napis wraca dopiero, gdy pliku nie udało się ANI skasować, ANI
+        # obciąć — a wtedy cisza kosztuje przy NASTĘPNYM tłumaczeniu tej sekcji:
+        # metryka cache'u zna wersję chunkowania i liczbę bloków, nie treść
+        # źródła, więc niezabrany plik wznowi się jako przekład POPRZEDNIEJ
+        # wersji sekcji, jeśli edycja nie zmieniła liczby bloków.
+        blad_cache = uniewaznij_cache_tlumaczenia(sciezka_cache)
+        if blad_cache:
+            print(f"⚠️  {kod}/{nazwa_pliku}: resume-cache left usable on disk — "
+                  f"delete it before re-translating section '{klucz_sekcji}'.\n"
+                  f"     {sciezka_cache}\n     {blad_cache}")
 
     tryb = "SURGICAL" if klucze_filtru else "FULL"
     if tryb_draft:

@@ -964,6 +964,18 @@ poliglota:
   # odmowa dotyczy treści fragmentu. Ta sama treść co `opowiesci.err_odmowa`.
   err_odmowa: |-
     Model odmówił wykonania tego polecenia — jego treść mogła naruszać zasady modelu albo być zbyt niejednoznaczna. Nic nie zostało zapisane; sformułuj polecenie inaczej i spróbuj ponownie.
+  # 18.30.1: cache wznawiania, którego po sukcesie nie udało się ani skasować,
+  # ani obciąć. Tłumaczenie jest gotowe i zapisane — ostrzegamy o MINIE na
+  # przyszłość: metryka cache'u nie zna treści źródła, więc kolejne tłumaczenie
+  # pliku o tej samej nazwie na ten sam język wznowiłoby się z niego.
+  ai_ostrzezenie_cache_tytul: "Ostrzeżenie pamięci wznawiania"
+  ai_ostrzezenie_cache: |-
+    Tłumaczenie zostało ukończone i zapisane, ale nie udało się usunąć pliku tymczasowego (pamięci podręcznej wznawiania):
+    {plik}
+
+    Usuń ten plik ręcznie. Dopóki tam leży, ponowne tłumaczenie pliku o tej samej nazwie na ten sam język może wznowić się z tej pamięci i oddać POPRZEDNI przekład zamiast nowego.
+
+    Szczegóły: {szczegoly}
   ai_ostrzezenie_iso_tytul: "Ostrzeżenie tagu językowego"
   ai_ostrzezenie_iso: |-
     Nie udało się automatycznie pobrać kodu ISO z API. Użyto domyślnego tagu „pl". W razie problemów z czytnikiem ekranu użyj „Naprawiacza Tagów" w Trybie Reżysera.

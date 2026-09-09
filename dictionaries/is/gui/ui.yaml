@@ -840,6 +840,8 @@ poliglota:
   chk_quality_name: Gæðastilling þýðingar
   chk_quality_tooltip: Líkanið fær fjárveitingu fyrir innri greiningu textans áður en þýðing hefst (extended thinking). Þetta bætir erfiða hluta á kostnað tíma og tóka. Gildir aðeins um Anthropic Claude — hefur engin áhrif á OpenAI-samhæfð endapunkta.
   err_odmowa: Líkanið hafnaði því að framkvæma þessa skipun — innihald hennar gæti hafa brotið gegn reglum líkansins eða verið of tvírætt. Engu var vistað; orðaðu skipunina á annan hátt og reyndu aftur.
+  ai_ostrzezenie_cache_tytul: Viðvörun um endurupptökuminni
+  ai_ostrzezenie_cache: "Þýðingin var kláruð og vistuð, en ekki tókst að fjarlægja bráðabirgðaskrána (endurupptökuminni):\n{plik}\n\nFjarlægðu þessa skrá handvirkt. Á meðan hún er til staðar getur það gerst að þýðing á sömu skrá yfir á sama tungumál taki upp þráðinn frá þessu minni og skili FYRRI þýðingunni í stað nýrrar.\n\nNánar: {szczegoly}"
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)

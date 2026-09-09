@@ -370,6 +370,41 @@ def sciezka_cache_tlumaczenia(
     return _sciezka_pliku_tymczasowego(runtime_dir, base_name)
 
 
+def uniewaznij_cache_tlumaczenia(sciezka: str) -> str | None:
+    """Unieważnia cache wznawiania. ``None`` = nie da się z niego wznowić.
+
+    Publiczna, bo wołający z ``zachowaj_cache=True`` musi umieć unieważnić
+    cache ODRZUCONEJ próby przed powtórką (batchowy builder docs) — a to nie to
+    samo co „skasuj plik".
+
+    **Kasowanie nie jest jedyną drogą i nie jest tą pewną.** Na Windows
+    ``DeleteFileW`` zwraca ``ERROR_SHARING_VIOLATION`` przy JAKIMKOLWIEK
+    otwartym uchwycie (antywirus, indekser, otwarty edytor), a otwarcie tego
+    samego pliku do zapisu przechodzi — bo o ważności cache'u decyduje jego
+    TREŚĆ (metryka w pierwszej linii), nie istnienie pliku. Dlatego po porażce
+    kasowania obcinamy plik do zera bajtów: taki plik następny przebieg czyta
+    jako „brak metryki", czyli cache nieużywalny.
+
+    Zwraca ``None``, gdy cache nie istnieje albo już nie da się z niego
+    wznowić, a napis z powodem, gdy NIE UDAŁO SIĘ ani jedno, ani drugie
+    (wołający ma wtedy realny problem, nie kosmetykę — i nie wolno mu
+    przemilczeć). Brak pliku to normalny stan, nie błąd.
+    """
+    try:
+        os.remove(sciezka)
+        return None
+    except FileNotFoundError:
+        return None
+    except OSError as exc_kasowanie:
+        try:
+            with open(sciezka, "w", encoding="utf-8"):
+                pass
+        except OSError as exc_obciecie:
+            return (f"remove: {type(exc_kasowanie).__name__}: {exc_kasowanie}; "
+                    f"truncate: {type(exc_obciecie).__name__}: {exc_obciecie}")
+        return None
+
+
 # =============================================================================
 # Pobranie kodu języka docelowego (drugie, tańsze zapytanie)
 # =============================================================================
@@ -615,7 +650,8 @@ def tlumacz_dlugi_tekst(
                            plik). Bez tego błąd sekcji 40/68 zostawiał
                            sekcje 1-39 bez cache'u i bez pliku, więc rerun
                            płacił za nie drugi raz. Wołający sprząta cache
-                           sam (:func:`sciezka_cache_tlumaczenia`) po
+                           sam (:func:`sciezka_cache_tlumaczenia` +
+                           :func:`uniewaznij_cache_tlumaczenia`) po
                            faktycznym zapisie pliku.
 
     Returns:
@@ -642,6 +678,7 @@ def tlumacz_dlugi_tekst(
     # blokami dałoby tekst z dziurami/duplikatami, więc odrzucamy go w
     # całości i tłumaczymy od zera.
     wczytane: dict[int, str] = {}
+    cache_uzywalny = False
     if os.path.exists(plik_temp):
         try:
             with open(plik_temp, "r", encoding="utf-8") as fh:
@@ -669,13 +706,21 @@ def tlumacz_dlugi_tekst(
                     detal="Wykryto plik zapisu – odtwarzanie opłaconego postępu…",
                 ))
             wczytane = {dane["id"]: dane["text"] for dane in wiersze[1:]}
-        else:
-            try:
-                os.remove(plik_temp)
-            except Exception:  # noqa: BLE001
-                pass
+            cache_uzywalny = True
 
-    if not os.path.exists(plik_temp):
+    if not cache_uzywalny:
+        # Metryka pisana ZAWSZE, gdy nie wznawiamy — i to NADPISANIEM w miejscu
+        # (tryb "w" obcina plik), a nie parą `os.remove` + „utwórz, jeśli brak".
+        # Dawna para miała cichy `except Exception: pass` na kasowaniu, a to na
+        # Windows pada przy dowolnym otwartym uchwycie (antywirus, edytor):
+        # plik zostawał ze STARĄ metryką, warunek „nie istnieje" był fałszywy,
+        # więc nowej metryki nikt nie zapisywał, a bloki dopisywały się pod
+        # starą. Cache stawał się trwale nieużywalny i user płacił za te bloki
+        # przy KAŻDYM wznowieniu, bez jednego słowa w logu. O ważności cache'u
+        # decyduje TREŚĆ pliku, nie jego brak — nadpisanie jest więc i pewniejsze,
+        # i krótsze. Porażka tego zapisu leci wyjątkiem do wołającego (GUI ma na
+        # to siatkę w `_ai_worker`, CLI dostaje traceback) — świadomie, bo bez
+        # zapisywalnego cache'u nie ma zabezpieczenia opłaconego postępu.
         with open(plik_temp, "w", encoding="utf-8") as fh:
             fh.write(
                 json.dumps({"meta": _WERSJA_CHUNKOWANIA, "bloki": len(bloki)})
@@ -764,6 +809,20 @@ def tlumacz_dlugi_tekst(
                 klucz_tytul="ai_ostrzezenie_iso_tytul",
             ))
 
+    def _ostrzezenie_cache(plik: str, powod: str) -> None:
+        """Rejestruje miękkie ostrzeżenie o niezabranym cache'u wznawiania."""
+        detal = (f"Could not invalidate the resume-cache ({plik}) — a later "
+                 f"translation of the same file name into the same language may "
+                 f"resume from it and return the PREVIOUS text. {powod}")
+        ostrzezenia.append(detal)
+        if on_blad_miekki:
+            on_blad_miekki(InfoBleduTlumaczenia(
+                klucz_i18n="ai_ostrzezenie_cache",
+                detal=detal,
+                kwargs={"plik": plik, "szczegoly": powod},
+                klucz_tytul="ai_ostrzezenie_cache_tytul",
+            ))
+
     try:
         iso_code_pobrany, surowa = _pobierz_iso(klient, jezyk_docelowy, model_iso)
         if iso_code_pobrany:
@@ -784,11 +843,17 @@ def tlumacz_dlugi_tekst(
     # -------- Posprzątanie cache'u i złożenie wyniku --------------------
     # `zachowaj_cache` = wołający zapisuje plik wynikowy dopiero po wielu
     # jednostkach i sam skasuje cache po udanym zapisie (patrz docstring).
-    if not zachowaj_cache and os.path.exists(plik_temp):
-        try:
-            os.remove(plik_temp)
-        except Exception:   # noqa: BLE001
-            pass
+    if not zachowaj_cache:
+        # Nie „best-effort i cisza": niezabrany cache jest MINĄ, nie śmieciem.
+        # Metryka zna wersję chunkowania i liczbę bloków, ale NIE treść źródła —
+        # więc kolejne tłumaczenie pliku o tej samej nazwie na ten sam język
+        # wznowiłoby się z niego i oddało POPRZEDNI przekład, gdyby edycja
+        # źródła nie zmieniła liczby bloków. `uniewaznij_cache_tlumaczenia` obcina plik,
+        # gdy kasowanie pada (typowy na Windows zajęty uchwyt), i wtedy nie ma
+        # o czym mówić; napis wraca tylko wtedy, gdy nie udało się NIC.
+        powod = uniewaznij_cache_tlumaczenia(plik_temp)
+        if powod:
+            _ostrzezenie_cache(plik_temp, powod)
 
     if on_postep:
         on_postep(InfoPostepu(

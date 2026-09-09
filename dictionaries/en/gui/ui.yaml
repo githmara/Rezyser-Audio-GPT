@@ -66,56 +66,56 @@ diag:
   brak_zastrzezen_tytul: "Rules Checked"
   powod:
     parse: |-
-       The file could not be read – its YAML syntax is invalid. The whole file
-       was skipped. The two numbers in the details point to the location of the
-       error: the line number and the character number within that line.
+      The file could not be read – its YAML syntax is invalid. The whole file
+      was skipped. The two numbers in the details point to the location of the
+      error: the line number and the character number within that line.
     ksztalt: |-
-       The file can be read, but there is no rule in it: instead of a set of
-       “name: value” fields it holds plain text, a list or nothing at all (the
-       details show what the engine found). The usual cause is deleting too many
-       lines, or indenting the whole content under a single dash. The whole file
-       was skipped.
+      The file can be read, but there is no rule in it: instead of a set of
+      “name: value” fields it holds plain text, a list or nothing at all (the
+      details show what the engine found). The usual cause is deleting too many
+      lines, or indenting the whole content under a single dash. The whole file
+      was skipped.
     brak_pol: |-
-       The file is missing the fields the engine needs to recognise a rule (they
-       are listed in the details). The file was skipped.
+      The file is missing the fields the engine needs to recognise a rule (they
+      are listed in the details). The file was skipped.
     kategoria: |-
-       The “kategoria” field holds a value the engine does not know – there is no
-       way to tell whether the file describes an AI mode or a post-production
-       tool. The file was skipped.
+      The “kategoria” field holds a value the engine does not know – there is no
+      way to tell whether the file describes an AI mode or a post-production
+      tool. The file was skipped.
     zakres: |-
-       The “zakres” field holds a value outside the allowed set, and that field
-       decides how the text is processed (chapter by chapter or all at once). The
-       tool was skipped so that it would not work differently than you intend.
+      The “zakres” field holds a value outside the allowed set, and that field
+      decides how the text is processed (chapter by chapter or all at once). The
+      tool was skipped so that it would not work differently than you intend.
     sufiks: |-
-       The “sufiks_pliku_wyniku” field contains characters that a file name
-       cannot hold, so the result would have nowhere to be saved. The tool was
-       skipped.
+      The “sufiks_pliku_wyniku” field contains characters that a file name
+      cannot hold, so the result would have nowhere to be saved. The tool was
+      skipped.
     pole: |-
-       One of the fields holds a value of the wrong kind – most often text where
-       the engine expects a number, or a list where a set of pairs belongs. The
-       file was skipped.
+      One of the fields holds a value of the wrong kind – most often text where
+      the engine expects a number, or a list where a set of pairs belongs. The
+      file was skipped.
     duplikat: |-
-       Another file in the same folder already uses this identifier. The engine
-       loaded that one (it is named in the details) and skipped this one – two
-       rules sharing a single identifier would be indistinguishable.
+      Another file in the same folder already uses this identifier. The engine
+      loaded that one (it is named in the details) and skipped this one – two
+      rules sharing a single identifier would be indistinguishable.
     rola: |-
-       The “rola” field holds an unknown value and was ignored. The file itself
-       works, but the tool will not receive the behaviour assigned to that role.
+      The “rola” field holds an unknown value and was ignored. The file itself
+      works, but the tool will not receive the behaviour assigned to that role.
     klucz: |-
-       The file is missing a key required by the engine (it is listed in the
-       details). That part of the recipe will not work until the key is back
-       in place.
+      The file is missing a key required by the engine (it is listed in the
+      details). That part of the recipe will not work until the key is back
+      in place.
     wpis: |-
-       One entry inside the file is incomplete (it is named in the details) and
-       was skipped. The remaining entries from that file work normally.
+      One entry inside the file is incomplete (it is named in the details) and
+      was skipped. The remaining entries from that file work normally.
     lingua: |-
-       The “lingua” field in the base file tells the application which name to use when
-       recognising this language in mixed text, and the value entered is not one of the
-       names the built-in detector knows. If the details offer a suggestion, enter it in
-       place of the current value. If there is no suggestion, the detector most likely
-       does not support this language – the pack still works normally, but it will not be
-       recognised from its content alone: pick it from the list in the Polyglot module and
-       turn on forcing a single language for the whole document.
+      The “lingua” field in the base file tells the application which name to use when
+      recognising this language in mixed text, and the value entered is not one of the
+      names the built-in detector knows. If the details offer a suggestion, enter it in
+      place of the current value. If there is no suggestion, the detector most likely
+      does not support this language – the pack still works normally, but it will not be
+      recognised from its content alone: pick it from the list in the Polyglot module and
+      turn on forcing a single language for the whole document.
 
 # -----------------------------------------------------------------------------
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
@@ -913,6 +913,8 @@ poliglota:
   chk_quality_name: Translation quality mode
   chk_quality_tooltip: The model is given a budget for internal text analysis before translating (extended thinking). This improves difficult passages at the cost of time and tokens. Applies only to Anthropic Claude — has no effect on OpenAI-compatible endpoints.
   err_odmowa: The model refused to carry out this command — its content may have violated the model's policies or been too ambiguous. Nothing was saved; rephrase the command and try again.
+  ai_ostrzezenie_cache_tytul: Resume Memory Warning
+  ai_ostrzezenie_cache: "The translation was completed and saved, but the temporary file (resume cache) could not be deleted:\n{plik}\n\nPlease delete this file manually. As long as it remains there, re-translating a file with the same name into the same language may resume from this cache and return the PREVIOUS translation instead of a new one.\n\nDetails: {szczegoly}"
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)

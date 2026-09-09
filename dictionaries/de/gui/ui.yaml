@@ -840,6 +840,8 @@ poliglota:
   chk_quality_name: Übersetzungsqualitätsmodus
   chk_quality_tooltip: Das Modell erhält ein Budget für die interne Textanalyse vor der Übersetzung (Extended Thinking). Dies verbessert schwierige Textstellen auf Kosten von Zeit und Tokens. Betrifft ausschließlich Anthropic Claude – bei OpenAI-kompatiblen Endpunkten hat dies keine Wirkung.
   err_odmowa: Das Modell hat die Ausführung dieses Befehls verweigert — sein Inhalt verstieß möglicherweise gegen die Richtlinien des Modells oder war zu mehrdeutig. Es wurde nichts gespeichert; formulieren Sie den Befehl anders und versuchen Sie es erneut.
+  ai_ostrzezenie_cache_tytul: Warnung zum Wiederaufnahme-Cache
+  ai_ostrzezenie_cache: "Die Übersetzung wurde abgeschlossen und gespeichert, aber die temporäre Datei (Wiederaufnahme-Cache) konnte nicht gelöscht werden:\n{plik}\n\nBitte löschen Sie diese Datei manuell. Solange sie vorhanden ist, kann eine erneute Übersetzung einer Datei mit demselben Namen in dieselbe Sprache aus diesem Cache fortgesetzt werden und die VORHERIGE Übersetzung anstelle der neuen liefern.\n\nDetails: {szczegoly}"
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)

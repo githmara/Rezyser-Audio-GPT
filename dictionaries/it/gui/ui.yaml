@@ -840,6 +840,8 @@ poliglota:
   chk_quality_name: Modalità qualità di traduzione
   chk_quality_tooltip: Il modello riceve un budget per l'analisi interna del testo prima della traduzione (extended thinking). Migliora i passaggi difficili a costo di tempo e token. Riguarda esclusivamente Anthropic Claude — non ha effetto sugli endpoint compatibili con OpenAI.
   err_odmowa: Il modello ha rifiutato di eseguire questo comando — il suo contenuto potrebbe violare le norme del modello o essere troppo ambiguo. Non è stato salvato nulla; riformula il comando e riprova.
+  ai_ostrzezenie_cache_tytul: Avviso memoria di ripristino
+  ai_ostrzezenie_cache: "La traduzione è stata completata e salvata, ma non è stato possibile eliminare il file temporaneo (cache di ripristino):\n{plik}\n\nElimina questo file manualmente. Finché rimane presente, una nuova traduzione dello stesso file nella stessa lingua potrebbe riprendere da questa cache e restituire la traduzione PRECEDENTE anziché quella nuova.\n\nDettagli: {szczegoly}"
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   # 18.8: segmento localizzato del nome del file di output (una parola, senza spazi)
