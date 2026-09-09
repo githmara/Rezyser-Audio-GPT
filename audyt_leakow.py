@@ -69,7 +69,7 @@ KOD_ZRODLOWY = "pl"
 # nowy folder, zero edycji tutaj. Spójne z `core_poliglota._zbuduj_mapowanie_lingua`
 # i `bot_i18n.mapa_iso_na_lingua` (lekka kopia: ten dev-tool celowo trzyma deps
 # wąsko — sam `yaml` + lazy `lingua`, bez ciągnięcia silnika z docx/num2words).
-# Mapowanie na enum robione lazy w `_zbuduj_detektor` (string → getattr).
+# Mapowanie na enum robione lazy w `detektor_dla` (string → getattr).
 # ---------------------------------------------------------------------------
 # Wspólne wczytanie YAML — cisza jest tu zakazana (v18.9, rozszerzone v18.26.1)
 # ---------------------------------------------------------------------------

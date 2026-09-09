@@ -650,6 +650,21 @@ def _czy_linia_markera(linia: str) -> bool:
     return bool(m) and m.group(1) == m.group(1).upper()
 
 
+# Ile pierwszych linii odpowiedzi wolno przeszukać za PRZETŁUMACZONYM markerem
+# końca prefiksu. Prefiks ma 9 linii; jego przekład bywa dłuższy (języki
+# rozwlekłe łamią linię inaczej), ale nie kilkukrotnie. Ograniczenie jest tu
+# istotne: bez niego linia w kształcie markera stojąca gdzieś w środku sekcji
+# (dziś w źródłach NIE MA ani jednej — zmierzone — ale podręczniki rosną)
+# kazałaby wyrzucić pół tłumaczenia jako „preambułę".
+_MAKS_LINII_PREAMBULY = 20
+
+# Literalne nazwy kodepointów markera. Prefiks WYMIENIA je z nazwy, a żadna
+# sekcja podręcznika nie ma powodu ich cytować (zmierzone: 0 wystąpień
+# w `dictionaries/pl/gui/dokumentacja/*.yaml`). Sygnał jest więc dokładny
+# i niezależny od języka, na jaki model przetłumaczył instrukcję.
+_SYGNATURY_PREAMBULY = ("U+27E6", "U+27E7")
+
+
 def utnij_prefix_z_wyniku(wynik: str) -> str:
     """Usuwa prefix-instrukcję z odpowiedzi LLM (jeśli nie usunął sam).
 
@@ -664,20 +679,129 @@ def utnij_prefix_z_wyniku(wynik: str) -> str:
     dopiero bramka odcisku struktury (`tlumacz_bramki`, reguła „tłumaczenie
     zaczyna się artefaktem"). Bramka zostaje jako siatka bezpieczeństwa, ale
     ubijanie opłaconej sekcji jest gorsze niż zdjęcie dwóch linii tutaj.
+
+    **Uogólnienie z v18.30.0 — ta sama klasa wróciła w innym kształcie.** Łata
+    z v18.16 zdejmowała tylko linie WIODĄCE, a model potrafi przetłumaczyć CAŁĄ
+    instrukcję jako prozę i postawić przekład markera na jej KOŃCU. Wtedy
+    `linie[0]` jest zwykłym zdaniem, pętla nie zdejmuje niczego i do szablonu
+    wchodzi dziewięć linii instrukcji. Zastane w WYDANEJ dokumentacji (v18.29.0):
+    `es`/`fi`/`fr` `dictionaries.yaml::poziom_1_dostroj` i `fi::poziom_2_duplikacja`
+    — podręcznik francuski otwierał się zdaniem „Le texte ci-dessous contient
+    des marqueurs…". Trzy bramki milczały: odcisk struktury bo tekst zaczyna się
+    prozą (a nie ``` ani `{`), stosunek długości bo górna granica wynosiła 2.20×
+    przy najgorszym przypadku 1.93×, bramka leaków bo instrukcja jest
+    PRZETŁUMACZONA, więc nie jest polszczyzną.
+
+    Dziś szukamy więc OSTATNIEJ linii w kształcie markera w pierwszych
+    :data:`_MAKS_LINII_PREAMBULY` liniach i ucinamy wszystko do niej włącznie.
+    Czego ta funkcja nie domknie (model przetłumaczył instrukcję, ale markera
+    nie odtworzył wcale), łapie :func:`wykryj_wyciek_preambuly`.
     """
     idx = wynik.find(MARKER_KONCA_PREFIXU)
     if idx != -1:
         return wynik[idx + len(MARKER_KONCA_PREFIXU):].lstrip()
 
     linie = wynik.lstrip("\n").split("\n")
-    zdjete = 0
-    while linie and zdjete < 2 and _czy_linia_markera(linie[0]):
-        linie.pop(0)
-        zdjete += 1
-    if zdjete:
+    ostatni_marker = -1
+    for i, linia in enumerate(linie[:_MAKS_LINII_PREAMBULY]):
+        if _czy_linia_markera(linia):
+            ostatni_marker = i
+    if ostatni_marker >= 0:
         print(f"⚠️  The model TRANSLATED the technical instruction block instead "
-              f"of removing it — stripped {zdjete} leading marker line(s).")
+              f"of removing it — stripped {ostatni_marker + 1} leading line(s) "
+              f"up to and including the translated end-of-instruction marker.")
+        linie = linie[ostatni_marker + 1:]
     return "\n".join(linie).lstrip()
+
+
+# Górna granica stosunku długości dla PROZY PODRĘCZNIKA — własna, ciaśniejsza
+# niż domyślne `(0.55, 2.20)` w `tlumacz_bramki.waliduj_odcisk` (tamten zakres
+# obsługuje krótkie, sztywne pola plików reguł u pięciu braci i NIE wolno go
+# ruszać dla samej elegancji).
+#
+# Liczba jest ZMIERZONA, nie dobrana na oko: 544 sekcje ≥200 znaków w ośmiu
+# paczkach × czterech szablonach dają medianę 1.08 i maksimum 1.29
+# (`de/manual::krok_5_detekcja_jezyka` — niemieckie złożenia). Cztery sekcje
+# z wyciekniętą preambułą, zastane w wydaniu v18.29.0, siedziały w przedziale
+# 1.54–1.93. Próg 1.40 rozdziela oba zbiory z zapasem po obu stronach: 0.11 nad
+# najdłuższą legalną sekcją i 0.14 pod najlżejszym wyciekiem. Dolnej granicy
+# NIE dublujemy — streszczenie/ucięcie zostaje ostrzeżeniem miękkim
+# `waliduj_odcisk`, bo języki zwięźlejsze od polskiego mają tam legalny ogon.
+#
+# Świadome ograniczenie: iloraz skaluje się odwrotnie do rozmiaru sekcji, więc
+# sam próg NIE jest kompletnym detektorem dosypanej treści — w sekcji
+# 3 800-znakowej te same 600 znaków to +16%. Dlatego stoi obok
+# `wykryj_wyciek_preambuly` (sygnał dokładny), a nie zamiast niej.
+PROG_ROZDMUCHANIA = 1.40
+
+
+def _doklejka_nacisku(zarzuty: list[str], znakow_zrodla: int) -> str:
+    """Blok nacisku doklejany do promptu systemowego przy POWTÓRCE.
+
+    Pisany pod DOWOLNY model, nie pod jednego dostawcę — builder docs jako
+    jedyny z rodziny honoruje `LLM_PROVIDER` (idzie przez `core_llm`, a nie przez
+    structured outputs `tlumacz_rdzen`), więc nacisk musi działać też na
+    endpointach `openai_compat`. Stąd: zarzuty LICZBOWE zamiast apeli o staranność
+    i jawny zakaz przepisywania bloku instrukcji, bo to on jest źródłem obu
+    klas wpadki.
+
+    Blok idzie na SAM KONIEC prompta (za `CORE_LITERALY`) — recency: przy
+    powtórce najważniejszą informacją jest to, co zostało odrzucone.
+    """
+    lista = "\n".join(f"  - {z}" for z in zarzuty)
+    return (
+        "\n\n# RETRY — YOUR PREVIOUS TRANSLATION OF THIS TEXT WAS REJECTED\n"
+        "A mechanical check rejected your previous answer for these MEASURED "
+        f"reasons:\n{lista}\n"
+        "Rules for this attempt, in order of importance:\n"
+        "1. Translate ONLY what the source contains. Do NOT add sections, "
+        "headings, examples, clarifications or instructions that are absent "
+        "from the source. Adding \"helpful\" related material is the single "
+        "most common cause of this rejection.\n"
+        "2. If the text you receive opens with a bracketed technical "
+        "instruction block, that block is NOT content and NOT data to "
+        "translate: leave it out of your answer entirely. Never reproduce it, "
+        "translated or verbatim, and never mention the marker codepoints.\n"
+        f"3. The source is {znakow_zrodla} characters long. Your answer must "
+        f"stay close to that; anything above {PROG_ROZDMUCHANIA:.2f}x it is "
+        "rejected again.\n"
+        "4. Everything else (markers, placeholders, headings, numbered list "
+        "structure) stays exactly as instructed above."
+    )
+
+
+def wykryj_wyciek_preambuly(src: str, tgt: str) -> list[str]:
+    """Resztki prefiks-instrukcji w tłumaczeniu → lista zarzutów (pusta = czysto).
+
+    Siatka bezpieczeństwa pod :func:`utnij_prefix_z_wyniku`: tam ucinamy to, co
+    da się rozpoznać po markerze, tutaj pytamy, czy cokolwiek z instrukcji
+    zostało. Oba sygnały są DOKŁADNE i niezależne od języka przekładu, bo
+    porównują z ŹRÓDŁEM — a źródło (`dictionaries/pl/gui/dokumentacja/*.yaml`)
+    nie ma dziś ani jednej linii w kształcie markera i ani jednej wzmianki
+    o kodepointach markera (zmierzone). Warunek „nieobecne w źródle" nie jest
+    więc dziś potrzebny, ale jest wpisany, bo podręczniki rosną i kiedyś ktoś
+    może legalnie opisać składnię markera.
+
+    Sygnał drugi (nazwy kodepointów) jest tu ważniejszy, niż wygląda: stosunek
+    długości skaluje się ODWROTNIE do rozmiaru sekcji, więc te same ~600 znaków
+    preambuły to +67% w sekcji 900-znakowej, ale tylko +16% w sekcji
+    3 800-znakowej (`fr/manual::krok_5_tryb_szyfrant`) — czyli pod każdym
+    rozsądnym progiem długości.
+    """
+    zarzuty: list[str] = []
+    for i, linia in enumerate(tgt.split("\n"), start=1):
+        if _czy_linia_markera(linia) and linia.strip() not in src:
+            zarzuty.append(
+                f"line {i} is a bracketed ALL-CAPS marker line absent from the "
+                f"source — a translated fragment of the technical instruction "
+                f"block: {linia.strip()[:80]!r}")
+    for sygnatura in _SYGNATURY_PREAMBULY:
+        if sygnatura in tgt and sygnatura not in src:
+            zarzuty.append(
+                f"the translation mentions the marker codepoint `{sygnatura}`, "
+                f"which the source never does — the model translated the "
+                f"technical instruction block into the content")
+    return zarzuty
 
 
 # ---------------------------------------------------------------------------
@@ -934,64 +1058,104 @@ def _tlumacz_pojedyncza_sekcje(
     def _on_blad_miekki(info: Any) -> None:
         print(f"⚠️  {kod}/{nazwa_pliku}{sufiks}: {str(info).splitlines()[0]}")
 
-    wynik = tlumacz_dlugi_tekst(
-        tresc=payload,
-        jezyk_docelowy=nazwa_pl,
-        klient=klient,
-        runtime_dir=str(RUNTIME_DIR),
-        oryginalna_nazwa=cache_key,
-        on_postep=_on_postep,
-        on_blad_krytyczny=_on_blad_krytyczny,
-        on_blad_miekki=_on_blad_miekki,
-        model_tlumacz=model,
-        prompt_dodatkowy=prompt_dodatkowy,
-        # 18.9: cache sekcji NIE ginie po jej sukcesie — plik wynikowy powstaje
-        # dopiero po WSZYSTKICH sekcjach, więc błąd sekcji 40/68 kasował dotąd
-        # 39 opłaconych cache'ów i rerun płacił za nie ponownie. Sprzątamy je
-        # w `tlumacz_szablon` dopiero po faktycznym zapisie pliku.
-        zachowaj_cache=True,
-        # Domyślne chunkowanie (~2 500 tok/blok): duża sekcja może rozpaść się
-        # na wiele bloków — bezpieczne, bo nie ma już META, której wielokrotny
-        # marker po podziale psułby sklejkę (dawny override 4 000 wymuszał
-        # „sekcja = jeden blok" wyłącznie pod META; zniesiony razem z META).
-    )
-    if wynik is None:
-        komunikat = blad_kryt["msg"] or "unknown error from the tlumacz_ai.py engine"
-        print(f"❌  {kod}/{nazwa_pliku}{sufiks}: translation aborted.\n    {komunikat.splitlines()[0]}")
-        return False, None
+    # JEDNA POWTÓRKA Z NACISKIEM (v18.30.0) dla dwóch klas, które da się zmierzyć
+    # i które model umie naprawić, gdy dostanie konkretny zarzut: rozdmuchana
+    # sekcja i wyciek prefiks-instrukcji. Wzorzec `previous_attempt_problems`
+    # z braci od Poligloty i akcentów (lekcja v18.18: ślepa powtórka bywa gorsza
+    # od pierwszej próby), przeniesiony na kanał, jaki ma builder docs —
+    # `prompt_dodatkowy`. Parzystość ⟦i⟧ i odcisk struktury zostają TWARDE bez
+    # powtórki, jak przed tym wydaniem.
+    zarzuty: list[str] = []
+    for proba in (1, 2):
+        prompt_proby = prompt_dodatkowy
+        if zarzuty:
+            prompt_proby += _doklejka_nacisku(zarzuty, len(tresc_tok))
+            # Cache pierwszej próby jest ODRZUCONY, więc musi zniknąć: przy
+            # `zachowaj_cache=True` wznowienie oddałoby po prostu tę samą,
+            # zakwestionowaną treść i powtórka byłaby no-opem.
+            try:
+                os.remove(sciezka_cache_tlumaczenia(
+                    str(RUNTIME_DIR), cache_key, nazwa_pl))
+            except OSError:
+                pass
+            print(f"🔁  {kod}/{nazwa_pliku}{sufiks}: powtórka z "
+                  f"{len(zarzuty)} zarzutami…")
 
-    tekst_wy = utnij_prefix_z_wyniku(wynik.tekst)
-    ok, problemy = sprawdz_parzystosc(tresc_tok, tekst_wy)
-    if not ok:
-        print(f"❌  {kod}/{nazwa_pliku}{sufiks}: BROKEN parity of ⟦i⟧ markers.")
-        for diag in problemy[:10]:
-            print(f"     {diag}")
-        if len(problemy) > 10:
-            print(f"     ... (+{len(problemy) - 10} more)")
-        return False, None
+        wynik = tlumacz_dlugi_tekst(
+            tresc=payload,
+            jezyk_docelowy=nazwa_pl,
+            klient=klient,
+            runtime_dir=str(RUNTIME_DIR),
+            oryginalna_nazwa=cache_key,
+            on_postep=_on_postep,
+            on_blad_krytyczny=_on_blad_krytyczny,
+            on_blad_miekki=_on_blad_miekki,
+            model_tlumacz=model,
+            prompt_dodatkowy=prompt_proby,
+            # 18.9: cache sekcji NIE ginie po jej sukcesie — plik wynikowy powstaje
+            # dopiero po WSZYSTKICH sekcjach, więc błąd sekcji 40/68 kasował dotąd
+            # 39 opłaconych cache'ów i rerun płacił za nie ponownie. Sprzątamy je
+            # w `tlumacz_szablon` dopiero po faktycznym zapisie pliku.
+            zachowaj_cache=True,
+            # Domyślne chunkowanie (~2 500 tok/blok): duża sekcja może rozpaść się
+            # na wiele bloków — bezpieczne, bo nie ma już META, której wielokrotny
+            # marker po podziale psułby sklejkę (dawny override 4 000 wymuszał
+            # „sekcja = jeden blok" wyłącznie pod META; zniesiony razem z META).
+        )
+        if wynik is None:
+            komunikat = blad_kryt["msg"] or "unknown error from the tlumacz_ai.py engine"
+            print(f"❌  {kod}/{nazwa_pliku}{sufiks}: translation aborted.\n    {komunikat.splitlines()[0]}")
+            return False, None
 
-    # Odcisk struktury (v18.16) — druga bramka tej samej klasy co parzystość, tylko
-    # na KSZTAŁCIE: szablony docs są Markdownem od v18.8, więc liczba nagłówków
-    # `#`/`##` i punktów numerowanych jest kontraktem (pilnuje jej też renderer).
-    # Model, który zamiast przetłumaczyć sekcję WYKONAŁ jej instrukcje albo ją
-    # streścił, gubi ten szkielet — a parzystość ⟦i⟧ tego nie widzi.
-    # TWARDE naruszenia ubijają sekcję; MIĘKKIE (pogrubienia, liczba linii,
-    # stosunek długości) tylko ostrzegają: w prozie manuala przełamanie akapitu
-    # i dłuższy niemiecki są legalne.
-    twarde, miekkie = tlumacz_bramki.waliduj_odcisk(tresc_tok, tekst_wy)
-    if twarde:
-        print(f"❌  {kod}/{nazwa_pliku}{sufiks}: BROKEN structural fingerprint "
-              f"(the model may have executed the text instead of translating it).")
-        for diag in twarde:
-            print(f"     {diag}")
-        return False, None
-    if miekkie:
-        print(f"⚠️  {kod}/{nazwa_pliku}{sufiks}: shape drift (review, not blocking):")
-        for diag in miekkie:
-            print(f"     {diag}")
+        tekst_wy = utnij_prefix_z_wyniku(wynik.tekst)
+        ok, problemy = sprawdz_parzystosc(tresc_tok, tekst_wy)
+        if not ok:
+            print(f"❌  {kod}/{nazwa_pliku}{sufiks}: BROKEN parity of ⟦i⟧ markers.")
+            for diag in problemy[:10]:
+                print(f"     {diag}")
+            if len(problemy) > 10:
+                print(f"     ... (+{len(problemy) - 10} more)")
+            return False, None
 
-    tekst_final = detokenizuj(tekst_wy, mapa)
-    return True, tekst_final
+        # Odcisk struktury (v18.16) — druga bramka tej samej klasy co parzystość, tylko
+        # na KSZTAŁCIE: szablony docs są Markdownem od v18.8, więc liczba nagłówków
+        # `#`/`##` i punktów numerowanych jest kontraktem (pilnuje jej też renderer).
+        # Model, który zamiast przetłumaczyć sekcję WYKONAŁ jej instrukcje albo ją
+        # streścił, gubi ten szkielet — a parzystość ⟦i⟧ tego nie widzi.
+        # TWARDE naruszenia ubijają sekcję; MIĘKKIE (pogrubienia, liczba linii)
+        # tylko ostrzegają: w prozie manuala przełamanie akapitu i dłuższy
+        # niemiecki są legalne.
+        twarde, miekkie = tlumacz_bramki.waliduj_odcisk(tresc_tok, tekst_wy)
+        if twarde:
+            print(f"❌  {kod}/{nazwa_pliku}{sufiks}: BROKEN structural fingerprint "
+                  f"(the model may have executed the text instead of translating it).")
+            for diag in twarde:
+                print(f"     {diag}")
+            return False, None
+        if miekkie:
+            print(f"⚠️  {kod}/{nazwa_pliku}{sufiks}: shape drift (review, not blocking):")
+            for diag in miekkie:
+                print(f"     {diag}")
+
+        zarzuty = wykryj_wyciek_preambuly(tresc_tok, tekst_wy)
+        iloraz = tlumacz_bramki.stosunek_dlugosci(tresc_tok, tekst_wy)
+        if iloraz > PROG_ROZDMUCHANIA:
+            zarzuty.append(
+                f"the translation is {iloraz:.2f}x the length of the source "
+                f"({len(tresc_tok)} -> {len(tekst_wy)} characters), above the "
+                f"{PROG_ROZDMUCHANIA:.2f}x limit — a section that long carries "
+                f"material the source does not have")
+        if not zarzuty:
+            return True, detokenizuj(tekst_wy, mapa)
+        etap = "attempt 1" if proba == 1 else "the retry"
+        print(f"{'⚠️ ' if proba == 1 else '❌'}  {kod}/{nazwa_pliku}{sufiks}: "
+              f"{len(zarzuty)} problem(s) after {etap}:")
+        for zarzut in zarzuty:
+            print(f"     {zarzut}")
+
+    print(f"❌  {kod}/{nazwa_pliku}{sufiks}: still rejected after the retry — "
+          f"NOT saving this section.")
+    return False, None
 
 
 def tlumacz_szablon(
@@ -1151,6 +1315,13 @@ def _zbierz_leaki_draftow(
     Detektor budujemy raz na język (ładowanie modeli lingua jest drogie) i
     reużywamy między plikami. Fail-open — błąd skanu (np. brak `lingua`) NIE
     wywraca buildu draftów; appendix to wygoda dla recenzenta, nie część krytyczna.
+
+    NAPRAWA v18.30.0: wołaliśmy tu `audyt_leakow._zbuduj_detektor`, a ta funkcja
+    nazywa się `detektor_dla` od v18.26.1. Fail-open zamieniał `AttributeError`
+    w jedno ostrzeżenie „audyt_leakow skipped", po którym checklista i tak
+    meldowała „0 kandydatów na leak" — czyli fałszywe zero dla KAŻDEGO draftu
+    od trzech wydań. Złapane smoke testem jednej sekcji `fi`, nie bramką: to
+    appendix, więc żadna bramka go nie pilnuje.
     """
     import audyt_leakow
     wynik: dict[tuple[str, str], dict] = {}
@@ -1159,7 +1330,7 @@ def _zbierz_leaki_draftow(
         try:
             detektor = detektory.get(kod)
             if detektor is None:
-                detektor = audyt_leakow._zbuduj_detektor(kod)
+                detektor = audyt_leakow.detektor_dla(kod)
                 detektory[kod] = detektor
             per_sekcja = audyt_leakow.leaki_per_sekcja(kod, nazwa_pliku, detektor)
         except Exception as exc:   # lingua brak / błąd modelu — nie wywracaj buildu

@@ -199,16 +199,6 @@ tresc:
     ## Comment commencer à s'amuser — trois niveaux de difficulté
     ----------------------------------------------------------
   poziom_1_dostroj: |
-    Le texte ci-dessous contient des marqueurs : un nombre placé entre doubles
-    crochets mathématiques (caractères U+27E6 et U+27E7). Ce sont des
-    espaces réservés (placeholders) programmatiques figés. Copiez-les dans la
-    réponse LITTÉRALEMENT, caractère pour caractère — ne modifiez pas les
-    chiffres, ne modifiez pas les crochets, ne les traduisez pas. Chaque
-    marqueur doit apparaître dans la réponse exactement le même nombre de
-    fois que dans l'original (un script parent vérifie la parité une fois
-    terminé). N'ajoutez AUCUN marqueur absent de l'original.
-    [FIN DE L'INSTRUCTION — LA TRADUCTION COMMENCE CI-DESSOUS]
-
     ## NIVEAU 1 — ajustement fin d'un accent existant
 
     Imaginez que l'accent français de l'application transforme « sz » en « sh », mais

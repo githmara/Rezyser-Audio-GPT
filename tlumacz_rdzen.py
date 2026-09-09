@@ -880,6 +880,12 @@ def zbierz_leaki(
     `[ODRZUCENIE_AI]` to celowo polskie literały zamrożone w każdej paczce —
     bez maskowania zalałyby raport fałszywymi trafieniami i recenzent przestałby
     go czytać. Fail-open: brak `lingua` nie wywraca buildu.
+
+    NAPRAWA v18.30.0: wołaliśmy `audyt_leakow._zbuduj_detektor`, a ta funkcja
+    nazywa się `detektor_dla` od v18.26.1 — fail-open zamieniał `AttributeError`
+    w jedno ostrzeżenie, po którym checklista meldowała „0 kandydatów na leak"
+    dla KAŻDEGO draftu wszystkich pięciu braci. Bliźniacza wpadka siedziała
+    w `buduj_wielojezyczne_docs._skanuj_leaki_draftow`.
     """
     import audyt_leakow
     wynik: dict[tuple[str, str], dict] = {}
@@ -889,7 +895,7 @@ def zbierz_leaki(
         try:
             detektor = detektory.get(kod)
             if detektor is None:
-                detektor = audyt_leakow._zbuduj_detektor(kod)
+                detektor = audyt_leakow.detektor_dla(kod)
                 detektory[kod] = detektor
             for j in jednostki:
                 tekst = j.cel

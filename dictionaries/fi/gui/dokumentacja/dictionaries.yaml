@@ -240,16 +240,6 @@ tresc:
     ## Kuinka aloittaa leikki — kolme vaikeustasoa
     -------------------------------------------
   poziom_1_dostroj: |
-    Seuraava teksti sisältää merkkejä: kaksinkertaisiin matemaattisiin
-    kulmasulkeisiin (merkit U+27E6 ja U+27E7) suljettu luku. Nämä ovat
-    jäädytettyjä ohjelmallisia paikkamerkkejä. Kopioi ne vastaukseen
-    KIRJAIMELLISESTI, merkki merkiltä — älä muuta numeroita, älä muuta
-    sulkeita, älä käännä. Jokaisen merkin on esiinnyttävä vastauksessa
-    täsmälleen yhtä monta kertaa kuin alkuperäisessä (ylätason skripti
-    tarkistaa parillisuuden lopuksi). ÄLÄ lisää mitään merkkejä, joita
-    alkuperäisessä ei ole.
-    [OHJEEN LOPPU — KÄÄNNÖS ALKAA ALLA]
-
     ## TASO 1 — olemassa olevan aksentin hieno säätö
 
     Kuvittele, että sovelluksen ranskalainen aksentti muuttaa "sz":n muotoon
@@ -270,15 +260,6 @@ tresc:
        Jos tiedostossa on syntaksivirhe, Hallinta näyttää välittömästi raportin
        virheen rivinumerolla.
   poziom_2_duplikacja: |
-    Seuraava teksti sisältää merkkejä: luku kaksinkertaisten matemaattisten
-    sulkeiden sisällä (merkit U+27E6 ja U+27E7). Nämä ovat jäädytettyjä
-    ohjelmallisia paikanpitäjiä. Kopioi ne vastaukseen KIRJAIMELLISESTI,
-    merkki merkiltä — älä muuta numeroita, älä muuta sulkeita, älä käännä.
-    Joka markkerin on esiinnyttävä vastauksessa täsmälleen yhtä monta
-    kertaa kuin alkuperäisessä (yliordinettu skripti tarkistaa parillisuuden
-    lopussa). ÄLÄ lisää mitään markkereita, joita alkuperäisessä ei ole.
-    [OHJEEN LOPPU — KÄÄNNÖS ALKAA ALLA]
-
     ## TASO 2 — uuden aksentin lisääminen kopioimalla
 
     Haluatko lisätä ruotsalaisen tai tanskalaisen aksentin? Aloita

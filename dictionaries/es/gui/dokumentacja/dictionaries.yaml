@@ -167,9 +167,6 @@ tresc:
     ## Cómo empezar a divertirse — tres niveles de dificultad
     ------------------------------------------------------
   poziom_1_dostroj: |
-    El siguiente texto contiene marcadores: un número encerrado entre dobles corchetes matemáticos (caracteres U+27E6 y U+27E7). Son marcadores de posición congelados del programa. Cópialos en la respuesta LITERALMENTE, carácter por carácter — no cambies los dígitos, no cambies los corchetes, no traduzcas. Cada marcador debe aparecer en la respuesta exactamente el mismo número de veces que en el original (un script superior verifica la paridad al finalizar). NO añadas ningún marcador que no esté en el original.
-    [FIN DE LA INSTRUCCIÓN — LA TRADUCCIÓN COMIENZA A CONTINUACIÓN]
-
     ## NIVEL 1 — ajuste fino de un acento existente
 
     Imagina que el acento francés de la aplicación convierte "sz" en "sh", pero

@@ -130,6 +130,27 @@ def _zaczyna_sie_artefaktem(tekst: str) -> bool:
     return tekst.lstrip().startswith(_PREFIKSY_ARTEFAKTU)
 
 
+def stosunek_dlugosci(src: str, tgt: str, *, prog: int = 200) -> float:
+    """Iloraz długości tłumaczenia do źródła. ``0.0`` = źródło krótsze niż `prog`.
+
+    Wydzielone z :func:`waliduj_odcisk` (v18.30.0), żeby iloraz liczyło JEDNO
+    miejsce, a POLITYKĘ ustalał każdy konsument osobno. Powód: bracia od plików
+    reguł mają materiał krótki i sztywny, więc szeroki zakres `(0.55, 2.20)`
+    jest tam ostrzeżeniem w sam raz; builder docs ma prozę podręcznika, gdzie
+    ten sam zakres NIGDY nie zadziałał (zmierzone na 544 sekcjach ≥200 znaków,
+    8 paczek × 4 szablony: mediana 1.08, maksimum 1.93) i gdzie górna granica
+    jest jedyną mechaniczną obroną przed dosypanym rozdziałem.
+
+    Args:
+        prog: poniżej tylu znaków ŹRÓDŁA ilorazu nie liczymy — krótkie napisy
+            mają naturalnie duży rozrzut i każdy próg dawałby na nich szum.
+    """
+    znaki_src = len(src)
+    if znaki_src < prog:
+        return 0.0
+    return len(tgt) / znaki_src
+
+
 def waliduj_odcisk(
     src: str,
     tgt: str,
@@ -195,8 +216,8 @@ def waliduj_odcisk(
             f"tłumaczenie: {o_wy['linie']} (tolerancja ±{tolerancja})"
         )
 
-    if o_we["znaki"] >= prog_dlugosci:
-        iloraz = o_wy["znaki"] / o_we["znaki"]
+    iloraz = stosunek_dlugosci(src, tgt, prog=prog_dlugosci)
+    if iloraz:
         dol, gora = zakres_dlugosci
         if not dol <= iloraz <= gora:
             miekkie.append(
