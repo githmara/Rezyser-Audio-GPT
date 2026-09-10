@@ -21,10 +21,14 @@ Architektura (decyzja 13.1 — Etap 5):
      przetłumaczenia", w przeciwieństwie do `{english_looking_key}`.
      Mapa `i → oryginał` przechowywana w pamięci na czas tłumaczenia.
 
-  3. PREFIX-INSTRUKCJA dla tłumacza (pas+szelki): kilka linii w nawiasach
-     kwadratowych przed treścią — przypomina modelowi, żeby markery
-     `⟦i⟧` kopiował 1:1. `_prompt_systemowy` w `tlumacz_ai.py` NIE jest
-     modyfikowany (reguła projektowa 13.1 Etap 5).
+  3. REGUŁA MARKERÓW WYŁĄCZNIE KANAŁEM SYSTEMOWYM (v18.32.0): payload to
+     sama stokenizowana treść, a przypomnienie „kopiuj `⟦i⟧` znak w znak
+     i zachowaj krotności" stoi w angielskim `_PROMPT_CORE_LITERALY`.
+     Do v18.31 była tu dodatkowo POLSKA prefiks-instrukcja wklejana na
+     początek user-promptu — i to ona była źródłem całej klasy wycieków
+     preambuły. `_prompt_systemowy` w `tlumacz_ai.py` nadal NIE jest
+     modyfikowany (reguła projektowa 13.1 Etap 5) — doklejamy się przez
+     `prompt_dodatkowy`.
 
   4. Tłumaczenie przez `tlumacz_dlugi_tekst` — reużywamy chunking, cache
      wznawiania (`runtime/temp_*.jsonl`), callbacki postępu. Z modułu
@@ -361,15 +365,14 @@ _PROMPT_CORE_KONTEKST = """\
 ## Project context (CRITICAL — read carefully)
 This documentation describes "Reżyser Audio GPT", a Polish desktop tool for writers
 and voice-over creators. The translation is for a {nazwa_natywna} user who already
-has the "dictionaries/{kod}/" package installed and complete in version 13.4.
+has the "dictionaries/{kod}/" package installed and complete.
 DO NOT write that {nazwa_natywna} support is "coming in a future version" — it is
 already shipped and the user is reading these docs in {nazwa_natywna} right now.
 
-The application supports MULTIPLE source languages (today: Polish and English; more
-in 13.4+). Each "dictionaries/<source>/" folder is a self-contained rule pack that
-operates on input text written in that source language. The application uses
-langdetect to pick the right pack automatically — you must NOT claim that the rules
-apply to Polish source only.\
+The application supports MULTIPLE source languages. Each "dictionaries/<source>/"
+folder is a self-contained rule pack that operates on input text written in that
+source language. The application picks the right pack automatically — you must NOT
+claim that the rules apply to Polish source only.\
 """
 
 _PROMPT_AKCENTY = """\
@@ -456,8 +459,10 @@ do NOT translate it into a {nazwa_natywna} phrase for "paste your key here"; the
 must see the exact string that exists in the file.
 
 ### Frozen markers ⟦i⟧
-Every ⟦N⟧ marker is a frozen placeholder. Copy character-for-character; do not
-translate, do not renumber, do not insert new ones.
+Every ⟦N⟧ marker is a frozen placeholder, not content. Copy character-for-character;
+do not translate, do not renumber, do not insert new ones. Each marker must occur in
+your answer exactly as many times as it occurs in the source text: a script checks
+this mechanically and discards the whole section when the counts differ.
 
 ### Markdown structure (since v18.8 the templates are Markdown rendered to HTML)
 Preserve the Markdown skeleton EXACTLY:
@@ -560,29 +565,38 @@ def _zbuduj_prompt_dodatkowy(
 
 
 # ---------------------------------------------------------------------------
-# Prefix-instrukcja dla LLM (dokleja się do samej treści, nie do systemu)
+# DLACZEGO PAYLOAD JEST CZYSTĄ TREŚCIĄ (v18.32.0 — koniec prefiks-instrukcji)
 # ---------------------------------------------------------------------------
-# `_prompt_systemowy` w tlumacz_ai.py NIE jest modyfikowany (reguła 13.1).
-# Ten prefix jest doklejany jako pierwszy fragment user-promptu. Po stronie
-# wyniku szukamy końcowego markera — jeżeli model go usunął (zgodnie
-# z instrukcją „Zwróć WYŁĄCZNIE przetłumaczony tekst"), bierzemy wynik
-# w całości. Jeżeli zostawił — utniemy prefix ręcznie.
-MARKER_KONCA_PREFIXU = "[KONIEC INSTRUKCJI — TŁUMACZENIE ZACZYNA SIĘ PONIŻEJ]"
-
-PREFIX_INSTRUKCJA = (
-    "[INSTRUKCJA TECHNICZNA — USUŃ TEN BLOK Z ODPOWIEDZI, NIE TŁUMACZ GO]\n"
-    # UWAGA (18.12): opis formatu CELOWO bez literalnych przykładów tokenów —
-    # claude-sonnet-5 „zachowywał" przykładowe markery z instrukcji, wstawiając
-    # je do tłumaczenia (walidacja parzystości ubijała sekcję).
-    "Poniższy tekst zawiera markery: liczba ujęta w podwójne nawiasy\n"
-    "matematyczne (znaki U+27E6 i U+27E7). To są zamrożone placeholdery\n"
-    "programowe. Skopiuj je do odpowiedzi DOSŁOWNIE, znak w znak — nie\n"
-    "zmieniaj cyfr, nie zmieniaj nawiasów, nie tłumacz. Każdy marker musi\n"
-    "wystąpić w odpowiedzi dokładnie tyle samo razy, co w oryginale (skrypt\n"
-    "nadrzędny weryfikuje parzystość po zakończeniu). NIE dodawaj żadnych\n"
-    "markerów, których nie ma w oryginale.\n"
-    f"{MARKER_KONCA_PREFIXU}\n\n"
-)
+# Do v18.31 na początek user-promptu wklejała się `PREFIX_INSTRUKCJA`: dziewięć
+# linii POLSKIEJ prozy w nawiasach kwadratowych, zaczynających się od „USUŃ TEN
+# BLOK Z ODPOWIEDZI, NIE TŁUMACZ GO", plus polski marker końca. Miały być
+# „szelkami" nad regułą markerów z prompta systemowego. Były źródłem osobnej
+# klasy defektów, bo stały w SPRZECZNOŚCI z bazowym promptem tłumacza
+# (`tlumacz_ai._PROMPT_SYSTEMOWY_TEMPLATE`: „Translate the **entire** provided
+# text"): w payloadzie stał polski blok twierdzący, że payloadem nie jest,
+# a jedyną cechą, po której model mógł to rozstrzygnąć, był JĘZYK — ten sam co
+# języka treści do przekładu. Rozstrzygał więc losowo, per sekcja, i gdy uznał,
+# że instrukcja nie jest do niego, tłumaczył ją jako tekst dla użytkownika.
+# Ślady w WYDANEJ dokumentacji: `es/dictionaries::co_to_tryb_rezysera` (v18.16),
+# potem `es`/`fi`/`fr` `dictionaries::poziom_1_dostroj` i `fi::poziom_2_duplikacja`
+# (zastane w v18.29.0). Łatanie skutków po stronie wyniku (ucinanie preambuły)
+# szło przez dwa wydania i za każdym razem model znajdował nowy kształt.
+#
+# Dwa dalsze argumenty, niezależne od języka:
+#   * prefiks jechał w TREŚCI, więc po chunkowaniu trafiał tylko do PIERWSZEGO
+#     bloku — sekcja podzielona na trzy bloki dostawała przypomnienie o markerach
+#     raz na trzy wywołania. `prompt_dodatkowy` idzie do każdego bloku;
+#   * reguła o markerach i tak już żyła po angielsku w `_PROMPT_CORE_LITERALY`,
+#     więc prefiks był jej polskim duplikatem.
+#
+# Dziś: payload = sama stokenizowana treść, cała instrukcja siedzi w kanale
+# systemowym po angielsku (parzystość dopisana do „### Frozen markers"). Reguła
+# 13.1 Etap 5 nienaruszona — `_prompt_systemowy` w `tlumacz_ai.py` zostaje bez
+# zmian, doklejamy się przez `prompt_dodatkowy`. Detektory wycieku preambuły
+# (:func:`wykryj_wyciek_preambuly`, próg :data:`PROG_ROZDMUCHANIA`, powtórka
+# z naciskiem) ZOSTAJĄ jako siatka bezpieczeństwa: model potrafi wkleić własną
+# preambułę albo przepisać instrukcję systemową także wtedy, gdy w treści nie
+# ma ani jednej linii instrukcji.
 
 
 # ---------------------------------------------------------------------------
@@ -639,8 +653,9 @@ def sprawdz_parzystosc(
 
 
 # Kształt linii markera w DOWOLNYM języku: cała linia jest jednym nawiasem
-# kwadratowym z tekstem wersalikowym. Nasz prefix to dokładnie dwie takie linie
-# (otwarcie + zamknięcie). Próg 15 znaków trzyma z daleka krótkie tagi-kotwice
+# kwadratowym z tekstem wersalikowym — tak wyglądała otwierająca i zamykająca
+# linia zniesionej prefiks-instrukcji, i tak wygląda każda preambuła, którą model
+# lubi dokleić z siebie. Próg 15 znaków trzyma z daleka krótkie tagi-kotwice
 # (`[CEL SCENY]`, `[ODRZUCENIE_AI]`), gdyby kiedyś stanęły w osobnej linii.
 _RE_LINIA_MARKERA = re.compile(r"^\s*\[([^\]\n]{15,})\]\s*$")
 
@@ -650,68 +665,14 @@ def _czy_linia_markera(linia: str) -> bool:
     return bool(m) and m.group(1) == m.group(1).upper()
 
 
-# Ile pierwszych linii odpowiedzi wolno przeszukać za PRZETŁUMACZONYM markerem
-# końca prefiksu. Prefiks ma 9 linii; jego przekład bywa dłuższy (języki
-# rozwlekłe łamią linię inaczej), ale nie kilkukrotnie. Ograniczenie jest tu
-# istotne: bez niego linia w kształcie markera stojąca gdzieś w środku sekcji
-# (dziś w źródłach NIE MA ani jednej — zmierzone — ale podręczniki rosną)
-# kazałaby wyrzucić pół tłumaczenia jako „preambułę".
-_MAKS_LINII_PREAMBULY = 20
-
-# Literalne nazwy kodepointów markera. Prefiks WYMIENIA je z nazwy, a żadna
-# sekcja podręcznika nie ma powodu ich cytować (zmierzone: 0 wystąpień
-# w `dictionaries/pl/gui/dokumentacja/*.yaml`). Sygnał jest więc dokładny
-# i niezależny od języka, na jaki model przetłumaczył instrukcję.
+# Literalne nazwy kodepointów markera. Od v18.32.0 NIE MA ich już w żadnym
+# prompcie (prefiks zniesiony, angielski blok „### Frozen markers" opisuje marker
+# bez kodepointów), więc sygnał zmienił rolę: był detektorem przepisanej
+# instrukcji, jest tripwire'em na model, który zaczyna teoretyzować o formacie
+# zamiast tłumaczyć. Zostaje, bo koszt jest zerowy, a warunek „nieobecne
+# w źródle" trzyma go dokładnym (zmierzone: 0 wystąpień w
+# `dictionaries/pl/gui/dokumentacja/*.yaml`).
 _SYGNATURY_PREAMBULY = ("U+27E6", "U+27E7")
-
-
-def utnij_prefix_z_wyniku(wynik: str) -> str:
-    """Usuwa prefix-instrukcję z odpowiedzi LLM (jeśli nie usunął sam).
-
-    Ścieżka podstawowa: szukamy polskiego :data:`MARKER_KONCA_PREFIXU`.
-
-    Ścieżka awaryjna (v18.16): marker jest polską PROZĄ, więc model potrafi go
-    PRZETŁUMACZYĆ — wtedy `find` zwraca -1, dawna wersja uznawała to za „model
-    posłuchał i usunął blok" i wpuszczała całą instrukcję do szablonu. Tak
-    powstał osad w `es/dictionaries::co_to_tryb_rezysera`: dwie linie
-    „[INSTRUCCIÓN TÉCNICA…]" / „[FIN DE LA INSTRUCCIÓN…]" pojechały do wydanej
-    dokumentacji i renderowały się w `docs/dictionaries.es.html`. Znalazła to
-    dopiero bramka odcisku struktury (`tlumacz_bramki`, reguła „tłumaczenie
-    zaczyna się artefaktem"). Bramka zostaje jako siatka bezpieczeństwa, ale
-    ubijanie opłaconej sekcji jest gorsze niż zdjęcie dwóch linii tutaj.
-
-    **Uogólnienie z v18.30.0 — ta sama klasa wróciła w innym kształcie.** Łata
-    z v18.16 zdejmowała tylko linie WIODĄCE, a model potrafi przetłumaczyć CAŁĄ
-    instrukcję jako prozę i postawić przekład markera na jej KOŃCU. Wtedy
-    `linie[0]` jest zwykłym zdaniem, pętla nie zdejmuje niczego i do szablonu
-    wchodzi dziewięć linii instrukcji. Zastane w WYDANEJ dokumentacji (v18.29.0):
-    `es`/`fi`/`fr` `dictionaries.yaml::poziom_1_dostroj` i `fi::poziom_2_duplikacja`
-    — podręcznik francuski otwierał się zdaniem „Le texte ci-dessous contient
-    des marqueurs…". Trzy bramki milczały: odcisk struktury bo tekst zaczyna się
-    prozą (a nie ``` ani `{`), stosunek długości bo górna granica wynosiła 2.20×
-    przy najgorszym przypadku 1.93×, bramka leaków bo instrukcja jest
-    PRZETŁUMACZONA, więc nie jest polszczyzną.
-
-    Dziś szukamy więc OSTATNIEJ linii w kształcie markera w pierwszych
-    :data:`_MAKS_LINII_PREAMBULY` liniach i ucinamy wszystko do niej włącznie.
-    Czego ta funkcja nie domknie (model przetłumaczył instrukcję, ale markera
-    nie odtworzył wcale), łapie :func:`wykryj_wyciek_preambuly`.
-    """
-    idx = wynik.find(MARKER_KONCA_PREFIXU)
-    if idx != -1:
-        return wynik[idx + len(MARKER_KONCA_PREFIXU):].lstrip()
-
-    linie = wynik.lstrip("\n").split("\n")
-    ostatni_marker = -1
-    for i, linia in enumerate(linie[:_MAKS_LINII_PREAMBULY]):
-        if _czy_linia_markera(linia):
-            ostatni_marker = i
-    if ostatni_marker >= 0:
-        print(f"⚠️  The model TRANSLATED the technical instruction block instead "
-              f"of removing it — stripped {ostatni_marker + 1} leading line(s) "
-              f"up to and including the translated end-of-instruction marker.")
-        linie = linie[ostatni_marker + 1:]
-    return "\n".join(linie).lstrip()
 
 
 # Górna granica stosunku długości dla PROZY PODRĘCZNIKA — własna, ciaśniejsza
@@ -741,9 +702,12 @@ def _doklejka_nacisku(zarzuty: list[str], znakow_zrodla: int) -> str:
     Pisany pod DOWOLNY model, nie pod jednego dostawcę — builder docs jako
     jedyny z rodziny honoruje `LLM_PROVIDER` (idzie przez `core_llm`, a nie przez
     structured outputs `tlumacz_rdzen`), więc nacisk musi działać też na
-    endpointach `openai_compat`. Stąd: zarzuty LICZBOWE zamiast apeli o staranność
-    i jawny zakaz przepisywania bloku instrukcji, bo to on jest źródłem obu
-    klas wpadki.
+    endpointach `openai_compat`. Stąd zarzuty LICZBOWE zamiast apeli o staranność.
+
+    Punkt 2 mówił do v18.31 „blok instrukcji, który dostajesz w tekście, nie jest
+    treścią" — czyli prompt systemowy tłumaczył modelowi, że payload kłamie.
+    Od v18.32.0 payload żadnego bloku nie zawiera, więc nacisk dotyczy tego, co
+    faktycznie zostało odrzucone: preambuły dopisanej przez model od siebie.
 
     Blok idzie na SAM KONIEC prompta (za `CORE_LITERALY`) — recency: przy
     powtórce najważniejszą informacją jest to, co zostało odrzucone.
@@ -758,10 +722,11 @@ def _doklejka_nacisku(zarzuty: list[str], znakow_zrodla: int) -> str:
         "headings, examples, clarifications or instructions that are absent "
         "from the source. Adding \"helpful\" related material is the single "
         "most common cause of this rejection.\n"
-        "2. If the text you receive opens with a bracketed technical "
-        "instruction block, that block is NOT content and NOT data to "
-        "translate: leave it out of your answer entirely. Never reproduce it, "
-        "translated or verbatim, and never mention the marker codepoints.\n"
+        "2. Return the translation and NOTHING else. Do not open your answer "
+        "with a preamble, a bracketed ALL-CAPS marker line, a note about what "
+        "you are about to do, or any remark about the marker format: the first "
+        "line of your answer must already be the translation of the first line "
+        "of the source.\n"
         f"3. The source is {znakow_zrodla} characters long. Your answer must "
         f"stay close to that; anything above {PROG_ROZDMUCHANIA:.2f}x it is "
         "rejected again.\n"
@@ -771,20 +736,24 @@ def _doklejka_nacisku(zarzuty: list[str], znakow_zrodla: int) -> str:
 
 
 def wykryj_wyciek_preambuly(src: str, tgt: str) -> list[str]:
-    """Resztki prefiks-instrukcji w tłumaczeniu → lista zarzutów (pusta = czysto).
+    """Preambuła zamiast przekładu → lista zarzutów (pusta = czysto).
 
-    Siatka bezpieczeństwa pod :func:`utnij_prefix_z_wyniku`: tam ucinamy to, co
-    da się rozpoznać po markerze, tutaj pytamy, czy cokolwiek z instrukcji
-    zostało. Oba sygnały są DOKŁADNE i niezależne od języka przekładu, bo
-    porównują z ŹRÓDŁEM — a źródło (`dictionaries/pl/gui/dokumentacja/*.yaml`)
-    nie ma dziś ani jednej linii w kształcie markera i ani jednej wzmianki
-    o kodepointach markera (zmierzone). Warunek „nieobecne w źródle" nie jest
-    więc dziś potrzebny, ale jest wpisany, bo podręczniki rosną i kiedyś ktoś
-    może legalnie opisać składnię markera.
+    Historycznie: siatka bezpieczeństwa pod prefiks-instrukcją, której model nie
+    usunął. Od v18.32.0 prefiksu nie ma (patrz komentarz sekcji „DLACZEGO PAYLOAD
+    JEST CZYSTĄ TREŚCIĄ"), więc detektor stoi tu jako obrona przed preambułą,
+    którą model dokleja Z SIEBIE — albo przed przepisaniem instrukcji SYSTEMOWEJ,
+    czyli klasą, której zniesienie prefiksu nie dotyka wcale.
 
-    Sygnał drugi (nazwy kodepointów) jest tu ważniejszy, niż wygląda: stosunek
-    długości skaluje się ODWROTNIE do rozmiaru sekcji, więc te same ~600 znaków
-    preambuły to +67% w sekcji 900-znakowej, ale tylko +16% w sekcji
+    Oba sygnały są DOKŁADNE i niezależne od języka przekładu, bo porównują
+    z ŹRÓDŁEM — a źródło (`dictionaries/pl/gui/dokumentacja/*.yaml`) nie ma dziś
+    ani jednej linii w kształcie markera i ani jednej wzmianki o kodepointach
+    markera (zmierzone). Warunek „nieobecne w źródle" nie jest więc dziś
+    potrzebny, ale jest wpisany, bo podręczniki rosną i kiedyś ktoś może legalnie
+    opisać składnię markera.
+
+    Sygnał pierwszy (linia w kształcie markera) jest tu ważniejszy, niż wygląda:
+    stosunek długości skaluje się ODWROTNIE do rozmiaru sekcji, więc te same
+    ~600 znaków preambuły to +67% w sekcji 900-znakowej, ale tylko +16% w sekcji
     3 800-znakowej (`fr/manual::krok_5_tryb_szyfrant`) — czyli pod każdym
     rozsądnym progiem długości.
     """
@@ -793,14 +762,14 @@ def wykryj_wyciek_preambuly(src: str, tgt: str) -> list[str]:
         if _czy_linia_markera(linia) and linia.strip() not in src:
             zarzuty.append(
                 f"line {i} is a bracketed ALL-CAPS marker line absent from the "
-                f"source — a translated fragment of the technical instruction "
-                f"block: {linia.strip()[:80]!r}")
+                f"source — a preamble or an instruction block, not a translation "
+                f"of the source: {linia.strip()[:80]!r}")
     for sygnatura in _SYGNATURY_PREAMBULY:
         if sygnatura in tgt and sygnatura not in src:
             zarzuty.append(
                 f"the translation mentions the marker codepoint `{sygnatura}`, "
-                f"which the source never does — the model translated the "
-                f"technical instruction block into the content")
+                f"which the source never does — the model wrote about the marker "
+                f"format instead of translating the text")
     return zarzuty
 
 
@@ -1037,11 +1006,15 @@ def _tlumacz_pojedyncza_sekcje(
         print(f"    {marker} Sanity check: {sum(oryginalne.values())} wystąpień ph, mapa {liczba_ph}.")
         return True, None
 
-    # Sekcja bez placeholderów → BEZ prefix-instrukcji o markerach. Empiryczne
-    # (18.12, claude-sonnet-5): przy zerze tokenów w źródle model potrafił
-    # „zachować" przykładowe ⟦0⟧/⟦12⟧/⟦47⟧ z samej instrukcji, wstawiając je
-    # do tłumaczenia — walidacja parzystości ubijała sekcję deterministycznie.
-    payload = (PREFIX_INSTRUKCJA + tresc_tok) if liczba_ph else tresc_tok
+    # Payload = SAMA stokenizowana treść (v18.32.0). Do v18.31 sekcja z choćby
+    # jednym placeholderem dostawała tu polską prefiks-instrukcję, a sekcja bez
+    # placeholderów była z niej wyłączona — bo (18.12, claude-sonnet-5) przy
+    # zerze tokenów w źródle model „zachowywał" przykładowe markery z samej
+    # instrukcji i walidacja parzystości ubijała sekcję deterministycznie. Ta
+    # ostrożność została przeniesiona do kanału systemowego: angielski blok
+    # „### Frozen markers" opisuje marker BEZ literalnego przykładu z cyfrą,
+    # więc nie ma czego skopiować niezależnie od liczby placeholderów.
+    payload = tresc_tok
     blad_kryt: dict[str, Any] = {"msg": None, "partial": None}
     cache_key = _cache_key_sekcji(rdzen, klucz_sekcji, kod)
     def _on_postep(info: Any) -> None:
@@ -1060,7 +1033,7 @@ def _tlumacz_pojedyncza_sekcje(
 
     # JEDNA POWTÓRKA Z NACISKIEM (v18.30.0) dla dwóch klas, które da się zmierzyć
     # i które model umie naprawić, gdy dostanie konkretny zarzut: rozdmuchana
-    # sekcja i wyciek prefiks-instrukcji. Wzorzec `previous_attempt_problems`
+    # sekcja i preambuła zamiast przekładu. Wzorzec `previous_attempt_problems`
     # z braci od Poligloty i akcentów (lekcja v18.18: ślepa powtórka bywa gorsza
     # od pierwszej próby), przeniesiony na kanał, jaki ma builder docs —
     # `prompt_dodatkowy`. Parzystość ⟦i⟧ i odcisk struktury zostają TWARDE bez
@@ -1121,7 +1094,15 @@ def _tlumacz_pojedyncza_sekcje(
             print(f"❌  {kod}/{nazwa_pliku}{sufiks}: translation aborted.\n    {komunikat.splitlines()[0]}")
             return False, None
 
-        tekst_wy = utnij_prefix_z_wyniku(wynik.tekst)
+        # Wynik idzie do bramek TAKI, JAKI PRZYSZEDŁ (v18.32.0). Do v18.31 stało
+        # tu ucinanie preambuły — łata na własny payload, zniesiona razem
+        # z prefiks-instrukcją. Preambułę doklejoną z siebie model ma dziś
+        # ODRZUCONĄ (`wykryj_wyciek_preambuly` → powtórka z naciskiem), a nie po
+        # cichu przyciętą: nie mamy prawa zgadywać, gdzie kończy się jego
+        # wstawka, a zaczyna przekład.
+        # `lstrip()` jak w zniesionej funkcji: model bywa hojny w pustych liniach
+        # na wejściu bloku, a wcięcie block-scalara liczy się od pierwszej linii.
+        tekst_wy = wynik.tekst.lstrip()
         ok, problemy = sprawdz_parzystosc(tresc_tok, tekst_wy)
         if not ok:
             print(f"❌  {kod}/{nazwa_pliku}{sufiks}: BROKEN parity of ⟦i⟧ markers.")

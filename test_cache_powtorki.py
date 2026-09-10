@@ -55,8 +55,8 @@ NAGLOWEK_NACISKU = "RETRY — YOUR PREVIOUS TRANSLATION"
 DICT_DIR = Path(__file__).parent / "dictionaries"
 
 # Zrodlo MUSI miec >= 200 znakow (`tlumacz_bramki.stosunek_dlugosci` ponizej
-# progu nie liczy ilorazu) i co najmniej jeden placeholder - wtedy sekcja idzie
-# z prefiks-instrukcja, dokladnie jak w realnym przebiegu.
+# progu nie liczy ilorazu). Placeholdery zostaja, bo przez nie idzie tokenizacja
+# i detokenizacja sekcji - a nie, jak do 18.31, bo wlaczaly prefiks-instrukcje.
 TRESC_PL = (
     "Projekt {nazwa_projektu} liczy {liczba_znakow} znakow.\n"
     "To zdanie zrodla istnieje, zeby sekcja miala ponad dwiescie znakow, bo\n"
@@ -106,18 +106,22 @@ def _sciezka_cache() -> str:
 
 def _blok_zrodla() -> str:
     """Jedyny blok, na jaki dzieli sie sekcja testowa (sanity: naprawde jeden)."""
-    tresc_tok, _mapa = bd.tokenizuj(TRESC_PL)
     bloki = tlumacz_ai._podziel_na_bloki(
-        bd.PREFIX_INSTRUKCJA + tresc_tok, max_tokenow=2_500,
-        model=tlumacz_ai._MODEL_TOKENIZER)
+        _payload_sekcji(), max_tokenow=2_500, model=tlumacz_ai._MODEL_TOKENIZER)
     assert len(bloki) == 1, f"oczekiwano jednego bloku, jest {len(bloki)}"
     return bloki[0]
 
 
 def _payload_sekcji() -> str:
-    """Tresc, jaka builder REALNIE podaje silnikowi (prefiks + stokenizowana)."""
+    """Tresc, jaka builder REALNIE podaje silnikowi.
+
+    Od 18.32 to SAMA stokenizowana tresc: polska prefiks-instrukcja zostala
+    zniesiona, a regula markerow zyje w angielskim prompcie systemowym. Helper
+    musi to odwzorowywac dokladnie, bo z payloadu liczy sie odcisk zrodla
+    w metryce cache'u (kontrakt 4).
+    """
     tresc_tok, _mapa = bd.tokenizuj(TRESC_PL)
-    return bd.PREFIX_INSTRUKCJA + tresc_tok
+    return tresc_tok
 
 
 def _odcisk_sekcji() -> str:
@@ -306,8 +310,8 @@ def test_niezgodna_metryka_nadpisuje_naglowek_w_miejscu():
                 model_tlumacz="stub", zachowaj_cache=True)
         assert wynik is not None, "tlumaczenie nie moze padnac"
         wiersze = _wiersze_cache(sciezka)
-        # Tu silnik wolany jest BEZPOSREDNIO, wiec zrodlem jest samo `TRESC_PL`
-        # (bez prefiks-instrukcji, ktora doklada builder) — odcisk musi to znac.
+        # Tu silnik wolany jest BEZPOSREDNIO, na surowym `TRESC_PL` - bez
+        # tokenizacji, ktora robi builder. Odcisk musi to znac.
         assert wiersze[0] == {"meta": tlumacz_ai._WERSJA_CHUNKOWANIA,
                               "bloki": 1,
                               "zrodlo": tlumacz_ai._odcisk_zrodla(TRESC_PL)},             wiersze[0]
