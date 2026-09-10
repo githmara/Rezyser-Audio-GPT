@@ -444,6 +444,27 @@ _KLUCZE_NAGLOWKOW = (
 )
 
 
+# Usterki paczki ŹRÓDŁOWEJ już zaraportowane w tym przebiegu (v18.32.0). Diagnoza
+# `pl` nie zmienia się per język, więc wypisana N razy przestaje być diagnozą,
+# a staje się szumem, w którym tonie werdykt — patrz `sprawdz_zrodla_pl`. Zbiór
+# jest stanem MODUŁU, nie procesu: dev-tool żyje jedno wywołanie CLI, a testy
+# czyszczą go przez :func:`zapomnij_ostrzezenia_o_zrodle`.
+_OSTRZEZENIA_O_ZRODLE: set[str] = set()
+
+
+def zapomnij_ostrzezenia_o_zrodle() -> None:
+    """Czyści pamięć ostrzeżeń o paczce źródłowej (dla testów i powtórnych przebiegów)."""
+    _OSTRZEZENIA_O_ZRODLE.clear()
+
+
+def _ostrzez_raz_o_zrodle(komunikat: str) -> None:
+    """Wypisuje ostrzeżenie o paczce ŹRÓDŁOWEJ najwyżej raz na przebieg."""
+    if komunikat in _OSTRZEZENIA_O_ZRODLE:
+        return
+    _OSTRZEZENIA_O_ZRODLE.add(komunikat)
+    print(f"⚠️  {komunikat}")
+
+
 def naglowki_struktury(kod: str) -> dict[str, str]:
     """Zwraca `{klucz_naglowka: napis}` z `dictionaries/<kod>/gui/ui.yaml`.
 
@@ -475,17 +496,31 @@ def wyprowadz_regex(regex_pl: str, kod: str) -> tuple[str, list[str]]:
 
     Zwraca (regex, lista_uwag). Uwaga na liście = coś degradowało (brak
     nagłówków w paczce, nieudana kompilacja) i regex PL został bez zmian.
+
+    Uwaga o braku nagłówków jest ROZDZIELONA na dwie połowy (v18.32.0), bo mają
+    różny zasięg: brak w paczce DOCELOWEJ jest per język i wraca na liście
+    wołającego, a brak w paczce ŹRÓDŁOWEJ jest jedną usterką `pl/gui/ui.yaml`
+    i powtarzał się raz na każdy język (dziś mnożnik 8 — pole
+    `regex_podzial_rozdzialow` deklaruje 1 z 7 przepisów; przy kolejnym takim
+    polu rósłby dalej). Połowa źródłowa idzie więc przez
+    :func:`_ostrzez_raz_o_zrodle`, czyli dokładnie raz na przebieg.
     """
     uwagi: list[str] = []
     if not regex_pl.strip():
         return regex_pl, uwagi
     zrodlowe = naglowki_struktury(KOD_ZRODLOWY)
     docelowe = naglowki_struktury(kod)
+    if not zrodlowe:
+        _ostrzez_raz_o_zrodle(
+            f"{KOD_ZRODLOWY}/{FOLDER_GUI}/{NAZWA_UI} has no `rezyser.naglowek_*` "
+            f"entries, so no chapter-split regex can be carried over to any "
+            f"language — every target keeps the Polish regex")
     if not zrodlowe or not docelowe:
+        # Nota per para (log tego pliku nie ma prawa milczeć o degradacji), ale
+        # BEZ powtarzania diagnozy paczki źródłowej — ta poszła raz, wyżej.
         uwagi.append(
-            f"brak nagłówków struktury w ui.yaml ({KOD_ZRODLOWY}: "
-            f"{len(zrodlowe)}, {kod}: {len(docelowe)}) — regex zostaje jak w PL"
-        )
+            f"regex zostaje jak w PL — nagłówki struktury w ui.yaml: "
+            f"{KOD_ZRODLOWY} {len(zrodlowe)}, {kod} {len(docelowe)}")
         return regex_pl, uwagi
 
     wynik = regex_pl
@@ -905,6 +940,13 @@ def _sprawdz_naglowki_struktury(
     """
     zrodlowe = naglowki_struktury(KOD_ZRODLOWY)
     docelowe = naglowki_struktury(kod)
+    if not zrodlowe:
+        # Bramka, która nic nie sprawdza, ma to POWIEDZIEĆ (standard „zero
+        # ciszy", v18.32.0) — ale raz na przebieg, nie raz na (język, plik).
+        _ostrzez_raz_o_zrodle(
+            f"{KOD_ZRODLOWY}/{FOLDER_GUI}/{NAZWA_UI} has no `rezyser.naglowek_*` "
+            f"entries, so the structure-header quote gate has nothing to compare "
+            f"against and is INACTIVE for every language")
     if not zrodlowe or not docelowe:
         return []
     bledy: list[str] = []
@@ -1440,6 +1482,59 @@ def _filtruj_przepisy(wszystkie: list[str], wybor_csv: str) -> list[str]:
     return [n for n in wszystkie if n in wybrane]
 
 
+def sprawdz_zrodla_pl(przepisy: list[str]) -> None:
+    """Pre-flight: każdy przepis PL musi dać się przeczytać ORAZ wczytać silnikiem.
+
+    Kontrola ISTNIAŁA już wcześniej, ale stała w :func:`waliduj_silnikiem`, czyli
+    w funkcji wołanej PER (język, plik) — a jej przedmiot (paczka `pl`) per język
+    się nie zmienia. Zepsute źródło dawało więc `języki × przepisy` kopii tego
+    samego zdania: zmierzone `--tylko-walidacja --wszystkie` na JEDNYM przepisie
+    z wyzerowaną `etykieta` = 8 identycznych par linii i werdykt „8 error(s) in
+    total", sugerujący osiem zepsutych paczek DOCELOWYCH. Przy pełnym przebiegu
+    (8 × 7) byłoby 56 kopii.
+
+    W ścieżce tłumaczącej ta sama wada kosztowała pieniądze: `waliduj_silnikiem`
+    jest tam wołany PO ZAPISIE, więc płaciliśmy za przekład wszystkich języków,
+    każdy wracał rollbackiem, a jedyny komunikat o prawdziwej przyczynie
+    powtarzał się N razy. Pre-flight jest tańszy od jednego wywołania API.
+
+    Zebrane są WSZYSTKIE zepsute przepisy, nie tylko pierwszy — jeden przebieg
+    ma powiedzieć maintainerowi całą prawdę o paczce źródłowej. Kanał i brzmienie
+    komunikatu jak w `dev_yaml` (standard „zero ciszy"): nie pracujemy dalej na
+    danych, których nie sparsowaliśmy.
+
+    Gałąź `p_pl is None` w :func:`waliduj_silnikiem` zostaje jako obrona w głąb —
+    ta funkcja jest wołana z `main()`, a tamta bywa wołana z testów.
+    """
+    import przepisy_rezysera as pr
+
+    pr.DICTIONARIES_DIR = str(DICT_DIR)
+    pr.wyczysc_cache()
+    zepsute: list[str] = []
+    for nazwa in przepisy:
+        plik = DICT_DIR / KOD_ZRODLOWY / FOLDER_REZYSER / nazwa
+        # Parser round-tripowy, ten sam, którym czyta źródło ścieżka tłumacząca —
+        # inaczej pre-flight orzekałby o innym drzewie niż realna praca.
+        dane = dev_yaml.wczytaj_lub_padnij(
+            plik, narzedzie=NARZEDZIE, parser=_yaml_io().load)
+        id_ = str(dane.get("id", ""))
+        kategoria = str(dane.get("kategoria", ""))
+        if pr.zaladuj_przepis(id_, KOD_ZRODLOWY, kategoria) is None:
+            zepsute.append(
+                f"{KOD_ZRODLOWY}/{FOLDER_REZYSER}/{nazwa}: the engine does not "
+                f"load it as a recipe (id={id_!r}, kategoria={kategoria!r}) — "
+                f"see the [przepisy_rezysera] line above for the reason")
+    if zepsute:
+        lista = "\n  - ".join(zepsute)
+        raise SystemExit(
+            f"❌ {NARZEDZIE}: the SOURCE pack is broken, so no target language "
+            f"can be translated or validated against it:\n  - {lista}\n"
+            f"   Fix dictionaries/{KOD_ZRODLOWY}/{FOLDER_REZYSER}/ first — "
+            f"continuing would repeat this same diagnosis once per target "
+            f"language and, in the translation path, only after paying for the "
+            f"API calls.")
+
+
 def _parsuj_argumenty() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
@@ -1566,13 +1661,20 @@ def main() -> int:
               f"| ⚠️ file missing: {braki}")
         return 0
 
+    # Pre-flight źródła PL — RAZ, przed pętlą języków (patrz `sprawdz_zrodla_pl`).
+    # Poza `--finalizuj`, który paczki źródłowej nie tyka wcale: zdejmuje baner
+    # draftu z plików DOCELOWYCH i ma prawo działać przy zepsutym `pl`.
+    sprawdz_zrodla_pl(przepisy)
+
     if args.tylko_walidacja:
-        yaml_io = _yaml_io()
         wszystkie_bledy = 0
         for nazwa in przepisy:
             zrodlo = DICT_DIR / KOD_ZRODLOWY / FOLDER_REZYSER / nazwa
-            with open(zrodlo, "r", encoding="utf-8") as fh:
-                drzewo_pl = yaml_io.load(fh)
+            # `dev_yaml`, nie gołe `open()` + `load()`: niepoprawny YAML w źródle
+            # dawał tu surowy traceback zamiast zdania o tym, którego pliku nie
+            # przeczytaliśmy (standard „zero ciszy", v18.32.0).
+            drzewo_pl = dev_yaml.wczytaj_lub_padnij(
+                zrodlo, narzedzie=NARZEDZIE, parser=_yaml_io().load)
             dane_pl = {str(k): drzewo_pl[k] for k in drzewo_pl.keys()}
             jednostki = zbierz_jednostki_pol(drzewo_pl, f"{KOD_ZRODLOWY}/{nazwa}")
             odn = wczytaj_orakuly(
