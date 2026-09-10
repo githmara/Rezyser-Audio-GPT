@@ -1398,7 +1398,8 @@ def zbierz_leaki_py(root: Path = ROOT) -> dict[str, list[str]]:
 #   * teksty argparse: `help=`, `description=`, `epilog=`, `metavar=`,
 #   * literały z `❌` albo `⚠️` (legenda emoji: error / warning),
 #   * banery `==========` (nagłówki bloków werdyktu),
-#   * literały docierające do `raise` — kategoria `fatal`, od v18.26.
+#   * literały docierające do komunikatu, który KOŃCZY narzędzie — kategoria
+#     `fatal`: `raise` od v18.26, wywołanie kończące (`parser.error`) od v18.32.0.
 #
 # KATEGORIA `fatal` i dlaczego akurat taka (v18.26). Bramka przepuściła własny
 # plik: `_skanuj_lingua_z_podstaw` zbierał POLSKIE powody („podstawy.yaml
@@ -1441,6 +1442,12 @@ _KWARGI_CLI = {"help", "description", "epilog", "metavar"}
 # nie dobrany „na oko" — uzasadnienie w komentarzu sekcji wyżej.
 _MIN_LITER_FATAL = 8
 
+# Nazwy wywołań, które KOŃCZĄ narzędzie razem z wypisaniem powodu — trzecia droga
+# do kategorii `fatal` (v18.32.0, patrz :func:`_literaly_fatalne`). Dziś w drzewie
+# obsadzone przez `parser.error(...)` argparse'a; `exit` stoi obok, bo `parser.exit`
+# i gołe `exit(...)` kończą proces tym samym gestem.
+_WYWOLANIA_KONCZACE = frozenset({"error", "exit"})
+
 # Dev-toole POZA kontraktem — narzędzia, których kontrybutor nie uruchomi.
 # `odpowiedz_lokalnie.py` wymaga zalogowanego `gh` CLI maintainera i domyka
 # issue jego głosem; dla kogokolwiek innego jest martwe, więc jego polskie
@@ -1471,7 +1478,8 @@ _RE_MASKA_IDENTYFIKATOROW = re.compile(
 def _literaly_fatalne(drzewo: ast.Module) -> set[int]:
     """`id()` literałów, których treść trafia do komunikatu przerywającego pracę.
 
-    Dwie drogi (druga jest tą, którą wpuściliśmy własny defekt):
+    Trzy drogi (druga jest tą, którą wpuściliśmy własny defekt, trzecia — siedem
+    kolejnych):
       1. WPROST — literał w wyrażeniu `raise ...` (dowolnie zagnieżdżony, więc
          łapie też `raise SystemExit("a" + "b")` i f-stringi). Skanowane w całym
          drzewie, bo `raise` bywa i na poziomie modułu.
@@ -1482,6 +1490,22 @@ def _literaly_fatalne(drzewo: ast.Module) -> set[int]:
          — `problemy` to w tej rodzinie najczęstsza nazwa listy diagnostyk, więc
          zasięg pliku zrównałby ze sobą nośnik komunikatu fatalnego i zwykły
          rejestr znalezisk, który nigdzie nie jest rzucany.
+      3. PRZEZ WYWOŁANIE KOŃCZĄCE (v18.32.0) — `parser.error("powód")`. Kryterium
+         obu poprzednich dróg jest SKŁADNIOWE (`raise`), a argparse kończy proces
+         WYWOŁANIEM: `error()` wypisuje usage plus komunikat na stderr i robi
+         `exit(2)`. Dla bramki to ten sam gatunek zdania — narzędzie mówi
+         kontrybutorowi, dlaczego padło — a przez dwa wydania było niewidoczne,
+         bo literał nie stoi ani w `raise`, ani w nośniku rzucanej listy.
+         Zmierzone przed naprawą (23 dev-toole w zasięgu kontraktu, AST):
+         13 literałów >10 znaków, z tego 7 POLSKICH w trzech braciach
+         (`buduj_wielojezyczne_opowiesci` ×3, `_poliglota` ×2, `_tryby` ×2 —
+         trzy różne zdania, dwa powtórzone), a pozostałe 6 (`docs`, `ui`) już
+         po angielsku.
+         Kryterium jest świadomie SZEROKIE (dowolny odbiorca, plus gołe
+         `exit(...)`), bo zawężenie do `parser.`/`sys.` dało w pomiarze
+         DOKŁADNIE te same 13 trafień: w drzewie nie ma dziś loggera `.error()`
+         ani `sys.exit("napis")`, więc szerokie łapie też przyszłe `p.error(...)`
+         za zero fałszywych alarmów.
     """
     fatalne: set[int] = set()
     for wezel in ast.walk(drzewo):
@@ -1511,6 +1535,19 @@ def _literaly_fatalne(drzewo: ast.Module) -> set[int]:
                     for w in ast.walk(arg):
                         if isinstance(w, (ast.Constant, ast.JoinedStr)):
                             fatalne.add(id(w))
+
+    for wezel in ast.walk(drzewo):
+        if not isinstance(wezel, ast.Call):
+            continue
+        funkcja = wezel.func
+        nazwa = (funkcja.attr if isinstance(funkcja, ast.Attribute)
+                 else funkcja.id if isinstance(funkcja, ast.Name) else "")
+        if nazwa not in _WYWOLANIA_KONCZACE:
+            continue
+        for arg in wezel.args:
+            for w in ast.walk(arg):
+                if isinstance(w, (ast.Constant, ast.JoinedStr)):
+                    fatalne.add(id(w))
     return fatalne
 
 

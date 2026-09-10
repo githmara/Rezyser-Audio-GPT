@@ -2197,10 +2197,11 @@ def _parsuj_argumenty() -> argparse.Namespace:
     args = parser.parse_args()
     tryby_lokalne = sum(bool(x) for x in (args.finalizuj, args.tylko_walidacja))
     if tryby_lokalne and (args.skip_existing or args.dry_run):
-        parser.error("--finalizuj / --tylko-walidacja to operacje lokalne (zero API) "
-                     "— nie łącz ich z --skip-existing/--dry-run.")
+        parser.error("--finalizuj / --tylko-walidacja are purely local operations "
+                     "(zero API) — do not combine them with "
+                     "--skip-existing/--dry-run.")
     if tryby_lokalne > 1:
-        parser.error("--finalizuj i --tylko-walidacja wykluczają się wzajemnie.")
+        parser.error("--finalizuj and --tylko-walidacja are mutually exclusive.")
     return args
 
 
