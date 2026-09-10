@@ -1,9 +1,39 @@
-wxpython
-anthropic
-elevenlabs
+# GRANICE WERSJI — wąsko i tylko tam, gdzie zmierzone (od 18.32).
+#
+# Do 18.31 ten manifest nie miał ANI JEDNEJ granicy, a pomiar 2026-09-10 pokazał,
+# że to nie jest problem teoretyczny: 10 z 15 pakietów było w rozjeździe wobec
+# PyPI, w tym DWIE zmiany majora (`anthropic` 0.109.2 → 1.5.0, `openai`
+# 2.31.0 → 3.12.0). Skutek ponosi kontrybutor, nie my: `pip install -r
+# requirements.txt` dawał mu inne majory niż te, na których pracujemy, więc jego
+# pierwsze uruchomienie mogło paść na przemianowanym API — z naszej winy.
+#
+# Górne granice stoją WYŁĄCZNIE na pakietach, których powierzchnię wołamy wprost
+# i które mają historię przemianowań. Granice na wszystkich piętnastu byłyby
+# zgadywane; te pięć są uzasadnione per pakiet niżej. Reszta zostaje bez granic
+# świadomie — o nowszych wydaniach melduje `audyt_zaleznosci.py`, a decyzja
+# (upgrade plus smoke test kontra granica) należy do maintainera.
+#
+# ODRUCH: `python audyt_zaleznosci.py` przed KAŻDYM zamrożeniem aplikacji, także
+# przy zmianach dev-tools-only — zmiana tego pliku wyklucza skróconą procedurę
+# wydawniczą (`PREFIKSY_NIE_DEV` w `sync_dev_release.py`), więc upgrade
+# biblioteki potrafi podnieść planowane skrócone wydanie do pełnego.
+
+# GUI całej aplikacji. 4.3 to nowa linia minorowa fundamentu — podmiana wymaga
+# przejścia po panelach z czytnikiem ekranu, nie samego builda.
+wxpython<4.3
+# Silnik AI całego runtime'u (`core_llm`). 1.x to nowy major SDK; nasze wołania
+# (structured outputs, `stop_reason`, `max_tokens`) idą po API 0.x.
+anthropic<1
+# Most do Studio: wołamy `client.studio.projects.create/delete`
+# i `client.user.subscription.get` — dokładnie tę powierzchnię ten SDK
+# przemianowuje między wydaniami.
+elevenlabs<3
 python-dotenv
 python-docx
-lingua-language-detector
+# `jezyki_lingua.KANON` jest LUSTREM enuma `lingua.Language`, a `audyt_podstaw`
+# porównuje je 1:1. Nowy MINOR potrafi dodać język, więc granicą jest tu linia
+# minorowa, nie majorowa: upgrade jest zmianą kanonu, nie tylko biblioteki.
+lingua-language-detector<2.2
 beautifulsoup4
 num2words
 pyyaml
@@ -11,6 +41,11 @@ ruamel.yaml
 jsonschema
 tiktoken
 pyinstaller
+# packaging — porównanie wersji wg PEP 440 w `audyt_zaleznosci.py` (dev-only,
+# runtime tego nie importuje). Wjeżdżało dotąd tranzytywnie (pyinstaller,
+# setuptools); deklarujemy je, bo NARZĘDZIE Z REPO go używa, a bramka bez
+# `packaging` degraduje się do „nie porównano".
+packaging
 # markdown — render szablonów docs (Markdown → HTML) w generuj_dokumentacje.py
 # (dev/build-time; runtime .exe go nie importuje, więc nie trafia do bundla).
 markdown
@@ -31,4 +66,6 @@ markdown
 # Nie jest to defekt — funkcja wyboru dostawcy tego SDK wymaga; kłamał tylko opis.
 # Domyślny end-user nadal potrzebuje JEDNEGO klucza (`ANTHROPIC_API_KEY`).
 # Patrz CLAUDE.md pkt 7.
-openai
+# Drugi dostawca runtime'u (`LLM_PROVIDER=openai_compat`) — ta sama klasa co
+# `anthropic`: 3.x to nowy major SDK, a nasze wołania idą po API 2.x.
+openai<3

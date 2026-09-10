@@ -16,8 +16,10 @@ Moduł jest w pełni niezależny od wxPython — testuj go bez GUI.
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import re
+import sys
 import tempfile
 import urllib.request
 from dataclasses import dataclass
@@ -50,6 +52,30 @@ _SCIEZKA_VERSION = sciezki.KATALOG_ZASOBOW / "VERSION"
 
 # Wzorzec nazwy pliku instalatora w assets (GitHub Release)
 _WZORZEC_INSTALATORA = re.compile(r"rezyser_audio.*installer.*\.exe", re.IGNORECASE)
+
+# --- DEV PATCH (skrócona procedura wydawnicza) ------------------------------
+# Skrócona procedura dopisuje dev-tooling do JUŻ OPUBLIKOWANEGO wydania:
+# przesuwa tag na nowy HEAD, BEZ bumpa `VERSION`. Dla end-usera to zdarzenie
+# niewidzialne i takie ma zostać (`.exe` bajt w bajt ten sam, dev-tooling nie
+# istnieje w bundlu). Ale dla kogoś, kto pracuje ZE ŹRÓDŁA, tag jest jedynym
+# kanałem dostawy — a `sprawdz_aktualizacje` porównuje wyłącznie NUMERY, więc po
+# przesunięciu tagu odpowiada „brak aktualizacji" i o dostawie nikt się nie
+# dowiaduje. Najgorzej ma kontrybutor bez gita, który wziął z Release archiwum
+# „Source code": nie ma czym zrobić `git fetch`, a apka mu nic nie powie.
+#
+# Licznik w `patch_dev.json` (tracked, NIEPAKOWANY do bundla) zamyka tę dziurę:
+# `{"wersja": "<VERSION>", "patch_dev": <N>}`, gdzie N rośnie o 1 przy każdej
+# skróconej procedurze i wraca do zera przy nowym wydaniu. Stan zdalny czytamy
+# z `raw.githubusercontent.com` **przy TAGU własnej wersji**, nie przy `main`:
+# tag jest tym, co przesuwa skrócona procedura i z czego generuje się archiwum
+# źródła, a `main` ogłaszałby jako dostępny WIP, którego nikt nie wydał. `raw`
+# zamiast API, bo nie zjada budżetu 60 zapytań/h (jedno już idzie na
+# `releases/latest`).
+NAZWA_PLIKU_PATCH_DEV = "patch_dev.json"
+# NIE `KATALOG_ZASOBOW` (tam mieszka spakowany VERSION): ten plik świadomie nie
+# wchodzi do bundla, więc szukamy go tylko tam, gdzie ma sens — w drzewie repo.
+_SCIEZKA_PATCH_DEV = sciezki.KATALOG_BAZOWY / NAZWA_PLIKU_PATCH_DEV
+_URL_RAW = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}"
 
 # Timeout HTTP (sekundy) — nie blokuj UI dłużej niż konieczne
 _TIMEOUT = 10
@@ -141,8 +167,6 @@ def _pobierz_json_api(url: str, token: Optional[str] = None) -> dict:
         token: Opcjonalny GitHub Personal Access Token (Bearer).
                Potrzebny tylko dla prywatnych repozytoriów.
     """
-    import json
-
     naglowki = {
         "Accept": "application/vnd.github+json",
         "User-Agent": f"RezyserAudio/{_odczytaj_wersje_lokalna()} (+github.com/{GITHUB_USER}/{GITHUB_REPO})",
@@ -349,3 +373,158 @@ def pobierz_instalator(
         raise
 
     return sciezka_docelowa
+
+
+# ---------------------------------------------------------------------------
+# DEV PATCH — czy tag mojej wersji dowiózł nowszy dev-tooling (tylko ZE ŹRÓDŁA)
+# ---------------------------------------------------------------------------
+@dataclass
+class PatchDevInfo:
+    """Nowszy dev patch dla TEJ SAMEJ wersji aplikacji."""
+    wersja: str          # wersja, której dotyczy licznik (== VERSION)
+    lokalny: int         # licznik w drzewie roboczym
+    zdalny: int          # licznik przy tagu na origin
+    url_tagu: str        # strona wydania (skąd wziąć archiwum „Source code")
+
+
+def _powiedz(komunikat: str) -> None:
+    """Jedna linia na stderr — jedyny kanał tego sprawdzenia.
+
+    Komunikaty są po ANGIELSKU i idą na stderr, nie do dialogu wx, bo:
+    adresatem jest kontrybutor pracujący z konsoli (end-user tego kroku nigdy
+    nie wykona — patrz warunek `sys.frozen`), rzecz dotyczy narzędzi, których
+    w oglądanej aplikacji NIE MA, a dialog wymagałby kluczy i18n w dziewięciu
+    paczkach dla zdania spoza produktu.
+    """
+    sys.stderr.write(f"{komunikat}\n")
+
+
+def _wczytaj_licznik_lokalny(wersja_apki: str) -> Optional[int]:
+    """Licznik z `patch_dev.json` w drzewie repo (``None`` = nie wiemy, głośno).
+
+    Cisza jest tu ZAKAZANA (standard `dev_yaml` przeniesiony na runtime-owy
+    odpowiednik): plik nieobecny, niepoprawny albo opisujący INNĄ wersję niż
+    `VERSION` to defekt drzewa roboczego, a nie stan normalny — sprawdzenie
+    odpada, ale mówi o tym wprost.
+    """
+    if not _SCIEZKA_PATCH_DEV.is_file():
+        _powiedz(f"⚠️  {NAZWA_PLIKU_PATCH_DEV} is missing from the repo root "
+                 f"({_SCIEZKA_PATCH_DEV}) — skipping the dev-patch check, so a "
+                 f"newer dev tooling for {wersja_apki} would go unnoticed.")
+        return None
+    try:
+        dane = json.loads(_SCIEZKA_PATCH_DEV.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError) as exc:
+        _powiedz(f"⚠️  {NAZWA_PLIKU_PATCH_DEV} is unreadable ({exc}) — skipping "
+                 f"the dev-patch check.")
+        return None
+    if not isinstance(dane, dict):
+        _powiedz(f"⚠️  {NAZWA_PLIKU_PATCH_DEV} parses as "
+                 f"{type(dane).__name__}, not an object — skipping the "
+                 f"dev-patch check.")
+        return None
+    wersja_pliku = str(dane.get("wersja", ""))
+    licznik = dane.get("patch_dev")
+    if not isinstance(licznik, int) or isinstance(licznik, bool) or licznik < 0:
+        _powiedz(f"⚠️  {NAZWA_PLIKU_PATCH_DEV}: `patch_dev` is {licznik!r}, "
+                 f"expected a non-negative integer — skipping the dev-patch check.")
+        return None
+    # Porównanie po ZNORMALIZOWANEJ krotce, nie po napisie: `VERSION` bywa
+    # oznaczony sufiksem (`18.32.0-WIP`), a licznik należy do numeru, nie do
+    # etapu pracy. Bez tego cykl WIP produkowałby ostrzeżenie przy każdym starcie.
+    try:
+        rozne = _normalizuj_wersje(wersja_pliku) != _normalizuj_wersje(wersja_apki)
+    except ValueError:
+        rozne = wersja_pliku != wersja_apki
+    if rozne:
+        # Najczęstsza przyczyna: VERSION podbity, licznik nie wyzerowany. To ta
+        # sama niespójność, którą łapie bramka wydawnicza — tu tylko mówimy.
+        _powiedz(f"⚠️  {NAZWA_PLIKU_PATCH_DEV} describes version "
+                 f"{wersja_pliku!r}, but VERSION says {wersja_apki!r} — the "
+                 f"counter was not reset with the bump; skipping the check.")
+        return None
+    return licznik
+
+
+def _pobierz_licznik_zdalny(wersja_apki: str) -> Optional[int]:
+    """Licznik z pliku PRZY TAGU `v<wersja>` na origin (``None`` = nie wiemy)."""
+    url = f"{_URL_RAW}/v{wersja_apki}/{NAZWA_PLIKU_PATCH_DEV}"
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": f"RezyserAudio/{wersja_apki}"})
+        with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
+            dane = json.loads(resp.read(4096).decode("utf-8"))
+        licznik = dane.get("patch_dev")
+        if not isinstance(licznik, int) or isinstance(licznik, bool):
+            _powiedz(f"⚠️  the released {NAZWA_PLIKU_PATCH_DEV} at tag "
+                     f"v{wersja_apki} has `patch_dev` = {licznik!r} — cannot "
+                     f"compare dev patches.")
+            return None
+        return licznik
+    except HTTPError as exc:
+        if exc.code == 404:
+            _powiedz(f"ℹ️  tag v{wersja_apki} carries no "
+                     f"{NAZWA_PLIKU_PATCH_DEV} — that release predates the "
+                     f"dev-patch counter, nothing to compare.")
+        else:
+            _powiedz(f"⚠️  could not read {NAZWA_PLIKU_PATCH_DEV} at tag "
+                     f"v{wersja_apki} (HTTP {exc.code}) — dev-patch check skipped.")
+        return None
+    except Exception as exc:  # noqa: BLE001 — sieć, DNS, JSON: jeden kanał, jedna linia
+        _powiedz(f"⚠️  dev-patch check skipped ({type(exc).__name__}: {exc}).")
+        return None
+
+
+def sprawdz_patch_dev() -> Optional[PatchDevInfo]:
+    """Czy tag MOJEJ wersji dowiózł nowszy dev-tooling. Zwraca info albo ``None``.
+
+    Pytanie jest świadomie węższe niż w :func:`sprawdz_aktualizacje`: nie „czy
+    jest nowsza wersja" (to tamta funkcja i tamten dialog), tylko „czy dla
+    wersji, którą mam, wyszedł nowszy dev patch". Dlatego czytamy plik przy
+    tagu `v<VERSION>` i porównujemy dwie liczby.
+
+    **Nie odpala się w aplikacji ZAMROŻONEJ** (`sys.frozen`): `patch_dev.json`
+    nie wchodzi do bundla, a end-user nie ma z dev-toolingu nic — bez tego
+    warunku każdy uruchomiony instalator wypisywałby skargę o brakującym pliku.
+
+    Wynik (i każdą anomalię) meldujemy na stderr wewnątrz tej funkcji, w jednym
+    miejscu i jednym kanałem — patrz :func:`_powiedz`. Zwracana wartość jest dla
+    testów i ewentualnych przyszłych konsumentów; wołający z GUI może ją
+    zignorować.
+    """
+    if getattr(sys, "frozen", False):
+        return None
+    try:
+        wersja = _odczytaj_wersje_lokalna()
+    except Exception as exc:  # noqa: BLE001 — brak/pusty VERSION: i tak tylko meldujemy
+        _powiedz(f"⚠️  dev-patch check skipped (cannot read VERSION: {exc}).")
+        return None
+
+    lokalny = _wczytaj_licznik_lokalny(wersja)
+    if lokalny is None:
+        return None
+
+    # Wersja z sufiksem (`18.32.0-WIP`) nie ma jeszcze tagu na origin, więc nie
+    # ma z czym porównywać — to legalny stan drzewa maintainera, nie defekt.
+    # Mówimy o tym raz, zamiast odpytywać `raw` o ref, którego nie ma (HTTP 404
+    # przy każdym starcie).
+    if re.search(r"[^0-9.]", wersja):
+        _powiedz(f"ℹ️  VERSION {wersja!r} carries a suffix, so no released tag "
+                 f"matches it — dev-patch check skipped.")
+        return None
+
+    zdalny = _pobierz_licznik_zdalny(wersja)
+    if zdalny is None or zdalny <= lokalny:
+        return None
+
+    url_tagu = (f"https://github.com/{GITHUB_USER}/{GITHUB_REPO}"
+                f"/releases/tag/v{wersja}")
+    _powiedz(
+        f"⚠️  NEWER DEV TOOLING for {wersja}: dev patch {zdalny} has been "
+        f"released, your tree is at {lokalny}. The application itself is "
+        f"unchanged (same installer, same bundle) — only the dev tools from "
+        f"the repository root are newer.\n"
+        f"    With git:    git fetch --tags --force origin && git pull\n"
+        f"    Without git: re-download the 'Source code' archive from {url_tagu}")
+    return PatchDevInfo(wersja=wersja, lokalny=lokalny, zdalny=zdalny,
+                        url_tagu=url_tagu)

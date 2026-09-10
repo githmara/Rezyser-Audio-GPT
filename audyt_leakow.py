@@ -1053,6 +1053,9 @@ DEV_TOOLE = {
     # `audyt_ciszy.py` — dev-tool bez powierzchni user-facing, wołany wyłącznie
     # ze źródła i z `build_release`.
     "audyt_podstaw.py",
+    # v18.32.0: bramka zależności (manifest kontra środowisko kontra PyPI).
+    # Ta sama klasa co dwie wyżej.
+    "audyt_zaleznosci.py",
 }
 
 # `jezyki_lingua.py` CELOWO NIE JEST na liście wyżej i to jest decyzja, nie

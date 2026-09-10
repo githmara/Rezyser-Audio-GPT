@@ -1394,6 +1394,14 @@ class MainFrame(wx.Frame):
         info = core_updater.sprawdz_aktualizacje()
         if info:
             wx.CallAfter(self._on_aktualizacja_dostepna, info)
+            return
+        # Nowej WERSJI nie ma — pytamy więc o dev patch, czyli o dev-tooling
+        # dowieziony przesunięciem tagu BEZ bumpa numeru (skrócona procedura
+        # wydawnicza). Kolejność jest istotna: gdy czeka nowa wersja, dev patch
+        # jest bez znaczenia i tylko dublowałby komunikat. Sprawdzenie milczy
+        # w aplikacji zamrożonej i mówi WYŁĄCZNIE na stderr — nie ma dialogu,
+        # bo dotyczy narzędzi, których w paczce nie ma (patrz core_updater).
+        core_updater.sprawdz_patch_dev()
 
     def _on_aktualizacja_dostepna(self, info: core_updater.UpdateInfo) -> None:
         """Główny wątek: rozgałęzia na dwa tryby w zależności od środowiska.

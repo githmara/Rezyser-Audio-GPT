@@ -11,6 +11,8 @@ od v18.6, użyty m.in. w v18.22.0 i v18.24.0):
   3. **bramka dev-tools-only** — patrz :func:`pliki_runtime_w_zakresie`,
   4. wycina sekcję `## <wersja>` z `RELEASE_NOTES.md` (wspólny
      `release_notes_sekcja`, ten sam co przy tworzeniu draftu),
+  4b. **bramka licznika dev patcha** — `patch_dev.json` podniesiony o 1 i opisany
+     nagłówkiem `### Dev Patch <N>` w sekcji wydania (:func:`bramka_patch_dev`),
   5. przesuwa tag na HEAD (force-push, jedyny dozwolony wyjątek od zakazu
      force-pusha — tag-only, nigdy gałąź),
   6. synchronizuje body wydania z wyciętą sekcją,
@@ -45,8 +47,10 @@ cudzysłowach i backtickach (ta sama pułapka, którą omija `issue_intake_sami`
 from __future__ import annotations
 
 import ast
+import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -78,6 +82,13 @@ PLIK_BODY = pathlib.Path(tempfile.gettempdir()) / "sync_release_body.md"
 
 # Punkt wejścia aplikacji — korzeń domknięcia importów (patrz niżej).
 PUNKT_WEJSCIA = "main.py"
+
+# Licznik skróconych wydań na tagu bieżącej wersji. Konsument runtime'owy:
+# `core_updater.sprawdz_patch_dev` (jedyny kanał, którym ktoś pracujący ZE
+# ŹRÓDŁA dowiaduje się, że tag się przesunął bez bumpa numeru). Plik jest
+# trackowany, ale NIE pakowany do bundla i CELOWO nie ma go na liście
+# `PREFIKSY_NIE_DEV` — musi być zmienialny w skróconej procedurze.
+PLIK_PATCH_DEV = "patch_dev.json"
 
 # Ścieżki, których zmiana wymaga PEŁNEJ procedury, choć nie są modułem `.py`
 # osiągalnym z `main.py`. `VERSION` bo jest w bundlu (`datas` w spec) i decyduje
@@ -216,6 +227,88 @@ def pliki_runtime_w_zakresie(tag: str) -> list[str]:
     return winowajcy
 
 
+def licznik_patch_dev(tekst: str, zrodlo: str) -> int:
+    """Licznik z treści `patch_dev.json` (fatalnie przy dowolnym odstępstwie).
+
+    `zrodlo` wchodzi do komunikatu, bo ta sama funkcja czyta plik z drzewa
+    roboczego i jego wersję sprzed synchronizacji (`git show <tag>:...`), a przy
+    odmowie trzeba wiedzieć, KTÓRA z nich jest zepsuta.
+    """
+    try:
+        dane = json.loads(tekst)
+    except ValueError as exc:
+        sys.exit(f"::error::{zrodlo}: niepoprawny JSON ({exc}).")
+    if not isinstance(dane, dict):
+        sys.exit(f"::error::{zrodlo}: oczekiwany obiekt JSON, jest "
+                 f"{type(dane).__name__}.")
+    licznik = dane.get("patch_dev")
+    if not isinstance(licznik, int) or isinstance(licznik, bool) or licznik < 0:
+        sys.exit(f"::error::{zrodlo}: `patch_dev` = {licznik!r}, oczekiwana "
+                 f"nieujemna liczba całkowita.")
+    return licznik
+
+
+def bramka_patch_dev(tag: str, wersja: str, body: str) -> None:
+    """Licznik dev patcha podniesiony o 1 i opisany w sekcji RELEASE_NOTES.
+
+    Skrócona procedura jest dla kogoś pracującego ZE ŹRÓDŁA jedynym kanałem
+    dostawy dev-toolingu, a `core_updater.sprawdz_patch_dev` rozpoznaje ją
+    WYŁĄCZNIE po tym liczniku (numer wersji się nie zmienia, więc porównanie
+    wersji milczy). Licznik niepodniesiony = dostawa, o której nikt bez gita się
+    nie dowie — dlatego jest to warunek synchronizacji, a nie zwyczaj.
+
+    Trzy warunki:
+      * plik opisuje DOKŁADNIE tę wersję (`wersja` == `VERSION`),
+      * jest o 1 większy od wartości PRZY TAGU — dokładnie o 1, bo jedna
+        synchronizacja to jeden dev patch, a wtedy numer w RELEASE_NOTES jest
+        jednoznaczny (skok 0→2 zostawiałby „Dev Patch 1", którego nie było),
+      * sekcja wydania ma nagłówek `### Dev Patch <N>` — inaczej opis wydania
+        nie mówi, co ta dostawa zmienia, choć tag już na nią wskazuje.
+
+    Brak pliku PRZY TAGU nie jest błędem: tagi wydane przed wprowadzeniem
+    licznika go nie mają i dla nich punktem odniesienia jest zero.
+    """
+    plik = ROOT / PLIK_PATCH_DEV
+    if not plik.is_file():
+        sys.exit(f"::error::Brak pliku {PLIK_PATCH_DEV} w roocie repo — bez "
+                 f"licznika dev patcha nikt pracujący ze źródła nie dowie się, "
+                 f"że tag {tag} się przesunął.")
+    dane_lokalne = plik.read_text(encoding="utf-8")
+    lokalny = licznik_patch_dev(dane_lokalne, f"{PLIK_PATCH_DEV} (drzewo robocze)")
+    wersja_pliku = json.loads(dane_lokalne).get("wersja")
+    if wersja_pliku != wersja:
+        sys.exit(f"::error::{PLIK_PATCH_DEV} opisuje wersję {wersja_pliku!r}, "
+                 f"a VERSION mówi {wersja!r}. Licznik należy do tagu {tag} — "
+                 f"popraw pole `wersja`.")
+
+    surowy_tag = uruchom(["git", "show", f"{tag}:{PLIK_PATCH_DEV}"], check=False)
+    przy_tagu = (licznik_patch_dev(surowy_tag, f"{PLIK_PATCH_DEV} przy tagu {tag}")
+                 if surowy_tag else 0)
+    if not surowy_tag:
+        print(f"[*] Tag {tag} nie ma jeszcze {PLIK_PATCH_DEV} — punkt "
+              f"odniesienia = 0 (wydanie sprzed wprowadzenia licznika).")
+
+    if lokalny != przy_tagu + 1:
+        sys.exit(
+            f"::error::Licznik dev patcha musi wzrosnąć DOKŁADNIE o 1: przy "
+            f"tagu {tag} jest {przy_tagu}, w drzewie {lokalny}, oczekiwane "
+            f"{przy_tagu + 1}. Podnieś `patch_dev` w {PLIK_PATCH_DEV} i dopisz "
+            f"sekcję `### Dev Patch {przy_tagu + 1}` do wpisu ## {wersja} "
+            f"w RELEASE_NOTES.md."
+        )
+
+    naglowek = re.compile(rf"^###\s+Dev Patch\s+{lokalny}\b", re.MULTILINE)
+    if not naglowek.search(body):
+        sys.exit(
+            f"::error::Sekcja ## {wersja} w RELEASE_NOTES.md nie ma nagłówka "
+            f"`### Dev Patch {lokalny}`. Tag ma wskazać tę dostawę, więc opis "
+            f"wydania musi mówić, co ona zmienia — dopisz nagłówek z listą "
+            f"zmian dev-toolingu."
+        )
+    print(f"[*] Licznik dev patcha: {przy_tagu} → {lokalny}, sekcja "
+          f"`### Dev Patch {lokalny}` obecna w opisie wydania.")
+
+
 def strzez_operacji_na_origin(tag: str) -> None:
     """Odmawia wykonania części zmieniającej origin poza runnerem Actions.
 
@@ -350,6 +443,10 @@ def main() -> int:
         sys.exit(f"::error::{exc}")
     PLIK_BODY.write_text(body, encoding="utf-8")
     print(f"[*] Sekcja ## {wersja}: {len(body)} znaków → {PLIK_BODY}")
+
+    # 6b. BRAMKA licznika dev patcha — stoi PO wycięciu sekcji, bo sprawdza też
+    #     jej treść, i PRZED pierwszą operacją na origin (patrz krok 7).
+    bramka_patch_dev(tag, wersja, body)
 
     # 7. Przesunięcie tagu (force-push TAG-ONLY, nigdy gałąź).
     #    Od tego miejsca w dół skrypt DZIAŁA NA ORIGIN — kroki 1-6 były czystą

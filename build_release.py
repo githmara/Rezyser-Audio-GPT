@@ -47,6 +47,11 @@ dev_konsola.skonfiguruj_stdout()
 
 SCIEZKA_VERSION = os.path.join(os.path.dirname(__file__), "VERSION")
 SCIEZKA_REQUIREMENTS = os.path.join(os.path.dirname(__file__), "requirements.txt")
+# Licznik skróconych (dev-tools-only) wydań opublikowanych na tagu bieżącej
+# wersji — jedyny sygnał dla kogoś pracującego ZE ŹRÓDŁA, że tag się przesunął
+# bez bumpa numeru (konsument: `core_updater.sprawdz_patch_dev`). Pełne wydanie
+# zeruje go, skrócona procedura podnosi o jeden.
+PLIK_PATCH_DEV = Path(__file__).with_name("patch_dev.json")
 
 # Mapowanie kodów ISO języków na wpisy Inno Setupa (nazwa + plik .isl).
 #
@@ -442,6 +447,40 @@ def odczytaj_wersje() -> str:
             "(e.g. 13.4 or 13.4-WIP)."
         )
     return wartosc
+
+
+def sprawdz_licznik_patch_dev(wersja: str) -> str | None:
+    """Powód odmowy albo ``None``, gdy licznik dev patcha jest gotowy na wydanie.
+
+    Kontrakt pełnej procedury: `patch_dev.json` opisuje DOKŁADNIE tę wersję
+    i stoi na zerze. Nowe wydanie zaczyna nowy tag, więc liczba skróconych
+    wydań na poprzednim tagu przestaje cokolwiek znaczyć — a niewyzerowana
+    zostałaby punktem odniesienia dla pierwszej skróconej procedury po tym
+    wydaniu (porównanie z liczbą, która nigdy nie należała do tego tagu).
+
+    Plik nieczytelny albo o niespodziewanym kształcie jest tu błędem, nie
+    domyślnym zerem — ten sam standard, co `dev_yaml` w rodzinie dev-tooli.
+    """
+    if not PLIK_PATCH_DEV.is_file():
+        return (f"{PLIK_PATCH_DEV.name} is missing from the repo root — the "
+                f"dev-patch counter is the only channel telling a source user "
+                f"that the tag moved without a version bump")
+    try:
+        dane = json.loads(PLIK_PATCH_DEV.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError) as exc:
+        return f"{PLIK_PATCH_DEV.name} is unreadable ({exc})"
+    if not isinstance(dane, dict):
+        return (f"{PLIK_PATCH_DEV.name} parses as {type(dane).__name__}, "
+                f"but this gate expects an object")
+    wersja_pliku = dane.get("wersja")
+    licznik = dane.get("patch_dev")
+    if wersja_pliku != wersja:
+        return (f"{PLIK_PATCH_DEV.name} describes version {wersja_pliku!r}, "
+                f"but VERSION says {wersja!r}")
+    if licznik != 0:
+        return (f"{PLIK_PATCH_DEV.name} has `patch_dev` = {licznik!r}; a full "
+                f"release must reset the shortened-release count to 0")
+    return None
 
 
 def wczytaj_wymagane_pakiety() -> list[str]:
@@ -1278,6 +1317,60 @@ def main(args: argparse.Namespace | None = None) -> None:
                     klasa, _, szczegol = p.partition("|")
                     print(f"      • {zakres} [{klasa}]: {szczegol}")
             sys.exit(1)
+
+    # 6b4. Dependency gate (v18.32). Fifth guard in this block, so the numbering
+    # goes back to digits: the chain of primes (6b', 6b'', 6b''') stopped being
+    # readable. Question: does any dependency have a newer release
+    # that our manifest still ALLOWS — i.e. one nobody decided about? Runs
+    # UNCONDITIONALLY before the freeze, because a library upgrade is exactly the
+    # kind of thing that turns a planned shortened (dev-tools-only) release into
+    # a full one: `requirements.txt` is not dev-tools-only.
+    # NON-FATAL on purpose. A new upstream release says nothing about OUR code
+    # being wrong, and blocking the build on it would mean no release can happen
+    # until every upgrade is migrated — the decision (upgrade + smoke test vs.
+    # a bound) belongs to the maintainer, and the gate exists so the decision is
+    # never made by silence. `--strict` (exit 1) is for the release procedure
+    # choice, not for the build.
+    print("🔍 Dependency gate: requirements.txt vs the installed environment vs PyPI...")
+    try:
+        import audyt_zaleznosci
+    except ImportError as exc:
+        print(f"⚠️  audyt_zaleznosci not available ({exc}) — dependency gate SKIPPED.\n")
+    else:
+        wynik_zal = audyt_zaleznosci.bramka()
+        if wynik_zal.degradacja:
+            print(f"⚠️  Dependency gate ran with REDUCED coverage: "
+                  f"{wynik_zal.degradacja}.")
+        trafienia_zal = [s for s in wynik_zal.stany if s.trafienie]
+        if trafienia_zal:
+            print(f"⚠️  {len(trafienia_zal)} dependency/dependencies have a newer "
+                  f"release our manifest allows — NOT blocking the build:")
+            for s in trafienia_zal:
+                print(f"      • {s.nazwa}: {s.zainstalowana or '[not installed]'} "
+                      f"→ {s.najnowsza or '?'}")
+            print("   Run `python audyt_zaleznosci.py` for the full table and the "
+                  "decision rule.\n")
+        else:
+            print(f"✅ Every dependency is either up to date or bounded on purpose "
+                  f"({len(wynik_zal.stany)} package(s)).\n")
+
+    # 6b5. Dev-patch counter gate: a FULL release resets it to zero.
+    # `patch_dev.json` counts the shortened (dev-tools-only) releases published on
+    # top of THIS version's tag — it is how someone working from source learns that
+    # the tag moved without a version bump. A full release makes the whole count
+    # meaningless (new version, new tag, new count), so the invariant is: at build
+    # time the file describes exactly this VERSION and stands at zero. Without this
+    # gate the counter would silently carry the previous version's value, and the
+    # first shortened release afterwards would compare against a number that never
+    # belonged to this tag.
+    print("🔍 Dev-patch counter gate: patch_dev.json describes this VERSION and is at zero...")
+    powod_patch = sprawdz_licznik_patch_dev(wersja)
+    if powod_patch:
+        print(f"❌ FATAL: {powod_patch}")
+        print(f"   Fix: set {{\"wersja\": \"{wersja}\", \"patch_dev\": 0}} in "
+              f"{PLIK_PATCH_DEV.name} and commit it with the release.\n")
+        sys.exit(1)
+    print(f"✅ {PLIK_PATCH_DEV.name}: version {wersja}, dev patch 0.\n")
 
     # 6c. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
     _weryfikuj_flagi_debug()
