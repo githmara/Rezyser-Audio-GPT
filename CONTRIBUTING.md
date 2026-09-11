@@ -133,6 +133,35 @@ Pass `--help` for full usage (help text is in English).
 > `przeglad_tryby.md` / `przeglad_opowiesci.md` / `przeglad_poliglota.md` /
 > `przeglad_akcenty.md`); finalize with `-f` once reviewed.
 
+### Expected build warning: `Hidden import "tzdata" not found!`
+
+`build_release.py` prints this once and keeps going. **It is correct, and installing
+`tzdata` to silence it is the wrong move** — it would add 1.7 MiB in 605 files to the
+end user's package for a code path this project does not have.
+
+Where it comes from: `pydantic` (a dependency of `anthropic`, `openai` and `elevenlabs`)
+imports `zoneinfo` at module level, so `zoneinfo` enters the import graph; the
+`pyinstaller-hooks-contrib` hook for `zoneinfo` then declares `tzdata` as a hidden import
+on Windows, because Windows ships no system timezone database. We never declared `tzdata`,
+so it is absent.
+
+Why it is harmless — measured, not assumed. `tzdata` is consulted only for a field typed
+`ZoneInfo` (pydantic's `_generate_schema` branches on `obj is ZoneInfo`, and the validator
+calls `ZoneInfo(value)`). There is no such field in `anthropic`, `openai`, `elevenlabs`,
+`jsonschema`, `num2words`, `lingua`, `tiktoken`, `python-docx` or `beautifulsoup4`, and
+this project's own code contains no `ZoneInfo`, `tzdata`, `astimezone` or `pytz` at all.
+Without the package, `import zoneinfo` and `import pydantic` both succeed, ISO timestamps
+**with an offset** (the only kind these SDKs produce) parse normally, and only an explicit
+`ZoneInfo("Europe/Warsaw")` would raise `ZoneInfoNotFoundError`.
+
+Note for the record: builds before 19.0 did **not** print this, because the previous
+development environment happened to carry `tzdata` as a transitive leftover from an
+unrelated project, so PyInstaller quietly packaged it. A clean environment made the true
+state visible. The general rule this illustrates: **`Hidden import X not found!` is a
+statement about a HOOK, not about your code.** Before installing X, establish (a) which
+package pulled in the module the hook fired for, and (b) whether that module can even
+reach X on the paths this project uses.
+
 ## Adding a UI language
 
 1. Create `dictionaries/<code>/` with at least `podstawy.yaml` (incl. the native
