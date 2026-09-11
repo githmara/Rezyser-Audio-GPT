@@ -328,8 +328,10 @@ def wywolaj_llm(
         # `temperature` wysyłamy TYLKO tam, gdzie ma szansę zadziałać — wiedzę
         # (baseline modeli + trwały autocache) dzielimy z runtimem przez
         # `core_llm`, zamiast trzymać trzecią kopię tej samej listy.
+        # Wkładamy przez `extra_body` — SDK 1.x wyciął `temperature`
+        # z sygnatury `messages.create` (uzasadnienie i pomiar: `core_llm`).
         if cl.honoruje_temperature(model, TEMPERATURA_TLUMACZENIA):
-            kwargs["temperature"] = TEMPERATURA_TLUMACZENIA
+            cl.wstaw_temperature(kwargs, TEMPERATURA_TLUMACZENIA)
     try:
         resp = klient.messages.create(**kwargs)
     except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO odrzucenie `temperature`
@@ -337,10 +339,11 @@ def wywolaj_llm(
         # może podać własny `--model`). Rozpoznanie winowajcy bierzemy z
         # `core_llm`, a wynik ZAPAMIĘTUJEMY — kolejne chunki tego przebiegu i
         # kolejne przebiegi nie zapłacą już jałowym round-tripem.
-        if "temperature" not in kwargs or not cl.czy_odrzucono_temperature(exc):
+        if (not cl.temperatura_w_payloadzie(kwargs)
+                or not cl.czy_odrzucono_temperature(exc)):
             raise
         cl.zapamietaj_odrzucenie_temperatury(model)
-        kwargs.pop("temperature", None)
+        cl.zdejmij_temperature(kwargs)
         resp = klient.messages.create(**kwargs)
 
     if getattr(resp, "stop_reason", None) == "max_tokens":

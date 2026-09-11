@@ -119,6 +119,53 @@ begin
   Result := 'en';
 end;
 
+// UWAGA 1: w sekcji [Code] obowiązuje składnia PASCALA — komentarz to `//`,
+// nie `;` jak w pozostałych sekcjach .iss. Średnik w kolumnie 1 wywala
+// kompilację („'BEGIN' expected"), a że generator i tak nadpisuje tę sekcję,
+// build by przeszedł i placeholder po cichu przestałby być kompilowalny.
+// Pilnuje tego `test_sprzatanie_bundla.test_sekcja_code_kompiluje_sie_pod_iscc`.
+//
+// UWAGA 2: procedura niżej NIE jest placeholderem — jej treść musi być
+// IDENTYCZNA z `build_release.KOD_SPRZATANIE_BUNDLA`, bo generator nadpisuje
+// całą sekcję [Code] i to JEGO kopia trafia do instalatora. Ta tutaj istnieje
+// po to, żeby `iscc installer.iss` sprawdzał tę samą składnię, a diff pokazywał
+// realny stan. Zgodność obu kopii pilnuje `test_sprzatanie_bundla.py`.
+procedure UsunMartwyBundle();
+var
+  FR: TFindRec;
+  Katalog, Nazwa: String;
+begin
+  Katalog := ExpandConstant('{app}\runtime');
+  if not DirExists(Katalog) then
+    Exit;
+  if FindFirst(Katalog + '\*', FR) then
+  try
+    repeat
+      Nazwa := Lowercase(FR.Name);
+      if (Nazwa = '.') or (Nazwa = '..') then
+        Continue;
+      if (Nazwa = 'skrypty') or (Nazwa = 'opowiesci')
+         or (Nazwa = 'jezyki_iso.json')
+         or (Nazwa = 'modele_bez_temperatury.json')
+         or ((Copy(Nazwa, 1, 5) = 'temp_')
+             and (Copy(Nazwa, Length(Nazwa) - 5, 6) = '.jsonl')) then
+        Continue;
+      if FR.Attributes and FILE_ATTRIBUTE_DIRECTORY <> 0 then
+        DelTree(Katalog + '\' + FR.Name, True, True, True)
+      else
+        DeleteFile(Katalog + '\' + FR.Name);
+    until not FindNext(FR);
+  finally
+    FindClose(FR);
+  end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssInstall then
+    UsunMartwyBundle();
+end;
+
 [CustomMessages]
 english.AdditionalActionsGroup=Additional actions:
 english.OpenManualTaskDesc=Open the user manual after installation

@@ -34,10 +34,11 @@ jobs:
       - name: Konfiguracja srodowiska Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.14'
 
       - name: Instalacja zaleznosci (lingua + pyyaml)
-        run: pip install lingua-language-detector pyyaml
+        # Granica zgodna z requirements.txt (kanon Lingui jest lustrem enuma).
+        run: pip install "lingua-language-detector<2.3" pyyaml
 
       - name: Polnocna bohaterka komentuje i zamyka
         # UWAGA: argumentow NIE przekazujemy przez CLI, bo bash robi

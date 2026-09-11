@@ -275,6 +275,9 @@ _ROLE_DOZWOLONE = ("system", "assistant", "user")
 # double quotes", a self-correction odesłał modelowi ten komunikat — więc trzy
 # razy z rzędu „naprawiał" cudzysłowy, które były bezbłędne. Przy wymuszonym
 # schemacie takie wyjście nie może powstać: kształt egzekwuje API, nie perswazja.
+# (Cytat jest HISTORYCZNY — CPython 3.14 mówi na to samo wejście „Illegal
+# trailing comma before end of object". Nie szukaj starego brzmienia w kodzie:
+# nigdzie go nie porównujemy, a fixture w `test_json_structured` zna oba.)
 #
 # Wzorzec przyszedł z WŁASNEGO repo — `buduj_wielojezyczne_ui.py` używa
 # `output_config.format` od dawna. Runtime po prostu nigdy go nie dostał.
@@ -304,11 +307,13 @@ _POWODY_ODRZUCENIA = ("safety", "brak_informacji", "niejednoznacznosc", "inne")
 # ---------------------------------------------------------------------------
 # Sampling: modele, które odrzucają niedomyślną `temperature` (v18.23)
 # ---------------------------------------------------------------------------
-# PUBLICZNE API TEJ SEKCJI (v18.24): `honoruje_temperature`,
-# `czy_odrzucono_temperature`, `zapamietaj_odrzucenie_temperatury` — i tylko ta
-# trójka; `_co_odrzucono` ma jednego konsumenta (drabinę niżej) i zostaje
-# prywatne. Nie uprywatniać tej trójki z powrotem: poza runtimem korzysta
-# z niej RODZINA AUTOTŁUMACZY, która ma własnych klientów
+# PUBLICZNE API TEJ SEKCJI (v18.24, rozszerzone przy migracji środowiska
+# 2026-09-11): DECYZJA — `honoruje_temperature`, `czy_odrzucono_temperature`,
+# `zapamietaj_odrzucenie_temperatury`; WYKONANIE — `temperatura_w_payloadzie`,
+# `wstaw_temperature`, `zdejmij_temperature`. `_co_odrzucono` ma jednego
+# konsumenta (drabinę niżej) i zostaje prywatne.
+# Nie uprywatniać żadnej z tych szóstki: poza runtimem korzysta
+# z nich RODZINA AUTOTŁUMACZY, która ma własnych klientów
 # Anthropic (`tlumacz_rdzen`, `buduj_wielojezyczne_ui`) i bez tego płaciła
 # jałowym round-tripem 400 przy KAŻDYM chunku: wszystkie sześć narzędzi jedzie
 # domyślnie na `claude-sonnet-5`, a tłumaczenie wysyła `temperature=0.0`
@@ -436,6 +441,61 @@ def honoruje_temperature(mdl: str, temperatura: float) -> bool:
     if mdl in _NAUCZONE_BEZ_TEMPERATURY:
         return False
     return not any(mdl.startswith(prefiks) for prefiks in _MODELE_BEZ_TEMPERATURY)
+
+
+# ---------------------------------------------------------------------------
+# `temperature` jedzie przez `extra_body` — SDK 1.x wyciął ją z sygnatury
+# ---------------------------------------------------------------------------
+# `anthropic` 1.x nie przyjmuje już `temperature` (ani `top_p`/`top_k`) jako
+# kwargu `messages.create` — poleciałby `TypeError`, czyli wyjątek SPRZED HTTP,
+# którego reaktywna połowa kontraktu (`czy_odrzucono_temperature`, oparta na
+# kodzie 400) nie ma jak złapać. Parametr zniknął z SDK, NIE z API: `extra_body`
+# wkleja go do JSON-a żądania as-is.
+#
+# Zmierzone żywo 2026-09-11 na `anthropic` 1.5.0:
+#   claude-haiku-4-5 + extra_body{"temperature": 0.2}  → OK
+#   claude-sonnet-5  + extra_body{"temperature": 0.85} → 400 „`temperature` is
+#                                                        deprecated for this model."
+#   claude-sonnet-5  bez parametru                     → OK
+# Komunikat 400 jest ZNAK W ZNAK ten sam, na którym stoi `_co_odrzucono`, więc
+# baseline, autocache i drabina degradacji działają dalej bez zmiany w logice —
+# przenosimy wyłącznie miejsce, w które wstawiamy wartość. Gałąź `openai_compat`
+# tego nie dotyczy (OpenAI dalej ma `temperature` w sygnaturze).
+#
+# Ta trójka jest PUBLICZNA z tego samego powodu co trójka wyżej: rodzina
+# autotłumaczy ma własnych klientów Anthropic i nie może składać tego idiomu
+# z prymitywów u siebie.
+def temperatura_w_payloadzie(kwargs: dict[str, Any]) -> bool:
+    """Czy ``kwargs`` niesie jeszcze ``temperature`` (do wysłania lub zdjęcia)."""
+    return "temperature" in kwargs.get("extra_body", {})
+
+
+def wstaw_temperature(kwargs: dict[str, Any], wartosc: float) -> None:
+    """Dokłada ``temperature`` do ``extra_body``, nie gubiąc innych jego pól."""
+    kwargs["extra_body"] = {**kwargs.get("extra_body", {}), "temperature": wartosc}
+
+
+def zdejmij_temperature(kwargs: dict[str, Any]) -> None:
+    """Zdejmuje ``temperature``; pusty ``extra_body`` znika razem z nią.
+
+    Pustego dicta nie zostawiamy, żeby payload po degradacji był DOKŁADNIE tym,
+    czym był przed przejściem na ``extra_body`` — inaczej porównania „ten sam
+    request" (ślad, cache) widziałyby różnicę tam, gdzie jej nie ma.
+
+    ``extra_body`` PODMIENIAMY na nowy dict zamiast robić ``pop`` na starym.
+    Ten sam zagnieżdżony dict bywa współdzielony przez zapis payloadu sprzed
+    degradacji (płytka kopia ``dict(kwargs)`` w logu, w śladzie, w atrapie
+    testowej); mutacja w miejscu cofnęłaby czas także tamtym zapisom i kazała
+    im twierdzić, że pierwsza próba też poszła bez parametru.
+    """
+    cialo = kwargs.get("extra_body")
+    if not cialo or "temperature" not in cialo:
+        return
+    reszta = {k: v for k, v in cialo.items() if k != "temperature"}
+    if reszta:
+        kwargs["extra_body"] = reszta
+    else:
+        kwargs.pop("extra_body", None)
 
 
 def czy_odrzucono_temperature(exc: Exception) -> bool:
@@ -693,7 +753,10 @@ def zaloguj_odmowe(powod: str, gdzie: str) -> None:
 # przecinek wiszący; `json.loads` zwrócił „Expecting property name enclosed in
 # double quotes"; kod odesłał tę treść modelowi jako wskazówkę — a ona wskazuje
 # na CUDZYSŁOWY, które były bezbłędne. Model trzy razy „naprawiał" nie tę winę
-# i trzy razy powtórzył przecinek. Komunikat parsera opisuje POZYCJĘ w tekście,
+# i trzy razy powtórzył przecinek. (Cytat historyczny — od CPythona 3.14 ten sam
+# przecinek daje „Illegal trailing comma before end of object"; reguła niżej
+# tego nie dotyka, bo nie zależy od BRZMIENIA, tylko od tego, co komunikat
+# w ogóle opisuje.) Komunikat parsera opisuje POZYCJĘ w tekście,
 # którego model już nie widzi; wskazówka musi opisywać WYMAGANĄ STRUKTURĘ
 # i prosić o czystą re-emisję całości.
 #
@@ -1070,6 +1133,12 @@ def _wywolaj_anthropic(
     z :data:`_MODELE_BEZ_TEMPERATURY` ani z trwałego autocache'u, więc typowe
     wywołanie nie płaci nawet jednym jałowym round-tripem.
 
+    ``temperature`` wkładamy do payloadu przez :func:`wstaw_temperature`
+    (``extra_body``), bo SDK 1.x nie ma jej już w sygnaturze — pomiar i pełne
+    uzasadnienie stoją przy tamtej funkcji. Dla drabiny to zmiana bez znaczenia:
+    komunikat 400 pozostał ten sam, więc :func:`_co_odrzucono` rozpoznaje
+    winowajcę dokładnie jak dotąd.
+
     ``slad`` (v18.23) → lista, do której dopisujemy metrykę KAŻDEGO wywołania
     (numer próby, ``request_id``, ``stop_reason``, liczniki tokenów). Nie zmienia
     zwracanej krotki, więc żaden z 19 istniejących wołających nie wymaga zmian;
@@ -1087,14 +1156,14 @@ def _wywolaj_anthropic(
     # autocache). Dla `claude-sonnet-5` i pokrewnych pomijamy ją od razu, więc
     # nie płacimy jałowym round-tripem przy każdej generacji.
     if honoruje_temperature(mdl, temperature):
-        kwargs["temperature"] = temperature
+        wstaw_temperature(kwargs, temperature)
     else:
         _dev_log(
             f"anthropic: model '{mdl}' nie honoruje niedomyślnej 'temperature' "
             f"({temperature}) — pomijam parametr bez próby (baseline/cache)."
         )
     if thinking_budget > 0:
-        kwargs.pop("temperature", None)
+        zdejmij_temperature(kwargs)
         kwargs["thinking"] = {"type": "enabled", "budget_tokens": thinking_budget}
         kwargs["max_tokens"] = max_tokens + thinking_budget
     if schema_json is not None:
@@ -1128,7 +1197,7 @@ def _wywolaj_anthropic(
                     f"({type(exc).__name__}) — ponawiam bez tego parametru "
                     "i zapamiętuję model w cache."
                 )
-                kwargs.pop("temperature", None)
+                zdejmij_temperature(kwargs)
                 zapamietaj_odrzucenie_temperatury(mdl)
             elif winowajca == "output_config":
                 _dev_log(
@@ -1150,7 +1219,7 @@ def _wywolaj_anthropic(
                     f"którego nie rozpoznaję ({type(exc).__name__}: "
                     f"{str(exc)[:120]}) — ponawiam z najprostszym payloadem."
                 )
-                kwargs.pop("temperature", None)
+                zdejmij_temperature(kwargs)
                 kwargs.pop("output_config", None)
                 kwargs["thinking"] = {"type": "disabled"}
                 kwargs["max_tokens"] = max_tokens

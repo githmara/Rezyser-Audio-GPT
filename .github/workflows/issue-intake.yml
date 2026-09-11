@@ -41,12 +41,15 @@ jobs:
       - name: Konfiguracja srodowiska Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.14'
 
       - name: Instalacja zaleznosci (openai + lingua + pyyaml)
         run: |
-          pip install --upgrade "openai>=1.40,<2.0"
-          pip install lingua-language-detector pyyaml
+          # Gorne granice MUSZA zgadzac sie z requirements.txt — runner
+          # instaluje z PyPI, wiec bez tego bot jedzie na innym majorze SDK niz
+          # reszta projektu. Pilnuje tego test_intake_zalaczniki.py.
+          pip install --upgrade "openai>=1.40,<4"
+          pip install "lingua-language-detector<2.3" pyyaml
 
       - name: Zbierz etykiety issue do CSV
         id: labels

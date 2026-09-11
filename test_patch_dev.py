@@ -269,12 +269,35 @@ def test_klasyfikacja_zaleznosci_rozdziela_decyzje_od_zaniedbania():
 
 def test_manifest_ma_granice_na_pieciu_pakietach():
     """Granice sa czescia kontraktu, nie ozdoba — trzymamy je pod asercja."""
-    oczekiwane = {"wxpython": "<4.3", "anthropic": "<1", "openai": "<3",
-                  "elevenlabs": "<3", "lingua-language-detector": "<2.2"}
+    oczekiwane = {"wxpython": "<4.4", "anthropic": "<2", "openai": "<4",
+                  "elevenlabs": "<3", "lingua-language-detector": "<2.3"}
     manifest = {w.nazwa: w.specyfikator for w in az.wczytaj_manifest()}
     for nazwa, granica in oczekiwane.items():
         assert manifest.get(nazwa) == granica, (
             f"{nazwa}: oczekiwana granica {granica}, jest {manifest.get(nazwa)!r}")
+
+
+def test_zadna_granica_nie_wyklucza_tego_co_mamy_zainstalowane():
+    """Granica ponizej wersji zainstalowanej = decyzja, ktorej nikt nie podjal.
+
+    Tak wygladal manifest przez caly cykl 18.32: piec granic wykluczalo piec
+    wersji, na ktorych mielismy zaczac pracowac po migracji. Stan jest legalny
+    jako ZAPOWIEDZ (`audyt_zaleznosci --strict` swiadomie swieci wtedy na
+    czerwono), ale po skonczonej migracji znaczy juz tylko tyle, ze ktos
+    zapomnial przesunac granice. Bramka jest offline — czyta metadane paczek,
+    nie PyPI — wiec dziala tez na runnerze bez sieci.
+    """
+    narzedzia = az._packaging()
+    if narzedzia is None:                      # bramka DEGRADOWANA, nie pominieta
+        print("      (brak `packaging` — porownanie granic pominiete)")
+        return
+    SpecifierSet, Version, _InvalidVersion = narzedzia
+    for wpis in az.wczytaj_manifest():
+        mam = az.zainstalowana_wersja(wpis.nazwa)
+        if not wpis.specyfikator or mam is None:
+            continue
+        assert Version(mam) in SpecifierSet(wpis.specyfikator), (
+            f"{wpis.nazwa}: granica {wpis.specyfikator} wyklucza zainstalowane {mam}")
 
 
 if __name__ == "__main__":

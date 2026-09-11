@@ -61,7 +61,7 @@ jobs:
       - name: Konfiguracja srodowiska Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.14'
 
       - name: Walidacja, bramka dev-tools-only, przesuniecie tagu i sync body
         # UWAGA: user-input NIE idzie przez argv ani przez interpolacje `${{ }}`

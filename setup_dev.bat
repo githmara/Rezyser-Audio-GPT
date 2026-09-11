@@ -13,11 +13,11 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-echo [2/3] Creating virtual environment (venv)...
-python -m venv venv
+echo [2/3] Creating virtual environment (.venv)...
+python -m venv .venv
 
 echo [3/3] Activating the venv and installing dependencies from requirements.txt...
-call venv\Scripts\activate.bat
+call .venv\Scripts\activate.bat
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 

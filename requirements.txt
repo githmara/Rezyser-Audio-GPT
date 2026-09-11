@@ -13,27 +13,39 @@
 # świadomie — o nowszych wydaniach melduje `audyt_zaleznosci.py`, a decyzja
 # (upgrade plus smoke test kontra granica) należy do maintainera.
 #
+# GRANICE PRZESUNIĘTE 2026-09-11 (migracja środowiska na Python 3.14): każdy
+# z tych pięciu pakietów jest teraz na najnowszym wydaniu, każdy z dowodem
+# z URUCHOMIENIA, a granica pilnuje NASTĘPNEJ linii — nie tej, na której stoimy.
+# Granica, która wyklucza wersję zainstalowaną, znaczy „nie zdecydowaliśmy";
+# granica o jeden stopień wyżej znaczy „zdecydowaliśmy i sprawdziliśmy".
+#
 # ODRUCH: `python audyt_zaleznosci.py` przed KAŻDYM zamrożeniem aplikacji, także
 # przy zmianach dev-tools-only — zmiana tego pliku wyklucza skróconą procedurę
 # wydawniczą (`PREFIKSY_NIE_DEV` w `sync_dev_release.py`), więc upgrade
 # biblioteki potrafi podnieść planowane skrócone wydanie do pełnego.
 
-# GUI całej aplikacji. 4.3 to nowa linia minorowa fundamentu — podmiana wymaga
-# przejścia po panelach z czytnikiem ekranu, nie samego builda.
-wxpython<4.3
-# Silnik AI całego runtime'u (`core_llm`). 1.x to nowy major SDK; nasze wołania
-# (structured outputs, `stop_reason`, `max_tokens`) idą po API 0.x.
-anthropic<1
+# GUI całej aplikacji. 4.4 to następna linia minorowa fundamentu — podmiana
+# wymaga przejścia po panelach z czytnikiem ekranu, nie samego builda.
+# Na 4.3.1 (wxWidgets 3.3.3) przejście zaliczone przy migracji środowiska.
+wxpython<4.4
+# Silnik AI całego runtime'u (`core_llm`). 2.x będzie nowym majorem SDK; nasze
+# wołania (structured outputs, `stop_reason`, `max_tokens`) idą po API 1.x.
+# Przejście 0.x → 1.x kosztowało JEDNĄ zmianę: `temperature` wypadła z sygnatury
+# `messages.create` i jedzie odtąd przez `extra_body` (patrz `core_llm`).
+anthropic<2
 # Most do Studio: wołamy `client.studio.projects.create/delete`
 # i `client.user.subscription.get` — dokładnie tę powierzchnię ten SDK
-# przemianowuje między wydaniami.
+# przemianowuje między wydaniami. 2.52 → 2.67 (15 minorów) przeszło bez zmian
+# w kodzie: cała trójka i wszystkie nasze kwargi `create` są na miejscu.
 elevenlabs<3
 python-dotenv
 python-docx
 # `jezyki_lingua.KANON` jest LUSTREM enuma `lingua.Language`, a `audyt_podstaw`
 # porównuje je 1:1. Nowy MINOR potrafi dodać język, więc granicą jest tu linia
 # minorowa, nie majorowa: upgrade jest zmianą kanonu, nie tylko biblioteki.
-lingua-language-detector<2.2
+# 2.1.1 → 2.2.0 listy nie ruszyło — kanon dalej ma 75 wpisów i bramka to
+# potwierdziła; granica idzie więc na kolejny minor, nie znika.
+lingua-language-detector<2.3
 beautifulsoup4
 num2words
 pyyaml
@@ -67,5 +79,7 @@ markdown
 # Domyślny end-user nadal potrzebuje JEDNEGO klucza (`ANTHROPIC_API_KEY`).
 # Patrz CLAUDE.md pkt 7.
 # Drugi dostawca runtime'u (`LLM_PROVIDER=openai_compat`) — ta sama klasa co
-# `anthropic`: 3.x to nowy major SDK, a nasze wołania idą po API 2.x.
-openai<3
+# `anthropic`: 4.x będzie nowym majorem SDK, a nasze wołania idą po API 3.x.
+# Przejście 2.x → 3.x nie wymagało żadnej zmiany — `chat.completions.create`
+# i `with_options` zostały, sprawdzone żywym wywołaniem przy migracji.
+openai<4

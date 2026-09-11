@@ -8,11 +8,11 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-echo "[1/2] Creating virtual environment (venv)..."
-python3 -m venv venv
+echo "[1/2] Creating virtual environment (.venv)..."
+python3 -m venv .venv
 
 echo "[2/2] Activating the venv and installing dependencies from requirements.txt..."
-source venv/bin/activate
+source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 

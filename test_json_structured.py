@@ -132,11 +132,24 @@ JSON_Z_LOGU = (
 # ---------------------------------------------------------------------------
 # 1. Schemat wysylany do API vs schemat kanoniczny
 # ---------------------------------------------------------------------------
+# Komunikat `JSONDecodeError.msg` NALEZY DO CPYTHONA, nie do nas: na 3.11 byl
+# to "Expecting property name enclosed in double quotes", na 3.14 jest
+# "Illegal trailing comma before end of object" (nowy parser JSON-a). Produkcja
+# tego tekstu NIE parsuje - `core_llm` tylko przepisuje go do prompta retry -
+# wiec asercjonujemy WLASNOSC fixture'a (nie parsuje sie, i to na przecinku
+# wiszacym), a nie zdanie cudzej biblioteki. Oba znane brzmienia trzymamy jako
+# slad, zeby bylo widac, o ktorym komunikacie z logu usera mowa.
+KOMUNIKATY_PRZECINKA = (
+    "Expecting property name enclosed in double quotes",   # CPython <= 3.13
+    "Illegal trailing comma before end of object",         # CPython >= 3.14
+)
+
+
 def test_fixture_odtwarza_komunikat_z_logu():
     try:
         json.loads(JSON_Z_LOGU)
     except json.JSONDecodeError as exc:
-        assert exc.msg == "Expecting property name enclosed in double quotes", exc.msg
+        assert exc.msg in KOMUNIKATY_PRZECINKA, exc.msg
         return
     raise AssertionError("fixture parses, but it must not")
 
@@ -291,7 +304,7 @@ def test_blad_temperatury_NIE_zdejmuje_schematu():
     wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     assert len(wynik.opcje) == 3
     assert len(wyslane) == 2, f"prob={len(wyslane)}"
-    assert "temperature" not in wyslane[1], "temperature was not dropped"
+    assert not cl.temperatura_w_payloadzie(wyslane[1]), "temperature was not dropped"
     assert "output_config" in wyslane[1], "the SCHEMA was dropped for no reason"
 
 
@@ -311,7 +324,8 @@ def test_nierozpoznany_400_konczy_sie_najprostszym_payloadem():
         (json.dumps({"opcje": TRZY_OPCJE}), "end_turn"),
     ])
     ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
-    assert "output_config" not in wyslane[1] and "temperature" not in wyslane[1]
+    assert ("output_config" not in wyslane[1]
+            and not cl.temperatura_w_payloadzie(wyslane[1]))
 
 
 def test_autocache_uczy_sie_nieznanego_modelu():
@@ -381,14 +395,14 @@ def test_rodzina_nie_placi_jalowym_round_tripem_na_domyslnym_modelu():
     mapa, wyslane = _wywolaj_rdzen("claude-sonnet-5", [ODP_TLUMACZENIA])
     assert mapa == {1: "Talo"}
     assert len(wyslane) == 1, f"idle 400 round-trip was paid anyway: {len(wyslane)} calls"
-    assert "temperature" not in wyslane[0]
+    assert not cl.temperatura_w_payloadzie(wyslane[0])
 
 
 def test_rodzina_nadal_wysyla_temperature_do_modelu_ktory_ja_honoruje():
     _mapa, wyslane = _wywolaj_rdzen("claude-sonnet-4-6", [ODP_TLUMACZENIA])
     import tlumacz_rdzen as tr
 
-    assert wyslane[0]["temperature"] == tr.TEMPERATURA_TLUMACZENIA
+    assert wyslane[0]["extra_body"]["temperature"] == tr.TEMPERATURA_TLUMACZENIA
 
 
 def test_rodzina_uczy_sie_nieznanego_modelu_raz_a_nie_co_chunk():
@@ -396,11 +410,12 @@ def test_rodzina_uczy_sie_nieznanego_modelu_raz_a_nie_co_chunk():
     _mapa, pierwsze = _wywolaj_rdzen(
         "egzotyczny-endpoint-9", [_Blad400(BLAD_TEMPERATURY), ODP_TLUMACZENIA])
     assert len(pierwsze) == 2, "the reactive safety net did not retry"
-    assert "temperature" in pierwsze[0] and "temperature" not in pierwsze[1]
+    assert (cl.temperatura_w_payloadzie(pierwsze[0])
+            and not cl.temperatura_w_payloadzie(pierwsze[1]))
     # Drugi chunk tego samego przebiegu juz NIE probuje - nauka jest trwala.
     _mapa2, drugie = _wywolaj_rdzen("egzotyczny-endpoint-9", [ODP_TLUMACZENIA])
     assert len(drugie) == 1, "the model rejection was not remembered"
-    assert "temperature" not in drugie[0]
+    assert not cl.temperatura_w_payloadzie(drugie[0])
 
 
 def test_blad_ktory_nie_dotyczy_temperatury_leci_wyzej_z_rodziny():
@@ -411,6 +426,34 @@ def test_blad_ktory_nie_dotyczy_temperatury_leci_wyzej_z_rodziny():
     raise AssertionError("a schema error must not be swallowed by the temperature retry")
 
 
+def test_payload_pasuje_do_sygnatury_prawdziwego_SDK():
+    """Atrapa przyjmuje wszystko - prawdziwe `messages.create` nie.
+
+    To byla LUKA, ktora przepuscila migracje SDK 1.x: kontrakt samplingu mial
+    komplet testow, ale kazdy przez `_MockSDK`, wiec wyciecie `temperature`
+    z sygnatury nie zapalilo zadnej lampki - `TypeError` wychodzil dopiero
+    z zywego wywolania. Test jest regresja, a nie tautologia: przy powrocie do
+    `kwargs["temperature"]` `bind` rzuca, mimo ze atrapa nadal by to zjadla.
+    """
+    import inspect
+
+    import anthropic
+
+    sygnatura = inspect.signature(anthropic.resources.messages.Messages.create)
+    # Model, ktory temperature HONORUJE - inaczej payload jej nie niesie
+    # i sprawdzalibysmy pusty przypadek.
+    _mapa, wyslane = _wywolaj_rdzen("claude-sonnet-4-6", [ODP_TLUMACZENIA])
+    assert cl.temperatura_w_payloadzie(wyslane[0]), "the case under test did not occur"
+
+    klient, wyslane_burza = klient_z([
+        (json.dumps({"opcje": TRZY_OPCJE}), "end_turn"),
+    ])
+    ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
+
+    for kwargs in (*wyslane, *wyslane_burza):
+        sygnatura.bind(None, **kwargs)   # `self` = None; TypeError = zly payload
+
+
 def test_builder_ui_dostal_ten_sam_kontrakt_co_rdzen():
     import buduj_wielojezyczne_ui as bu
 
@@ -418,7 +461,7 @@ def test_builder_ui_dostal_ten_sam_kontrakt_co_rdzen():
     sdk = _MockSDK([ODP_TLUMACZENIA], wyslane)
     mapa = bu.wywolaj_llm(sdk, "claude-sonnet-5", "Suomi", "fi", [(1, "Dom")])
     assert mapa == {1: "Talo"}
-    assert len(wyslane) == 1 and "temperature" not in wyslane[0]
+    assert len(wyslane) == 1 and not cl.temperatura_w_payloadzie(wyslane[0])
 
 
 # ---------------------------------------------------------------------------

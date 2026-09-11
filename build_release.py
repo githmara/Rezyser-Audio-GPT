@@ -350,6 +350,75 @@ INNO_MANUAL_MESSAGES_MAP: dict[str, dict[str, str]] = {
 }
 
 
+# =============================================================================
+# Sprzątanie martwego bundla przy upgrade w miejscu (19.0)
+# =============================================================================
+# `[Files]` ma `ignoreversion recursesubdirs`, czyli NADPISUJE, nigdy nie usuwa.
+# Dopóki kolejne wydania miały ten sam interpreter, osierocało to kilka plików.
+# Zmiana MINORA Pythona przemianowuje KAŻDY `*.pyd` i KAŻDY katalog `dist-info`,
+# więc przy 3.11 → 3.14 osierocony został praktycznie cały poprzedni bundle:
+# zmierzone na realnym upgrade 18.32.0 → 19.0.0-WIP to 1415 plików i 256 MiB,
+# które zostałyby u użytkownika na zawsze. Przy następnym bumpie interpretera
+# powtórzy się co do joty, więc sprzątamy mechanizmem, nie maskami per wersja.
+#
+# PUŁAPKA, dla której to NIE jest zwykły wpis `[InstallDelete]`: od v17.0
+# `runtime/` pełni PODWÓJNĄ rolę (folder bundla PyInstallera ORAZ kontener
+# metadanych projektów — patrz CLAUDE.md `# DEPLOYMENT`). Skasowanie całego
+# katalogu zabrałoby użytkownikowi `.mode` Reżysera, zapisy Opowieści, trwały
+# autocache samplingu i cache wznawiania przerwanego tłumaczenia.
+# `[InstallDelete]` nie umie „wszystko oprócz", więc idziemy przez `[Code]`.
+#
+# CHRONIONE (allowlist w procedurze) — jedyne rzeczy, które runtime sam tam
+# zapisuje:
+#   `skrypty\`                    — `core_rezyser.RUNTIME_DIR` + `gui_opowiesci.MODE_DIR`
+#   `opowiesci\`                  — zapisy gier (`gui_opowiesci.OPOWIESCI_DIR`)
+#   `jezyki_iso.json`             — `core_rezyser._PLIK_CACHE_ISO`
+#   `modele_bez_temperatury.json` — `core_llm._PLIK_CACHE_SAMPLINGU`
+#   `temp_*.jsonl`                — `tlumacz_ai._sciezka_pliku_tymczasowego`
+# Lista MUSI zgadzać się z kodem aplikacji — pilnuje tego bramka-lustro
+# `test_sprzatanie_bundla.py`, żeby nowy plik cache'u w `runtime/` nie zaczął
+# po cichu znikać przy każdym upgrade.
+#
+# Kasujemy na `ssInstall`, czyli PO potwierdzeniu przez użytkownika i PRZED
+# kopiowaniem — ten sam moment, w którym działa natywne `[InstallDelete]`.
+KOD_SPRZATANIE_BUNDLA = r"""procedure UsunMartwyBundle();
+var
+  FR: TFindRec;
+  Katalog, Nazwa: String;
+begin
+  Katalog := ExpandConstant('{app}\runtime');
+  if not DirExists(Katalog) then
+    Exit;
+  if FindFirst(Katalog + '\*', FR) then
+  try
+    repeat
+      Nazwa := Lowercase(FR.Name);
+      if (Nazwa = '.') or (Nazwa = '..') then
+        Continue;
+      if (Nazwa = 'skrypty') or (Nazwa = 'opowiesci')
+         or (Nazwa = 'jezyki_iso.json')
+         or (Nazwa = 'modele_bez_temperatury.json')
+         or ((Copy(Nazwa, 1, 5) = 'temp_')
+             and (Copy(Nazwa, Length(Nazwa) - 5, 6) = '.jsonl')) then
+        Continue;
+      if FR.Attributes and FILE_ATTRIBUTE_DIRECTORY <> 0 then
+        DelTree(Katalog + '\' + FR.Name, True, True, True)
+      else
+        DeleteFile(Katalog + '\' + FR.Name);
+    until not FindNext(FR);
+  finally
+    FindClose(FR);
+  end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssInstall then
+    UsunMartwyBundle();
+end;
+"""
+
+
 def buduj_blok_kodu_iso(wpisy: list[tuple[str, str]], kody_z_manualem: list[str]) -> str:
     """Generuje pascal-case dla `GetManualISO()` z mapowania Inno → ISO.
 
@@ -1453,6 +1522,10 @@ def main(args: argparse.Namespace | None = None) -> None:
             "begin\n"
             f"{blok_kod_iso}\n"
             "end;\n\n"
+            # Statyczne, nie per-język — ale MUSI lecieć stąd: ta sekcja
+            # NADPISUJE `[Code]` z `installer.iss` w CAŁOŚCI, więc procedura
+            # zostawiona tylko w placeholderze zniknęłaby z builda bez słowa.
+            f"{KOD_SPRZATANIE_BUNDLA}\n"
         )
         iss_etap_2 = (
             f"{przed_kodu}{kod_section}"

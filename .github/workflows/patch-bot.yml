@@ -19,11 +19,12 @@ jobs:
       - name: Konfiguracja środowiska Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.14'
 
       # Lingua (detekcja języka) + PyYAML (i18n czyta ui.yaml przez bot_i18n).
       - name: Instalacja zależności
-        run: pip install lingua-language-detector pyyaml
+        # Granica zgodna z requirements.txt (kanon Lingui jest lustrem enuma).
+        run: pip install "lingua-language-detector<2.3" pyyaml
 
       - name: Wysłanie maila z patchem
         id: send_patch
