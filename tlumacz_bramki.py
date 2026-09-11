@@ -274,6 +274,45 @@ def waliduj_zlamania_linii(src: str, tgt: str) -> tuple[list[str], list[str]]:
 
 
 # ---------------------------------------------------------------------------
+# PUSTE LINIE — akapity, których ani odcisk, ani kolaps linii NIE pilnują (v19.1)
+# ---------------------------------------------------------------------------
+# Klasa wyszła na `poliglota.md_render_tresc` w paczce `fi` (2026-09-11): źródło
+# miało trzy akapity rozdzielone pustymi liniami, tłumaczenie skleiło dwa
+# pierwsze jednym `\n` i wstawiło na szwie śmieć `")`. Żadna bramka nie mrugnęła:
+#
+#   * odcisk struktury liczy linie NIEPUSTE (3 = 3) i traktuje je MIĘKKO,
+#   * `waliduj_zlamania_linii` blokuje tylko kolaps do ZERA złamań, a tu
+#     złamania zostały — zniknęła sama PUSTA linia.
+#
+# Puste linie nie są w tym projekcie kosmetyką: czytnik ekranu nawiguje po
+# akapitach, a `wx.TextCtrl` w dialogach długich komunikatów łamie tekst wzdłuż
+# nich. Sklejony akapit to regres dostępności, nie inny styl. Separator jest
+# przy tym niezależny od języka — żaden przekład nie ma powodu go usuwać —
+# więc UBYTEK blokuje (retry; model poprawia się sam), a NADMIAR tylko ostrzega
+# (model czasem rozbija długie zdanie na dwa akapity; to szum, nie regres).
+_RE_PUSTA_LINIA = re.compile(r"\n[ \t]*\n")
+
+
+def waliduj_puste_linie(src: str, tgt: str) -> tuple[list[str], list[str]]:
+    """Czy podział na AKAPITY (puste linie) przeżył tłumaczenie? → ``(twarde, miekkie)``.
+
+    Args:
+        src: Wartość źródłowa (PL), po tokenizacji albo przed — tokeny nie
+            zawierają pustych linii.
+        tgt: Wartość zwrócona przez model.
+    """
+    we = len(_RE_PUSTA_LINIA.findall(src))
+    wy = len(_RE_PUSTA_LINIA.findall(tgt))
+    if we == wy:
+        return [], []
+    opis = (f"puste linie (podział na akapity) — źródło: {we}, "
+            f"tłumaczenie: {wy}")
+    if wy < we:
+        return [opis + " — akapity się skleiły, czytnik ekranu straci nawigację"], []
+    return [], [opis + " — model dodał akapit; sprawdź, czy nie rozbił zdania"]
+
+
+# ---------------------------------------------------------------------------
 # HEURYSTYKA „to jest prompt, nie etykieta"
 # ---------------------------------------------------------------------------
 # Dla narzędzi, w których prompty są mniejszością wśród wartości (`ui.yaml`:

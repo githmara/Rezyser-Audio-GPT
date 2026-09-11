@@ -400,6 +400,14 @@ def waliduj_liscia(
     problemy += twarde_linie
     ostrzezenia += miekkie_linie
 
+    # Puste linie (v19.1) — druga połowa tej samej reguły. Kolaps wyżej łapie
+    # „wszystko w jednej linii"; ta bramka łapie ubytek SAMYCH pustych linii,
+    # czyli sklejone akapity przy zachowanych złamaniach (`fi`,
+    # `poliglota.md_render_tresc`). Też dla KAŻDEGO liścia.
+    twarde_puste, miekkie_puste = tlumacz_bramki.waliduj_puste_linie(src_tok, tgt)
+    problemy += twarde_puste
+    ostrzezenia += miekkie_puste
+
     return (len(problemy) == 0), problemy, ostrzezenia
 
 

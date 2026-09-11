@@ -711,7 +711,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Seleccionar archivo fuente"
   file_dlg_wildcard: |-
-    Archivos soportados (*.txt;*.html;*.htm;*.docx)|*.txt;*.html;*.htm;*.docx|Archivos de texto (*.txt)|*.txt|Archivos HTML (*.html;*.htm)|*.html;*.htm|Documentos Word (*.docx)|*.docx|Todos los archivos (*.*)|*.*
+    Archivos admitidos (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Archivos de texto (*.txt)|*.txt|Archivos Markdown (*.md)|*.md|Archivos HTML (*.html;*.htm)|*.html;*.htm|Documentos Word (*.docx)|*.docx|Todos los archivos (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Proporciona un nombre o ruta de archivo antes de cargar."
   plik_nie_istnieje_tresc: "Archivo no encontrado:\n{sciezka_pliku}"
@@ -833,7 +833,7 @@ poliglota:
   combo_jezyk_tooltip: Elige el conjunto de reglas para los modos Director y Cifrador. «Detectar automáticamente» determina el idioma según el archivo cargado.
   chk_wymus: Forzar este idioma para todo el documento (sin detección de idioma por párrafo)
   chk_wymus_name: Forzar idioma para todo el documento
-  chk_wymus_tooltip: De forma predeterminada, cada párrafo se procesa según el idioma detectado para él. Marca esta opción para que todo el documento —incluidos los fragmentos en otros idiomas— se procese con las reglas de un solo idioma (por ejemplo, para un cifrado César reversible con un solo alfabeto).
+  chk_wymus_tooltip: Por defecto, cada párrafo se procesa según el idioma detectado para él. Marque esta opción para que todo el documento —incluidos los fragmentos en otros idiomas— se procese con las reglas de un solo idioma (por ejemplo, el cifrado reversible César con un único alfabeto). Requiere seleccionar un idioma en el campo de arriba.
   wykryto_jezyk_tytul: Idioma del documento detectado
   wykryto_jezyk_tresc: "El contenido del archivo cargado está en «{jezyk_wykryty}».\nLas listas de acentos y cifrados se han cambiado a este idioma."
   chk_quality: Modo calidad — el modelo reflexiona más a fondo (más lento y caro; sin efecto en endpoints compatibles con OpenAI)
@@ -842,6 +842,15 @@ poliglota:
   err_odmowa: El modelo se negó a ejecutar esta instrucción; su contenido podría infringir las normas del modelo o ser demasiado ambiguo. No se guardó nada; formule la instrucción de otra manera e inténtelo de nuevo.
   ai_ostrzezenie_cache_tytul: Advertencia de memoria de reanudación
   ai_ostrzezenie_cache: "La traducción se ha completado y guardado, pero no se pudo eliminar el archivo temporal (memoria caché de reanudación):\n{plik}\n\nElimine este archivo manualmente. Mientras permanezca ahí, volver a traducir un archivo con el mismo nombre al mismo idioma podría reanudarse a partir de esta memoria caché y devolver la traducción ANTERIOR en lugar de la nueva.\n\nDetalles: {szczegoly}"
+  ext_brak: sin extensión
+  ext_nieobslugiwane_tytul: Extensión no admitida
+  ext_nieobslugiwane_tresc: "Este archivo tiene la extensión {rozszerzenie}, que el programa no admite de forma nativa.\n\nExtensiones admitidas: {lista_rozszerzen}\n\nEl contenido se tratará como texto sin formato: el formato y las etiquetas de este formato pasarán al resultado como parte del contenido, y el sintetizador de voz los leerá en voz alta.\n\n¿Desea cargarlo de todos modos?"
+  md_render_tytul: Markdown convertido a HTML
+  md_render_tresc: "El archivo {nazwa_pliku} es Markdown, así que antes de aplicar el acento o el cifrado se convirtió a HTML.\n\nAsí, los encabezados, listas y citas se convertirán en elementos reales del documento en el resultado (el lector de pantalla podrá saltar entre ellos), y los caracteres de sintaxis —«---», «- », «> »— no se leerán en voz alta.\n\nEl resultado se guardará como archivo .html. El traductor de IA recibe el contenido sin cambios."
+  md_render_blad_tytul: No se pudo procesar el Markdown
+  md_render_blad_tresc: "No se pudo convertir el Markdown a HTML:\n{tresc_bledu}\n\nEl archivo se procesará como texto sin formato, por lo que los caracteres de sintaxis de Markdown aparecerán en el resultado como contenido."
+  wymus_bez_jezyka_tytul: Seleccione el idioma de procesamiento
+  wymus_bez_jezyka_tresc: "Para forzar un solo idioma es necesario indicarlo explícitamente en el campo «Idioma de procesamiento».\n\nCon la opción «Detectar automáticamente», el idioma forzado provendría de la detección automática, que es precisamente lo que se quiere desactivar. Para un texto ya cifrado, la detección devuelve un idioma aleatorio, por lo que el programa aplicaría el alfabeto incorrecto.\n\nSeleccione un idioma de la lista o desactive el forzado."
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)

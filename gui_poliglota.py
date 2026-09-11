@@ -39,6 +39,7 @@ import wx
 
 import bledy_ai
 import core_llm as cl
+import core_markdown
 import core_poliglota
 import core_tokeny as ct
 import gui_diagnostyka as gd
@@ -102,6 +103,13 @@ class PoliglotaPanel(wx.Panel):
         # Stan wewnętrzny (odpowiednik st.session_state)
         self._file_content: str = ""
         self._file_ext: str = ""
+        # v19.1: wejście dla trybów BEZ API (Reżyser/Szyfrant). Dla `.md` to
+        # wyrenderowany HTML, dla pozostałych rozszerzeń — to samo, co
+        # `_file_content`. Tłumacz AI dostaje treść SUROWĄ: jego prompt wprost
+        # obiecuje zachowanie tagów Markdowna, a render nadmuchałby płatny
+        # payload (`## X` → `<h2>X</h2>`) bez żadnego zysku.
+        self._tresc_pipeline: str = ""
+        self._ext_pipeline: str = ""
         self._oryginalna_nazwa: str = "nieznany"
         self._plik_katalog: str = "."
         self._sciezka_oryginalu: str | None = None
@@ -467,9 +475,27 @@ class PoliglotaPanel(wx.Panel):
             self._txt_file.SetFocus()
             return
 
+        # 19.1: guard rozszerzeń. Wildcard „Wszystkie pliki (*.*)" wpuszczał
+        # dotąd cokolwiek, a silnik mielił to w ciszy — `.srt` czy `.py`
+        # wychodziły jako HTML z surową składnią w treści. Nie odrzucamy:
+        # przemielenie dowolnego tekstu jest legalnym użyciem, tylko nie może
+        # być niejawne (zasada „zero ciszy"). Binaria odpadają osobno, na
+        # `UnicodeDecodeError` z bloku niżej.
+        _, ext = os.path.splitext(file_name)
+        ext = ext.lower()
+        if ext not in core_poliglota.EXT_OBSLUGIWANE:
+            odpowiedz = wx.MessageBox(
+                t("poliglota.ext_nieobslugiwane_tresc",
+                  rozszerzenie=ext or t("poliglota.ext_brak"),
+                  lista_rozszerzen=", ".join(core_poliglota.EXT_OBSLUGIWANE)),
+                t("poliglota.ext_nieobslugiwane_tytul"),
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self)
+            if odpowiedz != wx.YES:
+                self._txt_file.SetFocus()
+                return
+
         try:
-            _, ext = os.path.splitext(file_name)
-            self._file_ext = ext.lower()
+            self._file_ext = ext
             if self._file_ext == ".docx":
                 doc = docx.Document(file_name)
                 self._file_content = "\n".join(p.text for p in doc.paragraphs)
@@ -513,6 +539,10 @@ class PoliglotaPanel(wx.Panel):
                     wx.OK | wx.ICON_INFORMATION, self,
                 )
 
+        # v19.1: Markdown dostaje render do HTML, ale dopiero na wejściu do
+        # pipeline'u bez API (patrz `_tresc_pipeline`).
+        self._przygotuj_tresc_pipeline(os.path.basename(file_name))
+
         znaki = len(self._file_content)
         status_msg = t(
             "poliglota.plik_status_wczytany",
@@ -537,6 +567,39 @@ class PoliglotaPanel(wx.Panel):
             t("poliglota.plik_wczytany_tytul"),
             wx.OK | wx.ICON_INFORMATION, self)
 
+    def _przygotuj_tresc_pipeline(self, nazwa_pliku: str) -> None:
+        """Ustala treść i rozszerzenie dla trybów BEZ API (Reżyser/Szyfrant).
+
+        Dla `.md` renderuje Markdown → pełny HTML (`core_markdown`), bo inaczej
+        surowa składnia jedzie do wyniku jako treść: zmierzone na 4 kB
+        dokumentu — 18 linii z `---`, `- ` i `> `, które syntezator czyta na
+        głos, plus zero nagłówków w wynikowym HTML-u (czytnik traci nawigację
+        1–6/H). Reszta rozszerzeń przechodzi 1:1.
+
+        Render jest GŁOŚNY w obie strony: sukces potwierdzamy dialogiem INFO
+        (zmienia się format wyniku, więc użytkownik ma o tym wiedzieć), a brak
+        biblioteki `markdown` — komunikatem błędu z degradacją do treści
+        surowej, nigdy ciszą.
+        """
+        self._tresc_pipeline = self._file_content
+        self._ext_pipeline = self._file_ext
+        if self._file_ext != ".md":
+            return
+        try:
+            self._tresc_pipeline = core_markdown.renderuj(
+                self._file_content, self._jezyk_aktywny)
+        except Exception as exc:
+            wx.MessageBox(
+                t("poliglota.md_render_blad_tresc", tresc_bledu=str(exc)),
+                t("poliglota.md_render_blad_tytul"),
+                wx.OK | wx.ICON_ERROR, self)
+            return
+        self._ext_pipeline = ".html"
+        wx.MessageBox(
+            t("poliglota.md_render_tresc", nazwa_pliku=nazwa_pliku),
+            t("poliglota.md_render_tytul"),
+            wx.OK | wx.ICON_INFORMATION, self)
+
     def _on_clear(self, _event: wx.Event) -> None:
         # 18.11 (audyt): guard is_alive — „Wyczyść" w trakcie tłumaczenia AI
         # zerował _plik_katalog/_oryginalna_nazwa/_file_content, a callbacki
@@ -552,6 +615,8 @@ class PoliglotaPanel(wx.Panel):
 
         self._file_content      = ""
         self._file_ext          = ""
+        self._tresc_pipeline    = ""
+        self._ext_pipeline      = ""
         self._oryginalna_nazwa  = "nieznany"
         self._plik_katalog      = "."
         self._sciezka_oryginalu = None
@@ -597,14 +662,35 @@ class PoliglotaPanel(wx.Panel):
         self._odswiez_dostepnosc_wymuszania()
         self.Layout()
 
+    def _wymus_jezyk_do_opcji(self, opcje: dict) -> bool:
+        """Wpisuje `wymus_jezyk` do opcji silnika; ``False`` = przerwij bieg.
+
+        v19.1: wymuszenie ma znaczyc „ZERO detekcji", a przy combo na „Wykryj
+        automatycznie" wymuszany jezyk sam pochodzi z detekcji przy wczytaniu.
+        Dla dokumentu juz zaszyfrowanego (kanoniczny przypadek uzycia: nalozyc
+        kolejna warstwe na szyfrogram) detektor zwraca przypadkowa paczke, wiec
+        wymuszenie cicho nalozyloby ZLY alfabet. Zamiast zgadywac — mowimy to
+        wprost i zatrzymujemy sie.
+        """
+        if not self._chk_wymus.GetValue():
+            return True
+        if self._combo_jezyk.GetSelection() <= 0:
+            wx.MessageBox(t("poliglota.wymus_bez_jezyka_tresc"),
+                          t("poliglota.wymus_bez_jezyka_tytul"),
+                          wx.OK | wx.ICON_WARNING, self)
+            self._combo_jezyk.SetFocus()
+            return False
+        opcje["wymus_jezyk"] = self._jezyk_aktywny
+        return True
+
     def _odswiez_dostepnosc_wymuszania(self) -> None:
         """Wyszarza checkbox wymuszania języka tam, gdzie nie ma on efektu.
 
         18.11 (audyt): wymuszanie działa wyłącznie na ścieżkach z segmentacją
         (oczyszczenie/akcent/szyfry). Tłumacz AI go nie czyta, a Naprawiacz
-        Tagów wraca przed segmentacją (ISO per akapit wykrywa `zapisz_wynik`
-        na oryginale, docelowy tag podaje pole „Kod ISO"). Aktywny checkbox
-        bez efektu = etykieta kłamie — wyszarzamy zamiast udawać.
+        Tagów wraca przed segmentacją i stempluje cały dokument kodem z pola
+        „Kod ISO" (v19.1 — bez detekcji per akapit). Aktywny checkbox bez
+        efektu = etykieta kłamie — wyszarzamy zamiast udawać.
         """
         cfg = self._aktualny_wariant_akcentu()
         naprawiacz = bool(cfg and cfg.get("kategoria") == "naprawiacz")
@@ -802,8 +888,9 @@ class PoliglotaPanel(wx.Panel):
 
         # 18.11: checkbox „wymuś język" pomija detekcję lingua per akapit —
         # cały dokument przechodzi przez reguły języka pipeline'u.
-        if self._chk_wymus.GetValue():
-            opcje["wymus_jezyk"] = self._jezyk_aktywny
+        # 19.1: wymaga jawnego wyboru języka (patrz `_wymus_jezyk_do_opcji`).
+        if not self._wymus_jezyk_do_opcji(opcje):
+            return
 
         # Ostrzeżenie o języku źródłowym (tylko dla akcentów; przy jawnym
         # wymuszeniu rozjazd detekcji z wyborem usera jest zamierzony —
@@ -814,7 +901,7 @@ class PoliglotaPanel(wx.Panel):
         # >>>> GŁÓWNE WYWOŁANIE SILNIKA <<<<
         try:
             wynik = core_poliglota.przetworz(
-                self._file_content,
+                self._tresc_pipeline,
                 tryb=core_poliglota.TRYB_REZYSER,
                 jezyk=self._jezyk_aktywny,
                 wariant=cfg["id"],
@@ -856,13 +943,14 @@ class PoliglotaPanel(wx.Panel):
         # 18.11: wymuszenie języka = jeden zestaw reguł (i jeden alfabet
         # Cezara) na cały dokument — warunek odwracalności szyfrowania
         # wielowarstwowego przy tekstach mieszanych językowo.
-        if self._chk_wymus.GetValue():
-            opcje["wymus_jezyk"] = self._jezyk_aktywny
+        # 19.1: wymaga jawnego wyboru języka (patrz `_wymus_jezyk_do_opcji`).
+        if not self._wymus_jezyk_do_opcji(opcje):
+            return
 
         # >>>> GŁÓWNE WYWOŁANIE SILNIKA <<<<
         try:
             wynik = core_poliglota.przetworz(
-                self._file_content,
+                self._tresc_pipeline,
                 tryb=core_poliglota.TRYB_SZYFRANT,
                 jezyk=self._jezyk_aktywny,
                 wariant=cfg["id"],
@@ -930,11 +1018,11 @@ class PoliglotaPanel(wx.Panel):
                 tresc_wynikowa=wynik,
                 katalog_wyjscia=self._plik_katalog,
                 base_name=base,
-                ext=self._file_ext,
+                ext=self._ext_pipeline,
                 iso_code=iso,
                 tryb=tryb,
                 wariant_cfg=cfg,
-                oryginalny_content=self._file_content,
+                oryginalny_content=self._tresc_pipeline,
                 sciezka_oryginalu=self._sciezka_oryginalu,
                 segmenty_wynikowe=segmenty_wynikowe,
             )

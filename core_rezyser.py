@@ -59,6 +59,7 @@ import json
 import os
 import re
 import sys
+import unicodedata
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -78,6 +79,7 @@ import sciezki
 #   ``wariant_po_id`` – sprawdza, czy istnieje YAML akcentu o danej nazwie.
 from core_poliglota import (
     TRYB_REZYSER,
+    lista_wariantow,
     slowa_akcentu,
     wariant_po_id,
     zastosuj_reguly_fonetyczne,
@@ -562,17 +564,97 @@ def _usun_polskie(nazwa: str) -> str:
     return nazwa.strip()
 
 
+def _fold(nazwa: str) -> str:
+    """Klucz porównania nazw akcentu: bez diakrytyki, małymi literami.
+
+    Najpierw polskie znaki (``ł`` nie rozkłada się w NFKD, więc mapa
+    :data:`_PL_TO_ASCII` zostaje potrzebna), potem ogólny rozkład Unicode —
+    dzięki temu niemieckie „isländisch" i hiszpańskie „Finés" porównują się
+    tak samo jak wpisane bez diakrytyków. Obie strony porównania przechodzą
+    przez tę samą funkcję, więc pisma nierozkładalne (``þ``, cyrylica) też są
+    bezpieczne: zostają sobą po obu stronach.
+    """
+    bez_pl = _usun_polskie(nazwa).lower()
+    rozlozone = unicodedata.normalize("NFKD", bez_pl)
+    return "".join(z for z in rozlozone if not unicodedata.combining(z)).strip()
+
+
+def _etykieta_akcentu(cfg: dict) -> str:
+    """Natywny przymiotnik akcentu = PIERWSZY token pola ``etykieta``.
+
+    Sprawdzone we wszystkich dziewięciu paczkach: `etykieta` akcentu ma postać
+    „<przymiotnik> (np. Satu / Mikko / Heidi)" — pierwszy token to nazwa
+    akcentu w języku paczki (``Finnish``, ``Finnisch``, ``Finés``,
+    ``Englantilainen``, ``Venäläinen``…). Warianty NIEakcentowe
+    (``oczyszczenie``, ``naprawiacz_tagow``) odsiewa wywołujący po
+    ``kategoria``, więc ich etykiety („Żaden…", „🔧 Naprawiacz…") nigdy tu
+    nie trafiają.
+    """
+    etykieta = str(cfg.get("etykieta") or "").strip()
+    return _fold(etykieta.split()[0]) if etykieta.split() else ""
+
+
+def rozwiaz_nazwe_akcentu(nazwa: str, jezyk_projektu: str) -> str | None:
+    """Nazwa z Księgi Świata → kanoniczne ``id`` akcentu albo ``None``.
+
+    Przyjmuje DWIE formy, bo obie są naturalne dla autora Księgi:
+
+      1. ``id`` pliku reguł (``finski``, ``islandzki``) — polskie we
+         wszystkich paczkach, bo nazwy plików są IDENTYFIKATORAMI;
+      2. **natywny przymiotnik z pola ``etykieta``** (``finnish``,
+         ``isländisch``, ``islandés``, ``islantilainen``).
+
+    v19.1 — powód dodania (2): do v19.0 działała WYŁĄCZNIE forma (1), więc
+    zagraniczny reżyser musiał wpisać polski identyfikator, żeby akcent się
+    nałożył. Zmierzone: `[Speaker 1: Mark] - has an Icelandic accent`
+    zwracało tekst NIETKNIĘTY, a `has an islandzki accent` działało. Co
+    gorsza, komentarz w `dictionaries/en/podstawy.yaml` — w tym samym pliku,
+    który definiuje słowa-wyzwalacze — uczył formy „Icelandic accent", czyli
+    tej martwej. Cisza była podwójna: parser nie protestował, a Księga bez
+    rozpoznanej nazwy po prostu nie nakładała niczego.
+
+    Dopasowanie po :func:`_fold`, dokładne lub prefiksowe (kandydat zaczyna
+    się od nazwy) — prefiks obsługuje fleksję („fińskim" → ``finski``,
+    „islandzkiego" → ``islandzki``), tak jak dotychczasowa mapa w
+    ``core_screen_reader``.
+    """
+    klucz = _fold(nazwa)
+    if not klucz:
+        return None
+
+    akcenty = [cfg for cfg in lista_wariantow(TRYB_REZYSER, jezyk_projektu)
+               if cfg.get("kategoria") == "akcent" and cfg.get("id")]
+
+    # 1) `id` pliku reguł — dokładnie, potem prefiksowo (fleksja).
+    for cfg in akcenty:
+        if klucz == _fold(str(cfg["id"])):
+            return str(cfg["id"])
+    # 2) natywny przymiotnik z `etykieta` — dokładnie.
+    for cfg in akcenty:
+        etykieta = _etykieta_akcentu(cfg)
+        if etykieta and klucz == etykieta:
+            return str(cfg["id"])
+    # 3) prefiksy (fleksja) — id, potem etykieta.
+    for cfg in akcenty:
+        id_ = _fold(str(cfg["id"]))
+        if id_ and klucz.startswith(id_):
+            return str(cfg["id"])
+    for cfg in akcenty:
+        etykieta = _etykieta_akcentu(cfg)
+        if etykieta and klucz.startswith(etykieta):
+            return str(cfg["id"])
+    return None
+
+
 def czy_znany_akcent(nazwa: str, jezyk_projektu: str) -> bool:
     """Czy ``nazwa`` wskazuje akcent, który ta paczka naprawdę potrafi nałożyć?
 
     Kryterium jest to samo, którym posługuje się dispatch fonetyczny (v17.5):
-    istnieje ``dictionaries/<jezyk>/akcenty/<nazwa>.yaml`` o ``kategoria:
-    akcent``. Nazwy tych plików są IDENTYFIKATORAMI i we wszystkich paczkach
-    zostają polskie (``finski``, ``rosyjski``), więc to samo `id` użytkownik
-    wpisuje w Księdze Świata niezależnie od języka projektu.
+    istnieje ``dictionaries/<jezyk>/akcenty/<id>.yaml`` o ``kategoria:
+    akcent``. Od v19.1 nazwą może być `id` pliku ALBO natywny przymiotnik
+    z `etykieta` — rozstrzyga :func:`rozwiaz_nazwe_akcentu`.
     """
-    cfg = wariant_po_id(TRYB_REZYSER, jezyk_projektu, _usun_polskie(nazwa))
-    return bool(cfg) and cfg.get("kategoria") == "akcent"
+    return rozwiaz_nazwe_akcentu(nazwa, jezyk_projektu) is not None
 
 
 def zbuduj_mape_akcentow(lore_text: str, jezyk_projektu: str = "pl") -> dict[str, dict]:
@@ -618,10 +700,18 @@ def zbuduj_mape_akcentow(lore_text: str, jezyk_projektu: str = "pl") -> dict[str
     )
 
     def _nazwa_akcentu(opis: str) -> str | None:
-        """Kandydaci z obu stron wyzwalacza → pierwszy ZNANY, inaczej zastany."""
+        """Kandydaci z obu stron wyzwalacza → pierwszy ZNANY, inaczej zastany.
+
+        v19.1: zwracamy KANONICZNE ``id`` (`rozwiaz_nazwe_akcentu`), a nie
+        słowo wpisane przez autora — konsumenci mapy (dispatch fonetyczny,
+        generator dla czytników ekranu, bramka przykładów w docs) dostają
+        wtedy jedną postać niezależnie od tego, czy w Księdze stoi ``finski``,
+        ``Finnish`` czy ``fińskim``.
+        """
         for kandydat in wzorzec_po.findall(opis) + wzorzec_przed.findall(opis):
-            if czy_znany_akcent(kandydat, jezyk_projektu):
-                return kandydat
+            rozwiazana = rozwiaz_nazwe_akcentu(kandydat, jezyk_projektu)
+            if rozwiazana:
+                return rozwiazana
         dopasowanie = wzorzec_akcentu.search(opis)
         if not dopasowanie:
             return None
@@ -706,17 +796,25 @@ def zastosuj_akcenty_uniwersalne(
                 if dopasowane_dane:
                     zmodyfikowano = False
                     if dopasowane_dane["nazwa"]:
-                        znorm = _usun_polskie(dopasowane_dane["nazwa"])
                         # Dynamiczny dispatch (v17.5): akcent jest „znany", gdy
                         # istnieje jego YAML (kategoria=='akcent') w języku
                         # projektu. Brak pliku → spadamy do reguł ad-hoc niżej,
                         # zamiast — jak dawny statyczny whitelist — oznaczać
                         # fragment jako zmodyfikowany mimo braku reguł fonetycznych.
                         # v18.25: to samo kryterium wybiera nazwę w parserze
-                        # Księgi (`czy_znany_akcent`) — jeden warunek, nie dwa.
-                        if czy_znany_akcent(znorm, jezyk_projektu):
+                        # Księgi — jeden warunek, nie dwa.
+                        # v19.1: rozstrzyga JEDNO wywołanie, które zwraca już
+                        # kanoniczne `id`. Rozdzielenie „sprawdź nazwę" od
+                        # „nałóż regułę" było miną: po dopuszczeniu form
+                        # fleksyjnych i natywnych `zastosuj_reguly_fonetyczne`
+                        # dostawałoby nazwę, dla której `wariant_po_id` zwraca
+                        # pustkę — czyli akcent „nałożony" bez ani jednej
+                        # reguły, w ciszy.
+                        id_akcentu = rozwiaz_nazwe_akcentu(
+                            dopasowane_dane["nazwa"], jezyk_projektu)
+                        if id_akcentu:
                             dialog = zastosuj_reguly_fonetyczne(
-                                dialog, znorm, jezyk_projektu
+                                dialog, id_akcentu, jezyk_projektu
                             )
                             zmodyfikowano = True
                     if not zmodyfikowano and dopasowane_dane["reguly"]:

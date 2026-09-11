@@ -709,7 +709,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Sélectionner un fichier source"
   file_dlg_wildcard: |-
-    Fichiers pris en charge (*.txt;*.html;*.htm;*.docx)|*.txt;*.html;*.htm;*.docx|Fichiers texte (*.txt)|*.txt|Fichiers HTML (*.html;*.htm)|*.html;*.htm|Documents Word (*.docx)|*.docx|Tous les fichiers (*.*)|*.*
+    Fichiers pris en charge (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Fichiers texte (*.txt)|*.txt|Fichiers Markdown (*.md)|*.md|Fichiers HTML (*.html;*.htm)|*.html;*.htm|Documents Word (*.docx)|*.docx|Tous les fichiers (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Indiquez un nom ou un chemin pour le fichier avant de le charger."
   plik_nie_istnieje_tresc: "Fichier introuvable :\n{sciezka_pliku}"
@@ -831,7 +831,7 @@ poliglota:
   combo_jezyk_tooltip: Choisissez le jeu de règles pour les modes Réalisateur et Chiffrant. « Détecter automatiquement » détermine la langue à partir du fichier chargé.
   chk_wymus: Forcer cette langue pour tout le document (sans détection de la langue des paragraphes)
   chk_wymus_name: Forçage de la langue pour tout le document
-  chk_wymus_tooltip: Par défaut, chaque paragraphe est traité selon la langue détectée pour lui. Cochez cette option pour que tout le document — y compris les passages en langue étrangère — soit traité selon les règles d'une seule langue (par ex. chiffrement de César réversible avec un seul alphabet).
+  chk_wymus_tooltip: Par défaut, chaque paragraphe est traité selon la langue détectée pour lui. Cochez cette option pour que tout le document — y compris les passages en langue étrangère — soit traité selon les règles d'une seule langue (par exemple pour un chiffrement de César réversible avec un seul alphabet). Nécessite qu'une langue soit sélectionnée dans le champ ci-dessus.
   wykryto_jezyk_tytul: Langue du document détectée
   wykryto_jezyk_tresc: "Le contenu du fichier chargé est en langue « {jezyk_wykryty} ».\nLes listes d'accents et de chiffrements ont été basculées sur cette langue."
   chk_quality: Mode qualité — réflexion plus approfondie du modèle (plus lent et plus coûteux ; sans effet sur les points de terminaison compatibles OpenAI)
@@ -840,6 +840,15 @@ poliglota:
   err_odmowa: Le modèle a refusé d'exécuter cette instruction — son contenu enfreignait peut-être les règles du modèle ou était trop ambigu. Rien n'a été enregistré ; reformulez l'instruction et réessayez.
   ai_ostrzezenie_cache_tytul: Avertissement concernant la mémoire de reprise
   ai_ostrzezenie_cache: "La traduction a été terminée et enregistrée, mais la suppression du fichier temporaire (cache de reprise) a échoué :\n{plik}\n\nSupprimez ce fichier manuellement. Tant qu'il reste présent, une nouvelle traduction d'un fichier portant le même nom vers la même langue risque de reprendre à partir de cette mémoire et de restituer l'ANCIENNE traduction au lieu de la nouvelle.\n\nDétails : {szczegoly}"
+  ext_brak: aucune extension
+  ext_nieobslugiwane_tytul: Extension non prise en charge
+  ext_nieobslugiwane_tresc: "Ce fichier a l'extension {rozszerzenie}, que le programme ne prend pas en charge directement.\n\nExtensions prises en charge : {lista_rozszerzen}\n\nLe contenu sera traité comme du texte brut : le formatage et les balises de ce format seront inclus dans le résultat en tant que contenu, et le synthétiseur vocal les lira à voix haute.\n\nCharger malgré tout ?"
+  md_render_tytul: Markdown converti en HTML
+  md_render_tresc: "Le fichier {nazwa_pliku} est au format Markdown ; il a donc été converti en HTML avant l'application de l'accent ou du chiffrement.\n\nAinsi, les titres, listes et citations deviendront de véritables éléments du document dans le résultat (le lecteur d'écran pourra s'y déplacer), et les caractères de syntaxe — « --- », « - », « > » — ne seront pas lus à voix haute.\n\nLe résultat sera enregistré au format .html. Le traducteur IA reçoit le contenu sans modification."
+  md_render_blad_tytul: Échec du traitement du Markdown
+  md_render_blad_tresc: "Impossible de convertir le Markdown en HTML :\n{tresc_bledu}\n\nLe fichier sera traité comme du texte brut, ce qui fait que les caractères de syntaxe Markdown se retrouveront dans le résultat en tant que contenu."
+  wymus_bez_jezyka_tytul: Choisissez la langue de traitement
+  wymus_bez_jezyka_tresc: "Pour imposer une seule langue, il faut l'indiquer explicitement dans le champ « Langue de traitement ».\n\nAvec le réglage « Détecter automatiquement », la langue imposée proviendrait de la détection — ce qui est exactement ce que cette option est censée désactiver. Pour un texte déjà chiffré, la détection renvoie une langue aléatoire, ce qui amènerait le programme à appliquer le mauvais alphabet.\n\nChoisissez une langue dans la liste ou décochez cette option."
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)

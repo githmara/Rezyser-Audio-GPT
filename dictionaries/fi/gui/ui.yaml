@@ -709,7 +709,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Valitse lähdetiedosto"
   file_dlg_wildcard: |-
-    Tuetut tiedostot (*.txt;*.html;*.htm;*.docx)|*.txt;*.html;*.htm;*.docx|Tekstitiedostot (*.txt)|*.txt|HTML-tiedostot (*.html;*.htm)|*.html;*.htm|Word-dokumentit (*.docx)|*.docx|Kaikki tiedostot (*.*)|*.*
+    Tuetut tiedostot (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Tekstitiedostot (*.txt)|*.txt|Markdown-tiedostot (*.md)|*.md|HTML-tiedostot (*.html;*.htm)|*.html;*.htm|Word-asiakirjat (*.docx)|*.docx|Kaikki tiedostot (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Anna tiedoston nimi tai polku ennen lataamista."
   plik_nie_istnieje_tresc: "Tiedostoa ei löytynyt:\n{sciezka_pliku}"
@@ -831,7 +831,7 @@ poliglota:
   combo_jezyk_tooltip: Valitse sääntökokoelma Ohjaajan ja Koodinmurtajan tiloille. ”Tunnista automaattisesti” määrittää kielen ladatun tiedoston perusteella.
   chk_wymus: Pakota tämä kieli koko asiakirjalle (ei kappalekohtaista kielentunnistusta)
   chk_wymus_name: Kielen pakottaminen koko asiakirjalle
-  chk_wymus_tooltip: Oletuksena kukin kappale käsitellään sille tunnistetun kielen mukaan. Valitse tämä, jotta koko asiakirja — myös vieraskieliset osuudet — käsitellään yhden kielen säännöillä (esim. palautuva Caesar-salaus yhdellä aakkostolla).
+  chk_wymus_tooltip: Oletusarvoisesti jokainen kappale käsitellään sille tunnistetun kielen mukaan. Valitse tämä, jotta koko asiakirja — myös vieraskieliset osuudet — käsitellään yhden kielen sääntöjen mukaan (esim. palautuva Caesar-salaus yhdellä aakkostolla). Vaatii kielen valitsemisen yllä olevasta kentästä.
   wykryto_jezyk_tytul: Asiakirjan kieli tunnistettu
   wykryto_jezyk_tresc: "Ladatun tiedoston sisältö on kielellä ”{jezyk_wykryty}”.\nAksentti- ja salauslistat on vaihdettu tähän kieleen."
   chk_quality: Laatutila — mallin syvempi harkinta (hitaampi ja kalliimpi; ei vaikutusta OpenAI-yhteensopivilla päätepisteillä)
@@ -840,6 +840,15 @@ poliglota:
   err_odmowa: Malli kieltäytyi suorittamasta tätä komentoa — sen sisältö on voinut rikkoa mallin käytäntöjä tai olla liian moniselitteinen. Mitään ei tallennettu; muotoile komento toisin ja yritä uudelleen.
   ai_ostrzezenie_cache_tytul: Jatkamismuistin varoitus
   ai_ostrzezenie_cache: "Kääntäminen valmistui ja tallennettiin, mutta väliaikaista tiedostoa (jatkamisvälimuistia) ei voitu poistaa:\n{plik}\n\nPoista tämä tiedosto käsin. Niin kauan kuin se on olemassa, saman nimisen tiedoston kääntäminen samalle kielelle voi jatkua tästä välimuistista ja tuottaa AIEMMAN käännöksen uuden sijaan.\n\nLisätietoja: {szczegoly}"
+  ext_brak: ei tiedostopäätettä
+  ext_nieobslugiwane_tytul: Tiedostopäätettä ei tueta
+  ext_nieobslugiwane_tresc: "Tällä tiedostolla on tiedostopääte {rozszerzenie}, jota ohjelma ei tue suoraan.\n\nTuetut tiedostopäätteet: {lista_rozszerzen}\n\nSisältöä käsitellään pelkkänä tekstinä: tämän muodon merkinnät ja muotoilut päätyvät tulokseen sellaisenaan, ja puhesyntetisaattori lukee ne ääneen.\n\nLadataanko tiedosto silti?"
+  md_render_tytul: Markdown muunnettu HTML:ksi
+  md_render_tresc: "Tiedosto {nazwa_pliku} on Markdown-muodossa, joten se muunnettiin HTML-muotoon ennen aksentin tai salauksen lisäämistä.\n\nNäin otsikoista, luetteloista ja lainauksista tulee tuloksessa aitoja asiakirjaelementtejä (ruudunlukija voi hypätä niiden välillä), eikä syntaksimerkkejä — „---\", „- \", „> \" — lueta ääneen.\n\nTulos tallennetaan .html-tiedostona. Tekoälykääntäjä saa sisällön muuttamattomana."
+  md_render_blad_tytul: Markdownin käsittely epäonnistui
+  md_render_blad_tresc: "Markdownin muuntaminen HTML:ksi epäonnistui:\n{tresc_bledu}\n\nTiedosto käsitellään pelkkänä tekstinä, joten Markdown-syntaksin merkit päätyvät tulokseen sisältönä."
+  wymus_bez_jezyka_tytul: Valitse käsittelykieli
+  wymus_bez_jezyka_tresc: "Yhden kielen pakottaminen edellyttää, että kieli valitaan suoraan kentästä „Käsittelykieli\".\n\nAsetuksella „Tunnista automaattisesti\" pakotettu kieli tulisi tunnistuksesta — mikä on juuri se, mitä pakottamisen pitäisi estää. Jo salatulle tekstille tunnistus palauttaa satunnaisen kielen, jolloin ohjelma käyttäisi väärää aakkostoa.\n\nValitse kieli listasta tai poista pakotusvalinta."
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)

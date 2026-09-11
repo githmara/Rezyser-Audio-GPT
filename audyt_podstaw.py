@@ -400,20 +400,36 @@ def _sprawdz_slowo_akcent(kod: str, dane: dict, pary: dict, dodaj) -> None:
             dodaj("slowo-akcent-brak",
                   f"`slowo_akcent` contains an empty entry ({slowo!r})")
             continue
-        martwe = []
-        for szyk in _SZYK_SONDY:
-            tekst = szyk.format(slowo=slowo.strip(), akcent=akcent)
-            mapa = cr.zbuduj_mape_akcentow(tekst, kod)
-            rozpoznane = {(w or {}).get("nazwa") for w in mapa.values()}
-            if akcent not in rozpoznane:
-                martwe.append(tekst)
-        if martwe:
-            dodaj("slowo-akcent-nieaktywny",
-                  f"a World Book accent declaration does NOT work for this pack: "
-                  f"the real parser did not recognize the `{akcent}` accent in "
-                  + "; ".join(f"„{t}”" for t in martwe)
-                  + f". Check both ends — the trigger word „{slowo}” and the "
-                    f"`kategoria: akcent` of `akcenty/{akcent}.yaml`")
+        # Sondujemy DWIEMA nazwami tego samego akcentu, bo od v19.1 obie są
+        # legalne i obie mają działać: `id` pliku reguł (polskie w każdej
+        # paczce) ORAZ natywny przymiotnik, którym paczka sama się posługuje
+        # (pierwszy token `etykieta`). Powód drugiej sondy: do v19.0 działała
+        # tylko pierwsza forma, więc zagraniczny reżyser pisał „Icelandic
+        # accent" i dostawał tekst NIETKNIĘTY — a komentarz przy tej właśnie
+        # liście w `en/podstawy.yaml` uczył dokładnie tej martwej formy.
+        formy = [akcent]
+        natywna = (cr.wariant_po_id(cr.TRYB_REZYSER, kod, akcent) or {})
+        natywna = str(natywna.get("etykieta") or "").split()
+        if natywna and cr._fold(natywna[0]) != cr._fold(akcent):
+            formy.append(natywna[0])
+
+        for forma in formy:
+            martwe = []
+            for szyk in _SZYK_SONDY:
+                tekst = szyk.format(slowo=slowo.strip(), akcent=forma)
+                mapa = cr.zbuduj_mape_akcentow(tekst, kod)
+                rozpoznane = {(w or {}).get("nazwa") for w in mapa.values()}
+                if akcent not in rozpoznane:
+                    martwe.append(tekst)
+            if martwe:
+                dodaj("slowo-akcent-nieaktywny",
+                      f"a World Book accent declaration does NOT work for this "
+                      f"pack: the real parser did not recognize the `{akcent}` "
+                      f"accent (written as „{forma}”) in "
+                      + "; ".join(f"„{t}”" for t in martwe)
+                      + f". Check all three ends — the trigger word „{slowo}”, "
+                        f"the `kategoria: akcent` and the first word of "
+                        f"`etykieta` in `akcenty/{akcent}.yaml`")
 
 
 def _sprawdz_etykieta(kod: str, dane: dict, dodaj) -> None:

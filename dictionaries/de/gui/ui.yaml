@@ -711,7 +711,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Wählen Sie die Quelldatei"
   file_dlg_wildcard: |-
-    Unterstützte Dateien (*.txt;*.html;*.htm;*.docx)|*.txt;*.html;*.htm;*.docx|Textdateien (*.txt)|*.txt|HTML-Dateien (*.html;*.htm)|*.html;*.htm|Word-Dokumente (*.docx)|*.docx|Alle Dateien (*.*)|*.*
+    Unterstützte Dateien (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Textdateien (*.txt)|*.txt|Markdown-Dateien (*.md)|*.md|HTML-Dateien (*.html;*.htm)|*.html;*.htm|Word-Dokumente (*.docx)|*.docx|Alle Dateien (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Geben Sie den Namen oder Pfad der Datei vor dem Laden an."
   plik_nie_istnieje_tresc: "Datei nicht gefunden:\n{sciezka_pliku}"
@@ -833,7 +833,7 @@ poliglota:
   combo_jezyk_tooltip: Wählen Sie den Regelsatz für den Regisseur- und den Kryptographen-Modus. „Automatisch erkennen" legt die Sprache anhand der geladenen Datei fest.
   chk_wymus: Diese Sprache für das gesamte Dokument erzwingen (ohne Spracherkennung je Absatz)
   chk_wymus_name: Sprachvorgabe für das gesamte Dokument
-  chk_wymus_tooltip: Standardmäßig wird jeder Absatz gemäß der für ihn erkannten Sprache verarbeitet. Aktivieren Sie diese Option, damit das gesamte Dokument – auch fremdsprachige Einschübe – den Regeln einer einzigen Sprache folgt (z. B. bei der umkehrbaren Caesar-Verschlüsselung mit einem einzigen Alphabet).
+  chk_wymus_tooltip: Standardmäßig wird jeder Absatz nach der für ihn erkannten Sprache verarbeitet. Aktivieren Sie diese Option, damit das gesamte Dokument — einschließlich fremdsprachiger Einschübe — nach den Regeln einer einzigen Sprache verarbeitet wird (z. B. eine umkehrbare Cäsar-Verschlüsselung mit einem einzigen Alphabet). Dazu muss oben eine Sprache ausgewählt sein.
   wykryto_jezyk_tytul: Dokumentsprache erkannt
   wykryto_jezyk_tresc: "Der Inhalt der geladenen Datei ist in der Sprache „{jezyk_wykryty}\".\nDie Listen für Akzente und Chiffren wurden auf diese Sprache umgestellt."
   chk_quality: Qualitätsmodus – tiefere Überlegung des Modells (langsamer und teurer; ohne Effekt bei OpenAI-kompatiblen Endpunkten)
@@ -842,6 +842,15 @@ poliglota:
   err_odmowa: Das Modell hat die Ausführung dieses Befehls verweigert — sein Inhalt verstieß möglicherweise gegen die Richtlinien des Modells oder war zu mehrdeutig. Es wurde nichts gespeichert; formulieren Sie den Befehl anders und versuchen Sie es erneut.
   ai_ostrzezenie_cache_tytul: Warnung zum Wiederaufnahme-Cache
   ai_ostrzezenie_cache: "Die Übersetzung wurde abgeschlossen und gespeichert, aber die temporäre Datei (Wiederaufnahme-Cache) konnte nicht gelöscht werden:\n{plik}\n\nBitte löschen Sie diese Datei manuell. Solange sie vorhanden ist, kann eine erneute Übersetzung einer Datei mit demselben Namen in dieselbe Sprache aus diesem Cache fortgesetzt werden und die VORHERIGE Übersetzung anstelle der neuen liefern.\n\nDetails: {szczegoly}"
+  ext_brak: keine Erweiterung
+  ext_nieobslugiwane_tytul: Nicht unterstützte Erweiterung
+  ext_nieobslugiwane_tresc: "Diese Datei hat die Erweiterung {rozszerzenie}, die vom Programm nicht direkt unterstützt wird.\n\nUnterstützte Erweiterungen: {lista_rozszerzen}\n\nDer Inhalt wird als reiner Text behandelt: Formatierungen und Auszeichnungen dieses Formats gelangen als Inhalt in das Ergebnis, und die Sprachsynthese wird sie laut vorlesen.\n\nTrotzdem laden?"
+  md_render_tytul: Markdown in HTML umgewandelt
+  md_render_tresc: "Die Datei {nazwa_pliku} ist eine Markdown-Datei und wurde daher vor dem Anwenden von Akzent oder Verschlüsselung in HTML umgewandelt.\n\nDadurch werden Überschriften, Listen und Zitate im Ergebnis zu echten Dokumentelementen (der Screenreader kann zwischen ihnen springen), und Syntaxzeichen wie „---\", „- \", „> \" werden nicht laut vorgelesen.\n\nDas Ergebnis wird als .html-Datei gespeichert. Der KI-Übersetzer erhält den Inhalt unverändert."
+  md_render_blad_tytul: Markdown konnte nicht verarbeitet werden
+  md_render_blad_tresc: "Markdown konnte nicht in HTML umgewandelt werden:\n{tresc_bledu}\n\nDie Datei wird als reiner Text verarbeitet, wodurch die Markdown-Syntaxzeichen als Inhalt ins Ergebnis übernommen werden."
+  wymus_bez_jezyka_tytul: Verarbeitungssprache auswählen
+  wymus_bez_jezyka_tresc: "Um eine einzige Sprache zu erzwingen, muss sie im Feld „Verarbeitungssprache\" ausdrücklich angegeben werden.\n\nBei der Einstellung „Automatisch erkennen\" würde die erzwungene Sprache aus der Erkennung stammen — genau das soll die Erzwingung jedoch verhindern. Bei bereits verschlüsseltem Text liefert die Erkennung eine zufällige Sprache, wodurch das Programm das falsche Alphabet anwenden würde.\n\nWählen Sie eine Sprache aus der Liste oder deaktivieren Sie die Erzwingung."
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)

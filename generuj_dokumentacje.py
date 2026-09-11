@@ -57,6 +57,7 @@ from typing import Any
 
 import yaml
 
+import core_markdown
 import dev_konsola
 import dev_yaml
 
@@ -306,50 +307,23 @@ _TAGI_DOZWOLONE = frozenset({
 _TAG_REGEX = re.compile(r"</?([a-zA-Z][a-zA-Z0-9]*)")
 
 
-def _tytul_dokumentu(tresc_md: str) -> str:
-    """Wyciąga tytuł do ``<title>``: pierwszy nagłówek `# ` albo pierwsza linia."""
-    m = re.search(r"^#{1,2} +(.+)$", tresc_md, flags=re.MULTILINE)
-    tytul = m.group(1) if m else (tresc_md.strip().splitlines() or ["Dokument"])[0]
-    return tytul.strip().lstrip("#").strip()
-
-
 def _renderuj_html(tresc_md: str, jezyk: str) -> str:
     """Renderuje treść Markdown do pełnego, samodzielnego dokumentu HTML5.
+
+    v19.1: sam render (rozszerzenia, tytuł, szkielet dokumentu) mieszka
+    w `core_markdown` — od tego wydania ten sam kod obsługuje `.md` wczytane
+    przez użytkownika w Poliglocie, a runtime nie może importować dev-toola.
+    Wyjście musi zostać BAJT W BAJT takie jak przed wydzieleniem; pilnuje tego
+    `git diff docs/` po regeneracji (Step 0a procedury wydawniczej) oraz
+    bramka RAW-HTML niżej, która czyta wynikowe pliki.
 
     Raises:
         RuntimeError: gdy biblioteka `markdown` nie jest zainstalowana —
             celowo GŁOŚNO (build/`--waliduj` musi paść), bo cicha degradacja
             zostawiłaby paczkę bez plików, na które wskazuje menu Pomoc.
     """
-    try:
-        import markdown
-    except ImportError as exc:                              # pragma: no cover
-        raise RuntimeError(
-            "Missing the `markdown` package (docs render Markdown → HTML "
-            "since v18.8). Fix: .venv/Scripts/pip install markdown "
-            "(it is listed in requirements.txt)."
-        ) from exc
-
-    body = markdown.markdown(
-        tresc_md, extensions=["nl2br", "sane_lists"], output_format="html5",
-    )
-    tytul = _tytul_dokumentu(tresc_md)
-    tytul_safe = (tytul.replace("&", "&amp;").replace("<", "&lt;")
-                       .replace(">", "&gt;"))
-    return (
-        "<!DOCTYPE html>\n"
-        f'<html lang="{jezyk}">\n'
-        "<head>\n"
-        '<meta charset="utf-8">\n'
-        '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
-        f"<title>{tytul_safe}</title>\n"
-        f"<style>\n{_HTML_STYL}\n</style>\n"
-        "</head>\n"
-        "<body>\n"
-        f"{body}\n"
-        "</body>\n"
-        "</html>\n"
-    )
+    return core_markdown.renderuj(tresc_md, jezyk, styl=_HTML_STYL,
+                                  viewport=True)
 
 
 # ---------------------------------------------------------------------------
@@ -454,9 +428,12 @@ def _bramka_tagow_akcentu() -> dict[str, list[str]]:
                 zle = [n for n in nazwy if not cr.czy_znany_akcent(n, kod)]
                 if zle:
                     powody.append(
-                        f"{cytat!r}: extracted {zle} — not an accent id of the "
-                        f"`{kod}` pack (the word next to the trigger must be a "
-                        f"RULE FILE name from `dictionaries/{kod}/akcenty/`)"
+                        f"{cytat!r}: extracted {zle} — not an accent of the "
+                        f"`{kod}` pack. The word next to the trigger must be "
+                        f"either a RULE FILE name from "
+                        f"`dictionaries/{kod}/akcenty/` (e.g. `finski`) or the "
+                        f"native adjective the pack itself uses — the first "
+                        f"word of that file's `etykieta` (since v19.1)"
                     )
             if powody:
                 znaleziska[str(szablon.relative_to(ROOT))] = powody

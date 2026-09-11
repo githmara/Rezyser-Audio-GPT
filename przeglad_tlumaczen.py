@@ -133,6 +133,14 @@ _CHECKLIST_WSPOLNA = """\
   `.txt`, `.md`, `.yaml`. Never localize a path to a native word
   (`historias/`, `sögur/`, `script/` are BUGS — must stay `opowiesci/` etc.).
 - The product brand "Reżyser Audio GPT" stays as-is in every language.
+  MODULE names are the opposite case — they ARE localized per pack
+  ("Poliglota" is de "Polyglott", es "Políglota", fr "Polyglotte", ru
+  "Полиглот"), so a message that names one must use the form from that pack's
+  own `panel_name`. Leaving the Polish "Poliglota" in a German sentence is a
+  leak the docs gate does not see (no Polish diacritics in it). Best fix is
+  usually upstream: a message shown BY a module rarely needs to name it —
+  drop the name from the Polish source instead (done in v19.1 for
+  `poliglota.ext_nieobslugiwane_tresc`, which had leaked into 5 packs).
 - Proper names: voices and engines (Vocalizer, Tiflotecnia, Cerrence,
   Eloquence, Samantha, Alice, Milena, …) and version numbers (e.g. 17.2.2).
 
@@ -305,6 +313,15 @@ _CHECKLIST_DOCS = """\
   When you localize the example word in a cipher demo (e.g. the stutter cipher),
   RE-COMPUTE the output against the actual rule — a different native word can
   have a different second letter and break the very rule the example illustrates.
+- AN ACCENT EXAMPLE MUST NAME AN ACCENT YOUR PACK HAS. Native parity gives each
+  pack N-1 FOREIGN accents: there is no French accent in the `fr` pack, no
+  Russian one in `ru`. So an example may not simply be localized — translating
+  the Polish "akcent francuski" into French gives "accent français", which is
+  the one accent `fr` will never have. Swap the LANGUAGE in the example for one
+  your pack ships (check `dictionaries/<code>/akcenty/`), then re-read the
+  sentence. Measured 2026-09-11 (`fr`, v19.1): a regenerated section did exactly
+  this in three places. The ACCENT-TAG gate catches it inside a `[Speaker] …`
+  tag; the same mistake in ordinary prose ("has a French accent") has no gate.
 - INFLECTED LANGUAGES (Icelandic, Finnish): the machine output frequently gets
   the grammatical CASE/gender wrong (case is NOT frozen the way {placeholders}
   are). For is/fi a second, independent native/AI reviewer focused purely on
@@ -323,7 +340,24 @@ _CHECKLIST_UI = """\
   `opowiesci/`) must stay literal — the folder on disk is not localized.
 - BUTTON-NAME CITATIONS: avoid quoting a literal button label inside a message;
   describe the action instead (future-proof + no hallucinated label).
+  When a message MUST name a control (e.g. "specify it in the <X> field"),
+  copy the wording from that control's own key in THIS pack and nothing else.
+  Measured 2026-09-11 (`is`, v19.1): the message said „Vinnslutungumál" while
+  the field is labelled „Vinnslumál" — a plausible synonym that sends the user
+  hunting for a control that does not exist. Same class as the docs
+  GUI-LABEL gate, but no gate covers ui.yaml quoting ui.yaml yet.
+- ONE CONCEPT, ONE WORD, PER DIALOG: a term repeated inside one message (or
+  across the title/body/short-form keys of one dialog) must use the SAME
+  target word. Measured 2026-09-11 (`fi`, v19.1): one dialog about a file
+  extension carried "tiedostopääte" in the title and "tarkennin" /
+  "tarkentimet" in the body — three names for one thing, in one box.
 - TOOLTIP vs LABEL are SEPARATE keys for the same control — translate both.
+- FILE-DIALOG WILDCARDS (`poliglota.file_dlg_wildcard`): the `*.ext` patterns
+  and the `|` separators are LITERALS for the OS dialog — translate only the
+  human-readable group names. A translated or reordered pattern silently
+  hides a supported format. Mechanically gated by
+  `test_markdown_poliglota.py` (contract C: every extension in
+  `core_poliglota.EXT_OBSLUGIWANE` appears in every pack's wildcard).
 """
 
 _CHECKLIST_TRYBY = """\

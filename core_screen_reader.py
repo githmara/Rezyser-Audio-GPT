@@ -32,24 +32,12 @@ import re
 import core_elevenlabs as ce
 import core_rezyser as cr
 
-#: Nazwa akcentu (znormalizowana ``_usun_polskie``, małe litery) → kod ISO 639-1
-#: do atrybutu ``lang``. Klucze pokrywają id-y akcentów z
-#: ``dictionaries/<jezyk>/akcenty/`` (te same, których szuka dynamiczny
-#: dispatch ``core_rezyser.zastosuj_akcenty_uniwersalne``).
-#: Dopasowanie jest prefiksowe (patrz :func:`_iso_dla_mowcy`), więc fleksja
-#: („fińskim", „fińskiego") też trafia na ``finski`` → ``fi``.
-_AKCENT_ISO: dict[str, str] = {
-    "finski": "fi",
-    "niemiecki": "de",
-    "francuski": "fr",
-    "hiszpanski": "es",
-    "hiszp": "es",
-    "wloski": "it",
-    "rosyjski": "ru",
-    "islandzki": "is",
-    "angielski": "en",
-    "polski": "pl",
-}
+# v19.1: hardkodowana mapa `_AKCENT_ISO` (10 nazw → ISO) USUNIĘTA. Była
+# dublem pola `iso` z `dictionaries/<jezyk>/akcenty/<id>.yaml` — tego samego,
+# które o języku głosu decyduje w Poliglocie — i tak samo jak tamten defekt
+# nie znała języka projektu. Nazwę rozstrzyga teraz
+# `core_rezyser.rozwiaz_nazwe_akcentu` (przyjmuje `id`, formę fleksyjną i
+# natywny przymiotnik z `etykieta`), a ISO czytamy z YAML-a wariantu.
 
 _RE_NAWIAS = re.compile(r"\[([^\]]+)\]")
 
@@ -68,11 +56,16 @@ def _usun_audio_tagi(dialog: str) -> str:
     return re.sub(r"[ \t]{2,}", " ", bez).strip()
 
 
-def _iso_dla_mowcy(speaker_lower: str, mapa: dict[str, dict]) -> str | None:
-    """Zwraca kod ISO 639-1 akcentu mówcy lub ``None``.
+def _iso_dla_mowcy(speaker_lower: str, mapa: dict[str, dict],
+                   jezyk_projektu: str) -> str | None:
+    """Zwraca kod języka GŁOSU dla akcentu mówcy albo ``None``.
 
-    Dopasowanie mówcy do Księgi jak w silniku akcentów (podciąg w obie strony),
-    a nazwy akcentu do ISO — prefiksowo (tolerancja fleksji polskiej).
+    Dopasowanie mówcy do Księgi jak w silniku akcentów (podciąg w obie strony).
+    Nazwę akcentu rozstrzyga `core_rezyser.rozwiaz_nazwe_akcentu`, a kod
+    języka pochodzi z pola ``iso`` wariantu — z tego samego miejsca, z którego
+    bierze go ścieżka zapisu Poligloty (v19.1). Wcześniej stała tu osobna,
+    hardkodowana mapa nazw: dublowała dane, nie znała języka projektu i
+    milczała dla nazw natywnych (`Finnish`, `isländisch`).
     """
     dane = next(
         (d for k, d in mapa.items() if k and (k in speaker_lower or speaker_lower in k)),
@@ -80,11 +73,12 @@ def _iso_dla_mowcy(speaker_lower: str, mapa: dict[str, dict]) -> str | None:
     )
     if not dane or not dane.get("nazwa"):
         return None
-    norm = cr._usun_polskie(dane["nazwa"]).lower()
-    for key, iso in _AKCENT_ISO.items():
-        if norm == key or norm.startswith(key):
-            return iso
-    return None
+    id_akcentu = cr.rozwiaz_nazwe_akcentu(dane["nazwa"], jezyk_projektu)
+    if not id_akcentu:
+        return None
+    cfg = cr.wariant_po_id(cr.TRYB_REZYSER, jezyk_projektu, id_akcentu) or {}
+    iso = str(cfg.get("iso") or "").strip()
+    return iso or None
 
 
 def _szablon(lang: str, tytul: str, body: str) -> str:
@@ -146,7 +140,7 @@ def generuj_html(
         dialog = _usun_audio_tagi(m.group(2))
         if not mowca or not dialog:
             continue
-        iso = _iso_dla_mowcy(mowca.lower(), mapa)
+        iso = _iso_dla_mowcy(mowca.lower(), mapa, jezyk_projektu)
         dialog_html = _html.escape(dialog)
         if iso:
             dialog_html = f'<span lang="{iso}">{dialog_html}</span>'

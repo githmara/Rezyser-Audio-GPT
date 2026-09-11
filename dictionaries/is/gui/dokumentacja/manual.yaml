@@ -302,50 +302,57 @@ tresc:
   krok_5_poliglota_intro: |
     ## SKREF 5: Tungumálamaður AI
 
-    Forrit til þýðinga og þvingunar á hreimum á skjálesaralesurum. Fara í það með því að smella á hnappinn "{main.btn.poliglota}" á hnappastikunni eða velja {main.menu.narzedzia} → {main.menu.poliglota} úr valmyndinni (flýtilykill: Ctrl+2).
+    Forrit til að þýða og þvinga fram harða hreima í talgervlum skjálesara. Farðu í það með því að smella á hnappinn „{main.btn.poliglota}" á hnappastikunni eða velja {main.menu.narzedzia} → {main.menu.poliglota} úr valmyndinni (flýtileið: Ctrl+2).
 
-    ### Hamur 1: Venjulegur Þýðandi (Notar AI - Greitt)
 
-    Tilvalið til að hlusta á sögur á fallegu, réttmætu erlendu máli.
+    ### Hamur 1: Venjulegur þýðandi (Notar gervigreind - Greitt)
 
-    - Hladdu inn skrá með hnappnum "{poliglota.btn_wczytaj}" eða með því að nota hnappinn "{poliglota.btn_przegladaj}" til að velja skrá í kerfisglugganum.
-    - Veldu "AI Þýðandi" ham, sláðu inn markmálið (t.d. "Finska").
-    - Forritið mun þýða efnið. Ef þú hleður inn .html skrá, mun það aðeins þýða textann sem er sýnilegur lesandanum og uppfæra tungumálakóðann í html taginu.
-    - Ef þú hleður inn venjulegri .txt eða .md skrá (t.d. skrá sem er búin til af Leikstjóra), mun forritið sjálfkrafa vista niðurstöðuna sem .html skrá með innbyggðum tungumálakóða eftir þýðingu — tilbúið til að lesa með NVDA án viðbótarvinnu.
+    Fullkomið til að hlusta á sögur í fallegu, réttu erlendu tali.
+
+    - Hlaðið inn skrá með hnappinum „{poliglota.btn_wczytaj}" eða notið hnappinn „{poliglota.btn_przegladaj}" til að velja skrá í kerfisglugganum.
+    - Veljið hamur „Þýðandi gervigreindar", skrifið markmál (t.d. „Finnska").
+    - Handritið þýðir innihaldið. Ef þú hleður inn .html-skrá, þýðir það aðeins textann sem er sýnilegur lesandanum og uppfærir tungumálskóðann í html-taginu.
+    - Ef þú hleður inn venjulegri .txt eða .md skrá (t.d. handrit búið til af Leikstjóranum), vistar handritið útkomuna sjálfkrafa sem .html-skrá með innbyggðu tungumálstagi eftir þýðingu — tilbúið til lestrar af NVDA án nokkurrar aukavinnu.
     - Styður einnig .docx skrár.
 
-    Snjöll skipting í blokkir: Löngum textum er sjálfkrafa skipt í blokkir sem mældar eru í tókum líkansins (ekki stöfum) og þýddir í röð með framvindustiku. Þannig rúmast einnig þétt rituð tungumál, eins og kínverska eða japanska, innan svarmarka líkansins, og afklippt svar er greint og sjálfkrafa reynt aftur á minni hlutum.
+    Snjöll skipting í blokkir: Löngum textum er sjálfkrafa skipt í blokkir sem mældar eru í táknum líkansins (en ekki stöfum) og þýtt í röð með framvindustiku. Þannig komast einnig tungumál með þéttri ritun, eins og kínverska eða japanska, innan svarmarka líkansins, og stytt svar er greint og reynt aftur sjálfkrafa á minni hlutum.
 
-    Örugg framvinduvistun (NÝTT í útgáfu 9): Hver þýdd blokk er strax vistuð í falda tímabundna skrá í kerfismöppu forritsins. Ef þýðingin er rofin vegna þess að API kvótinn er uppurinn, mun forritið sjálfkrafa greina þessa skrá við næstu ræsingu, endurheimta þegar greidda framvindu og ljúka verkinu rólega frá því sem var rofið — án handvirkrar afritunar. Eftir árangursríka lokun er tímabundna skráin sjálfkrafa fjarlægð.
+    Bilanaþolinn framvinduvistun (NÝTT í útgáfu 9): Hver þýdd blokk er vistuð samstundis í falda bráðabirgðaskrá í kerfismöppu forritsins. Ef þýðingin er rofin vegna þess að API-mörk klárast, mun forritið sjálfkrafa greina þessa skrá við næstu ræsingu, endurheimta þegar greidda framvindu og ljúka rólega verkinu frá þeim stað sem hætt var — án nokkurrar handvirkrar afritunar. Eftir að verkinu er lokið með góðum árangri er bráðabirgðaskráin sjálfkrafa eytt.
 
-    Af hverju er þetta mikilvægt? Í útgáfu 8 var nálgunin við að halda áfram þýðingu með alvarlegum, hljóðlátum galla: ef þú endurnefndir ekki skrána með hlutþýðingu og skarst þýdda hlutann af samkvæmt leiðbeiningum, og síðan hélt áfram að þýða restina strax — opnaði forritið útskriftarskrána í yfirskriftarham. Greiddri framvindu var óafturkræft og ómeðvitað eytt áður en þú tókst eftir neinu. Útgáfa 9 útrýmir þessari gildru algjörlega: vistun er varanleg eftir hverja blokk, óháð því hvað þú gerir síðan.
+    Af hverju skiptir þetta máli? Í útgáfu 8 hafði aðferðin við að halda áfram þýðingu alvarlega, þögla villu: ef skránni með hlutaþýðingunni var ekki breytt í nafni og þýdda brotið var skorið úr samkvæmt fyrirmælum, og síðan var þýðingu afgangsins haldið áfram strax — opnaði forritið úttaksskrána í yfirskriftarham. Greidd framvinda gat óafturkræft og óafvitandi þurrkast út áður en þú náðir að taka eftir nokkru. Útgáfa 9 útilokar þessa gildru algjörlega: vistun er varanleg eftir hverja blokk, óháð því hvað þú gerir á eftir.
 
-    ### Hamur 2: Leikstjórnarhamur / Hreimar (Ókeypis - Virkar staðbundið)
+    ### Hamur 2: Leikstjórahamur / Hreimar (Ókeypis - Virkar staðbundið)
 
-    Tól til að "spilla" texta. Þvingar brotna pólsku á talgervla.
+    Verkfæri til að „skemma" texta. Þvingar talgervla til að tala brotna pólsku.
 
-    Samþætt fellivalmynd Leikstjórnarhams gerir þér kleift að velja hreim beint af einum lista. Í boði eru:
+    Samþætt fellivalmynd Leikstjórahams gerir kleift að velja hreim beint úr einum lista. Í boði eru:
     Enska (Samantha / Mark — Vocalizer/Apple, Zira / Hazel — OneCore)
     Rússneska (Milena — Vocalizer/Apple, Irina / Pavel / Yuri — OneCore, eSpeak)
     Franska (Thomas / Amelie — Vocalizer/Apple, Julie — OneCore)
     Þýska (Markus / Stefan — Vocalizer/Apple, Hedda / Katja — OneCore)
     Spænska (Jorge / Monica — Vocalizer/Apple, Helena — OneCore)
-    Pólska (Ewa — Vocalizer, Paulina — OneCore)
+    Pólska (Ewa í Vocalizer, Paulina í OneCore)
     Ítalska (Alice / Luca — Vocalizer/Apple, Elsa — OneCore)
-    Finska (Satu / Mikko — Vocalizer/Apple, Heidi — OneCore)
+    Finnska (Satu / Mikko — Vocalizer/Apple, Heidi — OneCore)
     Og einnig tveir hreinsunarvalkostir án hreims:
-    "Enginn (Hreinsun ÁN talnaviðmiðunar)"
-    "Enginn (Hreinsun MEÐ talnaviðmiðun)"
-    Valmöguleikinn með talnaviðmiðun breytir sjálfkrafa tölum í orðform (t.d. 15 verður "fimmtán") fyrir vinnslu — þannig les NVDA tölur áreynslulaust, og ef textinn hefur þvingaðan hreim, fær talan hann líka, án undantekninga.
-    Þú spyrð kannski hvort talgervillinn muni geta beygt slíkar tölur eftir samhengi? Svarið er: nei. Og það er viljandi eiginleiki. Eins og alkunna er: "pólska erfið mál" — og útlendingur sem brýtur málfræðina okkar bætir aðeins við áreiðanleika brotins hreims!
+    „Enginn (Hreinsun ÁN normalíseringar talna)"
+    „Enginn (Hreinsun MEÐ normalíseringu talna)"
+    Valkosturinn með normalíseringu talna breytir sjálfkrafa tölustöfum í orð þeirra (t.d. verður 15 að „fimmtán") áður en unnið er úr textanum — þannig les NVDA tölur mjúklega, og ef textinn hefur þvingaðan hreim, fær talan hann líka, án nokkurra undantekninga.
+    Þið spyrjið eflaust hvort talgervillinn geti beygt svona normalíseraðar tölur eftir samhengi? Svarið er: nei. Og það er meðvituð eiginleiki. Eins og alkunna er: „pólska er erfitt tungumál" — og útlendingur sem meiðir málfræði okkar bætir aðeins við trúverðugleika brotna hreimsins!
 
-    Tagaviðgerðarmaður (NÝTT í útgáfu 9): Neðst á listanum finnurðu viðbótarvalkost — Tagaviðgerðarmaður. Hann beitir engum hljóðreglum eða hreinsun. Hann gerir eitt: sprautar inn í skrána þann ISO tungumálakóða sem þú gefur upp — tveggja stafa (t.d. "fi" fyrir finska, "en" fyrir enska) eða með svæðis- eða leturmerki (t.d. "pt-BR" fyrir brasilíska portúgölsku, "zh-Hans" fyrir einfaldaða kínversku). Gagnlegt þegar þú hefur þegar tilbúna skrá — t.d. áður þýdda af AI Þýðanda — en af einhverjum ástæðum kom hún út með röngu tungumálamerki eða tungumálamerki sem vantar. Í stað þess að þýða hana aftur, einfaldlega keyrirðu Tagaviðgerðarmanninn með réttum ISO kóða og eftir smá stund hefurðu rétta skrá.
+    Tagaviðgerðarmaður (NÝTT í útgáfu 9): Neðst á listanum finnur þú aukavalkost — Tagaviðgerðarmaður. Beitir engum hljóðfræðilegum reglum né hreinsun. Gerir eitt: sprautar inn í skrána ISO tungumálskóða sem þú gefur upp — tveggja stafa (t.d. „fi" fyrir finnsku, „en" fyrir ensku) eða með undirtagi fyrir svæði eða letur (t.d. „pt-BR" fyrir brasilíska portúgölsku, „zh-Hans" fyrir einfaldaða kínversku). Kemur að gagni þegar þú átt þegar tilbúna skrá — t.d. þýdda áður af Þýðanda gervigreindar — en hún kom af einhverjum ástæðum út með rangt eða vantandi tungumálstag. Í stað þess að þýða hana aftur frá grunni, keyrir þú einfaldlega Viðgerðarmanninn með rétta ISO kóðanum og eftir smástund hefur þú rétta skrá.
 
-    Forritið hreinsar leikstjóraleiðbeiningar í sviga — fjarlægir alla texta sem eru í sviga (t.d. "(með innfelldum andardráttum)", "(hvíslað)", "(háðslega)"). ElevenLabs á að lesa aðeins samtöl og frásögn, ekki leikstjóraleiðbeiningar innfelldar í textann.
+    Frá útgáfu 19.1 gildir gefinn kóði fyrir ALLT skjalið: hann fer bæði í haus skrárinnar og í hverja málsgrein. Áður reyndi Viðgerðarmaðurinn einnig að giska á tungumál hverrar málsgreinar sérstaklega, svo skráin gat eftir viðgerð haft kóða inni sem þú skrifaðir ekki. Val á kóða fyrir einstakar málsgreinar er sérstakt verkefni og krefst notendaviðmóts þar sem þú sérð þessar málsgreinar — við áætlum það fyrir næstu útgáfu.
 
-    Forritið hreinsar einnig Markdown merki — fjarlægir fyrirsagnahashmerki (t.d. #, ##, ###), jafnaðarmerki notuð sem undirstrikanir á fyrirsögnum og munaðarlausar kommur sem gætu truflað lestrarhrynjandi talgervilsins.
+    Markdown-skrár (NÝTT í útgáfu 19.1): .md skrá er breytt í HTML áður en hreimi eða dulkóðun er beitt. Fyrirsagnir, listar og tilvitnanir verða í útkomunni raunveruleg skjalaeiningar sem skjálesari getur stokkið á milli (í NVDA lyklarnir 1-6 og H), og táknin sjálf úr setningafræðinni — „---", „- ", „> " — eru ekki lengur lesin upphátt sem efni. Áður fór .md inn í vinnsluna eins og venjulegur texti, svo þessi tákn lentu í útkomunni og öll uppbygging skjalsins týndist. Þýðandi gervigreindar fær Markdown óbreytt — líkanið skilur það náttúrulega, og breyting í HTML myndi aðeins hækka kostnað þýðingarinnar.
 
-    - Verndarskjöldur: Forritið verndar öll HTML merki. Það spillir aðeins samtölum og frásögn.
+    Skráarendingar utan listans: skráarvalsglugginn sýnir snið sem forritið styður beint (.txt, .md, .html, .htm, .docx). Síuna „allar skrár" má samt nota til að velja hvað sem er annað — þá færðu spurningu með viðvörun um að innihaldið verði meðhöndlað sem hreinn texti, svo merki þessa sniðs lenda í útkomunni og talgervillinn les þau upphátt.
+
+    Handritið hreinsar sviga með leikstjóraábendingum — fjarlægir alla textabúta í kringum sviga (t.d. „(með fléttuðum andköfum)", „(hvíslandi)", „(kaldhæðnislega)"). ElevenLabs á aðeins að lesa samræður og frásögn, en ekki leikstjórafyrirmæli fléttuð inn í textann.
+
+    Handritið hreinsar einnig Markdown-merki — fjarlægir myllumerki fyrirsagna (t.d. #, ##, ###), jafnaðarmerki notuð sem undirstrikanir fyrirsagna og munaðarlausar kommur sem gætu truflað lestrartakt talgervilsins.
+
+    - Verndarskjöldur: Handritið verndar öll HTML-tög. Það skemmir aðeins samræður og frásögn.
     - Virkar staðbundið og kostar ekkert!
   krok_5_tryb_szyfrant: |
     ## Hamur 3: Dulritari (NÝTT í 13.0 — skemmtun með texta, frítt, staðbundið)
@@ -374,16 +381,16 @@ tresc:
   krok_5_jezyk_pipeline: |
     ## Vinnslutungumál, þvingun og gæðahamur (NÝTT í 18.11)
 
-    Skjalahlutinn hefur nú fellilista fyrir vinnslutungumál. Með honum velur þú samkvæmt reglum hvaða tungumáls Leikstjórnar- og Dulkóðunarhamur vinna: hreimlista og dulmálslista, ásamt stafrófi Sesarslykils og tilfærsluspönn þess.
+    Kaflinn um innlestur skráar er nú með fellilista fyrir vinnslutungumál. Með honum velur þú samkvæmt reglum hvaða tungumáls stillingarnar Leikstjóri og Dulritari vinna: hreimlista og dulmálslista, sem og stafróf Sesar-dulritunar ásamt tilfærslusviðinu.
 
-    - Sjálfgefna stillingin „{poliglota.jezyk_auto}" heldur fyrra hegðunarmynstri: tungumálið ákvarðast út frá innlesnu skjali, og ef það er annað en tungumál forritsins færðu stutta tilkynningu um að listunum hafi verið skipt yfir.
-    - Val á tilteknu tungumáli úr listanum er bindandi — forritið breytir því ekki sjálfkrafa við innlestur skjals.
+    - Sjálfgefna staðan „{poliglota.jezyk_auto}" heldur núverandi hegðun óbreyttri: tungumálið ákvarðast út frá innlesnu skránni, og ef það er frábrugðið tungumáli forritsins færðu stutta tilkynningu um að listarnir hafi verið skiptir yfir.
+    - Val á tilteknu tungumáli af listanum er bindandi — forritið breytir því ekki sjálfkrafa við innlestur skráar.
 
-    Undir listanum er valreitur sem þvingar valið tungumál fyrir allt skjalið. Sjálfgefið er hver efnisgrein unnin samkvæmt tungumáli sem greinist fyrir þá efnisgrein — það er yfirleitt besti kosturinn, því innskot á öðrum tungumálum fá sínar eigin, réttu reglur. Merktu við þvingun þegar þú vilt samræmda vinnslu á öllu skjalinu. Dæmi þar sem þetta er nauðsynlegt: afturkræf fjöllaga dulritun. Stafróf Sesarslykils er mislangt eftir tungumálum, svo án þvingunar verður texti með blönduðum tungumálum dulritaður með nokkrum ólíkum stafrófum — og þá krefst afkóðun þess að vita hvar tungumálamörkin lágu. Með þvinguðu tungumáli dulritar og afkóðar allt skjalið eitt og sama stafróf. Fyrirvari: í tungumálum þar sem Caesar-stafrófið inniheldur broddstafi sem eru samræmdir við innlestur (pólska, þýska) er afkóðunin ekki fullkomlega trú — broddstafir dulritextans eru umbreyttir í grunnform sín við endurinnlestur, áður en þeir ná afkóðuninni. Full afturkræfni fæst með stafrófum án slíkra tákna (t.d. ensku).
+    Fyrir neðan listann er hakreitur sem þvingar fram valið tungumál fyrir allt skjalið. Sjálfgefið er hver málsgrein unnin samkvæmt tungumálinu sem greinist fyrir þá málsgrein — það er yfirleitt besta valið, því innskot á öðrum tungumálum fá sínar eigin, réttu reglur. Hakaðu við þvingun þegar þú vilt samræmda vinnslu á öllu skjalinu. Frá útgáfu 19.1 krefst þvingun þess að tungumál sé valið beinlínis af listanum hér að ofan: við stöðuna „{poliglota.jezyk_auto}" myndi þvingaða tungumálið koma frá greiningu, það er að segja frá kerfinu sem þvingunin á einmitt að slökkva á — og fyrir texta sem þegar er dulritaður skilar greiningin handahófskenndu tungumáli, þannig að forritið myndi leggja rangt stafróf yfir. Hakaður reitur án valins tungumáls stöðvar vinnsluna með stuttum skilaboðum. Dæmi þar sem þetta er nauðsynlegt: afturkræf fjöllaga dulritun. Stafróf Sesar-dulritunar hefur mismunandi lengd í hverju tungumáli, þannig að án þvingunar verður texti sem blandar tungumálum dulritaður með nokkrum ólíkum stafrófum — og þá krefst afkóðunin þess að vita hvar mörk tungumálanna lágu. Með þvinguðu tungumáli dulritar og afkóðar allt skjalið eitt og sama stafrófið. Fyrirvari: í tungumálum þar sem Sesar-stafrófið inniheldur broddstafi sem eru samræmdir (normaliseraðir) við innlestur (pólska, þýska), er afkóðunin ekki fullkomlega nákvæm — broddstafir dulritaða textans eru við endurinnlestur breyttir í grunnform sína áður en þeir fara í afkóðun. Fullkomna afturkræfni gefa aðeins stafróf án slíkra tákna (t.d. enska).
 
-    Gervigreindarþýðandinn hefur hins vegar fengið nýjan valreit fyrir gæðahaminn. Þegar merkt er við hann fær líkanið aukið svigrúm fyrir innri textagreiningu áður en þýtt er (svokölluð extended thinking) — þýðingin tekur lengri tíma og kostar fleiri tákneiningar (tokens), en erfiðir kaflar verða vandaðri. Valkosturinn virkar eingöngu með Anthropic Claude-líkönum; ef þú notar annan þjónustuveitanda gegnum OpenAI-samhæfðan endapunkt hefur merking við hann engin áhrif.
+    AI-þýðandinn fékk hins vegar hakreit fyrir gæðaham. Þegar hakað er við fær líkanið aukið svigrúm fyrir innri greiningu textans fyrir þýðingu (svokölluð „extended thinking") — þýðingin tekur lengri tíma og kostar fleiri tóka, en erfiðir kaflar verða vandaðri. Valkosturinn virkar eingöngu með Anthropic Claude-líkönum; ef þú notar annan þjónustuveitanda í gegnum endapunkt sem er samhæfður við OpenAI hefur hakið enga virkni.
 
-    Skyld smáatriði: Stafir með makron sem notaðir eru við umritun japönsku (t.d. Tōkyō, rāmen, jūdō) eru frá og með þessari útgáfu samræmdir eins og aðrir erlendir broddstafir — í flestum tungumálum í hreinan staf (Tokyo), en í finnska pakkanum með tvöföldun sérhljóðans (Tookyoo), í samræmi við finnsku venjuna við ritun langra hljóða. Þannig detta þeir ekki lengur út úr stafrófi Sesarslykils sem opinská tákn í dulritextanum.
+    Skyld smáatriði: tákn með lengdarmerki (makron) sem notuð eru í japanskri umritun (t.d. Tōkyō, rāmen, jūdō) eru frá þessari útgáfu samræmd líkt og önnur erlend broddtákn — í flestum tungumálum yfir í berstrikaðan bókstaf (Tokyo), en í finnska pakkanum með tvöföldun sérhljóðans (Tookyoo), í samræmi við finnska ritvenju fyrir löng hljóð. Þannig detta þau ekki lengur út úr stafrófi Sesar-dulritunar sem sýnileg tákn í dulritaða textanum.
   krok_5_detekcja_jezyka: |
     ## Málgreining
 
@@ -427,12 +434,16 @@ tresc:
   krok_5_tagi_jezykowe: |
     ## Killer Feature fyrir blinda: Skrár með tungumálamerkjum
 
-    Þetta er sannkölluð bylting. Unnar skrár eru nú vistaðar sem:
+    Þetta eru sannkölluð tímamót. Unnar skrár vistast núna sem:
 
-    - .html með lang eiginleika (t.d. lang="fi" fyrir finnsku) — NVDA les þennan merkimiða og skiptir sjálfkrafa yfir á viðeigandi tungumálatalgervil. Engin handvirk stilling!
-    - .docx með varðveittum sniði — hver textahluti hefur innsprautað tungumálamerki í XML skjalsins, þannig að Word og NVDA vita hvaða rödd á að nota fyrir hvern hluta.
+    - .html með lang eiginleikanum (t.d. lang="fi" fyrir finnsku) — NVDA les þetta merki og skiptir sjálfkrafa yfir í viðeigandi málgervil. Engin handvirk stilling nauðsynleg!
+    - .docx með varðveittu sniði — hvert textabrot (run) fær innspýtt málmerki í XML skjalsins, þannig að Word og NVDA vita hvaða rödd á að nota fyrir hvern hluta.
 
-    Unnar skrár eru alltaf vistaðar sem NÝ skjöl (t.d. akcent_Finski.html).
+    Unnar skrár vistast alltaf sem NÝ skjöl (t.d. akcent_Finski.html).
+
+    Lagfæring í útgáfu 19.1 — málmerkið lýsir RÖDDINNI, ekki upprunanum. Við hreim er merkið núna alls staðar það sama og vísar til málgervilsins sem á að lesa útkomuna: fyrir finnskan hreim er það lang="fi" bæði í haus skjalsins OG í hverri efnisgrein. Áður fékk hausinn markmálið, en einstakar efnisgreinar fengu málið sem skráin var skrifuð á fyrir vinnslu. Afleiðingin var þveröfug við það sem stefnt var að: NVDA skipti aftur yfir í upprunaröddina þegar komið var inn í efnisgreinina og las hljóðritunina eins og hún væri venjulegur pólskur texti, þannig að hreimurinn heyrðist ekki. Í skrám sem þú hlóðst inn sem heilt HTML gat þetta orðið enn verra — málið fyrir hverja efnisgrein var giskað út frá texta sem HAFÐI ÞEGAR farið í gegnum hljóðfræðilegar reglur, þannig að eitt skjal gat fengið nokkra ólíka kóða og enginn þeirra var sá rétti. Ef þú átt gamlar útkomuskrár þar sem hreimurinn „virkaði ekki", nægir að keyra frumtextann aftur í gegnum Tungumálamanninn.
+
+    Hamir sem breyta ekki málinu — bæði hreinsunarhamirnir og dulmálin — hegða sér eins og áður: efnisgrein á rússnesku er áfram merkt sem rússneska, því eftir hreinsun er hún enn á rússnesku.
   krok_5_auto_jezyk_nvda: |
     ## Sjálfvirk tungumálaskipting í NVDA — það sem þú þarft að vita
 
@@ -476,17 +487,17 @@ tresc:
   krok_7_ksiega_swiata: |
     ## SKREF 7: Hvernig á að skrifa Heimsbókina (Kvaðning Arkitektsins og Markdown-smánámskeið)
 
-    Gervigreind sem knýr Aðalstúdíóið skilur skipanir best þegar þær eru sniðnar á Markdown-merkingarmálinu. Ef þú gefur gervigreind í Leikstjóranum aðeins lauslega hugmynd (t.d. „tvær systur í hinum heimi"), mun vélin fara í uppnám vegna skorts á upplýsingum og búa til banallega, fyrirsjáanlega sögu sem hunsar rökfræðina.
+    Gervigreindin sem knýr Aðalstúdíóið skilur skipanir best þegar þær eru forsniðnar í Markdown-merkingarmáli. Ef þú gefur AI-inu í Leikstjóranum aðeins lauslega hugmynd (t.d. „tvær systur í framlífinu"), fer vélin í uppnám vegna skorts á smáatriðum og býr til klisjukennda, fyrirsjáanlega sögu, þar sem hún hunsar rökfræðina.
 
-    Til að koma í veg fyrir þetta skaltu nota ytri spjallbot (t.d. ókeypis ChatGPT eða Claude) sem persónulegan Arkitekt þinn. Í útgáfu 13.0 þarftu ekki lengur að afrita kvaðninguna úr leiðbeiningunum handvirkt — í stjórnborði Leikstjórans, rétt undir hnappinum „{rezyser.btn_zapisz_ksiege_label}", finnur þú hnappinn „{rezyser.btn_prompt_architekta_label}". Smelltu á hann og gluggi opnast með tilbúnum kvaðningstexta í „eingöngu lestur" reitnum ásamt hnappinum „Afrita á klippiborð". NVDA tilkynnir allt innihaldið strax þegar glugginn opnast — nóg er að smella á „Afrita", líma (Ctrl+V) í ChatGPT/Claude og skipta út hlutanum „[SETTU HUGMYND ÞÍNA HÉR]" fyrir eigin frumkeim sögunnar.
+    Til að koma í veg fyrir þetta skaltu nota ytri spjallmenni (t.d. ókeypis ChatGPT eða Claude) sem persónulegan Arkitekt. Í útgáfu 13.0 þarftu ekki lengur að afrita promptinn úr leiðbeiningunum handvirkt — í spjaldi Leikstjórans, rétt fyrir neðan hnappinn „{rezyser.btn_zapisz_ksiege_label}", finnur þú hnappinn „{rezyser.btn_prompt_architekta_label}". Smelltu á hann og upp opnast valmynd með tilbúnum prompt-texta í „skrifvörðum" reit ásamt hnappinum „{common.btn_skopiuj_schowek}". NVDA les upp allt innihaldið um leið og glugginn opnast — smelltu bara á „Afrita", límdu (Ctrl+V) inn í ChatGPT/Claude og skiptu út hlutanum „[SKRIFAÐU HUGMYND ÞÍNA HÉR]" fyrir þitt eigið söguefni.
 
-    Af hverju svona en ekki með afritun úr leiðbeiningunum? Glugginn í GUI hefur lykilforskot hvað aðgengi varðar: hann er innbyggður og lesinn án truflana af skjálesara, krefst ekki þess að skipta yfir í textaritil (þar sem pólskir „ogonki"-stafir og gæsalappir geta afritast rangt) og virkar eins á öllum stýrikerfum. Sama mynstur — gluggi með kvaðningu til afritunar — er einnig notað í Reglustjóranum (sjá SKREF 7b hér að neðan).
+    Af hverju svona en ekki með því að afrita úr leiðbeiningunum? Valmyndin í grafíska notandaviðmótinu hefur lykilkost hvað varðar aðgengi: hún er innbyggð og lesin án truflana af skjálesara, krefst ekki þess að skipta yfir í textaritil (þar sem íslenskir sérstafir og gæsalappir afritast stundum rangt) og virkar eins á öllum stýrikerfum. Sama mynstur — valmynd með prompt til að afrita — er einnig notað í Reglustjóranum (sjá SKREF 7b hér að neðan).
 
-    Hvernig gervigreind svarar: Í svarinu færðu texta í tveimur hlutum. Fyrsti hlutinn er Heimsbókin lokuð í Markdown-kóðablokk (merki ```markdown … ```). Afritaðu EINGÖNGU innihald kóðablokkanna (án sjálfra merkjanna ```) og límdu í reitinn „Heimsbókin" í Leikstjóranum, og smelltu síðan á „{rezyser.btn_zapisz_ksiege_label}". Annar hlutinn er ráðlegging um hvaða skapandi ham (Skript eða Hljóðbók) hentar hugmynd þinni best — líttu á hana sem vísbendingu þegar þú velur ham í hamsvalsreitnum.
+    Hvernig AI svarar: Í svarinu færðu texta í tveimur hlutum. Sá fyrri er Heimsbókin lokuð inni í Markdown-kóðabálki (merkin ```markdown … ```). Afritaðu EINGÖNGU innihald kóðabálksins (án sjálfra ``` merkjanna) og límdu inn í reitinn „Heimsbók" í Leikstjóranum, smelltu síðan á „{rezyser.btn_zapisz_ksiege_label}". Seinni hlutinn er tillaga um hvaða skapandi hamur (Handrit eða Hljóðbók) hentar hugmynd þinni best — taktu hana sem vísbendingu þegar þú velur ham í valreitnum.
 
-    Markdown-smánámskeið í Bókinni: eitt myllumerki (#) er aðalhluti (t.d. „# Persónur"), tvöfalt myllumerki (##) er undirhluti, bandstrik (-) búa til lista, og tvöföldar stjörnur (**texti**) feitletra algerar, óbrigðular reglur (t.d. „**Hetjan LYGAR ALDREI**"). Fyrir erlendmælandi persónu skaltu bæta við merki með hreim, t.d. „[Speaker 1: Marek] - hefur francuski hreim". Lykilorðið „hreimur" (í hvaða beygingarformi sem er) er NAUÐSYNLEGT, og „francuski" er SKRÁARHEITI reglnanna í Reglustjóranum (`akcenty/francuski.yaml`) — vélin ber það saman bókstaflega, þess vegna eru þessi skráarheiti eins í öllum málpökkum. Merki sem er skrifað þannig greinir vélin sjálfkrafa og beitir réttum hljóðfræðireglum á samræður viðkomandi persónu.
+    Markdown-smánámskeið í Bókinni: eitt myllumerki (#) er aðalkafli (t.d. „# Persónur"), tvöfalt myllumerki (##) er undirkafli, bandstrik (-) mynda lista og tvöfaldar stjörnur (**texti**) feitletra algerar, óhagganlegar reglur (t.d. „**Hetjan LÝGUR ALDREI**"). Fyrir persónu sem talar erlent tungumál skaltu bæta við tagi með hreim, t.d. „[Speaker 1: Marek] - hefur franskan hreim". Lykilorðið „hreim" er NAUÐSYNLEGT og „franskur" er SKRÁARHEITI reglnanna úr Reglustjóranum (`akcenty/francuski.yaml`) — þessi skráarheiti eru eins í öllum tungumálapökkum, svo þetta form virkar alls staðar. Frá útgáfu 19.1 þekkir vélin einnig heiti hreimsins á tungumáli pakkans þíns — það sem þú sérð á lista yfir hreima í Fjöltyngi — ásamt beygðum myndum (þannig virkar bæði „hefur franskan hreim" og „talar með frönskum hreim"). Áður taldi eingöngu skráarheitið í nefnifalli: hvers kyns önnur ritun samþykkti þáttarinn athugasemdalaust, en hljóðfræðilegum reglum var samt ekki beitt. Tag sem er skrifað svona greinir vélin sjálfkrafa og beitir réttum hljóðfræðilegum reglum á samtöl viðkomandi persónu.
 
-    Ráðlegging: Mundu að uppfæra Heimsbókina þína reglulega (þegar söguþráðurinn þróast með nýjum stöðum eða mikilvægum persónum). Þetta er hægt að gera handvirkt eða með hjálp ytri spjallbots. Því ríkulegri sem grunnurinn er, þeim mun betri verða niðurstöðurnar í Leikstjóranum!
+    **Ábending:** Mundu að uppfæra Heimsbókina þína reglulega (samhliða því sem sagan vex með nýjum stöðum eða mikilvægum persónum). Þú getur gert það handvirkt eða með aðstoð ytra spjallmennis. Því ríkari sem grunnurinn er, því betri verða niðurstöðurnar í Leikstjórninni!
   krok_7b_manager_regul: |
     ## SKREF 7b: Reglustjórinn (Ctrl+4) — orðasöfn fyrir málvísindafólk án Python-kunnáttu
 

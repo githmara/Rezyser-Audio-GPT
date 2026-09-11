@@ -839,9 +839,32 @@ poliglota:
   # Plik dialog
   file_dlg_title:        "Wybierz plik źródłowy"
   file_dlg_wildcard: |-
-    Obsługiwane pliki (*.txt;*.html;*.htm;*.docx)|*.txt;*.html;*.htm;*.docx|Pliki tekstowe (*.txt)|*.txt|Pliki HTML (*.html;*.htm)|*.html;*.htm|Dokumenty Word (*.docx)|*.docx|Wszystkie pliki (*.*)|*.*
+    Obsługiwane pliki (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Pliki tekstowe (*.txt)|*.txt|Pliki Markdown (*.md)|*.md|Pliki HTML (*.html;*.htm)|*.html;*.htm|Dokumenty Word (*.docx)|*.docx|Wszystkie pliki (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc:      "Podaj nazwę lub ścieżkę pliku przed wczytaniem."
+  ext_brak:              "brak rozszerzenia"
+  ext_nieobslugiwane_tytul: "Nieobsługiwane rozszerzenie"
+  ext_nieobslugiwane_tresc: |-
+    Ten plik ma rozszerzenie {rozszerzenie}, którego program nie obsługuje wprost.
+
+    Obsługiwane rozszerzenia: {lista_rozszerzen}
+
+    Zawartość zostanie potraktowana jak czysty tekst: formatowanie i znaczniki tego formatu trafią do wyniku jako treść, a syntezator mowy przeczyta je na głos.
+
+    Wczytać mimo to?
+  md_render_tytul:       "Markdown zamieniony na HTML"
+  md_render_tresc: |-
+    Plik {nazwa_pliku} to Markdown, więc przed nałożeniem akcentu lub szyfru został zamieniony na HTML.
+
+    Dzięki temu nagłówki, listy i cytaty zostaną w wyniku prawdziwymi elementami dokumentu (czytnik ekranu może po nich skakać), a znaki składni — „---", „- ", „> " — nie zostaną przeczytane na głos.
+
+    Wynik zapiszemy jako plik .html. Tłumacz AI dostaje treść bez zmian.
+  md_render_blad_tytul:  "Nie udało się przetworzyć Markdownu"
+  md_render_blad_tresc: |-
+    Nie udało się zamienić Markdownu na HTML:
+    {tresc_bledu}
+
+    Plik zostanie przetworzony jako czysty tekst, więc znaki składni Markdownu trafią do wyniku jako treść.
   plik_nie_istnieje_tresc: "Nie znaleziono pliku:\n{sciezka_pliku}"
   blad_odczytu_tresc:    "Błąd podczas odczytu pliku:\n{tresc_bledu}"
   plik_wczytany_tytul:   "Plik wczytany"
@@ -858,7 +881,14 @@ poliglota:
   combo_jezyk_tooltip:   'Wybierz zestaw reguł dla trybów Reżysera i Szyfranta. „Wykryj automatycznie" ustala język na podstawie wczytanego pliku.'
   chk_wymus:             "Wymuś ten język dla całego dokumentu (bez wykrywania języka akapitów)"
   chk_wymus_name:        "Wymuszenie języka dla całego dokumentu"
-  chk_wymus_tooltip:     "Domyślnie każdy akapit jest przetwarzany według wykrytego dla niego języka. Zaznacz, aby cały dokument — także obcojęzyczne wstawki — przeszedł przez reguły jednego języka (np. odwracalne szyfrowanie Cezarem jednym alfabetem)."
+  chk_wymus_tooltip:     "Domyślnie każdy akapit jest przetwarzany według wykrytego dla niego języka. Zaznacz, aby cały dokument — także obcojęzyczne wstawki — przeszedł przez reguły jednego języka (np. odwracalne szyfrowanie Cezarem jednym alfabetem). Wymaga wybrania języka w polu powyżej."
+  wymus_bez_jezyka_tytul: "Wybierz język przetwarzania"
+  wymus_bez_jezyka_tresc: |-
+    Wymuszenie jednego języka wymaga wskazania go wprost w polu „Język przetwarzania".
+
+    Przy ustawieniu „Wykryj automatycznie" wymuszany język pochodziłby z wykrywania — a to jest dokładnie to, co wymuszenie ma wyłączyć. Dla tekstu już zaszyfrowanego wykrywanie zwraca przypadkowy język, więc program nałożyłby zły alfabet.
+
+    Wybierz język z listy albo odznacz wymuszenie.
   wykryto_jezyk_tytul:   "Wykryto język dokumentu"
   wykryto_jezyk_tresc: |-
     Treść wczytanego pliku jest w języku „{jezyk_wykryty}".

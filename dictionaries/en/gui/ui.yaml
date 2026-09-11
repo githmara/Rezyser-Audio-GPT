@@ -784,7 +784,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Select source file"
   file_dlg_wildcard: |-
-    Supported files (*.txt;*.html;*.htm;*.docx)|*.txt;*.html;*.htm;*.docx|Text files (*.txt)|*.txt|HTML files (*.html;*.htm)|*.html;*.htm|Word documents (*.docx)|*.docx|All files (*.*)|*.*
+    Supported files (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Text files (*.txt)|*.txt|Markdown files (*.md)|*.md|HTML files (*.html;*.htm)|*.html;*.htm|Word documents (*.docx)|*.docx|All files (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Provide the file name or path before loading."
   plik_nie_istnieje_tresc: "File not found:\n{sciezka_pliku}"
@@ -906,7 +906,7 @@ poliglota:
   combo_jezyk_tooltip: Choose the rule set for Director and Cipher modes. "Detect automatically" sets the language based on the loaded file.
   chk_wymus: Force this language for the entire document (disable per-paragraph language detection)
   chk_wymus_name: Force language for the entire document
-  chk_wymus_tooltip: By default, each paragraph is processed according to its detected language. Check this to have the entire document — including foreign-language passages — processed using the rules of a single language (e.g. reversible Caesar cipher with one alphabet).
+  chk_wymus_tooltip: By default, each paragraph is processed according to its detected language. Check this to have the entire document — including foreign-language passages — go through the rules of a single language (e.g. reversible Caesar cipher using one alphabet). Requires selecting a language in the field above.
   wykryto_jezyk_tytul: Document language detected
   wykryto_jezyk_tresc: "The content of the loaded file is in \"{jezyk_wykryty}\".\nThe accent and cipher lists have been switched to this language."
   chk_quality: Quality mode — deeper model reasoning (slower and more expensive; no effect on OpenAI-compatible endpoints)
@@ -915,6 +915,15 @@ poliglota:
   err_odmowa: The model refused to carry out this command — its content may have violated the model's policies or been too ambiguous. Nothing was saved; rephrase the command and try again.
   ai_ostrzezenie_cache_tytul: Resume Memory Warning
   ai_ostrzezenie_cache: "The translation was completed and saved, but the temporary file (resume cache) could not be deleted:\n{plik}\n\nPlease delete this file manually. As long as it remains there, re-translating a file with the same name into the same language may resume from this cache and return the PREVIOUS translation instead of a new one.\n\nDetails: {szczegoly}"
+  ext_brak: no extension
+  ext_nieobslugiwane_tytul: Unsupported extension
+  ext_nieobslugiwane_tresc: "This file has the {rozszerzenie} extension, which the program doesn't support directly.\n\nSupported extensions: {lista_rozszerzen}\n\nThe content will be treated as plain text: this format's formatting and markup will end up in the output as content, and the speech synthesizer will read them aloud.\n\nLoad it anyway?"
+  md_render_tytul: Markdown converted to HTML
+  md_render_tresc: "The file {nazwa_pliku} is Markdown, so before applying the accent or cipher it was converted to HTML.\n\nThis way, headings, lists and quotes will become real document elements in the output (a screen reader can jump between them), and syntax characters — \"---\", \"- \", \"> \" — won't be read aloud.\n\nThe result will be saved as an .html file. The AI translator receives the content unchanged."
+  md_render_blad_tytul: Failed to process Markdown
+  md_render_blad_tresc: "Failed to convert Markdown to HTML:\n{tresc_bledu}\n\nThe file will be processed as plain text, so Markdown syntax characters will end up in the output as content."
+  wymus_bez_jezyka_tytul: Select processing language
+  wymus_bez_jezyka_tresc: "Forcing a single language requires specifying it explicitly in the \"Processing language\" field.\n\nWith \"Detect automatically\" selected, the forced language would come from detection — which is exactly what forcing is meant to bypass. For text that is already encrypted, detection returns a random language, so the program would apply the wrong alphabet.\n\nSelect a language from the list or uncheck forcing."
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)
