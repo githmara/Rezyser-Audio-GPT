@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.1.0 – Wersja Wydawnicza)</title>
+<title>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.2.0 – Wersja Wydawnicza)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.1.0 – Wersja Wydawnicza)</h1>
+<h1>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.2.0 – Wersja Wydawnicza)</h1>
 <p>Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).</p>
 <p>Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota), narzędzia do budowania struktury pliku (Architekt Audiobooków), Managera Reguł (od wersji 13.0 — bez Pythona dodasz nowy akcent, szyfr lub tryb twórczy, patrz KROK 7b poniżej) oraz — od wersji 15.0 — modułu Opowieści (interaktywna fikcja drugoosobowa generowana przez AI, czytana przez TTS lub czytnik ekranu, opisana osobnym manualem tales.pl.html). Wszystkie pięć narzędzi dostępnych jest w jednym oknie programu, przełączanym przyciskami na pasku lub skrótami klawiaturowymi Ctrl+1..Ctrl+5.</p>
 <h2>KROK 1: Pierwsze uruchomienie (Cross-Platform)</h2>
@@ -235,7 +235,7 @@ A także dwie opcje czyszczenia bez akcentu:<br>
 Opcja z normalizacją liczb automatycznie zamienia cyfry na ich słowny zapis (np. 15 staje się "piętnaście") przed przetworzeniem — dzięki temu NVDA czyta liczby płynnie, a jeśli tekst ma wymuszony akcent, liczba też go dostanie, bez żadnych wyjątków.<br>
 Zapytacie pewnie, czy syntezator będzie umiał odmieniać tak znormalizowane liczby w zależności od kontekstu? Odpowiedź brzmi: nie. I jest to celowy feature. Jak powszechnie wiadomo: "język polski być trudny" — a obcokrajowiec kaleczący naszą gramatykę tylko dodaje autentyczności łamanemu akcentowi!</p>
 <p>Naprawiacz Tagów (NOWOŚĆ w wersji 9): Na końcu listy znajdziesz dodatkową opcję — Naprawiacz Tagów. Nie stosuje żadnych reguł fonetycznych ani czyszczenia. Robi jedną rzecz: wstrzykuje do pliku podany przez Ciebie kod języka ISO — dwuliterowy (np. "fi" dla fińskiego, "en" dla angielskiego) albo z podtagiem regionu czy pisma (np. "pt-BR" dla portugalskiego brazylijskiego, "zh-Hans" dla chińskiego uproszczonego). Przydaje się, gdy masz już gotowy plik — np. przetłumaczony wcześniej przez Tłumacza AI — ale z jakiegoś powodu wyszedł z błędnym albo brakującym tagiem językowym. Zamiast tłumaczyć go od nowa, po prostu uruchamiasz Naprawiacz z właściwym kodem ISO i po chwili masz poprawny plik.</p>
-<p>Od wersji 19.1 podany kod obowiązuje CAŁY dokument: trafia zarówno do nagłówka pliku, jak i do każdego akapitu. Wcześniej Naprawiacz próbował dodatkowo zgadywać język każdego akapitu osobno, więc plik po naprawie mógł mieć w środku kody, których nie wpisałeś. Wybór kodu dla pojedynczych akapitów to osobne zadanie i wymaga interfejsu, w którym te akapity widzisz — planujemy je na kolejną wersję.</p>
+<p>Od wersji 19.1 podany kod obowiązuje CAŁY dokument: trafia zarówno do nagłówka pliku, jak i do każdego akapitu. Wcześniej Naprawiacz próbował dodatkowo zgadywać język każdego akapitu osobno, więc plik po naprawie mógł mieć w środku kody, których nie wpisałeś.</p>
 <p>Pliki Markdown (NOWOŚĆ w wersji 19.1): plik .md jest przed nałożeniem akcentu lub szyfru zamieniany na HTML. Nagłówki, listy i cytaty stają się w wyniku prawdziwymi elementami dokumentu, po których czytnik ekranu potrafi skakać (w NVDA klawisze 1-6 i H), a znaki samej składni — „---", „- ", „&gt; " — nie są już czytane na głos jako treść. Wcześniej .md wchodził do przetwarzania jak zwykły tekst, więc te znaki lądowały w wyniku, a cała struktura dokumentu ginęła. Tłumacz AI dostaje Markdown bez zmian — model rozumie go natywnie, a zamiana na HTML tylko podniosłaby koszt tłumaczenia.</p>
 <p>Rozszerzenia spoza listy: okno wyboru pliku pokazuje formaty, które program obsługuje wprost (.txt, .md, .html, .htm, .docx). Filtr „wszystkie pliki" nadal pozwala wskazać cokolwiek innego — dostaniesz wtedy pytanie z ostrzeżeniem, że zawartość zostanie potraktowana jak czysty tekst, więc znaczniki tego formatu trafią do wyniku i syntezator przeczyta je na głos.</p>
 <p>Skrypt czyści nawiasowe didaskalia reżyserskie — usuwa całe fragmenty tekstu ujęte w nawiasy okrągłe (np. "(z wplecionymi wdechami)", "(szeptem)", "(ironicznie)"). ElevenLabs ma czytać wyłącznie dialogi i narrację, a nie instrukcje reżyserskie wplecione w tekst.</p>
@@ -243,6 +243,17 @@ Zapytacie pewnie, czy syntezator będzie umiał odmieniać tak znormalizowane li
 <ul>
 <li>Tarcza ochronna: Skrypt chroni wszystkie tagi HTML. Psuje tylko dialogi i narrację.</li>
 <li>Działa lokalnie i nic nie kosztuje!</li>
+</ul>
+<h2>Naprawiacz Tagów: kod języka osobno dla każdego akapitu (NOWOŚĆ w wersji 19.2)</h2>
+<p>Pod polem kodu ISO znajdziesz pole wyboru „Ustaw kod ISO osobno dla każdego akapitu". Odznaczone — wszystko zostaje po staremu: jeden kod idzie na cały plik i nie pojawia się żadne dodatkowe okno. Zaznaczone — po naciśnięciu „Uruchom Przetwarzanie" otwiera się lista akapitów Twojego pliku.</p>
+<p>Każda pozycja listy mówi od razu trzy rzeczy: numer akapitu, początek jego treści i kod, który ten akapit dostanie. Nie musisz więc wchodzić w żadne pole, żeby usłyszeć, co gdzie trafi. Pod listą są trzy rzeczy dla wybranego akapitu: jego pełna treść, wynik wykrywania języka i pole, w którym kod zmieniasz. Wszystkie akapity startują z kodem, który wpisałeś w pole „Kod ISO" — do pliku nie trafia żaden kod, którego nie zatwierdziłeś.</p>
+<p>Dwa przyciski skracają pracę przy dłuższym pliku. „Zastosuj ten kod do wszystkich akapitów" rozsyła bieżący kod po całej liście — przydaje się, gdy chcesz zmienić kod globalny, a potem poprawić tylko kilka wyjątków. „Wypełnij wszystkie kody wynikiem wykrywania" pyta o język każdego akapitu po kolei i wstawia odpowiedzi jako kody; akapit, dla którego wykrywanie nie ma zdania (za krótki albo wynik niepewny), zachowuje kod, który już miał — „nie wiem" nigdy nie nadpisuje tego, co wpisałeś.</p>
+<p>Wykrywanie języka w tym okienku zna WSZYSTKIE języki, które rozpoznaje biblioteka detekcji — także te, dla których program nie ma własnej paczki reguł. To celowe: Naprawiacz Tagów istnieje właśnie dla plików w językach, dla których żadnego akcentu nie mamy, więc odpowiedź zawężona do wdrożonych paczek byłaby dla niego pewna i błędna (akapit czeski zostałby nazwany na przykład niemieckim). Podpowiedź zostaje podpowiedzią — decyzja i tak jest Twoja.</p>
+<p>Co to jest „akapit" — zależy od formatu pliku, bo program nadaje kod dokładnie tym miejscom, które czytnik ekranu widzi jako osobne jednostki: w .docx to akapit dokumentu Word, w pliku HTML akapit, nagłówek, punkt listy albo komórka tabeli, a w .txt fragment oddzielony pustą linią. Lista pokazuje je w kolejności czytania, więc pozycja numer 7 jest siódmym miejscem, do którego dojdzie syntezator.</p>
+<p>Dwie poprawki dorzucone przy okazji:</p>
+<ul>
+<li>Tabele w .docx dostają wreszcie kod języka. Program do tej pory w ogóle ich nie widział: akapity z komórek nie były tagowane, a przy wczytywaniu pliku ich treść nie pojawiała się nawet w podglądzie ani w liczniku znaków. Teraz i podgląd, i tagowanie idą przez całą treść dokumentu, razem z tabelami zagnieżdżonymi.</li>
+<li>Rozszerzenie, którego program nie obsługuje wprost, daje teraz jasne ostrzeżenie. W takim pliku nie ma gdzie umieścić kodu języka, więc Naprawiacz zapisałby kopię identyczną z oryginałem — a dotąd meldował „Sukces" i podawał ścieżkę pliku, w którym nie zmieniło się nic poza nazwą.</li>
 </ul>
 <h2>Tryb 3: Szyfrant (NOWOŚĆ w 13.0 — zabawy słowne, darmowe, lokalne)</h2>
 <p>Trzeci RadioButton w Poliglocie, obok Tłumacza AI i Trybu Reżysera: „Tryb Szyfranta (zabawy słowne, losowe jąkanie)". Uruchamia sześć lokalnych algorytmów zniekształcających tekst — do harców, zagadek, łamigłówek językowych. Po wybraniu trybu pojawia się rozwijana lista algorytmów, a dla jednego z nich (Szyfru Cezara) dodatkowe pole liczbowe na przesunięcie.</p>

@@ -851,6 +851,38 @@ poliglota:
   md_render_blad_tresc: "Markdown konnte nicht in HTML umgewandelt werden:\n{tresc_bledu}\n\nDie Datei wird als reiner Text verarbeitet, wodurch die Markdown-Syntaxzeichen als Inhalt ins Ergebnis übernommen werden."
   wymus_bez_jezyka_tytul: Verarbeitungssprache auswählen
   wymus_bez_jezyka_tresc: "Um eine einzige Sprache zu erzwingen, muss sie im Feld „Verarbeitungssprache\" ausdrücklich angegeben werden.\n\nBei der Einstellung „Automatisch erkennen\" würde die erzwungene Sprache aus der Erkennung stammen — genau das soll die Erzwingung jedoch verhindern. Bei bereits verschlüsseltem Text liefert die Erkennung eine zufällige Sprache, wodurch das Programm das falsche Alphabet anwenden würde.\n\nWählen Sie eine Sprache aus der Liste oder deaktivieren Sie die Erzwingung."
+  chk_per_akapit: '&ISO-Code separat für jeden Absatz festlegen'
+  chk_per_akapit_name: ISO-Codes separat für jeden Absatz
+  chk_per_akapit_tooltip: Standardmäßig wird der Code aus dem obigen Feld auf die gesamte Datei angewendet. Aktivieren Sie diese Option, um nach dem Start der Verarbeitung eine Liste der Absätze zu sehen und jedem einen eigenen Sprachcode zuzuweisen — nützlich bei Dokumenten mit fremdsprachigen Zitaten.
+  naprawiacz_bez_tagu_tytul: Kein Platz zum Einfügen des Sprachcodes
+  naprawiacz_bez_tagu_tresc: "Die Datei hat die Erweiterung {rozszerzenie}, für die das Programm den Inhalt unverändert speichert — es gibt darin keine Stelle, an der ein Sprachcode eingefügt werden könnte.\n\nDer Sprachcode wird nur in folgende Dateien eingefügt: {lista_rozszerzen}\n\nDie gespeicherte Datei wäre also eine Kopie ohne jeglichen Sprachcode, es würde sich also nichts außer dem Namen ändern. Fortfahren?"
+  per_akapit_tytul: Sprachcodes für einzelne Absätze
+  per_akapit_lista_lbl: 'Absätze ({liczba_akapitow}) — Nummer, Anfang des Inhalts und zugewiesener Code:'
+  per_akapit_lista_name: Liste der Absätze mit Sprachcodes
+  per_akapit_pozycja: '{numer_akapitu}. {tresc_akapitu} [{kod_iso}]'
+  per_akapit_tresc_lbl: 'Vollständiger Inhalt des ausgewählten Absatzes:'
+  per_akapit_tresc_name: Inhalt des ausgewählten Absatzes
+  per_akapit_opinia_lbl: 'Was die Spracherkennung zu diesem Absatz sagt:'
+  per_akapit_opinia_name: Ergebnis der Spracherkennung für den ausgewählten Absatz
+  per_akapit_opinia_wynik: '{nazwa_jezyka} ({kod_iso})'
+  per_akapit_opinia_brak: nicht erkannt — Absatz zu kurz oder Ergebnis unsicher
+  per_akapit_kod_lbl: '&ISO-Code für diesen Absatz (z. B. en, fr, pt-BR):'
+  per_akapit_kod_name: ISO-Code des ausgewählten Absatzes
+  per_akapit_btn_wszystkie: '&Diesen Code auf alle Absätze anwenden'
+  per_akapit_btn_detektor: Alle Codes mit dem &Erkennungsergebnis füllen
+  per_akapit_btn_ok: Codes &speichern und verarbeiten
+  per_akapit_btn_anuluj: '&Abbrechen'
+  per_akapit_postep_tytul: Spracherkennung der Absätze
+  per_akapit_postep_tresc: Sprache jedes Absatzes wird überprüft…
+  per_akapit_zly_kod_tytul: Ungültiger Sprachcode
+  per_akapit_zly_kod_tresc: "Absatz {numer_akapitu} hat den Code „{kod_iso}“, den das Programm nicht erkennt.\n\nEin gültiger Code besteht aus zwei Buchstaben (z. B. en), gegebenenfalls mit einem Region- oder Schriftsystem-Subtag (z. B. pt-BR, zh-Hans)."
+  per_akapit_brak_jednostek_tytul: Keine Absätze zum Markieren
+  per_akapit_brak_jednostek_tresc: "In dieser Datei gibt es keinen einzigen Absatz, dem das Programm einen Sprachcode zuweisen könnte.\n\nDie Verarbeitung wird mit einem einzigen Code aus dem Feld „ISO-Code“ fortgesetzt."
+  per_akapit_detektor_bilans_tytul: Ergebnis der Spracherkennung für Absätze
+  per_akapit_detektor_bilans_tresc: "Codes wurden in {liczba_wypelnionych} von {liczba_akapitow} Absätzen ausgefüllt.\n\nBei {liczba_bez_opinii} Absätzen konnte die Erkennung keine eindeutige Entscheidung treffen (zu kurz oder unsicheres Ergebnis) — sie haben ihren bisherigen Code behalten."
+  per_akapit_detektor_przerwane_tresc: "Abgebrochen bei Absatz {numer_akapitu} von {liczba_akapitow}.\n\nCodes wurden in {liczba_wypelnionych} Absätzen ausgefüllt; die übrigen haben ihren bisherigen Code behalten."
+  per_akapit_nadpisanie_tytul: Festgelegte Codes überschreiben?
+  per_akapit_nadpisanie_tresc: "Dieser Vorgang legt für alle Absätze gleichzeitig einen Code fest, und {liczba_zmienionych} von ihnen haben derzeit einen anderen Code als beim Öffnen der Liste.\n\nDie Änderung lässt sich nicht rückgängig machen. Fortfahren?"
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)

@@ -919,6 +919,59 @@ poliglota:
   lbl_iso:               "Kod ISO języka (np. en, fr, de; odmiany regionalne np. pt-BR, zh-CN):"
   txt_iso_name:          "Pole kodu ISO języka"
   txt_iso_hint:          "np. en lub pt-BR"
+  # v19.2: Naprawiacz Tagów — kod ISO osobno dla każdego akapitu.
+  chk_per_akapit:        "Ustaw &kod ISO osobno dla każdego akapitu"
+  chk_per_akapit_name:   "Kody ISO osobno dla każdego akapitu"
+  chk_per_akapit_tooltip: 'Domyślnie kod z pola powyżej trafia do całego pliku. Zaznacz, aby po uruchomieniu przetwarzania zobaczyć listę akapitów i nadać każdemu własny kod języka — przydatne w dokumentach z obcojęzycznymi cytatami.'
+  naprawiacz_bez_tagu_tytul: "Nie ma gdzie wstawić kodu języka"
+  naprawiacz_bez_tagu_tresc: |-
+    Plik ma rozszerzenie {rozszerzenie}, dla którego program zapisuje treść bez zmian — nie ma w niej miejsca, w którym mógłby umieścić kod języka.
+
+    Kod języka trafia tylko do plików: {lista_rozszerzen}
+
+    Zapisany plik będzie więc kopią bez żadnego kodu języka, czyli nie zmieni się nic poza nazwą. Kontynuować?
+  per_akapit_tytul:      "Kody języka dla poszczególnych akapitów"
+  per_akapit_lista_lbl:  "Akapity ({liczba_akapitow}) — numer, początek treści i nadany kod:"
+  per_akapit_lista_name: "Lista akapitów z kodami języka"
+  per_akapit_pozycja:    "{numer_akapitu}. {tresc_akapitu} [{kod_iso}]"
+  per_akapit_tresc_lbl:  "Pełna treść wybranego akapitu:"
+  per_akapit_tresc_name: "Treść wybranego akapitu"
+  per_akapit_opinia_lbl: "Co o tym akapicie sądzi wykrywanie języka:"
+  per_akapit_opinia_name: "Wynik wykrywania języka dla wybranego akapitu"
+  per_akapit_opinia_wynik: "{nazwa_jezyka} ({kod_iso})"
+  per_akapit_opinia_brak: "nie rozpoznano — akapit za krótki albo wynik niepewny"
+  per_akapit_kod_lbl:    "&Kod ISO dla tego akapitu (np. en, fr, pt-BR):"
+  per_akapit_kod_name:   "Kod ISO wybranego akapitu"
+  per_akapit_btn_wszystkie: "Zastosuj ten kod do &wszystkich akapitów"
+  per_akapit_btn_detektor: "Wypełnij wszystkie ko&dy wynikiem wykrywania"
+  per_akapit_btn_ok:     "&Zapisz kody i przetwórz"
+  per_akapit_btn_anuluj: "&Anuluj"
+  per_akapit_postep_tytul: "Wykrywanie języka akapitów"
+  per_akapit_postep_tresc: "Sprawdzam, w jakim języku jest każdy akapit…"
+  per_akapit_detektor_bilans_tytul: "Wynik wykrywania języka akapitów"
+  per_akapit_detektor_bilans_tresc: |-
+    Wypełniono kody w {liczba_wypelnionych} akapitach z {liczba_akapitow}.
+
+    Dla {liczba_bez_opinii} akapitów wykrywanie nie miało zdania (za krótkie albo wynik niepewny) — zachowały kod, który już miały.
+  per_akapit_detektor_przerwane_tresc: |-
+    Przerwano na akapicie {numer_akapitu} z {liczba_akapitow}.
+
+    Wypełniono kody w {liczba_wypelnionych} akapitach; pozostałe zachowały kod, który już miały.
+  per_akapit_nadpisanie_tytul: "Nadpisać ustawione kody?"
+  per_akapit_nadpisanie_tresc: |-
+    Ta czynność ustawi kod we wszystkich akapitach naraz, a {liczba_zmienionych} z nich ma teraz kod inny niż ten, z którym lista się otworzyła.
+
+    Zmiany nie da się cofnąć. Kontynuować?
+  per_akapit_zly_kod_tytul: "Niepoprawny kod języka"
+  per_akapit_zly_kod_tresc: |-
+    Akapit {numer_akapitu} ma kod „{kod_iso}", którego program nie rozpoznaje.
+
+    Poprawny kod to dwie litery (np. en), ewentualnie z podtagiem regionu lub pisma (np. pt-BR, zh-Hans).
+  per_akapit_brak_jednostek_tytul: "Brak akapitów do oznaczenia"
+  per_akapit_brak_jednostek_tresc: |-
+    W tym pliku nie ma ani jednego akapitu, któremu program nadałby kod języka.
+
+    Przetwarzanie pójdzie dalej z jednym kodem z pola „Kod ISO".
   # Panel Szyfranta
   lbl_szyfr:             "Wybierz algorytm zniekształcający:"
   combo_szyfr_name:      "Lista algorytmów szyfrujących"

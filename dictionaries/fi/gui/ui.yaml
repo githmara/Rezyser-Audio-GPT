@@ -849,6 +849,38 @@ poliglota:
   md_render_blad_tresc: "Markdownin muuntaminen HTML:ksi epäonnistui:\n{tresc_bledu}\n\nTiedosto käsitellään pelkkänä tekstinä, joten Markdown-syntaksin merkit päätyvät tulokseen sisältönä."
   wymus_bez_jezyka_tytul: Valitse käsittelykieli
   wymus_bez_jezyka_tresc: "Yhden kielen pakottaminen edellyttää, että kieli valitaan suoraan kentästä „Käsittelykieli\".\n\nAsetuksella „Tunnista automaattisesti\" pakotettu kieli tulisi tunnistuksesta — mikä on juuri se, mitä pakottamisen pitäisi estää. Jo salatulle tekstille tunnistus palauttaa satunnaisen kielen, jolloin ohjelma käyttäisi väärää aakkostoa.\n\nValitse kieli listasta tai poista pakotusvalinta."
+  chk_per_akapit: Aseta &ISO-koodi erikseen jokaiselle kappaleelle
+  chk_per_akapit_name: ISO-koodit erikseen jokaiselle kappaleelle
+  chk_per_akapit_tooltip: Oletuksena yllä olevan kentän koodi koskee koko tiedostoa. Valitse tämä, jos haluat käsittelyn käynnistyttyä nähdä luettelon kappaleista ja antaa jokaiselle oman kielikoodin — hyödyllistä asiakirjoissa, joissa on vieraskielisiä lainauksia.
+  naprawiacz_bez_tagu_tytul: Kielikoodille ei ole paikkaa
+  naprawiacz_bez_tagu_tresc: "Tiedostolla on tiedostopääte {rozszerzenie}, jonka sisällön ohjelma tallentaa muuttamattomana — siinä ei ole kohtaa, johon kielikoodin voisi lisätä.\n\nKielikoodi lisätään vain tiedostoihin: {lista_rozszerzen}\n\nTallennettu tiedosto on siis kopio ilman mitään kielikoodia, eli mikään ei muutu nimeä lukuun ottamatta. Jatketaanko?"
+  per_akapit_tytul: Kielikoodit kappaleittain
+  per_akapit_lista_lbl: 'Kappaleet ({liczba_akapitow}) — numero, sisällön alku ja annettu koodi:'
+  per_akapit_lista_name: Luettelo kappaleista ja niiden kielikoodeista
+  per_akapit_pozycja: '{numer_akapitu}. {tresc_akapitu} [{kod_iso}]'
+  per_akapit_tresc_lbl: 'Valitun kappaleen koko sisältö:'
+  per_akapit_tresc_name: Valitun kappaleen sisältö
+  per_akapit_opinia_lbl: 'Kielentunnistuksen näkemys tästä kappaleesta:'
+  per_akapit_opinia_name: Kielentunnistuksen tulos valitulle kappaleelle
+  per_akapit_opinia_wynik: '{nazwa_jezyka} ({kod_iso})'
+  per_akapit_opinia_brak: ei tunnistettu — kappale liian lyhyt tai tulos epävarma
+  per_akapit_kod_lbl: '&ISO-koodi tälle kappaleelle (esim. en, fr, pt-BR):'
+  per_akapit_kod_name: Valitun kappaleen ISO-koodi
+  per_akapit_btn_wszystkie: Käytä tätä koodia &kaikissa kappaleissa
+  per_akapit_btn_detektor: 'Tä&ytä kaikki koodit tunnistuksen tuloksella'
+  per_akapit_btn_ok: '&Tallenna koodit ja käsittele'
+  per_akapit_btn_anuluj: '&Peruuta'
+  per_akapit_postep_tytul: Kappaleiden kielentunnistus
+  per_akapit_postep_tresc: Tarkistetaan jokaisen kappaleen kieltä…
+  per_akapit_zly_kod_tytul: Virheellinen kielikoodi
+  per_akapit_zly_kod_tresc: "Kappaleella {numer_akapitu} on koodi „{kod_iso}\", jota ohjelma ei tunnista.\n\nKelvollinen koodi on kaksi kirjainta (esim. en), tarvittaessa alue- tai kirjoitusjärjestelmätunnisteella (esim. pt-BR, zh-Hans)."
+  per_akapit_brak_jednostek_tytul: Ei merkittäviä kappaleita
+  per_akapit_brak_jednostek_tresc: "Tässä tiedostossa ei ole yhtään kappaletta, jolle ohjelma voisi antaa kielikoodin.\n\nKäsittely jatkuu käyttäen yhtä koodia „ISO-koodi\"-kentästä."
+  per_akapit_detektor_bilans_tytul: Kappaleiden kielentunnistuksen tulos
+  per_akapit_detektor_bilans_tresc: "Koodit täytettiin {liczba_wypelnionych} kappaleeseen (yhteensä {liczba_akapitow}).\n\n{liczba_bez_opinii} kappaleen kohdalla tunnistus ei pystynyt päättämään (liian lyhyt teksti tai epävarma tulos) — niiden aiempi koodi säilytettiin."
+  per_akapit_detektor_przerwane_tresc: "Keskeytetty kappaleessa {numer_akapitu}/{liczba_akapitow}.\n\nKoodit täytettiin {liczba_wypelnionych} kappaleeseen; lopuissa säilyi niiden aiempi koodi."
+  per_akapit_nadpisanie_tytul: Korvataanko asetetut koodit?
+  per_akapit_nadpisanie_tresc: "Tämä toiminto asettaa koodin kaikkiin kappaleisiin kerralla, ja {liczba_zmienionych} niistä on nyt eri koodi kuin listaa avattaessa.\n\nMuutosta ei voi peruuttaa. Jatketaanko?"
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)

@@ -342,7 +342,7 @@ tresc:
 
     Tagien Korjaaja (UUTTA versiossa 9): Listan lopusta löydät lisävaihtoehdon — Tagien Korjaaja. Se ei sovella mitään foneettisia sääntöjä eikä puhdistusta. Se tekee yhden asian: se lisää tiedostoon antamasi ISO-kielikoodin — kaksikirjaimisen (esim. "fi" suomelle, "en" englannille) tai alueen tai kirjoitusjärjestelmän alitagilla varustetun (esim. "pt-BR" brasilianportugalille, "zh-Hans" yksinkertaistetulle kiinalle). Se on hyödyllinen, kun sinulla on jo valmis tiedosto — esim. aiemmin Tekoälykääntäjän kääntämä — mutta jostain syystä siinä on virheellinen tai puuttuva kielitagi. Sen sijaan, että kääntäisit sen uudelleen, käynnistät vain Korjaajan oikealla ISO-koodilla ja hetken kuluttua sinulla on korjattu tiedosto.
 
-    Versiosta 19.1 alkaen annettu koodi koskee KOKO asiakirjaa: se päätyy sekä tiedoston otsikkoon että jokaiseen kappaleeseen. Aiemmin Korjaaja yritti lisäksi arvata kunkin kappaleen kielen erikseen, joten korjatussa tiedostossa saattoi olla sisällä koodeja, joita et kirjoittanut. Yksittäisten kappaleiden koodin valinta on erillinen tehtävä ja vaatii käyttöliittymän, jossa nämä kappaleet näet — suunnittelemme sitä seuraavaan versioon.
+    Versiosta 19.1 alkaen annettu koodi koskee KOKO asiakirjaa: se päätyy sekä tiedoston otsikkoon että jokaiseen kappaleeseen. Aiemmin Korjaaja yritti lisäksi arvata kunkin kappaleen kielen erikseen, joten korjatussa tiedostossa saattoi olla sisällä koodeja, joita et kirjoittanut.
 
     Markdown-tiedostot (UUTTA versiossa 19.1): .md-tiedosto muunnetaan HTML:ksi ennen aksentin tai salauksen soveltamista. Otsikoista, listoista ja lainauksista tulee muunnoksen tuloksena todellisia asiakirjan elementtejä, joiden välillä ruudunlukuohjelma osaa hypätä (NVDA:ssa näppäimet 1-6 ja H), eikä itse syntaksin merkkejä — "---", "- ", "> " — enää lueta ääneen sisältönä. Aiemmin .md käsiteltiin kuin tavallinen teksti, joten nämä merkit päätyivät tulokseen ja koko asiakirjan rakenne katosi. Tekoälykääntäjä saa Markdownin muuttumattomana — malli ymmärtää sen luontaisesti, ja muunnos HTML:ksi vain nostaisi käännöksen kustannuksia.
 
@@ -725,3 +725,20 @@ tresc:
     •  Kun LLM_PROVIDER-riviä ei ole (tai sen arvo on anthropic), sovellus toimii kuten VAIHEESSA 2 — yksinomaan Anthropic-avaimella. Sinun ei tarvitse muuttaa mitään.
 
     **Tärkeää (laatu):** sovelluksen järjestelmäpromptit on kirjoitettu ja viritetty Claudea varten. Muu malli saattaa tuottaa heikompaa laatua — se saattaa noudattaa maailman sääntöjä heikommin, menettää JSON-rakenteen valintoja sisältävissä tiloissa tai palauttaa tekstiä väärällä kielellä. Tämä on tietoinen kustannus↔laatu-kompromissi sinun puoleltasi. Jos haluat parhaan tuloksen, pysy Anthropicissa.
+  krok_5_naprawiacz_per_akapit: |
+    ## Tunnistekorjain: kielikoodi erikseen jokaiselle kappaleelle (UUTTA versiossa 19.2)
+
+    ISO-koodikentän alapuolella löydät valintaruudun „{poliglota.chk_per_akapit}". Kun se on tyhjä — kaikki toimii kuten ennen: yksi koodi menee koko tiedostolle, eikä mitään ylimääräistä ikkunaa avaudu. Kun se on valittuna — painikkeen „{poliglota.btn_process}" painamisen jälkeen avautuu tiedostosi kappaleiden luettelo.
+
+    Jokainen luettelon kohta kertoo heti kolme asiaa: kappaleen numeron, sen sisällön alun ja koodin, jonka tämä kappale saa. Sinun ei siis tarvitse avata mitään kenttää kuullaksesi, mikä menee minnekin. Luettelon alla on kolme asiaa valittua kappaletta varten: sen koko sisältö, kielentunnistuksen tulos ja kenttä, jossa vaihdat koodin. Kaikki kappaleet lähtevät liikkeelle koodilla, jonka kirjoitit kenttään „Kod ISO" — tiedostoon ei päädy yhtään koodia, jota et ole hyväksynyt.
+
+    Kaksi painiketta lyhentävät työtä pidemmän tiedoston kanssa. „{poliglota.per_akapit_btn_wszystkie}" levittää nykyisen koodin koko luetteloon — hyödyllinen, kun haluat vaihtaa yleisen koodin ja korjata sitten vain muutaman poikkeuksen. „{poliglota.per_akapit_btn_detektor}" kysyy jokaisen kappaleen kielen vuorotellen ja lisää vastaukset koodeina; kappale, jonka kohdalla tunnistus ei osaa sanoa mielipidettä (liian lyhyt tai tulos epävarma), säilyttää koodin, joka sillä jo oli — „en tiedä" ei koskaan kirjoita yli sitä, minkä olet itse syöttänyt.
+
+    Tämän ikkunan kielentunnistus tuntee KAIKKI kielet, jotka tunnistuskirjasto osaa tunnistaa — myös ne, joille ohjelmalla ei ole omaa sääntöpakettia. Tämä on tarkoituksellista: Tagien korjaaja on olemassa juuri niitä tiedostoja varten, joiden kielelle meillä ei ole yhtään aksenttia, joten vastaus, joka rajoittuisi vain käyttöönotettuihin paketteihin, olisi tälle tiedostolle varma mutta väärä (esimerkiksi tšekinkielinen kappale nimettäisiin vaikkapa saksaksi). Vihje pysyy vihjeenä — päätös on silti aina sinun.
+
+    Mikä on „kappale" — riippuu tiedostomuodosta, sillä ohjelma antaa koodin täsmälleen niille kohdille, jotka ruudunlukija näkee erillisinä yksikköinä: .docx-tiedostossa se on Word-asiakirjan kappale, HTML-tiedostossa kappale, otsikko, luettelokohta tai taulukon solu, ja .txt-tiedostossa tyhjällä rivillä erotettu osuus. Luettelo näyttää ne lukujärjestyksessä, joten kohta numero 7 on seitsemäs paikka, johon synteesijärjestelmä tulee pääsemään.
+
+    Kaksi korjausta lisätty samalla:
+
+    - Taulukot .docx-tiedostoissa saavat vihdoin kielikoodin. Ohjelma ei tähän asti nähnyt niitä lainkaan: solujen kappaleita ei tagattu, ja tiedostoa ladattaessa niiden sisältö ei näkynyt edes esikatselussa eikä merkkilaskurissa. Nyt sekä esikatselu että tagaus käyvät läpi koko asiakirjan sisällön, mukaan lukien sisäkkäiset taulukot.
+    - Laajennus, jota ohjelma ei tue suoraan, antaa nyt selkeän varoituksen. Tällaisessa tiedostossa ei ole paikkaa, johon kielikoodin voisi sijoittaa, joten Tagien korjaaja tallentaisi kopion, joka on identtinen alkuperäisen kanssa — mutta tähän asti se ilmoitti „{common.sukces_tytul}" ja antoi polun tiedostoon, jossa mikään ei ollut muuttunut nimeä lukuun ottamatta.

@@ -36,7 +36,7 @@ tresc:
             └── rezyser/                   {liczba_trybow_rezysera} skrár með AI Leikstjóra hömum
 
     Nú þegar eru fullkomlega innleidd: {lista_kompletnych_jezykow_natywnie}
-    ({liczba_kompletnych_jezykow} grunnmál). Hvert hefur sitt eigið "`dictionaries/<code>/`" safn með diakritískum stöfum, stafrófi og hljóðreglum sem virka á texta í því tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (fyrir hvern málsgrein) og hleður viðeigandi pakka fyrir hvern hluta sérstaklega. Fleiri tungumál eru í undirbúningi (fullkomið safn krefst "podstawy.yaml", "gui/ui.yaml" og að minnsta kosti einnar skráar í "akcenty/" og "szyfry/").
+    ({liczba_kompletnych_jezykow} grunnmál). Hvert hefur sitt eigið "`dictionaries/<code>/`" safn með diakritískum stöfum, stafrófi og hljóðreglum sem virka á texta í því tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (fyrir hvern efnisgrein) og hleður viðeigandi pakka fyrir hvern hluta sérstaklega. Fleiri tungumál eru í undirbúningi (fullkomið safn krefst "podstawy.yaml", "gui/ui.yaml" og að minnsta kosti einnar skráar í "akcenty/" og "szyfry/").
   co_to_akcent: |
     ## Hvað er hreimur?
     ------------------

@@ -342,7 +342,7 @@ tresc:
 
     Tag Fixer (NEW in version 9): At the end of the list you'll find an additional option — Tag Fixer. It doesn't apply any phonetic rules or cleaning. It does one thing: it injects into the file the ISO language code you provide — a two-letter code (e.g., "fi" for Finnish, "en" for English) or one with a region or script subtag (e.g., "pt-BR" for Brazilian Portuguese, "zh-Hans" for Simplified Chinese). This is useful when you already have a ready file — e.g., previously translated by the AI Translator — but for some reason it came out with an incorrect or missing language tag. Instead of translating it from scratch, you simply run the Fixer with the correct ISO code and in a moment you have a correct file.
 
-    As of version 19.1, the provided code applies to the ENTIRE document: it goes into both the file's header and every paragraph. Previously, the Fixer also tried to guess the language of each paragraph separately, so the fixed file could end up with codes inside that you never entered. Choosing a code for individual paragraphs is a separate task and requires an interface where you can see those paragraphs — we're planning it for a future version.
+    As of version 19.1, the provided code applies to the ENTIRE document: it goes into both the file's header and every paragraph. Previously, the Fixer also tried to guess the language of each paragraph separately, so the fixed file could end up with codes inside that you never entered.
 
     Markdown files (NEW in version 19.1): a .md file is converted to HTML before an accent or cipher is applied. Headings, lists, and quotes become real document elements as a result, which a screen reader can jump between (in NVDA, keys 1-6 and H), and the syntax characters themselves — "---", "- ", "> " — are no longer read aloud as content. Previously, .md was fed into processing like plain text, so these characters ended up in the result and the entire document structure was lost. The AI Translator receives Markdown unchanged — the model understands it natively, and converting it to HTML would only raise the cost of translation.
 
@@ -723,3 +723,20 @@ tresc:
     •  When the LLM_PROVIDER line is absent (or set to anthropic), the application behaves as in STEP 2 — using the Anthropic key exclusively. You don't need to change anything.
 
     **Important (quality):** the application's system prompts are written and tuned for Claude. A different model may deliver lower quality — it may follow world rules less strictly, lose JSON structure in choice-based modes, or return text in the wrong language. This is a conscious cost↔quality trade-off on your part. If the best result matters to you, stick with Anthropic.
+  krok_5_naprawiacz_per_akapit: |
+    ## Tag Repair: separate language code for each paragraph (NEW in version 19.2)
+
+    Below the ISO code field you'll find the checkbox "{poliglota.chk_per_akapit}". Left unchecked — everything stays as before: one code applies to the whole file and no extra window appears. Checked — pressing "{poliglota.btn_process}" opens a list of your file's paragraphs.
+
+    Each item on the list tells you three things at once: the paragraph number, the beginning of its content, and the code that paragraph will receive. So you don't have to open any field to find out what goes where. Below the list are three things for the selected paragraph: its full content, the language-detection result, and the field where you change the code. All paragraphs start with the code you entered in the "ISO Code" field — no code you haven't approved ever makes it into the file.
+
+    Two buttons speed up work on a longer file. "{poliglota.per_akapit_btn_wszystkie}" applies the current code to the whole list — useful when you want to change the global code and then correct only a few exceptions. "{poliglota.per_akapit_btn_detektor}" asks for the language of each paragraph in turn and inserts the answers as codes; a paragraph for which detection has no opinion (too short, or the result is uncertain) keeps the code it already had — "I don't know" never overwrites what you entered.
+
+    Language detection in this window recognizes ALL the languages the detection library can identify — including those for which the program has no rule pack of its own. This is intentional: the Tag Fixer exists precisely for files in languages we have no accent for, so an answer limited to the packs that are actually installed would be confident and wrong for it (a Czech paragraph, for instance, might get labeled German). The suggestion remains a suggestion — the decision is still yours.
+
+    What counts as a "paragraph" depends on the file format, because the program assigns a code to exactly the units a screen reader sees as separate: in .docx it's a Word document paragraph, in an HTML file it's a paragraph, heading, list item, or table cell, and in .txt it's a chunk separated by a blank line. The list shows them in reading order, so item number 7 is the seventh place the synthesizer will reach.
+
+    Two fixes added along the way:
+
+    - Tables in .docx finally get a language code. Until now the program didn't see them at all: paragraphs inside cells weren't tagged, and when the file was loaded, their content didn't even show up in the preview or the character counter. Now both the preview and the tagging pass through the entire document content, including nested tables.
+    - An extension the program doesn't support directly now gives a clear warning. Such a file has nowhere to put a language code, so the Tag Fixer would have saved a copy identical to the original — and until now it reported "{common.sukces_tytul}" and gave the path of a file where nothing had changed except the name.

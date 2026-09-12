@@ -831,9 +831,9 @@ poliglota:
   jezyk_auto: Greina sjálfkrafa
   combo_jezyk_name: Val á vinnslumáli
   combo_jezyk_tooltip: Veldu reglusett fyrir Leikstjórnar- og Dulkóðunarham. „Greina sjálfkrafa" ákvarðar málið út frá skránni sem hlaðið er inn.
-  chk_wymus: Þvinga þetta mál fyrir allt skjalið (án greiningar á máli einstakra málsgreina)
+  chk_wymus: Þvinga þetta mál fyrir allt skjalið (án greiningar á máli einstakra efnisgreina)
   chk_wymus_name: Þvinguð málstilling fyrir allt skjalið
-  chk_wymus_tooltip: Sjálfgefið er hver málsgrein unnin samkvæmt því tungumáli sem greint var fyrir hana. Hakaðu við til að láta allt skjalið — einnig innskot á öðrum tungumálum — fara í gegnum reglur eins tungumáls (t.d. afturkræfa Caesar-dulritun með einu stafrófi). Krefst þess að tungumál sé valið í reitnum hér að ofan.
+  chk_wymus_tooltip: Sjálfgefið er hver efnisgrein unnin samkvæmt því tungumáli sem greint var fyrir hana. Hakaðu við til að láta allt skjalið — einnig innskot á öðrum tungumálum — fara í gegnum reglur eins tungumáls (t.d. afturkræfa Caesar-dulritun með einu stafrófi). Krefst þess að tungumál sé valið í reitnum hér að ofan.
   wykryto_jezyk_tytul: Mál skjals greint
   wykryto_jezyk_tresc: "Efni skráarinnar sem hlaðið var inn er á „{jezyk_wykryty}\".\nListar yfir áherslur og dulmál hafa verið skipt yfir í þetta mál."
   chk_quality: Gæðastilling — dýpri yfirvegun líkans (hægara og dýrara; hefur engin áhrif á OpenAI-samhæfð endapunkta)
@@ -851,6 +851,38 @@ poliglota:
   md_render_blad_tresc: "Ekki tókst að umbreyta Markdown í HTML:\n{tresc_bledu}\n\nSkráin verður unnin sem hreinn texti, þannig að setningafræðitákn Markdown munu birtast í niðurstöðunni sem venjulegt efni."
   wymus_bez_jezyka_tytul: Veldu vinnslutungumál
   wymus_bez_jezyka_tresc: "Til að þvinga fram eitt tungumál þarf að tilgreina það beint í reitnum „Vinnslumál\".\n\nMeð stillingunni „Greina sjálfkrafa\" myndi þvingaða tungumálið koma frá greiningunni sjálfri — en það er einmitt það sem þvingunin á að koma í veg fyrir. Fyrir texta sem þegar hefur verið dulritaður skilar greiningin handahófskenndu tungumáli, þannig að forritið myndi beita röngu stafrófi.\n\nVeldu tungumál af listanum eða slökktu á þvinguninni."
+  chk_per_akapit: Setja &ISO-kóða fyrir hverja efnisgrein sérstaklega
+  chk_per_akapit_name: ISO-kóðar fyrir hverja efnisgrein sérstaklega
+  chk_per_akapit_tooltip: Sjálfgefið er að kóðinn úr reitnum hér að ofan gildi fyrir alla skrána. Hakaðu við til að sjá lista yfir efnisgreinar eftir að vinnsla hefst og gefa hverri þeirra eigin tungumálakóða — gagnlegt í skjölum með tilvitnunum á öðrum tungumálum.
+  naprawiacz_bez_tagu_tytul: Ekkert pláss til að setja inn tungumálakóða
+  naprawiacz_bez_tagu_tresc: "Skráin er með endinguna {rozszerzenie}, en fyrir hana vistar forritið innihaldið óbreytt — það er ekki til staðar staður þar sem hægt væri að setja tungumálakóða.\n\nTungumálakóði fer aðeins í skrár af gerðinni: {lista_rozszerzen}\n\nVistaða skráin verður því afrit án nokkurs tungumálakóða, sem þýðir að ekkert breytist nema heitið. Halda áfram?"
+  per_akapit_tytul: Tungumálakóðar fyrir einstakar efnisgreinar
+  per_akapit_lista_lbl: 'Efnisgreinar ({liczba_akapitow}) — númer, upphaf texta og úthlutaður kóði:'
+  per_akapit_lista_name: Listi yfir efnisgreinar með tungumálakóðum
+  per_akapit_pozycja: '{numer_akapitu}. {tresc_akapitu} [{kod_iso}]'
+  per_akapit_tresc_lbl: 'Fullur texti valdrar efnisgreinar:'
+  per_akapit_tresc_name: Texti valdrar efnisgreinar
+  per_akapit_opinia_lbl: 'Hvað segir tungumálagreiningin um þessa efnisgrein:'
+  per_akapit_opinia_name: Niðurstaða tungumálagreiningar fyrir valda efnisgrein
+  per_akapit_opinia_wynik: '{nazwa_jezyka} ({kod_iso})'
+  per_akapit_opinia_brak: greindist ekki — efnisgreinin er of stutt eða niðurstaðan óviss
+  per_akapit_kod_lbl: '&ISO-kóði fyrir þessa efnisgrein (t.d. en, fr, pt-BR):'
+  per_akapit_kod_name: ISO-kóði valdrar efnisgreinar
+  per_akapit_btn_wszystkie: Nota þennan kóða fyrir &allar efnisgreinar
+  per_akapit_btn_detektor: Fylla alla kóða út með &niðurstöðu greiningarinnar
+  per_akapit_btn_ok: '&Vista kóða og vinna úr'
+  per_akapit_btn_anuluj: '&Hætta við'
+  per_akapit_postep_tytul: Greining tungumáls efnisgreina
+  per_akapit_postep_tresc: Athuga á hvaða tungumáli hver efnisgrein er…
+  per_akapit_zly_kod_tytul: Ógildur tungumálakóði
+  per_akapit_zly_kod_tresc: "Efnisgrein {numer_akapitu} er með kóðann „{kod_iso}\", sem forritið þekkir ekki.\n\nGildur kóði samanstendur af tveimur bókstöfum (t.d. en), hugsanlega með undirmerki fyrir svæði eða letur (t.d. pt-BR, zh-Hans)."
+  per_akapit_brak_jednostek_tytul: Engar efnisgreinar til að merkja
+  per_akapit_brak_jednostek_tresc: "Í þessari skrá er engin efnisgrein sem forritið gæti gefið tungumálakóða.\n\nVinnslan heldur áfram með einn kóða úr reitnum „ISO-kóði\"."
+  per_akapit_detektor_bilans_tytul: Niðurstaða málgreiningar efnisgreina
+  per_akapit_detektor_bilans_tresc: "Kóðar voru fylltir út í {liczba_wypelnionych} efnisgreinum af {liczba_akapitow}.\n\nFyrir {liczba_bez_opinii} efnisgreinar gat greiningin ekki tekið ákvörðun (of stutt eða óviss niðurstaða) — þær halda kóðanum sem þær höfðu þegar."
+  per_akapit_detektor_przerwane_tresc: "Hætt við á efnisgrein {numer_akapitu} af {liczba_akapitow}.\n\nKóðar voru fylltir út í {liczba_wypelnionych} efnisgreinum; hinar halda kóðanum sem þær höfðu þegar."
+  per_akapit_nadpisanie_tytul: Skrifa yfir stillta kóða?
+  per_akapit_nadpisanie_tresc: "Þessi aðgerð stillir kóðann í öllum efnisgreinum í einu og {liczba_zmienionych} þeirra eru núna með annan kóða en þann sem listinn opnaðist með.\n\nEkki er hægt að afturkalla breytinguna. Halda áfram?"
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)

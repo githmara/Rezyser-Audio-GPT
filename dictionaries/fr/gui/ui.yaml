@@ -849,6 +849,38 @@ poliglota:
   md_render_blad_tresc: "Impossible de convertir le Markdown en HTML :\n{tresc_bledu}\n\nLe fichier sera traité comme du texte brut, ce qui fait que les caractères de syntaxe Markdown se retrouveront dans le résultat en tant que contenu."
   wymus_bez_jezyka_tytul: Choisissez la langue de traitement
   wymus_bez_jezyka_tresc: "Pour imposer une seule langue, il faut l'indiquer explicitement dans le champ « Langue de traitement ».\n\nAvec le réglage « Détecter automatiquement », la langue imposée proviendrait de la détection — ce qui est exactement ce que cette option est censée désactiver. Pour un texte déjà chiffré, la détection renvoie une langue aléatoire, ce qui amènerait le programme à appliquer le mauvais alphabet.\n\nChoisissez une langue dans la liste ou décochez cette option."
+  chk_per_akapit: Définir le &code ISO séparément pour chaque paragraphe
+  chk_per_akapit_name: Codes ISO séparés pour chaque paragraphe
+  chk_per_akapit_tooltip: Par défaut, le code du champ ci-dessus s'applique à tout le fichier. Cochez cette case pour voir, une fois le traitement lancé, la liste des paragraphes et attribuer à chacun son propre code de langue — utile pour les documents contenant des citations en langue étrangère.
+  naprawiacz_bez_tagu_tytul: Aucun emplacement où insérer le code de langue
+  naprawiacz_bez_tagu_tresc: "Le fichier a l'extension {rozszerzenie}, pour laquelle le programme enregistre le contenu sans modification — il n'y a pas d'endroit où il pourrait y placer un code de langue.\n\nLe code de langue n'est ajouté qu'aux fichiers : {lista_rozszerzen}\n\nLe fichier enregistré sera donc une copie sans aucun code de langue, c'est-à-dire que rien ne changera à part le nom. Continuer ?"
+  per_akapit_tytul: Codes de langue pour chaque paragraphe
+  per_akapit_lista_lbl: 'Paragraphes ({liczba_akapitow}) — numéro, début du contenu et code attribué :'
+  per_akapit_lista_name: Liste des paragraphes avec leurs codes de langue
+  per_akapit_pozycja: '{numer_akapitu}. {tresc_akapitu} [{kod_iso}]'
+  per_akapit_tresc_lbl: 'Contenu complet du paragraphe sélectionné :'
+  per_akapit_tresc_name: Contenu du paragraphe sélectionné
+  per_akapit_opinia_lbl: 'Ce que la détection de langue pense de ce paragraphe :'
+  per_akapit_opinia_name: Résultat de la détection de langue pour le paragraphe sélectionné
+  per_akapit_opinia_wynik: '{nazwa_jezyka} ({kod_iso})'
+  per_akapit_opinia_brak: non reconnu — paragraphe trop court ou résultat incertain
+  per_akapit_kod_lbl: '&Code ISO pour ce paragraphe (par ex. en, fr, pt-BR) :'
+  per_akapit_kod_name: Code ISO du paragraphe sélectionné
+  per_akapit_btn_wszystkie: Appliquer ce code à &tous les paragraphes
+  per_akapit_btn_detektor: Remplir tous les codes avec le &résultat de la détection
+  per_akapit_btn_ok: '&Enregistrer les codes et traiter'
+  per_akapit_btn_anuluj: '&Annuler'
+  per_akapit_postep_tytul: Détection de la langue des paragraphes
+  per_akapit_postep_tresc: Vérification de la langue de chaque paragraphe…
+  per_akapit_zly_kod_tytul: Code de langue incorrect
+  per_akapit_zly_kod_tresc: "Le paragraphe {numer_akapitu} porte le code « {kod_iso} », que le programme ne reconnaît pas.\n\nUn code valide comprend deux lettres (par ex. en), éventuellement suivies d'un sous-tag de région ou d'écriture (par ex. pt-BR, zh-Hans)."
+  per_akapit_brak_jednostek_tytul: Aucun paragraphe à marquer
+  per_akapit_brak_jednostek_tresc: "Ce fichier ne contient aucun paragraphe auquel le programme pourrait attribuer un code de langue.\n\nLe traitement se poursuivra avec le seul code du champ « Code ISO »."
+  per_akapit_detektor_bilans_tytul: Résultat de la détection de la langue des paragraphes
+  per_akapit_detektor_bilans_tresc: "Codes renseignés dans {liczba_wypelnionych} paragraphes sur {liczba_akapitow}.\n\nPour {liczba_bez_opinii} paragraphes, la détection n'a pas pu se prononcer (texte trop court ou résultat incertain) — ils ont conservé le code qu'ils avaient déjà."
+  per_akapit_detektor_przerwane_tresc: "Interrompu au paragraphe {numer_akapitu} sur {liczba_akapitow}.\n\nCodes renseignés dans {liczba_wypelnionych} paragraphes ; les autres ont conservé le code qu'ils avaient déjà."
+  per_akapit_nadpisanie_tytul: Écraser les codes définis ?
+  per_akapit_nadpisanie_tresc: "Cette action va définir le code dans tous les paragraphes en même temps, et {liczba_zmienionych} d'entre eux ont actuellement un code différent de celui avec lequel la liste s'est ouverte.\n\nCette modification est irréversible. Continuer ?"
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)

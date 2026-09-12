@@ -1090,6 +1090,122 @@ def _wykryj_jezyk_fragmentu(tekst: str, fallback: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Detektor PEŁNEGO kanonu Lingui — wyłącznie jako OPINIA dla użytkownika
+# ---------------------------------------------------------------------------
+
+_LINGUA_DETEKTOR_PELNY: Any = None      # cache singletona; budowa leniwa
+_LINGUA_PELNY_BLD_FAILED = False        # flaga, by nie powtarzać próby budowy
+
+
+def _zbuduj_detektor_pelny() -> Any:
+    """Lazy singleton detektora znającego WSZYSTKIE języki z `jezyki_lingua`.
+
+    Różnica wobec :func:`_zbuduj_detektor_lingua` jest różnicą ROLI, nie
+    optymalizacji. Tamten detektor WYBIERA REGUŁY, więc musi być zawężony do
+    paczek obecnych w ``dictionaries/`` — kod języka, dla którego nie ma
+    reguł, byłby dla silnika bezużyteczny. Ten detektor niczego nie wybiera:
+    jest OPINIĄ pokazywaną użytkownikowi w dialogu „Kody języka per akapit"
+    Naprawiacza Tagów, a Naprawiacz istnieje właśnie dla języków, których
+    paczki NIE MA (wstrzykuje sam tag, bez reguł fonetycznych). Zawężenie do
+    dziewięciu paczek dawałoby tu opinię pewną i błędną: akapit islandzki
+    w pliku bez paczki `is` zostałby nazwany niemieckim.
+
+    Zmierzone 2026-09-12 na `lingua-language-detector`: build jest darmowy
+    (modele ładują się leniwie, przy pierwszej detekcji), a koszt rośnie
+    z LICZBĄ RÓŻNYCH języków, które detektor realnie dotknie. Na 30 akapitach
+    w 5 językach: 2.8 ms/akapit i ~52 MB RSS ponad import; po 200 detekcjach
+    w 15 językach: 2.4 ms/akapit i ~105 MB (dalej już nie rośnie). Rozmiar
+    paczki nie rośnie ani o bajt — modele siedzą w rozszerzeniu Rust, które
+    i tak jest w bundlu. Tryb ``with_low_accuracy_mode`` (1.0 ms, ~23 MB)
+    odrzucony świadomie: patrzy tylko na trigramy, a akapit to często
+    jedno–dwa zdania.
+
+    Ten singleton NIE jest czyszczony przez :func:`wyczysc_cache_regul` —
+    i to jest zamierzone. Tamten cache unieważnia stan czytany z
+    ``dictionaries/``, a kanon Lingui jest statycznym lustrem biblioteki:
+    zmienia się przy aktualizacji zależności, nie przy edycji paczki.
+    """
+    global _LINGUA_DETEKTOR_PELNY, _LINGUA_PELNY_BLD_FAILED
+
+    if _LINGUA_DETEKTOR_PELNY is not None:
+        return _LINGUA_DETEKTOR_PELNY
+    if _LINGUA_PELNY_BLD_FAILED:
+        return None
+    if _LinguaBuilder is None or _LinguaLanguage is None:
+        _LINGUA_PELNY_BLD_FAILED = True
+        return None
+
+    jezyki = []
+    for nazwa_enuma, _ in jezyki_lingua.KANON.values():
+        kandydat = getattr(_LinguaLanguage, nazwa_enuma, None)
+        if kandydat is not None:
+            jezyki.append(kandydat)
+    if len(jezyki) < 2:                                     # pragma: no cover
+        # Kanon rozjechany z biblioteką — pilnuje tego `audyt_podstaw --bramka`,
+        # a tutaj po prostu nie ma z czego zbudować detektora.
+        _LINGUA_PELNY_BLD_FAILED = True
+        return None
+
+    _LINGUA_DETEKTOR_PELNY = _LinguaBuilder.from_languages(*jezyki).build()
+    return _LINGUA_DETEKTOR_PELNY
+
+
+def opinia_detektora(tekst: str) -> str | None:
+    """Kod ISO języka fragmentu w opinii detektora; ``None`` gdy brak opinii.
+
+    ``None`` (a nie „jakiś kod") dostajesz w każdym przypadku, w którym
+    opinia byłaby udawaniem wiedzy: fragment krótszy niż
+    ``_MIN_TEKST_DLA_DETEKCJI`` znaków, brak ``lingua`` w środowisku,
+    detektor niepewny, albo wykryty enum bez odpowiednika w kanonie. GUI
+    pokazuje wtedy myślnik — użytkownik ma widzieć różnicę między „detektor
+    mówi: fiński" a „detektor nie ma zdania".
+
+    To funkcja WYŁĄCZNIE informacyjna: nie zasila wyboru reguł ani nie
+    wchodzi do pliku wynikowego bez jawnej decyzji użytkownika (kanon 19.1:
+    język wyniku jest danymi, nie zgadywaniem).
+    """
+    if not isinstance(tekst, str) or len(tekst.strip()) < _MIN_TEKST_DLA_DETEKCJI:
+        return None
+
+    detektor = _zbuduj_detektor_pelny()
+    if detektor is None:
+        return None
+
+    wynik = detektor.detect_language_of(tekst)
+    if wynik is None:
+        return None
+
+    return jezyki_lingua.iso_dla_enuma(wynik.name)
+
+
+def nazwa_dla_opinii(kod: str) -> str:
+    """Nazwa języka do POKAZANIA obok kodu ISO (bez wycieku polszczyzny).
+
+    Kolejność źródeł jest kolejnością jakości:
+      1. natywna nazwa z ``<kod>/podstawy.yaml`` (``Suomi``, ``Русский``) —
+         dostępna dla dziewięciu paczek i z definicji w dobrym języku,
+      2. nazwa enuma z kanonu Lingui, w formie tytułowej (``Icelandic``) —
+         dla pozostałych 66 języków, których paczki nie ma.
+
+    Dlaczego NIE `jezyki_lingua.nazwa_polska`: ta jest identyfikatorem dla
+    dev-toolingu (nazwy plików akcentów) i po polsku. W interfejsie
+    niemieckim czy rosyjskim „islandzki" byłoby wyciekiem PL, a runtime
+    używa z kanonu wyłącznie `nazwa_enuma` (tak samo robi
+    `manager_regul_szablony`).
+    """
+    if not kod:
+        return ""
+    if kod in _jezyki_obecne_w_dictionaries():
+        natywna = natywna_nazwa(kod)
+        if natywna and natywna != kod:
+            return natywna
+    enum = jezyki_lingua.nazwa_enuma(kod)
+    if enum:
+        return enum.replace("_", " ").title()
+    return kod
+
+
+# ---------------------------------------------------------------------------
 # Wyjątek: brak reguły dla wykrytego języka fragmentu
 # ---------------------------------------------------------------------------
 
@@ -1851,6 +1967,8 @@ def sufiks_nazwy_pliku(
       * ``<oczyszczony>_<oryginał>``                  – oczyszczanie
       * ``<oryginał>_<akcent>_<id akcentu>``          – akcent fonetyczny
       * ``<naprawiony>_<oryginał>_<iso>``             – naprawiacz tagów
+        (przy kodach per akapit ``<iso>`` to zbiór użytych kodów, np.
+        ``de-en-fi``, do czterech pozycji plus licznik nadwyżki ``+N``)
       * ``<oryginał>_<szyfr>_<id>[<±przesunięcie>]``  – szyfry
 
     ``id`` wariantu pozostaje techniczne (wspólny klucz wszystkich paczek).
@@ -1870,6 +1988,17 @@ def sufiks_nazwy_pliku(
 
     if kategoria == "naprawiacz":
         iso = (opcje.get("iso_reczne") or jezyk).strip()
+        # v19.2 (audyt): przy kodach per akapit jeden kod w nazwie KŁAMAŁBY
+        # o zawartości — `naprawiony_x_pl.html` z akapitami `en`/`de`/`fi` to
+        # dokładnie to, czego 19.1 miało nie robić. Bierzemy więc zbiór użytych
+        # kodów (do czterech, dalej licznik nadwyżki); przy jednym kodzie
+        # nazwa zostaje bez zmian.
+        kody = [k for k in (opcje.get("kody_jednostek") or []) if k]
+        unikalne = sorted(set(kody))
+        if len(unikalne) > 1:
+            iso = "-".join(unikalne[:4])
+            if len(unikalne) > 4:
+                iso = f"{iso}+{len(unikalne) - 4}"
         return f"{slowo('naprawiony')}_{oryginalna_nazwa}_{iso}"
 
     if kategoria == "oczyszczenie":
@@ -1912,8 +2041,123 @@ _PARA_TAGS_LANG = (
 )
 
 
+class _KodyPerJednostka:
+    """Kursor po liście kodów ISO nadawanych jednostkom PO KOLEI.
+
+    Kontrakt: liczba i kolejność jednostek widzianych przez
+    :func:`jednostki_jezykowe` (czyli lista, którą użytkownik miał przed
+    sobą w GUI) musi się ZGADZAĆ z liczbą i kolejnością stempli nakładanych
+    przez :func:`zapisz_wynik`. Rozjazd choćby o jedną pozycję znaczy, że
+    kod nr 7 wylądował na akapicie nr 8 — i jest to defekt NIEWIDOCZNY
+    w pliku wynikowym, bo plik pozostaje poprawnym HTML-em czy DOCX-em.
+    Dlatego kursor pilnuje obu kierunków rozjazdu i zamiast cicho spaść na
+    wartość domyślną — podnosi wyjątek (standard „zero ciszy").
+    """
+
+    def __init__(self, kody: list[str]) -> None:
+        self._kody = list(kody)
+        self._i = 0
+
+    def nastepny(self) -> str:
+        if self._i >= len(self._kody):
+            raise ValueError(
+                f"Too few per-unit language codes: {len(self._kody)} given, "
+                f"but the file has more units — the caller's unit list drifted "
+                f"from the one the writer walks (see `jednostki_jezykowe`)."
+            )
+        kod = self._kody[self._i]
+        self._i += 1
+        return kod
+
+    def zamknij(self) -> None:
+        """Sprawdza, że zużyto WSZYSTKIE kody (nadwyżka = ten sam rozjazd)."""
+        if self._i != len(self._kody):
+            raise ValueError(
+                f"Too many per-unit language codes: {len(self._kody)} given, "
+                f"{self._i} consumed — the caller's unit list drifted from the "
+                f"one the writer walks (see `jednostki_jezykowe`)."
+            )
+
+
+def _zbuduj_soup(html_text: str) -> Any | None:
+    """Parsuje HTML do ``BeautifulSoup``; ``None`` gdy ``bs4`` nie ma w środowisku.
+
+    Parser: ``lxml`` (szybki i tolerancyjny dla niedomkniętego HTML, w
+    ``requirements.txt`` od 13.4.3), fallback na wbudowany ``html.parser``.
+    ``None`` jest stanem WYŁĄCZNIE deweloperskim — paczka release zawsze ma
+    ``bs4``, więc wywołujący może na tej ścieżce zejść do regexa albo, gdy
+    obietnica wymaga DOM-u, głośno odmówić.
+    """
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:                                     # pragma: no cover
+        return None
+    try:
+        return BeautifulSoup(html_text, "lxml")
+    except Exception:                                       # pragma: no cover
+        return BeautifulSoup(html_text, "html.parser")
+
+
+def _tekst_bezposredni(el: Any) -> str:
+    """Tekst WŁASNY elementu — bez treści zagnieżdżonych w nim bloków.
+
+    Inline'y (``<b>``, ``<a>``) należą do tekstu własnego, bo nie są osobną
+    jednostką języka; blok w bloku ma swój wiersz na liście, więc jego treść
+    tu nie wchodzi.
+    """
+    czesci: list[str] = []
+    for tekst in el.find_all(string=True):
+        rodzic = tekst.parent
+        wlasny = True
+        while rodzic is not None and rodzic is not el:
+            if rodzic.name in _PARA_TAGS_LANG:
+                wlasny = False
+                break
+            rodzic = rodzic.parent
+        if wlasny:
+            czesci.append(str(tekst))
+    return re.sub(r"\s+", " ", "".join(czesci)).strip()
+
+
+def _tekst_jednostki(el: Any) -> str:
+    """Tekst jednostki do POKAZANIA: całość dla liścia, własny dla bloku z blokiem."""
+    if el.find(list(_PARA_TAGS_LANG)) is None:
+        return el.get_text(separator=" ", strip=True)
+    return _tekst_bezposredni(el)
+
+
+def _bloki_jednostki(soup: Any) -> list[Any]:
+    """Blokowe JEDNOSTKI języka z niepustym tekstem, w kolejności dokumentu.
+
+    Jednostką jest element z :data:`_PARA_TAGS_LANG`, który ma własny tekst:
+      * liść (nie zawiera innego takiego elementu) — całą swoją treścią,
+      * blok zawierający inne bloki — o ile ma tekst BEZPOŚREDNI.
+
+    Drugi warunek jest poprawką z audytu v19.2. Sama „liściowość" wycinała
+    z listy tekst, który użytkownik widzi w pliku: zagnieżdżona lista
+    Markdowna daje ``<li>Punkt pierwszy<ul><li>Podpunkt</li></ul></li>``,
+    więc „Punkt pierwszy" nie był żadną jednostką i po cichu dostawał kod
+    globalny. Tak samo ``<blockquote>Własny tekst<p>…</p></blockquote>``.
+    Lista, która nie zawiera całego tekstu pliku, łamie standard „zero ciszy";
+    HTML na tym nie traci, bo ``lang`` potomka nadpisuje przodka dla treści
+    potomka.
+
+    Kolejność jest DOKUMENTOWA, bo ``find_all`` z listą nazw przechodzi drzewo
+    raz. Do v19.1 zapis iterował ``for tag_name in _PARA_TAGS_LANG:``, czyli
+    grupami po nazwie tagu (wszystkie ``<p>``, potem wszystkie ``<h1>``…).
+    Dopóki język brał się z mapy PO TREŚCI, było to nieszkodliwe; przy kodach
+    nadawanych PO INDEKSIE byłoby zabójcze.
+    """
+    wynik: list[Any] = []
+    for el in soup.find_all(list(_PARA_TAGS_LANG)):
+        if _tekst_jednostki(el):
+            wynik.append(el)
+    return wynik
+
+
 def _wstrzyknij_lang_w_pelnym_html(html_text: str, iso_fallback: str,
-                                   *, mapa_iso: dict[str, str] | None = None) -> str:
+                                   *, mapa_iso: dict[str, str] | None = None,
+                                   kody: _KodyPerJednostka | None = None) -> str:
     """Parsuje pełnoprawny HTML i ustawia atrybut ``lang`` per element blokowy.
 
     13.4.3: zastępuje wcześniejszy regex (działający tylko na ``<html>``).
@@ -1942,10 +2186,14 @@ def _wstrzyknij_lang_w_pelnym_html(html_text: str, iso_fallback: str,
     na wbudowany ``html.parser`` w razie braku ``lxml`` w środowisku
     deweloperskim.
     """
-    try:
-        from bs4 import BeautifulSoup
-    except ImportError:                                     # pragma: no cover
+    soup = _zbuduj_soup(html_text)
+    if soup is None:                                        # pragma: no cover
         # bs4 niedostępne — wracamy do prostego ustawienia lang w <html>.
+        if kody is not None:
+            raise RuntimeError(
+                "Per-paragraph language codes require `bs4` (missing in this "
+                "environment) — without a DOM there are no units to stamp."
+            )
         if "lang=" in html_text.lower():
             return re.sub(
                 r'(<html[^>]*?)lang=["\'][^"\']+["\']',
@@ -1957,20 +2205,29 @@ def _wstrzyknij_lang_w_pelnym_html(html_text: str, iso_fallback: str,
             html_text, flags=re.IGNORECASE,
         )
 
-    try:
-        soup = BeautifulSoup(html_text, "lxml")
-    except Exception:                                       # pragma: no cover
-        soup = BeautifulSoup(html_text, "html.parser")
-
     if soup.html is not None:
         soup.html["lang"] = iso_fallback
 
-    for tag_name in _PARA_TAGS_LANG:
-        for el in soup.find_all(tag_name):
+    if kody is None:
+        for el in soup.find_all(list(_PARA_TAGS_LANG)):
             tekst = el.get_text(separator=" ", strip=True)
             if not tekst:
                 continue
             el["lang"] = _iso_dla_tekstu(tekst, mapa_iso, iso_fallback)
+    else:
+        # v19.2: Naprawiacz z kodami per akapit. Każda JEDNOSTKA z listy w GUI
+        # dostaje swój kod, w kolejności dokumentu — tej samej, w której
+        # użytkownik ją zobaczył. Blok bez własnego tekstu (sam kontener dla
+        # innych bloków) jednostką nie jest i dostaje kod globalny.
+        jednostki = _bloki_jednostki(soup)
+        id_jednostek = {id(el) for el in jednostki}
+        for el in soup.find_all(list(_PARA_TAGS_LANG)):
+            if id(el) in id_jednostek:
+                continue
+            if el.get_text(separator=" ", strip=True):
+                el["lang"] = iso_fallback
+        for el in jednostki:
+            el["lang"] = kody.nastepny()
 
     return str(soup)
 
@@ -1995,14 +2252,103 @@ def _iso_dla_tekstu(tekst: str, mapa_iso: dict[str, str] | None,
     return iso_fallback
 
 
-def _ustaw_lang_runa(run: Any, iso: str) -> None:
-    """Wstrzykuje ``<w:lang w:val=iso>`` do biegu Word, tworząc ``rPr`` jeśli brak."""
-    rPr = run._r.get_or_add_rPr()
+def _ustaw_lang_runa_xml(r_el: Any, iso: str) -> None:
+    """Wstrzykuje ``<w:lang w:val=iso>`` do biegu (element ``w:r``)."""
+    rPr = r_el.get_or_add_rPr()
     lang_el = rPr.find(qn("w:lang"))
     if lang_el is None:
         lang_el = OxmlElement("w:lang")
         rPr.append(lang_el)
     lang_el.set(qn("w:val"), iso)
+
+
+def _ustaw_lang_runa(run: Any, iso: str) -> None:
+    """Wstrzykuje ``<w:lang w:val=iso>`` do biegu Word, tworząc ``rPr`` jeśli brak."""
+    _ustaw_lang_runa_xml(run._r, iso)
+
+
+def _ustaw_lang_akapitu(para: Any, iso: str) -> None:
+    """Stempluje ``w:lang`` na KAŻDYM biegu akapitu — także wewnątrz hiperlinku.
+
+    Poprawka z audytu v19.2. ``Paragraph.runs`` w python-docx 1.2.0 NIE zwraca
+    biegów zagnieżdżonych w ``w:hyperlink``, a ``Paragraph.text`` je liczy —
+    więc akapit będący samym linkiem był jednostką na liście, zużywał swój kod
+    i nie dostawał ŻADNEGO tagu (plik pozostawał poprawnym DOCX-em, liczba
+    jednostek się zgadzała, więc nic nie krzyczało). Iterujemy po ``w:r``
+    w drzewie akapitu, co obejmuje oba przypadki naraz.
+    """
+    for r_el in para._p.iter(qn("w:r")):
+        _ustaw_lang_runa_xml(r_el, iso)
+
+
+def _iteruj_akapity_docx(kontener: Any) -> Any:
+    """Akapity dokumentu Word w KOLEJNOŚCI DOKUMENTU, wchodząc do tabel.
+
+    ``Document.paragraphs`` z python-docx zwraca wyłącznie akapity leżące
+    bezpośrednio w ``<w:body>`` — każdy akapit z komórki tabeli jest poza tą
+    listą. Do v19.1 płaciły za to dwie rzeczy naraz: podgląd wczytanego
+    ``.docx`` gubił całą treść tabel, a Naprawiacz Tagów nie wstrzykiwał
+    ``w:lang`` do ani jednej komórki, więc czytnik ekranu czytał tabelę
+    głosem poprzedniego języka. Zmierzone na dokumencie z tabelą 2×2,
+    scaleniem poziomym i tabelą zagnieżdżoną: ``doc.paragraphs`` widziało
+    2 akapity z 8.
+
+    Chodzimy więc po XML-u: ``w:p`` → akapit, ``w:tbl`` → tabela, do której
+    wchodzimy rekurencyjnie po ``tr_lst``/``tc_lst``. Iteracja po SUROWYCH
+    ``w:tc`` (a nie po ``row.cells``) rozwiązuje przy okazji scalenia —
+    komórka scalona poziomo jest w XML-u jedna, a ``row.cells`` pokazałoby
+    ją tyle razy, ile kolumn obejmuje, i tyle razy nadałoby jej kod.
+    """
+    from docx.document import Document as _DocxDocument
+    from docx.table import _Cell
+
+    if isinstance(kontener, _DocxDocument):
+        rodzic = kontener.element.body
+    elif isinstance(kontener, _Cell):
+        rodzic = kontener._tc
+    else:                                                   # pragma: no cover
+        raise TypeError(f"Unsupported paragraph container: {type(kontener)!r}")
+
+    yield from _iteruj_akapity_xml(rodzic, kontener)
+
+
+def _iteruj_akapity_xml(rodzic: Any, kontener: Any) -> Any:
+    """Akapity spod elementu XML — rekurencyjnie przez tabele i kontrolki treści.
+
+    Wydzielone z :func:`_iteruj_akapity_docx`, żeby dało się zejść pod element,
+    który KONTENEREM python-docx nie jest: ``w:sdtContent`` (kontrolka
+    zawartości, np. pole formularza). Znalezisko z audytu v19.2 — taki akapit
+    nie trafiał ani do podglądu, ani do listy jednostek, ani pod stempel,
+    a liczniki po obu stronach się zgadzały, więc nic nie krzyczało.
+    """
+    from docx.table import Table, _Cell
+    from docx.text.paragraph import Paragraph
+
+    for dziecko in rodzic.iterchildren():
+        if dziecko.tag == qn("w:p"):
+            yield Paragraph(dziecko, kontener)
+        elif dziecko.tag == qn("w:tbl"):
+            tabela = Table(dziecko, kontener)
+            for wiersz in dziecko.tr_lst:
+                for komorka_xml in wiersz.tc_lst:
+                    yield from _iteruj_akapity_docx(_Cell(komorka_xml, tabela))
+        elif dziecko.tag == qn("w:sdt"):
+            for wnetrze in dziecko.iterchildren(qn("w:sdtContent")):
+                yield from _iteruj_akapity_xml(wnetrze, kontener)
+
+
+def tekst_docx(sciezka: str) -> str:
+    """Cała treść tekstowa dokumentu Word, akapit na linię, w kolejności czytania.
+
+    Publiczne wejście dla GUI (podgląd wczytanego pliku i licznik znaków).
+    Różnica wobec naiwnego ``"\n".join(p.text for p in doc.paragraphs)``
+    jest różnicą KOMPLETNOŚCI: tamta forma pomija każdą komórkę tabeli
+    (patrz :func:`_iteruj_akapity_docx`), więc do v19.1 podgląd `.docx`
+    z tabelą pokazywał ułamek treści, a użytkownik nie miał sygnału, że
+    czegoś nie widzi.
+    """
+    doc = docx.Document(sciezka)
+    return "\n".join(para.text for para in _iteruj_akapity_docx(doc))
 
 
 def _iso_per_linia(tresc: str, segmenty: list[Segment] | None,
@@ -2045,6 +2391,76 @@ def _iso_per_linia(tresc: str, segmenty: list[Segment] | None,
     return wynik
 
 
+def _bez_tagow(fragment: str) -> str:
+    """Tekst akapitu bez tagów HTML, ze zwiniętymi białymi znakami (do LISTY).
+
+    Służy WYŁĄCZNIE prezentacji: użytkownik ma w liście usłyszeć treść
+    akapitu, nie jego znaczniki. Zapis operuje na oryginalnym fragmencie.
+    """
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", fragment)).strip()
+
+
+def jednostki_jezykowe(tresc: str, ext: str,
+                       sciezka_oryginalu: str | None = None) -> list[str]:
+    """Teksty jednostek, którym :func:`zapisz_wynik` nadaje ``lang``.
+
+    **Kolejność jest kolejnością stemplowania** — to cały sens tej funkcji.
+    GUI buduje z niej listę akapitów w dialogu „Kody języka per akapit", a
+    zwróconą listę kodów oddaje do ``zapisz_wynik(kody_jednostek=...)``,
+    które nakłada je PO INDEKSIE. Obie strony muszą więc liczyć jednostki
+    tak samo, a „jednostka" znaczy co innego na każdej ścieżce zapisu:
+
+      * ``.docx`` z istniejącym oryginałem — akapit Worda w kolejności
+        dokumentu, **wliczając komórki tabel** (:func:`_iteruj_akapity_docx`),
+      * ``.docx`` bez oryginału (plik zniknął między wczytaniem a zapisem) —
+        linia treści, tak jak buduje ją wtedy ``zapisz_wynik``,
+      * ``.html``/``.htm`` z ``<html>`` (tu wpada też wyrenderowany ``.md``) —
+        blokowy element z własnym tekstem (:func:`_bloki_jednostki`),
+      * fragment HTML / ``.txt`` / ``.md`` — akapit rozdzielony PUSTĄ LINIĄ,
+      * każde inne rozszerzenie — **lista pusta**: zapis jest surowy, żadna
+        jednostka nie dostaje tagu, więc nie ma czego wypełniać.
+
+    Jednostki puste (sam biały znak) są pomijane PO OBU stronach: dostają
+    kod globalny i nie zaśmiecają listy, którą użytkownik przesłuchuje.
+
+    KONTRAKT WYWOŁANIA: ``sciezka_oryginalu`` podawaj tylko wtedy, gdy zapis
+    też pójdzie po oryginale z dysku — czyli dla NAPRAWIACZA TAGÓW. Dla
+    pozostałych wariantów ``zapisz_wynik`` buduje dokument z treści wynikowej,
+    więc lista policzona z pliku źródłowego opisywałaby co innego.
+
+    Returns:
+        Teksty jednostek do POKAZANIA (bez tagów, białe znaki zwinięte).
+        Zapis nie polega na tych stringach — wyłącznie na ich liczbie
+        i kolejności.
+    """
+    ext = (ext or "").lower()
+
+    if ext == ".docx":
+        if sciezka_oryginalu and os.path.exists(sciezka_oryginalu):
+            doc = docx.Document(sciezka_oryginalu)
+            return [p.text.strip() for p in _iteruj_akapity_docx(doc)
+                    if p.text.strip()]
+        return [linia.strip() for linia in tresc.split("\n") if linia.strip()]
+
+    if ext in (".html", ".htm") and "<html" in tresc.lower():
+        soup = _zbuduj_soup(tresc)
+        if soup is None:                                    # pragma: no cover
+            raise RuntimeError(
+                "Per-paragraph language codes require `bs4` (missing in this "
+                "environment) — without a DOM there are no units to stamp."
+            )
+        return [_tekst_jednostki(el) for el in _bloki_jednostki(soup)]
+
+    if ext in (".txt", ".md", ".html", ".htm"):
+        # ``iso_fallback="und"`` (BCP-47: język nieokreślony) jest tu wartością
+        # ATRAPĄ — interesuje nas wyłącznie PODZIAŁ na akapity, a niepusty kod
+        # wyłącza detekcję lingua, której liczenie jednostek nie potrzebuje.
+        return [_bez_tagow(body)
+                for body, _ in _podziel_na_akapity_html(tresc, None, "und")]
+
+    return []
+
+
 def zapisz_wynik(
     tresc_wynikowa: str,
     katalog_wyjscia: str,
@@ -2057,6 +2473,7 @@ def zapisz_wynik(
     sciezka_oryginalu: str | None = None,
     *,
     segmenty_wynikowe: list[Segment] | None = None,
+    kody_jednostek: list[str] | None = None,
 ) -> str:
     """Zapisuje wynik do pliku i zwraca jego ścieżkę.
 
@@ -2110,11 +2527,20 @@ def zapisz_wynik(
                               dokument dostaje ``iso_code`` (przypadek
                               naprawiacza tagów i Tłumacza AI, gdzie jeden
                               zadeklarowany kod obowiązuje wszędzie).
+        kody_jednostek:       *Keyword-only.* v19.2 — kody ISO nadawane
+                              jednostkom PO INDEKSIE, w kolejności
+                              i liczbie z :func:`jednostki_jezykowe`.
+                              Zasilane dialogiem „Kody języka per akapit"
+                              Naprawiacza Tagów. ``None`` → cały dokument
+                              dostaje ``iso_code`` (zachowanie sprzed 19.2).
+                              Rozjazd liczby jednostek podnosi
+                              ``ValueError`` — patrz :class:`_KodyPerJednostka`.
 
     Returns:
         Pełna ścieżka zapisanego pliku.
     """
     jest_naprawiacz = bool(wariant_cfg and wariant_cfg.get("kategoria") == "naprawiacz")
+    kody = _KodyPerJednostka(kody_jednostek) if kody_jednostek is not None else None
 
     # v19.1: mapa ``tekst akapitu → iso`` dla ścieżki pełnego HTML. Budujemy ją
     # WYŁĄCZNIE wtedy, gdy wariant dał różne ``iso`` różnym akapitom (dokument
@@ -2134,14 +2560,17 @@ def zapisz_wynik(
 
         if jest_naprawiacz and sciezka_oryginalu and os.path.exists(sciezka_oryginalu):
             # Otwieramy oryginał i wstrzykujemy RĘCZNY kod w każdy bieg.
-            # v19.1: bez detekcji per paragraf — naprawiacz dostaje od
-            # użytkownika jeden kod i stempluje nim cały dokument. Wybór kodu
-            # per akapit to osobna funkcja (UI z listą akapitów), nie
-            # zgadywanie w tle.
+            # v19.1: bez detekcji per paragraf — naprawiacz dostaje kod od
+            # użytkownika. v19.2: kod może być RÓŻNY per akapit (dialog
+            # z listą akapitów), a iteracja idzie `_iteruj_akapity_docx`,
+            # czyli wchodzi też do komórek tabel — `doc.paragraphs` pomijało
+            # je co do jednej.
             doc = docx.Document(sciezka_oryginalu)
-            for para in doc.paragraphs:
-                for run in para.runs:
-                    _ustaw_lang_runa(run, iso_code)
+            for para in _iteruj_akapity_docx(doc):
+                if not para.text.strip():
+                    continue
+                kod = kody.nastepny() if kody is not None else iso_code
+                _ustaw_lang_akapitu(para, kod)
         else:
             # Nowy dokument: side-channel (tryb Rezyser/Szyfrant) lub live-detect
             # (naprawiacz bez pliku źródła, Tlumacz, inne wywołania).
@@ -2154,8 +2583,12 @@ def zapisz_wynik(
             linie = zawartosc.split("\n")
             for linia, iso_lin in zip(linie, iso_lista):
                 p = doc.add_paragraph(linia)
-                for run in p.runs:
-                    _ustaw_lang_runa(run, iso_lin)
+                kod = iso_lin
+                if kody is not None and linia.strip():
+                    kod = kody.nastepny()
+                _ustaw_lang_akapitu(p, kod)
+        if kody is not None:
+            kody.zamknij()
         doc.save(out_path)
         return out_path
 
@@ -2170,7 +2603,8 @@ def zapisz_wynik(
             # per element blokowy (paragraf, nagłówek, lista, komórka),
             # zachowując resztę DOM-u. Globalny ``<html lang>`` to fallback.
             tekst = _wstrzyknij_lang_w_pelnym_html(tekst, iso_code,
-                                                   mapa_iso=mapa_iso)
+                                                   mapa_iso=mapa_iso,
+                                                   kody=kody)
         else:
             # Fragment HTML / czysty tekst — owijamy akapity (``\n\s*\n``) w
             # ``<p lang="...">`` z dynamicznym językiem.
@@ -2178,9 +2612,11 @@ def zapisz_wynik(
                 tekst,
                 segmenty_wynikowe if not jest_naprawiacz else None,
                 iso_code,
-                z_doctype=False,
+                kody=kody,
             )
 
+        if kody is not None:
+            kody.zamknij()
         with open(out_path, "w", encoding="utf-8") as fh:
             fh.write(tekst)
         return out_path
@@ -2194,8 +2630,10 @@ def zapisz_wynik(
             tresc_wynikowa,
             segmenty_wynikowe if not jest_naprawiacz else None,
             iso_code,
-            z_doctype=False,
+            kody=kody,
         )
+        if kody is not None:
+            kody.zamknij()
         html = (
             f'<!DOCTYPE html>\n<html lang="{iso_code}">\n'
             f'<head>\n<meta charset="utf-8">\n<title>{tytul}</title>\n</head>\n'
@@ -2206,16 +2644,68 @@ def zapisz_wynik(
         return out_path
 
     # -------- Inne – zapis surowy -----------------------------------------
+    # Żadna jednostka nie dostaje tu tagu, więc kody per akapit są sprzeczne
+    # z tą ścieżką — `zamknij()` podnosi ValueError, jeśli ktoś je podał.
+    if kody is not None:
+        kody.zamknij()
     out_path = os.path.join(katalog_wyjscia, f"{base_name}{ext if ext else '.txt'}")
     with open(out_path, "w", encoding="utf-8") as fh:
         fh.write(tresc_wynikowa)
     return out_path
 
 
+def _podziel_na_akapity_html(tresc: str,
+                             segmenty: list[Segment] | None,
+                             iso_fallback: str) -> list[tuple[str, str]]:
+    """Dzieli treść na akapity: lista ``(body, iso)`` w KOLEJNOŚCI WYNIKOWEJ.
+
+    Jedno źródło prawdy dla dwóch stron tej samej umowy:
+    :func:`_zbuduj_html_z_akapitow` (zapis) i :func:`jednostki_jezykowe`
+    (lista w GUI) muszą widzieć te same jednostki w tej samej kolejności.
+    Wydzielone z ciała buildera w v19.2 właśnie dlatego — dopóki podział
+    siedział w środku pętli budującej HTML, GUI musiałoby go POWTÓRZYĆ,
+    a powtórzony podział to podział, który kiedyś się rozjedzie.
+
+    Akapity rozdziela pusta linia; pojedynczy ``chr(10)`` zostaje w treści
+    akapitu. Tag HTML trafia do bieżącego akapitu, separator go domyka.
+    Akapit z samych białych znaków jest pomijany.
+    """
+    if segmenty is None or "".join(s[1] for s in segmenty) != tresc:
+        segmenty = _segmentuj_z_ochrona_tagow(
+            tresc, fallback_jezyk=iso_fallback, wymus_jezyk=iso_fallback)
+
+    akapity: list[tuple[str, str]] = []
+    biezacy: list[str] = []
+    biezacy_iso = iso_fallback
+
+    def flush() -> None:
+        if not biezacy:
+            return
+        body = "".join(biezacy)
+        biezacy.clear()
+        if body.strip():
+            akapity.append((body, biezacy_iso))
+
+    for jez, fr, czy_tekst in segmenty:
+        if czy_tekst:
+            biezacy_iso = jez
+            biezacy.append(fr)
+        else:
+            # Separator pustej linii domyka akapit; tag HTML w środku akapitu
+            # zachowujemy w jego treści.
+            if re.fullmatch(r"\n\s*\n", fr):
+                flush()
+            else:
+                biezacy.append(fr)
+    flush()
+    return akapity
+
+
 def _zbuduj_html_z_akapitow(tresc: str,
                             segmenty: list[Segment] | None,
                             iso_fallback: str,
-                            z_doctype: bool = False) -> str:
+                            *,
+                            kody: _KodyPerJednostka | None = None) -> str:
     """Buduje HTML, owijając każdy akapit w ``<p lang="...">``.
 
     Akapity są oddzielane wzorcem ``\\n\\s*\\n``. Wewnątrz akapitu pojedyncze
@@ -2230,34 +2720,9 @@ def _zbuduj_html_z_akapitow(tresc: str,
     ``iso_fallback`` — **bez detekcji** (v19.1, patrz
     :func:`_wstrzyknij_lang_w_pelnym_html`).
     """
-    if segmenty is None or "".join(s[1] for s in segmenty) != tresc:
-        segmenty = _segmentuj_z_ochrona_tagow(
-            tresc, fallback_jezyk=iso_fallback, wymus_jezyk=iso_fallback)
-
     czesci_html: list[str] = []
-    biezacy_akapit: list[str] = []
-    biezacy_iso = iso_fallback
-
-    def flush_akapit() -> None:
-        if not biezacy_akapit:
-            return
-        body = "".join(biezacy_akapit)
-        if not body.strip():
-            biezacy_akapit.clear()
-            return
-        czesci_html.append(f'<p lang="{biezacy_iso}">{body.replace(chr(10), "<br>")}</p>')
-        biezacy_akapit.clear()
-
-    for jez, fr, czy_tekst in segmenty:
-        if czy_tekst:
-            biezacy_iso = jez
-            biezacy_akapit.append(fr)
-        else:
-            # Separator \n\n lub tag HTML
-            if re.fullmatch(r"\n\s*\n", fr):
-                flush_akapit()
-            else:
-                # Tag HTML w środku akapitu — zachowujemy w treści akapitu.
-                biezacy_akapit.append(fr)
-    flush_akapit()
+    for body, iso in _podziel_na_akapity_html(tresc, segmenty, iso_fallback):
+        if kody is not None:
+            iso = kody.nastepny()
+        czesci_html.append(f'<p lang="{iso}">{body.replace(chr(10), "<br>")}</p>')
     return "\n".join(czesci_html)

@@ -411,7 +411,7 @@ tresc:
 
     Naprawiacz Tagów (NOWOŚĆ w wersji 9): Na końcu listy znajdziesz dodatkową opcję — Naprawiacz Tagów. Nie stosuje żadnych reguł fonetycznych ani czyszczenia. Robi jedną rzecz: wstrzykuje do pliku podany przez Ciebie kod języka ISO — dwuliterowy (np. "fi" dla fińskiego, "en" dla angielskiego) albo z podtagiem regionu czy pisma (np. "pt-BR" dla portugalskiego brazylijskiego, "zh-Hans" dla chińskiego uproszczonego). Przydaje się, gdy masz już gotowy plik — np. przetłumaczony wcześniej przez Tłumacza AI — ale z jakiegoś powodu wyszedł z błędnym albo brakującym tagiem językowym. Zamiast tłumaczyć go od nowa, po prostu uruchamiasz Naprawiacz z właściwym kodem ISO i po chwili masz poprawny plik.
 
-    Od wersji 19.1 podany kod obowiązuje CAŁY dokument: trafia zarówno do nagłówka pliku, jak i do każdego akapitu. Wcześniej Naprawiacz próbował dodatkowo zgadywać język każdego akapitu osobno, więc plik po naprawie mógł mieć w środku kody, których nie wpisałeś. Wybór kodu dla pojedynczych akapitów to osobne zadanie i wymaga interfejsu, w którym te akapity widzisz — planujemy je na kolejną wersję.
+    Od wersji 19.1 podany kod obowiązuje CAŁY dokument: trafia zarówno do nagłówka pliku, jak i do każdego akapitu. Wcześniej Naprawiacz próbował dodatkowo zgadywać język każdego akapitu osobno, więc plik po naprawie mógł mieć w środku kody, których nie wpisałeś.
 
     Pliki Markdown (NOWOŚĆ w wersji 19.1): plik .md jest przed nałożeniem akcentu lub szyfru zamieniany na HTML. Nagłówki, listy i cytaty stają się w wyniku prawdziwymi elementami dokumentu, po których czytnik ekranu potrafi skakać (w NVDA klawisze 1-6 i H), a znaki samej składni — „---", „- ", „> " — nie są już czytane na głos jako treść. Wcześniej .md wchodził do przetwarzania jak zwykły tekst, więc te znaki lądowały w wyniku, a cała struktura dokumentu ginęła. Tłumacz AI dostaje Markdown bez zmian — model rozumie go natywnie, a zamiana na HTML tylko podniosłaby koszt tłumaczenia.
 
@@ -423,6 +423,23 @@ tresc:
 
     - Tarcza ochronna: Skrypt chroni wszystkie tagi HTML. Psuje tylko dialogi i narrację.
     - Działa lokalnie i nic nie kosztuje!
+  krok_5_naprawiacz_per_akapit: |
+    ## Naprawiacz Tagów: kod języka osobno dla każdego akapitu (NOWOŚĆ w wersji 19.2)
+
+    Pod polem kodu ISO znajdziesz pole wyboru „{poliglota.chk_per_akapit}". Odznaczone — wszystko zostaje po staremu: jeden kod idzie na cały plik i nie pojawia się żadne dodatkowe okno. Zaznaczone — po naciśnięciu „{poliglota.btn_process}" otwiera się lista akapitów Twojego pliku.
+
+    Każda pozycja listy mówi od razu trzy rzeczy: numer akapitu, początek jego treści i kod, który ten akapit dostanie. Nie musisz więc wchodzić w żadne pole, żeby usłyszeć, co gdzie trafi. Pod listą są trzy rzeczy dla wybranego akapitu: jego pełna treść, wynik wykrywania języka i pole, w którym kod zmieniasz. Wszystkie akapity startują z kodem, który wpisałeś w pole „Kod ISO" — do pliku nie trafia żaden kod, którego nie zatwierdziłeś.
+
+    Dwa przyciski skracają pracę przy dłuższym pliku. „{poliglota.per_akapit_btn_wszystkie}" rozsyła bieżący kod po całej liście — przydaje się, gdy chcesz zmienić kod globalny, a potem poprawić tylko kilka wyjątków. „{poliglota.per_akapit_btn_detektor}" pyta o język każdego akapitu po kolei i wstawia odpowiedzi jako kody; akapit, dla którego wykrywanie nie ma zdania (za krótki albo wynik niepewny), zachowuje kod, który już miał — „nie wiem" nigdy nie nadpisuje tego, co wpisałeś.
+
+    Wykrywanie języka w tym okienku zna WSZYSTKIE języki, które rozpoznaje biblioteka detekcji — także te, dla których program nie ma własnej paczki reguł. To celowe: Naprawiacz Tagów istnieje właśnie dla plików w językach, dla których żadnego akcentu nie mamy, więc odpowiedź zawężona do wdrożonych paczek byłaby dla niego pewna i błędna (akapit czeski zostałby nazwany na przykład niemieckim). Podpowiedź zostaje podpowiedzią — decyzja i tak jest Twoja.
+
+    Co to jest „akapit" — zależy od formatu pliku, bo program nadaje kod dokładnie tym miejscom, które czytnik ekranu widzi jako osobne jednostki: w .docx to akapit dokumentu Word, w pliku HTML akapit, nagłówek, punkt listy albo komórka tabeli, a w .txt fragment oddzielony pustą linią. Lista pokazuje je w kolejności czytania, więc pozycja numer 7 jest siódmym miejscem, do którego dojdzie syntezator.
+
+    Dwie poprawki dorzucone przy okazji:
+
+    - Tabele w .docx dostają wreszcie kod języka. Program do tej pory w ogóle ich nie widział: akapity z komórek nie były tagowane, a przy wczytywaniu pliku ich treść nie pojawiała się nawet w podglądzie ani w liczniku znaków. Teraz i podgląd, i tagowanie idą przez całą treść dokumentu, razem z tabelami zagnieżdżonymi.
+    - Rozszerzenie, którego program nie obsługuje wprost, daje teraz jasne ostrzeżenie. W takim pliku nie ma gdzie umieścić kodu języka, więc Naprawiacz zapisałby kopię identyczną z oryginałem — a dotąd meldował „{common.sukces_tytul}" i podawał ścieżkę pliku, w którym nie zmieniło się nic poza nazwą.
   krok_5_tryb_szyfrant: |
     ## Tryb 3: Szyfrant (NOWOŚĆ w 13.0 — zabawy słowne, darmowe, lokalne)
 

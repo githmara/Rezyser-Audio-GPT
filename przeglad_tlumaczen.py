@@ -351,6 +351,16 @@ _CHECKLIST_UI = """\
   target word. Measured 2026-09-11 (`fi`, v19.1): one dialog about a file
   extension carried "tiedostopääte" in the title and "tarkennin" /
   "tarkentimet" in the body — three names for one thing, in one box.
+  A NEW key extends this obligation to the whole pack: it must reuse the term
+  the pack already settled on, because the model translates the key in
+  isolation and does not read its neighbours. Measured 2026-09-12 (v19.2):
+  a new warning came back with "tarkennin" in `fi`, reopening the very split
+  v19.1 had closed. Grep the pack for the concept BEFORE accepting a new key.
+  The check also runs the other way: the pack's established word can be the
+  wrong one. In `is`, "paragraph" was "málsgrein" in `chk_wymus` since v18.11
+  — but "málsgrein" is Icelandic for SENTENCE; the pack's other 15 mentions
+  use the correct "efnisgrein". Two keys inherited the error before it was
+  caught, and all four were normalized in v19.2.
 - TOOLTIP vs LABEL are SEPARATE keys for the same control — translate both.
 - FILE-DIALOG WILDCARDS (`poliglota.file_dlg_wildcard`): the `*.ext` patterns
   and the `|` separators are LITERALS for the OS dialog — translate only the
@@ -358,6 +368,31 @@ _CHECKLIST_UI = """\
   hides a supported format. Mechanically gated by
   `test_markdown_poliglota.py` (contract C: every extension in
   `core_poliglota.EXT_OBSLUGIWANE` appears in every pack's wildcard).
+- NEVER NAME A MODE OR A VARIANT inside a `ui.yaml` message. The name of an
+  accent, a cipher or a tool like the Tag Fixer lives in
+  `dictionaries/<code>/akcenty|szyfry/<id>.yaml::etykieta` — one per pack, and
+  `ui.yaml` has no way to reach it. Measured 2026-09-12 (v19.2): a warning
+  whose Polish source opened with „Naprawiacz nie wstrzyknie tagu" came back
+  as „Der Fehlerbehebungs-Assistent" in `de` (the pack's real label is
+  „Tag-Reparateur") and as „The Fixer" in `en` (real label: „Tag Repair") —
+  an invented product name, in a dialog the user reaches by clicking that very
+  control. The fix is in the SOURCE, not in the eight translations: reword the
+  Polish so it names the ACTION („Nie ma gdzie wstawić kodu języka"). The
+  dialog is opened by the mode itself, so the subject is never in doubt.
+  Why no gate: the docs GUI-LABEL gate cannot be reused as-is. Probed
+  2026-09-12 over the whole tree — deriving variant-name roots from labels
+  flags 31 keys in `pl/ui.yaml`, nearly all of them legitimate (language
+  names in `manager.nazwy_jezykow.*`, the Caesar shift field), because a
+  label's longest word is its parenthetical suffix („Tylko wstrzyknięcie kodu
+  ISO"), not its name. Until that matcher is written, this bullet is the gate.
+- POLISH IDIOMS ARE TRAPS — reword the SOURCE, do not patch the eight outputs.
+  Measured 2026-09-12 (v19.2): „brak zdania" means „no opinion" in Polish, and
+  came back as „aucune phrase" (`fr`) and „nessuna frase" (`it`) — „no
+  sentence". Five packs got it right, which is exactly what makes the class
+  expensive: it survives a quick read of the two wrong ones. The source now
+  says „nie rozpoznano" and translates literally everywhere. Same treatment
+  for a source anglicism: „do otagowania" produced „taggare"/„zum Taggen",
+  „do oznaczenia" produces the native verb in every pack.
 """
 
 _CHECKLIST_TRYBY = """\

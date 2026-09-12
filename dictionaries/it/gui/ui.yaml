@@ -851,6 +851,38 @@ poliglota:
   md_render_blad_tresc: "Impossibile convertire il Markdown in HTML:\n{tresc_bledu}\n\nIl file verrà elaborato come testo semplice, quindi i caratteri di sintassi Markdown finiranno nel risultato come contenuto."
   wymus_bez_jezyka_tytul: Seleziona la lingua di elaborazione
   wymus_bez_jezyka_tresc: "Per forzare una singola lingua è necessario indicarla esplicitamente nel campo \"Lingua di elaborazione\".\n\nCon l'impostazione \"Rileva automaticamente\" la lingua forzata deriverebbe comunque dal rilevamento — ed è esattamente ciò che la forzatura dovrebbe disattivare. Per un testo già cifrato, il rilevamento restituisce una lingua casuale, quindi il programma applicherebbe l'alfabeto sbagliato.\n\nSeleziona una lingua dall'elenco oppure deseleziona la forzatura."
+  chk_per_akapit: Imposta il &codice ISO separatamente per ogni paragrafo
+  chk_per_akapit_name: Codici ISO separati per ogni paragrafo
+  chk_per_akapit_tooltip: Per impostazione predefinita, il codice inserito nel campo sopra viene applicato all'intero file. Seleziona questa opzione per visualizzare, all'avvio dell'elaborazione, l'elenco dei paragrafi e assegnare a ciascuno un proprio codice lingua — utile nei documenti con citazioni in altre lingue.
+  naprawiacz_bez_tagu_tytul: Nessun punto in cui inserire il codice lingua
+  naprawiacz_bez_tagu_tresc: "Il file ha estensione {rozszerzenie}, per la quale il programma salva il contenuto senza modifiche — non c'è alcun punto in cui inserire il codice lingua.\n\nIl codice lingua viene inserito solo nei file: {lista_rozszerzen}\n\nIl file salvato sarà quindi una copia priva di qualsiasi codice lingua, ovvero non cambierà nulla se non il nome. Continuare?"
+  per_akapit_tytul: Codici lingua per i singoli paragrafi
+  per_akapit_lista_lbl: 'Paragrafi ({liczba_akapitow}) — numero, inizio del contenuto e codice assegnato:'
+  per_akapit_lista_name: Elenco dei paragrafi con i codici lingua
+  per_akapit_pozycja: '{numer_akapitu}. {tresc_akapitu} [{kod_iso}]'
+  per_akapit_tresc_lbl: 'Contenuto completo del paragrafo selezionato:'
+  per_akapit_tresc_name: Contenuto del paragrafo selezionato
+  per_akapit_opinia_lbl: 'Cosa rileva il riconoscimento della lingua per questo paragrafo:'
+  per_akapit_opinia_name: Risultato del riconoscimento della lingua per il paragrafo selezionato
+  per_akapit_opinia_wynik: '{nazwa_jezyka} ({kod_iso})'
+  per_akapit_opinia_brak: non riconosciuto — paragrafo troppo breve o risultato incerto
+  per_akapit_kod_lbl: '&Codice ISO per questo paragrafo (es. en, fr, pt-BR):'
+  per_akapit_kod_name: Codice ISO del paragrafo selezionato
+  per_akapit_btn_wszystkie: Applica questo codice a &tutti i paragrafi
+  per_akapit_btn_detektor: Compila tutti i codici con il &risultato del rilevamento
+  per_akapit_btn_ok: '&Salva i codici ed elabora'
+  per_akapit_btn_anuluj: '&Annulla'
+  per_akapit_postep_tytul: Riconoscimento della lingua dei paragrafi
+  per_akapit_postep_tresc: Verifica della lingua di ogni paragrafo in corso…
+  per_akapit_zly_kod_tytul: Codice lingua non valido
+  per_akapit_zly_kod_tresc: "Il paragrafo {numer_akapitu} ha il codice \"{kod_iso}\", che il programma non riconosce.\n\nUn codice valido è composto da due lettere (es. en), eventualmente seguite da un sottotag di regione o script (es. pt-BR, zh-Hans)."
+  per_akapit_brak_jednostek_tytul: Nessun paragrafo da contrassegnare
+  per_akapit_brak_jednostek_tresc: "In questo file non è presente alcun paragrafo a cui il programma possa assegnare un codice lingua.\n\nL'elaborazione procederà con un unico codice preso dal campo \"Codice ISO\"."
+  per_akapit_detektor_bilans_tytul: Risultato del rilevamento della lingua dei paragrafi
+  per_akapit_detektor_bilans_tresc: "Codici compilati in {liczba_wypelnionych} paragrafi su {liczba_akapitow}.\n\nPer {liczba_bez_opinii} paragrafi il rilevamento non ha dato un esito certo (testo troppo breve o risultato incerto): hanno mantenuto il codice che avevano già."
+  per_akapit_detektor_przerwane_tresc: "Interrotto al paragrafo {numer_akapitu} di {liczba_akapitow}.\n\nCodici compilati in {liczba_wypelnionych} paragrafi; i restanti hanno mantenuto il codice che avevano già."
+  per_akapit_nadpisanie_tytul: Sovrascrivere i codici impostati?
+  per_akapit_nadpisanie_tresc: "Questa operazione imposterà il codice in tutti i paragrafi contemporaneamente, e {liczba_zmienionych} di essi ha attualmente un codice diverso da quello con cui l'elenco è stato aperto.\n\nLa modifica non potrà essere annullata. Continuare?"
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   # 18.8: segmento localizzato del nome del file di output (una parola, senza spazi)

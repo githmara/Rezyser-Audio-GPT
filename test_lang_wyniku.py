@@ -14,9 +14,10 @@ języka źródła:
     przemielonego: akcent włoski (`iso: it`) dawał ``pl``×25, ``en``×3,
     ``es``×1, ``fi``×1 — cztery języki, żaden docelowy.
 
-Pięć kontraktów, wszystkie mierzone WYKONANIEM prawdziwego silnika na
-prawdziwych paczkach z `dictionaries/` (zero atrap — atrapa mierzyłaby nasze
-wyobrażenie o polach YAML, nie paczki):
+Dziewięć kontraktów (A–I; F–I dopisane w v19.2 razem z kodami ISO per
+akapit), wszystkie mierzone WYKONANIEM prawdziwego silnika na prawdziwych
+paczkach z `dictionaries/` (zero atrap — atrapa mierzyłaby nasze wyobrażenie
+o polach YAML, nie paczki):
 
   A. Akcent daje w całym pliku JEDEN język, równy polu ``iso`` wariantu —
      dla wszystkich paczek i wszystkich wariantów, jakie w nich są.
@@ -31,6 +32,15 @@ wyobrażenie o polach YAML, nie paczki):
      akcent go spłaszcza do celu, a wymuszenie języka spłaszcza wszystko.
   E. Naprawiacz stempluje ręczny kod (także regionalny, `pt-BR`) w każdy
      akapit i w nagłówek — bez detekcji i bez wyjątków.
+  F. Kod per akapit (v19.2) ląduje na WŁASNEJ jednostce, w kolejności
+     dokumentu — na czterech ścieżkach zapisu, wliczając komórki tabel
+     w `.docx` i bloki zagnieżdżone w HTML-u.
+  G. Rozjazd liczby kodów i jednostek podnosi `ValueError` w OBU kierunkach
+     (za mało, za dużo, kody na ścieżce zapisu surowego).
+  H. `jednostki_jezykowe` liczy dokładnie tyle, ile zapis stempluje — spoiwo
+     obu stron umowy, sprawdzane wykonaniem na każdym rozszerzeniu.
+  I. Opinia detektora obejmuje PEŁNY kanon Lingui (czeski, portugalski — bez
+     paczek), a przy fragmencie za krótkim milczy, zamiast zgadywać.
 
 Test jest REGRESJĄ, nie tautologią: kontrakt A sprawdza JEDNOCZEŚNIE, że
 zbiór języków w pliku jest jednoelementowy i że ten język to `iso` wariantu
@@ -259,6 +269,314 @@ def test_e_naprawiacz_stempluje_reczny_kod() -> None:
                    opcje, iso_nadpis="pt-BR")
     assert set(_langi_docx(plik)) == {"pt-BR"}, (
         f"naprawiacz (.docx): {_langi_docx(plik)} zamiast {{'pt-BR'}}")
+
+
+def _langi_kolejnosc(sciezka: Path) -> list[str]:
+    """Wartości ``lang`` bloków HTML w KOLEJNOŚCI WYSTĄPIENIA w pliku.
+
+    Czyta plik REGEXEM po pozycji w tekście, a nie przez bs4 — celowo: bramka
+    ma mierzyć kolejność zapisaną na dysku, niezależnie od tego, jak silnik
+    chodzi po DOM-ie. Gdyby test iterował tym samym drzewem co kod, sprawdzałby
+    sam siebie.
+    """
+    tresc = sciezka.read_text(encoding="utf-8")
+    return re.findall(
+        r'<(?:p|h1|h2|h3|h4|h5|h6|li|blockquote|dt|dd|td|th|caption'
+        r'|figcaption|summary)[^>]*lang="([^"]+)"', tresc)
+
+
+def _langi_docx_kolejnosc(sciezka: Path) -> list[str]:
+    """Pierwszy ``w:lang`` każdego NIEPUSTEGO akapitu Worda, w kolejności dokumentu.
+
+    Enumeracja jest NIEZALEŻNA od `core_poliglota._iteruj_akapity_docx`:
+    surowe ``element.iter(w:p)`` z lxml przechodzi całe drzewo w kolejności
+    dokumentu, więc widzi też akapity w komórkach tabel — i widzi je „swoją"
+    drogą. Dzięki temu kontrakt F mierzy JEDNOCZEŚNIE kompletność iteratora
+    silnika i poprawność kolejności stempli.
+    """
+    from docx.oxml.ns import qn
+    wynik: list[str] = []
+    doc = docx.Document(str(sciezka))
+    for p_el in doc.element.body.iter(qn("w:p")):
+        tekst = "".join(t_el.text or "" for t_el in p_el.iter(qn("w:t")))
+        if not tekst.strip():
+            continue
+        lang = None
+        for lang_el in p_el.iter(qn("w:lang")):
+            lang = lang_el.get(qn("w:val"))
+            break
+        wynik.append(lang)
+    return wynik
+
+
+def _docx_z_tabela(sciezka: Path) -> None:
+    """Dokument ze WSZYSTKIMI pojemnikami tekstu, które silnik ma widzieć.
+
+    Kolejność czytania: akapit ciała, pusty akapit (pomijany), dwie komórki
+    tabeli, akapit będący samym HIPERLINKIEM, akapit w KONTROLCE ZAWARTOŚCI
+    (``w:sdt``), akapit po wszystkim. Trzy ostatnie pojemniki dorzucone po
+    audycie v19.2: `doc.paragraphs` nie widzi komórek tabel, `Paragraph.runs`
+    nie widzi biegów w ``w:hyperlink`` (a `Paragraph.text` je liczy, więc
+    akapit-link zużywał kod i nie dostawał ŻADNEGO tagu), a `w:sdt` nie jest
+    kontenerem python-docx i wypadał z obu stron naraz.
+    """
+    from docx.oxml.shared import OxmlElement
+
+    d = docx.Document()
+    d.add_paragraph(PL)
+    d.add_paragraph("")
+    tab = d.add_table(rows=1, cols=2)
+    tab.cell(0, 0).text = "Komorka lewa z trescia."
+    tab.cell(0, 1).text = "Komorka prawa z trescia."
+
+    # Akapit, którego CAŁY tekst siedzi w hiperlinku (zero `runs`).
+    p_link = d.add_paragraph()
+    hl = OxmlElement("w:hyperlink")
+    r = OxmlElement("w:r")
+    t = OxmlElement("w:t")
+    t.text = "Klikalny tekst linku w akapicie."
+    r.append(t)
+    hl.append(r)
+    p_link._p.append(hl)
+
+    # Akapit w kontrolce zawartości (np. pole formularza).
+    sdt = OxmlElement("w:sdt")
+    zawartosc = OxmlElement("w:sdtContent")
+    p_sdt = OxmlElement("w:p")
+    r_sdt = OxmlElement("w:r")
+    t_sdt = OxmlElement("w:t")
+    t_sdt.text = "Tekst w kontrolce zawartosci."
+    r_sdt.append(t_sdt)
+    p_sdt.append(r_sdt)
+    zawartosc.append(p_sdt)
+    sdt.append(zawartosc)
+    d.element.body.append(sdt)
+
+    d.add_paragraph(RU)
+    d.save(str(sciezka))
+
+
+def test_f_kody_per_akapit_trafiaja_we_wlasne_jednostki() -> None:
+    """F: kod nr N ląduje na jednostce nr N — na każdej ścieżce zapisu.
+
+    To kontrakt, którego złamanie jest NIEWIDOCZNE w pliku wynikowym: plik
+    z kodami przesuniętymi o jedną pozycję pozostaje poprawnym HTML-em czy
+    DOCX-em, a czytnik ekranu po prostu czyta obcym głosem sąsiedni akapit.
+    """
+    cfg = cp.wariant_po_id(cp.TRYB_REZYSER, "pl", "naprawiacz_tagow")
+
+    # --- .docx z oryginalem: akapity ciala ORAZ komorki tabeli ---
+    zrodlo = KAT / "kontrakt_f.docx"
+    _docx_z_tabela(zrodlo)
+    jednostki = cp.jednostki_jezykowe("", ".docx", str(zrodlo))
+    assert len(jednostki) == 6, (
+        f".docx units: {len(jednostki)} instead of 6 — body paragraph, two table "
+        f"cells, the hyperlink-only paragraph, the content-control paragraph and "
+        f"the closing one (the empty paragraph does not count); `doc.paragraphs` "
+        f"would see only 2, because it skips every one of those containers")
+    kody = ["pl", "en", "de", "fi", "es", "it"]
+    plik = Path(cp.zapisz_wynik("", str(KAT), "kontrakt_f_out", ".docx", "xx",
+                                cp.TRYB_REZYSER, cfg, "", str(zrodlo),
+                                kody_jednostek=kody))
+    assert _langi_docx_kolejnosc(plik) == kody, (
+        f".docx stamping order: {_langi_docx_kolejnosc(plik)} instead of {kody}")
+
+    # --- pelny HTML: jednostka to blok z WLASNYM tekstem, nie sam lisc ---
+    html = ('<html lang="pl"><head><title>T</title></head><body>'
+            f"<h1>{PL}</h1>"
+            f"<blockquote><p>{RU}</p></blockquote>"
+            f"<ul><li>{PL}</li><li>{RU}</li></ul>"
+            f"<table><tr><td>{PL}</td></tr></table>"
+            f"<p>{RU} <b>pogrubione</b></p>"
+            "</body></html>")
+    jednostki = cp.jednostki_jezykowe(html, ".html")
+    assert len(jednostki) == 6, (
+        f"full-HTML units: {len(jednostki)} instead of 6 (h1, the p inside the "
+        f"quote, two li, td, the last p) — this `blockquote` is NOT a unit, "
+        f"because it has no text of its own")
+    kody = ["en", "de", "es", "fr", "it", "ru"]
+    plik = Path(cp.zapisz_wynik(html, str(KAT), "kontrakt_f_html", ".html", "is",
+                                cp.TRYB_REZYSER, cfg, html, None,
+                                kody_jednostek=kody))
+    # blockquote bez wlasnego tekstu dostaje kod GLOBALNY, wiec siedzi miedzy
+    # kodem naglowka i kodem swojego wlasnego akapitu.
+    assert _langi_kolejnosc(plik) == ["en", "is", "de", "es", "fr", "it", "ru"], (
+        f"full-HTML order: {_langi_kolejnosc(plik)}")
+
+    # Blok, ktory ZAWIERA blok, ale ma tez tekst wlasny, JEST jednostka —
+    # inaczej ten tekst wypadal z listy i po cichu dostawal kod globalny
+    # (audyt v19.2; sciezka masowa to zagniezdzona lista Markdowna).
+    html_wlasny = ('<html lang="pl"><body>'
+                   f"<ul><li>{PL}<ul><li>{RU}</li></ul></li></ul>"
+                   f"<blockquote>{PL}<p>{RU}</p></blockquote>"
+                   "</body></html>")
+    jednostki = cp.jednostki_jezykowe(html_wlasny, ".html")
+    assert len(jednostki) == 4, (
+        f"units with own text: {len(jednostki)} instead of 4 — the outer `li` "
+        f"and the `blockquote` carry text of their own, so each is a unit")
+    plik = Path(cp.zapisz_wynik(html_wlasny, str(KAT), "kontrakt_f_wlasny",
+                                ".html", "is", cp.TRYB_REZYSER, cfg,
+                                html_wlasny, None,
+                                kody_jednostek=["en", "de", "es", "fr"]))
+    assert _langi_kolejnosc(plik) == ["en", "de", "es", "fr"], (
+        f"own-text order: {_langi_kolejnosc(plik)}")
+    assert re.search(r'<html lang="is"', plik.read_text(encoding="utf-8")), (
+        "the <html> element must keep the GLOBAL code, not the first unit's one")
+
+    # --- .txt: akapity rozdzielone pusta linia ---
+    txt = f"{PL}\n\n{RU}\n\n{PL}"
+    jednostki = cp.jednostki_jezykowe(txt, ".txt")
+    assert len(jednostki) == 3, f".txt units: {len(jednostki)} instead of 3"
+    plik = Path(cp.zapisz_wynik(txt, str(KAT), "kontrakt_f_txt", ".txt", "pl",
+                                cp.TRYB_REZYSER, cfg, txt, None,
+                                kody_jednostek=["en", "de", "fi"]))
+    assert _langi_kolejnosc(plik) == ["en", "de", "fi"], (
+        f".txt order: {_langi_kolejnosc(plik)}")
+
+    # --- .docx BEZ oryginalu (plik zniknal miedzy wczytaniem a zapisem) ---
+    jednostki = cp.jednostki_jezykowe(txt, ".docx", str(KAT / "nie_ma_mnie.docx"))
+    assert len(jednostki) == 3, (
+        f".docx units without the original file: {len(jednostki)} instead of 3 — "
+        f"NON-EMPTY lines count, exactly as `zapisz_wynik` builds them then")
+    plik = Path(cp.zapisz_wynik(txt, str(KAT), "kontrakt_f_nowy", ".docx", "pl",
+                                cp.TRYB_REZYSER, cfg, txt,
+                                str(KAT / "nie_ma_mnie.docx"),
+                                kody_jednostek=["en", "de", "fi"]))
+    assert _langi_docx_kolejnosc(plik) == ["en", "de", "fi"], (
+        f"order in the freshly built .docx: {_langi_docx_kolejnosc(plik)}")
+
+
+def test_g_rozjazd_licznosci_jest_glosny() -> None:
+    """G: liczba kodów ≠ liczba jednostek → ``ValueError``, nigdy cisza.
+
+    Oba kierunki rozjazdu, bo oba znaczą to samo: lista, którą widział
+    użytkownik, przestała odpowiadać plikowi. Cichy fallback na `iso_code`
+    dałby plik wyglądający poprawnie i otagowany nie tam, gdzie trzeba.
+    """
+    cfg = cp.wariant_po_id(cp.TRYB_REZYSER, "pl", "naprawiacz_tagow")
+    txt = f"{PL}\n\n{RU}\n\n{PL}"
+
+    for kody, opis in ((["en"], "too few"), (["en"] * 9, "too many")):
+        try:
+            cp.zapisz_wynik(txt, str(KAT), f"kontrakt_g_{len(kody)}", ".txt",
+                            "pl", cp.TRYB_REZYSER, cfg, txt, None,
+                            kody_jednostek=kody)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(
+                f"{opis} codes ({len(kody)} for 3 units) passed without an "
+                f"exception")
+
+    # Sciezka surowa nie stempluje niczego, wiec kody sa z nia sprzeczne.
+    try:
+        cp.zapisz_wynik(txt, str(KAT), "kontrakt_g_surowy", ".srt", "pl",
+                        cp.TRYB_REZYSER, cfg, txt, None, kody_jednostek=["en"])
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "per-unit codes on the raw-write path passed without an exception")
+
+
+def test_h_jednostki_zgadzaja_sie_z_liczba_stempli() -> None:
+    """H: ``jednostki_jezykowe`` liczy dokładnie tyle, ile zapis stempluje.
+
+    Kontrakt sprawdzany PRZEZ WYKONANIE: skoro rozjazd licznosci podnosi
+    wyjątek (kontrakt G), to zapis z ``kody_jednostek`` długości
+    ``len(jednostki_jezykowe(...))`` musi przejść — dla każdej ścieżki. Ten
+    test jest więc spoiwem obu stron umowy, a nie powtórzeniem kontraktu F.
+    """
+    cfg = cp.wariant_po_id(cp.TRYB_REZYSER, "pl", "naprawiacz_tagow")
+    txt = f"{PL}\n\n{RU}"
+    html_frag = f"<p>{PL}</p>\n\n<p>{RU}</p>"
+    html_pelny = f'<html lang="pl"><body><h1>{PL}</h1><p>{RU}</p></body></html>'
+    zrodlo = KAT / "kontrakt_h.docx"
+    _docx_z_tabela(zrodlo)
+
+    przypadki = [
+        (".txt", txt, None),
+        (".md", txt, None),
+        (".html", html_frag, None),
+        (".html", html_pelny, None),
+        (".htm", html_pelny, None),
+        (".docx", "", str(zrodlo)),        # tabela + hiperlink + w:sdt
+        (".docx", txt, None),
+    ]
+    for i, (ext, tresc, zrodlo_sc) in enumerate(przypadki):
+        jednostki = cp.jednostki_jezykowe(tresc, ext, zrodlo_sc)
+        assert jednostki, f"{ext}: zero units for non-empty content"
+        cp.zapisz_wynik(tresc, str(KAT), f"kontrakt_h_{i}", ext, "pl",
+                        cp.TRYB_REZYSER, cfg, tresc, zrodlo_sc,
+                        kody_jednostek=["pl"] * len(jednostki))
+
+    assert cp.jednostki_jezykowe(txt, ".srt") == [], (
+        "an extension written raw has no units — the writer does not touch the "
+        "content, so the list must be empty")
+
+
+def test_i_opinia_detektora_zna_jezyki_bez_paczki() -> None:
+    """I: opinia detektora obejmuje PEŁNY kanon Lingui, nie dziewięć paczek.
+
+    Sens Naprawiacza Tagów to pliki w językach, dla których paczki NIE MA —
+    detektor zawężony do `dictionaries/` odpowiadałby na nie pewnie i błędnie.
+    Czeski i portugalski są tu dowodem: obu brakuje w paczkach, oba są
+    w kanonie. Kontrakt pilnuje też ciszy tam, gdzie opinii nie ma.
+    """
+    czeski = ("Přišel jsem domů a našel jsem na stole dopis, který nikdo "
+              "nečekal, a pak už bylo pozdě cokoliv měnit.")
+    portugalski = ("O homem caminhou pela praia durante toda a tarde e "
+                   "nunca encontrou aquilo que procurava com tanto empenho.")
+    assert cp.opinia_detektora(czeski) == "cs", (
+        f"Czech detected as {cp.opinia_detektora(czeski)!r}; there is no `cs` "
+        f"pack, so a detector narrowed to packs could never return it")
+    assert cp.opinia_detektora(portugalski) == "pt", (
+        f"Portuguese detected as {cp.opinia_detektora(portugalski)!r}")
+    assert "cs" not in cp.dostepne_jezyki_bazowe(), (
+        "this contract loses its meaning once a `cs` pack exists — swap the "
+        "sample for another language that has no pack")
+
+    assert cp.opinia_detektora("Tak.") is None, (
+        "a fragment below the detection threshold must have NO opinion, rather "
+        "than receive a guessed code")
+    assert cp.opinia_detektora("") is None
+    assert cp.opinia_detektora(None) is None
+
+    # Nazwa do pokazania: natywna dla paczki, enumowa dla reszty — nigdy
+    # polski przymiotnik (to byloby wyciekiem PL w niemieckim interfejsie).
+    assert cp.nazwa_dla_opinii("fi") == "Suomi", cp.nazwa_dla_opinii("fi")
+    assert cp.nazwa_dla_opinii("cs") == "Czech", cp.nazwa_dla_opinii("cs")
+    assert cp.nazwa_dla_opinii("") == ""
+
+
+def test_j_nazwa_pliku_nie_klamie_o_jednym_jezyku() -> None:
+    """J: przy kodach per akapit nazwa pliku pokazuje ZBIÓR użytych kodów.
+
+    Znalezisko z audytu v19.2. `sufiks_nazwy_pliku` brało kod z pola „Kod ISO",
+    więc plik z akapitami `en`/`de`/`fi` nazywał się `naprawiony_x_pl.html` —
+    dokładnie ta klasa, którą v19.1 nazwało „plik wynikowy kłamie o swoim
+    języku", tylko przeniesiona do nazwy. Jeden kod = nazwa bez zmian
+    (kompatybilność z biegiem sprzed 19.2).
+    """
+    def nazwa(opcje: dict) -> str:
+        return cp.sufiks_nazwy_pliku(cp.TRYB_REZYSER, "pl", "naprawiacz_tagow",
+                                     "probka", opcje)
+
+    assert nazwa({"iso_reczne": "pl"}).endswith("_pl"), nazwa({"iso_reczne": "pl"})
+    assert nazwa({"iso_reczne": "pt-BR",
+                  "kody_jednostek": ["pt-BR", "pt-BR"]}).endswith("_pt-BR"), (
+        "one code repeated is still ONE language — the name must not change")
+
+    wiele = nazwa({"iso_reczne": "pl", "kody_jednostek": ["en", "de", "fi", "en"]})
+    assert wiele.endswith("_de-en-fi"), (
+        f"name for a mixed file: {wiele} — expected the sorted set of codes")
+    assert "_pl" not in wiele, (
+        f"name still claims the ISO field's code: {wiele}")
+
+    duzo = nazwa({"iso_reczne": "pl",
+                  "kody_jednostek": ["en", "de", "fi", "is", "it", "ru"]})
+    assert duzo.endswith("_de-en-fi-is+2"), (
+        f"name for six codes: {duzo} — expected four codes plus an overflow count")
 
 
 if __name__ == "__main__":

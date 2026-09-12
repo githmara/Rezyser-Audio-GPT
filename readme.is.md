@@ -7,7 +7,7 @@
 
 Safn sjálfstæðra verkfæra knúin af gervigreind til sjálfvirkrar ritunar, skipulagningar, sniðmáts og þýðingar á umfangsmiklum handritum og til að stýra gagnvirkum textaleikjum. Verkefnið er innfæddur skjáborðsforrit (wxPython) hannað frá grunni með fullu aðgengi fyrir skjálesara (NVDA, VoiceOver) og samhæfni við faglega talgervla (TTS). Það virkar án vafra og án staðbundins netþjóns — keyrir sem venjulegur gluggi forrits.
 
-Útgáfa: **19.1.0** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Útgáfa: **19.2.0** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Helstu einingar
@@ -59,7 +59,7 @@ Gagnvirkir textaleikir sem gervigreind stýrir í hlutverki frásagnarvélar. Ó
 
 ## Fjöltyngd (9 tungumál innfædd)
 
-Frá og með v14.0 styður forritið 9 innfædd tungumál: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Hver pakki `dictionaries/<code>/` inniheldur kommur, stafróf og hljóðfræðireglur sem starfa á texta á því tiltekna tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (per málsgrein) og hleður viðeigandi pakka fyrir hvern hluta sérstaklega.
+Frá og með v14.0 styður forritið 9 innfædd tungumál: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Hver pakki `dictionaries/<code>/` inniheldur kommur, stafróf og hljóðfræðireglur sem starfa á texta á því tiltekna tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (per efnisgrein) og hleður viðeigandi pakka fyrir hvern hluta sérstaklega.
 
 Allt GUI viðmót, skjöl (`docs/manual.<iso>.html`) og flest kerfisskilaboð eru fáanleg innfædd á hverju af studdu tungumálunum. Kerfisboð AI í Leikstjóra og Söguham eru skrifuð á markmálinu (handvirkt, ekki sjálfvirkt þýdd — sjá `dictionaries/<code>/rezyser/` og `dictionaries/<code>/opowiesci/`).
 

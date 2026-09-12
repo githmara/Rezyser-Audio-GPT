@@ -924,6 +924,38 @@ poliglota:
   md_render_blad_tresc: "Failed to convert Markdown to HTML:\n{tresc_bledu}\n\nThe file will be processed as plain text, so Markdown syntax characters will end up in the output as content."
   wymus_bez_jezyka_tytul: Select processing language
   wymus_bez_jezyka_tresc: "Forcing a single language requires specifying it explicitly in the \"Processing language\" field.\n\nWith \"Detect automatically\" selected, the forced language would come from detection — which is exactly what forcing is meant to bypass. For text that is already encrypted, detection returns a random language, so the program would apply the wrong alphabet.\n\nSelect a language from the list or uncheck forcing."
+  chk_per_akapit: Set an &ISO code separately for each paragraph
+  chk_per_akapit_name: Separate ISO codes for each paragraph
+  chk_per_akapit_tooltip: By default, the code from the field above applies to the whole file. Check this to see a list of paragraphs once processing starts and assign each one its own language code — useful for documents containing foreign-language quotes.
+  naprawiacz_bez_tagu_tytul: There's nowhere to insert the language code
+  naprawiacz_bez_tagu_tresc: "The file has the {rozszerzenie} extension, for which the program saves the content unchanged — there's no place in it to put a language code.\n\nThe language code is only added to these files: {lista_rozszerzen}\n\nSo the saved file will just be a copy without any language code, meaning nothing will change except the name. Continue?"
+  per_akapit_tytul: Language codes for individual paragraphs
+  per_akapit_lista_lbl: 'Paragraphs ({liczba_akapitow}) — number, start of content and assigned code:'
+  per_akapit_lista_name: List of paragraphs with language codes
+  per_akapit_pozycja: '{numer_akapitu}. {tresc_akapitu} [{kod_iso}]'
+  per_akapit_tresc_lbl: 'Full content of the selected paragraph:'
+  per_akapit_tresc_name: Content of the selected paragraph
+  per_akapit_opinia_lbl: 'What language detection thinks about this paragraph:'
+  per_akapit_opinia_name: Language detection result for the selected paragraph
+  per_akapit_opinia_wynik: '{nazwa_jezyka} ({kod_iso})'
+  per_akapit_opinia_brak: not recognized — paragraph too short or result uncertain
+  per_akapit_kod_lbl: '&ISO code for this paragraph (e.g. en, fr, pt-BR):'
+  per_akapit_kod_name: ISO code of the selected paragraph
+  per_akapit_btn_wszystkie: Apply this code to &all paragraphs
+  per_akapit_btn_detektor: Fill in all codes with the detection &result
+  per_akapit_btn_ok: '&Save codes and process'
+  per_akapit_btn_anuluj: '&Cancel'
+  per_akapit_postep_tytul: Paragraph language detection
+  per_akapit_postep_tresc: Checking what language each paragraph is in…
+  per_akapit_zly_kod_tytul: Invalid language code
+  per_akapit_zly_kod_tresc: "Paragraph {numer_akapitu} has the code \"{kod_iso}\", which the program doesn't recognize.\n\nA valid code consists of two letters (e.g. en), optionally with a region or script subtag (e.g. pt-BR, zh-Hans)."
+  per_akapit_brak_jednostek_tytul: No paragraphs to mark
+  per_akapit_brak_jednostek_tresc: "This file doesn't contain a single paragraph that the program could assign a language code to.\n\nProcessing will continue using the single code from the \"ISO code\" field."
+  per_akapit_detektor_bilans_tytul: Paragraph language detection result
+  per_akapit_detektor_bilans_tresc: "Codes filled in for {liczba_wypelnionych} paragraphs out of {liczba_akapitow}.\n\nFor {liczba_bez_opinii} paragraphs, detection couldn't make a determination (too short or result uncertain) — they kept the code they already had."
+  per_akapit_detektor_przerwane_tresc: "Stopped at paragraph {numer_akapitu} of {liczba_akapitow}.\n\nCodes filled in for {liczba_wypelnionych} paragraphs; the rest kept the code they already had."
+  per_akapit_nadpisanie_tytul: Overwrite the assigned codes?
+  per_akapit_nadpisanie_tresc: "This action will set the code for all paragraphs at once, and {liczba_zmienionych} of them currently have a code different from the one the list was opened with.\n\nThis change cannot be undone. Continue?"
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)

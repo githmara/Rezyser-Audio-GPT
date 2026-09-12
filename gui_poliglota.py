@@ -32,7 +32,6 @@ from __future__ import annotations
 import os
 import threading
 
-import docx
 from dotenv import load_dotenv
 
 import wx
@@ -74,6 +73,294 @@ def _wybierz_domyslny_jezyk_pipeline() -> str:
     if ui in kompletne:
         return ui
     return JEZYK_FALLBACK
+
+
+class DialogKodyPerAkapit(wx.Dialog):
+    """Lista akapitów pliku z edytowalnym kodem języka dla każdego z nich.
+
+    Domyka ostatni punkt architektury Naprawiacza Tagów zaplanowany w 19.1
+    („wybór kodu dla pojedynczych akapitów wymaga interfejsu, w którym te
+    akapity widzisz" — `manual.yaml` obiecał to użytkownikowi wprost).
+
+    A11y — dlaczego ListBox, a nie tabelka: w całym repozytorium nie ma ani
+    jednego ``wx.ListCtrl`` czy ``wx.grid``; GUI stoi na ComboBox / TextCtrl /
+    Button / CheckBox / SpinCtrl / Gauge. Tabela z edycją w komórce wymagałaby
+    od czytnika ekranu trybu tabelowego i nawigacji po kolumnach, a ``ListBox``
+    czyta się jedną strzałką. Dlatego stan jednostki (numer, początek treści
+    i NADANY KOD) jest wpisany w etykietę pozycji — użytkownik słyszy go bez
+    wchodzenia w którekolwiek pole.
+
+    Opinia detektora jest liczona LENIWIE, dla wybranej pozycji, i pamiętana
+    w ``_opinie``: dokument dwutysięczny nie płaci niczego z góry, a pełny
+    kanon 75 języków kosztuje ~3 ms na akapit (patrz
+    ``core_poliglota._zbuduj_detektor_pelny``). Kody startują wartością z pola
+    „Kod ISO", nigdy opinią detektora — do pliku wynikowego nie trafia kod,
+    którego użytkownik nie zatwierdził (kanon 19.1: język wyniku to dane).
+    """
+
+    MAKS_PODGLAD = 60   # znaków treści w etykiecie pozycji listy
+
+    def __init__(self, parent: wx.Window, jednostki: list[str],
+                 kod_domyslny: str) -> None:
+        super().__init__(parent, title=t("poliglota.per_akapit_tytul"),
+                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+                         size=(700, 520))
+        self._jednostki = jednostki
+        self._kod_domyslny = kod_domyslny
+        self._kody: list[str] = [kod_domyslny] * len(jednostki)
+        self._opinie: dict[int, str | None] = {}
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        lbl_lista = wx.StaticText(self, label=t("poliglota.per_akapit_lista_lbl",
+                                                liczba_akapitow=len(jednostki)))
+        self._lista = wx.ListBox(self, choices=self._etykiety(),
+                                 style=wx.LB_SINGLE,
+                                 name=t("poliglota.per_akapit_lista_name"))
+
+        lbl_tresc = wx.StaticText(self, label=t("poliglota.per_akapit_tresc_lbl"))
+        self._txt_tresc = wx.TextCtrl(
+            self, style=wx.TE_MULTILINE | wx.TE_READONLY,
+            size=(-1, 90), name=t("poliglota.per_akapit_tresc_name"))
+
+        lbl_opinia = wx.StaticText(self, label=t("poliglota.per_akapit_opinia_lbl"))
+        self._txt_opinia = wx.TextCtrl(
+            self, style=wx.TE_READONLY,
+            name=t("poliglota.per_akapit_opinia_name"))
+
+        lbl_kod = wx.StaticText(self, label=t("poliglota.per_akapit_kod_lbl"))
+        self._txt_kod = wx.TextCtrl(self, name=t("poliglota.per_akapit_kod_name"))
+        self._txt_kod.SetMaxLength(7)
+
+        btn_wszystkie = wx.Button(self, label=t("poliglota.per_akapit_btn_wszystkie"))
+        btn_detektor = wx.Button(self, label=t("poliglota.per_akapit_btn_detektor"))
+        btn_ok = wx.Button(self, wx.ID_OK, label=t("poliglota.per_akapit_btn_ok"))
+        btn_anuluj = wx.Button(self, wx.ID_CANCEL,
+                               label=t("poliglota.per_akapit_btn_anuluj"))
+
+        rzad_akcji = wx.BoxSizer(wx.HORIZONTAL)
+        rzad_akcji.Add(btn_wszystkie, flag=wx.RIGHT, border=8)
+        rzad_akcji.Add(btn_detektor)
+
+        rzad_konca = wx.StdDialogButtonSizer()
+        rzad_konca.AddButton(btn_ok)
+        rzad_konca.AddButton(btn_anuluj)
+        rzad_konca.Realize()
+
+        for kontrolka, proporcja in ((lbl_lista, 0), (self._lista, 1),
+                                     (lbl_tresc, 0), (self._txt_tresc, 0),
+                                     (lbl_opinia, 0), (self._txt_opinia, 0),
+                                     (lbl_kod, 0), (self._txt_kod, 0),
+                                     (rzad_akcji, 0)):
+            sizer.Add(kontrolka, proportion=proporcja,
+                      flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=8)
+        sizer.Add(rzad_konca, flag=wx.EXPAND | wx.ALL, border=8)
+        self.SetSizer(sizer)
+
+        self._lista.Bind(wx.EVT_LISTBOX, self._on_wybor)
+        # Kod zapisujemy na UTRACIE FOKUSU pola, nie przy każdym znaku:
+        # walidacja po literze odrzucałaby „p" w drodze do „pl", a zapis
+        # dopiero na OK gubiłby wpis użytkownika, który przeszedł strzałką do
+        # następnego akapitu. Utrata fokusu zachodzi ZAWSZE przed zmianą
+        # pozycji na liście, więc ten jeden punkt wystarcza.
+        self._txt_kod.Bind(wx.EVT_KILL_FOCUS, self._on_kod_kill_focus)
+        btn_wszystkie.Bind(wx.EVT_BUTTON, self._on_wszystkie)
+        btn_detektor.Bind(wx.EVT_BUTTON, self._on_detektor)
+        btn_ok.Bind(wx.EVT_BUTTON, self._on_ok)
+
+        if self._jednostki:
+            self._lista.SetSelection(0)
+            self._pokaz_pozycje(0)
+        self._lista.SetFocus()
+
+    # ------------------------------------------------------------------
+    # Wynik dla wywołującego
+    # ------------------------------------------------------------------
+    def kody(self) -> list[str]:
+        """Kody ISO w kolejności jednostek (długość == długość wejścia)."""
+        return list(self._kody)
+
+    # ------------------------------------------------------------------
+    # Prezentacja
+    # ------------------------------------------------------------------
+    def _etykieta(self, i: int) -> str:
+        tresc = self._jednostki[i]
+        if len(tresc) > self.MAKS_PODGLAD:
+            tresc = tresc[:self.MAKS_PODGLAD].rstrip() + "…"
+        return t("poliglota.per_akapit_pozycja",
+                 numer_akapitu=i + 1, tresc_akapitu=tresc, kod_iso=self._kody[i])
+
+    def _etykiety(self) -> list[str]:
+        return [self._etykieta(i) for i in range(len(self._jednostki))]
+
+    def _pokaz_pozycje(self, i: int) -> None:
+        self._txt_tresc.SetValue(self._jednostki[i])
+        self._txt_kod.SetValue(self._kody[i])
+        self._txt_opinia.SetValue(self._opis_opinii(i))
+
+    def _opis_opinii(self, i: int) -> str:
+        if i not in self._opinie:
+            self._opinie[i] = core_poliglota.opinia_detektora(self._jednostki[i])
+        kod = self._opinie[i]
+        if not kod:
+            return t("poliglota.per_akapit_opinia_brak")
+        return t("poliglota.per_akapit_opinia_wynik",
+                 nazwa_jezyka=core_poliglota.nazwa_dla_opinii(kod), kod_iso=kod)
+
+    def _odswiez_etykiete(self, i: int) -> None:
+        wybrany = self._lista.GetSelection()
+        self._lista.SetString(i, self._etykieta(i))
+        if wybrany != wx.NOT_FOUND:
+            self._lista.SetSelection(wybrany)
+
+    # ------------------------------------------------------------------
+    # Zdarzenia
+    # ------------------------------------------------------------------
+    def _on_wybor(self, _event: wx.Event) -> None:
+        i = self._lista.GetSelection()
+        if i != wx.NOT_FOUND:
+            self._pokaz_pozycje(i)
+
+    def _zapisz_biezacy(self) -> None:
+        i = self._lista.GetSelection()
+        if i == wx.NOT_FOUND:
+            return
+        nowy = self._txt_kod.GetValue().strip()
+        if nowy == self._kody[i]:
+            return
+        self._kody[i] = nowy
+        self._odswiez_etykiete(i)
+
+    def _on_kod_kill_focus(self, event: wx.Event) -> None:
+        # Guard na niszczenie okna: utrata fokusu potrafi przyjść w trakcie
+        # `Destroy()`, a wtedy `self._lista` jest już nieużywalne.
+        if self.IsBeingDeleted():                           # pragma: no cover
+            event.Skip()
+            return
+        self._zapisz_biezacy()
+        event.Skip()        # bez Skip() wx gubi dalszą obsługę fokusu
+
+    def _potwierdz_nadpisanie(self) -> bool:
+        """Pyta przed akcją, która nadpisze RĘCZNIE ustawione kody.
+
+        Audyt v19.2: obie akcje masowe („zastosuj do wszystkich", „wypełnij
+        wynikiem wykrywania") kasowały całą listę bez pytania i bez cofnięcia,
+        a w polskiej paczce miały dodatkowo ten sam akcelerator. Pytamy tylko
+        wtedy, gdy jest co stracić — czyli gdy co najmniej jeden kod różni się
+        od kodu domyślnego, z którym lista wstała.
+        """
+        zmienione = sum(1 for kod in self._kody if kod != self._kod_domyslny)
+        if not zmienione:
+            return True
+        odpowiedz = wx.MessageBox(
+            t("poliglota.per_akapit_nadpisanie_tresc",
+              liczba_zmienionych=zmienione),
+            t("poliglota.per_akapit_nadpisanie_tytul"),
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self)
+        return odpowiedz == wx.YES
+
+    def _on_wszystkie(self, _event: wx.Event) -> None:
+        self._zapisz_biezacy()
+        i = self._lista.GetSelection()
+        if i == wx.NOT_FOUND:
+            return
+        if not self._potwierdz_nadpisanie():
+            return
+        self._kody = [self._kody[i]] * len(self._kody)
+        self._lista.Set(self._etykiety())
+        self._lista.SetSelection(i)
+        self._pokaz_pozycje(i)
+        self._lista.SetFocus()
+
+    def _on_detektor(self, _event: wx.Event) -> None:
+        """Wypełnia kody opinią detektora — jawną decyzją i z BILANSEM na końcu.
+
+        Akapit bez opinii (za krótki, detektor niepewny) ZACHOWUJE dotychczasowy
+        kod: „nie wiem" nie może wyczyścić wartości, którą użytkownik wpisał.
+        Ale nie może też zniknąć bez słowa — w dokumencie dwutysięcznym nie ma
+        jak przesłuchać, których pozycji detektor nie ruszył, więc na końcu
+        mówimy wprost, ile wypełniono i ile zostało (audyt v19.2, standard
+        „zero ciszy"). To samo dotyczy anulowania: meldujemy, na której
+        pozycji przerwano.
+
+        Pasek postępu jest natywnym ``wx.ProgressDialog`` pompującym zdarzenia
+        w wątku GUI — świadomie BEZ wątku tła, bo wątek wymagałby własnego
+        ``threading.excepthook`` i guardu na zamknięcie dialogu w trakcie
+        pracy, a koszt to milisekundy na akapit.
+        """
+        if not self._jednostki:
+            return
+        self._zapisz_biezacy()
+        if not self._potwierdz_nadpisanie():
+            return
+
+        ile = len(self._jednostki)
+        postep = wx.ProgressDialog(
+            t("poliglota.per_akapit_postep_tytul"),
+            t("poliglota.per_akapit_postep_tresc"),
+            maximum=ile, parent=self,
+            style=wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_AUTO_HIDE)
+        wypelnione = 0
+        przerwane_na: int | None = None
+        try:
+            for i, tekst in enumerate(self._jednostki):
+                # Co dziesiąta pozycja ORAZ ostatnia — inaczej dokument
+                # krótszy niż dziesięć akapitów nie dostawał ani jednego
+                # odświeżenia poza zerowym.
+                if i % 10 == 0 or i == ile - 1:
+                    dalej, _ = postep.Update(i + 1)
+                    if not dalej:
+                        przerwane_na = i + 1
+                        break
+                if i not in self._opinie:
+                    self._opinie[i] = core_poliglota.opinia_detektora(tekst)
+                if self._opinie[i]:
+                    self._kody[i] = self._opinie[i]
+                    wypelnione += 1
+        finally:
+            postep.Destroy()
+
+        wybrany = max(0, self._lista.GetSelection())
+        self._lista.Set(self._etykiety())
+        self._lista.SetSelection(wybrany)
+        self._pokaz_pozycje(wybrany)
+        self._lista.SetFocus()
+
+        if przerwane_na is not None:
+            tresc = t("poliglota.per_akapit_detektor_przerwane_tresc",
+                      numer_akapitu=przerwane_na,
+                      liczba_wypelnionych=wypelnione, liczba_akapitow=ile)
+        else:
+            tresc = t("poliglota.per_akapit_detektor_bilans_tresc",
+                      liczba_wypelnionych=wypelnione, liczba_akapitow=ile,
+                      liczba_bez_opinii=ile - wypelnione)
+        wx.MessageBox(tresc, t("poliglota.per_akapit_detektor_bilans_tytul"),
+                      wx.OK | wx.ICON_INFORMATION, self)
+
+    def _on_ok(self, event: wx.Event) -> None:
+        """Waliduje WSZYSTKIE kody przed zamknięciem; pierwszy zły → fokus tam.
+
+        Normalizacja jest ta sama, co dla pola „Kod ISO" i dla Tłumacza AI
+        (``tlumacz_ai.normalizuj_kod_jezyka``), więc dialog nie wprowadza
+        drugiego rozumienia poprawnego kodu.
+        """
+        self._zapisz_biezacy()
+        for i, kod in enumerate(self._kody):
+            znormalizowany = tlumacz_ai.normalizuj_kod_jezyka(kod)
+            if not znormalizowany:
+                self._lista.SetSelection(i)
+                self._pokaz_pozycje(i)
+                wx.MessageBox(
+                    t("poliglota.per_akapit_zly_kod_tresc",
+                      numer_akapitu=i + 1, kod_iso=kod),
+                    t("poliglota.per_akapit_zly_kod_tytul"),
+                    wx.OK | wx.ICON_WARNING, self)
+                self._txt_kod.SetFocus()
+                return
+            if znormalizowany != kod:
+                self._kody[i] = znormalizowany
+                self._odswiez_etykiete(i)
+        event.Skip()        # domyślna obsługa ID_OK zamyka dialog
 
 
 class PoliglotaPanel(wx.Panel):
@@ -380,10 +667,23 @@ class PoliglotaPanel(wx.Panel):
         self._txt_iso.SetHint(t("poliglota.txt_iso_hint"))
         self._lbl_iso.Hide(); self._txt_iso.Hide()
 
-        sizer.Add(lbl,                flag=wx.BOTTOM, border=4)
-        sizer.Add(self._combo_akcent, flag=wx.EXPAND | wx.BOTTOM, border=8)
-        sizer.Add(self._lbl_iso,      flag=wx.BOTTOM, border=4)
-        sizer.Add(self._txt_iso,      flag=wx.EXPAND)
+        # v19.2: przelacznik trybu „kody per akapit". Odznaczony = bieg
+        # sprzed 19.2 (jeden kod na caly plik, zero dodatkowych okien).
+        # Zaznaczony = „Przetworz" otwiera dialog z lista akapitow. Stanu
+        # NIE trzymamy miedzy biegami: lista jednostek powstaje dopiero
+        # w momencie przetwarzania, wiec nie ma czego uniewazniac po
+        # wczytaniu innego pliku (klasa bledu z checklisty audytu).
+        self._chk_per_akapit = wx.CheckBox(
+            panel, label=t("poliglota.chk_per_akapit"),
+            name=t("poliglota.chk_per_akapit_name"))
+        self._chk_per_akapit.SetToolTip(t("poliglota.chk_per_akapit_tooltip"))
+        self._chk_per_akapit.Hide()
+
+        sizer.Add(lbl,                     flag=wx.BOTTOM, border=4)
+        sizer.Add(self._combo_akcent,      flag=wx.EXPAND | wx.BOTTOM, border=8)
+        sizer.Add(self._lbl_iso,           flag=wx.BOTTOM, border=4)
+        sizer.Add(self._txt_iso,           flag=wx.EXPAND)
+        sizer.Add(self._chk_per_akapit,    flag=wx.TOP, border=8)
         panel.SetSizer(sizer)
         return panel
 
@@ -497,8 +797,12 @@ class PoliglotaPanel(wx.Panel):
         try:
             self._file_ext = ext
             if self._file_ext == ".docx":
-                doc = docx.Document(file_name)
-                self._file_content = "\n".join(p.text for p in doc.paragraphs)
+                # v19.2: przez `core_poliglota.tekst_docx`, bo `doc.paragraphs`
+                # pomija akapity z komórek tabel — podgląd i licznik znaków
+                # gubiły całą treść tabel (zmierzone: 2 akapity z 8 na
+                # dokumencie z jedną tabelą). Ten sam iterator, którym
+                # stempluje `zapisz_wynik`.
+                self._file_content = core_poliglota.tekst_docx(file_name)
             else:
                 with open(file_name, "r", encoding="utf-8") as fh:
                     self._file_content = fh.read()
@@ -700,11 +1004,14 @@ class PoliglotaPanel(wx.Panel):
         self._chk_wymus.Enable(dziala)
 
     def _on_akcent_change(self, _event: wx.Event | None = None) -> None:
-        """Pokaż pole „Kod ISO" tylko dla wariantu Naprawiacz Tagów."""
+        """Pokaż pole „Kod ISO" i przełącznik kodów per akapit — tylko dla
+        wariantu Naprawiacz Tagów (A11y: NVDA nie ma ogłaszać kontrolek,
+        które dla akcentu fonetycznego nic nie robią)."""
         cfg = self._aktualny_wariant_akcentu()
         pokaz_iso = bool(cfg and cfg.get("kategoria") == "naprawiacz")
         self._lbl_iso.Show(pokaz_iso)
         self._txt_iso.Show(pokaz_iso)
+        self._chk_per_akapit.Show(pokaz_iso)
         self._odswiez_dostepnosc_wymuszania()
         self._pnl_rezyser.Layout()
         self.Layout()
@@ -923,7 +1230,20 @@ class PoliglotaPanel(wx.Panel):
                 wx.OK | wx.ICON_ERROR, self)
             return
 
-        self._zakoncz_zapisem(wynik, cfg, opcje, tryb=core_poliglota.TRYB_REZYSER)
+        # v19.2 (audyt): dialog kodów per akapit stoi NA KOŃCU, za całą
+        # walidacją i za silnikiem. Otwarty wcześniej kazałby użytkownikowi
+        # wypełnić kody, żeby po OK dostać komunikat o zupełnie innym polu
+        # (np. o wymuszaniu języka) — i stracić całą tę pracę.
+        kody_jednostek: list[str] | None = None
+        if cfg.get("kategoria") == "naprawiacz":
+            if not self._ostrzez_o_braku_tagu():
+                return
+            kody_jednostek = self._zbierz_kody_per_akapit(opcje["iso_reczne"])
+            if kody_jednostek is False:
+                return
+
+        self._zakoncz_zapisem(wynik, cfg, opcje, tryb=core_poliglota.TRYB_REZYSER,
+                              kody_jednostek=kody_jednostek)
 
     # ------------------------------------------------------------------
     # TRYB SZYFRANTA
@@ -984,10 +1304,75 @@ class PoliglotaPanel(wx.Panel):
         self._zakoncz_zapisem(wynik, cfg, opcje, tryb=core_poliglota.TRYB_SZYFRANT)
 
     # ------------------------------------------------------------------
+    # Naprawiacz Tagów – ostrzeżenie i kody per akapit
+    # ------------------------------------------------------------------
+    def _ostrzez_o_braku_tagu(self) -> bool:
+        """Uprzedza, że dla tego rozszerzenia Naprawiacz NIE wstrzyknie tagu.
+
+        v19.2, standard „zero ciszy". Guard rozszerzeń z 19.1 pyta przy
+        WCZYTANIU, czy przemleć plik spoza listy — i to zostaje. Ale dla
+        Naprawiacza konsekwencja jest mocniejsza niż dla akcentu: ścieżka
+        „zapis surowy" nie stempluje ani jednej jednostki, więc operacja jest
+        kompletnym no-opem, a aplikacja meldowała „sukces" i podawała ścieżkę
+        pliku, który jest kopią 1:1 bez tagu językowego. Pytamy więc wprost.
+
+        Returns:
+            ``True`` gdy wolno kontynuować (rozszerzenie obsługiwane albo
+            użytkownik potwierdził), ``False`` gdy bieg ma się zatrzymać.
+        """
+        if self._ext_pipeline in core_poliglota.EXT_OBSLUGIWANE:
+            return True
+        odpowiedz = wx.MessageBox(
+            t("poliglota.naprawiacz_bez_tagu_tresc",
+              rozszerzenie=self._ext_pipeline or t("poliglota.ext_brak"),
+              lista_rozszerzen=", ".join(core_poliglota.EXT_OBSLUGIWANE)),
+            t("poliglota.naprawiacz_bez_tagu_tytul"),
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self)
+        return odpowiedz == wx.YES
+
+    def _zbierz_kody_per_akapit(self, kod_domyslny: str):
+        """Zwraca listę kodów z dialogu, ``None`` (tryb wyłączony) lub ``False``.
+
+        ``False`` znaczy „użytkownik przerwał" i wywołujący ma zakończyć bieg
+        bez zapisu — rozróżnienie jest istotne, bo ``None`` to legalny stan
+        (jeden kod na cały plik), a pusta lista też (plik bez jednostek).
+        """
+        if not self._chk_per_akapit.GetValue():
+            return None
+
+        try:
+            jednostki = core_poliglota.jednostki_jezykowe(
+                self._tresc_pipeline, self._ext_pipeline, self._sciezka_oryginalu)
+        except Exception as exc:
+            wx.MessageBox(
+                t("poliglota.blad_przetwarzania", tresc_bledu=str(exc)),
+                t("poliglota.blad_wyniku_tytul"),
+                wx.OK | wx.ICON_ERROR, self)
+            return False
+
+        if not jednostki:
+            # Plik bez ani jednej jednostki (zapis surowy albo pusta treść) —
+            # dialog byłby pustą listą, więc mówimy to wprost i wracamy do
+            # trybu jednego kodu, zamiast pokazywać okno bez zawartości.
+            wx.MessageBox(t("poliglota.per_akapit_brak_jednostek_tresc"),
+                          t("poliglota.per_akapit_brak_jednostek_tytul"),
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return None
+
+        dlg = DialogKodyPerAkapit(self, jednostki, kod_domyslny)
+        try:
+            if dlg.ShowModal() != wx.ID_OK:
+                return False
+            return dlg.kody()
+        finally:
+            dlg.Destroy()
+
+    # ------------------------------------------------------------------
     # Zapis rezultatu (Rezyser / Szyfrant – wspólne)
     # ------------------------------------------------------------------
     def _zakoncz_zapisem(self, wynik: str, cfg: dict,
-                         opcje: dict, tryb: str) -> None:
+                         opcje: dict, tryb: str,
+                         kody_jednostek: list[str] | None = None) -> None:
         if not wynik and cfg.get("kategoria") != "naprawiacz":
             wx.MessageBox(t("poliglota.blad_wyniku_tresc"),
                           t("poliglota.blad_wyniku_tytul"),
@@ -995,6 +1380,10 @@ class PoliglotaPanel(wx.Panel):
             return
 
         wariant_id = cfg["id"]
+        # v19.2: nazwa pliku ma odbić RZECZYWISTY zbiór kodów, nie tylko ten
+        # z pola „Kod ISO" (patrz `sufiks_nazwy_pliku`).
+        if kody_jednostek:
+            opcje["kody_jednostek"] = kody_jednostek
         iso  = core_poliglota.kod_iso(tryb, self._jezyk_aktywny, wariant_id, opcje)
         # 18.8: człony nazwy pliku w języku UI (klucze filename_* z ui.yaml) —
         # sanityzacja + fallback na polskie defaulty w bezpieczny_czlon_nazwy.
@@ -1025,6 +1414,7 @@ class PoliglotaPanel(wx.Panel):
                 oryginalny_content=self._tresc_pipeline,
                 sciezka_oryginalu=self._sciezka_oryginalu,
                 segmenty_wynikowe=segmenty_wynikowe,
+                kody_jednostek=kody_jednostek,
             )
         except Exception as exc:
             wx.MessageBox(

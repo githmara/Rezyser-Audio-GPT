@@ -851,6 +851,38 @@ poliglota:
   md_render_blad_tresc: "No se pudo convertir el Markdown a HTML:\n{tresc_bledu}\n\nEl archivo se procesará como texto sin formato, por lo que los caracteres de sintaxis de Markdown aparecerán en el resultado como contenido."
   wymus_bez_jezyka_tytul: Seleccione el idioma de procesamiento
   wymus_bez_jezyka_tresc: "Para forzar un solo idioma es necesario indicarlo explícitamente en el campo «Idioma de procesamiento».\n\nCon la opción «Detectar automáticamente», el idioma forzado provendría de la detección automática, que es precisamente lo que se quiere desactivar. Para un texto ya cifrado, la detección devuelve un idioma aleatorio, por lo que el programa aplicaría el alfabeto incorrecto.\n\nSeleccione un idioma de la lista o desactive el forzado."
+  chk_per_akapit: Establecer &código ISO por separado para cada párrafo
+  chk_per_akapit_name: Códigos ISO por separado para cada párrafo
+  chk_per_akapit_tooltip: Por defecto, el código del campo de arriba se aplica a todo el archivo. Marca esta opción para ver, al iniciar el procesamiento, una lista de párrafos y asignar a cada uno su propio código de idioma; útil en documentos con citas en otros idiomas.
+  naprawiacz_bez_tagu_tytul: No hay dónde insertar el código de idioma
+  naprawiacz_bez_tagu_tresc: "El archivo tiene la extensión {rozszerzenie}, para la cual el programa guarda el contenido sin cambios; en ella no hay ningún lugar donde se pueda incluir el código de idioma.\n\nEl código de idioma solo se añade a los archivos: {lista_rozszerzen}\n\nPor lo tanto, el archivo guardado será una copia sin ningún código de idioma, es decir, no cambiará nada salvo el nombre. ¿Continuar?"
+  per_akapit_tytul: Códigos de idioma para cada párrafo
+  per_akapit_lista_lbl: 'Párrafos ({liczba_akapitow}) — número, inicio del contenido y código asignado:'
+  per_akapit_lista_name: Lista de párrafos con códigos de idioma
+  per_akapit_pozycja: '{numer_akapitu}. {tresc_akapitu} [{kod_iso}]'
+  per_akapit_tresc_lbl: 'Contenido completo del párrafo seleccionado:'
+  per_akapit_tresc_name: Contenido del párrafo seleccionado
+  per_akapit_opinia_lbl: 'Qué opina la detección de idioma sobre este párrafo:'
+  per_akapit_opinia_name: Resultado de la detección de idioma para el párrafo seleccionado
+  per_akapit_opinia_wynik: '{nazwa_jezyka} ({kod_iso})'
+  per_akapit_opinia_brak: no reconocido — párrafo demasiado corto o resultado poco fiable
+  per_akapit_kod_lbl: 'Código &ISO para este párrafo (p. ej., en, fr, pt-BR):'
+  per_akapit_kod_name: Código ISO del párrafo seleccionado
+  per_akapit_btn_wszystkie: Aplicar este código a &todos los párrafos
+  per_akapit_btn_detektor: Rellenar todos los códigos con el &resultado de la detección
+  per_akapit_btn_ok: '&Guardar códigos y procesar'
+  per_akapit_btn_anuluj: '&Cancelar'
+  per_akapit_postep_tytul: Detección de idioma de los párrafos
+  per_akapit_postep_tresc: Comprobando en qué idioma está cada párrafo…
+  per_akapit_zly_kod_tytul: Código de idioma no válido
+  per_akapit_zly_kod_tresc: "El párrafo {numer_akapitu} tiene el código «{kod_iso}», que el programa no reconoce.\n\nUn código válido consta de dos letras (por ejemplo, en), opcionalmente con un subtag de región o escritura (por ejemplo, pt-BR, zh-Hans)."
+  per_akapit_brak_jednostek_tytul: No hay párrafos para etiquetar
+  per_akapit_brak_jednostek_tresc: "En este archivo no hay ni un solo párrafo al que el programa pueda asignar un código de idioma.\n\nEl procesamiento continuará con un único código del campo «Código ISO»."
+  per_akapit_detektor_bilans_tytul: Resultado de la detección de idioma de los párrafos
+  per_akapit_detektor_bilans_tresc: "Se completaron los códigos en {liczba_wypelnionych} párrafos de {liczba_akapitow}.\n\nPara {liczba_bez_opinii} párrafos, la detección no pudo emitir un juicio (demasiado cortos o resultado poco fiable); conservaron el código que ya tenían."
+  per_akapit_detektor_przerwane_tresc: "Se interrumpió en el párrafo {numer_akapitu} de {liczba_akapitow}.\n\nSe completaron los códigos en {liczba_wypelnionych} párrafos; los demás conservaron el código que ya tenían."
+  per_akapit_nadpisanie_tytul: ¿Sobrescribir los códigos establecidos?
+  per_akapit_nadpisanie_tresc: "Esta acción establecerá el código en todos los párrafos a la vez, y {liczba_zmienionych} de ellos tiene ahora un código distinto al que tenía cuando se abrió la lista.\n\nEsta acción no se puede deshacer. ¿Desea continuar?"
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)
