@@ -16,7 +16,8 @@ lokalnego skryptu ``odpowiedz_lokalnie.py``. Maintainer ma od dawna lokalny
 ``gh`` CLI, więc nie potrzeba już obiegu przez zacommitowany plik: zniknęła
 cała maszyneria ``pending_answer.md`` + commit + atomic-reset / cleanup-commit
 / force-push + tryb COMMENT (draft odpowiedzi nigdy nie dotyka historii repo).
-Historia tamtego rozwiązania (v15.2.6 → v15.2.8) → ``claude_archive.md``.
+Historia tamtego rozwiązania (v15.2.6 → v15.2.8) siedzi w ``git log``
+i w ``RELEASE_NOTES.md`` pod odpowiednimi wersjami.
 
 Źródłem prawdy tekstów person jest ``dictionaries/<kod>/gui/ui.yaml`` (klucze
 ``bot.closure.*`` / ``bot.answered.*`` / ``bot.personal_note_intro``),
