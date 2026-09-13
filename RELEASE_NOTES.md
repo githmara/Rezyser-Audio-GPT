@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.2.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.2.1 „Wersja Wydawnicza"
+
+*Patch v19.2.1: bramka bez przedmiotu przestaje udawać walidację. Procedura wydawnicza kazała odpalać dziewięć bramek i trzynaście plików testów przy KAŻDEJ zmianie, co jest szumem, a nie ostrożnością: zielony wynik bramki, której wejścia nikt nie tknął, nie niesie informacji, a ściana takich wyników uczy przewijać ten jeden wiersz, który miał znaczenie. Reguła jest teraz zakresowa i wyprowadzona z importów samych testów, a nie z pamięci. Przy okazji wyszło, dlaczego to nie kosmetyka: `pytest` nie był ani w manifeście, ani w środowisku — mimo że procedura wymieniała go jako bramkę — a jego pierwszy przebieg pokazał, że cztery testy `core_updater` nie mogą zawieść, bo zwracają bool zamiast asertować. Plus decyzja zależnościowa: `pyinstaller` 6.22.3 z granicą `<7`, bo jego powierzchnię wołamy wprost ze specu.*
 
 *Release v19.2.0: Naprawiacz Tagów dostaje kod języka OSOBNO dla każdego akapitu — czyli to, co 19.1 zapowiedziało w podręczniku, zabierając mu wcześniej zgadywanie na tekście już przemielonym. Pole wyboru pod polem kodu ISO, a po uruchomieniu lista akapitów, w której każda pozycja mówi numer, początek treści i nadany kod; obok pełna treść, opinia detektora i edytowalny kod. Detektor w tym okienku zna PEŁNY kanon 75 języków, nie dziewięć paczek, bo Naprawiacz istnieje właśnie dla plików bez własnej paczki (zawężenie odpowiadałoby pewnie i błędnie: czeski akapit → niemiecki); zmierzony koszt 2,4–2,8 ms na akapit i od ~52 MB RSS (pięć języków) do ~105 MB (piętnaście), zero wzrostu paczki. Kody startują z pola „Kod ISO", nigdy z detekcji — kanon 19.1 („język pliku to DANE, nie zgadywanie") zostaje nietknięty. „Akapit" znaczy co innego na każdej ścieżce zapisu, więc lista w GUI i pętla stemplująca chodzą po JEDNEJ enumeracji, a rozjazd licznością podnosi wyjątek: plik z kodami przesuniętymi o pozycję jest poprawnym HTML-em i poprawnym DOCX-em, więc ten defekt byłby w pliku niewidoczny, a słyszalny tylko jako obcy głos na sąsiednim akapicie. Dwa defekty poboczne: tabele w `.docx` były niewidzialne dwa razy (brak `w:lang` ORAZ brak treści w podglądzie wczytanego pliku — zmierzone 2 akapity z 8), a zapis dla rozszerzenia bez tagu meldował „sukces" na kopii identycznej z oryginałem.*
 
@@ -65,6 +67,170 @@
 *Release v18.8.0: owoce testu maintainera „polskie UI na fińskiej treści" (Poliglota offline) — jeden bug krytyczny plus dwa niedociągnięcia międzynarodowości. **(1) BUG KRYTYCZNY: tagi `lang` per akapit liczone na tekście JUŻ zniekształconym transformacją.** Silnik od 13.5 MA mechanizm detekcji języka per akapit wykonywanej PRZED transformacją (side-channel `opcje["_segmenty_wynikowe"]`), ale kanał był martwy od urodzenia: GUI wołało `przetworz(..., **opcje)`, Python REPAKOWAŁ kwargi do nowego słownika i mutacje silnika nigdy nie wracały do GUI — `zapisz_wynik` zawsze spadał na detekcję „na żywo" po wyniku. Dla typoglikemii na fińskim tekście lingua strzelała `lang="de"` na akapitach nagłówkowych (dowód: pochodne `explore_raport`); dla cezara fałszerstwo byłoby totalne. Ten sam martwy kanał ukrywał DWA bugi-rodzeństwo cezara z losowym przesunięciem: komunikat „wylosowano N" nigdy się nie pokazywał, a nazwa pliku traciła sufiks `±N` — czyli zaszyfrowany plik był praktycznie nieodwracalny dla usera. Fix: `przetworz` przyjmuje jawny, MUTOWALNY słownik `opcje=` (przez referencję); jeden korzeń naprawia trzy objawy. **(2) Lokalizacja sklejek nazw plików wynikowych.** Prefiksy `naprawiony_/oczyszczony_/_akcent_/_szyfr_/_tlumaczenie_/architektura_` były polskim hard-kodem — koszmar dla niepolskich syntezatorów (fińska Satu czytająca „tlumaczenie" jako [tumaksenije]). Teraz człony pochodzą z `ui.yaml` (klucze `filename_*` ×9 języków, w języku UI: fi `salaus/käännös/arkkitehtuuri`, is `dulkóðun/þýðing`, ru `шифр/перевод`…), z Unicode-safe sanityzacją i twardym fallbackiem na polskie defaulty; `id` wariantu pozostaje techniczne. Manuale zlokalizowane w ślad (przykłady `architektura_` → natywne). **(3) A11y: spin przesunięcia Cezara ukryty dla nie-cezarowych szyfrów** (NVDA nie ogłasza już martwego pola; wzorzec show/hide jak przy polu ISO naprawiacza). **(4) Dokumentacja user-facing przechodzi z .txt na HTML renderowany z Markdownu.** Szablony `dokumentacja/*.yaml` są od teraz pisane w MD (mechaniczna migracja: nagłówki `#`/`##` per sekcja + backticki wokół `<placeholderów>` ×9 języków, z autotestem integralności treści), a `generuj_dokumentacje.py` renderuje `docs/<id>.<iso>.html` (biblioteka `markdown`, nl2br + sane_lists) z pełnym dokumentem HTML5: `<html lang="<iso>">` przełącza syntezator czytnika ekranu na język treści, nagłówki dają nawigację klawiszami 1-6/h w NVDA, a minimalny CSS (z trybem ciemnym) czyta się dobrze też wzrokiem — koniec „obleśnego" gołego .txt w Notatniku. README bez zmian (surowy MD dla GitHuba). Menu Pomoc, `installer.iss` (checkbox „otwórz manual" + sprzątanie osieroconych `docs\*.txt` przy upgrade) i `build_release` przepięte; nowa bramka RAW-HTML w `--waliduj` pilnuje, żeby żaden surowy `<fragment>` z szablonu nie został połknięty przez przeglądarkę. Przy okazji naprawione martwe odwołanie w 9 manualach: przewodnik Opowieści to `tales.<iso>.html`, nie `opowiesci.pl.txt`/`tarinat.fi.txt`/`recits.fr.txt` (plik o tych nazwach nigdy nie istniał).*
 
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
+
+---
+
+## 19.2.1 — patch release (a gate with no object stops passing for validation, and the first pytest run finds four tests that cannot fail)
+
+### 🆕 What's new (English)
+
+**The release procedure stopped demanding nine gates and thirteen test files for every
+change.** A green result from a gate whose input you never touched carries no information,
+and a wall of such results trains you to skim the one line that mattered — so the rule is
+now scoped: run what has an object. Two facts decide what that means, and both were easy
+to get backwards. `build_release.py` already re-runs the content gates itself,
+unconditionally, as steps 6a–6d, so before a full release a manual run is fail-fast rather
+than a safety net. Conversely, two things the build never runs are the only places where a
+manual run IS the coverage: `pytest` (never invoked at any step) and
+`generuj_dokumentacje.py --waliduj`, because the build calls `generuj()` and **six of the
+eight documentation gates live only in `waliduj()`**. The mapping from "the file you
+changed" to "the gate that has an object" is derived from the test files' own imports, so
+it can be re-derived with one shell loop instead of remembered.
+
+**`pytest` was missing from both the manifest and the environment**, while the procedure
+listed `python -m pytest test_*.py` as a gate. It is now a declared dependency, and its
+first run here took 13 seconds for 179 assertions across thirteen files — the measurement
+that keeps the new rule honest: the tests are the cheap half, and what actually deserves
+scoping is whatever costs money or minutes.
+
+**That first run immediately found four tests that could never fail.** Under pytest a test
+function's return value is ignored, so a function ending in `return ok` passes
+unconditionally — including when the thing it checks is broken — and still counts as
+"passed" in the summary. `test_core_updater.py` had four of them, left over from when it
+was a standalone script with its own bool-summing harness. They are now real assertions
+(each verified to fail on a deliberately broken input), the network-dependent ones skip on
+a connection error instead of reporting green, and the updater's own contract got stricter
+along the way: a published release must carry both the installer and its `.sha256`, and an
+offered update must have every field the update dialog actually uses.
+
+**Dependency decision: `pyinstaller` 6.22.3, with a `<7` bound.** The audit had been
+flagging "the manifest allows a newer one and nobody decided". We call PyInstaller's
+surface directly — not through its CLI: `rezyser_audio.spec` uses `Analysis`, `EXE`,
+`COLLECT` and the `contents_directory` kwarg, which has no stability contract across
+majors and whose breakage surfaces during a release build, i.e. at the worst possible
+moment. `pytest` is bounded `<10` for a measured reason too: 9 warns about the
+return-instead-of-assert pattern this release just fixed, and 10 is expected to reject it.
+
+### 🔭 Planned / deferred (English)
+
+- The scoped-gate rule is a table, not a tool. A dev tool that reads `git diff --name-only`
+  and prints the commands that have an object would remove the reading step entirely and
+  would follow this project's own preference for a mechanical gate over a checklist. It is
+  deferred deliberately: it is a new maintenance surface, and the table has to prove itself
+  useful first.
+- The dev-tool language contract (build step 6b') and the dependency gate (6b4) still only
+  warn. Whether either should become fatal was not decided here.
+- `test_core_updater.py` was the only file with the return-instead-of-assert pattern; the
+  other twelve were already assertion-based. No mechanical gate stops a new one from
+  appearing — the pytest warning is the whole defence, which is why the rule now says to
+  treat that warning as a failure.
+- The remainder of these notes is in Polish: dense diagnostics for the maintainer.
+
+### TL;DR — co się zmieniło
+
+**Dla kontrybutora: procedura przestała wymagać rytuału.** Do tej wersji ściąga wydawnicza
+była płaską listą dziewięciu komend „przed commitem release'u", bez wskazania, która z nich
+ma w danej zmianie przedmiot, którą build i tak powtórzy, a która kosztuje pieniądze. Teraz
+rozstrzyga tabela „co ruszyłeś → co odpalić", wyprowadzona z importów samych plików
+testowych, więc sprawdzalna jednym pętlowym grepem, a nie pamięciowa. `CONTRIBUTING.md`
+dostał tę samą regułę po angielsku — dotąd nie wspominał nawet, że trzynaście plików
+testów istnieje.
+
+**Dwa fakty, które tę regułę ustawiają, i oba były łatwe do pomylenia.** `build_release.py`
+sam powtarza bramki treściowe bezwarunkowo (6a→6d), więc przed pełnym wydaniem ręczny
+przebieg jest FAIL-FAST, a nie siatką bezpieczeństwa — odpalasz go, żeby nie czekać minut
+na build z tą samą wiadomością. Odwrotnie przy skróconej procedurze: dev patch nic nie
+buduje, więc tam ręczny przebieg JEST jedynym pokryciem. I dwie rzeczy, których build nie
+odpala NIGDY: `pytest` oraz `--waliduj` — bo build woła `generuj()`, a sześć z ośmiu bramek
+docsów żyje wyłącznie w `waliduj()`.
+
+**`pytest` nie był w manifeście ani w środowisku**, choć procedura wymieniała go jako
+bramkę. Pierwszy przebieg: 179 asercji, trzynaście plików, **13 sekund** — i to jest pomiar,
+który trzyma nową regułę w ryzach. Testy są tanią połową; scoping należy się temu, co
+kosztuje pieniądze albo minuty, czyli buildowi i przede wszystkim autotłumaczom.
+
+**Ten sam przebieg od razu pokazał cztery testy, które nie mogły zawieść.** Pod pytestem
+wartość zwracana z funkcji testowej jest ignorowana, więc funkcja kończąca się `return ok`
+przechodzi zawsze — także gdy sprawdzana rzecz jest zepsuta — i wchodzi do podsumowania
+jako „passed". Test, który nie ma jak zawieść, jest gorszy od braku testu: brak widać
+w spisie, a zielony pusty przebieg uczy, że obszar jest pokryty.
+
+### Co nowego
+
+**Reguła bramek jest zakresowa** (`reguly_git_workflow` §1.3 + nowa sekcja w
+`CONTRIBUTING.md`). Tabela mapuje dwanaście klas zmian na komendy, które w nich mają
+przedmiot; mapowanie wyprowadzone z importów plików testowych. Zachowane dwie starsze
+lekcje, bo obie są o MOMENCIE, nie o liczbie bramek: `--bramka-py` odpala się dopiero
+w buildzie (v18.12.0), a przebieg nie jest zaliczony, dopóki po nim cokolwiek dopisujesz —
+również w plikach testowych, bo ta bramka skanuje `test_*.py` i nie whitelistuje ich jak
+dev-tooli (v18.24.1).
+
+**`test_core_updater.py` przepisany na prawdziwe asercje.** Cztery funkcje kończące się
+`return True`/`return False`/`return ok` zamienione na `assert`; przypadki normalizacji
+wersji rozbite przez `parametrize` (pięć testów zamiast jednej pętli sumującej flagę).
+Kontrakt zaostrzony tam, gdzie dotąd sprawdzał tylko, że funkcja nie rzuca: opublikowane
+wydanie musi mieć instalator **i** jego `.sha256` (bez sumy updater po cichu pomija
+weryfikację SHA256 — od v18.10), a zwrócony `UpdateInfo` musi mieć wypełnione wszystkie
+pola używane przez dialog aktualizacji i wersję realnie wyższą od lokalnej. Testy sieciowe
+robią `pytest.skip()` przy błędzie połączenia — skip widać w podsumowaniu, fałszywego passa
+nie. Własny `__main__`-harness sumujący bool-e usunięty (to on był przyczyną: dwa sposoby
+raportowania wyniku, z czego jeden cichy) — skrypt deleguje do `pytest.main`.
+
+**Decyzja zależnościowa zamiast ostrzeżenia.** `pyinstaller` podniesiony 6.22.2 → 6.22.3
+i ograniczony `<7`; `pytest` dopisany z granicą `<10`. Obie granice mają zmierzony powód
+wpisany w komentarz `requirements.txt`, zgodnie z zasadą „granice wąsko i tylko tam, gdzie
+zmierzone".
+
+### Pod maską
+
+**Smoke test upgrade'u PyInstallera to ten build.** Odruch przed każdym zamrożeniem mówi:
+upgrade + smoke test funkcji zależnych od biblioteki albo granica. Tutaj biblioteką jest
+sam mechanizm zamrożenia, więc smoke testem jest wyprodukowanie tego instalatora.
+Oczekiwane ostrzeżenie `Hidden import "tzdata" not found!` (od 19.0) nadal jest oczekiwane
+i nadal NIE instalujemy `tzdata`.
+
+**Trzy asercje zweryfikowane NEGATYWNIE, nie tylko „na zielono".** Po przepisaniu testów
+sprawdziłem wykonaniem, że każda nowa asercja faktycznie kąsa: puste `VERSION`, odpowiedź
+API bez assetu `.sha256` oraz `UpdateInfo` z zerowym rozmiarem — wszystkie trzy wywracają
+test. Zielony przebieg był dokładnie tym, co w tym pliku zawiodło, więc nie jest dowodem
+sam z siebie.
+
+**Do paczki end-usera nie wchodzi nic poza numerem wersji.** `requirements.txt`,
+`CONTRIBUTING.md` i `test_*.py` nie są pakowane; `pytest` nie jest importowany z domknięcia
+`main.py`, więc nie trafia do bundla. Jedyna zmiana w `docs/` to podbita linia wersji.
+
+### Co nie weszło
+
+- **Dev tool zamiast tabeli.** Skrypt czytający `git diff --name-only` i wypisujący komendy,
+  które mają przedmiot, byłby mechaniczną wersją tej reguły — a kanon projektu przedkłada
+  bramkę nad checklistę. Odłożone świadomie: nowa powierzchnia do utrzymania, a tabela ma
+  się najpierw sprawdzić.
+- **Podniesienie 6b' i 6b4 do FATAL.** Kontrakt językowy dev-tooli i bramka zależności nadal
+  tylko ostrzegają w buildzie. Nie rozstrzygano tu, czy powinny blokować.
+- **Bramka na wzorzec `return` w testach.** `test_core_updater.py` był jedynym plikiem z tym
+  wzorcem — pozostałe dwanaście stały już na asercjach. Nic mechanicznego nie zapobiega
+  pojawieniu się nowego; obroną jest ostrzeżenie pytesta, dlatego reguła mówi wprost, żeby
+  traktować je jak porażkę.
+- **Usunięcie martwego `runtime/`** (452 MB portable Pythona sprzed v17.0) z dysku
+  maintainera. Folder jest gitignorowany, więc nie dotyczy wydania — zostaje jako porządek
+  lokalny.
+
+### Walidacja
+
+Bramki odpalone ZAKRESOWO, zgodnie z regułą, którą to wydanie wprowadza — i to jest jej
+pierwszy realny przebieg. Zmiana dotknęła `test_core_updater.py`, `requirements.txt`,
+`CONTRIBUTING.md`, `VERSION`, `patch_dev.json` (oraz `build_release.py` w poprzednim dev
+patchu na tym samym tagu):
+
+- `pytest test_*.py` — **183 asercje, 0 ostrzeżeń** (przed zmianą: 179 przeszło z czterema
+  `PytestReturnNotNoneWarning`; różnica 4 to `parametrize` rozbijający jeden test na pięć);
+- `audyt_zaleznosci.py --strict` — czysto po decyzji o `pyinstaller`;
+- `audyt_leakow.py --bramka-py` — 0 ponad baseline (przepisany plik testowy ma polską prozę
+  w docstringach, więc bramka miała przedmiot);
+- `generuj_dokumentacje.py --waliduj` — osiem bramek, docs przeliczone PO bumpie VERSION;
+- `audyt_podstaw.py --bramka` i `audyt_ciszy.py --bramka` — **NIE odpalone ręcznie**: zmiana
+  nie tknęła `dictionaries/**` ani żadnego loadera YAML, więc nie miały przedmiotu, a build
+  powtarza je bezwarunkowo (6b''/6b'''). To jest dokładnie ta różnica, o którą szło.
 
 ---
 

@@ -52,7 +52,21 @@ pyyaml
 ruamel.yaml
 jsonschema
 tiktoken
-pyinstaller
+# pyinstaller — granica DECYZJĄ (v19.2.1), nie zaniedbaniem. Wołamy jego
+# powierzchnię wprost, i to nie przez CLI: `rezyser_audio.spec` używa `Analysis`,
+# `EXE`, `COLLECT` i kwargu `contents_directory` (pułapka: to kwarg **EXE**, nie
+# COLLECT — patrz CLAUDE.md `# DEPLOYMENT`). Ta powierzchnia nie ma kontraktu
+# stabilności między majorami, a jej złamanie objawia się dopiero w buildzie
+# wydania, czyli w najgorszym momencie. 7.x ma być decyzją z próbnym buildem.
+pyinstaller<7
+# pytest — 13 plików `test_*.py` (179 asercji, ~13 s na całość) nie dało się
+# uruchomić, bo pakietu nie było ANI w manifeście, ANI w środowisku, choć
+# procedura wydawnicza wymieniała `python -m pytest test_*.py` jako bramkę.
+# Granica jest zmierzona, nie zgadnięta: pytest 9 OSTRZEGA o funkcji testowej,
+# która `return`uje zamiast asertować (taki test nie może zawieść — złapane
+# w v19.2.1 na `test_core_updater.py`), a w 10.x ta sytuacja ma być błędem.
+# Wołamy też `pytest.skip`/`pytest.main` wprost. 10.x = decyzja, nie awaria.
+pytest<10
 # packaging — porównanie wersji wg PEP 440 w `audyt_zaleznosci.py` (dev-only,
 # runtime tego nie importuje). Wjeżdżało dotąd tranzytywnie (pyinstaller,
 # setuptools); deklarujemy je, bo NARZĘDZIE Z REPO go używa, a bramka bez

@@ -162,6 +162,70 @@ statement about a HOOK, not about your code.** Before installing X, establish (a
 package pulled in the module the hook fired for, and (b) whether that module can even
 reach X on the paths this project uses.
 
+## Tests and gates: run the ones your change can actually break
+
+There are thirteen regression test files (179 assertions, **~13 s for all of them**) and
+nine gates. Running every one of them after every small edit is not thoroughness — a green
+result on a gate whose input you never touched carries no information, and a wall of such
+results trains you to skim the one line that mattered. So the rule is not "run more" or
+"run less", it is **run what has an object**.
+
+Two facts decide what that means, and both are easy to get backwards:
+
+1. **`build_release.py` re-runs the content gates itself, unconditionally**, as steps
+   6a–6d: the docs leak gate, `--bramka-py`, the dev-tool language contract (warning only),
+   the YAML silence gate, the foundations gate, the dependency gate (warning only), the
+   dev-patch counter, the debug-flag check, and a documentation regeneration that escalates
+   unresolved placeholders to a FATAL. **Before a full release, running these by hand is
+   fail-fast, not a safety net** — you do it to avoid waiting minutes for the build to tell
+   you the same thing, so run the one whose input you touched and let the build cover the
+   rest.
+2. **Two things the build never runs**, so here a manual run is the only coverage:
+   * `generuj_dokumentacje.py --waliduj` — the build calls `generuj()`, not `waliduj()`.
+     Six of the eight documentation gates live **only** in `--waliduj` (finalization
+     header, RAW-HTML, ACCENT-TAG, GUI-LABEL, SLASH-COMMAND, EXAMPLE-PAIR); only the leak
+     gate and the placeholder check are repeated by the build.
+   * `python -m pytest test_*.py` — never invoked by the build, at any point.
+
+### What you touched → what has an object
+
+| you changed | run |
+|---|---|
+| `core_rezyser.py` | `pytest test_puste_linie_rezysera.py test_json_structured.py test_sprzatanie_bundla.py` |
+| `core_poliglota.py` | `pytest test_akcent_wersaliki.py test_lang_wyniku.py test_markdown_poliglota.py test_oczyszczanie_tts.py test_cisza_yaml.py` |
+| `core_llm.py` | `pytest test_json_structured.py test_cache_powtorki.py test_sprzatanie_bundla.py` |
+| `core_updater.py` | `pytest test_core_updater.py test_patch_dev.py` |
+| `core_markdown.py` | `pytest test_markdown_poliglota.py` |
+| `build_release.py`, `patch_dev.json`, `installer.iss` | `pytest test_patch_dev.py test_sprzatanie_bundla.py` |
+| `.github/scripts/issue_intake_sami.py` | `pytest test_intake_zalaczniki.py` |
+| a `buduj_wielojezyczne_*.py` / `tlumacz_*.py` | `pytest test_cache_powtorki.py test_zrodlo_pl_raz.py` |
+| any `dictionaries/**/gui/dokumentacja/*.yaml` or `gui/ui.yaml` | `generuj_dokumentacje.py --waliduj` **and** `audyt_leakow.py --bramka` |
+| any other `dictionaries/**` (engine data: accents, ciphers, modes, tales) | `audyt_podstaw.py --bramka` + `audyt_ciszy.py --bramka` |
+| a new or renamed `.py` in the repo root | `audyt_leakow.py --bramka-py` (the build is otherwise the first place this fires) |
+| `requirements.txt`, or before any freeze | `audyt_zaleznosci.py` |
+
+The mapping comes from the test files' own imports (`grep -oE '^(import\|from) [a-z_]+'`),
+so it is checkable rather than remembered — and it is worth re-deriving when you add a
+test, because a test nobody knows to run is the same thing as no test.
+
+**The tests are the cheap half; do not over-optimise them.** Thirteen seconds for the whole
+suite means "just run `pytest test_*.py`" is a perfectly good default, and the table above
+matters most when you are iterating in a tight loop. What genuinely deserves scoping is
+everything that costs money or minutes: the build, and above all the auto-translators —
+every call to one of those **overwrites a whole unit** of already-reviewed prose and cannot
+be undone by re-running it.
+
+### A test that cannot fail is worse than no test
+
+Under pytest a test function's **return value is ignored**. A function that ends in
+`return ok` or `return False` therefore passes unconditionally, even when the thing it
+checks is broken — and the summary line counts it among the passes. `test_core_updater.py`
+carried four such functions until 19.2.1 (a leftover from when it was a standalone script
+with its own bool-summing harness). Pytest 9 reports this as
+`PytestReturnNotNoneWarning`; treat that warning as a failure. Use `assert`, and for a
+check that needs the network use `pytest.skip()` on a connection error rather than letting
+it report green — a skip is visible in the summary, a false pass is not.
+
 ## Adding a UI language
 
 1. Create `dictionaries/<code>/` with at least `podstawy.yaml` (incl. the native
