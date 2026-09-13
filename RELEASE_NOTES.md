@@ -90,6 +90,12 @@
 - A block element that contains another block element is a unit only when it has text of ITS OWN (an outer `<li>` in a nested Markdown list, a `<blockquote>` with a lead-in sentence). A pure container takes the global code, because listing it would show the same text twice.
 - Old output files are still not repaired retroactively, and text inside `<code>`/`<pre>` still goes through the phonetic rules — both unchanged from 19.1.
 
+### Dev Patch 1
+
+**Dead code removed from `build_release.py`: the dependency check that ran through the portable `runtime/python.exe`.** Its call site disappeared in v17.0, when PyInstaller replaced the portable interpreter — but the guard itself (`weryfikuj_runtime()`) and its manifest parser (`wczytaj_wymagane_pakiety()`) stayed in the file across four majors, advertising a fix nobody could apply any more (`runtime/python.exe -m pip install -r requirements.txt`). Two live mechanisms already cover that ground, both against the ACTIVE environment: `audyt_zaleznosci.py` (build step 6b4) audits the manifest against what is installed and against PyPI, and PyInstaller itself fails the build during import analysis when a package is missing. The four stale "runtime/ check" mentions in the CLI help and in comments were corrected in the same pass. No change to the installer or to the shipped `.exe`.
+
+**Bez zmian dla użytkownika — czyszczenie dev-toolingu.** Guard portable'owego Pythona (`weryfikuj_runtime` + `wczytaj_wymagane_pakiety`) przetrwał w `build_release.py` cztery majory po tym, jak v17.0 usunęła jego wywołanie, i obiecywał naprawę przez `runtime/python.exe -m pip install`, czyli przez interpreter, którego paczka od dawna nie wozi. Jego rolę pełnią dziś `audyt_zaleznosci.py` (krok 6b4) oraz sama analiza importów PyInstallera — oba na ŚRODOWISKU AKTYWNYM, więc osobny subprocess do pytania „czy pip uważa, że jest zainstalowane" stracił przedmiot. Wypadły też cztery nieaktualne wzmianki „runtime/ check" w helpie CLI i w komentarzach. Instalator i `.exe` bez zmian.
+
 ### TL;DR — co się zmieniło
 
 **Dla użytkownika: Naprawiacz Tagów dostał to, co 19.1 obiecało w podręczniku.** Tamto wydanie zabrało mu zgadywanie języka per akapit (bo zgadywał na tekście już przemielonym) i zostawiło jeden kod na cały plik, zapowiadając interfejs, w którym akapity widać. Jest: pole wyboru pod polem kodu ISO, a po uruchomieniu przetwarzania lista akapitów, w której każda pozycja mówi numer, początek treści i nadany kod. Odznaczone pole = bieg dokładnie jak dotąd, bez dodatkowego okna.

@@ -112,11 +112,12 @@ class WynikBramki:
 # Manifest
 # ---------------------------------------------------------------------------
 def wczytaj_manifest(sciezka: Path | None = None) -> list[Wpis]:
-    """Czyta `requirements.txt` — nazwa PLUS specyfikator (inaczej niż `build_release`).
+    """Czyta `requirements.txt` — nazwa PLUS specyfikator.
 
-    `build_release.wczytaj_wymagane_pakiety` obcina specyfikator, bo pyta tylko
-    „czy zainstalowane". Tutaj specyfikator jest połową odpowiedzi: to on
-    odróżnia decyzję („granica") od zaniedbania („nowsza").
+    Specyfikator jest POŁOWĄ odpowiedzi: to on odróżnia decyzję („granica")
+    od zaniedbania („nowsza"), więc obcięcie go — jak robił usunięty
+    `build_release.wczytaj_wymagane_pakiety`, który pytał tylko „czy
+    zainstalowane" — zostawiałoby narzędzie bez jego jedynej treści.
     """
     plik = sciezka or SCIEZKA_MANIFESTU
     if not plik.is_file():

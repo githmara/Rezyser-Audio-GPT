@@ -46,7 +46,6 @@ dev_konsola.skonfiguruj_stdout()
 #              w pliku VERSION — niezależnie od liczby paczek językowych.
 
 SCIEZKA_VERSION = os.path.join(os.path.dirname(__file__), "VERSION")
-SCIEZKA_REQUIREMENTS = os.path.join(os.path.dirname(__file__), "requirements.txt")
 # Licznik skróconych (dev-tools-only) wydań opublikowanych na tagu bieżącej
 # wersji — jedyny sygnał dla kogoś pracującego ZE ŹRÓDŁA, że tag się przesunął
 # bez bumpa numeru (konsument: `core_updater.sprawdz_patch_dev`). Pełne wydanie
@@ -552,117 +551,6 @@ def sprawdz_licznik_patch_dev(wersja: str) -> str | None:
     return None
 
 
-def wczytaj_wymagane_pakiety() -> list[str]:
-    """Czyta ``requirements.txt`` i zwraca listę nazw dystrybucji PyPI.
-
-    Specyfikatory wersji (``==``, ``>=``), extras (``[fast]``) i markers
-    (``; python_version >= "3.10"``) zostają obcięte — interesuje nas wyłącznie
-    nazwa, którą poda się do ``importlib.metadata.version()``. Komentarze
-    (``# ...``) i linie zaczynające się od ``-`` (np. ``-e ./mylib``,
-    ``-r other.txt``) są pomijane — to konstrukcje pip-a, nie pakiety, więc
-    nie ma sensu pytać o ich wersję.
-    """
-    if not os.path.exists(SCIEZKA_REQUIREMENTS):
-        raise RuntimeError(
-            f"requirements.txt not found at {SCIEZKA_REQUIREMENTS}. "
-            "Cannot verify the runtime environment without the dependency manifest."
-        )
-    pakiety: list[str] = []
-    with open(SCIEZKA_REQUIREMENTS, "r", encoding="utf-8") as fh:
-        for linia in fh:
-            tekst = linia.strip()
-            if not tekst or tekst.startswith("#") or tekst.startswith("-"):
-                continue
-            nazwa = re.split(r"[<>=!~;\s\[]", tekst, 1)[0].strip()
-            if nazwa:
-                pakiety.append(nazwa)
-    if not pakiety:
-        raise RuntimeError(
-            f"{SCIEZKA_REQUIREMENTS} contains no installable packages — "
-            "release verification needs at least one entry to be meaningful."
-        )
-    return pakiety
-
-
-def weryfikuj_runtime(sciezka_python: str) -> None:
-    """Sprawdza, czy ``runtime/python.exe`` to faktyczny interpreter Pythona
-    z kompletem zależności wydawniczych z ``requirements.txt``.
-
-    Zamiast minimalnego ``print('OK')`` (które potwierdzało tylko, że proces się
-    uruchamia, ale milczało o tym, czy wxpython/openai/lingua faktycznie są
-    zainstalowane), odpalamy w runtime jednorazowy skrypt: dla każdego pakietu
-    z manifestu pyta ``importlib.metadata.version()`` o numer wersji, a brak
-    rzuca ``PackageNotFoundError``. Logika dystynkcji błędów na końcu rozróżnia
-    dwa scenariusze:
-
-    * **brak pakietów** (subprocess wraca z ``__MISSING__:...`` na stderr) →
-      runtime istnieje, ale jest niegotowy do wydania; fix to
-      ``runtime/python.exe -m pip install -r requirements.txt``;
-    * **runtime/python.exe nie jest Pythonem** (timeout, non-zero exit bez
-      sygnału ``__MISSING__``) → trzeba podmienić cały folder ``runtime/``.
-
-    Używamy ``importlib.metadata.version`` zamiast ``importlib.import_module``,
-    bo czyta tylko metadata pip-a — nie ładuje natywnych bibliotek wxpython
-    (które bywają cięższe i potencjalnie psują output stderr). To wystarczy,
-    żeby stwierdzić „pip uważa, że jest zainstalowane" — a to dokładnie to
-    pytanie, na które chcemy odpowiedzi przed pakowaniem release'u.
-    """
-    try:
-        pakiety = wczytaj_wymagane_pakiety()
-    except RuntimeError as exc:
-        print(f"❌ FATAL: {exc}")
-        sys.exit(1)
-
-    skrypt_check = (
-        "import sys\n"
-        "from importlib.metadata import version, PackageNotFoundError\n"
-        f"pakiety = {pakiety!r}\n"
-        "brakujace = []\n"
-        "for nazwa in pakiety:\n"
-        "    try:\n"
-        "        print(f'   {nazwa} == {version(nazwa)}')\n"
-        "    except PackageNotFoundError:\n"
-        "        brakujace.append(nazwa)\n"
-        "        print(f'   {nazwa} == [MISSING]')\n"
-        "if brakujace:\n"
-        "    sys.stderr.write('__MISSING__:' + ','.join(brakujace) + '\\n')\n"
-        "    sys.exit(1)\n"
-    )
-
-    try:
-        wynik = subprocess.run(
-            [sciezka_python, "-c", skrypt_check],
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            timeout=15,
-        )
-    except subprocess.TimeoutExpired:
-        print("❌ FATAL: 'runtime/python.exe' stopped responding (timeout). It is probably not Python.")
-        sys.exit(1)
-    except Exception as exc:
-        print(f"❌ FATAL: Cannot launch 'runtime/python.exe'. Details: {exc}")
-        sys.exit(1)
-
-    if wynik.stdout:
-        print(wynik.stdout, end="")
-
-    if wynik.returncode != 0:
-        if wynik.stderr and "__MISSING__:" in wynik.stderr:
-            brakujace = wynik.stderr.split("__MISSING__:", 1)[1].strip().rstrip(",")
-            print()
-            print(f"❌ FATAL: 'runtime/' is missing release dependencies: {brakujace}")
-            print("The runtime exists, but it isn't release-ready yet. Install the manifest:")
-            print(f"   {sciezka_python} -m pip install -r requirements.txt")
-            sys.exit(1)
-        print("❌ FATAL: 'runtime/python.exe' exists but does not behave like Python!")
-        if wynik.stderr:
-            print("Subprocess stderr:")
-            print(wynik.stderr)
-        print("Make sure you put a proper Portable Python build there, not an installer or some other program.")
-        sys.exit(1)
-
-
 _RE_INSTALLER_NAME = re.compile(r"^Rezyser_Audio_v(.+)_Installer\.exe$")
 _RE_SHA256_NAME = re.compile(r"^Rezyser_Audio_v(.+)_Installer\.exe\.sha256$")
 
@@ -957,9 +845,9 @@ def _parsuj_argumenty() -> argparse.Namespace:
     """Parsuje argumenty CLI build_release.py.
 
     Pojedyncza flaga ``-y/--yes`` — pomija interaktywny prompt potwierdzający
-    przed kompilacją Inno Setupa. Reszta gardów (runtime/ check, VERSION
-    czytany z pliku, sprawdzenie ISCC w PATH, refuse-overwrite istniejącego
-    EXE o tej samej wersji) zostaje aktywna — `-y` pomija TYLKO ostatni
+    przed kompilacją Inno Setupa. Reszta gardów (VERSION czytany z pliku,
+    sprawdzenie ISCC w PATH, refuse-overwrite istniejącego EXE o tej samej
+    wersji, bramki treściowe 6a–6d) zostaje aktywna — `-y` pomija TYLKO ostatni
     human-in-the-loop, nie wyłącza walidacji.
 
     Use case: skrypt wywoływany przez CI/CD albo przez agenta automatyzacji
@@ -980,7 +868,8 @@ def _parsuj_argumenty() -> argparse.Namespace:
         action="store_true",
         help="Skip the interactive 'Build X? (y/n):' prompt and proceed "
              "directly to compilation. A deliberate choice — every other "
-             "validation (runtime/, VERSION, ISCC on PATH, refuse-overwrite) "
+             "validation (VERSION, ISCC on PATH, refuse-overwrite, content "
+             "gates) "
              "stays active; only the last human-in-the-loop step is skipped. "
              "Use case: CI/CD or automation by an agent.",
     )
@@ -1000,7 +889,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
         action="store_true",
         help="Run ONLY the cleanup step (delete locally cached installers "
              "and their .sha256 checksum files already published on GitHub) "
-             "and exit. Skips runtime/ check, doc regeneration, ISCC "
+             "and exit. Skips the content gates, doc regeneration and ISCC "
              "compilation. Use case: free up disk space after a release "
              "without rebuilding.",
     )
@@ -1160,21 +1049,27 @@ def main(args: argparse.Namespace | None = None) -> None:
     if args is None:
         args = argparse.Namespace(yes=False, no_cleanup=False, cleanup_only=False)
 
-    # --- CLEANUP-ONLY MODE (no build, no runtime/ guard) ---
-    # Skrót po publikacji żeby zwolnić miejsce bez ponownego uruchamiania
-    # weryfikacji runtime/ i kompilacji Inno. Bezpieczny niezależnie od tego
-    # czy runtime/ leży na dysku.
+    # --- CLEANUP-ONLY MODE (no build, no gates) ---
+    # Skrót po publikacji, żeby zwolnić miejsce bez ponownego uruchamiania
+    # bramek i kompilacji Inno.
     if getattr(args, "cleanup_only", False):
         sprzataj_opublikowane_instalatory()
         return
 
     # --- (v17.0) PyInstaller zastąpił portable runtime/python.exe ---
-    # Dawniej tu stał guard sprawdzający `runtime/python.exe` + `weryfikuj_runtime()`
-    # (czy portable Python istnieje i ma komplet zależności z requirements.txt).
-    # Po migracji na PyInstaller paczka jest budowana ze środowiska, w którym
-    # uruchamiamy ten skrypt (zwykle `.venv`), a interpreter + zależności wchodzą
-    # do bundla. Walidacja środowiska sprowadza się więc do tego, czy bieżący
-    # Python ma PyInstaller — sprawdzane w `buduj_pyinstaller()` niżej.
+    # Paczka jest budowana ze środowiska, w którym uruchamiamy ten skrypt
+    # (zwykle `.venv`), a interpreter + zależności wchodzą do bundla — więc
+    # NIE MA już czego sprawdzać w `runtime/python.exe`. Guard
+    # `weryfikuj_runtime()` (portable Python + komplet z requirements.txt)
+    # i jego parser manifestu USUNIĘTE 2026-09-13 jako martwy kod: wywołanie
+    # zniknęło w v17.0, a przez cztery majory nikt tych funkcji nie wołał.
+    # Tę rolę pełnią dziś DWA żywe mechanizmy, oba na ŚRODOWISKU AKTYWNYM:
+    #   * `audyt_zaleznosci.py` (krok 6b4 niżej) — manifest × zainstalowane ×
+    #     PyPI, z rozdzieleniem DECYZJI (`granica`) od zaniedbania (`nowsza`);
+    #   * sam PyInstaller — brak pakietu w `.venv` wywala build na analizie
+    #     importów, więc „pip uważa, że jest zainstalowane" nie jest już
+    #     pytaniem, na które trzeba odpowiadać osobnym subprocessem.
+    # Zostaje jedno: czy bieżący Python ma PyInstaller — `buduj_pyinstaller()`.
 
     # 1. Read the release version (single source of truth: VERSION in repo root).
     print(f"🔍 Detecting release version ({SCIEZKA_VERSION})...")
