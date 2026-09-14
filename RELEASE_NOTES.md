@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.2.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.2.2 „Wersja Wydawnicza"
+
+*Patch v19.2.2: cztery noty, które obiecywały co innego, niż robi kod — trzy w Konstytucji, jedna w prompcie systemowym autotłumacza interfejsu. Konstytucja opisywała runtime jako jedno-providerowy, choć od 18.4 `core_llm` jest warstwą wyboru dostawcy: `LLM_PROVIDER=openai_compat` przekierowuje całą aplikację na dowolny endpoint zgodny z OpenAI, `openai` jest realną zależnością i siedzi w bundlu, a w rodzinie autotłumaczy honoruje ten przełącznik wyłącznie builder docsów — i właśnie dlatego ŻĄDA interaktywnego potwierdzenia, którego w sesji agenta nie ma kto dać. To ta sama klasa, co dwie stare noty o wdrażaniu nowego języka („dziesiąty język w 15.x+" przy 19.x, „`opowiesci/` ręcznie, bez batcha" — nieprawda od 18.17): odsyłacz do prywatnego filaru pamięci znaczy dla maintainera „unieważnione", a dla kontrybutora z samym klonem repozytorium jest zakazem w mocy, bo pliku znoszącego zakaz u niego nie ma. Przy okazji `build_release.py` przestaje kończyć się tracebackiem `EOFError`, gdy nikogo nie ma przy klawiaturze — mówi, że służy do tego `-y`, wzorem narzędzia, któremu ten wzorzec sam kiedyś oddał. Prompt `_ui` traci instrukcję o cyfrach numeru wersji, których model nigdy nie widzi (dostaje zamrożony marker); zostaje sama semantyka sufiksu „Wersja Wydawnicza", a lekcja wchodzi jako BRAMKA, nie nota — nowy `test_prompty_markery.py` buduje wszystkie dziesięć promptów rodziny bez API i pilnuje, że żaden nie cytuje markera z cyfrą, a numer wersji nie przechodzi przez tokenizer. Dla użytkownika końcowego zmienia się wyłącznie podbity numer wersji w podręcznikach.*
 
 *Patch v19.2.1: bramka bez przedmiotu przestaje udawać walidację. Procedura wydawnicza kazała odpalać dziewięć bramek i trzynaście plików testów przy KAŻDEJ zmianie, co jest szumem, a nie ostrożnością: zielony wynik bramki, której wejścia nikt nie tknął, nie niesie informacji, a ściana takich wyników uczy przewijać ten jeden wiersz, który miał znaczenie. Reguła jest teraz zakresowa i wyprowadzona z importów samych testów, a nie z pamięci. Przy okazji wyszło, dlaczego to nie kosmetyka: `pytest` nie był ani w manifeście, ani w środowisku — mimo że procedura wymieniała go jako bramkę — a jego pierwszy przebieg pokazał, że cztery testy `core_updater` nie mogą zawieść, bo zwracają bool zamiast asertować. Plus decyzja zależnościowa: `pyinstaller` 6.22.3 z granicą `<7`, bo jego powierzchnię wołamy wprost ze specu.*
 
@@ -67,6 +69,212 @@
 *Release v18.8.0: owoce testu maintainera „polskie UI na fińskiej treści" (Poliglota offline) — jeden bug krytyczny plus dwa niedociągnięcia międzynarodowości. **(1) BUG KRYTYCZNY: tagi `lang` per akapit liczone na tekście JUŻ zniekształconym transformacją.** Silnik od 13.5 MA mechanizm detekcji języka per akapit wykonywanej PRZED transformacją (side-channel `opcje["_segmenty_wynikowe"]`), ale kanał był martwy od urodzenia: GUI wołało `przetworz(..., **opcje)`, Python REPAKOWAŁ kwargi do nowego słownika i mutacje silnika nigdy nie wracały do GUI — `zapisz_wynik` zawsze spadał na detekcję „na żywo" po wyniku. Dla typoglikemii na fińskim tekście lingua strzelała `lang="de"` na akapitach nagłówkowych (dowód: pochodne `explore_raport`); dla cezara fałszerstwo byłoby totalne. Ten sam martwy kanał ukrywał DWA bugi-rodzeństwo cezara z losowym przesunięciem: komunikat „wylosowano N" nigdy się nie pokazywał, a nazwa pliku traciła sufiks `±N` — czyli zaszyfrowany plik był praktycznie nieodwracalny dla usera. Fix: `przetworz` przyjmuje jawny, MUTOWALNY słownik `opcje=` (przez referencję); jeden korzeń naprawia trzy objawy. **(2) Lokalizacja sklejek nazw plików wynikowych.** Prefiksy `naprawiony_/oczyszczony_/_akcent_/_szyfr_/_tlumaczenie_/architektura_` były polskim hard-kodem — koszmar dla niepolskich syntezatorów (fińska Satu czytająca „tlumaczenie" jako [tumaksenije]). Teraz człony pochodzą z `ui.yaml` (klucze `filename_*` ×9 języków, w języku UI: fi `salaus/käännös/arkkitehtuuri`, is `dulkóðun/þýðing`, ru `шифр/перевод`…), z Unicode-safe sanityzacją i twardym fallbackiem na polskie defaulty; `id` wariantu pozostaje techniczne. Manuale zlokalizowane w ślad (przykłady `architektura_` → natywne). **(3) A11y: spin przesunięcia Cezara ukryty dla nie-cezarowych szyfrów** (NVDA nie ogłasza już martwego pola; wzorzec show/hide jak przy polu ISO naprawiacza). **(4) Dokumentacja user-facing przechodzi z .txt na HTML renderowany z Markdownu.** Szablony `dokumentacja/*.yaml` są od teraz pisane w MD (mechaniczna migracja: nagłówki `#`/`##` per sekcja + backticki wokół `<placeholderów>` ×9 języków, z autotestem integralności treści), a `generuj_dokumentacje.py` renderuje `docs/<id>.<iso>.html` (biblioteka `markdown`, nl2br + sane_lists) z pełnym dokumentem HTML5: `<html lang="<iso>">` przełącza syntezator czytnika ekranu na język treści, nagłówki dają nawigację klawiszami 1-6/h w NVDA, a minimalny CSS (z trybem ciemnym) czyta się dobrze też wzrokiem — koniec „obleśnego" gołego .txt w Notatniku. README bez zmian (surowy MD dla GitHuba). Menu Pomoc, `installer.iss` (checkbox „otwórz manual" + sprzątanie osieroconych `docs\*.txt` przy upgrade) i `build_release` przepięte; nowa bramka RAW-HTML w `--waliduj` pilnuje, żeby żaden surowy `<fragment>` z szablonu nie został połknięty przez przeglądarkę. Przy okazji naprawione martwe odwołanie w 9 manualach: przewodnik Opowieści to `tales.<iso>.html`, nie `opowiesci.pl.txt`/`tarinat.fi.txt`/`recits.fr.txt` (plik o tych nazwach nigdy nie istniał).*
 
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
+
+---
+
+## 19.2.2 — patch release (the Constitution stops describing a single-provider runtime, a confirmation prompt stops looking like a crash, and a prompt rule about digits no model ever sees is gone)
+
+### 🆕 What's new (English)
+
+**A `y/n` prompt is not a defect, but an `EOFError` traceback looks like one.**
+`build_release.py` asks for a last-chance confirmation before it compiles the installer,
+and an agent or CI session has nobody to answer it — until now that ended in a raw
+`EOFError` traceback, in which the build looked BROKEN rather than merely unconfirmed. The
+pattern for saying this properly was invented here, improved in the translator family
+(`tlumacz_bramki`, 18.25) and never copied back; it is now symmetrical, and both places
+name the `-y/--yes` flag that accepts the contract up front. Verified by execution: with
+stdin closed the build exits 1 with that message and starts nothing.
+
+**The Constitution stopped describing a single-provider runtime, which it has not been
+since 18.4.** `core_llm` is a provider-choice layer: `LLM_PROVIDER=openai_compat` points
+the whole runtime at any OpenAI-compatible endpoint, `openai` is a real dependency that
+PyInstaller does put into the bundle (a lazy import from a function body is still a static
+import for the analysis), and in the translator family exactly one tool honors the switch —
+`buduj_wielojezyczne_docs.py`, which then DEMANDS an interactive confirmation before it
+spends money on a foreign endpoint. An agent that met that demand non-interactively used to
+learn the whole arrangement from the exception; it is now in the rules, together with the
+`-y` answer and the one-line `grep` that says whether the run would have left Anthropic at
+all.
+
+**Two more corrections in the same file, both of one class: a stale note that reads as a
+ban.** The deployment order for a new language still said "should a 10th language appear in
+15.x+" (this is 19.x) and "`opowiesci/` — manually, without batch", which stopped being
+true in 18.17, when `buduj_wielojezyczne_opowiesci.py` was born. For the maintainer the
+pointer to a private memory pillar meant "invalidated"; for a contributor with a clone and
+no such file it was simply a ban in force. The order is now spelled out in the Constitution
+itself, tool by tool, including the one file the tool deliberately leaves alone
+(`zaczatki.yaml`, written by hand per language) and the registration step
+(`refresh_languages.py`) without which the whole family rejects the new ISO code.
+
+**The UI translator stopped instructing the model about a version number it never
+receives.** `app.wersja` is `"{numer_wersji} – Wersja Wydawnicza"`: the number is injected
+by `i18n.t()` at runtime and the tokenizer freezes the placeholder, so the model is handed
+`⟦P0⟧ – Wersja Wydawnicza`. The rule that asked it to "keep the number (digits + dot) and
+the dash", quoting a value with digits in it, was dead in every run of every language — and
+the quote was worse than dead: a digit-bearing marker example inside the instruction is
+exactly what the docs brother measured (18.12) as copyable into the answer, where the
+parity gate then kills the unit deterministically. What stays is the only live half, the
+semantics of the suffix, which no gate can measure and the review checklist owns. The
+system prompt is 65 characters shorter and it goes out with every chunk of every language.
+
+**This time the lesson is a gate, not a note.** `test_prompty_markery.py` builds all ten
+system prompts of the translator family — no API key, 0.2 seconds — and pins two invariants
+that until now lived in comments. First: no prompt may quote a NUMBERED frozen marker,
+because that is precisely what the docs brother measured in 18.12 as copyable by a model
+that has no tokens of its own to preserve, after which the parity gate discards the unit.
+Second: the version number must not reach the model at all — the test reads the real
+`app.wersja` out of the PL pack, pushes it through the actual tokenizer and checks that
+nothing numeric survives outside the markers. All three assertion classes were verified
+negatively, by sabotaging the `_ui` prompt and watching exactly those three fail.
+
+### 🔭 Planned / deferred (English)
+
+- **The gate pins two invariants, not the whole class.** "An instruction about material the
+  model never sees" is wider than markers and version digits: a rule about, say, a YAML key
+  the tokenizer hides would still pass. Covering that would mean pushing a real unit of
+  every material through both halves and diffing, which is a bigger surface than the class
+  has earned so far.
+- **Reading for dead instructions covered two prompts of the six.** The marker invariant is
+  now machine-checked in all ten prompts, but the line-by-line read was done only in `_docs`
+  (clean — no app-version rule at all) and `_ui` (fixed here).
+- **The provider asymmetry stays, because it follows from protocol rather than preference.**
+  The compat branch cannot send Anthropic structured outputs, so the five list-based
+  translators keep ignoring the switch, and keep saying so on startup.
+- The remainder of these notes is in Polish: dense diagnostics for the maintainer.
+
+### TL;DR — co się zmieniło
+
+**Cztery poprawki jednej klasy: tekst, który obiecywał co innego, niż robi kod.** Trzy z nich
+siedziały w Konstytucji, czwarta w prompcie systemowym autotłumacza interfejsu. Żadna nie
+dotyka aplikacji — użytkownik końcowy dostaje w tym wydaniu wyłącznie podbity numer wersji
+w podręcznikach.
+
+**Klasa jest ważniejsza od samych poprawek.** Nota, która mówi „tak się NIE robi",
+z odsyłaczem do prywatnego filaru pamięci, znaczy dla maintainera „unieważnione", a dla
+kontrybutora z samym `git clone` — zakaz w mocy, bo pliku, który go znosi, u niego nie ma.
+Dwie takie noty stały w sekcji o wdrażaniu nowego języka: „dziesiąty język w 15.x+"
+(jesteśmy na 19.x) oraz „`opowiesci/` ręcznie, bez batcha" (nieprawda od 18.17). Reguła,
+która z tego wynika: **jeśli Konstytucja mówi kontrybutorowi „nie", musi powiedzieć to
+sama, bez przypisu do pamięci, której on nigdy nie dostanie.**
+
+**Drugi wątek to niespodzianka, którą agent poznawał z wyjątku.**
+`LLM_PROVIDER=openai_compat` przekierowuje runtime na obcy endpoint, a w rodzinie
+autotłumaczy honoruje go wyłącznie `buduj_wielojezyczne_docs.py` — i właśnie dlatego ten
+jeden brat ŻĄDA interaktywnego potwierdzenia. W sesji nieinteraktywnej nie ma kto
+odpowiedzieć, więc przebieg kończył się komunikatem o EOF, z którego dopiero dało się
+wywnioskować, że konfiguracja wskazywała nie tam, gdzie się zakładało. Konstytucja mówi to
+teraz wprost, razem z odpowiedzią (`-y`).
+
+### Co nowego
+
+**`build_release.py` przechwytuje `EOFError` w kroku 5.** Wzorzec powstał TU, został
+ulepszony w `tlumacz_bramki._potwierdz_endpoint_obcy` (18.25) i nie wrócił — kopia
+ulepszona w jedną stronę jest defektem sama w sobie, bo oba miejsca pytają o zgodę tym
+samym `input()` i oba bywają wołane przez agenta albo CI. Komunikat jest po angielsku
+(kontrakt dev-tooli), wskazuje `-y/--yes` i kończy przebieg przed jakąkolwiek kompilacją.
+
+**Konstytucja, punkt 7: „SINGLE-PROVIDER RUNTIME" → „jeden klucz domyślnie, obcy endpoint
+jako opt-in".** Punkt twierdził dodatkowo, że runtime NIE importuje `openai` — nieprawda od
+18.4, sprostowana raz w notach 18.24, ale nie w regułach: gałąź compat importuje bibliotekę
+leniwie, a PyInstaller analizuje importy z ciała funkcji statycznie, więc `openai` JEST
+w bundlu. Nowy tekst mówi też to, czego agent nie miał skąd wiedzieć: który brat honoruje
+przełącznik, dlaczego pozostałych pięciu nie może (structured outputs Anthropica), że
+potwierdzenie jest kontraktem, a nie awarią, i jak jednym `grep -c` sprawdzić, czy przebieg
+w ogóle wychodził poza Anthropica.
+
+**Konstytucja, kolejność wdrażania nowego języka: kroki z nazwami narzędzi.**
+`podstawy.yaml` (jedyna część paczki BEZ własnego narzędzia — wyprowadzana per język),
+`refresh_languages.py` (rejestracja w `jezyki_docelowe.yaml`; bez niej rodzina odrzuca nowy
+kod ISO), potem `akcenty/` (`_akcenty --nowy-jezyk`, GENERATOR par, nie tłumacz), `szyfry/`
+(`_poliglota`), `rezyser/` (`_tryby`), `opowiesci/` (`_opowiesci` — cała paczka POZA
+`zaczatki.yaml`, pisanym ręcznie per język i ruszanym tylko wtedy, gdy wskaże się go jawnie
+przez `-p`), `gui/ui.yaml` (`_ui`), `gui/dokumentacja/*.yaml` (`_docs`), a wydanie na końcu.
+
+**Reguła 6 promptu `_ui` przepisana, cytat z cyfrą usunięty.** Model nigdy nie widzi numeru
+wersji — widzi `⟦P0⟧ – Wersja Wydawnicza`, bo `{numer_wersji}` wstrzykuje `i18n.t()`
+w runtime'ie, a tokenizer zamraża placeholder. Instrukcja „zachowaj cyfry z kropką i kreskę"
+była więc martwa w każdym przebiegu każdego języka, a cytowana jako przykład wartość
+`"13.1 – Wersja Wydawnicza"` była dodatkowym ryzykiem: przy zerze tokenów w źródle model
+„zachowuje" markery z samej instrukcji (pomiar 18.12 u brata od docsów), a bramka
+parzystości ubija wtedy jednostkę. Żywa zostaje semantyka sufiksu (*software release*, nigdy
+sens drukarski, nigdy tautologia) — tej nie zmierzy żadna bramka, pilnuje jej checklista
+w `przeglad_tlumaczen.py`.
+
+**Nowa bramka `test_prompty_markery.py` — lekcja zamiast noty.** Buduje wszystkie dziesięć
+promptów systemowych rodziny (bez API, 0,2 s) i pilnuje dwóch niezmienników, które dotąd
+żyły w komentarzach: (1) żaden prompt nie cytuje markera Z CYFRĄ — opis wolno podać tylko
+symbolicznie (`⟦P{n}⟧`, `⟦i⟧`), bo cyfrowy egzemplarz model kopiuje do odpowiedzi, gdy nie
+ma czego zachowywać z własnej jednostki; (2) numer wersji nie dochodzi do modelu — test
+bierze REALNĄ wartość `app.wersja` z paczki PL, przepuszcza ją przez tokenizer i sprawdza,
+że poza markerami nie zostaje żadna cyfra. To jest odruch z Konstytucji wykonany wprost:
+najpierw bramka mechaniczna, checklista tylko dla tego, czego zmierzyć nie można.
+
+### Pod maską
+
+**Dług z rejestru zamknięty tym wydaniem.** Commit WIP z 14 września poprawiał docstring
+`rezyser_audio.spec` (`contents_directory='runtime'` to parametr `EXE`, nie `COLLECT` — plik
+przeczył sam sobie dokładnie w tym miejscu, które oznacza jako PUŁAPKĘ PyInstallera 6.x).
+`.spec` jest na liście `SUFIKSY_NIE_DEV`, więc procedura skrócona odmawia go przenieść;
+zmiana czekała na najbliższe pełne wydanie i to jest ono.
+
+**Dowód wykonaniem zamiast „powinno działać".** Ścieżka EOF odpalona realnie
+(`build_release.py --no-cleanup` z zamkniętym stdin): komunikat, wyjście 1, zero
+uruchomionego PyInstallera, `git status` bez śladu. Prompt `_ui` zmierzony przed i po
+(4202 → 4137 znaków), a tokenizacja realnej wartości z paczki PL pokazana wprost:
+`⟦P0⟧ – Wersja Wydawnicza`, mapa `P0 → {numer_wersji}`.
+
+**Nowa bramka zweryfikowana NEGATYWNIE, nie „na zielono".** Do promptu `_ui` wstrzyknięty
+sabotaż (zdanie z `13.1` i cyfrowym markerem), po czym padły dokładnie trzy testy: dwa
+parametryzowane wariantami promptu `_ui` i ten o cyfrach wersji. Plik przywrócony z kopii,
+`git diff --stat` sprawdzony po przywróceniu. Jedna asercja zakąsiła od razu na prawdziwym
+przypadku, jeszcze przy pisaniu: pierwsza wersja testu szukała cyfr w CAŁEJ
+stokenizowanej wartości, a marker `⟦P0⟧` nosi cyfrę własnego indeksu — liczy się to, co
+zostaje POZA markerami.
+
+**Do paczki end-usera nie wchodzi nic poza numerem wersji.** `build_release.py`,
+`buduj_wielojezyczne_ui.py`, `CLAUDE.md` i `rezyser_audio.spec` nie są pakowane ani
+importowane z domknięcia `main.py`; jedyna zmiana w `docs/` to podbita linia tytułowa
+w osiemnastu plikach (manual + tales × 9 języków).
+
+### Co nie weszło
+
+- **Bramka na CAŁĄ klasę „instrukcja o materiale, którego model nie widzi".** Nowy test
+  pilnuje dwóch niezmienników (marker z cyfrą, cyfry numeru wersji); reguła o, powiedzmy,
+  kluczu YAML ukrywanym przez tokenizer przeszłaby. Pełne pokrycie wymagałoby przepychania
+  realnej jednostki KAŻDEGO materiału przez oba końce i porównywania — większa powierzchnia,
+  niż ta klasa zdążyła zasłużyć.
+- **Czytanie pozostałych czterech promptów** (`_tryby`, `_opowiesci`, `_poliglota`,
+  `_akcenty`) linia po linii pod martwe instrukcje. Niezmiennik markera jest w nich
+  sprawdzany maszynowo, ale przeczytane zostały dwa: `_docs` (czysty — nie ma reguły
+  o wersji aplikacji) i `_ui` (naprawiony).
+- **Zniesienie asymetrii providerów.** Pięciu braci nadal ignoruje `LLM_PROVIDER`, bo wymiana
+  list pozycji stoi na structured outputs Anthropica, których gałąź compat nie umie wysłać.
+  To ograniczenie protokołu, nie zaniedbanie — zmiana wymagałaby własnego walidatora
+  kształtu odpowiedzi dla ścieżki compat.
+- **Podniesienie 6b' i 6b4 do FATAL** — kontrakt językowy dev-tooli i bramka zależności
+  nadal tylko ostrzegają. Odłożone z 19.2.1 bez zmiany stanowiska.
+
+### Walidacja
+
+Bramki odpalone ZAKRESOWO (reguła z 19.2.1). Zmiana dotknęła `build_release.py`,
+`buduj_wielojezyczne_ui.py`, `CLAUDE.md`, `rezyser_audio.spec`, `VERSION`, `patch_dev.json`,
+`RELEASE_NOTES.md` oraz nowego `test_prompty_markery.py`:
+
+- `pytest test_*.py` — **195 passed w 11,09 s** (183 przed tym wydaniem + 12 nowych;
+  przedmiot: `patch_dev.json` → `test_patch_dev.py`, `.spec` i installer →
+  `test_sprzatanie_bundla.py`, prompty rodziny → nowy plik);
+- `generuj_dokumentacje.py --waliduj` — osiem bramek zielonych, docs przeliczone PO bumpie
+  VERSION, diff to 18 plików × 2 linie (sam numer w tytule);
+- `audyt_leakow.py --bramka-kontrakt` — czysto; bramka miała przedmiot, bo nowy komunikat
+  w `build_release.py` jest tekstem CLI objętym kontraktem angielskim;
+- `audyt_zaleznosci.py --strict` — 17/17 zgodnych z PyPI w granicach manifestu (odruch przed
+  zamrożeniem);
+- `audyt_leakow.py --bramka-py` — 0 ponad baseline; miała przedmiot, bo bramka skanuje
+  `test_*.py` i świadomie NIE whitelistuje ich jak dev-tooli (lekcja 18.24.1), a to wydanie
+  dodaje nowy plik testowy z polską prozą w docstringach;
+- `audyt_podstaw.py --bramka`, `audyt_ciszy.py --bramka` — **NIE odpalone ręcznie**: zmiana
+  nie tknęła `dictionaries/**` ani żadnego loadera YAML, więc nie miały przedmiotu. Build
+  powtarza obie bezwarunkowo (6b''/6b''').
 
 ---
 

@@ -233,10 +233,20 @@ def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str, *, persona_hint: bool = False) 
         "key prefixes (`sk-`), and Ctrl/Alt/Shift inside keyboard shortcuts.\n"
         "5. **Whitespace** — preserve every `\\n`, double space and indentation. Line "
         "breaks in messages are deliberately tuned to the dialog width.\n"
-        "6. **Application version** — in a value like `\"13.1 – Wersja Wydawnicza\"` "
-        "keep the number (digits + dot) and the dash, but translate the Polish phrase "
-        "'Wersja Wydawnicza' into the target-language equivalent "
-        "(e.g. 'Release Edition' / 'Julkaisuversio'). Here 'wydawnicza' means a "
+        # 19.2.2: reguła prosiła o „zachowaj cyfry i kreskę" i cytowała wartość
+        # `"13.1 – Wersja Wydawnicza"`, której model NIGDY nie widzi. `app.wersja`
+        # to w paczce PL `"{numer_wersji} – Wersja Wydawnicza"` — numer wstrzykuje
+        # `i18n.t()` z pliku `VERSION` w RUNTIME'IE, a tokenizer zamraża sam
+        # placeholder do `⟦P{i}⟧`, więc instrukcja o cyfrach była martwa w każdym
+        # przebiegu każdego języka. Cytatu z cyfrą nie zostawiamy nawet jako
+        # przykładu: przy zerze tokenów w źródle model „zachowuje" markery
+        # z samej instrukcji (lekcja 18.12 u brata od docsów), a bramka
+        # parzystości ubija wtedy jednostkę deterministycznie. ŻYWA zostaje sama
+        # semantyka sufiksu — tej żadna bramka nie zmierzy, pilnuje jej
+        # checklista w `przeglad_tlumaczen.py`.
+        "6. **Release suffix** — in `app.wersja` translate ONLY the Polish phrase "
+        "'Wersja Wydawnicza' (e.g. 'Release Edition' / 'Julkaisuversio'); the "
+        "version number itself arrives as a frozen marker. 'Wydawnicza' means a "
         "SOFTWARE RELEASE — never the printing-house sense of a book edition "
         "(never ru 'Издательская', it 'di Pubblicazione', de 'Verlags-'), and never "
         "a tautology repeating the word for version/edition twice.\n\n"

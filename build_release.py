@@ -1111,7 +1111,22 @@ def main(args: argparse.Namespace | None = None) -> None:
     # „Regenerating documentation…" z kroku 6. Bez -y developer manualny musi
     # potwierdzić y/n/t (tak/nie habit pl).
     if not args.yes:
-        odp = input(f"Build {nazwa_installer}? (y/n): ").strip().lower()
+        try:
+            odp = input(f"Build {nazwa_installer}? (y/n): ").strip().lower()
+        except EOFError:
+            # Sesja nieinteraktywna (agent, CI) to NIE odmowa, tylko brak
+            # kogokolwiek, kto mógłby odpowiedzieć — więc mówimy wprost, czym
+            # się potwierdza, zamiast wywracać się `EOFError` z tracebackiem,
+            # w którym build wygląda na ZEPSUTY, a nie na czekający na zgodę.
+            # Wzorzec powstał TU (krok 5), został ulepszony w rodzinie
+            # autotłumaczy (`tlumacz_bramki._potwierdz_endpoint_obcy`, v18.25)
+            # i wraca stamtąd w 19.2.2: kopia ulepszona tylko w jedną stronę
+            # jest defektem sama w sobie, bo oba miejsca pytają o zgodę tym
+            # samym `input()` i oba bywają wołane przez agenta lub CI.
+            print(f"❌ FATAL: non-interactive session — nobody can confirm the "
+                  f"build of {nazwa_installer}.")
+            print("   Pass -y/--yes to accept the build up front.")
+            sys.exit(1)
         if odp not in ("y", "t"):   # `t` kept as alias — historical tak/nie habit
             print("Build aborted.")
             sys.exit(0)
