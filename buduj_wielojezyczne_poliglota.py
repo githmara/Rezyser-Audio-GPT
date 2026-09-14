@@ -7,9 +7,9 @@ dokumentacji (`_docs.py`), przepisach Reżysera (`_tryby.py`) i przepisach
 Opowieści (`_opowiesci.py`) bierze na siebie `dictionaries/pl/szyfry/*.yaml`
 oraz TRZY narzędzia z `dictionaries/pl/akcenty/` (`oczyszczenie`,
 `oczyszczenie_bez_liczb`, `naprawiacz_tagow`). Właściwe akcenty fonetyczne
-(`akcenty/<jezyk>.yaml`, 99 par) są POZA zakresem — to nie tłumaczenie, a
-wyprowadzenie reguły fonetycznej dla pary języków, i ma dostać własne
-narzędzie (etap 4 roadmapy).
+(`akcenty/<jezyk>.yaml`, 72 pary = 9 paczek × 8 obcych akcentów) są POZA
+zakresem — to nie tłumaczenie, a wyprowadzenie reguły fonetycznej dla pary
+języków, i ma dostać własne narzędzie (etap 4 roadmapy).
 
 Materiał jest schematycznie NAJPROSTSZY w rodzinie (zbiór kluczy identyczny
 w 9/9 paczkach, brak `prompt_systemowy`, 17–61 linii na plik), ale ma cechę,
