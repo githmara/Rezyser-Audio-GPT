@@ -7,8 +7,9 @@ nazwami obok aplikacji — wszystko ląduje w jednym, „onieśmielającym" fold
 bundla.
 
 KLUCZOWE DECYZJE:
-  * ``contents_directory='runtime'`` (COLLECT) — folder PyInstallera z
-    interpreterem i bibliotekami nazywa się ``runtime/`` zamiast domyślnego
+  * ``contents_directory='runtime'`` (parametr ``EXE``, NIE ``COLLECT`` —
+    patrz komentarz przy samym wywołaniu) — folder PyInstallera
+    z interpreterem i bibliotekami nazywa się ``runtime/`` zamiast domyślnego
     ``_internal/``. Dzięki temu (a) zachowuje „systemową/onieśmielającą" naturę
     dawnego ``runtime/python.exe`` (ciekawski user go nie rusza), (b) metadane
     projektów (``runtime/skrypty/*.mode``, ``.brainstorm.json`` itd.) lądują
