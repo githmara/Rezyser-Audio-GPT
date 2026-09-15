@@ -469,7 +469,6 @@ rezyser:
   # Panel opcji Burzy Mózgów (v15.2)
   pnl_opcji_burzy_name:        "Panel opcji Burzy Mózgów"
   lbl_opcji_burzy:             "🌪️ Opcje Burzy Mózgów — kliknij, by wstawić do Instrukcji:"
-  txt_streszczenie_burzy_name: "Streszczenie wygenerowane przez Burzę Mózgów — tylko do odczytu"
   btn_opcja_burzy_format:      "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-

@@ -1196,7 +1196,7 @@ def buduj_pelny_prompt_systemowy(
            gdy puste, z :data:`KLAUZULA_ODRZUCENIA_DOMYSLNA`.
 
     Dzięki temu eksperymentalny sufiks w YAML-u może wpływać na zachowanie
-    modelu (np. wymusić wygenerowanie ``<STRESZCZENIE>``) nie kolidując
+    modelu (np. doklejając kontekst ``"alarm"``/``"startowy"``) nie kolidując
     z infrastrukturalnym wymuszeniem tagu ``[ODRZUCENIE_AI]``.
 
     Args:

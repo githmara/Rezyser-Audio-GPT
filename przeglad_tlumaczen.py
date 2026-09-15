@@ -125,6 +125,39 @@ def naglowek_roboczy(
 
 # Wspólny rdzeń checklisty (reguły niezależne od typu pliku).
 _CHECKLIST_WSPOLNA = """\
+## What counts as a Polish leak — and what does not
+
+Use this definition before you report one (it is also the answer to give
+a chatbot you ask for help with a language you do not speak). A leak is text
+that belongs to the POLISH SOURCE and has no business in the target pack. It
+has exactly four shapes:
+
+1. EXPLICIT POLISH TERM — left as-is, kept in a Polish inflected form, or bent
+   into the target language's morphology: "Reżysera", "Managerze Reguł",
+   de "im Reżyser-Modus". A module name is the common case (see below).
+2. TRANSLITERATED TERM — the Polish word rewritten in the target script.
+   Defensive and unlikely, but cheap to check: a Russian pack spelling the
+   chapter heading as a transliteration of "Rozdział" instead of using "Глава".
+3. WHOLE LINE IN POLISH — a sentence, list item or title the model never
+   translated. The usual giveaway is a Polish diacritic (ą ę ł ń ś ć ź ż), and
+   that is exactly what the automatic gate scans for — which is why leaks
+   WITHOUT those characters are the ones that need human eyes.
+4. NEOLOGISM ON A POLISH ROOT — a word that does not exist in the target
+   language at all, invented by transliterating or bending the Polish one.
+   Measured case, still listed in `audyt_leakow`: the Icelandic manual said
+   „Ważar" (Polish ż) where Icelandic has „Mikilvæg".
+
+NOT a leak: an INTERNATIONAL word that genuinely exists in the target language,
+even when it is spelled exactly like the Polish one. Icelandic and German both
+have "Prolog", Russian has "Пролог", Finnish has "Prologi" — so
+`naglowek_prolog: "Prolog"` in the Icelandic pack is correct, not a calque.
+A term is a leak because it is FOREIGN TO THE TARGET, never because it looks
+Polish. Check a dictionary of the target language first; and if the word turns
+out to be fine while something around it is off (a stale keyword list, a missing
+entry), report THAT instead — measured 2026-09-15: the Icelandic pack's real
+defect was the converter's keyword list, which did not contain the heading word
+the engine actually inserts, while the heading word itself was fine.
+
 ## Keep these 1:1 — do NOT translate or alter
 
 - `{curly_placeholders}` — copy verbatim, including the braces. Same multiset

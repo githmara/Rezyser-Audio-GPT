@@ -338,7 +338,6 @@ rezyser:
   # Panneau des options de Brainstorming (v15.2)
   pnl_opcji_burzy_name: "Panneau des options de Brainstorming"
   lbl_opcji_burzy: "🌪️ Options du Brainstorming — clique pour insérer dans Instructions :"
-  txt_streszczenie_burzy_name: "Résumé généré par le Brainstorming — lecture seule"
   btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-

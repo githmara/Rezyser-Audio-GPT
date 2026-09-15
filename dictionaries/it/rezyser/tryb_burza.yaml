@@ -7,9 +7,6 @@
 #  i pulsanti 1/2/3. Le righe `[Regista: ...]` e `[DIRETTIVA]: ...` sono
 #  aggiunte IN PYTHON da `doklejka_celu_sceny` qui sotto — l'LLM non le scrive,
 #  quindi non può eludere il divieto di inventare proprie indicazioni di regia.
-#  I suffissi alarm/streszczenie richiedono la chiave JSON opzionale
-#  `streszczenie` (in sostituzione delle precedenti etichette
-#  `<STRESZCZENIE>...</STRESZCZENIE>`).
 #  v15.5: il riassunto non cita più gli ultimi paragrafi — Python ricostruisce
 #  il finale narrativo durante la riconciliazione con il disco.
 # -----------------------------------------------------------------------------
@@ -95,8 +92,6 @@ prompt_systemowy: |
 # errore di validazione dello schema invece di un risultato. Il riassunto è ora
 # uno strumento di postproduzione a sé: `postprod_streszczenie.yaml` (ruolo
 # `pamiec_dlugotrwala`), che parte anche da solo alla soglia d'allarme.
-# Il motore SA ancora leggere una chiave `streszczenie` — per tornare al
-# comportamento precedente basta rimettere qui il suffisso.
 
 # --- Promemoria aggiunto alle istruzioni dell'utente (role=user) ---
 przypomnienie_uzytkownika: |

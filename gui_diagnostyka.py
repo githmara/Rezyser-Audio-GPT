@@ -29,6 +29,7 @@ import os
 import wx
 
 import core_poliglota as cp
+import core_rezyser as cr
 import i18n
 import opowiesci_ai as oai
 import przepisy_rezysera as pr
@@ -77,6 +78,12 @@ def przeskanuj_reguly(jezyk: str | None = None) -> tuple[pr.PominietyPlik, ...]:
     pr.wyczysc_cache()
     cp.wyczysc_cache()
     oai._zaladuj_przepis.cache_clear()
+    # v19.3: wzorce nagłówków struktury czytane z `rezyser.naglowek_*` KAŻDEJ
+    # paczki. Cache i18n zostaje nietknięty (naprawa `ui.yaml` wymaga restartu
+    # — patrz `gui_manager_regul._on_odswiez`), ale NOWA paczka pojawia się
+    # w `dostepne_jezyki_ui()` od razu, a wtedy parser struktury musi poznać
+    # jej słowa bez restartu.
+    cr.wyczysc_cache_naglowkow()
     # Skan to świeży start diagnostyki: po naprawie (albo po zepsuciu pliku na
     # nowo TYM SAMYM sposobem) panele muszą mieć prawo pokazać raport ponownie.
     _POKAZANE.clear()

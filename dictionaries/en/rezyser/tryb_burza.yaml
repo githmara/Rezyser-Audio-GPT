@@ -7,9 +7,7 @@
 #  buttons 1/2/3. The `[Director: ...]` and `[DIRECTIVE]: ...` lines are
 #  appended IN PYTHON from `doklejka_celu_sceny` below — the LLM does
 #  not write them, so it cannot hijack the ban on inventing its own
-#  director hints. The alarm/summary suffixes require the optional JSON
-#  key `streszczenie` (replacing the earlier `<STRESZCZENIE>...</STRESZCZENIE>`
-#  tags).
+#  director hints.
 #
 #  v15.5: summary no longer quotes the last paragraphs — Python reconstructs
 #  the narrative tail on disk reconciliation.
@@ -95,8 +93,12 @@ prompt_systemowy: |
 # the model's improvisation failed) a schema validation error instead of a result.
 # The summary is now a separate postproduction tool: `postprod_streszczenie.yaml`
 # (role `pamiec_dlugotrwala`), which also fires by itself at the alarm threshold.
-# The engine can STILL read a `streszczenie` key from a Brainstorm response — to
-# restore the old behaviour a linguist only needs to add the suffix back here.
+# v19.3: the `streszczenie` key was REMOVED from the response schema — adding
+# the suffix back no longer restores the old behaviour (the engine has nowhere
+# to put that text, and an extra key is a structure error). Reason: an optional
+# field the prompt says nothing about gets filled with a meaning the model
+# invents — measured: a preview of FUTURE events where Long-Term Memory is
+# supposed to summarise the past.
 
 # --- Reminder appended to user instructions (role=user) ---
 przypomnienie_uzytkownika: |

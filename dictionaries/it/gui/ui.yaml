@@ -338,7 +338,6 @@ rezyser:
   # Pannello opzioni Brainstorm (v15.2)
   pnl_opcji_burzy_name: "Pannello opzioni Brainstorm"
   lbl_opcji_burzy: "🌪️ Opzioni del Brainstorm — clicca per inserire nelle Istruzioni:"
-  txt_streszczenie_burzy_name: "Riassunto generato dal Brainstorm — solo lettura"
   btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-

@@ -15,14 +15,12 @@ Zakres odpowiedzialności:
     * Budowa payloadu Messages API (prompt systemowy w parametrze ``system=``
       + sufiks kontekstowy + klauzula odrzucenia + kontekst pamięci złożony
       w wiadomość ``user`` — Anthropic wymaga pierwszej wiadomości ``user``).
-    * Wybór sufiksu kontekstowego (``startowy``/``kontynuacja``/
-      ``optymalizacja``/``alarm``/``streszczenie``) na podstawie stanu
-      pamięci i słów kluczowych w instrukcji użytkownika.
+    * Wybór sufiksu kontekstowego (``startowy``/``kontynuacja``/``alarm``)
+      na podstawie stanu pamięci.
     * Wywołanie Claude (Messages API) z timeoutem (domyślnie 120 s dla
       generowania, 60 s dla tytułów) — przez ``klient.with_options(timeout=...)``.
     * Detekcja odrzucenia modelu przez uniwersalny tag
       :data:`przepisy_rezysera.TAG_ODRZUCENIA_AI`.
-    * Ekstrakcja ``<STRESZCZENIE>...</STRESZCZENIE>`` w trybie Burzy.
     * Post-processing fonetyczny (:func:`core_rezyser.zastosuj_akcenty_uniwersalne`)
       dla trybów z ``stosuj_akcenty_fonetyczne: true``.
     * Postprodukcja: iteracja po rozdziałach (``zakres: per_rozdzial``,
@@ -43,9 +41,6 @@ Publiczne API:
     if wynik.odrzucone:
         # AI odmówiło – nie zapisujemy do pliku historii
         pokaz_blad("AI odrzuciło prompt.")
-    elif wynik.nowe_streszczenie:
-        # Burza Mózgów wygenerowała streszczenie – aktualizujemy Pamięć Długotrwałą
-        proj.summary_text = wynik.nowe_streszczenie
 
     # Nadawanie tytułów rozdziałom:
     wynik_tyt = rai.nadaj_tytuly_rozdzialom(
@@ -114,9 +109,8 @@ class WynikGeneracji:
 
     Attributes:
         tekst_odpowiedzi:  Surowy tekst z modelu PO post-processingu:
-                           ekstrakcja ``<STRESZCZENIE>`` (w Burzy trafia
-                           do ``nowe_streszczenie``), aplikacja akcentów
-                           fonetycznych (w Skrypcie). Gdy ``odrzucone``
+                           aplikacja akcentów fonetycznych (w Skrypcie).
+                           Gdy ``odrzucone``
                            jest ``True`` — zawiera surową odpowiedź
                            modelu (głównie sam tag, ewentualnie z
                            fragmentami, jeśli model go nie posłuchał).
@@ -124,10 +118,6 @@ class WynikGeneracji:
                            :data:`przepisy_rezysera.TAG_ODRZUCENIA_AI`.
                            W tym wypadku GUI NIE powinno zapisywać tekstu
                            do pliku historii.
-        nowe_streszczenie: Jeśli w trybie Burza Mózgów AI zwróciło
-                           ``<STRESZCZENIE>...</STRESZCZENIE>``, tutaj
-                           jest zawartość wewnątrz tagu (bez samych tagów).
-                           W pozostałych trybach zawsze ``""``.
         uzyty_sufiks:      Diagnostyczne – nazwa sufiksu, który został
                            doklejony do prompt_systemowy (``"alarm"``,
                            ``"startowy"`` itd.), lub ``None`` gdy żaden.
@@ -141,7 +131,6 @@ class WynikGeneracji:
 
     tekst_odpowiedzi: str
     odrzucone: bool = False
-    nowe_streszczenie: str = ""
     uzyty_sufiks: str | None = None
     ostrzezenie: str = ""
 
@@ -216,13 +205,20 @@ SCHEMA_BURZA: dict[str, Any] = {
     "type": "object",
     "required": ["opcje"],
     "additionalProperties": False,
+    # v19.3: klucz `streszczenie` USUNIĘTY. Był opcjonalnym polem schematu,
+    # o którym prompt Burzy nie mówi ani słowa (sufiksy `streszczenie`/`alarm`
+    # zniknęły w v18.13, a streszczenie robi postprodukcja `postprod_streszczenie`).
+    # Do refaktoru na structured outputs (v18.23) był nieszkodliwym martwym
+    # kodem — model po prostu go nie wypełniał. Po refaktorze gałąź tury
+    # (`core_llm.schemat_z_dyskryminatorem`) mówi modelowi „fill in ALL fields
+    # of this branch", więc pole BEZ instrukcji promptowej jest wypełniane
+    # znaczeniem wymyślonym przez model. Zmierzone na projekcie użytkownika
+    # (`helsinki_story.brainstorm.json`, 9/2026): model wpisywał tam wspólne
+    # TŁO TRZECH OPCJI, czyli zapowiedź przyszłych zdarzeń — a pole GUI
+    # zapraszało do skopiowania tego do Pamięci Długotrwałej, której zadaniem
+    # jest streszczać PRZESZŁOŚĆ. Reguła ogólna: pole opcjonalne w schemacie
+    # structured outputs nie jest martwym kodem, dopóki nie zniknie ze schematu.
     "properties": {
-        # Streszczenie pojawia się TYLKO gdy sufiks "streszczenie"/"alarm" był
-        # aktywny. W normalnej turze klucz jest pusty stringiem albo nieobecny
-        # — GUI traktuje brak/"" tak samo. Sentinel pozwala odróżnić „LLM celowo
-        # nie wygenerował" (pusty string) od „pamięć była pełna i streszczenie
-        # jest" (niepusty string).
-        "streszczenie": {"type": "string"},
         "opcje": {
             "type": "array",
             "minItems": 1,   # liberalnie — yaml mówi 3, ale halucynacja 2 nie powinna blokować GUI
@@ -283,17 +279,16 @@ class WynikBurzy:
         opcje:             Lista 1-5 :class:`OpcjaBurzy` (yaml wymaga 3,
                            ale schemę zostawiamy liberalną — halucynacja
                            2 nie powinna blokować GUI).
-        streszczenie:      Niepusty string gdy sufiks streszczenie/alarm
-                           był aktywny; pusty gdy LLM celowo nie generował.
         odrzucone:         True jeśli LLM zwrócił sam tag ``[ODRZUCENIE_AI]``
                            zamiast JSON-a (klauzula odmowy zadziałała).
         uzyty_sufiks:      Diagnostyczne — nazwa sufiksu doklejonego do
-                           prompt_systemowy (``"alarm"``/``"streszczenie"``/
-                           ``"optymalizacja"``/``None``).
+                           prompt_systemowy (``"optymalizacja"``/``None``).
         surowy_json:       Sucha odpowiedź modelu (do logu / debugowania).
+
+    v19.3: pole ``streszczenie`` usunięte razem z kluczem schematu
+    (patrz komentarz przy :data:`SCHEMA_BURZA`).
     """
     opcje:        list[OpcjaBurzy] = field(default_factory=list)
-    streszczenie: str = ""
     odrzucone:    bool = False
     uzyty_sufiks: str | None = None
     surowy_json:  str = ""
@@ -306,7 +301,6 @@ class WynikBurzy:
 def wybierz_sufiks(
     przepis: pr.PrzepisRezysera,
     snapshot: cr.SnapshotProjektu,
-    user_text: str,
 ) -> str | None:
     """Zwraca nazwę sufiksu do doklejenia, lub ``None`` gdy żaden.
 
@@ -314,11 +308,8 @@ def wybierz_sufiks(
     ale teraz opartej o flagi z YAML-a):
 
         * **Tryb planowania** (``zapis_do_pliku: false``, np. Burza Mózgów):
-            - użytkownik wpisał słowo ze ``slowa_wyzwalajace.streszczenie``
-              → doklejamy sufiks ``"streszczenie"`` (wymusza wygenerowanie
-              ``<STRESZCZENIE>...</STRESZCZENIE>``);
             - pamięć ``>= PROG_OSTRZEZENIE`` → doklejamy ``"alarm"``
-              (sam z siebie wymusza streszczenie, zanim zabraknie tokenów);
+              (kontekst „pamięć się kończy" dla przepisu, który go definiuje);
             - w przeciwnym razie (pamięć jest pojemna) → ``None``
               (brak sufiksu; dawny „optymalizacja" zniesiony — był szumem,
               instruował AI o czymś, czego i tak domyślnie nie robi).
@@ -334,15 +325,17 @@ def wybierz_sufiks(
     – lingwista może w YAML-u usunąć dany sufiks, co skutecznie wyłączy
     odpowiednie zachowanie silnika (np. wyłączyć alarm dla Burzy = zawsze
     bez sufiksu).
-    """
-    slowa_s = przepis.slowa_wyzwalajace.get("streszczenie", [])
-    user_lower = (user_text or "").lower()
-    zada_streszczenia = any(slowo in user_lower for slowo in slowa_s)
 
+    v19.3: gałąź ``"streszczenie"`` (sufiks po słowie wyzwalającym w trybie
+    planowania) USUNIĘTA. Jej jedynym celem było wymuszenie tagu
+    ``<STRESZCZENIE>``, którego silnik już nie odczytuje — zostałby prompt
+    każący modelowi napisać coś, czego nikt nie odbiera, a w Burzy dodatkowo
+    kolidujący ze schematem JSON. ``slowa_wyzwalajace.streszczenie`` żyje
+    dalej i ma innego konsumenta: w trybach ZAPISU GUI odrzuca takie
+    wysłanie, żeby streszczenie nie nadpisało historii.
+    """
     # --- Tryb planowania (Burza) ---
     if not przepis.zapis_do_pliku:
-        if zada_streszczenia and "streszczenie" in przepis.sufiksy:
-            return "streszczenie"
         # v15.1: pamięć liczymy w tokenach przez `core_tokeny` (był len-w-znakach).
         tokeny  = cr.policz_tokeny_payloadu_snapshot(snapshot)
         udzial  = tokeny / cr.OKNO_KONTEKSTU_MAX
@@ -449,7 +442,7 @@ def buduj_payload(
         Krotka ``(system_prompt, messages, segmenty, nazwa_sufiksu)``. Czwarta
         wartość jest diagnostyczna i trafia do :class:`WynikGeneracji.uzyty_sufiks`.
     """
-    sufiks_nazwa = wybierz_sufiks(przepis, snapshot, user_text)
+    sufiks_nazwa = wybierz_sufiks(przepis, snapshot)
 
     system_prompt = pr.buduj_pelny_prompt_systemowy(
         przepis,
@@ -527,28 +520,16 @@ def zloz_wejscie_rekoncyliacji(
 
 
 # =============================================================================
-# Ekstrakcja <STRESZCZENIE> (tylko Burza Mózgów)
+# v19.3: `wyciagnij_streszczenie` + `_RE_STRESZCZENIE` USUNIĘTE
 # =============================================================================
-
-_RE_STRESZCZENIE = re.compile(
-    r"<STRESZCZENIE>(.*?)</STRESZCZENIE>",
-    re.DOTALL | re.IGNORECASE,
-)
-
-
-def wyciagnij_streszczenie(tekst: str) -> tuple[str, str]:
-    """Usuwa ``<STRESZCZENIE>...</STRESZCZENIE>`` z tekstu i zwraca oba.
-
-    Returns:
-        Krotka ``(tekst_bez_streszczenia, sama_tresc_streszczenia)``.
-        Jeśli tagu nie ma – zwraca ``(tekst, "")``.
-    """
-    m = _RE_STRESZCZENIE.search(tekst)
-    if not m:
-        return tekst, ""
-    streszczenie = m.group(1).strip()
-    tekst_bez = _RE_STRESZCZENIE.sub("", tekst).strip()
-    return tekst_bez, streszczenie
+# Druga (po kluczu JSON) droga, którą model mógł napisać do Pamięci
+# Długotrwałej: tag ``<STRESZCZENIE>…</STRESZCZENIE>`` wycinany z odpowiedzi
+# KAŻDEGO przepisu z `zapis_do_pliku: false`, po czym GUI nadpisywało
+# `summary_text` bez pytania. Od v18.13 nic tego tagu nie zamawia (sufiksy
+# zniesione), a streszczenie ma jedno źródło: postprodukcja
+# `postprod_streszczenie.yaml` (rola `pamiec_dlugotrwala`), która pisze do
+# pliku pamięci świadomym ruchem reżysera albo przy progu alarmowym.
+# Kanał „model pisze do Pamięci Długotrwałej mimochodem" jest zamknięty.
 
 
 # =============================================================================
@@ -715,13 +696,11 @@ def generuj_burze(
             )
             for o in dane["opcje"]
         ]
-        streszczenie = (dane.get("streszczenie") or "").strip()
-
         # v17.11.1 BRAMKA JĘZYKOWA — sklejka WSZYSTKICH wartości narracyjnych
-        # (tytuł + opis + cel sceny + streszczenie) daje Lingui dość tekstu mimo
-        # że pojedyncza opcja bywa krótka. Pewny rozjazd → jeden dodatkowy strzał.
+        # (tytuł + opis + cel sceny) daje Lingui dość tekstu mimo że pojedyncza
+        # opcja bywa krótka. Pewny rozjazd → jeden dodatkowy strzał.
         wartosci = " ".join(
-            [o.tytul + " " + o.opis + " " + o.cel_sceny for o in opcje] + [streszczenie]
+            o.tytul + " " + o.opis + " " + o.cel_sceny for o in opcje
         )
         wykryty = _wykryty_inny_jezyk(wartosci, przepis.kod_jezyka)
         if wykryty and not jezyk_skorygowano:
@@ -738,7 +717,6 @@ def generuj_burze(
 
         return WynikBurzy(
             opcje=opcje,
-            streszczenie=streszczenie,
             odrzucone=False,
             uzyty_sufiks=sufiks_nazwa,
             surowy_json=surowy_text,
@@ -1146,8 +1124,8 @@ def generuj_fragment(
                     audiobookowych można podnieść.
 
     Returns:
-        :class:`WynikGeneracji` – GUI sprawdza ``.odrzucone`` i
-        ``.nowe_streszczenie`` decydując, co zrobić z odpowiedzią.
+        :class:`WynikGeneracji` – GUI sprawdza ``.odrzucone`` decydując,
+        co zrobić z odpowiedzią.
 
     Raises:
         Wyjątki Anthropic (``RateLimitError``, ``APITimeoutError``,
@@ -1176,15 +1154,7 @@ def generuj_fragment(
                 uzyty_sufiks=sufiks_nazwa,
             )
 
-        # 2) Ekstrakcja <STRESZCZENIE> — tylko w trybach planowania (Burza).
-        # Tryby zapisu nie powinny nigdy zwracać tego tagu, bo klauzula
-        # w prompt_systemowy tego nie wymusza; ale jeśli model je doda, to
-        # zostają w tekście. To mniej istotne niż brak streszczenia w Burzy.
-        nowe_streszczenie = ""
-        if not przepis.zapis_do_pliku:
-            tekst, nowe_streszczenie = wyciagnij_streszczenie(tekst)
-
-        # 2b) BRAMKA JĘZYKOWA — na narracji PO ekstrakcji streszczenia, PRZED
+        # 2) BRAMKA JĘZYKOWA — na narracji PRZED
         # akcentami (akcenty psują ortografię → myliłyby Linguę). Pewny rozjazd
         # → jeden dodatkowy strzał z instrukcją tłumaczenia; po nim przepuszczamy
         # z dev-logiem (nie blokujemy reżysera w kółko — D2).
@@ -1225,7 +1195,6 @@ def generuj_fragment(
         return WynikGeneracji(
             tekst_odpowiedzi=tekst,
             odrzucone=False,
-            nowe_streszczenie=nowe_streszczenie,
             uzyty_sufiks=sufiks_nazwa,
             ostrzezenie=ostrzezenie,
         )

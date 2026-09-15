@@ -7,9 +7,7 @@
 #  jossa on 3 vaihtoehtoa (kukin: tytul/opis/cel_sceny). GUI rakentaa
 #  painikkeet 1/2/3. Rivit `[Ohjaaja: ...]` ja `[DIREKTIIVI]: ...` liitetään
 #  PYTHONISSA `doklejka_celu_sceny`-kentästä alla — LLM ei kirjoita niitä,
-#  joten se ei voi kaapata ohjaajavihjeen kieltoa. Hälytys-/yhteenvetosuffiksit
-#  vaativat valinnaisen JSON-avaimen `streszczenie` (korvaa aiemmat
-#  `<STRESZCZENIE>...</STRESZCZENIE>`-tunnisteet).
+#  joten se ei voi kaapata ohjaajavihjeen kieltoa.
 #
 #  v15.5: tiivistelmä ei enää lainaa viimeisiä kappaleita — Python rakentaa
 #  kerronnan lopun levyltä täsmäytyksessä.
@@ -95,8 +93,6 @@ prompt_systemowy: |
 # improvisoinnin epäonnistuessa) skeeman validointivirheen tuloksen sijaan.
 # Yhteenveto on nyt erillinen jälkituotantotyökalu: `postprod_streszczenie.yaml`
 # (rooli `pamiec_dlugotrwala`), joka käynnistyy myös itsestään hälytysrajalla.
-# Moottori OSAA yhä lukea avaimen `streszczenie` — vanhan toiminnan palauttamiseksi
-# riittää lisätä liite tähän takaisin.
 
 # --- Muistutus, joka liitetään käyttäjän ohjeisiin (role=user) ---
 przypomnienie_uzytkownika: |

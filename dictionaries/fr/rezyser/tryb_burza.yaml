@@ -8,9 +8,7 @@
 #  les boutons 1/2/3. Les lignes `[Réalisateur : ...]` et `[DIRECTIVE] : ...`
 #  sont ajoutées EN PYTHON depuis `doklejka_celu_sceny` ci-dessous — le LLM
 #  ne les écrit pas, il ne peut donc pas détourner l'interdiction d'inventer
-#  ses propres indications de mise en scène. Les suffixes alarm/streszczenie
-#  exigent la clé JSON facultative `streszczenie` (remplaçant les anciennes
-#  balises `<STRESZCZENIE>...</STRESZCZENIE>`).
+#  ses propres indications de mise en scène.
 #
 #  v15.5 : le résumé ne cite plus les derniers paragraphes — Python reconstruit
 #  la fin narrative lors de la réconciliation avec le disque.
@@ -98,8 +96,6 @@ prompt_systemowy: |
 # échouait) une erreur de validation du schéma au lieu d'un résultat. Le résumé
 # est désormais un outil de postproduction distinct : `postprod_streszczenie.yaml`
 # (rôle `pamiec_dlugotrwala`), qui se déclenche aussi seul au seuil d'alarme.
-# Le moteur SAIT toujours lire une clé `streszczenie` — pour revenir à l'ancien
-# comportement, il suffit de remettre le suffixe ici.
 
 # --- Rappel ajouté aux instructions utilisateur (role=user) ---
 przypomnienie_uzytkownika: |

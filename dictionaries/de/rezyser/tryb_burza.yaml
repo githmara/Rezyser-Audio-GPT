@@ -8,9 +8,7 @@
 #  Schaltflächen 1/2/3. Die Zeilen `[Regisseur: ...]` und `[DIREKTIVE]: ...`
 #  werden IN PYTHON aus `doklejka_celu_sceny` unten angehängt — das LLM
 #  schreibt sie nicht und kann daher das Verbot, eigene Regieanweisungen
-#  zu erfinden, nicht umgehen. Die alarm-/Zusammenfassungs-Suffixe verlangen
-#  den optionalen JSON-Schlüssel `streszczenie` (ersetzt frühere
-#  `<STRESZCZENIE>...</STRESZCZENIE>`-Tags).
+#  zu erfinden, nicht umgehen.
 #  v15.5: Zusammenfassung zitiert die letzten Absätze nicht mehr — Python
 #  rekonstruiert das Erzähl-Ende bei der Datenträger-Abgleichung.
 # -----------------------------------------------------------------------------
@@ -96,8 +94,6 @@ prompt_systemowy: |
 # einen Schema-Validierungsfehler statt eines Ergebnisses. Die Zusammenfassung ist
 # jetzt ein eigenes Nachbearbeitungswerkzeug: `postprod_streszczenie.yaml`
 # (Rolle `pamiec_dlugotrwala`), das auch von selbst bei der Alarmschwelle startet.
-# Die Engine KANN einen Schlüssel `streszczenie` weiterhin lesen — für das alte
-# Verhalten genügt es, das Suffix hier wieder einzutragen.
 
 # --- Erinnerung, die an die Nutzeranweisungen (role=user) angehängt wird ---
 przypomnienie_uzytkownika: |

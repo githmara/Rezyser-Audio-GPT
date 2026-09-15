@@ -338,7 +338,6 @@ rezyser:
   # Spjald hugstormunarvalkosta (v15.2)
   pnl_opcji_burzy_name: "Spjald hugstormunarvalkosta"
   lbl_opcji_burzy: "🌪️ Hugstormunarvalkostir — smelltu til að setja inn í Leiðbeiningar:"
-  txt_streszczenie_burzy_name: "Samantekt mynduð af Hugstormun — aðeins til lesturs"
   btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
@@ -910,7 +909,7 @@ konwerter:
   # (gui_konwerter.py). Unia ze WSZYSTKICH paczek — dopisanie 10. języka =
   # nowy folder + te listy, bez edycji regexów w Pythonie. Dopasowanie
   # prefiksowe, case-insensitive. rozdzialow → H1; sceny → pogrubienie bez TOC.
-  naglowki_rozdzialow: ["Kafli", "Formáli", "Eftirorð", "Þáttur"]
+  naglowki_rozdzialow: ["Kafli", "Prolog", "Formáli", "Epilog", "Eftirorð", "Þáttur"]
   naglowki_scen: ["Atriði"]
   # Dialog wyboru pliku
   file_dlg_title: "Veldu upprunaskrá"

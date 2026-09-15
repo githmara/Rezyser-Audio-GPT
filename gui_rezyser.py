@@ -945,24 +945,21 @@ class RezyserPanel(wx.Panel):
         f.MakeBold()
         self._lbl_opcji_burzy.SetFont(f)
 
-        # Label streszczenia (widoczny tylko gdy LLM wygenerował streszczenie).
-        # Multilinia + read-only — gracz może skopiować treść do Pamięci
-        # Długotrwałej, ale nie edytuje.
-        self._txt_opcji_burzy_streszczenie = wx.TextCtrl(
-            self._pnl_opcji_burzy,
-            style=wx.TE_MULTILINE | wx.TE_READONLY,
-            name=t("rezyser.txt_streszczenie_burzy_name"),
-        )
-        self._txt_opcji_burzy_streszczenie.SetMinSize((-1, 80))
-        self._txt_opcji_burzy_streszczenie.Hide()
+        # v19.3: read-only pole streszczenia USUNIĘTE razem z kluczem JSON
+        # `streszczenie` (uzasadnienie → `rezyser_ai.SCHEMA_BURZA`). Miało dwa
+        # niezależne defekty: podsuwało do Pamięci Długotrwałej treść, którą
+        # model wypełniał zapowiedzią PRZYSZŁYCH zdarzeń, i nie miało własnego
+        # `wx.StaticText`, więc NVDA czytała nad nim nagłówek całego panelu
+        # („kliknij, by wstawić do Instrukcji") — nad polem, które nie jest
+        # klikalne i nic nie wstawia. Nowa kontrolka w tym panelu musi dostać
+        # własną etykietę; `name=` jej nie zastępuje.
 
         # Kontener przycisków — populowany dynamicznie przez `_przeladuj_opcje_burzy`.
         self._sizer_przyciskow_burzy = wx.BoxSizer(wx.VERTICAL)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self._lbl_opcji_burzy,                flag=wx.ALL, border=BORDER)
-        sizer.Add(self._txt_opcji_burzy_streszczenie,   flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
-        sizer.Add(self._sizer_przyciskow_burzy,         flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
+        sizer.Add(self._lbl_opcji_burzy,        flag=wx.ALL, border=BORDER)
+        sizer.Add(self._sizer_przyciskow_burzy, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
         self._pnl_opcji_burzy.SetSizer(sizer)
 
         # Panel jest ukryty domyślnie — pokazuje się dopiero po sukcesie Burzy.
@@ -971,8 +968,7 @@ class RezyserPanel(wx.Panel):
 
     def _przeladuj_opcje_burzy(
         self,
-        opcje:        list[dict[str, str]],
-        streszczenie: str,
+        opcje: list[dict[str, str]],
     ) -> None:
         """Rebuilduje przyciski w panelu opcji Burzy z list[dict].
 
@@ -983,18 +979,9 @@ class RezyserPanel(wx.Panel):
            late-binding gotcha).
         3. `Layout()` panelu i okna nadrzędnego (sizery zewnętrzne też
            muszą się przeliczyć po zmianie zawartości).
-        4. Pokaż / ukryj label streszczenia w zależności od ``streszczenie``.
-        5. Pokaż cały panel (`_pnl_opcji_burzy`) — był ukryty.
+        4. Pokaż cały panel (`_pnl_opcji_burzy`) — był ukryty.
         """
         self._sizer_przyciskow_burzy.Clear(delete_windows=True)
-
-        # Streszczenie — pokazujemy tylko gdy LLM celowo je wygenerował
-        # (sufiks alarm/streszczenie był aktywny). Pusty string → ukrywamy.
-        if streszczenie:
-            self._txt_opcji_burzy_streszczenie.SetValue(streszczenie)
-            self._txt_opcji_burzy_streszczenie.Show()
-        else:
-            self._txt_opcji_burzy_streszczenie.Hide()
 
         # Doklejkę pobieramy z przepisu BURZY, nie z aktualnie zaznaczonego
         # trybu w RadioBox-ie — opcje Burzy są zawsze owocem Burzy, a doklejka
@@ -1032,8 +1019,6 @@ class RezyserPanel(wx.Panel):
     def _ukryj_panel_opcji_burzy(self) -> None:
         """Ukrywa panel opcji Burzy i czyści przyciski (po wysyłce produkcyjnej)."""
         self._sizer_przyciskow_burzy.Clear(delete_windows=True)
-        self._txt_opcji_burzy_streszczenie.SetValue("")
-        self._txt_opcji_burzy_streszczenie.Hide()
         self._pnl_opcji_burzy.Hide()
         self.Layout()
 
@@ -1764,10 +1749,7 @@ class RezyserPanel(wx.Panel):
         except Exception:
             brainstorm = None
         if brainstorm is not None:
-            self._przeladuj_opcje_burzy(
-                brainstorm["opcje"],
-                brainstorm.get("streszczenie", ""),
-            )
+            self._przeladuj_opcje_burzy(brainstorm["opcje"])
         else:
             # Bezpieczeństwo: gdyby panel był pokazany ze starszych
             # operacji (np. cykl Burza → wczytaj inny projekt bez brainstorm),
@@ -2475,11 +2457,6 @@ class RezyserPanel(wx.Panel):
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_odrzucenie"))
                 return
 
-            if wynik_b.streszczenie:
-                wx.CallAfter(
-                    self._on_wyslij_zapisz_streszczenie, wynik_b.streszczenie,
-                )
-
             wx.CallAfter(self._on_wyslij_done_burza_json, wynik_b)
             return
 
@@ -2543,11 +2520,6 @@ class RezyserPanel(wx.Panel):
             )
             return
 
-        if wynik.nowe_streszczenie:
-            wx.CallAfter(
-                self._on_wyslij_zapisz_streszczenie, wynik.nowe_streszczenie,
-            )
-
         if tryb_zapisu:
             # Bezpiecznik: tryb tekstowy (`format_wyjscia: tekst`), którego prompt
             # został tak zaprojektowany (np. przez duplikację Skryptu), że model
@@ -2586,10 +2558,6 @@ class RezyserPanel(wx.Panel):
         wywołanie i wątek zwykle, ale nie zawsze, zdąży się zakończyć wcześniej.
         """
         self._worker_thread = None
-
-    def _on_wyslij_zapisz_streszczenie(self, streszczenie: str) -> None:
-        self.summary_text = streszczenie
-        self._txt_pamiec.SetValue(streszczenie)
 
     def _on_wyslij_done_zapis(
         self, response_text: str, nazwa: str, ostrzezenie: str = "",
@@ -2665,7 +2633,7 @@ class RezyserPanel(wx.Panel):
         # (gracz nie wpisał) nie jest blokowana, po prostu nie zapisujemy.
         if self._projekt.nazwa_pliku:
             try:
-                self._projekt.zapisz_brainstorm(opcje_dict, wynik.streszczenie)
+                self._projekt.zapisz_brainstorm(opcje_dict)
             except OSError as exc:
                 # Niekrytyczne — opcje są w GUI, brak pliku oznacza tylko
                 # że nie przeżyją reload. Logujemy w last_response żeby
@@ -2678,7 +2646,7 @@ class RezyserPanel(wx.Panel):
         self.last_response = wynik.surowy_json
 
         # Rebuild przycisków — pokazuje panel, ukryty od inicjalizacji.
-        self._przeladuj_opcje_burzy(opcje_dict, wynik.streszczenie)
+        self._przeladuj_opcje_burzy(opcje_dict)
 
         self._btn_wyslij.Enable()
         self._refresh_ui_state()

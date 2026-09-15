@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.2.2 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.3.0 „Wersja Wydawnicza"
+
+*Release v19.3.0: dwa ciche kanały Reżysera zamknięte, a wzorce nagłówków przestają być listą języków wypisaną w Pythonie. PIERWSZY kanał: klucz JSON `streszczenie` w Burzy Mózgów był polem OPCJONALNYM, o którym prompt nie mówi ani słowa od 18.13 — nieszkodliwym dokładnie do refaktoru na structured outputs, bo potem gałąź tury każe modelowi „wypełnić WSZYSTKIE pola", więc pole bez instrukcji dostaje znaczenie wymyślone przez model. Zmierzone na realnym projekcie: siedziała tam ZAPOWIEDŹ przyszłych zdarzeń, a GUI podstawiało ją jako Pamięć Długotrwałą, która ma streszczać PRZESZŁOŚĆ — automatycznie, bez pytania; bliźniacza droga (tag `<STRESZCZENIE>`) robiła to samo dla każdego trybu planowania. DRUGI kanał: reguły akcentu pisane wprost w Księdze Świata (`'w' na 'v'`) — spójnik zaszyty po polsku, więc w 8 z 9 paczek bez szans na trafienie, składnia nieudokumentowana nigdzie, bez bramki, a treść reguły jedzie do modelu w `world_context` KAŻDEGO trybu jako instrukcja łamania ortografii. Trzeci wątek: dziesiąty język nie wymaga już Pythona — wzorce nagłówków czytają słowa z paczek, czyli stąd, skąd silnik je wstawia, bo tryb porażki był w całości cichy (nierozpoznany nagłówek → rekoncyliacja oddaje CAŁĄ narrację, punkt odniesienia pamięci spada na cięcie znakowe). Audyt przed zamknięciem zarobił na siebie od razu: poszerzenie alternatywy o obce języki sprawiło, że zdanie prozy ze słowem „epilogue" wyłączało przycisk „Wyślij" na stałe i bez komunikatu w 8 z 9 paczek — liczą się odtąd LINIE będące nagłówkiem, co zdjęło też 21,5 ms → 0,88 ms z każdego naciśniętego klawisza. Dla użytkownika końcowego: panel Burzy traci pole, które podsuwało zapowiedź przyszłości (i nad którym NVDA czytała etykietę całego panelu), a islandzki prolog zaczyna być nagłówkiem „Heading 1" w Wordzie.*
 
 *Patch v19.2.2: cztery noty, które obiecywały co innego, niż robi kod — trzy w Konstytucji, jedna w prompcie systemowym autotłumacza interfejsu. Konstytucja opisywała runtime jako jedno-providerowy, choć od 18.4 `core_llm` jest warstwą wyboru dostawcy: `LLM_PROVIDER=openai_compat` przekierowuje całą aplikację na dowolny endpoint zgodny z OpenAI, `openai` jest realną zależnością i siedzi w bundlu, a w rodzinie autotłumaczy honoruje ten przełącznik wyłącznie builder docsów — i właśnie dlatego ŻĄDA interaktywnego potwierdzenia, którego w sesji agenta nie ma kto dać. To ta sama klasa, co dwie stare noty o wdrażaniu nowego języka („dziesiąty język w 15.x+" przy 19.x, „`opowiesci/` ręcznie, bez batcha" — nieprawda od 18.17): odsyłacz do prywatnego filaru pamięci znaczy dla maintainera „unieważnione", a dla kontrybutora z samym klonem repozytorium jest zakazem w mocy, bo pliku znoszącego zakaz u niego nie ma. Przy okazji `build_release.py` przestaje kończyć się tracebackiem `EOFError`, gdy nikogo nie ma przy klawiaturze — mówi, że służy do tego `-y`, wzorem narzędzia, któremu ten wzorzec sam kiedyś oddał. Prompt `_ui` traci instrukcję o cyfrach numeru wersji, których model nigdy nie widzi (dostaje zamrożony marker); zostaje sama semantyka sufiksu „Wersja Wydawnicza", a lekcja wchodzi jako BRAMKA, nie nota — nowy `test_prompty_markery.py` buduje wszystkie dziesięć promptów rodziny bez API i pilnuje, że żaden nie cytuje markera z cyfrą, a numer wersji nie przechodzi przez tokenizer. Dla użytkownika końcowego zmienia się wyłącznie podbity numer wersji w podręcznikach.*
 
@@ -69,6 +71,258 @@
 *Release v18.8.0: owoce testu maintainera „polskie UI na fińskiej treści" (Poliglota offline) — jeden bug krytyczny plus dwa niedociągnięcia międzynarodowości. **(1) BUG KRYTYCZNY: tagi `lang` per akapit liczone na tekście JUŻ zniekształconym transformacją.** Silnik od 13.5 MA mechanizm detekcji języka per akapit wykonywanej PRZED transformacją (side-channel `opcje["_segmenty_wynikowe"]`), ale kanał był martwy od urodzenia: GUI wołało `przetworz(..., **opcje)`, Python REPAKOWAŁ kwargi do nowego słownika i mutacje silnika nigdy nie wracały do GUI — `zapisz_wynik` zawsze spadał na detekcję „na żywo" po wyniku. Dla typoglikemii na fińskim tekście lingua strzelała `lang="de"` na akapitach nagłówkowych (dowód: pochodne `explore_raport`); dla cezara fałszerstwo byłoby totalne. Ten sam martwy kanał ukrywał DWA bugi-rodzeństwo cezara z losowym przesunięciem: komunikat „wylosowano N" nigdy się nie pokazywał, a nazwa pliku traciła sufiks `±N` — czyli zaszyfrowany plik był praktycznie nieodwracalny dla usera. Fix: `przetworz` przyjmuje jawny, MUTOWALNY słownik `opcje=` (przez referencję); jeden korzeń naprawia trzy objawy. **(2) Lokalizacja sklejek nazw plików wynikowych.** Prefiksy `naprawiony_/oczyszczony_/_akcent_/_szyfr_/_tlumaczenie_/architektura_` były polskim hard-kodem — koszmar dla niepolskich syntezatorów (fińska Satu czytająca „tlumaczenie" jako [tumaksenije]). Teraz człony pochodzą z `ui.yaml` (klucze `filename_*` ×9 języków, w języku UI: fi `salaus/käännös/arkkitehtuuri`, is `dulkóðun/þýðing`, ru `шифр/перевод`…), z Unicode-safe sanityzacją i twardym fallbackiem na polskie defaulty; `id` wariantu pozostaje techniczne. Manuale zlokalizowane w ślad (przykłady `architektura_` → natywne). **(3) A11y: spin przesunięcia Cezara ukryty dla nie-cezarowych szyfrów** (NVDA nie ogłasza już martwego pola; wzorzec show/hide jak przy polu ISO naprawiacza). **(4) Dokumentacja user-facing przechodzi z .txt na HTML renderowany z Markdownu.** Szablony `dokumentacja/*.yaml` są od teraz pisane w MD (mechaniczna migracja: nagłówki `#`/`##` per sekcja + backticki wokół `<placeholderów>` ×9 języków, z autotestem integralności treści), a `generuj_dokumentacje.py` renderuje `docs/<id>.<iso>.html` (biblioteka `markdown`, nl2br + sane_lists) z pełnym dokumentem HTML5: `<html lang="<iso>">` przełącza syntezator czytnika ekranu na język treści, nagłówki dają nawigację klawiszami 1-6/h w NVDA, a minimalny CSS (z trybem ciemnym) czyta się dobrze też wzrokiem — koniec „obleśnego" gołego .txt w Notatniku. README bez zmian (surowy MD dla GitHuba). Menu Pomoc, `installer.iss` (checkbox „otwórz manual" + sprzątanie osieroconych `docs\*.txt` przy upgrade) i `build_release` przepięte; nowa bramka RAW-HTML w `--waliduj` pilnuje, żeby żaden surowy `<fragment>` z szablonu nie został połknięty przez przeglądarkę. Przy okazji naprawione martwe odwołanie w 9 manualach: przewodnik Opowieści to `tales.<iso>.html`, nie `opowiesci.pl.txt`/`tarinat.fi.txt`/`recits.fr.txt` (plik o tych nazwach nigdy nie istniał).*
 
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
+
+---
+
+## 19.3.0 — minor release (the Director loses two silent channels: an accent rule nobody documented, and a schema field the prompt never mentioned — plus heading patterns that finally come from the language packs)
+
+### 🆕 What's new (English)
+
+**A model was writing into Long-Term Memory by accident, and the engine let it.** Brainstorm
+mode's JSON schema still carried an OPTIONAL `streszczenie` key that the prompt has not
+mentioned since 18.13, when the suffixes that used to request it were removed. Before the
+move to structured outputs that was harmless dead weight — the model simply never filled it
+in. Afterwards it stopped being harmless: the turn branch of the discriminator tells the
+model to "fill in ALL fields of this branch", so a field with no prompt behind it gets a
+meaning the model invents. Measured on a real user project: the key held the shared
+BACKGROUND OF THE THREE OPTIONS — a preview of events yet to happen — and the GUI fed that
+straight into Long-Term Memory, whose whole job is to summarise the PAST. Automatically,
+with no confirmation. A second, twin channel did the same through a `<STRESZCZENIE>` tag
+cut out of the answer of every recipe with `zapis_do_pliku: false`. Both are gone; the
+summary has exactly one source, the `postprod_streszczenie.yaml` postproduction tool. The
+lesson is a gate, not a note: every field of the Brainstorm schema must be REQUIRED, which
+is another way of saying "described in the prompt".
+
+**Accent rules written inline in the World Book are gone — one way to declare an accent, not
+two.** Next to the documented form ("has a French accent") the parser also accepted ad-hoc
+pairs like `'w' na 'v'` and applied them character by character whenever the accent NAME
+could not be resolved. Three reasons to remove rather than extend it: the joining word `na`
+was hard-coded in Polish, so in 8 of the 9 packs the pattern could never match; no manual
+and no Rule Manager template ever documented the syntax, and no gate watched it; and the
+rule itself lives in the World Book, i.e. in text that goes to the model in `world_context`
+for EVERY mode — as an instruction to break spelling. A mode with
+`stosuj_akcenty_fonetyczne: true` and no safeguard of its own would tempt the model to
+apply it itself (Python would then corrupt the text a second time) or to refuse the payload
+outright. Spelling corruption now has a single source: the audited `akcenty/<id>.yaml` file.
+
+**A tenth language no longer needs a Python change to be seen by the Director.** Four
+hand-written regexes enumerated the structure headings of 9 languages, and `ma_prolog` /
+`ma_epilog` had a separate Polish-and-English one. The patterns are now built from the
+`rezyser.naglowek_*` values of every installed pack — the same source the engine uses to
+INSERT those headings. This mattered because the failure mode was entirely silent: with
+unknown headings `_znajdz_naglowki` returns an empty list, so incremental summarisation
+degrades into resending the whole narrative, and the working-memory anchor falls back to
+character-level truncation. Every word also enters without diacritics, so a hand-typed
+"Rozdzial 7" or "Naytos 2" still counts, and the emergency fallback speaks English rather
+than Polish, like `i18n`'s own.
+
+**Accessibility fix that came with the schema cleanup.** The read-only summary field in the
+Brainstorm panel had no `wx.StaticText` of its own, so NVDA announced the heading of the
+whole panel above it — "click to insert into the Instructions" — over a field that is
+neither clickable nor an insert. It disappears together with the key it displayed.
+
+**One real data defect in the Icelandic pack.** `konwerter.naglowki_rozdzialow` listed the
+native "Formáli"/"Eftirorð", which the engine never inserts, and omitted "Prolog"/"Epilog",
+which it does — so an Icelandic prologue never became a "Heading 1" in the generated Word
+file, and a screen-reader user lost heading navigation right there. The list now holds both
+variants, as the English pack always has, and a new assertion pins the class in every pack.
+The heading words themselves are unchanged: Icelandic does have the word "Prolog", and
+changing `naglowek_*` would break the project files users already own.
+
+### 🔭 Planned / deferred (English)
+
+- **The "every field is required" gate covers Brainstorm, not every schema.** Tales' turn
+  schema legitimately has optional fields (the vial, inventory deltas, open threads) and its
+  prompt does describe them, so the same assertion cannot be lifted there. A generic
+  criterion exists — "the key name appears in the recipe's `prompt_systemowy`" — but it
+  needs prompt parsing, which this class has not earned yet.
+- **Those Tales fields were not re-read line by line** against their prompt in this release.
+  The class is now understood; the audit of the other schema is not done.
+- **`i18n.dostepne_jezyki_ui()` does not filter incomplete packs** (unlike the engine's own
+  `dostepne_jezyki_bazowe`), so a half-built pack contributes its heading words. That is the
+  intended behaviour — a heading is a GUI string, not an engine rule — and is now documented
+  rather than changed.
+- **Two provider SDKs moved a minor** (`anthropic` 1.5.0 → 1.6.0, `openai` 3.13.0 → 3.14.0).
+  The surface we call was inspected and the suites pass, but no live paid call was made on
+  either endpoint for this release.
+- The remainder of these notes is in Polish: dense diagnostics for the maintainer.
+
+### TL;DR — co się zmieniło
+
+**Dwa zgłoszone defekty Reżysera, oba tej samej klasy: kod martwy do chwili, w której coś
+obok niego się zmieniło.** Reguła akcentu ad-hoc w Księdze Świata nie miała jak trafić w 8
+z 9 paczek (polski spójnik `na` w regexie), nie była udokumentowana nigdzie i jednocześnie
+jechała do modelu jako instrukcja łamania ortografii. Klucz JSON `streszczenie` w Burzy był
+nieszkodliwy dokładnie do refaktoru na structured outputs — po nim gałąź tury mówi „wypełnij
+WSZYSTKIE pola", więc model nadał pustemu polu własne znaczenie i **Pamięć Długotrwała
+dostawała zapowiedź przyszłości zamiast streszczenia przeszłości, automatycznie**.
+
+**Trzeci wątek jest architektoniczny i wychodzi z Twojej uwagi o dziesiątym języku.** Wzorce
+nagłówków struktury przestały być listą wypisaną w Pythonie i czytają słowa z paczek — czyli
+z tego samego miejsca, którym silnik nagłówki wstawia. Tryb porażki był w całości cichy:
+nierozpoznany nagłówek → rekoncyliacja oddaje CAŁĄ narrację (koniec przyrostowości
+streszczenia) → punkt odniesienia pamięci roboczej spada na cięcie znakowe, a każda z tych
+ścieżek ma legalny fallback, więc nic nie krzyczy.
+
+**Audyt przed zamknięciem zarobił na siebie w pierwszym znalezisku.** Poszerzenie alternatywy
+o obce języki zmieniło klasę fałszywych trafień tam, gdzie wzorzec był używany `re.search`iem
+po CAŁYM tekście: zdanie prozy ze słowem „epilogue" wyłączało przycisk „Wyślij" na stałe
+i bez komunikatu, w 8 z 9 paczek. Naprawa (liczy się LINIA będąca nagłówkiem) zdjęła przy
+okazji koszt z gorącej ścieżki — te właściwości wiszą na `EVT_TEXT` pola Instrukcji.
+
+### Co nowego
+
+**Reguły ad-hoc akcentu USUNIĘTE — razem z fallbackiem, który je obsługiwał.** Mapa akcentów
+przyjmuje odtąd tylko nazwy ROZPOZNANE i trzyma kanoniczne `id`. Dawny fallback („weź
+pierwsze dopasowanie regexa, choćby nieznane") istniał wyłącznie dla reguł ad-hoc; bez nich
+wpis z nazwą, dla której nie ma pliku `akcenty/<id>.yaml`, nie miał ANI JEDNEGO konsumenta —
+dispatch fonetyczny i generator dla czytników ekranu rozwiązują nazwę ponownie i milczą,
+więc mapa obiecywała akcent, którego nikt nie nakładał. `zastosuj_akcenty_uniwersalne` nie
+rozwiązuje jej już po raz drugi.
+
+**Klucz `streszczenie` wycięty z obu dróg.** Ze schematu kanonicznego i API Burzy, z
+`WynikBurzy`, ze sklejki bramki językowej, z persystencji `.brainstorm.json`, z pola GUI
+i z klucza `ui.yaml` w dziewięciu paczkach; z drugiej strony — `wyciagnij_streszczenie`,
+`WynikGeneracji.nowe_streszczenie` i OBA bloki GUI nadpisujące `summary_text`. Padła też
+gałąź `"streszczenie"` w `wybierz_sufiks`: jej jedynym celem było wymuszenie tagu, którego
+silnik już nie odbiera, a w Burzy kolidowałaby ze schematem. `slowa_wyzwalajace.streszczenie`
+ZOSTAJE — ma innego konsumenta: w trybach zapisu GUI odrzuca taką wysyłkę, żeby streszczenie
+nie nadpisało historii. Pliki `.brainstorm.json` z 19.2 wczytują się dalej (nadmiarowy klucz
+jest ignorowany).
+
+**Wzorce nagłówków z paczek: `wzorzec_naglowka(typ)`.** Siedem wzorców (rozdział, akt, scena,
+akt bez numeru do `re.split`, prolog, epilog, „cała linia jest nagłówkiem") budowanych z CAŁYCH
+wartości `rezyser.naglowek_*` wszystkich zainstalowanych paczek, plus wariant bez diakrytyków
+per słowo. Cache modułowy czyści „Odśwież" Managera Reguł (`gui_diagnostyka.przeskanuj_reguly`),
+bo nowa paczka pojawia się w `dostepne_jezyki_ui()` bez restartu; cache `i18n` zostaje
+nietknięty zgodnie z dotychczasową decyzją. Fallback, gdy żadna paczka nie da słowa, jest
+ANGIELSKI (`Chapter/Act/Scene/Prologue/Epilogue`) — jak `i18n.JEZYK_FALLBACK` — i zostawia
+ślad na konsoli dewelopera. Przy okazji zniknął rozjazd, o którym nikt nie wiedział: stary
+regex znał islandzkie „formáli"/„eftirorð", których paczka `is` nigdy nie wstawia.
+
+**`ma_prolog` / `ma_epilog` / `epilog_ma_tresc` pytają o LINIĘ, nie o słowo w prozie.** Nowa
+`ProjektRezysera._naglowki_typu(typ)` przechodzi przez `_znajdz_naglowki` + `_rozbij_naglowek`.
+To naprawa regresji wprowadzonej przez poprzedni punkt (patrz „Pod maską") i jednocześnie
+usunięcie długu, który istniał od zawsze: pytanie „czy w pamięci jest epilog" nigdy nie
+powinno było być pytaniem o podłańcuch.
+
+**Etykieta pola Burzy — defekt A11y odpada razem z polem.** W miejscu, gdzie powstanie
+następna kontrolka tego panelu, stoi teraz komentarz z lekcją: `name=` nie zastępuje
+etykiety, nowa kontrolka potrzebuje własnego `wx.StaticText`.
+
+**Definicja PL-LEAKA w checkliście przeglądu tłumaczeń.** Pierwsza sekcja artefaktu draftu
+(`przeglad_tlumaczen`), czyli tam, gdzie czyta recenzent — albo chatbot, którego recenzent
+pyta o pomoc z językiem, którego nie zna. Cztery kształty: jawny termin polski (także wygięty
+w morfologię celu), transliterat terminu na pismo celu, cała linia po polsku (zwykle z
+diakrytykiem — i to jego szuka bramka, więc leak bez takich znaków wymaga człowieka),
+neologizm na polskim rdzeniu (zmierzony przypadek: islandzkie „Ważar" zamiast „Mikilvæg").
+Plus zdanie, którego brakowało: **słowo międzynarodowe, które w języku celu realnie istnieje,
+leakiem NIE jest** — termin jest leakiem, bo jest obcy dla CELU, nie bo przypomina polski.
+
+### Pod maską
+
+**Audyt kodu przed zamknięciem (odruch z Konstytucji) znalazł regresję wprowadzoną w tym
+wydaniu.** `ma_prolog`/`ma_epilog`/`epilog_ma_tresc` pytały `re.search`iem po całym tekście.
+Dopóki wzorzec brzmiał `\bprolog\b`, w obcych paczkach nie trafiał NIGDY — więc nikt nie
+zauważył, że pytanie jest źle zadane. Gdy alternatywa poznała „epilogue"/„epílogo"/„Эпилог",
+zdanie *„She read the epilogue and closed the book."* ustawiało flagę, a
+`gui_rezyser._refresh_ui_state` wyłączał „Wyślij" na stałe i bez komunikatu. Reguła, która
+z tego wynika: **poszerzając wzorzec, wypisz wszystkich jego konsumentów i sprawdź, który
+pyta o LINIĘ, a który o tekst.**
+
+**Ta sama naprawa zdjęła koszt z gorącej ścieżki.** Te trzy właściwości są czytane przez
+`_refresh_ui_state`, który wisi na `EVT_TEXT` pola Instrukcji — czyli liczą się przy KAŻDYM
+naciśnięciu klawisza. Zmierzone na 264 kB historii: **21,5 ms → 0,88 ms** (24×); audytor
+zmierzył stan przed naprawą na 1 MB jako 71 ms na znak. Sam skan po liniach jest niewinny
+(1,3 ms na 247 kB, tyle samo co stary kod — `re.match` na linii prozy pada na pierwszym
+znaku), winowajcą był `re.search` po całości.
+
+**Trzy dalsze znaleziska audytu, wszystkie naprawione w tym samym ruchu.** (1) Zmiana objęła
+osiem paczek, nie dziewięć: `txt_streszczenie_burzy_name` wrócił do `is/gui/ui.yaml`, bo
+rewert islandzkiej terminologii zrobiono `git checkout` na CAŁYM pliku (§6.8b filaru
+potwierdzona po raz drugi). (2) Parser brał `.split()[0]` wartości, a silnik wstawia CAŁĄ
+(`f"{naglowek_akt} {licznik}"`), więc wartość „Rozdział numer" z Managera Reguł dałaby
+nagłówek niewidoczny dla liczników i rekoncyliacji — a test przechodził, bo sam robił
+`.split()[0]`: lustro implementacji, nie niezmiennika. (3) Guard placeholdera `[klucz]`
+odrzucał każdą wartość zaczynającą się nawiasem, w tym legalne `"[Prolog]"`.
+
+**Dowody wykonaniem, nie „powinno działać".** Stary i nowy wzorzec porównane dla 9 paczek
+× 5 typów — brak różnic; `re.split` sprawdzony na identyczność wyniku i brak grupy
+przechwytującej; alternatywa przepuszczona przez 14 wrogich wartości `ui.yaml` (`(`, `a|b`,
+`a*`, `.`, `\`, pusty, same spacje, 5000 znaków, lista, `None`, placeholder, emoji,
+wielowyrazowa) — każda się kompiluje, żadna nie łapie prozy; każda gałąź `_wyslij_worker`
+potwierdzona jako terminalna (zwalnia workera i odblokowuje przycisk); projekt z nagłówkami
+we wszystkich 9 językach ma niezmienione liczniki i działający anchor przyrostowy; panel
+Burzy zbudowany bez `MainLoop` i sprawdzony pod kątem zawartości oraz etykiety A11y.
+
+**Dwie zależności providerowe podniesione o minor** (odruch „upgrade przed zamrożeniem"):
+`anthropic` 1.5.0 → 1.6.0 i `openai` 3.13.0 → 3.14.0, obie w granicach manifestu (`<2`,
+`<4`), więc żadna granica się nie zmieniła. Powierzchnia, którą wołamy, sprawdzona
+inspekcją: `messages.create` nadal przyjmuje `output_config`, `extra_body`, `system`,
+`stop_sequences` i nadal NIE ma `temperature` w sygnaturze — kontrakt samplingu z 19.0
+(temperatura przez `extra_body`, żeby 400 dało się rozpoznać) jest nietknięty;
+`chat.completions.create` gałęzi compat nadal ma `response_format` i `extra_body`; klasy
+wyjątków, na których stoi rozpoznawanie limitów i timeoutów, obecne w obu SDK. Wszystkie
+moduły aplikacji importują się, cały zestaw testów przechodzi na nowych wersjach.
+
+**Nowe pliki testowe.** `test_burza_schemat.py` (9 testów) pilnuje klasy, nie klucza:
+każde pole schematu Burzy wymagane, nadmiarowy klucz w odpowiedzi = błąd struktury, brak
+drugiej drogi do Pamięci, tolerancja starych `.brainstorm.json`, reguła ad-hoc nie psuje
+tekstu, znany akcent nadal działa i zwraca kanoniczne `id`.
+`test_naglowki_paczek.py` (10 testów) wstrzykuje paczkę-atrapę `sv` — język, którego w repo
+NIE MA — i wymaga, by „Scen 2" było nagłówkiem sceny, a rekoncyliacja przycięła narrację do
+anchora; lustrem jest test, że bez tej paczki jej nagłówki są zwykłą prozą. Dalej: nagłówek
+wielowyrazowy, placeholder i18n, słowo w prozie, fallback angielski, prolog/epilog bez
+własnego hardkodu oraz spójność `konwerter.naglowki_*` z tym, co silnik wstawia — ta ostatnia
+asercja jest tą, która wykryła defekt paczki `is`.
+
+### Co nie weszło
+
+- **Bramka generyczna „każde pole schematu jest opisane w prompcie".** Dla Burzy wystarcza
+  mocniejsza i tańsza reguła (wszystkie pola wymagane), ale schemat tury Opowieści ma pola
+  opcjonalne z założenia (`fiolka`, `ekwipunek_zmiany`, `watki_otwarte`, `etap_luku`) i jego
+  prompt je opisuje. Kryterium „nazwa klucza występuje w `prompt_systemowy`" wymagałoby
+  parsowania promptów — większa powierzchnia, niż ta klasa zdążyła zasłużyć.
+- **Przegląd pól opcjonalnych `SCHEMA_TURA` linia po linii** pod tym samym kątem, co Burza.
+  Klasa jest już zrozumiana, audyt drugiego schematu — nie zrobiony.
+- **Islandzka terminologia nagłówków** (`Formáli`/`Eftirorð` zamiast `Prolog`/`Epilog`)
+  ROZWAŻONA I ODRZUCONA: islandzki ma słowo „Prolog", a zmiana `naglowek_*` zerwałaby
+  zgodność z plikami projektów, które użytkownicy już mają. Poprawiona została lista
+  konwertera, czyli to, co realnie nie działało.
+- **Etykiety GUI paczki `is` mówiące o prologu** nie były ruszane, bo nie ma czego
+  uzgadniać — nagłówki zostały bez zmian.
+- **Filtr kompletności dla źródła słów nagłówków.** `dostepne_jezyki_ui()` nie odsiewa paczek
+  niekompletnych; uznane za zachowanie pożądane i udokumentowane w komentarzu, nie zmienione.
+- **`policz_naglowki_per_jezyk` zachowuje własny kształt danych** (słowa rozbite per język,
+  po pierwszym tokenie), bo odpowiada na inne pytanie: „w jakim języku są nagłówki", a nie
+  „czy ta linia jest nagłówkiem". Dwa kształty tych samych danych są tu celowe.
+- **Podniesienie kontraktu językowego dev-tooli i bramki zależności do FATAL** — odłożone
+  z 19.2.1 i 19.2.2 bez zmiany stanowiska.
+
+### Walidacja
+
+Bramki odpalone ZAKRESOWO (reguła z 19.2.1). Zmiana dotknęła `core_rezyser.py`,
+`rezyser_ai.py`, `gui_rezyser.py`, `gui_diagnostyka.py`, `przepisy_rezysera.py`,
+`przeglad_tlumaczen.py`, `dictionaries/**` (9 × `gui/ui.yaml`, 9 × `rezyser/tryb_burza.yaml`),
+`requirements.txt`-owych zależności bez zmiany granic oraz dwóch nowych plików testowych:
+
+- `pytest test_*.py` — **214 passed** (195 przed tym wydaniem + 19 nowych w dwóch plikach),
+  na PODNIESIONYCH wersjach `anthropic`/`openai`;
+- `audyt_ciszy.py --bramka` — czysto; przedmiot: zmiany w loaderach i w `dictionaries/**`;
+- `audyt_leakow.py --bramka` — 8/8 paczek w pełnym pokryciu, zero ponad baseline;
+- `audyt_leakow.py --bramka-py` — czysto; bramka miała przedmiot i od razu zarobiła na
+  siebie: pierwszy wariant zapasowych nagłówków był POLSKI i został odrzucony, stąd fallback
+  angielski;
+- `audyt_leakow.py --bramka-kontrakt` — czysto; przedmiot: komunikaty asercji w nowych
+  testach (bramka skanuje `test_*.py`), dwa zdania przepisane na angielski;
+- `audyt_podstaw.py --bramka` — kanon 75 języków i dziewięć `podstawy.yaml` czyste;
+- `generuj_dokumentacje.py --waliduj` — osiem bramek zielonych (w tym ACCENT-TAG i
+  GUI-LABEL, obie z przedmiotem: usunięty klucz `ui.yaml` i zmiany w silniku akcentów),
+  `docs/` przeliczone PO bumpie VERSION, diff to 18 plików × 2 linie plus readme — sam numer;
+- `audyt_zaleznosci.py` — po podniesieniu dwóch SDK **17/17 zgodnych z PyPI w granicach
+  manifestu**;
+- smoke GUI bez `MainLoop` (`wx.App(False)` → konstruktor → `Destroy`) — panel Burzy
+  z zawartością, `_refresh_ui_state` bez wyjątku.
 
 ---
 

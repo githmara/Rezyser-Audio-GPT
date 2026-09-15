@@ -338,7 +338,6 @@ rezyser:
   # Панель вариантов Мозгового штурма (v15.2)
   pnl_opcji_burzy_name: "Панель вариантов Мозгового штурма"
   lbl_opcji_burzy: "🌪️ Варианты Мозгового штурма — нажми, чтобы вставить в Инструкции:"
-  txt_streszczenie_burzy_name: "Сводка, созданная Мозговым штурмом — только для чтения"
   btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-

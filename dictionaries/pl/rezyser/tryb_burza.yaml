@@ -7,8 +7,6 @@
 #  Linijki `[Reżyserze: ...]` i `[DYREKTYWA]: ...` doklejane są W PYTHONIE
 #  z `doklejka_celu_sceny` poniżej — LLM ich nie pisze, więc nie może
 #  zhakować zakazu wymyślania własnych wskazówek reżyserskich.
-#  Sufiksy alarm/streszczenie wymuszają opcjonalny klucz JSON `streszczenie`
-#  (zamiast wcześniejszych tagów `<STRESZCZENIE>...</STRESZCZENIE>`).
 #  v15.5: streszczenie NIE cytuje już ostatnich akapitów ([OSTATNIA SCENA]
 #  usunięte) — końcówkę narracji odtwarza Python przy rekoncyliacji z dysku
 #  (meta-marker struktury w core_rezyser.rekoncyliuj_z_dysku).
@@ -95,8 +93,12 @@ prompt_systemowy: |
 # nieudanej improwizacji modelu) błąd walidacji zamiast wyniku. Streszczenie jest
 # odtąd osobnym narzędziem postprodukcji: `postprod_streszczenie.yaml`
 # (rola `pamiec_dlugotrwala`), które odpala się także samo przy progu alarmowym.
-# Silnik nadal UMIE odczytać klucz `streszczenie` z odpowiedzi Burzy — gdyby
-# lingwista chciał wrócić do dawnego zachowania, wystarczy tu dopisać sufiks.
+# v19.3: klucz `streszczenie` USUNIĘTY ze schematu odpowiedzi — sam sufiks nie
+# wystarczy już, by wrócić do dawnego zachowania (silnik nie ma gdzie tej treści
+# przyjąć, a nadmiarowy klucz jest błędem struktury). Powód: pole opcjonalne,
+# o którym prompt milczy, model wypełnia znaczeniem wymyślonym przez siebie —
+# zmierzone: zapowiedź PRZYSZŁYCH zdarzeń tam, gdzie Pamięć Długotrwała ma
+# streszczać przeszłość.
 
 # --- Przypomnienie doklejane do instrukcji użytkownika (role=user) ---
 # Ostatnia szansa na przypilnowanie modelu tuż przed "wysłaniem".

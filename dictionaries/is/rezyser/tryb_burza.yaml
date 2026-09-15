@@ -8,8 +8,6 @@
 #  Línurnar `[Leikstjóri: ...]` og `[FYRIRMÆLI]: ...` eru viðauknar
 #  Í PYTHON úr `doklejka_celu_sceny` hér að neðan — LLM skrifar þær ekki,
 #  svo það getur ekki rænt bann við að finna upp eigin leikstjórnarvísbendingar.
-#  Viðvörun-/samantektarviðauki krefst valkvæða JSON-lykilsins `streszczenie`
-#  (kemur í staðinn fyrir fyrri `<STRESZCZENIE>...</STRESZCZENIE>`-merki).
 #  v15.5: samantektin vitnar ekki lengur í síðustu málsgreinar — Python
 #  endurgerir enda frásagnarinnar við samstillingu við disk.
 # -----------------------------------------------------------------------------
@@ -94,8 +92,7 @@ prompt_systemowy: |
 # fyrirmæli og (ef spuni líkansins mistókst) villu í staðfestingu skemans í stað
 # niðurstöðu. Samantektin er nú sjálfstætt eftirvinnsluverkfæri:
 # `postprod_streszczenie.yaml` (hlutverk `pamiec_dlugotrwala`), sem fer líka
-# sjálft í gang við viðvörunarmörkin. Vélin GETUR enn lesið lykilinn
-# `streszczenie` — til að fá fyrri hegðun nægir að setja viðskeytið hér aftur.
+# sjálft í gang við viðvörunarmörkin.
 
 # --- Áminning bætt við notendaleiðbeiningar (role=user) ---
 przypomnienie_uzytkownika: |

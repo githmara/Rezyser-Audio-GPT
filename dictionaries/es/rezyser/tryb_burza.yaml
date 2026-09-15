@@ -8,10 +8,7 @@
 #  construye los botones 1/2/3. Las líneas `[Director: ...]` y
 #  `[DIRECTIVA]: ...` se añaden EN PYTHON desde `doklejka_celu_sceny`
 #  más abajo — el LLM no las escribe, así que no puede secuestrar la
-#  prohibición de inventar sus propias indicaciones de director. Los
-#  sufijos alarm/streszczenie requieren la clave JSON opcional
-#  `streszczenie` (sustituyendo a las antiguas etiquetas
-#  `<STRESZCZENIE>...</STRESZCZENIE>`).
+#  prohibición de inventar sus propias indicaciones de director.
 #
 #  v15.5: el resumen ya no cita los últimos párrafos — Python reconstruye el
 #  final narrativo al reconciliar con el disco.
@@ -98,8 +95,6 @@ prompt_systemowy: |
 # validación del esquema en lugar de un resultado. El resumen es ahora una
 # herramienta de postproducción aparte: `postprod_streszczenie.yaml` (rol
 # `pamiec_dlugotrwala`), que además se dispara sola en el umbral de alarma.
-# El motor TODAVÍA sabe leer una clave `streszczenie` — para volver al
-# comportamiento anterior basta con reponer aquí el sufijo.
 
 # --- Recordatorio añadido a las instrucciones del usuario (role=user) ---
 przypomnienie_uzytkownika: |

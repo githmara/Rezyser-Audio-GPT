@@ -64,6 +64,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 import core_tokeny as ct
+import i18n
 import przepisy_rezysera as pr
 import sciezki
 
@@ -85,32 +86,159 @@ from core_poliglota import (
     zastosuj_reguly_fonetyczne,
 )
 
-# Wzorce nagłówków dla wszystkich 9 obsługiwanych języków aplikacji
-# (pl en de es fr it fi is ru). Używane przez parsing liczników, detekcję
-# ostatniej linii oraz konwerter. v17.9: domknięty dług 6→9 — do regexów
-# dopisane de (Kapitel/Szene), es (Capítulo/Acto/Escena/Prólogo/Epílogo) i fr
-# (Chapitre/Acte/Scène/Épilogue), których wcześniej brakowało (źródło prawdy:
-# `rezyser.naglowek_*` w `dictionaries/<kod>/gui/ui.yaml`). `(?i)` + Unicode
-# obejmują warianty z diakrytykami (ó/é/ä/þ) i cyrylicę; `\s+(\d+)` po członie
-# rozróżnia np. „Acto 1" (es) od „Act 1" (en) przez backtracking alternatywy.
-_WZORZEC_ROZDZIAL = (
-    r"(?i)\b(?:rozdzia[łl]|chapter|chapitre|kapitel|capitolo|capítulo|luku|kafli|глава)\s+(\d+)"
-)
-_WZORZEC_AKT = (
-    r"(?i)\b(?:akt|acte|acto|atto|act|näytös|þáttur|акт)\s+(\d+)"
-)
-_WZORZEC_SCENA = (
-    r"(?i)\b(?:scena|scène|scene|szene|escena|kohtaus|atriði|сцена)\s+(\d+)"
-)
-_WZORZEC_NAGLOWEK_LINIA = (
-    r"(?i)^(?:"
-    r"(?:rozdzia[łl]|chapter|chapitre|kapitel|capitolo|capítulo|luku|kafli|глава)\s+\d+"
-    r"|(?:akt|acte|acto|atto|act|näytös|þáttur|акт)\s+\d+"
-    r"|(?:scena|scène|scene|szene|escena|kohtaus|atriði|сцена)\s+\d+"
-    r"|prolog(?:ue|i|o)?|prólogo|formáli|пролог"
-    r"|epilog(?:ue|i|o)?|epílogo|épilogue|eftirorð|эпилог"
-    r")\s*$"
-)
+# =============================================================================
+# Wzorce nagłówków struktury — BUDOWANE Z PACZEK, nie z hardkodu (v19.3)
+# =============================================================================
+# Używane przez parsing liczników, rekoncyliację z dysku (anchor streszczenia
+# przyrostowego), detekcję ostatniej linii i właściwości `ma_prolog`/`ma_epilog`.
+#
+# Do v19.2 były to cztery ręcznie wypisane alternatywy 9 języków, a `ma_prolog`
+# miało własny, angielsko-polski `\bprolog\b`. Dług był PODWÓJNY: raz 6→9
+# (v17.9 dopisała de/es/fr, których brakowało), a przy DZIESIĄTYM języku
+# historia powtórzyłaby się w najgorszym możliwym miejscu — bez tknięcia
+# Pythona `_znajdz_naglowki` zwracałoby pustą listę, więc `wytnij_od_anchora`
+# oddawałby CAŁĄ narrację (payload rośnie liniowo zamiast przyrostowo),
+# a wybór punktu odniesienia pamięci roboczej spadałby na cięcie znakowe.
+# Cicho, bo każda z tych ścieżek ma legalny fallback.
+#
+# Źródłem prawdy były te regexy „na papierze" od zawsze: `rezyser.naglowek_*`
+# w `dictionaries/<kod>/gui/ui.yaml` — to TYMI słowami silnik wstawia nagłówki
+# (`wstaw_akt`, `wstaw_rozdzial`), więc czytamy je wprost z paczek, dokładnie
+# jak `policz_naglowki_per_jezyk` robi to od v17.9 dla ostrzeżenia o języku
+# nagłówków. Nowy język = nowa paczka, zero zmian w kodzie.
+_KLUCZE_NAGLOWKOW: dict[str, str] = {
+    "rozdzial": "rezyser.naglowek_rozdzial",
+    "akt":      "rezyser.naglowek_akt",
+    "scena":    "rezyser.naglowek_scena",
+    "prolog":   "rezyser.naglowek_prolog",
+    "epilog":   "rezyser.naglowek_epilog",
+}
+
+# Zapasowe słowa — WYŁĄCZNIE dla sytuacji „z żadnej paczki nie dało się
+# wyczytać ani jednego nagłówka" (katastrofa `dictionaries/`, przy której
+# aplikacja i tak pokazuje twardy alarm o `ui.yaml`). Bez tego parser struktury
+# milczałby zupełnie: każdy nagłówek byłby zwykłą prozą.
+#
+# Po ANGIELSKU, nie po polsku — ta sama zasada, którą trzyma `i18n`
+# (`JEZYK_FALLBACK = "en"`): nie-polski użytkownik nie ma powodu dostać
+# polskiego przecieku w awaryjnej ścieżce. Bramka `audyt_leakow --bramka-py`
+# pilnuje tego mechanicznie.
+_ZAPASOWE_NAGLOWKI: dict[str, str] = {
+    "rozdzial": "Chapter",
+    "akt":      "Act",
+    "scena":    "Scene",
+    "prolog":   "Prologue",
+    "epilog":   "Epilogue",
+}
+
+_CACHE_WZORCOW: dict[str, str] | None = None
+
+
+def _zbierz_slowa_naglowkow() -> dict[str, list[str]]:
+    """``{typ: [nagłówki ze wszystkich zainstalowanych paczek]}``, bez duplikatów.
+
+    Bierzemy CAŁĄ wartość klucza, nie jej pierwszy token — bo silnik wstawia
+    całą (``wstaw_akt``: ``f"{naglowek_akt} {licznik}"``). Gdyby autor paczki
+    wpisał w Managerze Reguł „Rozdział numer", parser po pierwszym tokenie
+    przestałby widzieć to, co silnik właśnie zapisał na dysk (puste liczniki
+    i rekoncyliacja oddająca całą narrację — ta sama cicha degradacja, przed
+    którą broni ten mechanizm). `re.escape` radzi sobie ze spacją w środku.
+    Osobny kształt tych danych — słowa rozbite per język i po pierwszym
+    tokenie — ma :func:`policz_naglowki_per_jezyk`; tam to jest właściwe, bo
+    pyta „w jakim języku są nagłówki", a nie „czy ta linia jest nagłówkiem".
+
+    Placeholder ``[klucz]`` z :func:`i18n.t` (brak klucza w paczce i w EN)
+    odrzucamy po DOKŁADNEJ postaci, nie po nawiasie otwierającym — legalna
+    wartość ``"[Prolog]"`` ma prawo działać, a `re.escape` ją zabezpiecza.
+
+    Sortowanie malejąco po długości: alternatywa regexa jest zachłanna od
+    lewej, więc dłuższy wariant („Prologue") musi stać przed krótszym
+    („Prolog"), który jest jego przedrostkiem.
+
+    Każde słowo dokładamy TAKŻE w wersji bez diakrytyków (:func:`_fold`).
+    Silnik wstawia nagłówki z ogonkami, ale reżyser dopisujący „Rozdzial 7"
+    czy „Naytos 2" z klawiatury bez danego układu ma prawo być rozumiany —
+    zastany regex miał na to tylko jedną, ręczną poprawkę (``rozdzia[łl]``).
+    """
+    zebrane: dict[str, set[str]] = {typ: set() for typ in _KLUCZE_NAGLOWKOW}
+    # `dostepne_jezyki_ui` nie filtruje paczek niekompletnych (w odróżnieniu od
+    # `core_poliglota.dostepne_jezyki_bazowe`) — i tak ma być: nagłówek jest
+    # NAPISEM GUI, nie regułą silnika, więc paczka bez akcentów czy trybów
+    # nadal legalnie wstawia nagłówki i jej słowa muszą być rozpoznawane.
+    for kod in i18n.dostepne_jezyki_ui():
+        for typ, klucz in _KLUCZE_NAGLOWKOW.items():
+            wartosc = i18n.t(klucz, jezyk_override=kod)
+            if not isinstance(wartosc, str):
+                continue
+            naglowek = " ".join(wartosc.split())
+            if not naglowek or naglowek == f"[{klucz}]":
+                continue
+            zebrane[typ].add(naglowek)
+            bez_diakrytykow = _fold(naglowek)
+            if bez_diakrytykow:
+                zebrane[typ].add(bez_diakrytykow)
+
+    wynik: dict[str, list[str]] = {}
+    for typ, slowa in zebrane.items():
+        if not slowa:
+            slowa = {_ZAPASOWE_NAGLOWKI[typ]}
+            _dev_log_naglowki(typ)
+        wynik[typ] = sorted(slowa, key=lambda s: (-len(s), s))
+    return wynik
+
+
+def _zbuduj_wzorce() -> dict[str, str]:
+    """Wzorce (jako STRINGI regexów) dla wszystkich typów nagłówków.
+
+    Klucze: ``rozdzial``/``akt``/``scena`` (człon + ``(\\d+)`` — jedna grupa,
+    bo wołający robi ``findall`` i chce samych numerów), ``akt_bez_numeru``
+    (do ``re.split`` po aktach), ``prolog``/``epilog`` (człon bez numeru,
+    szukany gdziekolwiek w tekście) oraz ``linia`` (CAŁA linia jest czystym
+    nagłówkiem — dowolny z powyższych typów).
+    """
+    slowa = _zbierz_slowa_naglowkow()
+    alt = {typ: "|".join(re.escape(s) for s in lista) for typ, lista in slowa.items()}
+    numerowane = {
+        typ: rf"(?i)\b(?:{alt[typ]})\s+(\d+)"
+        for typ in ("rozdzial", "akt", "scena")
+    }
+    return {
+        **numerowane,
+        "akt_bez_numeru": rf"(?i)\b(?:{alt['akt']})\s+\d+",
+        "prolog": rf"(?i)\b(?:{alt['prolog']})\b",
+        "epilog": rf"(?i)\b(?:{alt['epilog']})\b",
+        "linia": (
+            r"(?i)^(?:"
+            rf"(?:{alt['rozdzial']})\s+\d+"
+            rf"|(?:{alt['akt']})\s+\d+"
+            rf"|(?:{alt['scena']})\s+\d+"
+            rf"|(?:{alt['prolog']})"
+            rf"|(?:{alt['epilog']})"
+            r")\s*$"
+        ),
+    }
+
+
+def wzorzec_naglowka(typ: str) -> str:
+    """Zwraca wzorzec nagłówka danego typu (cache modułowy).
+
+    Cache jest budowany raz na sesję, bo jego źródło (`ui.yaml`) i tak ma
+    w i18n cache do restartu — a przycisk „Odśwież" Managera Reguł świadomie
+    go NIE czyści (naprawa `ui.yaml` wymaga restartu). Wyjątek, który cache tu
+    unieważnia, to POJAWIENIE SIĘ NOWEJ PACZKI w trakcie sesji: dlatego
+    :func:`wyczysc_cache_naglowkow` wisi obok pozostałych czyszczeń
+    w ``gui_diagnostyka.przeskanuj_reguly``.
+    """
+    global _CACHE_WZORCOW
+    if _CACHE_WZORCOW is None:
+        _CACHE_WZORCOW = _zbuduj_wzorce()
+    return _CACHE_WZORCOW[typ]
+
+
+def wyczysc_cache_naglowkow() -> None:
+    """Zapomina wzorce nagłówków — następne użycie czyta paczki od nowa."""
+    global _CACHE_WZORCOW
+    _CACHE_WZORCOW = None
 
 
 # =============================================================================
@@ -135,6 +263,25 @@ def _dev_log_runtime(sciezka: str) -> None:
     try:
         if sys.stdout is not None:
             print(f"[runtime] zapis: {sciezka}")
+    except Exception:  # noqa: BLE001 — log dev nie może nigdy ubić apki
+        pass
+
+
+def _dev_log_naglowki(typ: str) -> None:
+    """Loguje spadnięcie na zapasowe słowo nagłówka (:data:`_ZAPASOWE_NAGLOWKI`).
+
+    Osobny kanał od `_dev_log_runtime`, bo mówi o czymś innym: żadna paczka
+    w `dictionaries/` nie dała słowa dla danego typu nagłówka. Użytkownik widzi
+    wtedy twardy alarm o `gui/ui.yaml` (i18n), więc tutaj wystarczy ślad dla
+    dewelopera — ale ŚLAD MUSI BYĆ, żeby „parser struktury działa na polskich
+    słowach w fińskim projekcie" nie było niewidoczne.
+    """
+    try:
+        if sys.stdout is not None:
+            print(
+                f"[naglowki] no '{typ}' heading word in any language pack — "
+                f"falling back to: {_ZAPASOWE_NAGLOWKI[typ]}"
+            )
     except Exception:  # noqa: BLE001 — log dev nie może nigdy ubić apki
         pass
 
@@ -272,8 +419,8 @@ AUDIO_TAGS: frozenset[str] = frozenset({
 
 def _znajdz_naglowki(tekst: str) -> list[tuple[int, str]]:
     """Zwraca listę ``(offset_startu_linii, tekst_nagłówka)`` dla linii będących
-    czystymi nagłówkami struktury (Rozdział/Akt/Scena/Prolog/Epilog — wszystkie
-    obsługiwane języki, regex :data:`_WZORZEC_NAGLOWEK_LINIA`).
+    czystymi nagłówkami struktury (Rozdział/Akt/Scena/Prolog/Epilog — słowa
+    wszystkich zainstalowanych paczek, :func:`wzorzec_naglowka`).
 
     ``offset`` to indeks znakowy początku linii nagłówka w ``tekst`` — pozwala
     pociąć ``tekst[offset:]`` tak, by przywrócona końcówka zaczynała się
@@ -283,7 +430,7 @@ def _znajdz_naglowki(tekst: str) -> list[tuple[int, str]]:
     offset = 0
     for linia in tekst.splitlines(keepends=True):
         rdzen = linia.strip()
-        if rdzen and re.match(_WZORZEC_NAGLOWEK_LINIA, rdzen):
+        if rdzen and re.match(wzorzec_naglowka("linia"), rdzen):
             wynik.append((offset, rdzen))
         offset += len(linia)
     return wynik
@@ -415,21 +562,16 @@ def _rozbij_naglowek(naglowek: str) -> tuple[str, int | None]:
     ``typ`` ∈ {rozdzial, akt, scena, prolog, epilog, inny}; ``numer`` to int
     dla rozdziału/aktu/sceny, ``None`` dla prologu/epilogu/innego.
     """
-    for typ, wzorzec in (
-        ("rozdzial", _WZORZEC_ROZDZIAL),
-        ("akt",      _WZORZEC_AKT),
-        ("scena",    _WZORZEC_SCENA),
-    ):
-        m = re.search(wzorzec, naglowek)
+    for typ in ("rozdzial", "akt", "scena"):
+        m = re.search(wzorzec_naglowka(typ), naglowek)
         if m:
             return typ, int(m.group(1))
-    low = naglowek.lower()
-    # v17.9: warianty z diakrytykami (es „prólogo"/„epílogo", fr „épilogue")
-    # nie zawieraja czystego „prolog"/„epilog" jako podlancucha — dopisane jawnie.
-    if any(s in low for s in ("prolog", "prólogo", "formáli", "пролог")):
-        return "prolog", None
-    if any(s in low for s in ("epilog", "epílogo", "épilogue", "eftirorð", "эпилог")):
-        return "epilog", None
+    # v19.3: prolog/epilog też po słowach z paczek. Do v19.2 stała tu lista
+    # podłańcuchów wypisana ręcznie (dopisywana przy v17.9 o „prólogo"/
+    # „épilogue"/„eftirorð") — ten sam dług co w regexach wyżej, tylko cichszy.
+    for typ in ("prolog", "epilog"):
+        if re.search(wzorzec_naglowka(typ), naglowek):
+            return typ, None
     return "inny", None
 
 
@@ -441,9 +583,10 @@ def policz_naglowki_per_jezyk(
     v17.9 (Obszar 3b, ostrzeżenie wczytania): heurystyczna detekcja języka
     istniejącej treści projektu. ``mapa_slow`` = ``{kod_jezyka: {słowa-nagłówki
     małymi literami}}`` budowane przez GUI z ``t("rezyser.naglowek_*",
-    jezyk_override=<kod>)`` — pokrywa WSZYSTKIE zainstalowane języki (w
-    odróżnieniu od 6-językowego ``_WZORZEC_NAGLOWEK_LINIA``, który nie zna
-    np. niemieckiego „Kapitel").
+    jezyk_override=<kod>)``. Ta funkcja potrzebuje ROZBICIA na języki (mówi
+    „nagłówki wyglądają na inny język niż przepis"), a :func:`wzorzec_naglowka`
+    zlewa wszystkie paczki w jedną alternatywę — stąd dwa kształty tych samych
+    danych, oba czytane z `ui.yaml`.
 
     Liczy tylko linie wyglądające na czysty nagłówek: pojedyncze słowo +
     opcjonalny numer (np. „Akt 1", „Prolog") — nie prozę zaczynającą się od
@@ -658,11 +801,10 @@ def czy_znany_akcent(nazwa: str, jezyk_projektu: str) -> bool:
 
 
 def zbuduj_mape_akcentow(lore_text: str, jezyk_projektu: str = "pl") -> dict[str, dict]:
-    """Parsuje Księgę Świata → ``{nazwa_postaci_lower: {"nazwa", "reguly"}}``.
+    """Parsuje Księgę Świata → ``{nazwa_postaci_lower: {"nazwa"}}``.
 
-    ``nazwa`` to rozpoznana nazwa akcentu (np. ``"fiński"``) albo ``None``;
-    ``reguly`` to lista par ad-hoc ``[("w","v"), …]`` z zapisów typu
-    ``'w' na 'v'``. Postać bez żadnej definicji akcentu nie trafia do mapy.
+    ``nazwa`` to KANONICZNE ``id`` akcentu, który ta paczka naprawdę potrafi
+    nałożyć. Postać bez rozpoznanego akcentu nie trafia do mapy.
 
     Wyłuskane z :func:`zastosuj_akcenty_uniwersalne` w v16.1, bo korzysta z tego
     również generator wersji dla czytników ekranu (``core_screen_reader``) —
@@ -677,30 +819,28 @@ def zbuduj_mape_akcentow(lore_text: str, jezyk_projektu: str = "pl") -> dict[str
     znak w znak nietknięty — a to najbardziej naturalny zapis po polsku,
     hiszpańsku i francusku. Teraz sprawdzamy WSZYSTKICH kandydatów z obu stron
     słowa-wyzwalacza i bierzemy pierwszego, który jest znanym akcentem tej
-    paczki (:func:`czy_znany_akcent`). Gdy żaden nie jest znany, wracamy do
-    dawnego wyniku (pierwsze dopasowanie): nierozpoznana nazwa nadal ma prawo
-    trafić do mapy, bo obok niej mogą stać reguły ad-hoc.
+    paczki (:func:`rozwiaz_nazwe_akcentu`).
+
+    v19.3 — NIEROZPOZNANA NAZWA NIE TRAFIA DO MAPY. Do v19.2 wracaliśmy wtedy
+    do pierwszego dopasowania regexa, bo obok nazwy mogły stać reguły ad-hoc
+    (``'w' na 'v'``) — mechanizm zniesiony razem z tym fallbackiem (patrz
+    :func:`zastosuj_akcenty_uniwersalne`). Bez niego wpis z nazwą, dla której
+    nie ma pliku ``akcenty/<id>.yaml``, nie miał ANI JEDNEGO konsumenta:
+    dispatch fonetyczny i generator dla czytników ekranu rozwiązują nazwę
+    ponownie i milkną, więc mapa obiecywała akcent, którego nikt nie nakładał.
     """
     slowa = slowa_akcentu(jezyk_projektu)
     alt_slow = "|".join(re.escape(s) for s in slowa)
-    # Trzy wzorce z jednej listy słów: dwa zbierają kandydatów („po wyzwalaczu"
-    # i „przed wyzwalaczem"), złożony (zastany) rozstrzyga fallback. Osobne
-    # wzorce są konieczne, bo alternatywa KONSUMUJE słowo-wyzwalacz: w „ma
-    # akcent francuski" match „ma akcent" zjada „akcent", więc kolejne
-    # `finditer` nie zobaczyłoby już „akcent francuski".
+    # Dwa wzorce z jednej listy słów zbierają kandydatów („po wyzwalaczu" i
+    # „przed wyzwalaczem"). Osobne wzorce są konieczne, bo alternatywa
+    # KONSUMUJE słowo-wyzwalacz: w „ma akcent francuski" match „ma akcent"
+    # zjada „akcent", więc kolejne `finditer` nie zobaczyłoby już
+    # „akcent francuski".
     wzorzec_po = re.compile(rf"(?:{alt_slow})\s+(\w+)", re.UNICODE)
     wzorzec_przed = re.compile(rf"(\w+)\s+(?:{alt_slow})", re.UNICODE)
-    wzorzec_akcentu = re.compile(
-        rf"(?:{alt_slow})\s+(\w+)|(\w+)\s+(?:{alt_slow})",
-        re.UNICODE,
-    )
-    wzorzec_regul_lore = re.compile(
-        r"[\"'](\w)[\"']\s+na\s+[\"'](\w)[\"']",
-        re.IGNORECASE | re.UNICODE,
-    )
 
     def _nazwa_akcentu(opis: str) -> str | None:
-        """Kandydaci z obu stron wyzwalacza → pierwszy ZNANY, inaczej zastany.
+        """Kandydaci z obu stron wyzwalacza → pierwszy ZNANY albo ``None``.
 
         v19.1: zwracamy KANONICZNE ``id`` (`rozwiaz_nazwe_akcentu`), a nie
         słowo wpisane przez autora — konsumenci mapy (dispatch fonetyczny,
@@ -712,10 +852,7 @@ def zbuduj_mape_akcentow(lore_text: str, jezyk_projektu: str = "pl") -> dict[str
             rozwiazana = rozwiaz_nazwe_akcentu(kandydat, jezyk_projektu)
             if rozwiazana:
                 return rozwiazana
-        dopasowanie = wzorzec_akcentu.search(opis)
-        if not dopasowanie:
-            return None
-        return dopasowanie.group(1) or dopasowanie.group(2)
+        return None
 
     akcenty_map: dict[str, dict] = {}
     postacie_bloki = re.split(r"\[([^:\]\-]+).*?\]", lore_text)
@@ -723,9 +860,8 @@ def zbuduj_mape_akcentow(lore_text: str, jezyk_projektu: str = "pl") -> dict[str
         imie = postacie_bloki[i].strip().lower()
         opis = postacie_bloki[i + 1].lower() if i + 1 < len(postacie_bloki) else ""
         nazwa_akcentu = _nazwa_akcentu(opis)
-        reguly_lore = wzorzec_regul_lore.findall(opis)
-        if nazwa_akcentu or reguly_lore:
-            akcenty_map[imie] = {"nazwa": nazwa_akcentu, "reguly": reguly_lore}
+        if nazwa_akcentu:
+            akcenty_map[imie] = {"nazwa": nazwa_akcentu}
     return akcenty_map
 
 
@@ -740,11 +876,22 @@ def zastosuj_akcenty_uniwersalne(
     a następnie stosuje odpowiednią funkcję z ``core_poliglota`` na każdym
     fragmencie tekstu wypowiadanym przez tę postać (między tagami).
 
-    Obsługuje dwa tryby definicji akcentu w Księdze:
+    Akcent definiuje się w Księdze JEDNYM sposobem: nazwą z listy YAML-i
+    („akcent islandzki" — ``id`` pliku, natywny przymiotnik z ``etykieta``
+    albo forma odmieniona). Nazwa nierozpoznana = brak akcentu.
 
-        * nazwa akcentu z listy YAML-i ("akcent islandzki"),
-        * reguły ad-hoc ("zamień 'w' na 'v'") – stosowane znak po znaku,
-          tylko gdy nazwa akcentu nie została rozpoznana.
+    v19.3: usunięty drugi kanał — reguły ad-hoc („zamień 'w' na 'v'"),
+    stosowane znak po znaku, gdy nazwy nie udało się rozpoznać. Powody
+    (kolejność = waga): (1) spójnik ``na`` w ich wzorcu był zaszyty po
+    polsku, więc w 8 z 9 paczek mechanizm nie miał jak trafić; (2) żaden
+    podręcznik ani Manager Reguł tej składni nie opisywał, więc nikt nie
+    mógł się jej nauczyć — a żadna bramka jej nie pilnowała; (3) reguła
+    ad-hoc jest zapisana w Księdze, czyli w treści, którą model dostaje
+    w ``world_context`` KAŻDEGO trybu — jako instrukcja łamania ortografii.
+    Tryb z ``stosuj_akcenty_fonetyczne: true`` i bez własnego zabezpieczenia
+    kusiłby model, żeby wykonał ją sam (Python nałożyłby psucie po raz drugi)
+    albo odmówił payloadu. Psucie ortografii ma jedno źródło: plik
+    ``akcenty/<id>.yaml``, audytowany i wersjonowany.
 
     Jeśli Księga nie zawiera żadnych definicji akcentów, tekst zwracany
     jest bez zmian.
@@ -794,36 +941,18 @@ def zastosuj_akcenty_uniwersalne(
                     None,
                 )
                 if dopasowane_dane:
-                    zmodyfikowano = False
-                    if dopasowane_dane["nazwa"]:
-                        # Dynamiczny dispatch (v17.5): akcent jest „znany", gdy
-                        # istnieje jego YAML (kategoria=='akcent') w języku
-                        # projektu. Brak pliku → spadamy do reguł ad-hoc niżej,
-                        # zamiast — jak dawny statyczny whitelist — oznaczać
-                        # fragment jako zmodyfikowany mimo braku reguł fonetycznych.
-                        # v18.25: to samo kryterium wybiera nazwę w parserze
-                        # Księgi — jeden warunek, nie dwa.
-                        # v19.1: rozstrzyga JEDNO wywołanie, które zwraca już
-                        # kanoniczne `id`. Rozdzielenie „sprawdź nazwę" od
-                        # „nałóż regułę" było miną: po dopuszczeniu form
-                        # fleksyjnych i natywnych `zastosuj_reguly_fonetyczne`
-                        # dostawałoby nazwę, dla której `wariant_po_id` zwraca
-                        # pustkę — czyli akcent „nałożony" bez ani jednej
-                        # reguły, w ciszy.
-                        id_akcentu = rozwiaz_nazwe_akcentu(
-                            dopasowane_dane["nazwa"], jezyk_projektu)
-                        if id_akcentu:
-                            dialog = zastosuj_reguly_fonetyczne(
-                                dialog, id_akcentu, jezyk_projektu
-                            )
-                            zmodyfikowano = True
-                    if not zmodyfikowano and dopasowane_dane["reguly"]:
-                        for z, na in dopasowane_dane["reguly"]:
-                            dialog = (
-                                dialog
-                                .replace(z.lower(), na.lower())
-                                .replace(z.upper(), na.upper())
-                            )
+                    # Dynamiczny dispatch (v17.5): reguły czytamy z YAML-a
+                    # akcentu w języku projektu, na bieżąco. Nazwa w mapie jest
+                    # już KANONICZNYM `id` (v19.1 + v19.3 — parser Księgi nie
+                    # przepuszcza nierozpoznanych nazw), więc nie rozwiązujemy
+                    # jej tu po raz drugi. Rozdzielenie „sprawdź nazwę" od
+                    # „nałóż regułę" było miną: po dopuszczeniu form fleksyjnych
+                    # i natywnych `zastosuj_reguly_fonetyczne` dostawałoby
+                    # nazwę, dla której `wariant_po_id` zwraca pustkę — czyli
+                    # akcent „nałożony" bez ani jednej reguły, w ciszy.
+                    dialog = zastosuj_reguly_fonetyczne(
+                        dialog, dopasowane_dane["nazwa"], jezyk_projektu
+                    )
             nowe_fragmenty.append(dialog)
 
     return "".join(nowe_fragmenty)
@@ -1138,13 +1267,17 @@ class ProjektRezysera:
         pamiec_odrzucona = self._rozstrzygnij_pamiec(nazwa, wybor_pamieci)
 
         # --- Liczniki: bierzemy maksimum znalezionych numerów i +1 ---
-        chapter_nums = [int(m) for m in re.findall(_WZORZEC_ROZDZIAL, content)]
-        akt_nums = [int(m) for m in re.findall(_WZORZEC_AKT, content)]
+        chapter_nums = [
+            int(m) for m in re.findall(wzorzec_naglowka("rozdzial"), content)
+        ]
+        akt_nums = [int(m) for m in re.findall(wzorzec_naglowka("akt"), content)]
         # Sceny liczymy tylko wewnątrz OSTATNIEGO aktu – numeracja
         # scen restartuje się z każdym aktem.
-        ostatni_split = re.split(_WZORZEC_AKT.replace(r"(\d+)", r"\d+"), content)
+        ostatni_split = re.split(wzorzec_naglowka("akt_bez_numeru"), content)
         ostatni_frag = ostatni_split[-1] if ostatni_split else content
-        scena_nums = [int(m) for m in re.findall(_WZORZEC_SCENA, ostatni_frag)]
+        scena_nums = [
+            int(m) for m in re.findall(wzorzec_naglowka("scena"), ostatni_frag)
+        ]
 
         self.chapter_counter = (max(chapter_nums) + 1) if chapter_nums else 1
         self.akt_counter = (max(akt_nums) + 1) if akt_nums else 1
@@ -1765,16 +1898,18 @@ class ProjektRezysera:
     def zapisz_brainstorm(
         self,
         opcje: list[dict[str, str]],
-        streszczenie: str = "",
     ) -> str:
         """Zapisuje wynik Burzy do `runtime/skrypty/<nazwa>.brainstorm.json`.
 
         Args:
-            opcje:        Lista dictów ``{"tytul", "opis", "cel_sceny"}``.
-                          GUI tworzy je z :class:`rezyser_ai.OpcjaBurzy`
-                          przez ``dataclasses.asdict`` lub ręczne mapowanie.
-            streszczenie: Opcjonalna treść streszczenia (sufiks alarm/
-                          streszczenie). Pusty string gdy bez streszczenia.
+            opcje: Lista dictów ``{"tytul", "opis", "cel_sceny"}``.
+                   GUI tworzy je z :class:`rezyser_ai.OpcjaBurzy`
+                   przez ``dataclasses.asdict`` lub ręczne mapowanie.
+
+        v19.3: parametr ``streszczenie`` usunięty razem z kluczem JSON
+        (uzasadnienie → `rezyser_ai.SCHEMA_BURZA`). Pliki zapisane wcześniej
+        wczytują się dalej — :meth:`wczytaj_brainstorm` czyta wyłącznie
+        ``opcje`` i nadmiarowy klucz ignoruje.
 
         Zwraca ścieżkę zapisanego pliku. Nadpisuje plik (overwrite, jak
         `.mode`) — każda nowa Burza zastępuje poprzednią; do historii
@@ -1798,7 +1933,6 @@ class ProjektRezysera:
         payload = {
             "wersja": 1,
             "opcje": opcje_clean,
-            "streszczenie": streszczenie or "",
         }
         import json  # noqa: PLC0415  (lazy — używane tylko przy I/O brainstorm)
         with open(sciezka, "w", encoding="utf-8") as fh:
@@ -1813,9 +1947,10 @@ class ProjektRezysera:
         """Wczytuje plik `runtime/skrypty/<nazwa>.brainstorm.json`.
 
         Returns:
-            Dict ``{"opcje": [...], "streszczenie": str}`` gdy plik istnieje
-            i parsuje się jako JSON. ``None`` gdy brak pliku, błąd parsowania,
-            albo `opcje` puste (uznajemy za niezdatny do GUI).
+            Dict ``{"opcje": [...]}`` gdy plik istnieje i parsuje się jako
+            JSON. ``None`` gdy brak pliku, błąd parsowania, albo `opcje`
+            puste (uznajemy za niezdatny do GUI). Klucze spoza ``opcje``
+            (m.in. ``streszczenie`` z plików do v19.2) są ignorowane.
 
         GUI wywołuje to po :meth:`wczytaj` żeby odbudować przyciski opcji
         — bez wymagania od gracza ponownej Burzy. Po sukcesie produkcyjnym
@@ -1837,10 +1972,7 @@ class ProjektRezysera:
         opcje = dane.get("opcje") or []
         if not opcje:
             return None
-        return {
-            "opcje":        list(opcje),
-            "streszczenie": str(dane.get("streszczenie", "")),
-        }
+        return {"opcje": list(opcje)}
 
     def usun_brainstorm(self, nazwa: str | None = None) -> None:
         """Usuwa plik brainstorm (cichy fail jeśli nie istnieje).
@@ -2050,27 +2182,55 @@ class ProjektRezysera:
         """True gdy w RAM jest już historia lub streszczenie (blokuje zmianę projektu)."""
         return bool(self.full_story.strip() or self.summary_text.strip())
 
+    def _naglowki_typu(self, typ: str) -> list[int]:
+        """Offsety LINII, które są czystym nagłówkiem danego typu.
+
+        v19.3 — LICZY SIĘ LINIA, NIE SŁOWO W PROZIE. Trzy właściwości niżej
+        pytały o to `re.search`iem po CAŁYM tekście: dopóki wzorzec był ręcznym
+        `\\bprolog\\b`, w obcych paczkach po prostu nie trafiał. Po przejściu na
+        słowa z paczek alternatywa zna „epilogue"/„epílogo"/„Эпилог"…, więc
+        zdanie „She read the epilogue and closed the book." ustawiłoby
+        `epilog_ma_tresc`, a `gui_rezyser._refresh_ui_state` wyłączyłby przycisk
+        „Wyślij" NA STAŁE i bez komunikatu (zmierzone w audycie na 8 z 9
+        paczek). Nagłówek to linia złożona WYŁĄCZNIE z nagłówka — dokładnie to,
+        co rozstrzyga `_znajdz_naglowki` + `_rozbij_naglowek`.
+
+        Drugi zysk jest wydajnościowy: te właściwości wiszą na `EVT_TEXT` pola
+        Instrukcji (`_refresh_ui_state` czyta je przy każdym naciśnięciu
+        klawisza), a `re.search` długą alternatywą po całej historii kosztował
+        na 1 MB ~71 ms. Skan po liniach pada na pierwszym znaku linii prozy.
+        """
+        return [
+            offset
+            for offset, tekst in _znajdz_naglowki(self.full_story)
+            if _rozbij_naglowek(tekst)[0] == typ
+        ]
+
     @property
     def ma_prolog(self) -> bool:
-        """True gdy pamięć zawiera nagłówek Prolog (gdziekolwiek)."""
-        return bool(re.search(r"(?i)\bprolog\b", self.full_story))
+        """True gdy pamięć zawiera LINIĘ-nagłówek Prolog (gdziekolwiek)."""
+        return bool(self._naglowki_typu("prolog"))
 
     @property
     def ma_epilog(self) -> bool:
-        """True gdy pamięć zawiera nagłówek Epilog."""
-        return bool(re.search(r"(?i)\bepilog\b", self.full_story))
+        """True gdy pamięć zawiera LINIĘ-nagłówek Epilog."""
+        return bool(self._naglowki_typu("epilog"))
 
     @property
     def epilog_ma_tresc(self) -> bool:
         """True gdy po Epilogu jest już jakaś treść (historia zamknięta).
 
         Używane przez GUI do blokady dalszego generowania fragmentów
-        po zakończeniu historii.
+        po zakończeniu historii. Bierzemy PIERWSZY nagłówek epilogu (jak dawne
+        `re.search`) i patrzymy, czy po jego LINII zostało cokolwiek nie-białe.
         """
-        m = re.search(r"(?i)\bepilog\b", self.full_story)
-        if m is None:
+        offsety = self._naglowki_typu("epilog")
+        if not offsety:
             return False
-        return len(self.full_story[m.end():].strip()) > 0
+        po_naglowku = self.full_story[offsety[0]:]
+        nowa_linia = po_naglowku.find("\n")
+        reszta = po_naglowku[nowa_linia + 1:] if nowa_linia != -1 else ""
+        return bool(reszta.strip())
 
     @property
     def ostatnia_linia_to_naglowek(self) -> bool:
@@ -2082,7 +2242,7 @@ class ProjektRezysera:
         """
         for linia in reversed(self.full_story.splitlines()):
             if linia.strip():
-                return bool(re.match(_WZORZEC_NAGLOWEK_LINIA, linia.strip()))
+                return bool(re.match(wzorzec_naglowka("linia"), linia.strip()))
         return False
 
     # ------------------------------------------------------------------
