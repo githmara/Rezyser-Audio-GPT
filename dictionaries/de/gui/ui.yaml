@@ -622,6 +622,7 @@ rezyser:
   btn_sr_label: 📖 Version für Screenreader generieren
   btn_sr_name: Version für Screenreader generieren
   btn_sr_tooltip: "Erstellt die Datei skrypty/<nazwa>_screen_reader.html: Akzente durch Rechtschreibfehler + Sprachkennzeichen, Audio-Tags entfernt.\nErfordert eine gespeicherte Projektdatei; das Buch der Welt bestimmt, welche Figur welchen Akzent hat."
+  sr_html_tytul: '{nazwa_projektu} — Version für Screenreader'
   sr_sukces_tytul: Version für Screenreader fertig
   sr_sukces_tresc: 'Datei für Screenreader gespeichert: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Fehler beim Generieren der Version für Screenreader

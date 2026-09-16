@@ -566,6 +566,10 @@ rezyser:
   btn_sr_tooltip: |-
     Tworzy plik skrypty/<nazwa>_screen_reader.html: akcenty przez psucie ortografii + znacznik języka, audio-tagi usunięte.
     Wymaga zapisanego pliku projektu; Księga Świata określa, która postać ma jaki akcent.
+  # TYTUŁ DOKUMENTU WYNIKOWEGO (element <title> w HTML-u), nie napis w GUI —
+  # dlatego bierze się z języka TREŚCI przepisu, tak jak atrybut <html lang>
+  # obok niego (`i18n.t(..., jezyk_override=<kod jezyka projektu>)`).
+  sr_html_tytul: "{nazwa_projektu} — wersja dla czytników ekranu"
   sr_sukces_tytul: "Wersja dla czytników ekranu gotowa"
   sr_sukces_tresc: "Zapisano plik dla czytników ekranu: skrypty/{nazwa_pliku}_screen_reader.html"
   sr_blad_tytul: "Błąd generowania wersji dla czytników ekranu"

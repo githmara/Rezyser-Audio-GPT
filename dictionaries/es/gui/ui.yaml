@@ -622,6 +622,7 @@ rezyser:
   btn_sr_label: 📖 Generar versión para lectores de pantalla
   btn_sr_name: Generar versión para lectores de pantalla
   btn_sr_tooltip: "Crea el archivo skrypty/<nazwa>_screen_reader.html: acentos mediante alteración ortográfica + etiqueta de idioma, etiquetas de audio eliminadas.\nRequiere un archivo de proyecto guardado; el Libro del Mundo determina qué personaje tiene qué acento."
+  sr_html_tytul: '{nazwa_projektu} — versión para lectores de pantalla'
   sr_sukces_tytul: Versión para lectores de pantalla lista
   sr_sukces_tresc: 'Archivo para lectores de pantalla guardado: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Error al generar la versión para lectores de pantalla

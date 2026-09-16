@@ -32,8 +32,6 @@
     "POSSIBLE|znak-PL:ć|ć",
     "POSSIBLE|znak-PL:ćę|Brak nazwy projektu — nie mogę zapisać obsady.",
     "POSSIBLE|znak-PL:ę|ę",
-    "POSSIBLE|znak-PL:ł|(?i)\\b(?:rozdzia[łl]|chapter|chapitre|kapitel|capitolo|capítulo|luku|kafli|глава)\\s+(\\d+)",
-    "POSSIBLE|znak-PL:ł|(?i)^(?:(?:rozdzia[łl]|chapter|chapitre|kapitel|capitolo|capítulo|luku|kafli|глава)\\s+\\d+|(?:akt|acte|acto|atto|act|näyt",
     "POSSIBLE|znak-PL:ł|ProjektRezysera: operacja wymaga ustawionej nazwa_pliku (ustaw self.nazwa_pliku lub najpierw wywołaj wczytaj()).",
     "POSSIBLE|znak-PL:ł|Rozdział",
     "POSSIBLE|znak-PL:ł|ł",
@@ -41,9 +39,6 @@
     "POSSIBLE|znak-PL:ś|ś",
     "POSSIBLE|znak-PL:ź|ź",
     "POSSIBLE|znak-PL:ż|ż"
-  ],
-  "core_screen_reader.py": [
-    "POSSIBLE|lingua:PL|<!DOCTYPE html> <html lang=\"{…}\"> <head> <meta charset=\"utf-8\"> <title>{…} — wersja dla czytników ekranu</title> </head>"
   ],
   "core_updater.py": [
     "POSSIBLE|lingua:PL|Plik VERSION jest pusty.",

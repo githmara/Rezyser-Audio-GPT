@@ -394,6 +394,20 @@ _CHECKLIST_UI = """\
   — but "málsgrein" is Icelandic for SENTENCE; the pack's other 15 mentions
   use the correct "efnisgrein". Two keys inherited the error before it was
   caught, and all four were normalized in v19.2.
+  WHEN THE GREP RETURNS TWO ANSWERS, the sibling keys win over the manuals.
+  Measured 2026-09-16 (v19.3.1), on a new key for the screen-reader document
+  title: `de/ui.yaml` says "Screenreader" in every `rezyser.sr_*` key, while
+  `de` documentation says "Bildschirmleseprogramm" in 13 places; `it/ui.yaml`
+  says "lettori di schermo" in the same keys and "screen reader" in its prose.
+  The model returned the DOCS word for both — plausible, and wrong for a
+  `<title>` that sits next to those keys. Tie-break: the other keys of the
+  SAME feature in THIS file, plus the canon table above; never the manuals,
+  whose prose is written per passage. Do NOT add these to
+  `audyt_leakow.DRIFT_VARIANTS` — probed the same day: the calques are
+  established usage in those manuals, so the gate would fire on legitimate
+  prose (13 hits in `de` docs alone) and earn a baseline entry, which is the
+  noisy-gate anti-pattern. This bullet is the gate; `test_tytul_screen_readera.py`
+  covers only the narrower property that the title comes from a pack at all.
 - TOOLTIP vs LABEL are SEPARATE keys for the same control — translate both.
 - FILE-DIALOG WILDCARDS (`poliglota.file_dlg_wildcard`): the `*.ext` patterns
   and the `|` separators are LITERALS for the OS dialog — translate only the

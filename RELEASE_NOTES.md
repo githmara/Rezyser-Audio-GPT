@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.3.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.3.1 „Wersja Wydawnicza"
+
+*Patch v19.3.1: dokument dla czytników ekranu przestaje mówić o sobie dwie różne rzeczy w dwóch kolejnych linijkach. Tytuł był sklejany z zaszytego polskiego sufiksu, a atrybut `<html lang>` linijkę wyżej brał język projektu — fiński projekt dostawał więc `lang="fi"` plus polski tytuł, a syntezator wykonywał polecenie dosłownie i czytał polskie słowa fińskim głosem; sąsiedni dispatch akcentów w TYM SAMYM module przeszedł na `jezyk_override` już w v17.9, tylko tytuł go nie dostał. Ciekawsza jest jednak druga połowa: przeciek nie był niewykryty, był ZBASELINE'OWANY — bramka literałów go widziała, a wpis stał w baseline jako zaakceptowany. Triaż wszystkich 110 trafień pokazał, że był jedyny w swojej klasie: każdy inny polski literał ma tam uzasadnienie (wyjątek dla dewelopera, regex, alfabet, kanon polskich nazw języków, prompt Managera Reguł, świadomie zaszyty dialog crashu, fallback klucza `baza.yaml`), a ten łączył dwie cechy naraz — bezwarunkowo wchodził do artefaktu użytkownika i nie miał żadnego źródła w YAML-u. Naprawa to klucz `rezyser.sr_html_tytul` w dziewięciu paczkach plus `jezyk_override`, przy czym brak klucza NIE odtwarza przecieku (`i18n.t` spada na EN, nigdy na PL — zmierzone na nieistniejącej paczce `sv`). Lekcja weszła jako bramka, nie akapit: `test_tytul_screen_readera.py` pilnuje, że tytuł jest dokładnie wartością paczki przepuszczoną przez `html.escape`, że polski sufiks nie trafia do dokumentu żadnego innego języka i że dziesiąty język nie wymaga Pythona — a sama bramka została zweryfikowana OD STRONY PORAŻKI (przywrócenie szablonu z v19.3.0 wywraca dwa z pięciu testów). Tryb chirurgiczny autotłumacza pokazał przy okazji swoją cenę: tłumaczenie jednego klucza nie daje modelowi rodzeństwa do przeczytania, więc wróciły trzy kalki rozjechane z własnymi paczkami (`de`, `it`, `ru`), poprawione ręcznie wobec kluczy `sr_*` i tabeli kanonu. Baseline literałów okazał się zwietrzały o dwa wydania — regeneracja usunęła dwa wpisy po literałach, które wypadły z kodu w v19.1/v19.3 — co złapał wyłącznie odruch czytania jego diffu w OBIE strony. Odrzucone w tym wydaniu: `pyperclip` (wx ma schowek natywnie, a repo już z niego korzysta w dwóch miejscach) oraz parser `IMIĘ: kwestia`, do którego wracamy wyłącznie po zgłoszeniu, bo `_RE_TAG` jest wspólny ze ścieżką wydającą pieniądze na render, a reguła zakresu mówi, że Reżyser przyjmuje to, co sam potrafi wyprodukować. Odruch zależnościowy przed zamrożeniem dołożył `openai` 3.14.0 → 3.14.1 — wydanie, które manifest już dopuszczał, więc granica została nietknięta, a cała wołana powierzchnia SDK potwierdzona wykonaniem, bez ani jednego zapytania do API. Dla użytkownika końcowego: plik `<projekt>_screen_reader.html` ma wreszcie tytuł w języku swojej treści.*
 
 *Release v19.3.0: dwa ciche kanały Reżysera zamknięte, a wzorce nagłówków przestają być listą języków wypisaną w Pythonie. PIERWSZY kanał: klucz JSON `streszczenie` w Burzy Mózgów był polem OPCJONALNYM, o którym prompt nie mówi ani słowa od 18.13 — nieszkodliwym dokładnie do refaktoru na structured outputs, bo potem gałąź tury każe modelowi „wypełnić WSZYSTKIE pola", więc pole bez instrukcji dostaje znaczenie wymyślone przez model. Zmierzone na realnym projekcie: siedziała tam ZAPOWIEDŹ przyszłych zdarzeń, a GUI podstawiało ją jako Pamięć Długotrwałą, która ma streszczać PRZESZŁOŚĆ — automatycznie, bez pytania; bliźniacza droga (tag `<STRESZCZENIE>`) robiła to samo dla każdego trybu planowania. DRUGI kanał: reguły akcentu pisane wprost w Księdze Świata (`'w' na 'v'`) — spójnik zaszyty po polsku, więc w 8 z 9 paczek bez szans na trafienie, składnia nieudokumentowana nigdzie, bez bramki, a treść reguły jedzie do modelu w `world_context` KAŻDEGO trybu jako instrukcja łamania ortografii. Trzeci wątek: dziesiąty język nie wymaga już Pythona — wzorce nagłówków czytają słowa z paczek, czyli stąd, skąd silnik je wstawia, bo tryb porażki był w całości cichy (nierozpoznany nagłówek → rekoncyliacja oddaje CAŁĄ narrację, punkt odniesienia pamięci spada na cięcie znakowe). Audyt przed zamknięciem zarobił na siebie od razu: poszerzenie alternatywy o obce języki sprawiło, że zdanie prozy ze słowem „epilogue" wyłączało przycisk „Wyślij" na stałe i bez komunikatu w 8 z 9 paczek — liczą się odtąd LINIE będące nagłówkiem, co zdjęło też 21,5 ms → 0,88 ms z każdego naciśniętego klawisza. Dla użytkownika końcowego: panel Burzy traci pole, które podsuwało zapowiedź przyszłości (i nad którym NVDA czytała etykietę całego panelu), a islandzki prolog zaczyna być nagłówkiem „Heading 1" w Wordzie.*
 
@@ -71,6 +73,204 @@
 *Release v18.8.0: owoce testu maintainera „polskie UI na fińskiej treści" (Poliglota offline) — jeden bug krytyczny plus dwa niedociągnięcia międzynarodowości. **(1) BUG KRYTYCZNY: tagi `lang` per akapit liczone na tekście JUŻ zniekształconym transformacją.** Silnik od 13.5 MA mechanizm detekcji języka per akapit wykonywanej PRZED transformacją (side-channel `opcje["_segmenty_wynikowe"]`), ale kanał był martwy od urodzenia: GUI wołało `przetworz(..., **opcje)`, Python REPAKOWAŁ kwargi do nowego słownika i mutacje silnika nigdy nie wracały do GUI — `zapisz_wynik` zawsze spadał na detekcję „na żywo" po wyniku. Dla typoglikemii na fińskim tekście lingua strzelała `lang="de"` na akapitach nagłówkowych (dowód: pochodne `explore_raport`); dla cezara fałszerstwo byłoby totalne. Ten sam martwy kanał ukrywał DWA bugi-rodzeństwo cezara z losowym przesunięciem: komunikat „wylosowano N" nigdy się nie pokazywał, a nazwa pliku traciła sufiks `±N` — czyli zaszyfrowany plik był praktycznie nieodwracalny dla usera. Fix: `przetworz` przyjmuje jawny, MUTOWALNY słownik `opcje=` (przez referencję); jeden korzeń naprawia trzy objawy. **(2) Lokalizacja sklejek nazw plików wynikowych.** Prefiksy `naprawiony_/oczyszczony_/_akcent_/_szyfr_/_tlumaczenie_/architektura_` były polskim hard-kodem — koszmar dla niepolskich syntezatorów (fińska Satu czytająca „tlumaczenie" jako [tumaksenije]). Teraz człony pochodzą z `ui.yaml` (klucze `filename_*` ×9 języków, w języku UI: fi `salaus/käännös/arkkitehtuuri`, is `dulkóðun/þýðing`, ru `шифр/перевод`…), z Unicode-safe sanityzacją i twardym fallbackiem na polskie defaulty; `id` wariantu pozostaje techniczne. Manuale zlokalizowane w ślad (przykłady `architektura_` → natywne). **(3) A11y: spin przesunięcia Cezara ukryty dla nie-cezarowych szyfrów** (NVDA nie ogłasza już martwego pola; wzorzec show/hide jak przy polu ISO naprawiacza). **(4) Dokumentacja user-facing przechodzi z .txt na HTML renderowany z Markdownu.** Szablony `dokumentacja/*.yaml` są od teraz pisane w MD (mechaniczna migracja: nagłówki `#`/`##` per sekcja + backticki wokół `<placeholderów>` ×9 języków, z autotestem integralności treści), a `generuj_dokumentacje.py` renderuje `docs/<id>.<iso>.html` (biblioteka `markdown`, nl2br + sane_lists) z pełnym dokumentem HTML5: `<html lang="<iso>">` przełącza syntezator czytnika ekranu na język treści, nagłówki dają nawigację klawiszami 1-6/h w NVDA, a minimalny CSS (z trybem ciemnym) czyta się dobrze też wzrokiem — koniec „obleśnego" gołego .txt w Notatniku. README bez zmian (surowy MD dla GitHuba). Menu Pomoc, `installer.iss` (checkbox „otwórz manual" + sprzątanie osieroconych `docs\*.txt` przy upgrade) i `build_release` przepięte; nowa bramka RAW-HTML w `--waliduj` pilnuje, żeby żaden surowy `<fragment>` z szablonu nie został połknięty przez przeglądarkę. Przy okazji naprawione martwe odwołanie w 9 manualach: przewodnik Opowieści to `tales.<iso>.html`, nie `opowiesci.pl.txt`/`tarinat.fi.txt`/`recits.fr.txt` (plik o tych nazwach nigdy nie istniał).*
 
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
+
+---
+
+## 19.3.1 — patch release (the screen-reader document stops declaring one language and speaking another, and a baselined leak turns out to be the only one of its kind)
+
+### 🆕 What's new (English)
+
+**The screen-reader HTML no longer contradicts itself in two consecutive lines.** The
+document title was assembled from a hard-coded Polish suffix, while the `<html lang>`
+attribute right above it came from the project language. A Finnish project therefore got
+`<html lang="fi">` plus a Polish title — and a screen reader does exactly what it is told:
+it read the Polish words with a Finnish voice. The title now comes from
+`rezyser.sr_html_tytul` in the content language's pack, resolved with the same
+`jezyk_override` the accent dispatch in that very module switched to back in v17.9.
+
+**The leak was not undetected — it was baselined, and that is the more interesting half.**
+`audyt_leakow --bramka-py` had flagged the string and the entry sat in
+`audyt_leakow_py_baseline.json` as an accepted leak. Triaging all 110 hits in that baseline
+showed the entry was the only one of its class: every other Polish literal there is a
+developer-facing exception, a regex, an alphabet, a curated Polish language name, a Rule
+Manager prompt (the end user's own path), a deliberately hard-coded crash dialog, or a
+last-resort fallback for a `baza.yaml` key. This one was different on two counts at once —
+it reached a **user-facing artifact unconditionally**, and it had **no YAML source at all**.
+
+**A missing key can no longer recreate the leak.** `i18n.t` falls back to English, never to
+Polish, so a pack without the key yields an English title; measured on a non-existent `sv`
+pack. The property is now pinned by a gate rather than by this paragraph:
+`test_tytul_screen_readera.py` (5 tests) checks that every installed pack resolves the key,
+that the title equals the pack's value passed through `html.escape`, that the Polish suffix
+appears in no other language's document, and that a stub tenth-language pack governs the
+title with no Python change. The gate was verified **negatively** — restoring the v19.3.0
+template makes two of its tests fail and name the offending pack.
+
+**A side effect of the same run: the `.py` baseline was two releases stale.** Regenerating
+it also dropped two `core_rezyser.py` entries that this change never touched — chapter-heading
+regexes whose literals left the code in v19.1/v19.3, while the baseline was last committed
+in v18.29. Removing an entry never fails a gate, so nobody saw it. Reading the baseline diff
+in both directions is the habit that caught it.
+
+### 🔭 Planned / deferred (English)
+
+- **`pyperclip` was considered and rejected outright.** Clipboard support for the Polyglot
+  module was on the table for this release; the repository already reads and writes the
+  clipboard through `wx.TheClipboard` in two places, and the read path was confirmed by
+  execution. A new runtime dependency — inside the PyInstaller bundle and under the
+  manifest's version-bound policy — buys nothing the GUI framework does not already own.
+- **A `NAME: line` parser for classically written plays is deferred until somebody reports
+  wanting it.** The speaker tag is constitutively bracketed (`\s*(\[[^\]]+\])(.*)`), so such
+  a play yields zero recognised speakers and a screen-reader file with no per-character
+  accents. Clipboard input would not have fixed that: the Polyglot engine has no notion of a
+  speaker at all and applies one rule per paragraph. The real fix is a parser change, and
+  `_RE_TAG` is shared with the ElevenLabs bridge — the path that spends money on renders —
+  so it is a design decision, not a patch tail. The scope rule behind the deferral: the
+  **Director accepts what it can itself produce** and does not reach beyond that, whereas
+  **Polyglot and the Converter accept arbitrary input by design**. No current mode emits a
+  classically written play, so nothing in the product contradicts that boundary today.
+- **`de` and `it` disagree with themselves about the term "screen reader", and this release
+  did not settle it.** `Bildschirmlese*` appears 13 times in the German manuals while the
+  German GUI keys say `Screenreader`; the Italian manuals and parts of `it/ui.yaml` say
+  `screen reader` while its `sr_*` keys say `lettori di schermo`. The new key follows the
+  sibling GUI keys and the canon table. Fixing the manuals is prose work plus a docs
+  regeneration, on its own.
+- **Deliberately NOT turned into a gate:** adding those calques to
+  `audyt_leakow.DRIFT_VARIANTS` was probed and rejected — it would fire on established,
+  legitimate manual prose (13 hits in the German docs alone) and earn a baseline entry,
+  which is the noisy-gate anti-pattern. The lesson went into the review checklist instead.
+- The remainder of these notes is in Polish: dense diagnostics for the maintainer.
+
+### TL;DR — co się zmieniło
+
+**Jeden przeciek treściowy, ale jego wartość jest w klasie, nie w rozmiarze.** Generator
+wersji dla czytników ekranu sklejał `<title>` z zaszytego polskiego sufiksu, podczas gdy
+atrybut `<html lang>` linijkę wyżej brał język projektu. Dokument mówił więc dwie różne
+rzeczy o sobie samym w dwóch kolejnych linijkach, a adresat pliku — syntezator mowy —
+wykonywał polecenie dosłownie i czytał polski tytuł fińskim głosem. Sąsiedni dispatch
+akcentów w TYM SAMYM module przeszedł na `jezyk_override` już w v17.9; tytuł go nie dostał.
+
+**„Niewykryty czy zbaseline'owany" → zbaseline'owany, i to jest ciekawsza połowa.** Bramka
+literałów widziała ten string, a wpis stał w baseline jako przeciek zaakceptowany. Triaż
+wszystkich 110 trafień tego pliku pokazał, że był **jedyny w swojej klasie**: każdy inny
+polski literał ma tam uzasadnienie (wyjątek dla dewelopera, regex, alfabet, kanon polskich
+nazw języków, prompt Managera Reguł, świadomie zaszyty dialog crashu, fallback klucza
+`baza.yaml`). Ten łączył dwie cechy naraz — bezwarunkowo wchodził do **artefaktu
+użytkownika** i **nie miał żadnego źródła w YAML-u**.
+
+**Lekcja weszła jako bramka, nie jako akapit** — i została zweryfikowana od strony porażki,
+nie tylko „na zielono".
+
+### Co nowego
+
+**Nowy klucz `rezyser.sr_html_tytul` w dziewięciu paczkach.** Wartość PL to
+`"{nazwa_projektu} — wersja dla czytników ekranu"`, z komentarzem w źródle mówiącym, czym
+ten napis jest: tytułem DOKUMENTU, nie napisem w GUI, więc jedzie językiem treści przepisu.
+`core_screen_reader._szablon` rozwiązuje go przez `i18n.t(..., jezyk_override=lang, ...)`,
+gdzie `lang` jest tożsamy z `jezyk_projektu` — jednocześnie atrybutem dokumentu i kodem
+paczki. Moduł pozostaje wx-free: `core_rezyser`, który i tak ciągnie, importuje `i18n` od
+dawna, więc nie ma tu ryzyka cyklu.
+
+**Brak klucza nie odtwarza przecieku.** `i18n.t` spada na EN, nigdy na PL — dla paczki `sv`,
+której w repozytorium NIE MA, tytuł wychodzi angielski (zmierzone), a nie polski.
+
+**Nowa bramka `test_tytul_screen_readera.py` (5 testów).** Pilnuje czterech własności:
+każda zainstalowana paczka rozwiązuje klucz (zero placeholderów `[rezyser.…]`); tytuł jest
+DOKŁADNIE wartością paczki przepuszczoną przez `html.escape`; polski sufiks nie pojawia się
+w dokumencie żadnego innego języka; paczka-atrapa `sv` rządzi tytułem, czyli dziesiąty język
+nie wymaga Pythona. Piąty test pilnuje escapowania nazwy projektu (`<b>`, `&`).
+
+### Pod maską
+
+**Bramka ma zęby, i to jest dowód z uruchomienia.** Po podstawieniu `_szablon` w kształcie
+z v19.3.0 dwa testy padają, wskazując paczkę w komunikacie. Bramka zielona na kodzie, którego
+nie potrafi obalić, nie jest bramką.
+
+**Porównanie idzie do wartości ESCAPOWANEJ, i to nie jest szczegół stylu.** Pierwsza wersja
+testu porównywała `<title>` z surową wartością paczki i przewróciła się na `fr` —
+francuski klucz ma apostrof (`lecteurs d'écran`), więc w dokumencie stoi `&#x27;`. Kod był
+poprawny, oczekiwanie testu nie. Po zmianie test przypina dwie rzeczy naraz: źródło napisu
+ORAZ to, że przechodzi przez `html.escape`.
+
+**Trzy kalki z trybu chirurgicznego `-k`, wszystkie poprawione ręcznie.** Tłumaczenie
+JEDNEGO klucza nie daje modelowi rodzeństwa do przeczytania, więc wróciło: `de`
+„Bildschirmleseprogramme" (paczka mówi `Version für Screenreader` w każdym kluczu `sr_*`),
+`it` „screen reader" (paczka: `Versione per lettori di schermo`), `ru` „программ экранного
+доступа" (paczka: `Версия для скринридеров`). Wszystkie trzy poprawki zgadzają się też
+z tabelą kanonu w `przeglad_tlumaczen.py`. Dodatkowo klucz został w ośmiu paczkach
+przeniesiony na pozycję obok rodzeństwa `sr_*`: `-k` dopisuje nowy liść na KOŃCU sekcji
+`rezyser:`, czyli dokładnie tam, gdzie następny recenzent nie zobaczy go w kontekście.
+
+**Checklista przeglądu dostała niuans, nie nowy bullet.** Reguła „ONE CONCEPT, ONE WORD"
+już mówiła, że model tłumaczy klucz w izolacji i nie czyta sąsiadów — dlatego te trzy kalki
+zostały złapane. Brakowało rozstrzygnięcia sytuacji, w której „grep po paczce" zwraca DWIE
+odpowiedzi: wygrywają klucze tej samej funkcji w `ui.yaml` plus tabela kanonu, nigdy proza
+podręczników, pisana per akapit.
+
+**Baseline literałów był zwietrzały o dwa wydania.** Regeneracja usunęła też dwa wpisy
+`core_rezyser.py` (regexy nagłówków rozdziałów), których to wydanie nie tknęło: literały
+wypadły z kodu w v19.1/v19.3, a baseline commitowano ostatnio w v18.29. Usunięcie wpisu
+nie wywala bramki, więc nikt tego nie widział — złapał to odruch czytania diffu baseline'u
+w OBIE strony. Przy okazji potwierdzone wykonaniem: skaner nie liczy docstringów, więc nowy,
+obszerny polski docstring w `core_screen_reader` nie wyprodukował trafienia.
+
+**`openai` 3.14.0 → 3.14.1 — decyzja, nie automat.** Odruch `audyt_zaleznosci.py --strict`
+przed zamrożeniem wskazał wydanie, które manifest JUŻ dopuszczał (`openai<4`), więc granica
+została nietknięta: zmiana granicy byłaby NOWĄ decyzją zawężającą, a uzasadnienie tej
+granicy jest majorowe („4.x będzie nowym majorem SDK"). Zostawienie 3.14.0 w środowisku przy
+manifeście wpuszczającym 3.14.1 znaczyłoby, że kontrybutor dostaje wersję, której my nie
+sprawdziliśmy — i właśnie tę asymetrię ten odruch zamyka. Powierzchnia potwierdzona
+WYKONANIEM, nie changelogiem: `openai.OpenAI(api_key=, base_url=)`,
+`with_options(timeout=)` oraz wszystkie sześć kwargów, które realnie wysyłamy do
+`chat.completions.create`: `model`, `messages`, `temperature`, `response_format` oraz OBA
+klucze limitu tokenów — `max_tokens` i `max_completion_tokens`, bo ostatni szczebel drabiny
+degradacji używa drugiego z nich (rodziny o-*/gpt-5). Zero wywołań sieciowych, zero kosztu API. `requirements.txt` bez
+zmian, więc klasyfikacja procedury z §1.1 się nie rusza.
+
+### Co nie weszło
+
+**`pyperclip` i schowek w Poliglocie — odrzucone, nie odłożone.** Zależność jest zbędna:
+repozytorium już czyta i pisze schowek przez `wx.TheClipboard` (`gui_manager_regul`,
+`gui_rezyser`), a odczyt sprawdzono uruchomieniem. Ważniejszy jest jednak drugi powód —
+schowek nie rozwiązywał use case'u, dla którego był rozważany.
+
+**Parser `IMIĘ: kwestia` — wracamy do tego WYŁĄCZNIE po zgłoszeniu.** Tag mówcy jest
+konstytutywnie nawiasowy, więc klasycznie zapisana sztuka daje zero rozpoznanych mówców
+i plik dla czytnika bez akcentów per postać. Schowek by tego nie naprawił: `core_poliglota`
+nie ma pojęcia „mówcy" w ogóle i stosuje regułę na akapit. Naprawą jest zmiana parsera,
+a `_RE_TAG` jest wspólny z mostem ElevenLabs — czyli ze ścieżką, która wydaje pieniądze na
+render — więc to decyzja projektowa z własnymi bramkami, nie ogon łatki.
+
+**Reguła zakresu, z której wynika ta decyzja:** moduł Reżysera przyjmuje z założenia to, co
+sam jest w stanie wyprodukować, i nie wychodzi poza ten zakres; moduły Poliglota i Konwerter
+przyjmują z założenia wejście dowolne. Żaden obecny tryb nie produkuje klasycznie pisanej
+sztuki, więc dzisiejszy produkt tej granicy nie narusza — i dopóki jej nie narusza, ryzyko
+transformacji parsera jest większe niż brak funkcji.
+
+**Niespójność terminu w `de` i `it` między GUI a podręcznikami.** Opisana w sekcji
+angielskiej; to praca w prozie ośmiu paczek plus regeneracja docs, na osobno.
+
+### Walidacja
+
+Bramki odpalone ZAKRESOWO (reguła z 19.2.1). Zmiana dotknęła `core_screen_reader.py`,
+`dictionaries/*/gui/ui.yaml` (9 paczek), `przeglad_tlumaczen.py`,
+`audyt_leakow_py_baseline.json`, `VERSION`, `patch_dev.json`, `RELEASE_NOTES.md` oraz nowego
+`test_tytul_screen_readera.py`:
+
+- `pytest test_*.py` — **219 passed** (214 przed tym wydaniem + 5 nowych);
+- `audyt_leakow.py --bramka-py` — 0 ponad baseline; miała przedmiot, bo to wydanie zmienia
+  literał w module aplikacji I regeneruje sam baseline (diff przeczytany w obie strony);
+- `audyt_leakow.py --bramka` — czysto, 8/8 paczek w pełnym pokryciu; miała przedmiot, bo
+  zmiana dotyka `dictionaries/**`;
+- `audyt_ciszy.py --bramka` — czysto; miała przedmiot z tego samego powodu;
+- `audyt_zaleznosci.py --strict` — **17/17 zgodnych** z PyPI w granicach manifestu, exit 0;
+  odruch przed zamrożeniem, w pierwszym przebiegu wskazał `openai` 3.14.1 (patrz „Pod maską");
+- `generuj_dokumentacje.py --waliduj` — osiem bramek zielonych, docs przeliczone PO bumpie
+  VERSION;
+- nowa bramka zweryfikowana NEGATYWNIE: podstawienie `_szablon` z v19.3.0 wywraca dwa z pięciu
+  testów;
+- `audyt_podstaw.py --bramka` — **NIE odpalone ręcznie**: zmiana nie tknęła `podstawy.yaml`
+  ani kanonu Lingui, więc nie miała przedmiotu. Build powtarza ją bezwarunkowo (6b''').
 
 ---
 

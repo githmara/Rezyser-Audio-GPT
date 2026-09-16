@@ -620,6 +620,7 @@ rezyser:
   btn_sr_label: 📖 Luo näytönlukijan versio
   btn_sr_name: Luo näytönlukijan versio
   btn_sr_tooltip: "Luo tiedosto skrypty/<nazwa>_screen_reader.html: aksentit ortografian rikkomisen kautta + kielitunniste, äänitunnisteet poistettu.\nVaatii tallennetun projektitiedoston; Maailman Kirja määrittää, millä hahmolla on mikä aksentti."
+  sr_html_tytul: '{nazwa_projektu} — versio ruudunlukuohjelmille'
   sr_sukces_tytul: Näytönlukijan versio valmis
   sr_sukces_tresc: 'Näytönlukijan tiedosto tallennettu: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Virhe näytönlukijan version luomisessa

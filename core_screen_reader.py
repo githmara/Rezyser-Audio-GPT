@@ -31,6 +31,7 @@ import re
 
 import core_elevenlabs as ce
 import core_rezyser as cr
+import i18n
 
 # v19.1: hardkodowana mapa `_AKCENT_ISO` (10 nazw → ISO) USUNIĘTA. Była
 # dublem pola `iso` z `dictionaries/<jezyk>/akcenty/<id>.yaml` — tego samego,
@@ -82,12 +83,30 @@ def _iso_dla_mowcy(speaker_lower: str, mapa: dict[str, dict],
 
 
 def _szablon(lang: str, tytul: str, body: str) -> str:
+    """Skleja dokument; ``<title>`` bierze z paczki języka TREŚCI (v19.3.1).
+
+    Sufiks tytułu („— wersja dla czytników ekranu") był tu zaszyty po polsku,
+    a `audyt_leakow --bramka-py` miał go w baseline jako przeciek zaakceptowany.
+    Był to jednak przeciek REALNY i innej klasy niż reszta tego baseline'u
+    (wyjątki dla dewelopera, regexy, alfabety, fallbacki do `baza.yaml`): ten
+    string bezwarunkowo wchodził do ARTEFAKTU UŻYTKOWNIKA i to takiego, który
+    w tej samej linijce deklaruje `<html lang="fi">`. Fiński projekt dostawał
+    fiński `lang` i polski tytuł — czyli dokładnie to, przed czym broni
+    `jezyk_override`, użyty już przez sąsiedni dispatch akcentów (v17.9).
+
+    ``lang`` jest tożsamy z ``jezyk_projektu``, więc jest zarazem atrybutem
+    dokumentu i kodem paczki, z której bierzemy napis. Brak klucza w paczce
+    NIE odtwarza przecieku: `i18n.t` spada na EN, nigdy na PL.
+    """
+    tytul_dokumentu = i18n.t(
+        "rezyser.sr_html_tytul", jezyk_override=lang, nazwa_projektu=tytul,
+    )
     return (
         "<!DOCTYPE html>\n"
         f'<html lang="{_html.escape(lang, quote=True)}">\n'
         "<head>\n"
         '  <meta charset="utf-8">\n'
-        f"  <title>{_html.escape(tytul)} — wersja dla czytników ekranu</title>\n"
+        f"  <title>{_html.escape(tytul_dokumentu)}</title>\n"
         "</head>\n"
         "<body>\n"
         f"{body}\n"

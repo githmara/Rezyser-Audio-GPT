@@ -706,6 +706,7 @@ rezyser:
   btn_sr_label: 📖 Generate Screen Reader Version
   btn_sr_name: Generate Screen Reader Version
   btn_sr_tooltip: "Creates file skrypty/<name>_screen_reader.html: accents by misspelling + language tag, audio tags removed.\nRequires a saved project file; the World Book determines which character has which accent."
+  sr_html_tytul: '{nazwa_projektu} — screen reader version'
   sr_sukces_tytul: Screen Reader Version Ready
   sr_sukces_tresc: 'Screen reader file saved: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Error Generating Screen Reader Version

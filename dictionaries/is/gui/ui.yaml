@@ -622,6 +622,7 @@ rezyser:
   btn_sr_label: 📖 Búðu til útgáfu fyrir skjálesara
   btn_sr_name: Búðu til útgáfu fyrir skjálesara
   btn_sr_tooltip: "Býr til skrána skrypty/<nazwa>_screen_reader.html: hreim með því að skemma stafsetningu + tungumálamerki, hljóðmerki fjarlægð.\nKrefst vistaðrar verkefnaskrár; Heimsbók ákvarðar hvaða persóna hefur hvaða hreim."
+  sr_html_tytul: '{nazwa_projektu} — útgáfa fyrir skjálesara'
   sr_sukces_tytul: Útgáfa fyrir skjálesara tilbúin
   sr_sukces_tresc: 'Skrá fyrir skjálesara vistuð: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Villa við að búa til útgáfu fyrir skjálesara
