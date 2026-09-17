@@ -274,13 +274,24 @@ correct target language.
   NVDA's own Tools menu are not our labels — quoting them is correct, and
   placeholdering them would print our label in a sentence about someone else's
   window. If you add such a case, add the reason with it.
-- A QUOTE THAT MISSES BY ONE WORD IS ALSO DEAD, and the gate can only WARN
-  about it (it prints "quote(s) ALMOST equal to a label"). Read that list every
-  release: half of those cases are the manual being RIGHT and the label being
-  wrong (`de/ui.yaml` says "Senden an AI" where the manual says "Senden an KI";
-  `it` "Invia all'AI", `fr` "pour AI"), the other half are inflection
+- A QUOTE THAT MISSES BY ONE WORD IS ALSO DEAD, and since v19.4.0 the gate
+  BLOCKS on a new one. The class is fuzzy (0.86 similarity), so the verdict
+  belongs to a human — which is exactly why it has a BASELINE:
+  `bliskie_cytaty_baseline.json` holds every such quote inherited from earlier
+  releases, each one a case where a reader of that language still understands
+  the text and the "quote or label?" call belongs to a native speaker. The
+  report therefore shows ONE summary line for those, and exit 1 only for a
+  quote nobody has looked at yet. When you get that exit 1, decide which side
+  is wrong: half of the known cases are the manual being RIGHT and the label
+  being wrong (`de/ui.yaml` says "Senden an AI" where the manual says "Senden
+  an KI"; `it` "Invia all'AI", `fr` "pour AI"), the other half are inflection
   („Ný leikur" vs the real „Nýr leikur"). Fixing the label is a `ui.yaml`
-  change in nine packs, so decide which side is wrong BEFORE you touch either.
+  change in nine packs, so decide BEFORE you touch either — and if both sides
+  are understandable, record that verdict with `python generuj_dokumentacje.py
+  --zapisz-baseline-cytatow` and commit the diff. A shrinking baseline is the
+  good direction: it means a native settled the naming canon. The report also
+  names baseline entries that no longer occur, because a dead entry makes the
+  snapshot looser than the facts.
 - DO NOT let a placeholder swallow sentence punctuation. In English typography
   the full stop lives INSIDE the quotes (`a title such as "Error." NVDA will…`),
   so a quote of a label plus a period is not the label. The gate deliberately

@@ -49,8 +49,10 @@ Moduł NIE zależy od wxPython — można go wywołać w headlessowym kontekści
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
+from collections import Counter
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
@@ -734,7 +736,9 @@ def _znajdz_cytaty_etykiet() -> list[dict[str, Any]]:
 
 
 # Próg podobieństwa dla cytatów PRAWIE pasujących do etykiety. Zmierzony na
-# dziewięciu paczkach: 0.86 daje 52 trafienia, z czego większość to realnie
+# dziewięciu paczkach (v18.26; liczba trafień od tego czasu spadła, a AKTUALNĄ
+# trzyma `bliskie_cytaty_baseline.json`, nie ten komentarz):
+# 0.86 daje 52 trafienia, z czego większość to realnie
 # martwe cytaty (podręcznik obiecuje „Senden an KI", a przycisk mówi „Senden
 # an AI"), a resztę widać na pierwszy rzut oka („World Book" vs „No World
 # Book"). Niżej rośnie szum, wyżej klasa zaczyna znikać.
@@ -750,8 +754,11 @@ def _znajdz_bliskie_cytaty() -> list[dict[str, Any]]:
     MARTWY: user szuka na ekranie przycisku, którego tam nie ma. Rozstrzygnięcie
     wymaga jednak człowieka, bo w połowie przypadków to ETYKIETA jest gorsza od
     cytatu (niemieckie `ui.yaml` mówi „Senden an AI", podręcznik poprawnie
-    „Senden an KI"). Dlatego OSTRZEŻENIE, nie blokada — wzorem uwag audytu par
-    przykładów.
+    „Senden an KI"). Do v19.3.1 była to więc goła uwaga, powtarzana przy
+    każdym przebiegu; od v19.4.0 werdykt człowieka ma swój plik:
+    `bliskie_cytaty_baseline.json` trzyma stan przepuszczony kryterium
+    zrozumiałości, a blokuje wyłącznie trafienie PONAD baseline (patrz
+    `bramka_bliskich_cytatow`).
     """
     import difflib                                                # noqa: PLC0415
 
@@ -762,8 +769,12 @@ def _znajdz_bliskie_cytaty() -> list[dict[str, Any]]:
         pojecia = _pojecia_funkcjonalne(kod)
         rdzenie = {_rdzen_etykiety(k): v for k, v in dokladna.items()}
         for szablon in sorted(folder.glob("*.yaml")):
+            sekcja = ""
             for nr, linia in enumerate(
                     szablon.read_text(encoding="utf-8").splitlines(), start=1):
+                naglowek = _RE_SEKCJA_SZABLONU.match(linia)
+                if naglowek:
+                    sekcja = naglowek.group(1)
                 if _czy_komentarz_yaml(linia):
                     continue
                 for dopasowanie in _RE_CYTAT.finditer(linia):
@@ -777,13 +788,114 @@ def _znajdz_bliskie_cytaty() -> list[dict[str, Any]]:
                         rdzen, rdzenie.keys(), n=1, cutoff=_PROG_BLISKOSCI)
                     if blisko:
                         trafienia.append({
+                            "kod": kod,
                             "plik": str(szablon.relative_to(ROOT)),
                             "linia": nr,
+                            "sekcja": sekcja,
                             "cytat": cytat,
+                            "rdzen": rdzen,
                             "etykieta": blisko[0],
                             "klucze": rdzenie[blisko[0]],
                         })
     return trafienia
+
+
+# ---------------------------------------------------------------------------
+# BASELINE BLISKICH CYTATÓW (od v19.4.0)
+# ---------------------------------------------------------------------------
+# Ta klasa stała OSTRZEŻENIEM od v18.26, a stan zastany (49 trafień w ośmiu
+# paczkach) przeszedł kryterium zrozumiałości z filaru tłumaczeń: każdy z tych
+# cytatów user ROZUMIE, a rozstrzygnięcie „poprawić cytat czy etykietę"
+# w obcym języku należy do native'a, nie do maintainera. Dopóki wszystkie 49
+# wypisywało się przy KAŻDYM `--waliduj`, werdykt żył wyłącznie w pamięci
+# człowieka, a 50. trafienie — być może realnie martwy cytat — utonęłoby
+# w wyliczance. Stąd ten sam wzorzec, co przy PL-leakach: snapshot werdyktów
+# w pliku, blokada TYLKO na trafienie ponad snapshot, kurczenie snapshotu gdy
+# native ustali kanon (`--zapisz-baseline-cytatow` + diff w commicie).
+#
+# Helpery są LOKALNE, nie brane z `audyt_leakow` — bramka etykiet ma działać
+# w kontekście zdegradowanym (świeży klon bez dev-toolchainu), gdzie import
+# `audyt_leakow` jest właśnie tą rzeczą, która nie musi się udać. Cena to
+# ~20 linii stdliba; alternatywą byłaby blokada 49 trafieniami u kogoś, kto
+# nigdy nie zobaczy baseline'u.
+BASELINE_BLISKICH_PATH = ROOT / "bliskie_cytaty_baseline.json"
+
+
+def klucze_bliskich_cytatow() -> dict[str, list[str]]:
+    """Trafienia `_znajdz_bliskie_cytaty` w kształcie baseline'u.
+
+    Returns:
+        ``{"<kod>/<plik>/<sekcja>": ["bliski:<rdzeń cytatu>≈<rdzeń etykiety>"]}``
+        — klucz świadomie BEZ numeru linii (przepisanie akapitu przesuwa linie
+        i wyprodukowałoby falę „nowych" trafień na niezmienionej treści),
+        a powód po RDZENIACH, bo dokładnie na nich pracuje `difflib`: dorzucone
+        do przycisku emoji nie jest zmianą werdyktu.
+    """
+    wynik: dict[str, list[str]] = {}
+    for t in _znajdz_bliskie_cytaty():
+        nazwa = Path(t["plik"]).name
+        klucz = f"{t['kod']}/{nazwa}/{t['sekcja']}"
+        wynik.setdefault(klucz, []).append(
+            f"bliski:{t['rdzen']}≈{t['etykieta']}")
+    return {k: sorted(v) for k, v in wynik.items()}
+
+
+def wczytaj_baseline_bliskich() -> dict[str, list[str]]:
+    """Wczytuje snapshot werdyktów albo `{}` przy braku/uszkodzeniu pliku.
+
+    Brak pliku = pusty baseline = KAŻDE trafienie jest nowe, więc bramka jest
+    wtedy maksymalnie surowa. Tak samo jak `audyt_leakow.wczytaj_baseline`:
+    lepiej zatrzymać build na zgubionym snapshocie niż przepuścić klasę,
+    której nikt nie przejrzał.
+    """
+    if not BASELINE_BLISKICH_PATH.is_file():
+        return {}
+    try:
+        dane = json.loads(BASELINE_BLISKICH_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(dane, dict):
+        return {}
+    return {k: list(v) for k, v in dane.items() if isinstance(v, list)}
+
+
+def zapisz_baseline_bliskich(dane: dict[str, list[str]]) -> None:
+    """Zapisuje snapshot (UTF-8, `sort_keys`, LF) — deterministyczny w diffie."""
+    tresc = json.dumps(dane, ensure_ascii=False, indent=2, sort_keys=True)
+    BASELINE_BLISKICH_PATH.write_text(tresc + "\n", encoding="utf-8")
+
+
+def bramka_bliskich_cytatow() -> tuple[dict[str, list[str]], dict[str, list[str]], int]:
+    """Porównuje bieżące bliskie cytaty ze snapshotem werdyktów.
+
+    Returns:
+        ``(nowe, martwe, ile_zbaselineowanych)``:
+          * ``nowe`` — trafienia PONAD baseline (multiset-nadwyżka, jak przy
+            PL-leakach: dwa takie same cytaty w jednej sekcji to dwa wpisy)
+            → blokują walidację;
+          * ``martwe`` — wpisy baseline'u, których dziś już nie ma. NIE blokują,
+            ale są raportowane, bo martwy wpis czyni snapshot LUŹNIEJSZYM niż
+            stan faktyczny (lekcja z regeneracji `audyt_leakow_baseline.json`
+            w tym samym cyklu: −4 wpisy martwe = bramka SUROWSZA);
+          * licznik trafień wchłoniętych przez baseline — do jednej linii
+            podsumowania, bez wyliczanki.
+    """
+    aktualne = klucze_bliskich_cytatow()
+    baseline = wczytaj_baseline_bliskich()
+    nowe: dict[str, list[str]] = {}
+    wchloniete = 0
+    for klucz, powody in aktualne.items():
+        biezace, znane = Counter(powody), Counter(baseline.get(klucz, []))
+        nadwyzka = biezace - znane
+        if nadwyzka:
+            nowe[klucz] = sorted(nadwyzka.elements())
+        wchloniete += sum((biezace & znane).values())
+    martwe: dict[str, list[str]] = {}
+    for klucz, powody in baseline.items():
+        brak = Counter(powody) - Counter(aktualne.get(klucz, []))
+        if brak:
+            martwe[klucz] = sorted(brak.elements())
+    return nowe, martwe, wchloniete
 
 
 def _bramka_cytatow_etykiet() -> dict[str, list[str]]:
@@ -1323,6 +1435,13 @@ def waliduj() -> int:
     (od v18.20) przeliczający pary „X → Y" prawdziwymi szyframi i akcentami
     wchodzi TUTAJ, bo osobne narzędzie trzeba było pamiętać uruchomić.
 
+    Od v19.4.0 klasa „cytat PRAWIE równy etykiecie" (do tej pory goła uwaga
+    przy każdym przebiegu) ma własny BASELINE werdyktów
+    (`bramka_bliskich_cytatow`, `bliskie_cytaty_baseline.json`): stan zastany
+    schodzi do jednej linii podsumowania, trafienie PONAD baseline → exit 1,
+    a wpis martwy (trafienie już nie występuje) jest raportowany jako powód do
+    skurczenia snapshotu.
+
     Od v18.5.3 dochodzi BRAMKA LEAKÓW (`audyt_leakow.bramka_docs`): skan szablonów
     docs pod kątem nieprzetłumaczonego polskiego tekstu względem zaakceptowanego
     baseline'u. Nowy/przesunięty leak (spoza baseline) → exit 1. Import jest LAZY
@@ -1433,17 +1552,53 @@ def waliduj() -> int:
               "of that label. If the quote is deliberately NOT the app's label "
               "(e.g. the installer's own button), add a (section, key-tail) "
               "entry to `_LITERALY_SWIADOME` with the reason.")
-    # Klasa OSTRZEGAJĄCA: cytat prawie równy etykiecie. Nie blokuje, bo
-    # rozstrzygnięcie („poprawić cytat czy etykietę?") należy do człowieka.
-    bliskie = _znajdz_bliskie_cytaty()
-    if bliskie:
-        print(f"⚠️  {len(bliskie)} quote(s) ALMOST equal to a label — a quote "
-              f"that misses by one word is a DEAD quote (the user looks for a "
-              f"button that is not there). Decide per case whether the QUOTE "
-              f"or the LABEL is the wrong one:")
-        for t in bliskie:
-            print(f"      - {t['plik']}:{t['linia']} {t['cytat']!r} ≈ "
-                  f"{t['etykieta']!r} ({'/'.join(t['klucze'])})")
+    # Klasa „prawie równy cytat": od v19.4.0 z BASELINE'em werdyktów. Trafienie
+    # ZNANE (przepuszczone kryterium zrozumiałości) schodzi do jednej linii,
+    # trafienie NOWE — czyli takie, którego nikt jeszcze nie przejrzał — blokuje.
+    bliskie_nowe, bliskie_martwe, bliskie_znane = bramka_bliskich_cytatow()
+    if bliskie_nowe:
+        ile = sum(len(v) for v in bliskie_nowe.values())
+        # Ponowny skan tylko na ścieżce blokującej — klucz baseline'u nie zna
+        # numeru linii (świadomie), a człowiek musi dostać miejsce w pliku.
+        # Indeks trzyma POWÓD, nie samą sekcję: sekcja z dwoma bliskimi cytatami
+        # (jeden znany, jeden nowy) pokazywała pierwszy z nich, czyli kierowała
+        # człowieka do trafienia, które właśnie przepuścił baseline.
+        szczegoly: dict[tuple[str, str], dict[str, Any]] = {}
+        for t in _znajdz_bliskie_cytaty():
+            klucz_t = f"{t['kod']}/{Path(t['plik']).name}/{t['sekcja']}"
+            szczegoly.setdefault(
+                (klucz_t, f"bliski:{t['rdzen']}≈{t['etykieta']}"), t)
+        print(f"❌ Found {ile} quote(s) ALMOST equal to a label ABOVE the "
+              f"baseline in {len(bliskie_nowe)} section(s) — a quote that "
+              f"misses by one word is a DEAD quote (the user looks for a "
+              f"button that is not there):")
+        for klucz, powody in sorted(bliskie_nowe.items()):
+            print(f"  • {klucz}:")
+            for powod in powody:
+                t = szczegoly.get((klucz, powod))
+                gdzie = (f" — {t['plik']}:{t['linia']} "
+                         f"({'/'.join(t['klucze'])})" if t else "")
+                print(f"      - {powod}{gdzie}")
+        print("Fix: decide which side is wrong — the QUOTE (then use the "
+              "`{sekcja.klucz}` placeholder, which can never drift) or the "
+              "LABEL in that pack's ui.yaml. If BOTH are understandable to a "
+              "reader of that language, the comprehensibility criterion "
+              "accepts the quote: record the verdict with `python "
+              "generuj_dokumentacje.py --zapisz-baseline-cytatow` and commit "
+              "the diff.")
+    elif bliskie_znane:
+        print(f"✅ No quote ALMOST equal to a label beyond the accepted "
+              f"baseline ({BASELINE_BLISKICH_PATH.name}: {bliskie_znane} "
+              f"quote(s) a human passed as understandable).")
+    else:
+        print("✅ No quote is ALMOST equal to a label.")
+    if bliskie_martwe:
+        ile = sum(len(v) for v in bliskie_martwe.values())
+        print(f"ℹ️  The baseline carries {ile} entry(ies) that no longer "
+              f"occur, so it is LOOSER than the facts — regenerate it with "
+              f"`--zapisz-baseline-cytatow` to shrink:")
+        for klucz, powody in sorted(bliskie_martwe.items()):
+            print(f"  • {klucz}: {', '.join(powody)}")
     print("===============================================================")
 
     # Bramka slash-komend (od v18.26) — komenda przetłumaczona w podręczniku
@@ -1541,7 +1696,8 @@ def waliduj() -> int:
     return 1 if (brakujace_wedlug_pliku or drafty_wedlug_pliku
                  or leaki_blokujace or obce_tagi_wedlug_pliku
                  or tagi_wedlug_pliku or etykiety_wedlug_pliku
-                 or komendy_wedlug_pliku or pary_blokujace) else 0
+                 or bliskie_nowe or komendy_wedlug_pliku
+                 or pary_blokujace) else 0
 
 
 # ---------------------------------------------------------------------------
@@ -1558,7 +1714,31 @@ def main() -> int:
              "via ui.yaml. Exit 1 if anything was left as a raw `{klucz}` in "
              "the resulting docs/*.txt.",
     )
+    parser.add_argument(
+        "--zapisz-baseline-cytatow",
+        dest="zapisz_baseline_cytatow",
+        action="store_true",
+        help="Regenerate `bliskie_cytaty_baseline.json` — the snapshot of "
+             "quotes ALMOST equal to a GUI label that a human passed as "
+             "understandable. Run it after you have LOOKED at the new hits "
+             "(or after a native settled the naming canon, which SHRINKS the "
+             "file) and commit the diff.",
+    )
     args = parser.parse_args()
+
+    if args.zapisz_baseline_cytatow:
+        aktualne = klucze_bliskich_cytatow()
+        stare = wczytaj_baseline_bliskich()
+        zapisz_baseline_bliskich(aktualne)
+        ile = sum(len(v) for v in aktualne.values())
+        bylo = sum(len(v) for v in stare.values())
+        print(f"✅ Saved {ile} accepted quote(s) in "
+              f"{len(aktualne)} section(s) to "
+              f"{BASELINE_BLISKICH_PATH.name} (was {bylo}). "
+              f"Review `git --no-pager diff "
+              f"{BASELINE_BLISKICH_PATH.name}` — a GROWING file means you "
+              f"just accepted a new quote, a SHRINKING one means a fix landed.")
+        return 0
 
     if args.waliduj:
         return waliduj()

@@ -1,0 +1,111 @@
+{
+  "de/manual.yaml/changelog_13": [
+    "bliski:architekten-prompt für ai≈architekten-prompt für ki",
+    "bliski:in texteditor öffnen≈im texteditor öffnen",
+    "bliski:in zwischenablage kopieren≈in die zwischenablage kopieren"
+  ],
+  "de/manual.yaml/krok_3_glowne_studio": [
+    "bliski:projektdateiname≈projektdateinamenfeld",
+    "bliski:senden an ki≈senden an ai"
+  ],
+  "de/tales.yaml/najczestsze_problemy": [
+    "bliski:modellspeicher überlastet≈modellspeicher überladen"
+  ],
+  "en/dictionaries.yaml/co_to_tryb_rezysera": [
+    "bliski:director mode≈no director modes"
+  ],
+  "en/manual.yaml/changelog_13": [
+    "bliski:architect prompt for ai≈architect's prompt for ai",
+    "bliski:save book permanently≈save the book permanently"
+  ],
+  "en/manual.yaml/changelog_9": [
+    "bliski:load story≈load history",
+    "bliski:save book permanently≈save the book permanently"
+  ],
+  "en/manual.yaml/krok_3_glowne_studio": [
+    "bliski:closed≈close",
+    "bliski:insert chapter cut≈insert chapter button"
+  ],
+  "en/manual.yaml/krok_5_tryb_szyfrant": [
+    "bliski:choose a distorting algorithm≈select a distorting algorithm",
+    "bliski:cipher mode (text play, random stuttering)≈cipher mode (wordplay, random stuttering)"
+  ],
+  "en/manual.yaml/krok_7_ksiega_swiata": [
+    "bliski:world book≈no world book"
+  ],
+  "en/manual.yaml/nvda_a11y": [
+    "bliski:error.≈error",
+    "bliski:success,≈success"
+  ],
+  "es/manual.yaml/krok_3_glowne_studio": [
+    "bliski:enviar a ia≈enviar a la ia"
+  ],
+  "es/manual.yaml/krok_3b_most_elevenlabs": [
+    "bliski:crear proyecto de elevenlabs studio≈crear proyecto en elevenlabs studio"
+  ],
+  "es/readme.yaml/ograniczenia_modeli": [
+    "bliski:actualizar desde disco≈actualizar desde el disco"
+  ],
+  "fi/manual.yaml/krok_5_tryb_szyfrant": [
+    "bliski:valitse vääristysalgoritmi≈valitse vääristävä algoritmi"
+  ],
+  "fi/tales.yaml/krok_7_pamiec_modelu": [
+    "bliski:kontekstin automaattinen tiivistys käynnissä≈kontekstin automaattinen tiivistäminen käynnissä"
+  ],
+  "fi/tales.yaml/najczestsze_problemy": [
+    "bliski:kontekstin automaattinen tiivistys käynnissä≈kontekstin automaattinen tiivistäminen käynnissä",
+    "bliski:mallin muisti ylikuormittunut≈mallin muisti ylikuormitettu"
+  ],
+  "fr/manual.yaml/changelog_13": [
+    "bliski:ouvrir dans un éditeur de texte≈ouvrir dans l'éditeur de texte",
+    "bliski:prompt de l'architecte pour ai≈prompt de l'architecte pour l'ia"
+  ],
+  "fr/manual.yaml/krok_3_glowne_studio": [
+    "bliski:nom du fichier de projet≈champ nom du fichier de projet"
+  ],
+  "fr/manual.yaml/krok_3b_most_elevenlabs": [
+    "bliski:créer un projet elevenlabs studio≈créer le projet elevenlabs studio",
+    "bliski:générer la version pour lecteurs d'écran≈générer une version pour lecteurs d'écran"
+  ],
+  "is/manual.yaml/krok_1_pierwsze_uruchomienie": [
+    "bliski:opna dictionaries möppu≈opna dictionaries möppuna"
+  ],
+  "is/manual.yaml/krok_7_ksiega_swiata": [
+    "bliski:afrita≈afritað"
+  ],
+  "is/tales.yaml/krok_10_dostepnosc_nvda": [
+    "bliski:ný leikur≈nýr leikur",
+    "bliski:opnaðu frásögnarskrá≈opna frásagnarskrá",
+    "bliski:opnaðu frásögnarskrá≈opna frásagnarskrá"
+  ],
+  "is/tales.yaml/krok_7_pamiec_modelu": [
+    "bliski:minni líkansins endurheimt≈minni líkans endurheimt",
+    "bliski:sjálfvirk samantekt samhengis í gangi≈sjálfvirk samantekt á samhengi í gangi"
+  ],
+  "is/tales.yaml/najczestsze_problemy": [
+    "bliski:engin api-lykill≈enginn api lykill",
+    "bliski:minni líkansins ofhlaðið≈minni líkans ofhlaðið",
+    "bliski:sjálfvirk samantekt samhengis í gangi≈sjálfvirk samantekt á samhengi í gangi"
+  ],
+  "it/manual.yaml/changelog_13": [
+    "bliski:apri in editor di testo≈apri nell'editor di testo",
+    "bliski:nuovo file di regole≈nuovo file regole"
+  ],
+  "it/manual.yaml/changelog_9": [
+    "bliski:salva libro in modo permanente≈salva il libro in modo permanente"
+  ],
+  "it/manual.yaml/krok_3_glowne_studio": [
+    "bliski:invia all'ia≈invia all'ai",
+    "bliski:nome file di progetto≈nessun file di progetto"
+  ],
+  "it/tales.yaml/krok_10_dostepnosc_nvda": [
+    "bliski:apri file narrazione≈apri file di narrazione",
+    "bliski:apri file narrazione≈apri file di narrazione"
+  ],
+  "it/tales.yaml/najczestsze_problemy": [
+    "bliski:memoria del modello sovraccarica≈memoria del modello sovraccaricata"
+  ],
+  "ru/manual.yaml/changelog_13": [
+    "bliski:скопировать в буфер обмена≈копировать в буфер обмена"
+  ]
+}
