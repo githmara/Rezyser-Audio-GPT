@@ -262,21 +262,33 @@ tresc:
     1. W Managerze Reguł zaznacz np. "finski.yaml" (fiński jest blisko
        szwedzkiego fonetycznie) i kliknij "{manager.btn_duplikuj_label}".
     2. Manager zapyta o nową nazwę — wpisz np. "szwedzki" (małymi literami,
-       bez spacji, bez polskich znaków).
+       bez spacji, bez polskich znaków). Musi to być tradycyjna POLSKA nazwa
+       języka, i to niezależnie od tego, w jakim języku masz interfejs: nazwa
+       pliku akcentu nie jest napisem dla Ciebie, ale identyfikatorem wspólnym
+       dla wszystkich paczek językowych. Manager to sprawdza — jeśli wpiszesz
+       "swedish" albo cokolwiek innego, odmówi i pokaże nazwę właściwą.
     3. Nowy plik otworzy się w edytorze. Zmień pola:
-          - "etykieta" — to, co zobaczysz w menu aplikacji, np.
-            "Szwedzki (Alva / Oskar — OneCore/Vocalizer)"
+          - "etykieta" — to, co zobaczysz w menu aplikacji, więc pisz ją
+            w swoim języku, np. "Szwedzki (Alva / Oskar — OneCore/Vocalizer)"
           - "opis" — krótki opis dla siebie na przyszłość
-          - "iso" — dwuliterowy kod języka, dla szwedzkiego "sv"
+       Pola "iso" (kod języka, dla szwedzkiego "sv") NIE musisz ruszać:
+       Manager ustawił je sam, bo wynika z nazwy, którą wpisałeś. Komentarz
+       dopisany na górze pliku przypomina też o rzeczy najważniejszej z całej
+       tej listy — patrz punkt 4.
     4. Dostrój listę "zamian" pod fonetykę szwedzką (np. dodaj "å → o",
        "ö → ö", usuń albo zmień te, które są specyficzne dla fińskiego).
+       To jest sedno: dopóki tego nie zrobisz, "szwedzki" jest kopią fińskiego
+       i brzmi po fińsku, choć nazywa się szwedzki.
     5. Zapisz plik, a w Managerze Reguł kliknij "{manager.btn_odswiez_label}"
-       — bez zamykania aplikacji. Nowy szwedzki pojawi się w
-       menu akcentów Poligloty (a jeśli dodasz do Księgi Świata postaci
-       tag "[Marek] - ma akcent szwedzki", to Reżyser też go rozpozna
-       automatycznie i zastosuje do jej dialogów). Nazwa pliku ("szwedzki")
-       jest zarazem słowem, którego Reżyser szuka w Księdze Świata — musi
-       stać obok słowa "akcent".
+       — bez zamykania aplikacji. Nowy szwedzki pojawi się w menu akcentów
+       Poligloty. Rozpozna go też Reżyser, jeśli dopiszesz do Księgi Świata
+       postaci tag w rodzaju "[Marek] - ma akcent szwedzki" — i warto wiedzieć,
+       że ten tag ma dwie części o RÓŻNYM statusie. Słowo wyzwalające
+       ("akcent") jest w języku Twojej paczki i bierze się z pola
+       "slowo_akcent" w pliku podstaw. Stojąca obok nazwa akcentu ("szwedzki")
+       to nazwa pliku, czyli ten sam polski identyfikator we wszystkich
+       paczkach; zamiast niej Reżyser przyjmie też natywny przymiotnik
+       z pola "etykieta" tego akcentu.
   poziom_3_cos_nowego: |
     ## POZIOM 3 — stworzenie czegoś zupełnie nowego
 
@@ -287,11 +299,23 @@ tresc:
     2. Wybierz typ (akcent, szyfr zamian, tryb Reżysera, nowy język bazowy,
        szyfr algorytmiczny). Dla zwykłych przypadków aplikacja utworzy od
        razu gotowy szablon YAML — edytujesz go jak w poziomie 2.
+       Dwóch pól nie wpisujesz z klawiatury, bo nie ma w nich nic do
+       wymyślenia: nazwę pliku akcentu Manager wylicza z kodu ISO, który
+       podajesz (stąd pole nazwy tylko do odczytu), a nazwę narzędzia
+       czyszczącego wybierasz z krótkiej listy, bo silnik zna je po nazwie
+       i czwartej nie rozpozna.
     3. Dla trudniejszych przypadków (algorytmy typu "mieszanie końcówek"
        albo cały nowy język bazowy) Manager pokaże Ci gotowy prompt do
        wklejenia w ChatGPT lub Claude. AI wygeneruje kompletny plik YAML,
        Ty go tylko skopiujesz do folderu. Nie musisz umieć programować —
        wystarczy umieć przekleić.
+    4. Świeży szablon ma w środku znaczniki `<FILL …>` — miejsca, których
+       aplikacja nie potrafi wypełnić za Ciebie (natywny nagłówek, opis,
+       reszta listy zamian). Dopóki tam są, plik już DZIAŁA, ale robi coś
+       innego, niż chcesz, więc po każdym odświeżeniu drzewa Manager wypisze
+       Ci go jako niedokończony. To też odpowiedź na pytanie, czy plik jest
+       gotowy, by wysłać go komuś jako propozycję: dopóki widzisz go na tej
+       liście, nie jest.
   pomysly: |
     ## Kilka pomysłów na zabawę
     ------------------------

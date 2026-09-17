@@ -946,7 +946,6 @@ manager:
   tree_tooltip: |-
     Baum aller YAML-Dateien im dictionaries/-Ordner. Erweitern Sie die Sprache, dann die Kategorie und wählen Sie dann die Datei aus. Pfeile und Enter funktionieren standardmäßig für NVDA.
   tree_root: "Wörterbücher (dictionaries/)"
-  tree_brak_folderu: "⚠️  Kein dictionaries/-Ordner – erstellen Sie die erste Sprache mit der Schaltfläche „Neue Regeldatei…\"."
   # 13.2: filtr języka — domyślnie pokazujemy tylko aktywny język UI (A11y),
   # a osobna opcja „Wszystkie języki" jest dla autorów paczek językowych.
   dropdown_jezyk_label: "&Sprache:"

@@ -163,33 +163,72 @@ Claude Sonnet 5) — sterkara líkan heldur ströngum reglum heimsins<br>
    Ef skráin inniheldur setningafræðivillu mun Reglustjórinn samstundis sýna skýrslu með línunúmeri.</li>
 </ol>
 <h2>STIG 2 — bæta við nýjum hreim með afritun</h2>
-<p>Viltu bæta við sænskum eða dönskum hreim? Byrjaðu á þeim núverandi hreim sem er líkastur.</p>
+<p>Viltu bæta við sænskum eða dönskum hreim? Byrjaðu á þeim núverandi<br>
+hreim sem líkist honum mest.</p>
 <ol>
-<li>Í Reglustjóranum skaltu velja t.d. "finski.yaml" (finnska er hljóðfræðilega náskyld sænsku) og smella á "📋  Afrita valda skrá".</li>
-<li>Stjórnandinn mun spyrja um nýtt heiti — sláðu inn t.d. "szwedzki" (með litlum stöfum, án bila, án pólskra sértákna).</li>
-<li>Nýja skráin opnast í ritlinum. Breyttu eftirfarandi reitum:<ul>
-<li>"etykieta" (merking) — það sem þú munt sjá í valmynd forritsins, t.d.<br>
-    "Sænska (Alva / Oskar — OneCore/Vocalizer)"</li>
-<li>"opis" (lýsing) — stutt lýsing fyrir sjálfan þig til framtíðar</li>
-<li>"iso" — tveggja stafa tungumálakóði, fyrir sænsku "sv"</li>
+<li>Í Reglustjóranum skaltu velja t.d. "finski.yaml" (finnska er náskyld<br>
+   sænsku hljóðfræðilega) og smella á "📋  Afrita valda skrá".</li>
+<li>Stjórinn spyr um nýtt heiti — sláðu inn t.d. "szwedzki" (með litlum<br>
+   stöfum, án bila, án pólskra sértákna). Þetta verður að vera hefðbundið<br>
+   PÓLSKT heiti tungumálsins, óháð því á hvaða tungumáli viðmótið þitt er:<br>
+   heiti hreimskrárinnar er ekki texti fyrir þig, heldur sameiginlegt<br>
+   auðkenni fyrir allar tungumálapakkana. Stjórinn athugar þetta — ef þú<br>
+   slærð inn "swedish" eða eitthvað annað, hafnar hann því og sýnir rétta<br>
+   heitið.</li>
+<li>Nýja skráin opnast í ritlinum. Breyttu reitunum:<ul>
+<li>"etykieta" (heiti) — það sem þú sérð í valmynd forritsins, svo<br>
+    skrifaðu það á þínu tungumáli, t.d. "Sænska (Alva / Oskar —<br>
+    OneCore/Vocalizer)"</li>
+<li>"opis" (lýsing) — stutt lýsing fyrir þig sjálfan til framtíðar<br>
+   Reitinn "iso" (tungumálakóða, fyrir sænsku "sv") þarftu EKKI að snerta:<br>
+   Stjórinn stillti hann sjálfkrafa út frá heitinu sem þú slóst inn.<br>
+   Athugasemdin efst í skránni minnir einnig á mikilvægasta atriðið í<br>
+   öllum þessum lista — sjá lið 4.</li>
 </ul>
 </li>
-<li>Stilltu listann "zamiany" (skiptingar) að sænskri hljóðfræði (t.d. bættu við "å → o", "ö → ö", fjarlægðu eða breyttu þeim atriðum sem eru sértæk fyrir finnsku).</li>
+<li>Stilltu listann yfir "zamiany" (útskiptingar) að sænskri hljóðfræði<br>
+   (t.d. bættu við "å → o", "ö → ö", fjarlægðu eða breyttu þeim sem eru<br>
+   sérstakar fyrir finnsku). Þetta er kjarni málsins: þangað til þú gerir<br>
+   þetta er "sænska" bara afrit af finnsku og hljómar finnsk, þótt hún<br>
+   heiti sænska.</li>
 <li>Vistaðu skrána og smelltu á "🔄  Endurnýja tré" í Reglustjóranum<br>
-   — án þess að loka forritinu. Nýja sænskan mun birtast í<br>
-   hreimvalmynd Fjöltyngisins (og ef þú bætir við tagginu<br>
-   "[Marek] - hefur szwedzki hreim" í Heimsbók persónunnar, mun Leikstjórinn<br>
-   einnig þekkja það sjálfkrafa og beita því á samtöl hennar). Skráarheitið<br>
-   ("szwedzki") er jafnframt orðið sem Leikstjórinn leitar að í<br>
-   Heimsbókinni — það verður að standa við hlið orðsins "hreimur"<br>
-   (í hvaða beygingarformi sem er).</li>
+   — án þess að loka forritinu. Nýja sænskan birtist í hreimvalmynd<br>
+   Fjöltyngisins. Leikstjórinn þekkir hana líka ef þú bætir við í<br>
+   Heimsbókina fyrir persónuna merkingu á borð við "[Marek] - hefur szwedzki hreim" — og það er gott að vita<br>
+   að þessi merking hefur tvo hluta með ÓLÍKA stöðu. Kveikjuorðið<br>
+   ("akcent") er á tungumáli pakkans þíns og kemur úr reitnum<br>
+   "slowo_akcent" í grunnskránni. Heiti hreimsins við hliðina á því<br>
+   ("szwedzki") er heiti skrárinnar, sem sagt sama pólska auðkennið í<br>
+   öllum pökkunum; í stað þess mun Leikstjórinn einnig samþykkja innfætt<br>
+   lýsingarorð úr "etykieta" reit þess hreims.</li>
 </ol>
-<h2>POFI 3 — að skapa eitthvað alveg nýtt</h2>
-<p>Viltu skólaslangur? Tungumál fornra riddara? Grasiðmál? Kóða foreldra fyrir börnum?</p>
+<h2>STIG 3 — að skapa eitthvað algjörlega nýtt</h2>
+<p>Viltu skólamállýsku? Tungumál fornra riddara? Grasamál? Dulmál<br>
+foreldra fyrir framan börnin?</p>
 <ol>
-<li>Í Reglustjóra, smelltu á "Ný skrá með reglum…".</li>
-<li>Veldu tegund (hreimur, skipti dulmál, Leikstjórnarhamur, nýtt grunntungumál, reiknirit dulmál). Fyrir venjuleg tilfelli mun forritið strax búa til tilbúið YAML sniðmát — þú breytir því eins og á stigi 2.</li>
-<li>Fyrir erfiðari tilfelli (reiknirit eins og "blöndun endingar" eða alveg nýtt grunntungumál) mun Reglustjóri sýna þér tilbúið prompt til að líma í ChatGPT eða Claude. Gervigreindin mun búa til fullkomna YAML skrá, þú þarft bara að afrita hana í möppuna. Þú þarft ekki að kunna að forrita — það nægir að geta afritað.</li>
+<li>Í Reglustjóranum smelltu á "➕  Ný regla skrá…".</li>
+<li>Veldu tegund (hreim, útskiptingardulmál, Leikstjóra-ham, nýtt<br>
+   grunnmál, algrím-dulmál). Fyrir venjuleg tilvik útbýr forritið<br>
+   strax tilbúið YAML-sniðmát — þú breytir því eins og á stigi 2.<br>
+   Tveir reitir eru ekki fylltir út handvirkt af lyklaborði, því þar<br>
+   er ekkert að finna upp á: skráarnafn hreimsins reiknar Stjórinn<br>
+   út frá ISO-kóðanum sem þú gefur upp (þess vegna er nafnareiturinn<br>
+   einungis til lestrar), en heiti hreinsunartólsins velur þú af<br>
+   stuttum lista, því vélin þekkir þau eftir nafni og fjórða mun hún<br>
+   ekki þekkja.</li>
+<li>Fyrir erfiðari tilvik (algrím á borð við "blöndun endinga" eða<br>
+   heilt nýtt grunnmál) sýnir Stjórinn þér tilbúna forskrift (prompt)<br>
+   til að líma inn í ChatGPT eða Claude. Gervigreindin býr til<br>
+   heildstæða YAML-skrá, þú afritar hana bara í möppuna. Þú þarft<br>
+   ekki að kunna að forrita — það nægir að kunna að líma.</li>
+<li>Nýtt sniðmát hefur inni í sér merkingar <code>&lt;FILL …&gt;</code> — staði sem<br>
+   forritið getur ekki fyllt út fyrir þig sjálft (upprunalega<br>
+   fyrirsögnin, lýsingin, restin af útskiptingarlistanum). Á meðan<br>
+   þeir eru til staðar VIRKAR skráin, en gerir eitthvað annað en þú<br>
+   vilt, svo eftir hverja endurnýjun trésins mun Stjórinn birta hana<br>
+   sem óklárað verkefni. Þetta svarar líka spurningunni um hvort<br>
+   skráin sé tilbúin til að senda einhverjum sem tillögu: á meðan þú<br>
+   sérð hana á þessum lista, er hún það ekki.</li>
 </ol>
 <h2>Nokkrar hugmyndir að leikjum</h2>
 <hr>

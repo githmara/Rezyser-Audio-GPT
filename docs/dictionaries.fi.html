@@ -250,44 +250,68 @@ vaihtoehdon on oltava todella epäedullinen).</p>
    virheen rivinumerolla.</li>
 </ol>
 <h2>TASO 2 — uuden aksentin lisääminen kopioimalla</h2>
-<p>Haluatko lisätä ruotsalaisen tai tanskalaisen aksentin? Aloita<br>
-kopioimalla mahdollisimman läheistä olemassa olevaa aksenttia.</p>
+<p>Haluatko lisätä ruotsalaisen tai tanskalaisen aksentin? Aloita kaikkein<br>
+lähimmästä olemassa olevasta.</p>
 <ol>
-<li>Valitse Sääntömanagerissa esim. "finski.yaml" (suomi on foneettisesti<br>
-   lähellä ruotsia) ja napsauta "📋  Kopioi valittu tiedosto".</li>
-<li>Manageri kysyy uutta nimeä — kirjoita esim. "szwedzki" (pienin<br>
-   kirjaimin, ei välilyöntejä, ei puolalaisia erikoismerkkejä).</li>
+<li>Merkitse Sääntöjen Hallinnassa esim. "finski.yaml" (suomi on foneettisesti<br>
+   lähellä ruotsia) ja klikkaa "📋  Kopioi valittu tiedosto".</li>
+<li>Hallinta kysyy uutta nimeä — kirjoita esim. "szwedzki" (pienillä kirjaimilla,<br>
+   ilman välilyöntejä, ilman puolalaisia erikoismerkkejä). Sen on oltava perinteinen<br>
+   PUOLALAINEN kielen nimi, riippumatta siitä, missä kielessä käyttöliittymäsi on:<br>
+   aksenttitiedoston nimi ei ole sinulle tarkoitettu teksti, vaan kaikille<br>
+   kielipaketeille yhteinen tunniste. Hallinta tarkistaa tämän — jos kirjoitat<br>
+   "swedish" tai jotain muuta, se kieltäytyy ja näyttää oikean nimen.</li>
 <li>Uusi tiedosto avautuu editorissa. Muuta kenttiä:<ul>
-<li>"etykieta" — se, minkä näet sovelluksen valikossa, esim.<br>
-    "Ruotsi (Alva / Oskar — OneCore/Vocalizer)"</li>
-<li>"opis" — lyhyt kuvaus itsellesi tulevaisuutta varten</li>
-<li>"iso" — kaksikirjaiminen kielikoodi, ruotsille "sv"</li>
+<li>"etykieta" — tämä näkyy sovelluksen valikossa, joten kirjoita se<br>
+    omalla kielelläsi, esim. "Ruotsi (Alva / Oskar — OneCore/Vocalizer)"</li>
+<li>"opis" — lyhyt kuvaus itseäsi varten tulevaisuutta ajatellen<br>
+   Kenttää "iso" (kielikoodi, ruotsille "sv") EI tarvitse koskea:<br>
+   Hallinta on asettanut sen itse, sillä se johdetaan kirjoittamastasi nimestä.<br>
+   Tiedoston yläreunaan lisätty kommentti muistuttaa myös koko tämän listan<br>
+   tärkeimmästä asiasta — katso kohta 4.</li>
 </ul>
 </li>
-<li>Säädä "zamian"-lista (korvaukset) vastaamaan ruotsin fonetiikkaa<br>
-   (esim. lisää "å → o", "ö → ö", poista tai muuta ne, jotka ovat<br>
-   ominaisia nimenomaan suomelle).</li>
-<li>Tallenna tiedosto ja napsauta Sääntömanagerissa "🔄  Päivitä puu"<br>
-   — sovellusta sulkematta. Uusi ruotsalainen aksentti ilmestyy<br>
-   Polyglotin aksenttivalikkoon (ja jos lisäät Maailmankirjan hahmolle<br>
-   tagin "[Marek] - hänellä on szwedzki aksentti", myös Ohjaaja tunnistaa sen<br>
-   automaattisesti ja soveltaa sitä hänen dialogeihinsa). Tiedostonimi<br>
-   ("szwedzki") on samalla se sana, jota Ohjaaja etsii Maailmankirjasta —<br>
-   sen on oltava sanan "aksentti" vieressä.</li>
+<li>Säädä "zamiany"-lista (korvaukset) ruotsin fonetiikkaan sopivaksi (esim. lisää<br>
+   "å → o", "ö → ö", poista tai muuta ne, jotka ovat ominaisia suomen kielelle).<br>
+   Tämä on koko jutun ydin: kunnes teet tämän, "szwedzki" on suomen kopio<br>
+   ja kuulostaa suomelta, vaikka sen nimi on ruotsi.</li>
+<li>Tallenna tiedosto ja klikkaa Sääntöjen Hallinnassa "🔄  Päivitä puu"<br>
+   — sulkematta sovellusta. Uusi ruotsi ilmestyy Poligloten aksenttivalikkoon.<br>
+   Myös Ohjaaja tunnistaa sen, jos lisäät Maailman Kirjaan hahmon kohdalle<br>
+   tagin kaltaisen "[Marek] - hänellä on szwedzki aksentti" — ja kannattaa tietää,<br>
+   että tässä tagissa on kaksi ERI asemassa olevaa osaa. Laukaiseva sana<br>
+   ("akcent") on pakettisi kielellä ja tulee "podstawy"-tiedoston<br>
+   kentästä "slowo_akcent". Sen vieressä oleva aksentin nimi ("szwedzki")<br>
+   on tiedoston nimi, eli sama puolalainen tunniste kaikissa paketeissa;<br>
+   sen sijasta Ohjaaja hyväksyy myös kyseisen aksentin "etykieta"-kentän<br>
+   natiivin adjektiivin.</li>
 </ol>
-<h2>TASO 3 — täysin uuden luominen</h2>
-<p>Haluatko kouluslangin? Muinaisten ritarien kielen? Ruohopuheen? Vanhempien<br>
-salakielen lapsilta?</p>
+<h2>TASO 3 — täysin uuden asian luominen</h2>
+<p>Haluatko koulun oman slangin? Muinaisten ritarien kielen? Kissankieltä?<br>
+Salakielen, jota vanhemmat käyttävät lasten selän takana?</p>
 <ol>
-<li>Sääntöjen Hallinnassa klikkaa "➕  Uusi sääntötiedosto…".</li>
-<li>Valitse tyyppi (aksentti, korvaussalaus, Ohjaaja-tila, uusi<br>
-   peruskieli, algoritminen salaus). Tavallisissa tapauksissa sovellus<br>
-   luo heti valmiin YAML-mallin — muokkaat sitä kuten tasolla 2.</li>
-<li>Vaikeammissa tapauksissa (algoritmit, kuten "päätteiden sekoittaminen"<br>
-   tai kokonaan uusi peruskieli) Hallinta näyttää sinulle valmiin<br>
-   kehotuksen liitettäväksi ChatGPT:hen tai Claudeen. AI luo täydellisen<br>
-   YAML-tiedoston, sinun tarvitsee vain kopioida se kansioon. Sinun ei<br>
-   tarvitse osata ohjelmoida — riittää, että osaat kopioida ja liittää.</li>
+<li>Napsauta Sääntöjen hallinnassa "➕  Uusi sääntötiedosto…".</li>
+<li>Valitse tyyppi (aksentti, korvausperusteinen salakieli, Ohjaajan tila,<br>
+   uusi peruskieli, algoritminen salakieli). Tavallisissa tapauksissa<br>
+   sovellus luo heti valmiin YAML-mallipohjan — muokkaat sitä samaan<br>
+   tapaan kuin tasolla 2.<br>
+   Kahta kenttää et kirjoita itse näppäimistöltä, koska niissä ei ole<br>
+   mitään keksittävää: aksenttitiedoston nimen Sääntöjen hallinta laskee antamastasi<br>
+   ISO-koodista (siksi nimikenttä on vain luku -tilassa), ja<br>
+   puhdistustyökalun nimen valitset lyhyestä listasta, sillä moottori<br>
+   tunnistaa ne nimen perusteella eikä tunnista neljättä vaihtoehtoa.</li>
+<li>Vaikeammissa tapauksissa (esimerkiksi "päätteiden sekoitus"<br>
+   -tyyppiset algoritmit tai kokonaan uusi peruskieli) Sääntöjen hallinta näyttää<br>
+   sinulle valmiin promptin liitettäväksi ChatGPT:hen tai Claudeen.<br>
+   Tekoäly luo täydellisen YAML-tiedoston, jonka vain kopioit kansioon.<br>
+   Sinun ei tarvitse osata ohjelmoida — riittää, että osaat liittää tekstiä.</li>
+<li>Tuoreessa mallipohjassa on sisällä merkinnät <code>&lt;FILL …&gt;</code> — kohdat,<br>
+   joita sovellus ei osaa täyttää puolestasi (natiivi otsikko, kuvaus,<br>
+   loput korvauslistasta). Niin kauan kuin ne ovat siellä, tiedosto jo<br>
+   TOIMII, mutta tekee jotain muuta kuin haluat, joten jokaisen puun<br>
+   päivityksen jälkeen Sääntöjen hallinta listaa sen keskeneräisenä. Tämä vastaa<br>
+   myös kysymykseen siitä, onko tiedosto valmis lähetettäväksi jollekulle<br>
+   ehdotuksena: niin kauan kuin näet sen tällä listalla, se ei ole valmis.</li>
 </ol>
 <h2>Muutamia ideoita leikkiin</h2>
 <hr>

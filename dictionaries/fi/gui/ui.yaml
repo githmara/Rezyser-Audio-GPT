@@ -944,7 +944,6 @@ manager:
   tree_tooltip: |-
     Kaikkien YAML-tiedostojen puu dictionaries/-kansiossa. Laajenna kieli, sitten kategoria ja valitse tiedosto. Nuolinäppäimet ja Enter toimivat NVDA:lle tavanomaisesti.
   tree_root: "Sanakirjat (dictionaries/)"
-  tree_brak_folderu: "⚠️  Ei dictionaries/-kansiota – luo ensimmäinen kieli painikkeella „Uusi sääntötiedosto…\"."
   # 13.2: filtr języka — domyślnie pokazujemy tylko aktywny język UI (A11y),
   # a osobna opcja „Wszystkie języki" jest dla autorów paczek językowych.
   dropdown_jezyk_label: "&Kieli:"

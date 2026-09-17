@@ -251,46 +251,76 @@ Sie sind der Meinung, ein Franzose würde eher „sch" oder „ch" sagen. Kein P
    werden neu geladen — Ihre Änderung ist sofort aktiv, ohne die Anwendung zu schließen.<br>
    Falls die Datei einen Syntaxfehler enthält, zeigt der Manager sofort einen Bericht mit der Zeilennummer an.</li>
 </ol>
-<h2>STUFE 2 — Hinzufügen eines neuen Akzents durch Duplikation</h2>
+<h2>STUFE 2 — Hinzufügen eines neuen Akzents durch Duplizierung</h2>
 <p>Möchten Sie einen schwedischen oder dänischen Akzent hinzufügen? Beginnen Sie<br>
-mit dem ähnlichsten bereits vorhandenen Akzent.</p>
+mit dem ähnlichsten bereits vorhandenen.</p>
 <ol>
 <li>Markieren Sie im Regel-Manager z. B. "finski.yaml" (Finnisch ist<br>
-   phonetisch dem Schwedischen nahe) und klicken Sie auf "📋  Ausgewählte Datei duplizieren".</li>
+   phonetisch nahe am Schwedischen) und klicken Sie auf "📋  Ausgewählte Datei duplizieren".</li>
 <li>Der Manager fragt nach dem neuen Namen — geben Sie z. B. "szwedzki" ein<br>
-   (Kleinbuchstaben, ohne Leerzeichen, ohne polnische Sonderzeichen).</li>
+   (in Kleinbuchstaben, ohne Leerzeichen, ohne polnische Sonderzeichen).<br>
+   Es muss die traditionelle POLNISCHE Bezeichnung der Sprache sein, und<br>
+   zwar unabhängig davon, in welcher Sprache Ihre Oberfläche eingestellt<br>
+   ist: Der Dateiname des Akzents ist keine Bezeichnung für Sie, sondern<br>
+   ein Identifikator, der für alle Sprachpakete gemeinsam gilt. Der<br>
+   Manager prüft das — wenn Sie "swedish" oder etwas anderes eingeben,<br>
+   verweigert er die Aktion und zeigt Ihnen den korrekten Namen an.</li>
 <li>Die neue Datei öffnet sich im Editor. Ändern Sie die Felder:<ul>
-<li>"etykieta" — das, was Sie im Anwendungsmenü sehen werden, z. B.<br>
-    "Schwedisch (Alva / Oskar — OneCore/Vocalizer)"</li>
-<li>"opis" — eine kurze Beschreibung für sich selbst, für die Zukunft</li>
-<li>"iso" — der zweibuchstabige Sprachcode, für Schwedisch "sv"</li>
+<li>"etykieta" — das, was Sie im Menü der Anwendung sehen werden, also<br>
+    schreiben Sie es in Ihrer Sprache, z. B. "Schwedisch (Alva / Oskar<br>
+    — OneCore/Vocalizer)"</li>
+<li>"opis" — eine kurze Beschreibung für Sie selbst, für später<br>
+   Das Feld "iso" (Sprachcode, für Schwedisch "sv") müssen Sie NICHT<br>
+   anfassen: Der Manager hat es bereits selbst gesetzt, da es sich aus<br>
+   dem von Ihnen eingegebenen Namen ergibt. Der Kommentar am Anfang der<br>
+   Datei erinnert auch an das Wichtigste aus dieser ganzen Liste — siehe<br>
+   Punkt 4.</li>
 </ul>
 </li>
 <li>Passen Sie die Liste der "zamian" (Ersetzungen) an die schwedische<br>
    Phonetik an (fügen Sie z. B. "å → o", "ö → ö" hinzu, entfernen oder<br>
-   ändern Sie die Einträge, die spezifisch für das Finnische sind).</li>
-<li>Speichern Sie die Datei und klicken Sie im Regel-Manager auf "🔄  Baum aktualisieren"<br>
+   ändern Sie diejenigen, die spezifisch für das Finnische sind). Das ist<br>
+   der Kernpunkt: Solange Sie das nicht tun, ist "szwedzki" eine Kopie des<br>
+   Finnischen und klingt auch finnisch, obwohl es Schwedisch heißt.</li>
+<li>Speichern Sie die Datei, und klicken Sie im Regel-Manager auf "🔄  Baum aktualisieren"<br>
    — ohne die Anwendung zu schließen. Das neue Schwedisch erscheint im<br>
-   Akzentmenü des Polyglotten (und wenn Sie im Weltenbuch der Figur den<br>
-   Tag "[Marek] - hat einen szwedzki Akzent" hinzufügen, erkennt der Regisseur<br>
-   dies ebenfalls automatisch und wendet ihn auf ihre Dialoge an). Der<br>
-   Dateiname ("szwedzki") ist gleichzeitig das Wort, das der Regisseur im<br>
-   Weltenbuch sucht — es muss neben dem Wort "Akzent" stehen.</li>
+   Akzentmenü des Polyglotten. Auch der Regisseur erkennt es, wenn Sie im<br>
+   Buch der Welt bei der Figur ein Tag der Art "[Marek] - hat einen szwedzki Akzent" hinzufügen — und dabei sollte man wissen, dass dieses Tag aus<br>
+   zwei Teilen mit UNTERSCHIEDLICHEM Status besteht. Das Auslösewort<br>
+   ("akcent") ist in der Sprache Ihres Pakets und stammt aus dem Feld<br>
+   "slowo_akcent" in der Grunddatei. Der danebenstehende Name des Akzents<br>
+   ("szwedzki") ist der Dateiname, also derselbe polnische Identifikator<br>
+   in allen Paketen; anstelle dessen akzeptiert der Regisseur auch das<br>
+   native Adjektiv aus dem Feld "etykieta" dieses Akzents.</li>
 </ol>
-<h2>STUFE 3 — Etwas völlig Neues erschaffen</h2>
-<p>Schulhofsprache? Sprache der antiken Ritter? Elterngeheimsprache vor den<br>
-Kindern?</p>
+<h2>STUFE 3 — etwas völlig Neues erschaffen</h2>
+<p>Möchten Sie einen Schuljargon? Die Sprache antiker Ritter? Kauderwelsch?<br>
+Einen Geheimcode der Eltern vor den Kindern?</p>
 <ol>
-<li>Klicken Sie im Regelmanager auf "➕  Neue Regeldatei…".</li>
-<li>Wählen Sie den Typ (Akzent, Ersetzungschiffre, Regisseur-Modus, neue<br>
-   Basissprache, algorithmische Chiffre). Für einfache Fälle erstellt die<br>
-   Anwendung sofort eine bearbeitbare YAML-Vorlage — Sie bearbeiten sie<br>
-   wie in Stufe 2.</li>
-<li>Für schwierigere Fälle (Algorithmen wie "Wortendungsmischung" oder eine<br>
-   ganz neue Basissprache) zeigt der Manager einen fertigen Prompt zum<br>
-   Einfügen in ChatGPT oder Claude. Die KI generiert eine vollständige<br>
-   YAML-Datei, Sie kopieren sie nur in den Ordner. Kein Programmieren<br>
-   nötig — es reicht die Fähigkeit zum Kopieren und Einfügen.</li>
+<li>Klicken Sie im Regel-Manager auf "➕  Neue Regeldatei…".</li>
+<li>Wählen Sie den Typ (Akzent, Substitutionschiffre, Regisseur-Modus, neue<br>
+   Basissprache, algorithmische Chiffre). Für gewöhnliche Fälle erstellt<br>
+   die Anwendung sofort eine fertige YAML-Vorlage — Sie bearbeiten sie<br>
+   wie in Stufe 2.<br>
+   Zwei Felder geben Sie nicht von Hand ein, weil es dort nichts zu<br>
+   erfinden gibt: Den Dateinamen des Akzents berechnet der Manager aus<br>
+   dem ISO-Code, den Sie angeben (daher ist das Namensfeld nur lesbar),<br>
+   und den Namen des Bereinigungswerkzeugs wählen Sie aus einer kurzen<br>
+   Liste, weil die Engine sie nur unter diesen Namen kennt und ein<br>
+   viertes nicht erkennt.</li>
+<li>Für schwierigere Fälle (Algorithmen wie "Endungen mischen" oder eine<br>
+   ganz neue Basissprache) zeigt Ihnen der Manager einen fertigen Prompt<br>
+   zum Einfügen in ChatGPT oder Claude. Die KI generiert eine<br>
+   vollständige YAML-Datei, Sie kopieren sie nur in den Ordner. Sie<br>
+   müssen nicht programmieren können — es reicht, einfügen zu können.</li>
+<li>Eine frische Vorlage enthält Markierungen <code>&lt;FILL …&gt;</code> — Stellen, die<br>
+   die Anwendung nicht für Sie ausfüllen kann (native Überschrift,<br>
+   Beschreibung, der Rest der Substitutionsliste). Solange diese dort<br>
+   stehen, FUNKTIONIERT die Datei bereits, tut aber etwas anderes als<br>
+   gewünscht, weshalb der Manager sie nach jeder Aktualisierung des<br>
+   Baums als unvollständig anzeigt. Das ist zugleich die Antwort auf<br>
+   die Frage, ob eine Datei bereit ist, um sie jemandem als Vorschlag zu<br>
+   schicken: Solange sie in dieser Liste erscheint, ist sie es nicht.</li>
 </ol>
 <h2>Einige Spielideen</h2>
 <hr>

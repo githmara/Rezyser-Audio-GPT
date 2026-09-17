@@ -217,47 +217,82 @@ tresc:
        se rechargeront — votre modification est déjà active, sans fermer l'application.
        Si le fichier contient une erreur de syntaxe, le Gestionnaire affichera immédiatement un rapport avec le numéro de ligne.
   poziom_2_duplikacja: |
-    ## POZIOM 2 — ajout d'un nouvel accent par duplication
+    ## NIVEAU 2 — ajouter un nouvel accent par duplication
 
-    Vous voulez ajouter un accent suédois ou danois ? Commencez par le plus
-    proche des accents déjà existants.
+    Vous voulez ajouter un accent suédois ou danois ? Commencez par l'accent
+    existant le plus proche.
 
-    1. Dans le Gestionnaire de Règles, sélectionnez par exemple « finski.yaml » (le finnois
-       est phonétiquement proche du suédois) et cliquez sur « {manager.btn_duplikuj_label} ».
-    2. Le Gestionnaire vous demandera un nouveau nom — saisissez par exemple « szwedzki »
-       (en minuscules, sans espaces, sans caractères polonais).
+    1. Dans le Gestionnaire de Règles, sélectionnez par exemple « finski.yaml »
+       (le finnois est phonétiquement proche du suédois) et cliquez sur « {manager.btn_duplikuj_label} ».
+    2. Le Gestionnaire demandera un nouveau nom — saisissez par exemple
+       « szwedzki » (en minuscules, sans espaces, sans caractères polonais
+       spéciaux). Il doit s'agir du nom POLONAIS traditionnel de la langue,
+       et ce indépendamment de la langue de votre interface : le nom du
+       fichier d'accent n'est pas un texte destiné à vous, mais un identifiant
+       commun à tous les paquets linguistiques. Le Gestionnaire vérifie
+       cela — si vous saisissez « swedish » ou autre chose, il refusera et
+       affichera le nom correct.
     3. Le nouveau fichier s'ouvrira dans l'éditeur. Modifiez les champs :
-          - « etykieta » — ce que vous verrez dans le menu de l'application, par ex.
-            « Suédois (Alva / Oskar — OneCore/Vocalizer) »
-          - « opis » — une brève description pour vous-même, à titre de mémo
-          - « iso » — le code de langue à deux lettres, pour le suédois « sv »
-    4. Ajustez la liste des « zamiany » (substitutions) à la phonétique suédoise
-       (par ex. ajoutez « å → o », « ö → ö », supprimez ou modifiez celles qui sont
-       spécifiques au finnois).
-    5. Enregistrez le fichier, puis dans le Gestionnaire de Règles cliquez sur « {manager.btn_odswiez_label} »
-       — sans fermer l'application. Le nouvel accent suédois apparaîtra dans
-       le menu des accents du Polyglotte (et si vous ajoutez au Livre du Monde du personnage
-       le tag « [Marek] - a un accent szwedzki », le Réalisateur le
-       reconnaîtra également automatiquement et l'appliquera à ses dialogues).
-       Le nom du fichier (« szwedzki ») est aussi le mot que le Réalisateur
-       cherche dans le Livre du Monde — il doit se trouver à côté du mot
-       « accent ».
+          - « etykieta » — ce que vous verrez dans le menu de l'application,
+            écrivez-le donc dans votre langue, par exemple « Suédois
+            (Alva / Oskar — OneCore/Vocalizer) »
+          - « opis » — une brève description pour vous-même, pour l'avenir
+       Le champ « iso » (code de la langue, pour le suédois « sv ») n'a PAS
+       besoin d'être modifié : le Gestionnaire l'a défini automatiquement,
+       car il découle du nom que vous avez saisi. Le commentaire ajouté en
+       haut du fichier rappelle également l'élément le plus important de
+       toute cette liste — voir le point 4.
+    4. Ajustez la liste des « zamiany » (remplacements) en fonction de la
+       phonétique suédoise (par exemple ajoutez « å → o », « ö → ö »,
+       supprimez ou modifiez celles qui sont spécifiques au finnois).
+       C'est là l'essentiel : tant que vous ne l'avez pas fait, « szwedzki »
+       est une copie du finnois et sonne comme du finnois, bien qu'il
+       s'appelle suédois.
+    5. Enregistrez le fichier, puis dans le Gestionnaire de Règles cliquez
+       sur « {manager.btn_odswiez_label} » — sans fermer l'application. Le nouveau suédois
+       apparaîtra dans le menu des accents du Polyglotte. Le Réalisateur le
+       reconnaîtra également si vous ajoutez au Livre du Monde, dans la
+       section du personnage, une balise du type « [Marek] - a un accent szwedzki » — et il est utile de savoir que cette balise comporte deux
+       parties de statut DIFFÉRENT. Le mot déclencheur (« akcent ») est
+       dans la langue de votre paquet et provient du champ « slowo_akcent »
+       du fichier de base. Le nom de l'accent qui l'accompagne
+       (« szwedzki ») est le nom du fichier, c'est-à-dire le même
+       identifiant polonais dans tous les paquets ; à sa place, le
+       Réalisateur acceptera également l'adjectif natif provenant du champ
+       « etykieta » de cet accent.
   poziom_3_cos_nowego: |
-    ## NIVEAU 3 — créer quelque chose de complètement nouveau
+    ## NIVEAU 3 — création de quelque chose de complètement nouveau
 
-    Vous voulez un argot scolaire ? La langue des chevaliers anciens ? Un langage
-    cryptique ? Un chiffrement pour les parents devant les enfants ?
+    Vous voulez un argot scolaire ? Une langue de chevaliers anciens ? Un
+    langage des herbes ? Un chiffre entre parents et enfants ?
 
-    1. Dans le Gestionnaire de Règles, cliquez sur « {manager.btn_nowy_label} ».
-    2. Choisissez le type (accent, chiffrement de substitution, mode Réalisateur,
-       nouvelle langue de base, chiffrement algorithmique). Pour les cas courants,
-       l'application créera immédiatement un modèle YAML prêt — vous le modifiez
-       comme au niveau 2.
-    3. Pour les cas plus complexes (algorithmes du type « mélange des terminaisons »
-       ou toute une nouvelle langue de base), le Gestionnaire vous montrera un prompt prêt
-       à coller dans ChatGPT ou Claude. L'IA générera un fichier YAML complet,
-       vous le copierez simplement dans le dossier. Pas besoin de savoir programmer —
-       il suffit de savoir copier-coller.
+    1. Dans le Gestionnaire de Règles, cliquez sur "{manager.btn_nowy_label}".
+    2. Choisissez le type (accent, chiffre de substitution, mode Réalisateur,
+       nouvelle langue de base, chiffre algorithmique). Pour les cas
+       standards, l'application créera immédiatement un modèle YAML prêt à
+       l'emploi — vous l'éditez comme au niveau 2.
+       Il y a deux champs que vous ne remplissez pas au clavier, car il n'y
+       a rien à y inventer : le nom du fichier d'accent est calculé par le
+       Gestionnaire à partir du code ISO que vous fournissez (d'où le champ
+       nom en lecture seule uniquement), et le nom de l'outil de nettoyage
+       se choisit dans une courte liste, car le moteur les reconnaît par
+       leur nom et n'en reconnaîtra pas un quatrième.
+    3. Pour les cas plus complexes (algorithmes du type "mélange de
+       terminaisons" ou toute une nouvelle langue de base), le Gestionnaire
+       vous affichera un prompt prêt à coller dans ChatGPT ou Claude. L'IA
+       générera un fichier YAML complet, que vous n'aurez plus qu'à copier
+       dans le dossier. Vous n'avez pas besoin de savoir programmer —
+       il suffit de savoir coller.
+    4. Un modèle fraîchement créé contient à l'intérieur des marqueurs
+       `<FILL …>` — des emplacements que l'application ne peut pas remplir
+       à votre place (en-tête natif, description, reste de la liste de
+       substitutions). Tant qu'ils sont présents, le fichier FONCTIONNE déjà,
+       mais fait autre chose que ce que vous voulez ; c'est pourquoi, après
+       chaque rafraîchissement de l'arborescence, le Gestionnaire vous
+       l'affichera comme inachevé. C'est également la réponse à la question
+       de savoir si le fichier est prêt à être envoyé à quelqu'un en tant
+       que proposition : tant que vous le voyez dans cette liste, il ne
+       l'est pas.
   pomysly: |
     ## Quelques idées pour s'amuser
     ----------------------------

@@ -1550,6 +1550,12 @@ def main() -> None:
     app = wx.App(False)
     kod_jezyka = _wybierz_jezyk_startowy()
     i18n.ustaw_jezyk(kod_jezyka)
+    # v19.4: NAJPIERW brak napisów, potem zepsute napisy. Kolejność nie jest
+    # kosmetyką — oba alarmy są modalne, a przy zniknięciu `dictionaries/`
+    # prawdziwy jest tylko pierwszy: `awarie_ui()` milczy (brak pliku celowo
+    # nie jest awarią, patrz `i18n.napisy_niedostepne`), więc do v19.3.1
+    # aplikacja wstawała w samych `[klucz]` bez ani jednego słowa wyjaśnienia.
+    gui_diagnostyka.pokaz_alarm_braku_napisow(None, i18n.napisy_niedostepne())
     gui_diagnostyka.pokaz_alarm_ui(None, i18n.awarie_ui())
 
     frame = MainFrame()  # noqa: F841  (frame jest trzymany przez wx.App)

@@ -298,6 +298,57 @@ _ALARM_POWODY: dict[str, tuple[str, str]] = {
 }
 
 
+def pokaz_alarm_braku_napisow(parent: wx.Window | None,
+                              sciezki: tuple[str, ...]) -> None:
+    """Alarm „aplikacja nie ma skąd wziąć ani jednego napisu" (no-op przy ``()``).
+
+    Osobny od :func:`pokaz_alarm_ui`, bo opisuje INNY stan i inną naprawę:
+    tam plik jest i jest zepsuty (popraw linię), tu pliku NIE MA (przywróć
+    paczkę). ``parent=None`` jest legalne — alarm leci z ``main.main()`` przed
+    powstaniem okna.
+    """
+    tresc = tekst_alarmu_braku_napisow(sciezki)
+    if not tresc:
+        return
+    _dialog_twardy(_ALARM_TYTUL, tresc, parent)
+
+
+def tekst_alarmu_braku_napisow(sciezki: tuple[str, ...]) -> str:
+    """Treść alarmu o braku plików tłumaczeń — ZASZYTA PL+EN, jak crash dialog.
+
+    Tekst NIE MOŻE iść przez ``i18n``: mówi o tym, że ``i18n`` nie ma skąd
+    wziąć słów, więc `t()` zwróciłoby tu `[diag.…]` — czyli dokładnie objaw,
+    o którym alarm ma poinformować. To ta sama reguła, co w
+    :func:`tekst_alarmu_ui` i ``main._pokaz_dialog_crash``: warstwa
+    dostarczająca słów jest tą, która padła.
+
+    Wyłuskane z prezentacji, żeby dało się sprawdzić bez ``MainLoop``.
+    """
+    if not sciezki:
+        return ""
+    lista = "\n".join(f"    {s}" for s in sciezki)
+    return (
+        "Nie ma skąd wziąć napisów interfejsu — brakuje plików tłumaczeń.\n"
+        "The interface has no strings to show — the translation files are "
+        "missing.\n\n"
+        f"{lista}\n\n"
+        "PL: W oknach zobaczysz nazwy kluczy w nawiasach kwadratowych "
+        "(np. [app.banner]), bo nie ma ani paczki aktywnego języka, ani "
+        "angielskiej paczki zapasowej. Najczęstsza przyczyna to skasowany albo "
+        "przeniesiony folder `dictionaries/`, który musi leżeć OBOK programu. "
+        "Co zrobić: przywróć ten folder z kopii albo zainstaluj aplikację "
+        "ponownie (Twoje projekty i gry zostaną nietknięte), a potem uruchom "
+        "program jeszcze raz.\n\n"
+        "EN: Windows will show key names in square brackets (e.g. "
+        "[app.banner]), because neither the active language pack nor the "
+        "English fallback pack is available. The usual cause is a deleted or "
+        "moved `dictionaries/` folder, which must sit NEXT TO the program. "
+        "What to do: restore that folder from a backup or reinstall the "
+        "application (your projects and games are left untouched), then start "
+        "the program again."
+    )
+
+
 def tekst_alarmu_ui(awarie: tuple[i18n.AwariaUI, ...]) -> str:
     """Składa treść alarmu o zepsutym ``ui.yaml`` (pusty ciąg = nie ma o czym mówić).
 
@@ -330,10 +381,10 @@ def tekst_alarmu_ui(awarie: tuple[i18n.AwariaUI, ...]) -> str:
                      "fallback pack, which is fine.")
     else:
         skutek_pl = ("Zamiast napisów w oknach mogą pojawić się nazwy kluczy "
-                     "w nawiasach kwadratowych (np. [main.app_title]), bo padła "
+                     "w nawiasach kwadratowych (np. [app.banner]), bo padła "
                      "też angielska paczka zapasowa.")
         skutek_en = ("Instead of labels you may see key names in square brackets "
-                     "(e.g. [main.app_title]), because the English fallback pack "
+                     "(e.g. [app.banner]), because the English fallback pack "
                      "is broken as well.")
 
     return (

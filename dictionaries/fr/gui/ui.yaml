@@ -942,7 +942,6 @@ manager:
   tree_tooltip: |-
     Arborescence de tous les fichiers YAML du dossier dictionaries/. Développez la langue, puis la catégorie, puis sélectionnez le fichier. Les flèches et Entrée fonctionnent normalement pour NVDA.
   tree_root: "Dictionnaires (dictionaries/)"
-  tree_brak_folderu: "⚠️  Aucun dossier dictionaries/ — créez la première langue avec le bouton « Nouveau fichier de règles… »."
   # 13.2: filtr języka
   dropdown_jezyk_label: "&Langue :"
   dropdown_jezyk_tooltip: |-

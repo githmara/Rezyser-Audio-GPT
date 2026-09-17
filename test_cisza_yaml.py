@@ -188,8 +188,20 @@ def test_szablony_managera_zglaszaja_powod():
 
 
 def test_klucz_i18n_dla_nowego_powodu_istnieje_w_kazdej_paczce():
-    """Kod powodu bez klucza `diag.powod.*` daloby userowi goly identyfikator."""
+    """Kod powodu bez klucza `diag.powod.*` daloby userowi goly identyfikator.
+
+    v19.4: sprawdzamy KAZDY kod z `przepisy_rezysera.POWOD_*`, nie jeden
+    wybrany. Docstring obiecywal to od poczatku, a test pilnowal tylko
+    `POWOD_KSZTALT` — czyli nowy powod (`POWOD_SZKIC` w tym wydaniu) wchodzil
+    do rejestru bez gwarancji, ze raport ma czym go opisac. Kody `i18n.POWOD_*`
+    sa tu NIE na miejscu: alarm o zepsutym `ui.yaml` ma teksty zaszyte PL+EN,
+    bo nie moze zalezec od warstwy, ktora padla.
+    """
     import i18n
+
+    kody = sorted(v for k, v in vars(pr).items()
+                  if k.startswith("POWOD_") and isinstance(v, str))
+    assert len(kody) >= 13, f"czy `POWOD_*` naprawde jest tylko {len(kody)}?"
 
     dict_dir = Path(__file__).parent / "dictionaries"
     braki = []
@@ -198,10 +210,96 @@ def test_klucz_i18n_dla_nowego_powodu_istnieje_w_kazdej_paczce():
             continue
         i18n._CACHE.pop(paczka.name, None)
         dane = i18n.zaladuj(paczka.name)
-        wartosc = ((dane.get("diag") or {}).get("powod") or {}).get(pr.POWOD_KSZTALT)
-        if not isinstance(wartosc, str) or not wartosc.strip():
-            braki.append(paczka.name)
-    assert not braki, f"brak `diag.powod.{pr.POWOD_KSZTALT}` w paczkach: {braki}"
+        powody = (dane.get("diag") or {}).get("powod") or {}
+        for kod in kody:
+            wartosc = powody.get(kod)
+            if not isinstance(wartosc, str) or not wartosc.strip():
+                braki.append(f"{paczka.name}: brak `diag.powod.{kod}`")
+    assert not braki, "\n".join(braki)
+
+
+def test_brak_plikow_tlumaczen_nie_jest_juz_cisza():
+    """Zniknienie `dictionaries/` musi sie ODEZWAC, i to bez pomocy `i18n`.
+
+    Zmierzone 2026-09-17 przed poprawka: `t()` zwracalo `[klucz]` dla
+    wszystkiego, `awarie_ui()` bylo PUSTE (brak pliku celowo nie jest awaria),
+    a `main._wybierz_jezyk_startowy` po cichu wybieral `pl` — wiec aplikacja
+    wstawala w samych nawiasach kwadratowych i nie mowila ani slowa dlaczego.
+    Mechanizm zbudowany dokladnie na ten przypadek (`_dialog_twardy`, tekst
+    zaszyty PL+EN) nie mial sie z czego odpalic.
+
+    Granica legalnosci jest tu cala trescia testu: brak paczki INNEJ niz
+    aktywna to stan normalny (stub, `jezyk_override` z przepisu), a brak
+    aktywnej PRZY DZIALAJACYM zapasie `en` to udokumentowany miekki fallback.
+    Alarm ma odezwac sie WYLACZNIE wtedy, gdy nie ma ANI JEDNEGO zrodla slow.
+    """
+    import gui_diagnostyka as gd
+    import i18n
+
+    pierwotny_dir = i18n._DICTIONARIES_DIR
+    pierwotny_jezyk = i18n.aktualny_jezyk()
+    katalog = Path(tempfile.mkdtemp())
+    try:
+        # 1. Stan normalny: cisza.
+        i18n.ustaw_jezyk("pl")
+        assert i18n.napisy_niedostepne() == ()
+        assert gd.tekst_alarmu_braku_napisow(()) == ""
+
+        # 2. Aktywna paczka bez `ui.yaml`, ale zapas `en` dziala -> CISZA.
+        (katalog / "dictionaries" / "de" / "gui").mkdir(parents=True)
+        (katalog / "dictionaries" / "en" / "gui").mkdir(parents=True)
+        shutil.copy(pierwotny_dir / "en" / "gui" / "ui.yaml",
+                    katalog / "dictionaries" / "en" / "gui" / "ui.yaml")
+        i18n._DICTIONARIES_DIR = katalog / "dictionaries"
+        i18n._CACHE.clear()
+        i18n.ustaw_jezyk("de")
+        assert i18n.napisy_niedostepne() == (), \
+            "alarm krzyczy na LEGALNY miekki fallback na angielski"
+
+        # 3. Nie ma ANI aktywnej, ANI zapasu -> ALARM, z oboma sciezkami.
+        (katalog / "dictionaries" / "en" / "gui" / "ui.yaml").unlink()
+        i18n._CACHE.clear()
+        sciezki = i18n.napisy_niedostepne()
+        assert len(sciezki) == 2, sciezki
+        assert i18n.awarie_ui() == (), "brak pliku to NIE awaria pliku"
+        tresc = gd.tekst_alarmu_braku_napisow(sciezki)
+        # Tekst nie moze pochodzic z `i18n` — inaczej byl by objawem, o ktorym
+        # ma informowac. Obie wersje jezykowe zaszyte, oba jezyki obecne.
+        assert "[" not in tresc.replace("[app.banner]", ""), tresc
+        assert "PL:" in tresc and "EN:" in tresc
+        assert all(s in tresc for s in sciezki)
+    finally:
+        i18n._DICTIONARIES_DIR = pierwotny_dir
+        i18n._CACHE.clear()
+        i18n.ustaw_jezyk(pierwotny_jezyk)
+        shutil.rmtree(katalog, ignore_errors=True)
+
+
+def test_alarmy_cytuja_istniejacy_klucz():
+    """Przyklad `[sekcja.klucz]` w alarmie musi byc kluczem, ktory ISTNIEJE.
+
+    Oba twarde alarmy pokazuja userowi, jak wyglada objaw („zobaczysz nazwy
+    kluczy w nawiasach, np. [...]"). Zmierzone 2026-09-17: cytowaly
+    `[main.app_title]`, klucza, ktorego w zadnej paczce NIE MA (prawdziwe to
+    `app.nazwa` / `app.banner`) — czyli uczyly rozpoznawac objaw, ktorego nikt
+    nigdy nie zobaczy. Defekt byl w kodzie od v18.25.
+    """
+    import re
+
+    import gui_diagnostyka as gd
+    import i18n
+
+    i18n.ustaw_jezyk("pl")
+    teksty = [
+        gd.tekst_alarmu_braku_napisow(("x/ui.yaml",)),
+        gd.tekst_alarmu_ui((i18n.AwariaUI("pl", "x/ui.yaml",
+                                          i18n.POWOD_PARSE, "1:1"),)),
+    ]
+    cytowane = {m for tekst in teksty
+                for m in re.findall(r"\[([a-z_]+(?:\.[a-z_]+)+)\]", tekst)}
+    assert cytowane, "alarmy przestaly cytowac przykladowy klucz"
+    braki = [k for k in sorted(cytowane) if i18n.t(k).startswith("[")]
+    assert not braki, f"alarm cytuje nieistniejace klucze: {braki}"
 
 
 # ---------------------------------------------------------------------------

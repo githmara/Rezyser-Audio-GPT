@@ -87,6 +87,17 @@ _PREFIKS_NARZEDZIA: dict[str, str] = {
     mrs.TYP_AKCENT_NAPRAWIACZ:   "naprawiacz",
 }
 
+# Jedyny napis tego panelu POZA i18n (v19.4) — i to jest reguła, nie wyjątek:
+# zdanie „brak folderu dictionaries/" nie może czekać W folderze
+# `dictionaries/`, bo wtedy `t()` zwraca `[manager.tree_brak_folderu]`, czyli
+# placeholder nierozwijalny z definicji. Dwujęzycznie, jak „Zamknij / Close"
+# w `gui_diagnostyka._dialog_twardy`.
+_TEKST_BRAK_FOLDERU = (
+    "⚠️  Brak folderu dictionaries/ obok programu — przywróć go z kopii albo "
+    "zainstaluj aplikację ponownie.  /  The dictionaries/ folder is missing "
+    "next to the program — restore it from a backup or reinstall the app."
+)
+
 
 def _etykieta_kategorii(kat: str) -> str:
     """Zwraca przyjazną etykietę kategorii drzewa (z ``manager.kategorie.*``).
@@ -343,8 +354,13 @@ class ManagerRegulPanel(wx.Panel):
         root = self._tree.AddRoot(t("manager.tree_root"))
 
         if not os.path.isdir(DICTIONARIES_DIR):
-            # Brak katalogu – ostrzeż i zakończ
-            wezel = self._tree.AppendItem(root, t("manager.tree_brak_folderu"))
+            # Brak katalogu – ostrzeż i zakończ. Tekst jest ZASZYTY PL+EN,
+            # a nie w `ui.yaml` (v19.4): komunikat o braku folderu
+            # `dictionaries/` nie może mieszkać W TYM folderze, bo `t()`
+            # zwróciłby wtedy `[manager.tree_brak_folderu]` — placeholder
+            # nierozwijalny z definicji. Ta sama reguła, co w
+            # `gui_diagnostyka._dialog_twardy` i `main._pokaz_dialog_crash`.
+            wezel = self._tree.AppendItem(root, _TEKST_BRAK_FOLDERU)
             self._tree.SetItemData(wezel, {"typ": "info"})
             return
 

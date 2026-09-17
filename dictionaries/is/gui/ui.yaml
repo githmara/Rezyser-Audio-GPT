@@ -946,7 +946,6 @@ manager:
   tree_tooltip: |-
     Tré allra YAML skráa í dictionaries/ möppunni. Stækkaðu tungumál, síðan flokk, og veldu síðan skrá. Örvar og Enter virka venjulega fyrir NVDA.
   tree_root: "Orðabækur (dictionaries/)"
-  tree_brak_folderu: "⚠️  Engin dictionaries/ mappa – búðu til fyrsta tungumálið með „Ný regla skrá…\" hnappinum."
   # 13.2: filtr języka — domyślnie pokazujemy tylko aktywny język UI (A11y),
   # a osobna opcja „Wszystkie języki" jest dla autorów paczek językowych.
   dropdown_jezyk_label: "&Tungumál:"

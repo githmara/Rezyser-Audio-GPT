@@ -209,46 +209,52 @@ tu pensi che un francese direbbe piuttosto "sch" o "ch". Nessun problema.</p>
    mostra subito un rapporto con il numero di riga.</li>
 </ol>
 <h2>LIVELLO 2 — aggiungere un nuovo accento tramite duplicazione</h2>
-<p>Vuoi aggiungere un accento svedese o danese? Inizia con quello più simile<br>
-esistente.</p>
+<p>Vuoi aggiungere un accento svedese o danese? Inizia dal più simile<br>
+tra quelli già esistenti.</p>
 <ol>
-<li>Nel Gestore Regole seleziona ad esempio "finski.yaml" (il finlandese<br>
-   è foneticamente vicino allo svedese) e fai clic su "📋  Duplica file selezionato".</li>
-<li>Il Gestore chiederà un nuovo nome — inserisci ad esempio "szwedzki" (in<br>
-   minuscolo, senza spazi, senza caratteri polacchi).</li>
-<li>Il nuovo file si aprirà nell'editor. Cambia i campi:<ul>
-<li>"etykieta" — ciò che vedrai nel menu dell'applicazione, ad esempio<br>
-    "Svedese (Alva / Oskar — OneCore/Vocalizer)"</li>
-<li>"opis" — breve descrizione per te stesso per il futuro</li>
-<li>"iso" — codice lingua a due lettere, per lo svedese "sv"</li>
+<li>Nel Gestore Regole seleziona ad es. "finski.yaml" (il finlandese è<br>
+   foneticamente vicino allo svedese) e clicca su "📋  Duplica file selezionato".</li>
+<li>Il Manager chiederà un nuovo nome — inserisci ad es. "szwedzki" (in<br>
+   minuscolo, senza spazi, senza caratteri polacchi speciali). Deve essere<br>
+   il tradizionale nome POLACCO della lingua, indipendentemente dalla<br>
+   lingua della tua interfaccia: il nome del file dell'accento non è un<br>
+   testo per te, ma un identificatore comune a tutti i pacchetti<br>
+   linguistici. Il Manager lo verifica — se digiti "swedish" o qualcos'altro,<br>
+   rifiuterà e mostrerà il nome corretto.</li>
+<li>Il nuovo file si aprirà nell'editor. Modifica i campi:<ul>
+<li>"etykieta" — ciò che vedrai nel menu dell'applicazione, quindi<br>
+    scrivilo nella tua lingua, ad es. "Svedese (Alva / Oskar — OneCore/Vocalizer)"</li>
+<li>"opis" — una breve descrizione per te stesso, per il futuro<br>
+   Il campo "iso" (codice della lingua, per lo svedese "sv") NON devi<br>
+   toccarlo: il Manager lo imposta automaticamente, perché deriva dal nome<br>
+   che hai inserito. Il commento aggiunto in cima al file ricorda anche la<br>
+   cosa più importante di tutto questo elenco — vedi punto 4.</li>
 </ul>
 </li>
-<li>Regola l'elenco delle "zamiany" secondo la fonetica svedese (ad esempio,<br>
-   aggiungi "å → o", "ö → ö", rimuovi o modifica quelle specifiche per il<br>
-   finlandese).</li>
-<li>Salva il file e, nel Gestore Regole, fai clic su<br>
-   "🔄  Aggiorna albero" — senza chiudere l'applicazione. Il nuovo<br>
-   svedese apparirà nel<br>
-   menu degli accenti di Poliglotta (e se aggiungi al Libro del Mondo il tag<br>
-   "[Marek] - ha l'accento szwedzki", anche il Regista lo riconoscerà<br>
-   automaticamente e lo applicherà ai suoi dialoghi). Il nome del file<br>
-   ("szwedzki") è anche la parola che il Regista cerca nel Libro del Mondo:<br>
-   deve stare accanto alla parola "accento".</li>
+<li>Adatta l'elenco delle "zamiany" (sostituzioni) alla fonetica svedese<br>
+   (ad es. aggiungi "å → o", "ö → ö", rimuovi o modifica quelle specifiche<br>
+   per il finlandese). Questo è il punto cruciale: finché non lo farai,<br>
+   "szwedzki" sarà una copia del finlandese e suonerà come il finlandese,<br>
+   anche se si chiama svedese.</li>
+<li>Salva il file e nel Gestore Regole clicca su "🔄  Aggiorna albero"<br>
+   — senza chiudere l'applicazione. Il nuovo svedese apparirà nel menu<br>
+   degli accenti del Poliglotta. Lo riconoscerà anche il Regista, se<br>
+   aggiungerai al Libro del Mondo del personaggio un tag del tipo<br>
+   "[Marek] - ha l'accento szwedzki" — ed è bene sapere che questo tag ha<br>
+   due parti di stato DIVERSO. La parola scatenante ("akcent") è nella<br>
+   lingua del tuo pacchetto e proviene dal campo "slowo_akcent" nel file<br>
+   delle basi. Il nome dell'accento accanto ad essa ("szwedzki") è il nome<br>
+   del file, cioè lo stesso identificatore polacco in tutti i pacchetti;<br>
+   al suo posto il Regista accetterà anche l'aggettivo nativo dal campo<br>
+   "etykieta" di quell'accento.</li>
 </ol>
 <h2>LIVELLO 3 — creare qualcosa di completamente nuovo</h2>
-<p>Vuoi un gergo scolastico? La lingua degli antichi cavalieri? Un linguaggio<br>
-criptico? Un cifrario per i genitori davanti ai bambini?</p>
+<p>Vuoi un gergo scolastico? Una lingua degli antichi cavalieri? Un linguaggio in codice? Un cifrario dei genitori contro i figli?</p>
 <ol>
-<li>Nel Gestore Regole fai clic su "Nuovo file di regole…".</li>
-<li>Scegli il tipo (accento, cifrario di sostituzione, modalità del Regista,<br>
-   nuova lingua di base, cifrario algoritmico). Per i casi comuni<br>
-   l'applicazione creerà immediatamente un modello YAML pronto — lo modifichi<br>
-   come al livello 2.</li>
-<li>Per i casi più complessi (algoritmi come "mescolamento delle desinenze"<br>
-   o un'intera nuova lingua di base) il Gestore ti mostrerà un prompt pronto<br>
-   da incollare in ChatGPT o Claude. L'IA genererà un file YAML completo,<br>
-   tu lo copierai semplicemente nella cartella. Non devi sapere programmare —<br>
-   basta saper copiare e incollare.</li>
+<li>Nel Gestore Regole clicca su "➕  Nuovo file regole…".</li>
+<li>Scegli il tipo (accento, cifrario di sostituzione, modalità Regista, nuova lingua base, cifrario algoritmico). Per i casi comuni l'applicazione creerà subito un modello YAML pronto — lo modifichi come nel livello 2. Due campi non li compili da tastiera, perché non c'è nulla da inventare: il nome del file dell'accento viene calcolato dal Gestore Regole in base al codice ISO che fornisci (per questo il campo del nome è di sola lettura), mentre il nome dello strumento di pulizia lo scegli da un breve elenco, perché il motore lo riconosce dal nome e un quarto non lo riconoscerebbe.</li>
+<li>Per i casi più complessi (algoritmi del tipo "mescolamento delle desinenze" oppure un'intera nuova lingua base) il Gestore Regole ti mostrerà un prompt pronto da incollare in ChatGPT o Claude. L'IA genererà un file YAML completo, tu dovrai solo copiarlo nella cartella. Non serve saper programmare — basta saper incollare.</li>
+<li>Un modello appena creato contiene al suo interno dei marcatori <code>&lt;FILL …&gt;</code> — punti che l'applicazione non è in grado di compilare per te (intestazione nativa, descrizione, resto dell'elenco delle sostituzioni). Finché sono presenti, il file FUNZIONA già, ma fa qualcosa di diverso da ciò che desideri, quindi ad ogni aggiornamento dell'albero il Gestore Regole te lo segnalerà come incompleto. Questa è anche la risposta alla domanda se il file sia pronto per essere inviato a qualcuno come proposta: finché lo vedi in questo elenco, non lo è.</li>
 </ol>
 <h2>Alcune idee per divertirsi</h2>
 <hr>

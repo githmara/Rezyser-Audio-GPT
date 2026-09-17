@@ -195,6 +195,35 @@ def _sciezka_ui(jezyk: str) -> Path:
     return _DICTIONARIES_DIR / jezyk / _FOLDER_GUI / _NAZWA_PLIKU_UI
 
 
+def napisy_niedostepne() -> tuple[str, ...]:
+    """Ścieżki, których BRAK odbiera aplikacji wszystkie napisy (albo ``()``).
+
+    Odpowiada na pytanie, którego :func:`sprawdz_pliki_ui` zadać nie może.
+    Tamta zgłasza plik, który ISTNIEJE, ale się nie nadaje — bo BRAK pliku jest
+    w tym module stanem normalnym (stub w ``dictionaries/``, ``jezyk_override``
+    z przepisu na paczkę, której nie ma). Jest jednak dokładnie jeden przypadek,
+    w którym brak przestaje być normalny: gdy naraz nie ma paczki AKTYWNEJ
+    i angielskiego zapasu, czyli obu źródeł, z których :func:`t` bierze słowa.
+
+    Zmierzone 2026-09-17 na nieistniejącym ``dictionaries/``: każde ``t()``
+    zwraca ``[klucz]``, ``awarie_ui()`` jest PUSTE, a ``main`` po cichu wybiera
+    ``pl`` — więc aplikacja wstaje w nawiasach kwadratowych i nie mówi ani
+    słowa dlaczego. Alarm zbudowany dokładnie na tę sytuację
+    (``gui_diagnostyka._dialog_twardy``, tekst zaszyty PL+EN) nie miał się
+    z czego odpalić.
+
+    Returns:
+        Krotka ścieżek do pokazania użytkownikowi (aktywna paczka + zapas),
+        albo ``()``, gdy choć jedno źródło napisów działa.
+    """
+    jezyki = [_AKTUALNY_JEZYK]
+    if _AKTUALNY_JEZYK != JEZYK_FALLBACK:
+        jezyki.append(JEZYK_FALLBACK)
+    if any(zaladuj(kod) for kod in jezyki):
+        return ()
+    return tuple(str(_sciezka_ui(kod)) for kod in jezyki)
+
+
 def _wczytaj_yaml(jezyk: str) -> dict[str, Any]:
     """Wczytuje surowy plik YAML. Nie rzuca wyjątków – zwraca ``{}`` przy awarii.
 

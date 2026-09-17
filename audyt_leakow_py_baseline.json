@@ -48,12 +48,16 @@
   ],
   "gui_diagnostyka.py": [
     "POSSIBLE|znak-PL:ąćĘęłńś|Nie udało się wczytać pliku z tłumaczeniami interfejsu. {…} {…} Co zrobić: otwórz wskazany plik w edytorze tekstu, popra",
-    "POSSIBLE|znak-PL:ąćęłż|Zamiast napisów w oknach mogą pojawić się nazwy kluczy w nawiasach kwadratowych (np. [main.app_title]), bo padła też ang",
+    "POSSIBLE|znak-PL:ąćęłńż|Nie ma skąd wziąć napisów interfejsu — brakuje plików tłumaczeń. The interface has no strings to show — the translation ",
+    "POSSIBLE|znak-PL:ąćęłż|Zamiast napisów w oknach mogą pojawić się nazwy kluczy w nawiasach kwadratowych (np. [app.banner]), bo padła też angiels",
     "POSSIBLE|znak-PL:ąćłńś|plik nie zawiera tłumaczeń (jest pusty albo nie jest mapą klucz: wartość)",
     "POSSIBLE|znak-PL:ąę|Napisy w oknach będą tymczasowo po ANGIELSKU — z zapasowej paczki, która jest w porządku.",
     "POSSIBLE|znak-PL:ął|błąd składni YAML we wskazanym miejscu (linia:kolumna)",
     "POSSIBLE|znak-PL:ćęł|nie udało się odczytać pliku (uprawnienia albo plik zajęty przez inny program)",
     "POSSIBLE|znak-PL:łż|Reżyser Audio GPT — tłumaczenia interfejsu / interface translations"
+  ],
+  "gui_manager_regul.py": [
+    "POSSIBLE|znak-PL:ćę|⚠️ Brak folderu dictionaries/ obok programu — przywróć go z kopii albo zainstaluj aplikację ponownie. / The dictionaries"
   ],
   "gui_opowiesci.py": [
     "POSSIBLE|slowo-PL:wczytaj|/wczytaj",

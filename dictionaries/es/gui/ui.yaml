@@ -946,7 +946,6 @@ manager:
   tree_tooltip: |-
     Árbol de todos los archivos YAML en la carpeta dictionaries/. Expande el idioma, luego la categoría, y luego selecciona el archivo. Las flechas y Enter funcionan de manera estándar para NVDA.
   tree_root: "Diccionarios (dictionaries/)"
-  tree_brak_folderu: "⚠️  Falta la carpeta dictionaries/ – crea el primer idioma con el botón \"Nuevo archivo de reglas…\"."
   # 13.2: filtr języka — domyślnie pokazujemy tylko aktywny język UI (A11y),
   # a osobna opcja „Wszystkie języki" jest dla autorów paczek językowych.
   dropdown_jezyk_label: "&Idioma:"

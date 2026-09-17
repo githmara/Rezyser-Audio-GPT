@@ -935,7 +935,7 @@ konwerter:
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
 manager:
-  panel_name: "Pannello Manager Regole – esploratore dizionari"
+  panel_name: "Pannello Gestore Regole – esploratore dizionari"
   desc: |-
     Il Manager Regole consente di esplorare e modificare i file YAML nella cartella dictionaries/ senza entrare nell'Esplora file del sistema. Seleziona un file nell'albero a sinistra, quindi utilizza i pulsanti a destra: apri nell'editor di testo, crea un nuovo file, duplica o elimina.
 
@@ -946,7 +946,6 @@ manager:
   tree_tooltip: |-
     Albero di tutti i file YAML nella cartella dictionaries/. Espandi la lingua, poi la categoria, quindi seleziona il file. Le frecce e Invio funzionano standard per NVDA.
   tree_root: "Dizionari (dictionaries/)"
-  tree_brak_folderu: "⚠️  Nessuna cartella dictionaries/ – crea la prima lingua con il pulsante \"Nuovo file regole…\"."
   # 13.2: filtr języka — domyślnie pokazujemy tylko aktywny język UI (A11y),
   # a osobna opcja „Wszystkie języki" jest dla autorów paczek językowych.
   dropdown_jezyk_label: "&Lingua:"

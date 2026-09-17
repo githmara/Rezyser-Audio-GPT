@@ -245,23 +245,35 @@ podobnego istniejącego.</p>
 <li>W Managerze Reguł zaznacz np. "finski.yaml" (fiński jest blisko<br>
    szwedzkiego fonetycznie) i kliknij "📋  Duplikuj wybrany plik".</li>
 <li>Manager zapyta o nową nazwę — wpisz np. "szwedzki" (małymi literami,<br>
-   bez spacji, bez polskich znaków).</li>
+   bez spacji, bez polskich znaków). Musi to być tradycyjna POLSKA nazwa<br>
+   języka, i to niezależnie od tego, w jakim języku masz interfejs: nazwa<br>
+   pliku akcentu nie jest napisem dla Ciebie, ale identyfikatorem wspólnym<br>
+   dla wszystkich paczek językowych. Manager to sprawdza — jeśli wpiszesz<br>
+   "swedish" albo cokolwiek innego, odmówi i pokaże nazwę właściwą.</li>
 <li>Nowy plik otworzy się w edytorze. Zmień pola:<ul>
-<li>"etykieta" — to, co zobaczysz w menu aplikacji, np.<br>
-    "Szwedzki (Alva / Oskar — OneCore/Vocalizer)"</li>
-<li>"opis" — krótki opis dla siebie na przyszłość</li>
-<li>"iso" — dwuliterowy kod języka, dla szwedzkiego "sv"</li>
+<li>"etykieta" — to, co zobaczysz w menu aplikacji, więc pisz ją<br>
+    w swoim języku, np. "Szwedzki (Alva / Oskar — OneCore/Vocalizer)"</li>
+<li>"opis" — krótki opis dla siebie na przyszłość<br>
+   Pola "iso" (kod języka, dla szwedzkiego "sv") NIE musisz ruszać:<br>
+   Manager ustawił je sam, bo wynika z nazwy, którą wpisałeś. Komentarz<br>
+   dopisany na górze pliku przypomina też o rzeczy najważniejszej z całej<br>
+   tej listy — patrz punkt 4.</li>
 </ul>
 </li>
 <li>Dostrój listę "zamian" pod fonetykę szwedzką (np. dodaj "å → o",<br>
-   "ö → ö", usuń albo zmień te, które są specyficzne dla fińskiego).</li>
+   "ö → ö", usuń albo zmień te, które są specyficzne dla fińskiego).<br>
+   To jest sedno: dopóki tego nie zrobisz, "szwedzki" jest kopią fińskiego<br>
+   i brzmi po fińsku, choć nazywa się szwedzki.</li>
 <li>Zapisz plik, a w Managerze Reguł kliknij "🔄  Odśwież drzewo"<br>
-   — bez zamykania aplikacji. Nowy szwedzki pojawi się w<br>
-   menu akcentów Poligloty (a jeśli dodasz do Księgi Świata postaci<br>
-   tag "[Marek] - ma akcent szwedzki", to Reżyser też go rozpozna<br>
-   automatycznie i zastosuje do jej dialogów). Nazwa pliku ("szwedzki")<br>
-   jest zarazem słowem, którego Reżyser szuka w Księdze Świata — musi<br>
-   stać obok słowa "akcent".</li>
+   — bez zamykania aplikacji. Nowy szwedzki pojawi się w menu akcentów<br>
+   Poligloty. Rozpozna go też Reżyser, jeśli dopiszesz do Księgi Świata<br>
+   postaci tag w rodzaju "[Marek] - ma akcent szwedzki" — i warto wiedzieć,<br>
+   że ten tag ma dwie części o RÓŻNYM statusie. Słowo wyzwalające<br>
+   ("akcent") jest w języku Twojej paczki i bierze się z pola<br>
+   "slowo_akcent" w pliku podstaw. Stojąca obok nazwa akcentu ("szwedzki")<br>
+   to nazwa pliku, czyli ten sam polski identyfikator we wszystkich<br>
+   paczkach; zamiast niej Reżyser przyjmie też natywny przymiotnik<br>
+   z pola "etykieta" tego akcentu.</li>
 </ol>
 <h2>POZIOM 3 — stworzenie czegoś zupełnie nowego</h2>
 <p>Chcesz gwarę szkolną? Język starożytnych rycerzy? Mowę trawę? Szyfr<br>
@@ -270,12 +282,24 @@ rodziców przed dziećmi?</p>
 <li>W Managerze Reguł kliknij "➕  Nowy plik reguł…".</li>
 <li>Wybierz typ (akcent, szyfr zamian, tryb Reżysera, nowy język bazowy,<br>
    szyfr algorytmiczny). Dla zwykłych przypadków aplikacja utworzy od<br>
-   razu gotowy szablon YAML — edytujesz go jak w poziomie 2.</li>
+   razu gotowy szablon YAML — edytujesz go jak w poziomie 2.<br>
+   Dwóch pól nie wpisujesz z klawiatury, bo nie ma w nich nic do<br>
+   wymyślenia: nazwę pliku akcentu Manager wylicza z kodu ISO, który<br>
+   podajesz (stąd pole nazwy tylko do odczytu), a nazwę narzędzia<br>
+   czyszczącego wybierasz z krótkiej listy, bo silnik zna je po nazwie<br>
+   i czwartej nie rozpozna.</li>
 <li>Dla trudniejszych przypadków (algorytmy typu "mieszanie końcówek"<br>
    albo cały nowy język bazowy) Manager pokaże Ci gotowy prompt do<br>
    wklejenia w ChatGPT lub Claude. AI wygeneruje kompletny plik YAML,<br>
    Ty go tylko skopiujesz do folderu. Nie musisz umieć programować —<br>
    wystarczy umieć przekleić.</li>
+<li>Świeży szablon ma w środku znaczniki <code>&lt;FILL …&gt;</code> — miejsca, których<br>
+   aplikacja nie potrafi wypełnić za Ciebie (natywny nagłówek, opis,<br>
+   reszta listy zamian). Dopóki tam są, plik już DZIAŁA, ale robi coś<br>
+   innego, niż chcesz, więc po każdym odświeżeniu drzewa Manager wypisze<br>
+   Ci go jako niedokończony. To też odpowiedź na pytanie, czy plik jest<br>
+   gotowy, by wysłać go komuś jako propozycję: dopóki widzisz go na tej<br>
+   liście, nie jest.</li>
 </ol>
 <h2>Kilka pomysłów na zabawę</h2>
 <hr>

@@ -185,37 +185,51 @@ tresc:
        se recargarán desde cero — tu cambio ya está en vigor, sin necesidad de cerrar la aplicación.
        Si el archivo tiene un error de sintaxis, el Gestor mostrará de inmediato un informe con el número de línea.
   poziom_2_duplikacja: |
-    ## POZIOM 2 — añadir un nuevo acento por duplicación
+    ## NIVEL 2 — añadir un nuevo acento por duplicación
 
     ¿Quieres añadir el acento sueco o danés? Empieza por el más
     parecido de los ya existentes.
 
-    1. En el Gestor de Reglas selecciona, por ejemplo, "finski.yaml" (el finés
-       está fonéticamente cerca del sueco) y haz clic en "{manager.btn_duplikuj_label}".
-    2. El Gestor te pedirá un nuevo nombre — escribe, por ejemplo, "szwedzki"
-       (en minúsculas, sin espacios, sin caracteres polacos).
+    1. En el Gestor de Reglas marca, por ejemplo, "finski.yaml" (el finlandés está
+       fonéticamente cerca del sueco) y haz clic en "{manager.btn_duplikuj_label}".
+    2. El Gestor preguntará por el nuevo nombre — escribe, por ejemplo, "szwedzki" (en minúsculas,
+       sin espacios, sin caracteres polacos). Debe ser el nombre tradicional
+       POLACO del idioma, y esto independientemente del idioma en que tengas
+       la interfaz: el nombre del archivo de acento no es un texto para ti, sino un identificador
+       común para todos los paquetes de idiomas. El Gestor lo comprueba — si escribes
+       "swedish" o cualquier otra cosa, se negará y te mostrará el nombre correcto.
     3. El nuevo archivo se abrirá en el editor. Cambia los campos:
-          - "etykieta" — lo que verás en el menú de la aplicación, por ejemplo
-            "Sueco (Alva / Oskar — OneCore/Vocalizer)"
-          - "opis" — una breve descripción para ti mismo, de cara al futuro
-          - "iso" — el código de idioma de dos letras, para el sueco "sv"
+          - "etykieta" — lo que verás en el menú de la aplicación, así que escríbela
+            en tu propio idioma, por ejemplo, "Sueco (Alva / Oskar — OneCore/Vocalizer)"
+          - "opis" — una breve descripción para tu propia referencia futura
+       El campo "iso" (código de idioma, para el sueco "sv") NO hace falta tocarlo:
+       el Gestor lo ha configurado él mismo, porque se deduce del nombre que has introducido.
+       El comentario añadido en la parte superior del archivo también recuerda lo más
+       importante de toda esta lista — ver el punto 4.
     4. Ajusta la lista de "zamian" a la fonética sueca (por ejemplo, añade "å → o",
-       "ö → ö", elimina o modifica las que sean específicas del finés).
-    5. Guarda el archivo y, en el Gestor de Reglas, haz clic en "{manager.btn_odswiez_label}"
-       — sin cerrar la aplicación. El nuevo sueco aparecerá en
-       el menú de acentos del Políglota (y si añades al Libro del Mundo del personaje
-       la etiqueta "[Marek] - tiene acento szwedzki", el Director también lo reconocerá
-       automáticamente y lo aplicará a sus diálogos). El nombre del archivo
-       ("szwedzki") es a la vez la palabra que el Director busca en el Libro del
-       Mundo: tiene que estar junto a la palabra "acento".
+       "ö → ö", elimina o modifica las que son específicas del finlandés).
+       Esto es lo esencial: mientras no lo hagas, el "sueco" es una copia del finlandés
+       y suena a finlandés, aunque se llame sueco.
+    5. Guarda el archivo y en el Gestor de Reglas haz clic en "{manager.btn_odswiez_label}"
+       — sin cerrar la aplicación. El nuevo acento sueco aparecerá en el menú de acentos
+       del Políglota. El Director también lo reconocerá si añades al Libro del Mundo
+       del personaje una etiqueta del tipo "[Marek] - tiene acento szwedzki" — y conviene saber
+       que esta etiqueta tiene dos partes con estatus DIFERENTE. La palabra desencadenante
+       ("akcent") está en el idioma de tu paquete y proviene del campo
+       "slowo_akcent" del archivo de bases. El nombre del acento que la acompaña ("szwedzki")
+       es el nombre del archivo, es decir, el mismo identificador polaco en todos los
+       paquetes; en su lugar, el Director también aceptará el adjetivo nativo
+       del campo "etykieta" de ese acento.
   poziom_3_cos_nowego: |
-    ## NIVEL 3 — crear algo completamente nuevo
+    ## NIVEL 3 — creación de algo completamente nuevo
 
-    ¿Quieres jerga escolar? ¿El idioma de los caballeros antiguos? ¿Lenguaje enredado? ¿Cifrado de padres ante los niños?
+    ¿Quieres una jerga escolar? ¿La lengua de antiguos caballeros? ¿Un lenguaje de "hierba"? ¿Un cifrado de padres frente a los hijos?
 
-    1. En el Gestor de Reglas, haz clic en "{manager.btn_nowy_label}".
-    2. Elige el tipo (acento, cifrado de sustitución, modo Director, nuevo idioma base, cifrado algorítmico). Para casos simples, la aplicación creará inmediatamente una plantilla YAML lista: la editas como en el nivel 2.
-    3. Para casos más difíciles (algoritmos como "mezcla de finales" o un nuevo idioma base completo), el Administrador te mostrará un prompt listo para pegar en ChatGPT o Claude. La IA generará un archivo YAML completo, solo tienes que copiarlo a la carpeta. No necesitas saber programar: solo saber copiar y pegar.
+    1. En el Gestor de Reglas haz clic en "{manager.btn_nowy_label}".
+    2. Elige el tipo (acento, cifrado por sustitución, modo Director, nuevo idioma base, cifrado algorítmico). Para los casos habituales, la aplicación creará de inmediato una plantilla YAML lista para usar — la editas igual que en el nivel 2.
+       Hay dos campos que no rellenas desde el teclado, porque no hay nada que inventar en ellos: el nombre del archivo de acento lo calcula el Administrador a partir del código ISO que proporcionas (de ahí que el campo de nombre sea solo de lectura), y el nombre de la herramienta de limpieza lo eliges de una lista breve, porque el motor las reconoce por nombre y no reconocerá una cuarta.
+    3. Para los casos más difíciles (algoritmos del tipo "mezcla de terminaciones" o un idioma base completamente nuevo) el Administrador te mostrará un prompt listo para pegar en ChatGPT o Claude. La IA generará un archivo YAML completo, y tú solo tendrás que copiarlo a la carpeta. No necesitas saber programar — basta con saber pegar.
+    4. Una plantilla recién creada contiene marcadores `<FILL …>` — lugares que la aplicación no puede rellenar por ti (encabezado nativo, descripción, el resto de la lista de sustituciones). Mientras estén ahí, el archivo ya FUNCIONA, pero hace algo distinto de lo que quieres, así que después de cada actualización del árbol el Administrador lo mostrará como incompleto. Esto también responde a la pregunta de si el archivo está listo para enviárselo a alguien como propuesta: mientras lo veas en esta lista, no lo está.
   pomysly: |
     ## Algunas ideas para divertirse
     -----------------------------

@@ -250,42 +250,67 @@ you feel that a Frenchman would more likely say "sch" or "ch". No problem at all
 <p>Want to add a Swedish or Danish accent? Start from the most similar<br>
 existing one.</p>
 <ol>
-<li>In the Rule Manager, select e.g. "finski.yaml" (Finnish is<br>
-   phonetically close to Swedish) and click "📋  Duplicate selected file".</li>
+<li>In the Rule Manager, select e.g. "finski.yaml" (Finnish is phonetically<br>
+   close to Swedish) and click "📋  Duplicate selected file".</li>
 <li>The Manager will ask for a new name — type e.g. "szwedzki" (lowercase,<br>
-   no spaces, no Polish diacritics).</li>
-<li>The new file will open in the editor. Change the fields:<ul>
-<li>"etykieta" — what you'll see in the app menu, e.g.<br>
-    "Swedish (Alva / Oskar — OneCore/Vocalizer)"</li>
-<li>"opis" — a short description for your own future reference</li>
-<li>"iso" — the two-letter language code, for Swedish "sv"</li>
+   no spaces, no Polish diacritics). This must be the traditional POLISH<br>
+   name of the language, regardless of what language your interface is<br>
+   set to: the accent file name is not a label meant for you, but an<br>
+   identifier shared across all language packs. The Manager checks this —<br>
+   if you type "swedish" or anything else, it will refuse and show you<br>
+   the correct name.</li>
+<li>The new file will open in the editor. Change these fields:<ul>
+<li>"etykieta" (label) — what you'll see in the app menu, so write it<br>
+    in your own language, e.g. "Swedish (Alva / Oskar — OneCore/Vocalizer)"</li>
+<li>"opis" (description) — a short note to yourself for future reference<br>
+   You do NOT need to touch the "iso" field (language code, "sv" for<br>
+   Swedish): the Manager set it automatically, since it follows from the<br>
+   name you typed. The comment added at the top of the file also reminds<br>
+   you of the single most important thing on this whole list — see point 4.</li>
 </ul>
 </li>
-<li>Adjust the "zamiany" (replacements) list to Swedish phonetics (e.g. add<br>
-   "å → o", "ö → ö", remove or change the ones specific to Finnish).</li>
-<li>Save the file, then in the Rule Manager click "🔄  Refresh tree"<br>
-   — without closing the application. The new Swedish option will appear in<br>
-   the Polyglot's accent menu (and if you add the tag<br>
-   "[Marek] - has a szwedzki accent" to a<br>
-   character in the World Book, the Director will also recognize it<br>
-   automatically and apply it to her dialogues). The file name ("szwedzki")<br>
-   doubles as the word the Director looks for in the World Book — it has to<br>
-   stand next to the word "accent".</li>
+<li>Fine-tune the "zamiany" (replacements) list to match Swedish phonetics<br>
+   (e.g. add "å → o", "ö → ö", remove or change the ones specific to<br>
+   Finnish). This is the crux of it: until you do this, "szwedzki" is just<br>
+   a copy of Finnish and sounds Finnish, even though it's called Swedish.</li>
+<li>Save the file, and in the Rule Manager click "🔄  Refresh tree"<br>
+   — without closing the application. The new Swedish accent will appear<br>
+   in the Polyglot's accent menu. The Director will also recognize it if<br>
+   you add a tag like "[Marek] - has a szwedzki accent" to the character's World Bible — and it's worth<br>
+   knowing that this tag has two parts with DIFFERENT status. The trigger<br>
+   word ("akcent") is in the language of your pack and comes from the<br>
+   "slowo_akcent" field in the base file. The accent name next to it<br>
+   ("szwedzki") is the file name — the same Polish identifier used across<br>
+   all packs; instead of it, the Director will also accept the native<br>
+   adjective from that accent's "etykieta" field.</li>
 </ol>
 <h2>LEVEL 3 — creating something completely new</h2>
-<p>Want school slang? Ancient knights' language? Gibberish? Parent cipher<br>
-before children?</p>
+<p>Want a school slang? The language of ancient knights? Grass-speak?<br>
+A cipher for parents to keep from their kids?</p>
 <ol>
 <li>In the Rule Manager, click "➕  New rule file…".</li>
-<li>Choose the type (accent, substitution cipher, Director mode, new base<br>
-   language, algorithmic cipher). For ordinary cases, the application<br>
-   will immediately create a ready YAML template — you edit it as in<br>
-   level 2.</li>
-<li>For more difficult cases (algorithms like "endings mixing" or a whole<br>
-   new base language), the Manager will show you a ready prompt to paste<br>
-   into ChatGPT or Claude. AI will generate a complete YAML file, you<br>
-   just copy it to the folder. You don't need to know programming —<br>
-   just know how to paste.</li>
+<li>Choose a type (accent, substitution cipher, Director mode, new base<br>
+   language, algorithmic cipher). For ordinary cases the app will<br>
+   immediately create a ready-made YAML template — you edit it just as<br>
+   in level 2. There are two fields you don't type in by hand, because<br>
+   there's nothing to invent there: the Manager calculates the accent's<br>
+   file name from the ISO code you provide (which is why that name<br>
+   field is read-only), and you pick the cleanup tool's name from a<br>
+   short list, because the engine only recognizes them by name and<br>
+   won't recognize a fourth one.</li>
+<li>For harder cases (algorithms like "ending blending" or an entirely<br>
+   new base language) the Manager will show you a ready prompt to paste<br>
+   into ChatGPT or Claude. The AI will generate a complete YAML file,<br>
+   and all you need to do is copy it into the folder. You don't need to<br>
+   know how to program — just how to paste.</li>
+<li>A fresh template contains <code>&lt;FILL …&gt;</code> markers inside it — spots the<br>
+   app cannot fill in for you (the native heading, the description, the<br>
+   rest of the substitution list). As long as they're there, the file<br>
+   already WORKS, but it does something different from what you want,<br>
+   so after every tree refresh the Manager will list it as unfinished.<br>
+   That's also the answer to the question of whether the file is ready<br>
+   to send to someone as a suggestion: as long as you see it on this<br>
+   list, it isn't.</li>
 </ol>
 <h2>Some Ideas for Fun</h2>
 <hr>

@@ -8,9 +8,6 @@
   "de/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
   ],
-  "de/manual.yaml/krok_7_ksiega_swiata": [
-    "znak-PL:ż"
-  ],
   "de/tales.yaml/krok_2_quick_start": [
     "znak-PL:ę"
   ],
@@ -40,9 +37,6 @@
   ],
   "en/dictionaries.yaml/co_to_tryb_rezysera": [
     "znak-PL:Ł"
-  ],
-  "en/dictionaries.yaml/poziom_2_duplikacja": [
-    "lingua:PL"
   ],
   "en/manual.yaml/changelog_13": [
     "znak-PL:źż"
@@ -81,14 +75,14 @@
   "es/dictionaries.yaml/co_to_tryb_rezysera": [
     "znak-PL:Ł"
   ],
+  "es/dictionaries.yaml/poziom_2_duplikacja": [
+    "lingua:PL"
+  ],
   "es/manual.yaml/changelog_13": [
     "znak-PL:źż"
   ],
   "es/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
-  ],
-  "es/manual.yaml/krok_7_ksiega_swiata": [
-    "znak-PL:ż"
   ],
   "es/tales.yaml/krok_2_quick_start": [
     "znak-PL:ę",
@@ -223,6 +217,10 @@
   "it/dictionaries.yaml/co_to_tryb_rezysera": [
     "znak-PL:Ł"
   ],
+  "it/dictionaries.yaml/poziom_2_duplikacja": [
+    "lingua:PL",
+    "lingua:PL"
+  ],
   "it/manual.yaml/changelog_13": [
     "znak-PL:źż"
   ],
@@ -269,9 +267,6 @@
   ],
   "ru/dictionaries.yaml/co_to_tryb_rezysera": [
     "znak-PL:Ł"
-  ],
-  "ru/dictionaries.yaml/poziom_2_duplikacja": [
-    "lingua:PL"
   ],
   "ru/manual.yaml/changelog_13": [
     "znak-PL:ćŻż",

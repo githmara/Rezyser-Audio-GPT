@@ -262,41 +262,66 @@ tresc:
     Want to add a Swedish or Danish accent? Start from the most similar
     existing one.
 
-    1. In the Rule Manager, select e.g. "finski.yaml" (Finnish is
-       phonetically close to Swedish) and click "{manager.btn_duplikuj_label}".
+    1. In the Rule Manager, select e.g. "finski.yaml" (Finnish is phonetically
+       close to Swedish) and click "{manager.btn_duplikuj_label}".
     2. The Manager will ask for a new name — type e.g. "szwedzki" (lowercase,
-       no spaces, no Polish diacritics).
-    3. The new file will open in the editor. Change the fields:
-          - "etykieta" — what you'll see in the app menu, e.g.
-            "Swedish (Alva / Oskar — OneCore/Vocalizer)"
-          - "opis" — a short description for your own future reference
-          - "iso" — the two-letter language code, for Swedish "sv"
-    4. Adjust the "zamiany" (replacements) list to Swedish phonetics (e.g. add
-       "å → o", "ö → ö", remove or change the ones specific to Finnish).
-    5. Save the file, then in the Rule Manager click "{manager.btn_odswiez_label}"
-       — without closing the application. The new Swedish option will appear in
-       the Polyglot's accent menu (and if you add the tag
-       "[Marek] - has a szwedzki accent" to a
-       character in the World Book, the Director will also recognize it
-       automatically and apply it to her dialogues). The file name ("szwedzki")
-       doubles as the word the Director looks for in the World Book — it has to
-       stand next to the word "accent".
+       no spaces, no Polish diacritics). This must be the traditional POLISH
+       name of the language, regardless of what language your interface is
+       set to: the accent file name is not a label meant for you, but an
+       identifier shared across all language packs. The Manager checks this —
+       if you type "swedish" or anything else, it will refuse and show you
+       the correct name.
+    3. The new file will open in the editor. Change these fields:
+          - "etykieta" (label) — what you'll see in the app menu, so write it
+            in your own language, e.g. "Swedish (Alva / Oskar — OneCore/Vocalizer)"
+          - "opis" (description) — a short note to yourself for future reference
+       You do NOT need to touch the "iso" field (language code, "sv" for
+       Swedish): the Manager set it automatically, since it follows from the
+       name you typed. The comment added at the top of the file also reminds
+       you of the single most important thing on this whole list — see point 4.
+    4. Fine-tune the "zamiany" (replacements) list to match Swedish phonetics
+       (e.g. add "å → o", "ö → ö", remove or change the ones specific to
+       Finnish). This is the crux of it: until you do this, "szwedzki" is just
+       a copy of Finnish and sounds Finnish, even though it's called Swedish.
+    5. Save the file, and in the Rule Manager click "{manager.btn_odswiez_label}"
+       — without closing the application. The new Swedish accent will appear
+       in the Polyglot's accent menu. The Director will also recognize it if
+       you add a tag like "[Marek] - has a szwedzki accent" to the character's World Bible — and it's worth
+       knowing that this tag has two parts with DIFFERENT status. The trigger
+       word ("akcent") is in the language of your pack and comes from the
+       "slowo_akcent" field in the base file. The accent name next to it
+       ("szwedzki") is the file name — the same Polish identifier used across
+       all packs; instead of it, the Director will also accept the native
+       adjective from that accent's "etykieta" field.
   poziom_3_cos_nowego: |
     ## LEVEL 3 — creating something completely new
 
-    Want school slang? Ancient knights' language? Gibberish? Parent cipher
-    before children?
+    Want a school slang? The language of ancient knights? Grass-speak?
+    A cipher for parents to keep from their kids?
 
     1. In the Rule Manager, click "{manager.btn_nowy_label}".
-    2. Choose the type (accent, substitution cipher, Director mode, new base
-       language, algorithmic cipher). For ordinary cases, the application
-       will immediately create a ready YAML template — you edit it as in
-       level 2.
-    3. For more difficult cases (algorithms like "endings mixing" or a whole
-       new base language), the Manager will show you a ready prompt to paste
-       into ChatGPT or Claude. AI will generate a complete YAML file, you
-       just copy it to the folder. You don't need to know programming —
-       just know how to paste.
+    2. Choose a type (accent, substitution cipher, Director mode, new base
+       language, algorithmic cipher). For ordinary cases the app will
+       immediately create a ready-made YAML template — you edit it just as
+       in level 2. There are two fields you don't type in by hand, because
+       there's nothing to invent there: the Manager calculates the accent's
+       file name from the ISO code you provide (which is why that name
+       field is read-only), and you pick the cleanup tool's name from a
+       short list, because the engine only recognizes them by name and
+       won't recognize a fourth one.
+    3. For harder cases (algorithms like "ending blending" or an entirely
+       new base language) the Manager will show you a ready prompt to paste
+       into ChatGPT or Claude. The AI will generate a complete YAML file,
+       and all you need to do is copy it into the folder. You don't need to
+       know how to program — just how to paste.
+    4. A fresh template contains `<FILL …>` markers inside it — spots the
+       app cannot fill in for you (the native heading, the description, the
+       rest of the substitution list). As long as they're there, the file
+       already WORKS, but it does something different from what you want,
+       so after every tree refresh the Manager will list it as unfinished.
+       That's also the answer to the question of whether the file is ready
+       to send to someone as a suggestion: as long as you see it on this
+       list, it isn't.
   pomysly: |
     ## Some Ideas for Fun
     ------------------
