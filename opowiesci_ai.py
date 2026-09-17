@@ -405,6 +405,25 @@ _NAZWA_PLIKU_PER_TRYB = {
     TRYB_MNIEJSZE_ZLO: "tryb_mniejsze_zlo",
 }
 
+# Pliki DANYCH tego silnika — czytane pod stałą nazwą tak samo jak tryby, tylko
+# bez mapy z int-a (`zaczatki` z `zaczatki()`, `baza` z `_zbuduj_prompt_systemowy`,
+# `streszczenie` i `cinematic_warning` z własnych funkcji).
+_NAZWY_DANYCH: frozenset[str] = frozenset({
+    "baza", "zaczatki", "streszczenie", "cinematic_warning",
+})
+
+# ZAMKNIĘTY zbiór nazw, jakie ten silnik potrafi w ogóle wczytać (v19.4).
+# `_zaladuj_przepis` bierze nazwę, nie skanuje folderu, więc plik nazwany
+# inaczej NIE JEST przez nikogo czytany — i to jest jedyny powód, dla którego
+# ten zbiór istnieje jawnie: Manager Reguł musi umieć odpowiedzieć autorowi
+# paczki „ten plik będzie martwy", zanim mu go utworzy (test bojowy 4,
+# 2026-09-17: duplikat `zaczatki.yaml` → `zaczatki_kopia_*.yaml` powstał
+# w pl/ i — przez strażnika crosschecku — w en/, martwy w obu).
+# Test `test_opowiesci_nazwy_przepisow.py` pilnuje, że zbiór zgadza się
+# z zawartością paczki `pl` w obie strony.
+NAZWY_PRZEPISOW: frozenset[str] = \
+    frozenset(_NAZWA_PLIKU_PER_TRYB.values()) | _NAZWY_DANYCH
+
 
 @functools.lru_cache(maxsize=128)
 def _zaladuj_przepis(jezyk: str, nazwa: str) -> dict[str, Any]:

@@ -1235,13 +1235,14 @@ manager:
   dup_komentarz_naglowek: |-
     # Duplikat z: {nazwa_pliku}
     # UWAGA: zmień pola `etykieta` i `opis`, a potem zapisz plik.
-  dup_opowiesci_ostrzezenie_tytul: "Tryb Opowieści wymaga programisty"
-  dup_opowiesci_ostrzezenie_tresc: |-
-    Duplikujesz plik trybu Opowieści. Sama kopia YAML NIE wystarczy, by nowy tryb pojawił się w grze — silnik rozpoznaje tryby po stałych liczbowych i słownikach w kodzie Pythona, więc niezintegrowany w kodzie plik to martwy kod.
-
-    Jeśli chcesz dodać NOWY tryb Opowieści, użyj „Nowy plik reguł…" → „Nowy tryb Opowieści", który wygeneruje kompletny przewodnik dla programisty.
-
-    Kontynuować duplikację mimo to?
+  # v19.4: duplikat akcentu pod nazwą INNEGO języka dostaje też nowe `iso`
+  # (nazwa i `iso` pochodzą z jednego kanonu), ale reguły w środku są nadal
+  # regułami języka źródłowego — i to jest jedyna rzecz, której kanon nie
+  # naprawi za użytkownika.
+  dup_komentarz_akcent: |-
+    # UWAGA: nazwa pliku jest nazwą JĘZYKA CELU, więc pole `iso` ustawiono na `{iso}`.
+    # Lista `zamiany:` jest jednak nadal listą z pliku {nazwa_pliku} — przepisz ją,
+    # bo inaczej ten akcent brzmi jak język, z którego pochodzi kopia.
   dup_ok_tytul:          "Duplikat utworzony"
   dup_ok_tresc: |-
     Utworzono duplikat: {nazwa_pliku}
@@ -1288,6 +1289,12 @@ manager:
   kreator_jezyk_bazowy_id_label: "Kod języka (ISO 639-1):"
   kreator_id_name:       "Pole identyfikator pliku"
   kreator_id_hint:       "np. szwedzki  (małe litery, bez spacji)"
+  # v19.4: dla akcentu nazwa pliku jest WYLICZANA z kodu ISO (kanon 75 języków
+  # detektora), a dla narzędzi Poligloty WYBIERANA z zamkniętej trójki —
+  # etykieta musi powiedzieć, skąd pochodzi, bo pole nie przyjmuje wpisu.
+  kreator_lbl_id_kanon:  "Nazwa pliku (z kanonu, tylko do odczytu):"
+  kreator_lbl_id_narzedzie: "Nazwa narzędzia (do wyboru):"
+  kreator_id_narzedzie_name: "Wybór kanonicznej nazwy narzędzia"
   kreator_lbl_etykieta:  "Etykieta (widoczna w GUI):"
   kreator_etykieta_name: "Pole etykieta reguły"
   kreator_etykieta_hint: 'np. "Szwedzki (Alva / Oskar)"'
@@ -1315,6 +1322,56 @@ manager:
   kreator_blad_iso:      "Podaj kod ISO języka docelowego (np. sv, de)."
   kreator_blad_opis_efektu: |-
     Dla szyfru algorytmicznego opisz efekt słowami – ten opis trafi do promptu dla AI.
+  kreator_blad_narzedzia_komplet: |-
+    Ta paczka ma już wszystkie narzędzia tego rodzaju ({kanon}) – nie ma czego tworzyć.
+
+    Silnik szuka tych plików po nazwie, więc czwartej nazwy nie da się wymyślić. Jeśli chcesz DODATKOWY wariant czyszczący, zduplikuj istniejący plik i nadaj mu własną nazwę – nazwa pliku jest tam wolna, bo silnik czyta pole `kategoria`.
+  # Kontrakt nazw plików (v19.4) — nazwa pliku jest interfejsem paczki wobec
+  # silnika, nie treścią użytkownika. Blokujemy WYŁĄCZNIE nazwy, pod którymi
+  # plik byłby martwy albo kłamałby o swojej zawartości; o konwencji
+  # ostrzegamy i pytamy o zgodę.
+  kontrakt_blokada_tytul:     "Ta nazwa pliku nie zadziała"
+  kontrakt_ostrzezenie_tytul: "Nazwa pliku łamie konwencję paczki"
+  kontrakt_kontynuowac:       "Utworzyć plik mimo to?"
+  kontrakt:
+    nazwa_jezyka_nie_akcent: |-
+      „{nazwa}" to nazwa języka ({jezyk}), a ten plik ma `kategoria: {kategoria}`.
+
+      Silnik rozpoznaje zawartość po polu `kategoria`, więc plik zadziałałby jako narzędzie – ale pod nazwą zarezerwowaną dla akcentu tego języka ({jezyk}). Taki plik nigdy żadnego akcentu nie nakłada i zajmuje nazwę, której potrzebowałby prawdziwy akcent. Nazwy narzędzi tego rodzaju: {propozycja}.
+    akcent_zla_nazwa: |-
+      Akcent języka o kodzie `{iso}` musi nazywać się `{propozycja}` – wpisano „{nazwa}".
+
+      Nazwa pliku akcentu jest identyfikatorem wspólnym dla wszystkich paczek i to jej szuka Księga Świata Reżysera (w zapisie „ma akcent {propozycja}", w mianowniku). Nazwa spoza kanonu daje akcent, którego nie da się wywołać z tekstu.
+    akcent_iso_rozjazd: |-
+      Nazwa „{nazwa}" należy do języka {jezyk_nazwy} (kod `{iso_nazwy}`), a pole `iso` ma wartość `{iso_pola}`.
+
+      Pole `iso` znaczy „język głosu, który ma przeczytać wynik", więc rozjazd nie jest kosmetyczny: czytnik ekranu wraca na głos źródłowy i czyta zapis fonetyczny jak zwykły tekst. Dla kodu `{iso_pola}` poprawna nazwa to `{propozycja}`.
+    akcent_iso_poza_kanonem: |-
+      Detektor języków nie zna kodu `{iso}`, więc kanon nie ma dla tego języka nazwy pliku i nazwę („{nazwa}") ustalasz Ty.
+
+      To NIE jest usterka – tak samo jak zakomentowane pole `lingua:` w `podstawy.yaml`. Pamiętaj jednak, że nazwa pliku akcentu nie jest napisem dla użytkownika, ale IDENTYFIKATOREM wspólnym dla wszystkich paczek językowych: tak jak nazwy pól (`iso`, `zamiany`) zapisuje się ją ZAWSZE w języku polskim, niezależnie od języka interfejsu. Użyj więc tradycyjnej POLSKIEJ nazwy tego języka bez diakrytyków, tak jak pozostałe pliki w tym folderze – nie nazwy w języku, w którym czytasz ten komunikat.
+    akcent_brak_paczki_celu: |-
+      Kod `{iso}` nie ma jeszcze paczki `dictionaries/{iso}/`, więc język celu nie jest wspieranym językiem bazowym programu.
+
+      Akcent zadziała, ale reguła parzystości natywnej mówi, że akcenty celują w języki, które paczka ma na dysku.
+    narzedzie_poza_kanonem: |-
+      „{nazwa}" nie jest jedną z kanonicznych nazw narzędzi ({kanon}).
+
+      Plik zadziała, bo silnik czyta pole `kategoria`, ale wypada z zestawu sprawdzanego parytetem baz pl/en i z liczby narzędzi opisanej w podręcznikach.
+    opowiesci_tryb_bez_okablowania: |-
+      Nowy tryb Opowieści nie powstaje przez plik YAML.
+
+      Silnik rozpoznaje tryby po stałej liczbowej i dwóch mapach w kodzie Pythona (inaczej niż tryby Reżysera, które dispatchuje z pól pliku), więc „{nazwa}.yaml" nie zostałby przez nikogo wczytany. Nazwy, które silnik czyta: {kanon}.
+
+      Nowy tryb dodaje się inaczej: w tym panelu utwórz nowy plik reguł i wybierz w kreatorze typ przeznaczony dla trybu Opowieści. Kreator nie zapisze wtedy żadnego pliku – wygeneruje kompletny przewodnik dla programisty.
+    opowiesci_nazwa_nieczytana: |-
+      Silnik Opowieści czyta z tego folderu WYŁĄCZNIE stałe nazwy ({kanon}), więc „{nazwa}.yaml" nie zostanie przez nikogo wczytany.
+
+      Kopia przydaje się dopiero wtedy, gdy przeniesiesz ją do folderu INNEGO języka i nadasz jej nazwę pliku źródłowego – wtedy staje się wersją tego przepisu dla tamtej paczki.
+    szyfr_algorytm_nieznany: |-
+      Pole `algorytm: {algorytm}` nie odpowiada żadnemu algorytmowi w silniku.
+
+      Algorytmy szyfrów są kodem Pythona, nie danymi – dostępne: {dostepne}. Szyfr z nieznaną nazwą zgłosi błąd przy pierwszym użyciu.
   # Wynik kreatora
   wynik_tytul:           "Nowy plik reguł – wynik"
   wynik_sukces_naglowek: "✅  Utworzono plik:\n{sciezka_pliku}"

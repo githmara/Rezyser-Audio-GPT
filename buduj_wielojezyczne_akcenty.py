@@ -1051,13 +1051,12 @@ def wypisz_podsumowanie(znaleziska: list[Znalezisko], ile_par: int) -> None:
 def nazwa_pliku_akcentu(nazwa_polska: str) -> str:
     """`fiński` → `finski`, `włoski` → `wloski` (nazwa pliku = identyfikator).
 
-    Nazwy plików akcentów są polskimi przymiotnikami BEZ diakrytyków —
-    zweryfikowane na 72 parach (`finski`, `wloski`, `hiszpanski`). Fold robimy
-    przez NFKD plus ręczne `ł`, którego dekompozycja nie rozbija.
+    Cienka nakładka na :func:`jezyki_lingua.fold_nazwy` — od 19.4 fold mieszka
+    przy kanonie, bo tego samego pytania („jak ma się nazywać plik akcentu")
+    zadaje Manager Reguł w ZAMROŻONEJ paczce, gdzie tego dev-toola nie ma.
+    Nazwa zostaje, bo woła ją `audyt_podstaw` i kilka miejsc tutaj.
     """
-    bez_l = nazwa_polska.replace("ł", "l").replace("Ł", "L")
-    rozlozone = unicodedata.normalize("NFKD", bez_l)
-    return "".join(z for z in rozlozone if not unicodedata.combining(z)).lower()
+    return jezyki_lingua.fold_nazwy(nazwa_polska)
 
 
 def _mapa_akcentow(pary: dict[tuple[str, str], dict]) -> dict[str, str]:

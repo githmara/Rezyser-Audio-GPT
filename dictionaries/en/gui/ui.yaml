@@ -1085,8 +1085,6 @@ manager:
   dup_komentarz_naglowek: |-
     # Duplicate from: {nazwa_pliku}
     # NOTE: change `label` and `description` fields, then save the file.
-  dup_opowiesci_ostrzezenie_tytul: "Story Mode requires a developer"
-  dup_opowiesci_ostrzezenie_tresc: |-
     You are duplicating a Story Mode file. A YAML copy ALONE is NOT enough for the new mode to appear in the game — the engine recognizes modes by numerical constants and maps in Python code, so an unwired file is dead code.
 
     If you want to add a NEW Story Mode, use "New rules file…" → "New Story Mode", which will generate a complete guide for the developer.
@@ -1281,6 +1279,24 @@ manager:
   lustro_usun_pytanie_tresc: "The file \"{nazwa_pliku}\" has a mirror counterpart in the twin database \"{jezyk_lustra}\".\n\nPolish and English must have an IDENTICAL set of files — deleting it only from \"{jezyk_zrodlowy}\" will cause BOTH to disappear from the language list after the application restarts.\n\nAlso delete the counterpart from \"{jezyk_lustra}\"? (Yes = consistent deletion from both databases; No = you delete only this file and knowingly desync the databases.)"
   lustro_komentarz_naglowek: "# Mirror copy from the \"{jezyk_zrodlowy}\" database (pl/en parity — engine requirement).\n# NOTE: translate the content of this file natively (label, description, prompt)."
   lustro_blad: "Failed to create the mirror copy:\n{tresc_bledu}"
+  dup_komentarz_akcent: "# NOTE: the file name is the name of the TARGET LANGUAGE, so the `iso` field is set to `{iso}`.\n# The `zamiany:` list, however, is still the list from the {nazwa_pliku} file — rewrite it,\n# otherwise this accent will sound like the language the copy came from."
+  kreator_lbl_id_kanon: 'File name (from the canon, read-only):'
+  kreator_lbl_id_narzedzie: 'Tool name (to choose):'
+  kreator_id_narzedzie_name: Choice of canonical tool name
+  kreator_blad_narzedzia_komplet: "This pack already has all the tools of this kind ({kanon}) – there's nothing left to create.\n\nThe engine looks for these files by name, so a fourth name can't simply be invented. If you want an EXTRA cleanup variant, duplicate an existing file and give it its own name – the file name is free there because the engine reads the `kategoria` field."
+  kontrakt_blokada_tytul: This file name won't work
+  kontrakt_ostrzezenie_tytul: File name breaks the pack convention
+  kontrakt_kontynuowac: Create the file anyway?
+  kontrakt:
+    nazwa_jezyka_nie_akcent: "\"{nazwa}\" is the name of a language ({jezyk}), and this file has `kategoria: {kategoria}`.\n\nThe engine recognizes content by the `kategoria` field, so the file would work as a tool – but under a name reserved for that language's accent ({jezyk}). Such a file never applies any accent and takes up the name that a real accent would need. Names of tools of this kind: {propozycja}."
+    akcent_zla_nazwa: "The accent for the language with code `{iso}` must be named `{propozycja}` – „{nazwa}\" was entered.\n\nThe accent file name is an identifier shared by all packs, and it's what the Director's World Book looks for (recorded as \"has accent {propozycja}\", in the nominative case). A name outside the canon produces an accent that can't be invoked from the text."
+    akcent_iso_rozjazd: "The name \"{nazwa}\" belongs to the {jezyk_nazwy} language (code `{iso_nazwy}`), while the `iso` field has the value `{iso_pola}`.\n\nThe `iso` field means \"the language of the voice that should read the output\", so this mismatch isn't cosmetic: the screen reader falls back to the source voice and reads the phonetic transcription as plain text. For code `{iso_pola}` the correct name is `{propozycja}`."
+    akcent_iso_poza_kanonem: "The language detector doesn't recognize the code `{iso}`, so the canon has no file name for this language, and it's up to you to decide the name (\"{nazwa}\").\n\nThis is NOT a bug – just like the commented-out `lingua:` field in `podstawy.yaml`. However, keep in mind that the accent's file name is not a user-facing string, but an IDENTIFIER shared by all language packs: like field names (`iso`, `zamiany`), it is ALWAYS written in Polish, regardless of the interface language. So use the traditional POLISH name of this language without diacritics, just like the other files in this folder – not the name in the language you're reading this message in."
+    akcent_brak_paczki_celu: "Code `{iso}` doesn't yet have a `dictionaries/{iso}/` pack, so the target language isn't one of the program's supported base languages.\n\nThe accent will work, but the native parity rule says accents should target languages that the pack has on disk."
+    narzedzie_poza_kanonem: "\"{nazwa}\" is not one of the canonical tool names ({kanon}).\n\nThe file will work, since the engine reads the `kategoria` field, but it falls outside the set checked by the pl/en base parity and the number of tools described in the manuals."
+    opowiesci_tryb_bez_okablowania: "A new Story mode is not created via a YAML file.\n\nThe engine recognizes modes by a numeric constant and two maps in the Python code (unlike Director modes, which are dispatched from file fields), so \"{nazwa}.yaml\" would not be loaded by anything. The names the engine reads are: {kanon}.\n\nA new mode is added differently: in this panel, create a new rules file and select the type intended for Story mode in the wizard. In that case, the wizard will not save any file – it will generate a complete guide for the developer."
+    opowiesci_nazwa_nieczytana: "The Story engine reads ONLY fixed names ({kanon}) from this folder, so \"{nazwa}.yaml\" won't be loaded by anything.\n\nThe copy only becomes useful once you move it to ANOTHER language's folder and give it the source file's name – then it becomes that pack's version of this recipe."
+    szyfr_algorytm_nieznany: "The field `algorytm: {algorytm}` doesn't correspond to any algorithm in the engine.\n\nCipher algorithms are Python code, not data – available: {dostepne}. A cipher with an unknown name will report an error on first use."
 updater:
   # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Update available"

@@ -65,10 +65,12 @@
   ],
   "jezyki_lingua.py": [
     "POSSIBLE|znak-PL:ę|węgierski",
+    "POSSIBLE|znak-PL:Ł|Ł",
     "POSSIBLE|znak-PL:ł|białoruski",
     "POSSIBLE|znak-PL:ł|bułgarski",
     "POSSIBLE|znak-PL:ł|słowacki",
     "POSSIBLE|znak-PL:ł|włoski",
+    "POSSIBLE|znak-PL:ł|ł",
     "POSSIBLE|znak-PL:ł|łotewski",
     "POSSIBLE|znak-PL:łń|słoweński",
     "POSSIBLE|znak-PL:łń|łaciński",

@@ -1012,8 +1012,6 @@ manager:
   dup_komentarz_naglowek: |-
     # Duplicado de: {nazwa_pliku}
     # ATENCIÓN: cambia los campos `etiqueta` y `descripción`, luego guarda el archivo.
-  dup_opowiesci_ostrzezenie_tytul: "El modo de Narración requiere un desarrollador"
-  dup_opowiesci_ostrzezenie_tresc: |-
     Estás duplicando el archivo del modo de Narración. Solo una copia del YAML NO es suficiente para que el nuevo modo aparezca en el juego — el motor reconoce los modos por constantes numéricas y diccionarios en el código Python, por lo que un archivo no integrado en el código es código muerto.
 
     Si deseas agregar un NUEVO modo de Narración, usa "Nuevo archivo de reglas…" → "Nuevo modo de Narración", que generará una guía completa para el desarrollador.
@@ -1205,6 +1203,24 @@ manager:
   lustro_usun_pytanie_tresc: "El archivo «{nazwa_pliku}» tiene un equivalente especular en la base gemela «{jezyk_lustra}».\n\nLos idiomas polaco e inglés deben tener un conjunto de archivos IDÉNTICO — eliminarlo solo de «{jezyk_zrodlowy}» hará que AMBOS desaparezcan de la lista de idiomas al reiniciar la aplicación.\n\n¿Eliminar también el equivalente de «{jezyk_lustra}»? (Sí = eliminación coherente en ambas bases; No = eliminas solo este archivo y desincronizas las bases de forma deliberada.)"
   lustro_komentarz_naglowek: "# Copia especular de la base «{jezyk_zrodlowy}» (paridad pl/en — requisito del motor).\n# ATENCIÓN: traduce de forma nativa el contenido de este archivo (etiqueta, descripción, prompt)."
   lustro_blad: "No se pudo crear la copia especular:\n{tresc_bledu}"
+  dup_komentarz_akcent: "# ATENCIÓN: el nombre del archivo es el nombre del IDIOMA DE DESTINO, por lo que el campo `iso` se ha fijado en `{iso}`.\n# Sin embargo, la lista `zamiany:` sigue siendo la lista del archivo {nazwa_pliku} — reescríbela,\n# porque de lo contrario este acento sonará como el idioma del que procede la copia."
+  kreator_lbl_id_kanon: 'Nombre del archivo (del canon, solo lectura):'
+  kreator_lbl_id_narzedzie: 'Nombre de la herramienta (a elegir):'
+  kreator_id_narzedzie_name: Selección del nombre canónico de la herramienta
+  kreator_blad_narzedzia_komplet: "Este paquete ya tiene todas las herramientas de este tipo ({kanon}); no hay nada que crear.\n\nEl motor busca estos archivos por nombre, así que no se puede inventar un cuarto nombre. Si quieres una variante de limpieza ADICIONAL, duplica el archivo existente y ponle tu propio nombre; el nombre del archivo es libre en ese caso, porque el motor lee el campo `kategoria`."
+  kontrakt_blokada_tytul: Este nombre de archivo no funcionará
+  kontrakt_ostrzezenie_tytul: El nombre del archivo infringe la convención del paquete
+  kontrakt_kontynuowac: ¿Crear el archivo de todos modos?
+  kontrakt:
+    nazwa_jezyka_nie_akcent: "«{nazwa}» es el nombre de un idioma ({jezyk}), y este archivo tiene `kategoria: {kategoria}`.\n\nEl motor reconoce el contenido por el campo `kategoria`, así que el archivo funcionaría como herramienta, pero con un nombre reservado para el acento de ese idioma ({jezyk}). Un archivo así nunca aplica ningún acento y ocupa el nombre que necesitaría el acento real. Nombres de herramientas de este tipo: {propozycja}."
+    akcent_zla_nazwa: "El acento del idioma con código `{iso}` debe llamarse `{propozycja}`; se escribió «{nazwa}».\n\nEl nombre del archivo del acento es un identificador común a todos los paquetes, y es el que busca el Libro del Mundo del Director (en la expresión «tiene acento {propozycja}», en nominativo). Un nombre fuera del canon produce un acento que no se puede invocar desde el texto."
+    akcent_iso_rozjazd: "El nombre «{nazwa}» pertenece al idioma {jezyk_nazwy} (código `{iso_nazwy}`), y el campo `iso` tiene el valor `{iso_pola}`.\n\nEl campo `iso` significa «idioma de la voz que debe leer el resultado», así que la discrepancia no es cosmética: el lector de pantalla vuelve a la voz de origen y lee la transcripción fonética como texto normal. Para el código `{iso_pola}` el nombre correcto es `{propozycja}`."
+    akcent_iso_poza_kanonem: "El detector de idiomas no reconoce el código `{iso}`, por lo que el canon no tiene un nombre de archivo para este idioma, y el nombre («{nazwa}») lo decides tú.\n\nEsto NO es un error – al igual que el campo comentado `lingua:` en `podstawy.yaml`. Recuerda, sin embargo, que el nombre del archivo del acento no es un texto para el usuario, sino un IDENTIFICADOR común a todos los paquetes de idioma: al igual que los nombres de los campos (`iso`, `zamiany`), se escribe SIEMPRE en polaco, independientemente del idioma de la interfaz. Usa, por tanto, el nombre tradicional POLACO de este idioma sin diacríticos, tal como los demás archivos de esta carpeta – no el nombre en el idioma en el que lees este mensaje."
+    akcent_brak_paczki_celu: "El código `{iso}` todavía no tiene un paquete `dictionaries/{iso}/`, así que el idioma de destino no es un idioma base soportado por el programa.\n\nEl acento funcionará, pero la regla de paridad nativa dice que los acentos apuntan a idiomas que el paquete tiene en disco."
+    narzedzie_poza_kanonem: "«{nazwa}» no es uno de los nombres canónicos de herramientas ({kanon}).\n\nEl archivo funcionará, porque el motor lee el campo `kategoria`, pero queda fuera del conjunto verificado por la paridad de bases pl/en y del número de herramientas descrito en los manuales."
+    opowiesci_tryb_bez_okablowania: "El nuevo modo de Narración no se crea mediante un archivo YAML.\n\nEl motor reconoce los modos por una constante numérica y dos mapas en el código Python (a diferencia de los modos de Director, que se despachan a partir de los campos del archivo), por lo que «{nazwa}.yaml» no sería leído por nadie. Los nombres que el motor lee son: {kanon}.\n\nEl nuevo modo se añade de otra forma: en este panel crea un nuevo archivo de reglas y elige en el asistente el tipo destinado al modo de Narración. En ese caso el asistente no guardará ningún archivo, sino que generará una guía completa para el programador."
+    opowiesci_nazwa_nieczytana: "El motor de Historia solo lee de esta carpeta nombres fijos ({kanon}), así que nadie cargará «{nazwa}.yaml».\n\nLa copia solo es útil cuando la mueves a la carpeta de OTRO idioma y le das el nombre del archivo de origen; entonces se convierte en la versión de esa receta para ese paquete."
+    szyfr_algorytm_nieznany: "El campo `algorytm: {algorytm}` no corresponde a ningún algoritmo del motor.\n\nLos algoritmos de cifrado son código Python, no datos; los disponibles son: {dostepne}. Un cifrado con un nombre desconocido dará un error en el primer uso."
 updater:
   # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Actualización disponible"

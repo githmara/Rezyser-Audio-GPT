@@ -1010,8 +1010,6 @@ manager:
   dup_komentarz_naglowek: |-
     # Kopioitu: {nazwa_pliku}
     # HUOMIO: muuta kenttiä `etiketti` ja `kuvaus`, sitten tallenna tiedosto.
-  dup_opowiesci_ostrzezenie_tytul: "Tarinatila vaatii kehittäjää"
-  dup_opowiesci_ostrzezenie_tresc: |-
     Kopioit Tarinatilan tiedoston. Pelkkä YAML-kopio EI riitä, jotta uusi tila ilmestyisi peliin — moottori tunnistaa tilat numeeristen vakioiden ja Python-koodin karttojen perusteella, joten kytkemätön tiedosto on kuollutta koodia.
 
     Jos haluat lisätä UUDEN Tarinatilan, käytä "Uusi sääntötiedosto…" → "Uusi Tarinatila", joka luo täydellisen oppaan kehittäjälle.
@@ -1203,6 +1201,24 @@ manager:
   lustro_usun_pytanie_tresc: "Tiedostolla \"{nazwa_pliku}\" on peilikopio kaksoistietokannassa \"{jezyk_lustra}\".\n\nPuolan ja englannin tietokannoilla täytyy olla TÄSMÄLLEEN sama tiedostojoukko — jos poistat tiedoston vain kannasta \"{jezyk_zrodlowy}\", MOLEMMAT kielet katoavat kielilistalta sovelluksen uudelleenkäynnistyksen jälkeen.\n\nPoistetaanko vastaava tiedosto myös kannasta \"{jezyk_lustra}\"? (Kyllä = johdonmukainen poisto molemmista kannoista; Ei = poistat vain tämän tiedoston ja hajautat tietokannat tietoisesti.)"
   lustro_komentarz_naglowek: "# Peilikopio tietokannasta \"{jezyk_zrodlowy}\" (pl/en-pariteetti — moottorin vaatimus).\n# HUOM: käännä tämän tiedoston sisältö (nimike, kuvaus, prompti) natiivisti."
   lustro_blad: "Peilikopion luominen epäonnistui:\n{tresc_bledu}"
+  dup_komentarz_akcent: "# HUOMIO: tiedoston nimi on KOHDEKIELEN nimi, joten kentäksi `iso` on asetettu `{iso}`.\n# Lista `zamiany:` on kuitenkin edelleen tiedoston {nazwa_pliku} lista — kirjoita se uudelleen,\n# muuten tämä aksentti kuulostaa siltä kielimuodolta, josta kopio on peräisin."
+  kreator_lbl_id_kanon: 'Tiedoston nimi (kaanonista, vain luku):'
+  kreator_lbl_id_narzedzie: 'Työkalun nimi (valittavana):'
+  kreator_id_narzedzie_name: Työkalun kanonisen nimen valinta
+  kreator_blad_narzedzia_komplet: "Tässä paketissa on jo kaikki tämän tyyppiset työkalut ({kanon}) – ei ole mitään lisättävää.\n\nMoottori etsii näitä tiedostoja nimen perusteella, joten neljättä nimeä ei voi keksiä. Jos haluat LISÄTÄ ylimääräisen puhdistusvariantin, monista olemassa oleva tiedosto ja anna sille oma nimi – tiedoston nimi on siellä vapaa, koska moottori lukee kentän `kategoria`."
+  kontrakt_blokada_tytul: Tämä tiedostonimi ei toimi
+  kontrakt_ostrzezenie_tytul: Tiedoston nimi rikkoo paketin käytäntöä
+  kontrakt_kontynuowac: Luodaanko tiedosto silti?
+  kontrakt:
+    nazwa_jezyka_nie_akcent: "„{nazwa}\" on kielen nimi ({jezyk}), ja tällä tiedostolla on `kategoria: {kategoria}`.\n\nMoottori tunnistaa sisällön kentän `kategoria` perusteella, joten tiedosto toimisi työkaluna – mutta nimellä, joka on varattu tämän kielen aksentille ({jezyk}). Tällainen tiedosto ei koskaan tuota mitään aksenttia ja vie nimen, jota oikea aksentti tarvitsisi. Tämäntyyppisten työkalujen nimet: {propozycja}."
+    akcent_zla_nazwa: "Kielikoodin `{iso}` aksentin täytyy olla nimeltään `{propozycja}` – syötettiin „{nazwa}\".\n\nAksentin tiedostonimi on kaikille paketeille yhteinen tunniste, ja juuri sitä Ohjaajan Maailmankirja etsii (muodossa „on aksentti {propozycja}\", nimeävässä sijassa). Kaanonin ulkopuolinen nimi antaa aksentin, jota ei voi kutsua tekstistä."
+    akcent_iso_rozjazd: "Nimi „{nazwa}\" kuuluu kielelle {jezyk_nazwy} (koodi `{iso_nazwy}`), mutta kentän `iso` arvo on `{iso_pola}`.\n\nKenttä `iso` tarkoittaa „kieltä, jolla äänen tulee lukea tulos\", joten ero ei ole vain kosmeettinen: ruudunlukija palaa lähdekieliseen ääneen ja lukee foneettisen merkinnän tavallisena tekstinä. Koodille `{iso_pola}` oikea nimi on `{propozycja}`."
+    akcent_iso_poza_kanonem: "Kielentunnistin ei tunne koodia `{iso}`, joten kaanonissa ei ole tälle kielelle tiedostonimeä, ja nimen („{nazwa}\") määrität itse.\n\nTämä EI ole virhe – samoin kuin kommentoitu `lingua:`-kenttä tiedostossa `podstawy.yaml`. Muista kuitenkin, että aksenttitiedoston nimi ei ole käyttäjälle näkyvä teksti, vaan KAIKKIEN kielipakettien yhteinen TUNNISTE: samoin kuin kenttien nimet (`iso`, `zamiany`) se kirjoitetaan AINA puolaksi, käyttöliittymän kielestä riippumatta. Käytä siis tämän kielen perinteistä PUOLALAISTA nimeä ilman diakriittisiä merkkejä, samaan tapaan kuin muut tiedostot tässä kansiossa – ei nimeä sillä kielellä, jolla luet tätä viestiä."
+    akcent_brak_paczki_celu: "Koodilla `{iso}` ei vielä ole pakettia `dictionaries/{iso}/`, joten kohdekieli ei ole ohjelman tuettu peruskieli.\n\nAksentti toimii silti, mutta natiiviparillisuuden sääntö sanoo, että aksentit kohdistuvat kieliin, jotka paketilla on levyllä."
+    narzedzie_poza_kanonem: "„{nazwa}\" ei ole yksi kanonisista työkalujen nimistä ({kanon}).\n\nTiedosto toimii, koska moottori lukee kentän `kategoria`, mutta se jää pois pl/en-tietokantojen pariteettitarkistuksen ja käsikirjoissa kuvatun työkalumäärän ulkopuolelle."
+    opowiesci_tryb_bez_okablowania: "Uutta Tarinatilaa ei luoda YAML-tiedostolla.\n\nMoottori tunnistaa tilat numeerisen vakion ja kahden Python-koodissa olevan kartan perusteella (toisin kuin Ohjaajan tilat, jotka jaetaan tiedoston kenttien mukaan), joten kukaan ei lataisi tiedostoa „{nazwa}.yaml\". Nimet, jotka moottori lukee: {kanon}.\n\nUusi tila lisätään eri tavalla: luo tässä paneelissa uusi sääntötiedosto ja valitse ohjatussa toiminnossa Tarinatilaa varten tarkoitettu tyyppi. Ohjattu toiminto ei tällöin tallenna mitään tiedostoa – se luo täydellisen oppaan kehittäjälle."
+    opowiesci_nazwa_nieczytana: "Tarinan moottori lukee tästä kansiosta AINOASTAAN kiinteitä nimiä ({kanon}), joten tiedostoa „{nazwa}.yaml\" ei lataa kukaan.\n\nKopiosta on hyötyä vasta, kun siirrät sen TOISEN kielen kansioon ja annat sille lähdetiedoston nimen – silloin siitä tulee tämän reseptin versio kyseiselle paketille."
+    szyfr_algorytm_nieznany: "Kenttä `algorytm: {algorytm}` ei vastaa mitään moottorin algoritmia.\n\nSalausalgoritmit ovat Python-koodia, ei dataa – käytettävissä: {dostepne}. Salaus, jolla on tuntematon nimi, aiheuttaa virheen ensimmäisellä käyttökerralla."
 updater:
   # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Päivitys saatavilla"

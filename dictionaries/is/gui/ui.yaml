@@ -1012,8 +1012,6 @@ manager:
   dup_komentarz_naglowek: |-
     # Afrit frá: {nazwa_pliku}
     # ATH: breyttu reitunum `label` og `description`, og vistaðu síðan skrána.
-  dup_opowiesci_ostrzezenie_tytul: "Söguhamur krefst forritara"
-  dup_opowiesci_ostrzezenie_tresc: |-
     Þú ert að afrita skrá fyrir Söguham. Bara afrit af YAML er EKKI nóg til að nýr hamur birtist í leiknum — vélin þekkir hami eftir tölulegum föstum og kortum í Python kóða, þannig að ótengd skrá er dauður kóði.
 
     Ef þú vilt bæta við NÝJUM Söguhami, notaðu „Ný regla skrá…" → „Nýr Söguhamur", sem mun búa til fullkomna leiðbeiningu fyrir forritara.
@@ -1205,6 +1203,24 @@ manager:
   lustro_usun_pytanie_tresc: "Skráin „{nazwa_pliku}\" á sér speglaða hliðstæðu í systurgagnagrunninum „{jezyk_lustra}\".\n\nPólska og enska verða að hafa NÁKVÆMLEGA SÖMU skráasafn — ef skránni er aðeins eytt úr „{jezyk_zrodlowy}\" munu BÁÐIR málkostir hverfa af tungumálalistanum eftir að forritið er endurræst.\n\nEyða einnig hliðstæðunni úr „{jezyk_lustra}\"? (Já = samræmd eyðing úr báðum gagnagrunnum; Nei = þú eyðir aðeins þessari skrá og skapar viljandi ósamræmi milli gagnagrunna.)"
   lustro_komentarz_naglowek: "# Speglað afrit úr gagnagrunninum „{jezyk_zrodlowy}\" (jöfnuður pl/en — krafa vélarinnar).\n# ATHUGIÐ: þýddu innihald þessarar skrár á upprunalegan hátt (heiti, lýsingu, skipun)."
   lustro_blad: "Ekki tókst að búa til speglað afrit:\n{tresc_bledu}"
+  dup_komentarz_akcent: "# ATHUGIÐ: skráarnafnið er nafn MARKMÁLSINS, þess vegna er reitnum `iso` stillt á `{iso}`.\n# Listinn `zamiany:` er þó enn listinn úr skránni {nazwa_pliku} — endurskrifaðu hann,\n# annars hljómar þessi hreimur eins og tungumálið sem afritið er upprunalega úr."
+  kreator_lbl_id_kanon: 'Skráarnafn (úr kanónunni, aðeins til lestrar):'
+  kreator_lbl_id_narzedzie: 'Nafn tólsins (til að velja):'
+  kreator_id_narzedzie_name: Val á kanónísku nafni tóls
+  kreator_blad_narzedzia_komplet: "Þessi pakki hefur nú öll tól af þessari gerð ({kanon}) – það er ekkert eftir að búa til.\n\nVélin finnur þessar skrár út frá nafni þeirra, þannig að ekki er hægt að finna upp fjórða nafnið. Viltu AUKALEGT hreinsunarafbrigði, afritaðu þá fyrirliggjandi skrá og gefðu henni eigið nafn – skráarnafnið er frjálst þar, vélin les reitinn `kategoria`."
+  kontrakt_blokada_tytul: Þetta skráarnafn virkar ekki
+  kontrakt_ostrzezenie_tytul: Skráarnafnið brýtur venjur pakkans
+  kontrakt_kontynuowac: Búa til skrána þrátt fyrir þetta?
+  kontrakt:
+    nazwa_jezyka_nie_akcent: "„{nazwa}\" er nafn tungumáls ({jezyk}), en þessi skrá hefur `kategoria: {kategoria}`.\n\nVélin greinir innihald út frá reitnum `kategoria`, þannig að skráin myndi virka sem tól – en undir nafni sem er frátekið fyrir hreim þess tungumáls ({jezyk}). Slík skrá setur aldrei neinn hreim á og tekur nafn sem raunverulegur hreimur myndi þurfa. Nöfn tóla af þessari gerð: {propozycja}."
+    akcent_zla_nazwa: "Hreimur tungumáls með kóðanum `{iso}` þarf að heita `{propozycja}` – slegið var inn „{nazwa}\".\n\nSkráarnafn hreimsins er auðkenni sem er sameiginlegt öllum pökkum og er það sem Heimsbók leikstjórans leitar að (skrifað sem „hefur hreim {propozycja}\", í nefnifalli). Nafn utan kanónunnar gefur hreim sem ekki er hægt að kalla fram úr texta."
+    akcent_iso_rozjazd: "Nafnið „{nazwa}\" tilheyrir tungumálinu {jezyk_nazwy} (kóði `{iso_nazwy}`), en reiturinn `iso` hefur gildið `{iso_pola}`.\n\nReiturinn `iso` þýðir „tungumál raddarinnar sem á að lesa niðurstöðuna\", svo þessi misræming er ekki bara fagurfræðileg: skjálesarinn fellur aftur á upprunalega rödd og les hljóðritunina eins og venjulegan texta. Fyrir kóðann `{iso_pola}` er réttnefnið `{propozycja}`."
+    akcent_iso_poza_kanonem: "Málgreiningin þekkir ekki kóðann `{iso}`, þannig að kanónan hefur ekkert skráarheiti fyrir þetta tungumál og þú ákveður nafnið (\"{nazwa}\") sjálf/ur.\n\nÞetta er EKKI villa – rétt eins og útkommenteraða reitinn `lingua:` í `podstawy.yaml`. Mundu samt að skráarheiti hreimsins er ekki texti fyrir notandann, heldur AUÐKENNI sem er sameiginlegt öllum málpökkum: rétt eins og heiti reita (`iso`, `zamiany`) er það ALLTAF skrifað á pólsku, óháð tungumáli viðmótsins. Notaðu því hefðbundið PÓLSKT heiti þessa tungumáls án broddstafa, líkt og aðrar skrár í þessari möppu – ekki heitið á því tungumáli sem þú lest þessi skilaboð á."
+    akcent_brak_paczki_celu: "Kóðinn `{iso}` hefur ekki enn pakka `dictionaries/{iso}/`, þannig að markmálið er ekki eitt af grunnmálum sem forritið styður.\n\nHreimurinn mun virka, en jöfnunarreglan um innfædda hreima segir að hreimar eigi að miða á tungumál sem pakkinn hefur á disknum."
+    narzedzie_poza_kanonem: "„{nazwa}\" er ekki eitt af kanónísku nöfnum tóla ({kanon}).\n\nSkráin mun virka, því vélin les reitinn `kategoria`, en hún fellur utan þess sem er athugað með jöfnun pl/en gagnagrunnanna og talningu tóla sem lýst er í handbókunum."
+    opowiesci_tryb_bez_okablowania: "Nýja Söguhaminn er ekki hægt að búa til með YAML-skrá.\n\nVélin þekkir ham eftir tölugildi og tveimur römmum í Python-kóðanum (ólíkt hömum Leikstjórans, sem er úthlutað út frá reitum í skrá), þannig að „{nazwa}.yaml\" myndi enginn hlaða inn. Heitin sem vélin les eru: {kanon}.\n\nNýjum ham er bætt við á annan hátt: í þessum glugga skaltu búa til nýja reglnaskrá og velja í leiðarvísinum þá tegund sem ætluð er fyrir Söguhaminn. Leiðarvísirinn vistar þá enga skrá – hann útbýr í staðinn heildstæðan leiðarvísi fyrir forritara."
+    opowiesci_nazwa_nieczytana: "Sögu-vélin les úr þessari möppu EINGÖNGU föst nöfn ({kanon}), þannig að „{nazwa}.yaml\" verður ekki lesin af neinum.\n\nAfritið nýtist fyrst þegar þú flytur það í möppu ANNARS tungumáls og gefur því nafn upprunaskrárinnar – þá verður það útgáfa af þessari uppskrift fyrir þann pakka."
+    szyfr_algorytm_nieznany: "Reiturinn `algorytm: {algorytm}` samsvarar engum algríma í vélinni.\n\nDulkóðunaralgrímur eru Python-kóði, ekki gögn – tiltækir: {dostepne}. Dulmál með óþekktu nafni gefur villu í fyrstu notkun."
 updater:
   # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Uppfærsla í boði"

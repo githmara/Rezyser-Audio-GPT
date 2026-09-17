@@ -30,13 +30,22 @@ import os
 import re
 
 import wx
+import yaml
 
 import core_poliglota
 import gui_diagnostyka as gd
 import i18n
+import jezyki_lingua
+import manager_regul_kontrakt as mrk
 import manager_regul_szablony as mrs
 import sciezki
 from i18n import aktualny_jezyk, t
+from przepisy_rezysera import (
+    POWOD_KSZTALT,
+    POWOD_PARSE,
+    opis_bledu_yaml,
+    zglos_pominiecie,
+)
 
 
 # 13.2: sentinel oznaczający widok bez filtra (dla autorów paczek językowych).
@@ -68,6 +77,15 @@ FOLDER_OPOWIESCI = "opowiesci"  # tryby Opowieści (v15.0+) — dodane do drzewa
 _RE_ID_PLIKU        = re.compile(r"^[a-z][a-z0-9_]*$")
 _RE_KOD_JEZYKA      = re.compile(r"^[a-z]{2,3}$")
 _RE_KOD_ISO         = re.compile(r"^[a-z]{2,3}$")
+
+# v19.4: typy kreatora, dla których nazwa pliku NIE jest tekstem, a wyborem
+# z zamkniętej trójki narzędzi Poligloty. Wartość = prefiks, po którym
+# `manager_regul_kontrakt.narzedzia_dla_typu` wybiera kanoniczne nazwy
+# z `core_poliglota._NARZEDZIA_AKCENTOW` — żadnej własnej listy nazw plików.
+_PREFIKS_NARZEDZIA: dict[str, str] = {
+    mrs.TYP_AKCENT_OCZYSZCZENIE: "oczyszczenie",
+    mrs.TYP_AKCENT_NAPRAWIACZ:   "naprawiacz",
+}
 
 
 def _etykieta_kategorii(kat: str) -> str:
@@ -514,22 +532,12 @@ class ManagerRegulPanel(wx.Panel):
         if not meta or meta["typ"] != "plik":
             return
 
-        # Ostrzeżenie dla plików trybów Opowieści: duplikat YAML sam w sobie nie
-        # wystarczy — silnik rozpoznaje tryby po stałych int + mapach w Pythonie,
-        # więc nowy plik bez okablowania w kodzie to martwy kod (nie pojawi się
-        # w grze). Dla plików danych (baza/zaczatki/streszczenie) duplikacja jest
-        # OK — ostrzegamy tylko przy `tryb_*.yaml`.
-        if meta.get("kategoria") == FOLDER_OPOWIESCI and \
-                os.path.basename(meta["sciezka"]).startswith("tryb_"):
-            odp = wx.MessageBox(
-                t("manager.dup_opowiesci_ostrzezenie_tresc"),
-                t("manager.dup_opowiesci_ostrzezenie_tytul"),
-                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
-                self,
-            )
-            if odp != wx.YES:
-                return
-
+        # v19.4: dawne, ręczne ostrzeżenie „duplikujesz tryb Opowieści,
+        # kontynuować?" zniknęło stąd na rzecz `mrk.ocen_cel` niżej. Pytanie
+        # zadawane PRZED nazwą nie mogło być trafne, bo werdykt zależy od nazwy
+        # DOCELOWEJ: `tryb_burza` → `tryb_swobodny` (przywrócenie brakującego
+        # pliku z kanonu) jest legalne, a `tryb_burza` → `tryb_horror` jest
+        # martwym kodem niezależnie od zgody użytkownika.
         stary = meta["sciezka"]
         folder = os.path.dirname(stary)
         stara_nazwa = os.path.basename(stary)
@@ -574,6 +582,24 @@ class ManagerRegulPanel(wx.Panel):
             )
             return
 
+        # --- Kontrakt nazw (v19.4) -------------------------------------
+        # Duplikat ufał wpisanej nazwie NAIWNIE (test bojowy 1, 2026-09-17):
+        # kopia `rosyjski.yaml` nazwana `ucraine` dostawała `id: ucraine`,
+        # zachowywała `iso: ru` i wchodziła do paczki jako akcent, którego
+        # Księga Świata nigdy nie zawoła. Dlatego: dla akcentu nazwa
+        # ROZSTRZYGA `iso` (obie wartości pochodzą wtedy z jednego kanonu),
+        # a całość i tak przechodzi przez ocenę nazwy.
+        cfg_zrodla = _wczytaj_cfg(stary)
+        jest_akcentem = str(cfg_zrodla.get("kategoria") or "").strip().lower() == "akcent"
+        iso_zrodla = str(cfg_zrodla.get("iso") or "").strip().lower()
+        iso_docelowe = iso_zrodla
+        if jest_akcentem:
+            iso_docelowe = jezyki_lingua.iso_dla_pliku_akcentu(nowa_id) or iso_zrodla
+        if not self._wolno_zapisac(
+                os.path.relpath(nowa_sciezka, DICTIONARIES_DIR),
+                {**cfg_zrodla, "id": nowa_id, "iso": iso_docelowe}):
+            return
+
         try:
             with open(stary, "r", encoding="utf-8") as fh:
                 zawartosc = fh.read()
@@ -588,6 +614,27 @@ class ManagerRegulPanel(wx.Panel):
             # Dopisz jednorazowy komentarz na górze, żeby lingwista wiedział,
             # skąd pochodzi plik i co zmienić dalej.
             naglowek = t("manager.dup_komentarz_naglowek", nazwa_pliku=stara_nazwa) + "\n"
+            if iso_docelowe != iso_zrodla:
+                # Nazwa pliku jest nazwą JĘZYKA CELU, a `iso` znaczy „język
+                # głosu, który ma przeczytać wynik" (kanon v19.1) — rozjazd
+                # tych dwóch pól kasuje cały produkt, bo czytnik ekranu wraca
+                # na głos źródłowy. Skoro nazwę już rozstrzygnął kanon,
+                # rozstrzyga on i `iso`.
+                zawartosc_nowa, podmienione = re.subn(
+                    r"^(\s*iso:\s*).*$",
+                    rf"\1{iso_docelowe}",
+                    zawartosc_nowa,
+                    count=1,
+                    flags=re.MULTILINE,
+                )
+                # Notę dopisujemy TYLKO wtedy, gdy podmiana faktycznie zaszła.
+                # Plik bez linii `iso:` (ręcznie okrojony) dostałby inaczej
+                # komentarz mówiący o polu, którego w nim nie ma — czyli dane
+                # kłamiące o własnej treści.
+                if podmienione:
+                    naglowek += t("manager.dup_komentarz_akcent",
+                                  iso=iso_docelowe,
+                                  nazwa_pliku=stara_nazwa) + "\n"
             with open(nowa_sciezka, "w", encoding="utf-8") as fh:
                 fh.write(naglowek + zawartosc_nowa)
         except Exception as exc:                                # noqa: BLE001
@@ -609,6 +656,42 @@ class ManagerRegulPanel(wx.Panel):
         self._zaproponuj_lustro_po_zapisie(nowa_sciezka)
         _otworz_w_edytorze_tekstu(self, nowa_sciezka)
         self._zaladuj_drzewo(zaznacz_sciezke=nowa_sciezka)
+
+    # ------------------------------------------------------------------
+    # Kontrakt nazw plików (v19.4)
+    # ------------------------------------------------------------------
+    def _wolno_zapisac(self, sciezka_rel: str, cfg: dict) -> bool:
+        """Pyta :mod:`manager_regul_kontrakt` o nazwę i rozmawia z użytkownikiem.
+
+        BLOKADA → komunikat i ``False``: operacja nie ma wykonalnego sensu, bo
+        plik byłby dla silnika niewidoczny albo kłamałby nazwą. OSTRZEŻENIA →
+        JEDNO pytanie „kontynuować?" z wypisanymi powodami (odmowa =
+        ``False``). Brak zastrzeżeń → cisza i ``True``.
+
+        Rozdzielenie na dwa poziomy jest tu całą treścią decyzji: paczki są
+        danymi użytkownika, więc blokujemy WYŁĄCZNIE to, co dowodliwie martwe
+        albo dowodliwie kłamie, a o konwencji ostrzegamy.
+        """
+        zastrzezenia = mrk.ocen_cel(sciezka_rel, cfg)
+        if not zastrzezenia:
+            return True
+        tresci = [t(f"manager.kontrakt.{z.klucz}", **z.parametry)
+                  for z in zastrzezenia]
+        if any(z.blokuje for z in zastrzezenia):
+            wx.MessageBox(
+                "\n\n".join(tresci),
+                t("manager.kontrakt_blokada_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return False
+        odp = wx.MessageBox(
+            "\n\n".join(tresci + [t("manager.kontrakt_kontynuowac")]),
+            t("manager.kontrakt_ostrzezenie_tytul"),
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
+            self,
+        )
+        return odp == wx.YES
 
     # ------------------------------------------------------------------
     # Strażnik crosschecku pl↔en (v18.10)
@@ -850,6 +933,16 @@ class ManagerRegulPanel(wx.Panel):
                     self,
                 )
                 return
+            # v19.4: szablon przechodzi przez TEN SAM kontrakt nazw, co
+            # duplikat. Kreator pilnuje pól z osobna (ISO regexem, ID
+            # kanonem), ale dopiero tutaj widać KOMPLET: nazwę pliku razem
+            # z `kategoria` i `iso`, które w nim wylądują. Tak wypadł test
+            # bojowy 2 — naprawiacz tagów zapisany pod nazwą `bulgarski`,
+            # czyli działające narzędzie pod nazwą zarezerwowaną dla akcentu.
+            if not self._wolno_zapisac(
+                    docelowy_rel,
+                    _cfg_z_szablonu(pakiet["yaml"], docelowy_rel)):
+                return
             if os.path.exists(docelowy_abs):
                 odp = wx.MessageBox(
                     t(
@@ -954,6 +1047,59 @@ def _opis_jezyka(kod: str) -> str:
     if nazwa == f"[{klucz}]":
         return kod
     return nazwa
+
+
+def _cfg_z_szablonu(tekst_yaml: str, docelowy_rel: str) -> dict:
+    """Parsuje tekst szablonu z :mod:`manager_regul_szablony` jako dict.
+
+    Szablony zawierają markery ``<FILL NATIVELY …>``, ale wyłącznie
+    w komentarzach i skalarach blokowych/cytowanych — wszystkie dziewięć typów
+    parsuje się poprawnie (`test_manager_kontrakt`). Awaria znaczy więc regresję
+    NASZEGO szablonu, nie błąd użytkownika, i dlatego nie może być cicha:
+    kontrakt nazw ocenia wtedy samą nazwę, a powód ląduje w rejestrze pominięć
+    (dialog „Pominięte reguły" po „Odśwież drzewo") pod ścieżką, która miała
+    powstać. Standard „zero ciszy" — patrz `audyt_ciszy.py --bramka`.
+    """
+    try:
+        dane = yaml.safe_load(tekst_yaml)
+    except yaml.YAMLError as exc:
+        zglos_pominiecie(docelowy_rel, POWOD_PARSE, opis_bledu_yaml(exc))
+        return {}
+    if not isinstance(dane, dict):
+        zglos_pominiecie(docelowy_rel, POWOD_KSZTALT, type(dane).__name__)
+        return {}
+    return dane
+
+
+def _wczytaj_cfg(sciezka: str) -> dict:
+    """Wczytuje YAML jako dict; ``{}`` przy braku pliku ALBO awarii parsera.
+
+    Kontrakt nazw ma odpowiadać także nad plikiem, którego parser nie rozumie
+    (użytkownik zepsuł go w edytorze i teraz duplikuje) — wtedy oceniamy samą
+    NAZWĘ, bo tyle wiemy. Powód idzie do rejestru pominięć, który jest
+    IDEMPOTENTNY po trójce (ścieżka, powód, szczegół), więc plik zgłoszony już
+    przez skan paczki nie dostaje drugiego wpisu — a plik spoza zakresu skanu
+    (inna paczka, `gui/dokumentacja/`) w ogóle nie miałby innego kanału.
+
+    BRAK pliku jest tu stanem NORMALNYM i celowo NIE trafia do rejestru —
+    dokładnie jak w `manager_regul_szablony._wczytaj_yaml`: wpis „niepoprawna
+    składnia" o nieistniejącym pliku byłby komunikatem wprost fałszywym.
+    """
+    if not os.path.isfile(sciezka):
+        return {}
+    try:
+        with open(sciezka, "r", encoding="utf-8") as fh:
+            dane = yaml.safe_load(fh)
+    except (OSError, UnicodeDecodeError) as exc:
+        zglos_pominiecie(sciezka, POWOD_PARSE, str(exc).replace("\n", " "))
+        return {}
+    except yaml.YAMLError as exc:
+        zglos_pominiecie(sciezka, POWOD_PARSE, opis_bledu_yaml(exc))
+        return {}
+    if not isinstance(dane, dict):
+        zglos_pominiecie(sciezka, POWOD_KSZTALT, type(dane).__name__)
+        return {}
+    return dane
 
 
 def _zaproponuj_nowa_nazwe(stara_nazwa: str) -> str:
@@ -1117,23 +1263,42 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         # pole formularza miał za sobą tylko TextCtrl-y, nie StaticText).
         # Wzorzec: NAJPIERW konstruujemy `_lbl_*`, potem `_txt_*` / `_cb_*`,
         # i dopiero wtedy wkładamy je w form.Add() w kolejności [label, field].
+        # v19.4: „Kod ISO" stoi PRZED „ID pliku", bo dla akcentu fonetycznego
+        # nazwa pliku jest z tego kodu WYLICZANA (`jezyki_lingua.plik_akcentu`),
+        # a nie wpisywana — czytanie formularza w dół odpowiada wtedy kolejności
+        # przyczyna → skutek. Dla pozostałych typów wiersz ISO jest ukryty, więc
+        # kolejność, którą słyszy czytnik ekranu, nie zmienia się wcale.
+        self._lbl_iso = wx.StaticText(self, label=t("manager.kreator_lbl_iso"))
+        self._txt_iso = wx.TextCtrl(self, name=t("manager.kreator_iso_name"))
+        self._txt_iso.SetHint(t("manager.kreator_iso_hint"))
+        form.Add(self._lbl_iso, flag=wx.ALIGN_CENTER_VERTICAL)
+        form.Add(self._txt_iso, flag=wx.EXPAND)
+
         self._lbl_id = wx.StaticText(self, label=t("manager.kreator_lbl_id"))
         self._txt_id = wx.TextCtrl(self, name=t("manager.kreator_id_name"))
         self._txt_id.SetHint(t("manager.kreator_id_hint"))
+        # Drugi widget w tym samym wierszu: dla narzędzi Poligloty nazwa nie
+        # jest tekstem, a WYBOREM z zamkniętej trójki (`oczyszczenie`,
+        # `oczyszczenie_bez_liczb`, `naprawiacz_tagow`) — silnik szuka ich po
+        # nazwie, więc czwarta z klawiatury byłaby nazwą, której nikt nie czyta.
+        # `name=` jest tu obowiązkowe: gdy ComboBox jest widoczny, poprzedni
+        # element listy dzieci (ukryty `_txt_id`) nie dostarczy czytnikowi
+        # etykiety, więc nazwa dostępnościowa musi być własna.
+        self._cb_id_narzedzie = wx.ComboBox(
+            self, choices=[], style=wx.CB_READONLY,
+            name=t("manager.kreator_id_narzedzie_name"),
+        )
+        box_id = wx.BoxSizer(wx.HORIZONTAL)
+        box_id.Add(self._txt_id, proportion=1, flag=wx.EXPAND)
+        box_id.Add(self._cb_id_narzedzie, proportion=1, flag=wx.EXPAND)
         form.Add(self._lbl_id, flag=wx.ALIGN_CENTER_VERTICAL)
-        form.Add(self._txt_id, flag=wx.EXPAND)
+        form.Add(box_id, flag=wx.EXPAND)
 
         self._lbl_etykieta = wx.StaticText(self, label=t("manager.kreator_lbl_etykieta"))
         self._txt_etykieta = wx.TextCtrl(self, name=t("manager.kreator_etykieta_name"))
         self._txt_etykieta.SetHint(t("manager.kreator_etykieta_hint"))
         form.Add(self._lbl_etykieta, flag=wx.ALIGN_CENTER_VERTICAL)
         form.Add(self._txt_etykieta, flag=wx.EXPAND)
-
-        self._lbl_iso = wx.StaticText(self, label=t("manager.kreator_lbl_iso"))
-        self._txt_iso = wx.TextCtrl(self, name=t("manager.kreator_iso_name"))
-        self._txt_iso.SetHint(t("manager.kreator_iso_hint"))
-        form.Add(self._lbl_iso, flag=wx.ALIGN_CENTER_VERTICAL)
-        form.Add(self._txt_iso, flag=wx.EXPAND)
 
         self._lbl_jezyk = wx.StaticText(self, label=t("manager.kreator_lbl_jezyk"))
         self._cb_jezyk = wx.ComboBox(
@@ -1175,11 +1340,64 @@ class KreatorNowejRegulyDialog(wx.Dialog):
     # Zdarzenia
     # ------------------------------------------------------------------
     def _bind_events(self) -> None:
-        self.Bind(wx.EVT_COMBOBOX, self._on_typ_change, self._cb_typ)
-        self.Bind(wx.EVT_BUTTON,   self._on_ok,          id=wx.ID_OK)
+        self.Bind(wx.EVT_COMBOBOX, self._on_typ_change,   self._cb_typ)
+        self.Bind(wx.EVT_COMBOBOX, self._on_jezyk_change, self._cb_jezyk)
+        self.Bind(wx.EVT_TEXT,     self._on_iso_change,   self._txt_iso)
+        self.Bind(wx.EVT_BUTTON,   self._on_ok,           id=wx.ID_OK)
 
     def _on_typ_change(self, _event: wx.CommandEvent) -> None:
         self._aktualizuj_widoczne_pola()
+
+    def _on_jezyk_change(self, _event: wx.CommandEvent) -> None:
+        # Lista brakujących narzędzi zależy od paczki, więc zmiana języka
+        # bazowego musi ją przeliczyć — inaczej użytkownik wybrałby nazwę,
+        # która w NOWEJ paczce już istnieje.
+        self._odswiez_nazwy_narzedzi()
+
+    def _on_iso_change(self, _event: wx.CommandEvent) -> None:
+        self._odswiez_nazwe_akcentu()
+
+    # ------------------------------------------------------------------
+    # Nazwy wyliczane z kanonu (v19.4)
+    # ------------------------------------------------------------------
+    def _aktualny_typ(self) -> str:
+        idx = self._cb_typ.GetSelection()
+        return self._id_typow[idx] if idx != wx.NOT_FOUND else ""
+
+    def _odswiez_nazwe_akcentu(self) -> None:
+        """Wylicza nazwę pliku akcentu z pola „Kod ISO" (kanon Lingui).
+
+        Kod Z kanonu → pole ID jest tylko do odczytu i pokazuje jedyną
+        poprawną nazwę. Kod POZA kanonem (faroeski, maltański, luksemburski…)
+        → kanon nie zna polskiej nazwy tego języka, więc nie ma czym
+        rozstrzygnąć i pole wraca do użytkownika. To ta sama granica, co przy
+        polu `lingua:` w `podstawy.yaml`, i tak samo NIE jest usterką.
+        """
+        if self._aktualny_typ() != mrs.TYP_AKCENT:
+            return
+        nazwa = jezyki_lingua.plik_akcentu(self._txt_iso.GetValue())
+        if nazwa:
+            self._txt_id.SetEditable(False)
+            if self._txt_id.GetValue() != nazwa:
+                self._txt_id.SetValue(nazwa)
+            return
+        self._txt_id.SetEditable(True)
+        # Zostawiona nazwa POPRZEDNIEGO języka byłaby najgorszym wariantem:
+        # wyglądałaby na zatwierdzoną, a mówiłaby o innym języku.
+        if jezyki_lingua.iso_dla_pliku_akcentu(self._txt_id.GetValue()):
+            self._txt_id.SetValue("")
+
+    def _odswiez_nazwy_narzedzi(self) -> None:
+        """Wypełnia ComboBox nazwami narzędzi, których wybrana paczka NIE ma."""
+        typ = self._aktualny_typ()
+        prefiks = _PREFIKS_NARZEDZIA.get(typ)
+        if prefiks is None:
+            return
+        kod = self._cb_jezyk.GetStringSelection() or self._domyslny_jezyk
+        brakujace = mrk.narzedzia_brakujace(kod, prefiks)
+        self._cb_id_narzedzie.Set(brakujace)
+        if brakujace:
+            self._cb_id_narzedzie.SetSelection(0)
 
     def _aktualizuj_widoczne_pola(self) -> None:
         """Pokazuje/chowa pola zależne od wybranego typu."""
@@ -1197,9 +1415,12 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         #   - ISO: tylko dla akcentu (nie dla nowego języka — tam jest zbędne).
         #   - Opis efektu: tylko dla szyfru algorytmicznego.
         #   - Język bazowy (ComboBox): dla WSZYSTKICH poza nowym językiem.
+        #   - ID: pole tekstowe ALBO (dla narzędzi Poligloty) ComboBox
+        #     z zamkniętej trójki nazw — v19.4.
         pokaz_iso        = typ == mrs.TYP_AKCENT
         pokaz_opis_efekt = typ == mrs.TYP_SZYFR_ALGORYTM
         pokaz_jezyk      = typ != mrs.TYP_JEZYK_BAZOWY
+        nazwa_z_listy    = typ in _PREFIKS_NARZEDZIA
 
         self._lbl_iso.Show(pokaz_iso)
         self._txt_iso.Show(pokaz_iso)
@@ -1207,6 +1428,8 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         self._txt_opis_efektu.Show(pokaz_opis_efekt)
         self._lbl_jezyk.Show(pokaz_jezyk)
         self._cb_jezyk.Show(pokaz_jezyk)
+        self._txt_id.Show(not nazwa_z_listy)
+        self._cb_id_narzedzie.Show(nazwa_z_listy)
 
         # Zmiana etykiet + podpowiedzi pod dany typ
         if typ == mrs.TYP_JEZYK_BAZOWY:
@@ -1222,6 +1445,19 @@ class KreatorNowejRegulyDialog(wx.Dialog):
             self._lbl_iso.SetLabel(t("manager.kreator_lbl_iso"))
             self._txt_iso.SetHint(t("manager.kreator_iso_hint"))
 
+        # v19.4: etykieta pola ID mówi, SKĄD pochodzi nazwa — z kanonu
+        # (akcent), z zamkniętej listy (narzędzia) albo z klawiatury (reszta).
+        # Bez tego użytkownik nie usłyszy, czemu pole nie przyjmuje wpisu.
+        if typ == mrs.TYP_AKCENT:
+            self._lbl_id.SetLabel(t("manager.kreator_lbl_id_kanon"))
+            self._txt_id.SetEditable(False)
+            self._odswiez_nazwe_akcentu()
+        elif nazwa_z_listy:
+            self._lbl_id.SetLabel(t("manager.kreator_lbl_id_narzedzie"))
+            self._odswiez_nazwy_narzedzi()
+        else:
+            self._txt_id.SetEditable(True)
+
         self.Layout()
 
     # ------------------------------------------------------------------
@@ -1233,7 +1469,20 @@ class KreatorNowejRegulyDialog(wx.Dialog):
             return
         typ = self._id_typow[idx]
 
-        id_pliku     = self._txt_id.GetValue().strip().lower()
+        if typ in _PREFIKS_NARZEDZIA:
+            # Nazwa narzędzia pochodzi z listy, nie z klawiatury. Pusta lista
+            # znaczy „paczka ma komplet trójki" — i wtedy nie ma czego tworzyć,
+            # a nie „wpisz czwartą nazwę". Czwarty wariant czyszczący powstaje
+            # przez duplikat istniejącego pliku (nazwa wolna, silnik czyta
+            # `kategoria`), nie przez kreator kanonicznej paczki.
+            id_pliku = self._cb_id_narzedzie.GetStringSelection().strip()
+            if not id_pliku:
+                self._alert(t("manager.kreator_blad_narzedzia_komplet",
+                              kanon=", ".join(
+                                  mrk.narzedzia_dla_typu(_PREFIKS_NARZEDZIA[typ]))))
+                return
+        else:
+            id_pliku = self._txt_id.GetValue().strip().lower()
         etykieta     = self._txt_etykieta.GetValue().strip()
         iso_lub_nazwa = self._txt_iso.GetValue().strip()
         jezyk_bazowy = self._cb_jezyk.GetStringSelection() if self._cb_jezyk.IsShown() else "pl"
@@ -1250,19 +1499,28 @@ class KreatorNowejRegulyDialog(wx.Dialog):
                 return
             iso = iso_lub_nazwa or etykieta   # w prompcie użyjemy nazwy
         else:
+            # KOLEJNOŚĆ: najpierw ISO, bo dla akcentu nazwa pliku jest z niego
+            # WYLICZANA (v19.4) — przy pustym ISO pole ID też jest puste,
+            # a komunikat „zła nazwa pliku" kierowałby użytkownika w pole,
+            # którego nie da się wypełnić z klawiatury.
+            iso = iso_lub_nazwa.lower()
+            if typ == mrs.TYP_AKCENT:
+                if not _RE_KOD_ISO.match(iso):
+                    self._alert(t("manager.kreator_blad_iso"))
+                    return
+                # Nazwa jest FUNKCJĄ kodu ISO, więc liczymy ją tu ponownie
+                # z kanonu, zamiast ufać stanowi widgetu. Dla języka POZA
+                # kanonem funkcja zwraca `None` i zostaje to, co wpisał
+                # użytkownik — tam kanon nie ma czym rozstrzygnąć.
+                id_pliku = jezyki_lingua.plik_akcentu(iso) or id_pliku
+            else:
+                iso = iso or "pl"    # domyślny dla szyfrów i trybów
             if not _RE_ID_PLIKU.match(id_pliku):
                 self._alert(t("manager.kreator_blad_id"))
                 return
             if not etykieta:
                 self._alert(t("manager.kreator_blad_etykieta"))
                 return
-            iso = iso_lub_nazwa.lower()
-            if typ == mrs.TYP_AKCENT:
-                if not _RE_KOD_ISO.match(iso):
-                    self._alert(t("manager.kreator_blad_iso"))
-                    return
-            else:
-                iso = iso or "pl"    # domyślny dla szyfrów i trybów
 
         if typ == mrs.TYP_SZYFR_ALGORYTM and not opis_efektu:
             self._alert(t("manager.kreator_blad_opis_efektu"))

@@ -432,6 +432,23 @@ _CHECKLIST_UI = """\
   names in `manager.nazwy_jezykow.*`, the Caesar shift field), because a
   label's longest word is its parenthetical suffix („Tylko wstrzyknięcie kodu
   ISO"), not its name. Until that matcher is written, this bullet is the gate.
+- A FACT ABOUT THE DATA FORMAT IS NOT A FACT ABOUT THE UI LANGUAGE. When a
+  message says that something is written in a particular language, the model
+  reads „the language of this pack" and localizes the claim itself. Measured
+  2026-09-17 (v19.4), on a new key telling the user that an accent file name
+  for a language outside the `lingua` canon has to be its traditional POLISH
+  name: five packs of eight returned „the canon has no SPANISH name … use the
+  traditional SPANISH name" (`de`, `es`, `fr`, `it`, `ru`; `en`, `fi`, `is`
+  kept Polish). A user who obeyed would produce `bulgarian.yaml` instead of
+  `bulgarski.yaml` — the exact defect the message exists to prevent, because
+  the accent file name is a cross-pack IDENTIFIER, like the YAML field names
+  (`iso`, `zamiany`), and identifiers are Polish in every pack. Fix in the
+  SOURCE: say that the name is an identifier and not a user-facing string,
+  and add „not the name in the language you are reading this in". Mechanically
+  gated for this one key by `test_manager_kontrakt.py`
+  (`test_komunikat_o_nazwie_poza_kanonem_mowi_POLSKA`, curated word list per
+  pack); the gate does not generalize, so for any NEW key that names the
+  language of a literal, of a file name or of a field, check this by hand.
 - POLISH IDIOMS ARE TRAPS — reword the SOURCE, do not patch the eight outputs.
   Measured 2026-09-12 (v19.2): „brak zdania" means „no opinion" in Polish, and
   came back as „aucune phrase" (`fr`) and „nessuna frase" (`it`) — „no
