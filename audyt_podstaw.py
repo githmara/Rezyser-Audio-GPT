@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 """audyt_podstaw.py — bramka na PODSTAWY paczki językowej: kanon Lingui + `podstawy.yaml`.
 
-Dwie części, jedna bramka, bo jedna jest ORAKUŁEM drugiej: kanon
+Trzy części, jedna bramka, bo pierwsza jest ORAKUŁEM drugiej: kanon
 (`jezyki_lingua.py`) rozstrzyga, jaką wartość ma mieć pole `lingua:` w danym
 folderze, więc rozdzielenie dałoby dwa moduły czytające te same dane i dwa
-wpisy w `build_release`.
+wpisy w `build_release`. Trzecia dołączyła w v19.4 z tego samego powodu:
+chodzi o gotowość PACZKI do wydania, a to jest pytanie, które ta bramka już
+zadaje.
 
 CZĘŚĆ 1 — kanon jest lustrem zainstalowanej biblioteki 1:1 (sześć klas niżej).
 CZĘŚĆ 2 — treść `dictionaries/<kod>/podstawy.yaml` w każdej paczce na dysku:
@@ -14,6 +16,15 @@ szyfru Cezara), `polskie_znaki` (pre-pass KAŻDEGO akcentu paczki),
 w `etykieta`. Szesnaście klas, każda z konsekwencją w działaniu — komentarz
 nad sekcją „CZĘŚĆ 2" tłumaczy, dlaczego to KONTROLA, a nie siódmy generator
 rodziny `buduj_wielojezyczne_*` (decyzja maintainera 2026-09-08).
+CZĘŚĆ 3 (v19.4) — żaden plik paczki nie nosi już markerów `<FILL …>` z kreatora
+Managera Reguł. Niewypełniony szablon NIE JEST martwy: `szablon_akcent`
+zapisuje dwie realne reguły, a silnik dispatchuje warianty po polu `kategoria`,
+nie po nazwie — więc taki plik jedzie do użytkownika jako ŻYWY akcent robiący
+jedną bezsensowną zamianę, z angielską instrukcją dla modelu w polu `opis:`
+(które jest zarazem orakułem bramki G6 przykładów, więc i ona wtedy milczy).
+Zakres pomija `gui/` — tam nie pisze kreator, a `ui.yaml` MUSI móc o markerze
+mówić (`manager.uwagi.jezyk_bazowy` go cytuje). Szczegóły →
+`manager_regul_szablony.pliki_do_skanu_szkicow`.
 
 Geneza (v18.29.0, etap 2 standardu „zero ciszy"). `jezyki_lingua.KANON` jest
 LUSTREM enuma `lingua.Language`, a nie źródłem — i lustro bez kontroli po
@@ -61,7 +72,7 @@ BLOKUJE (kontrybutor bez pełnego dev-env), tylko melduje, że się nie wykonał
 Maintainer robiący kanoniczny release `lingui` MA, więc dostaje pełną kontrolę.
 
 Użycie:
-  python audyt_podstaw.py                # raport obu części (zero API, zero sieci)
+  python audyt_podstaw.py                # raport trzech części (zero API, zero sieci)
   python audyt_podstaw.py --tylko-kanon  # tylko część 1 (lustro kanonu)
   python audyt_podstaw.py --bramka       # GATE: exit 1 na jakimkolwiek trafieniu
 """
@@ -77,6 +88,7 @@ import buduj_wielojezyczne_akcenty as bwa
 import dev_konsola
 import dev_yaml
 import jezyki_lingua
+import manager_regul_szablony as mrs
 import refresh_languages as rl
 
 dev_konsola.skonfiguruj_stdout()
@@ -95,6 +107,12 @@ _NOTY_DEGRADACJI: list[str] = []
 # bytem (nie plikiem per język), więc wszystkie jego trafienia lądują pod jedną
 # etykietą — czytelną w wyjściu `build_release`.
 ZAKRES_KANON = "jezyki_lingua.KANON"
+
+# Klasa trafienia części 3 (v19.4). Rada naprawcza bramki rozstrzyga po KLASIE,
+# nie po zakresie: szkic w `podstawy.yaml` ma ten sam zakres (ścieżkę pliku),
+# co usterka podstaw, więc filtr po zakresie kierowałby użytkownika do alfabetu
+# i pre-passu, gdy problem jest zupełnie inny.
+KLASA_SZKICU = "szkic-niewypelniony"
 
 
 @dataclass
@@ -491,6 +509,44 @@ def sprawdz_paczki() -> list[Znalezisko]:
     return znaleziska
 
 
+def sprawdz_szkice() -> list[Znalezisko]:
+    """CZĘŚĆ 3: niewypełniony szablon z Managera Reguł nie wchodzi do wydania.
+
+    Kreator Managera zapisuje pliki z markerami `<FILL …>` w miejscach, których
+    nie potrafi wypełnić sam (nagłówek natywny, opis, lista zamian). To stan
+    ROBOCZY i legalny na dysku autora — ale nie w paczce, którą ktoś dostaje
+    w instalatorze.
+
+    **Bramka istnieje, bo szkic NIE JEST martwy.** `szablon_akcent` zapisuje dwie
+    realne reguły (`ch → h`, `Ch → H`), a silnik dispatchuje warianty po polu
+    `kategoria`, nie po nazwie — więc taki plik wchodzi jako ŻYWY akcent robiący
+    jedną bezsensowną zamianę, a jego `opis:` (orakuł bramki G6 przykładów)
+    zawiera angielską meta-instrukcję dla modelu. Zmierzone 2026-09-17: przed tą
+    bramką markera nie ścigał NIKT — `grep` po „FILL" w całym repozytorium
+    trafiał wyłącznie w `manager_regul_szablony`, czyli w producenta.
+
+    Czytamy SUROWY tekst, nie sparsowany YAML: większość markerów siedzi
+    w komentarzach, które parser wyrzuca.
+    """
+    znaleziska: list[Znalezisko] = []
+    for kod in paczki():
+        for plik in mrs.pliki_do_skanu_szkicow(bwa.DICT_DIR / kod):
+            try:
+                tekst = plik.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError) as exc:
+                _NOTY_DEGRADACJI.append(
+                    f"{plik.name} not scanned for draft markers ({exc})")
+                continue
+            markery = mrs.znajdz_markery_szkicu(tekst)
+            if markery:
+                znaleziska.append(Znalezisko(
+                    plik.relative_to(ROOT).as_posix(),
+                    KLASA_SZKICU,
+                    mrs.opis_markerow(markery),
+                ))
+    return znaleziska
+
+
 def zbierz(*, tylko_kanon: bool = False) -> dict[str, list[str]]:
     """Trafienia jako `{"<zakres>": ["<klasa>|<szczegol>", …]}` — kanon raportu.
 
@@ -511,6 +567,10 @@ def zbierz(*, tylko_kanon: bool = False) -> dict[str, list[str]]:
             f"available: {exc})")
     if not tylko_kanon:
         znaleziska += sprawdz_paczki()
+        # Część 3 (v19.4) — niewypełnione szablony Managera Reguł. Nie tyka ani
+        # biblioteki, ani parsera YAML-a (czyta surowy tekst), więc nie ma jak
+        # zdegradować i nie potrzebuje własnego przełącznika.
+        znaleziska += sprawdz_szkice()
     wynik: dict[str, list[str]] = {}
     for z in znaleziska:
         wynik.setdefault(z.zakres, []).append(f"{z.klasa}|{z.szczegol}")
@@ -548,7 +608,10 @@ def main() -> int:
                     "`alfabet` the Caesar cipher shifts along, the `polskie_znaki` "
                     "pre-pass of every accent, the `slowo_akcent` trigger words "
                     "re-run through the real World Book parser, and the endonym in "
-                    "`etykieta`.",
+                    "`etykieta`. Part 3: no pack file may still carry the Rule "
+                    "Manager's `<FILL …>` placeholders — an unfilled template is "
+                    "not dead code but a LIVE rule with an instruction for the "
+                    "model inside it.",
     )
     parser.add_argument("--bramka", action="store_true",
                         help="CI/build GATE: exit 1 on any hit (this gate has no "
@@ -557,12 +620,12 @@ def main() -> int:
                              "cipher and every accent of the pack).")
     parser.add_argument("--tylko-kanon", dest="tylko_kanon", action="store_true",
                         help="Run part 1 only (the canon mirror), skipping the "
-                             "per-pack content checks.")
+                             "per-pack content checks and the draft-marker scan.")
     args = parser.parse_args()
 
     if args.bramka:
         wynik = bramka(tylko_kanon=args.tylko_kanon)
-        print("========== FOUNDATIONS GATE (lingua canon + podstawy.yaml) ==========")
+        print("===== FOUNDATIONS GATE (lingua canon + podstawy.yaml + drafts) =====")
         # Niepusty powód przy zielonej bramce = „czysto, ale czegoś nie
         # sprawdziliśmy". Mówimy to ZAWSZE, nie tylko przy trafieniach.
         if wynik.degradacja:
@@ -573,8 +636,10 @@ def main() -> int:
             else:
                 czesc_1 = (f"KANON mirrors the installed lingua 1:1 "
                            f"({len(jezyki_lingua.KANON)} languages)")
-            czesc_2 = ("part 2 skipped (--tylko-kanon)" if args.tylko_kanon
-                       else f"all {len(paczki())} pack foundation file(s) are clean")
+            czesc_2 = ("parts 2-3 skipped (--tylko-kanon)" if args.tylko_kanon
+                       else f"all {len(paczki())} pack foundation file(s) are "
+                            f"clean and no pack carries an unfilled "
+                            f"`<FILL …>` template")
             print(f"✅ {czesc_1}; {czesc_2}.")
             print("=====================================================================")
             return 0
@@ -591,10 +656,25 @@ def main() -> int:
             print("Fix (canon): `jezyki_lingua.KANON` is a MIRROR of the library "
                   "enum, so the library always wins — edit the canon, not the "
                   "expectation.")
-        if any(z != ZAKRES_KANON for z in wynik.nowe):
+        # Rozróżniamy po KLASIE, nie po zakresie: szkic w `podstawy.yaml` ma ten
+        # sam zakres (ścieżkę pliku), co usterka podstaw, więc filtr po zakresie
+        # dawałby radę naprawczą nie na temat.
+        powody_paczek = [p for zakres, lista in wynik.nowe.items()
+                         if zakres != ZAKRES_KANON for p in lista]
+        ma_szkice   = any(p.startswith(f"{KLASA_SZKICU}|") for p in powody_paczek)
+        ma_podstawy = any(not p.startswith(f"{KLASA_SZKICU}|")
+                          for p in powody_paczek)
+        if ma_podstawy:
             print("Fix (pack): the `alfabet` feeds the Caesar cipher and "
                   "`polskie_znaki` is the pre-pass of EVERY accent in the pack, so "
                   "a defect there fails quietly and everywhere at once.")
+        if ma_szkice:
+            print("Fix (draft): the file still carries the Rule Manager's "
+                  "`<FILL …>` placeholders, so it is an UNFINISHED template — and "
+                  "not a dead one: the accent template ships two real rules and the "
+                  "engine dispatches on `kategoria`, so the pack would ship a live "
+                  "rule with an English instruction for the model in its `opis`. "
+                  "Fill it in (the wizard's prompt does it) or delete the file.")
         print("=====================================================================")
         return 1
 
@@ -628,7 +708,15 @@ def main() -> int:
         if not z_paczek:
             print("✅ Podstawy wszystkich paczek bez uwag (pole `lingua`, alfabet, "
                   "pre-pass, wyzwalacze akcentu przeliczone parserem, endonim).")
-        znaleziska = znaleziska + z_paczek
+        z_szkicow = sprawdz_szkice()
+        ile_plikow = sum(len(mrs.pliki_do_skanu_szkicow(bwa.DICT_DIR / k))
+                         for k in kody)
+        print(f"🔎 Szkice: {ile_plikow} plików YAML w paczkach przeskanowanych "
+              f"pod markery `<FILL …>`.")
+        if not z_szkicow:
+            print("✅ Żadna paczka nie nosi niewypełnionego szablonu z Managera "
+                  "Reguł.")
+        znaleziska = znaleziska + z_paczek + z_szkicow
     if not znaleziska:
         return 0
     licznik: dict[str, int] = {}

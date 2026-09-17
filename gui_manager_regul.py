@@ -519,10 +519,30 @@ class ManagerRegulPanel(wx.Panel):
         ``i18n.sprawdz_pliki_ui``): naprawa `ui.yaml` wymaga restartu i tak
         właśnie mówi alarm — czyszczenie cache tylko zdegradowałoby napisy
         w otwartym oknie.
+
+        v19.4 dokłada piątą rzecz: skan NIEWYPEŁNIONYCH SZABLONÓW (markery
+        `<FILL …>`) w paczkach, które drzewo właśnie pokazuje. Idzie PO skanie
+        reguł, bo tamten czyści rejestr, i obejmuje paczki z filtra języka,
+        a nie język interfejsu — szkic jest własną, niedokończoną robotą autora
+        paczki, prowadzoną tam, gdzie on patrzy.
         """
         self._zaladuj_drzewo()
         gd.pokaz_alarm_ui(self, i18n.sprawdz_pliki_ui())
-        gd.pokaz_raport_lub_potwierdzenie(self, gd.przeskanuj_reguly())
+        gd.przeskanuj_reguly()
+        wpisy = gd.przeskanuj_szkice(self._kody_do_skanu_szkicow())
+        gd.pokaz_raport_lub_potwierdzenie(self, wpisy)
+
+    def _kody_do_skanu_szkicow(self) -> list[str]:
+        """Paczki, których dotyczy skan szkiców = to, co pokazuje drzewo.
+
+        Filtr „Wszystkie" (widok autora paczek językowych) daje wszystkie kody
+        z dysku; filtr konkretnego języka — tylko jego. Dzięki temu przycisk
+        „Odśwież" odpowiada o tym, na co użytkownik właśnie patrzy.
+        """
+        filtr = self._aktywny_filtr_jezyka()
+        if filtr == _OPCJA_WSZYSTKIE:
+            return self._dostepne_kody_jezykow()
+        return [filtr] if filtr else []
 
     # ------------------------------------------------------------------
     # Duplikowanie pliku

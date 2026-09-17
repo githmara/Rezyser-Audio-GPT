@@ -396,6 +396,7 @@ POWOD_ROLA      = "rola"        # nieznana `rola:` — pole zignorowane, plik dz
 POWOD_KLUCZ     = "klucz"       # brak klucza wymaganego przez silnik (Opowieści)
 POWOD_WPIS      = "wpis"        # wadliwy wpis WEWNĄTRZ pliku (np. zaczątek)
 POWOD_LINGUA    = "lingua"      # `lingua:` w podstawy.yaml: nazwa nieznana detektorowi
+POWOD_SZKIC     = "szkic"       # niewypełniony szablon z Managera Reguł — plik DZIAŁA
 
 
 @dataclass(frozen=True)

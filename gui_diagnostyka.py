@@ -25,12 +25,14 @@ i techniczne, więc zgodnie z CLAUDE.md idą do ``wx.Dialog`` z ``TextCtrl``
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 import wx
 
 import core_poliglota as cp
 import core_rezyser as cr
 import i18n
+import manager_regul_szablony as mrs
 import opowiesci_ai as oai
 import przepisy_rezysera as pr
 from i18n import aktualny_jezyk, t
@@ -121,6 +123,49 @@ def _skanuj_paczke(kod: str) -> None:
         oai.zaczatki(kod)
     except Exception:                                               # noqa: BLE001
         pass
+
+
+def przeskanuj_szkice(kody: list[str]) -> tuple[pr.PominietyPlik, ...]:
+    """Dopisuje do rejestru każdy plik paczki z niewypełnionym szablonem (v19.4).
+
+    Wołać PO :func:`przeskanuj_reguly`, bo tamta czyści rejestr
+    (``pr.wyczysc_cache`` → ``wyczysc_pominiecia``). Zwraca pełny, świeży
+    snapshot, więc wołający pokazuje jedną listę zamiast składać dwie.
+
+    DLACZEGO SUROWY TEKST, A NIE LOADER. Loadery widzą sparsowany YAML, a markery
+    `<FILL …>` siedzą w większości w KOMENTARZACH, które parser wyrzuca —
+    więc żaden loader nie mógłby o tym powiedzieć. Skan czyta pliki wprost.
+
+    DLACZEGO LISTA KODÓW, A NIE JĘZYK INTERFEJSU. :func:`przeskanuj_reguly`
+    świadomie skanuje paczkę języka INTERFEJSU (użytkownik z polskim UI nie ma
+    powodu słuchać o literówce w pliku, którego aplikacja u niego nie tknie).
+    Szkic jest odwrotnym przypadkiem: to WŁASNA, niedokończona robota autora
+    paczki, którą on prowadzi w paczce wybranej w drzewie Managera — nie
+    w swoim języku interfejsu. Dlatego zakres podaje wołający.
+
+    Args:
+        kody: kody paczek do przeskanowania (``[]`` = nic nie robimy).
+
+    Returns:
+        Snapshot rejestru po dopisaniu szkiców.
+    """
+    for kod in kody:
+        for sciezka in mrs.pliki_do_skanu_szkicow(Path(pr.DICTIONARIES_DIR) / kod):
+            try:
+                tekst = sciezka.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError) as exc:
+                # Plik, którego nie da się PRZECZYTAĆ, ma zwykle swój powód
+                # z loadera — ale tylko jeśli loader po niego sięgnął. Rejestr
+                # jest idempotentny po trójce, więc podwójnego wpisu nie ma,
+                # a milczenie o nieprzeczytanym pliku byłoby fałszywą czystością.
+                pr.zglos_pominiecie(str(sciezka), pr.POWOD_PARSE,
+                                    str(exc).replace("\n", " "))
+                continue
+            markery = mrs.znajdz_markery_szkicu(tekst)
+            if markery:
+                pr.zglos_pominiecie(str(sciezka), pr.POWOD_SZKIC,
+                                    mrs.opis_markerow(markery))
+    return pr.pominiete_pliki()
 
 
 def _przepisy_opowiesci(jezyk: str) -> list[str]:

@@ -58,11 +58,19 @@ common:
 # osobną linią (`szczegol`), więc tłumaczenie nie może zgubić żadnej zmiennej.
 # -----------------------------------------------------------------------------
 diag:
-  tytul:                 "Pominięte reguły"
+  # v19.4: tytuł i wstęp mówiły „pominięte", a rejestr od dawna niesie też
+  # powody dotyczące plików, które DZIAŁAJĄ (`rola`, `wpis`, `lingua`, a od
+  # v19.4 `szkic`). Słowo „zastrzeżenia" jest zgodne z `brak_zastrzezen` niżej
+  # i obejmuje oba przypadki, więc raport przestaje obiecywać nieprawdę.
+  tytul:                 "Zastrzeżenia do reguł"
   wstep: |-
-    Poniższe pliki reguł (albo ich fragmenty) zostały pominięte przez silnik.
-    Dlatego odpowiadające im tryby AI, narzędzia postprodukcyjne albo gotowe
-    zaczątki nie pojawiają się w aplikacji.
+    Poniżej są wszystkie zastrzeżenia do Twoich plików reguł.
+
+    Większość z nich znaczy, że plik (albo jego fragment) został POMINIĘTY przez
+    silnik – wtedy odpowiadające mu tryby AI, narzędzia postprodukcyjne albo
+    gotowe zaczątki nie pojawiają się w aplikacji. Część dotyczy jednak plików,
+    które DZIAŁAJĄ, a i tak wymagają Twojej uwagi; mówi o tym opis przy każdym
+    z nich.
   szczegol:              "   Szczegóły techniczne: {szczegol}"
   wpis:                  "📄 {plik}"
   stopka: |-
@@ -125,6 +133,15 @@ diag:
        detektor najpewniej nie obsługuje – paczka działa wtedy normalnie, ale nie
        będzie rozpoznawana po samej treści: w Poligloci wybierz ją z listy i włącz
        wymuszenie jednego języka dla całego dokumentu.
+    szkic: |-
+       Plik jest niedokończonym szablonem z kreatora Managera Reguł – zostały
+       w nim markery „<FILL …>" w miejscach, które miał uzupełnić agent AI albo
+       lingwista (w szczegółach jest ich liczba i początek pierwszego). Reguła
+       DZIAŁA, więc widać ją na listach aplikacji, ale robi coś innego, niż
+       zamierzasz: szablon akcentu ma tylko dwie przykładowe zamiany, a opis,
+       który przeczyta każdy, kto dostanie ten plik, jest angielską instrukcją
+       dla modelu. Dokończ plik – prompt z kreatora robi to za Ciebie – albo go
+       usuń.
 
 # -----------------------------------------------------------------------------
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)

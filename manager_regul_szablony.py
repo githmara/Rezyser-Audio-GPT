@@ -79,6 +79,100 @@ def _uwagi(klucz_typu: str, **kwargs: str) -> str:
 
 
 # =============================================================================
+# Marker miejsca do uzupełnienia — JEDNO źródło wzorca (v19.4)
+# =============================================================================
+# Szablony niżej oznaczają każde miejsce, którego nie potrafią wypełnić same,
+# markerem `<FILL …>` (wariant `<FILL NATIVELY in <język>: …>` dla treści, która
+# ma być natywna, oraz `<FILL IN: …>` dla listy do dopisania). Marker rozciąga
+# się na wiele linii, bo instrukcja dla wykonawcy bywa akapitem.
+#
+# DLACZEGO TO MA DETEKTOR. Niewypełniony szablon NIE JEST martwy: `szablon_akcent`
+# zapisuje dwie realne reguły (`ch → h`, `Ch → H`), a silnik dispatchuje warianty
+# po polu `kategoria`, nie po nazwie — więc taki plik wchodzi do paczki jako
+# ŻYWY akcent robiący jedną bezsensowną zamianę, pod etykietą od użytkownika
+# (zmierzone 2026-09-17, test bojowy 3). Do v19.3.1 nie ścigał tego NIKT: `grep`
+# po „FILL" w całym repozytorium trafiał wyłącznie w ten plik, czyli w producenta.
+#
+# Wzorzec jest tutaj, a nie w detektorach, bo tutaj są markery — a że jest
+# wzorcem, nie literałem wplecionym w dziewięć f-stringów, jego zgodność
+# z szablonami pilnuje `test_manager_kontrakt.test_kazdy_szablon_ma_marker`.
+_RE_MARKER_SZKICU = re.compile(r"<\s*FILL\b[^>]*>", re.IGNORECASE)
+
+
+def znajdz_markery_szkicu(tekst: str) -> list[str]:
+    """Zwraca wszystkie markery `<FILL …>` z tekstu pliku, w kolejności.
+
+    Pracuje na SUROWYM tekście, nie na sparsowanym YAML-u, bo większość markerów
+    siedzi w KOMENTARZACH (nagłówek pliku, opis pipeline'u), które `yaml.safe_load`
+    wyrzuca. Pusta lista = plik nie jest niewypełnionym szablonem.
+
+    Wołają to dwa światy: :func:`gui_diagnostyka.przeskanuj_szkice` (rejestr
+    pominięć w aplikacji, żeby autor paczki zobaczył swój szkic) oraz
+    `audyt_podstaw` (bramka — szkic nie ma prawa wejść do wydania).
+    """
+    if not isinstance(tekst, str):
+        return []
+    return [m.group(0) for m in _RE_MARKER_SZKICU.finditer(tekst)]
+
+
+# Podfolder, którego skan szkiców NIE obejmuje. Nie jest to wyjątek „bo się nie
+# zgadza", ale ZAKRES: żadna ścieżka aplikacji nie zapisuje tam szablonu —
+# `gui/ui.yaml` generuje `buduj_wielojezyczne_ui.py`, a `gui/dokumentacja/*.yaml`
+# `buduj_wielojezyczne_docs.py`; kreator nie ma dla `gui/` ani jednego typu
+# (świadoma decyzja: paczka end-usera nie zawiera autotłumaczy).
+#
+# Bez tego wykluczenia bramka blokuje wydanie na WSZYSTKICH dziewięciu paczkach,
+# i to słusznie z jej punktu widzenia: `ui.yaml` MUSI móc mówić o markerze, bo
+# nota „Dalsze kroki" dla nowego języka bazowego brzmi „szablon `podstawy.yaml`
+# ma markery `<FILL NATIVELY>`" (zmierzone 2026-09-17, pierwszy przebieg bramki
+# = 9 trafień). Bramka `audyt_podstaw` nie ma baseline'u, więc cytat markera
+# w podręczniku też zatrzymywałby build bez drogi wyjścia poza przepisaniem
+# prozy — a to jest dokładnie anty-wzorzec „hałaśliwej bramki".
+_FOLDER_POZA_SKANEM_SZKICOW = "gui"
+
+
+def pliki_do_skanu_szkicow(folder_paczki) -> list:
+    """Pliki paczki, w które kreator Managera Reguł potrafi zapisać szablon.
+
+    Obchód jest REKURENCYJNY (minus :data:`_FOLDER_POZA_SKANEM_SZKICOW`), a nie
+    oparty na liście podfolderów językowych — lista byłaby lustrem
+    `core_poliglota._PODFOLDERY_JEZYKOWE` do synchronizowania przy każdej
+    zmianie struktury, czyli tym samym długiem, co każda inna tabela
+    odwzorowująca zawartość `dictionaries/`. Nowy podfolder paczki wchodzi więc
+    w zakres sam. Koszt zmierzony 2026-09-17: 342 pliki, 4 MiB na dziewięć
+    paczek — bez znaczenia dla naciśnięcia przycisku.
+
+    Args:
+        folder_paczki: ``Path`` do `dictionaries/<kod>/`.
+
+    Returns:
+        Posortowana lista ``Path`` (pusta, gdy folderu nie ma).
+    """
+    if not folder_paczki.is_dir():
+        return []
+    return sorted(
+        p for p in folder_paczki.rglob("*.yaml")
+        if p.is_file()
+        and _FOLDER_POZA_SKANEM_SZKICOW not in p.relative_to(folder_paczki).parts
+    )
+
+
+def opis_markerow(markery: list[str], limit: int = 110) -> str:
+    """Szczegół techniczny do raportu: ile markerów i jak zaczyna się pierwszy.
+
+    Marker jest po angielsku (to instrukcja dla modelu albo lingwisty) i taki
+    trafia do raportu — użytkownik ma go ODNALEŹĆ w pliku, więc tłumaczenie
+    uniemożliwiłoby dopasowanie.
+    """
+    if not markery:
+        return ""
+    pierwszy = " ".join(markery[0].split())
+    if len(pierwszy) > limit:
+        pierwszy = pierwszy[:limit].rstrip() + "…"
+    return f"{len(markery)} × <FILL …>, pierwszy: {pierwszy}"
+
+
+# =============================================================================
 # Pomocnicze stałe – lista typów obsługiwanych przez kreator
 # =============================================================================
 TYP_JEZYK_BAZOWY         = "jezyk_bazowy"

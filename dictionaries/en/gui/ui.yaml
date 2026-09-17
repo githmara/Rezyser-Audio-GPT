@@ -47,11 +47,15 @@ common:
 # DIAG – raport pominiętych reguł (gui_diagnostyka.py, od v18.24.2)
 # -----------------------------------------------------------------------------
 diag:
-  tytul: "Skipped Rules"
+  tytul: "Rule Warnings"
   wstep: |-
-    The engine skipped the rule files listed below (or parts of them). That is
-    why the matching AI modes, post-production tools or ready-made story seeds
-    do not appear in the application.
+    Below are all the warnings for your rule files.
+
+    Most of them mean that the file (or part of it) was SKIPPED by the
+    engine – in that case, the corresponding AI modes, post-production tools
+    or ready-made starting points don't appear in the application. However, some
+    relate to files that DO WORK but still require your attention; this is
+    stated in the description next to each of them.
   szczegol: "   Technical details: {szczegol}"
   wpis: "📄 {plik}"
   stopka: |-
@@ -120,6 +124,7 @@ diag:
 # -----------------------------------------------------------------------------
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
+    szkic: "The file is an unfinished template from the Rule Manager wizard – it still\ncontains \"<FILL …>\" markers in places meant to be completed by an AI agent\nor a linguist (the details show their count and the beginning of the first\none). The rule WORKS, so it shows up in the application's lists, but it does\nsomething different from what you intend: the accent template has only two\nsample replacements, and the description that anyone who receives this file\nwill read is an English instruction for the model. Finish the file – the\nwizard's prompt does this for you – or delete it."
 main:
   menu:
     narzedzia: "&Tools"
