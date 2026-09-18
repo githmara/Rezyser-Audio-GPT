@@ -44,6 +44,8 @@ import builtins
 import contextlib
 import io
 import os
+import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -210,6 +212,25 @@ def _manifest(*linie: str) -> str:
     return NL.join(linie) + NL
 
 
+def _sprzataj(katalog: Path) -> None:
+    """Usuwa repo tymczasowe — z odblokowaniem read-only obiektow `.git/`.
+
+    Goly `rmtree` z `ignore_errors` NIE wystarcza i to jest zmierzone: po
+    dwoch seriach testow w `%TEMP%` zostawalo 5 z 6 repo, bo pliki
+    w `.git/objects/` sa na Windows read-only, a tlumienie bledow zjada
+    `PermissionError` w milczeniu. `onexc` (nie `onerror` — ten wypadl
+    w Pythonie 3.14) zdejmuje flage i ponawia.
+    """
+    def _odblokuj(func, sciezka, _wyjatek):
+        try:
+            os.chmod(sciezka, stat.S_IWRITE)
+            func(sciezka)
+        except OSError:
+            pass
+
+    shutil.rmtree(katalog, onexc=_odblokuj)
+
+
 def _repo_z_manifestem(przed: str, po: str) -> Path:
     """Repo tymczasowe: tag `v1.0` z `przed`, HEAD z `po`."""
     katalog = Path(tempfile.mkdtemp(prefix="test_manifest_"))
@@ -245,7 +266,10 @@ def _tylko_granice(przed: str, po: str) -> bool:
         with contextlib.redirect_stdout(io.StringIO()):
             return sdr.manifest_tylko_granice("v1.0")
     finally:
+        # Sprzatamy ZAWSZE: bez tego kazdy przebieg pytesta zostawial
+        # w %TEMP% repo gitowe (zmierzone 15 katalogow po dwoch seriach).
         os.chdir(poprzedni_cwd)
+        _sprzataj(katalog)
 
 
 def test_parser_manifestu_widzi_nazwe_i_specyfikator():
@@ -307,6 +331,7 @@ def test_brak_manifestu_w_tagu_idzie_na_strone_ostrozna():
             assert sdr.manifest_tylko_granice("v1.0") is False
     finally:
         os.chdir(poprzedni_cwd)
+        _sprzataj(katalog)
 
 
 def test_klasyfikacja_uzywa_wyjatku_tylko_dla_manifestu():
