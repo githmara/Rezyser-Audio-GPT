@@ -8,7 +8,9 @@ od v18.6, użyty m.in. w v18.22.0 i v18.24.0):
 
   1. czyta `VERSION` i sprawdza, że tag `v<wersja>` istnieje na origin,
   2. sprawdza, że wydanie dla tego tagu jest OPUBLIKOWANE (nie draft),
-  3. **bramka dev-tools-only** — patrz :func:`pliki_runtime_w_zakresie`,
+  3. **bramka dev-tools-only** — patrz :func:`pliki_runtime_w_zakresie`
+     (od 2026-09-18 z jednym wąskim wyjątkiem dla `requirements.txt`:
+     :func:`manifest_tylko_granice`),
   4. wycina sekcję `## <wersja>` z `RELEASE_NOTES.md` (wspólny
      `release_notes_sekcja`, ten sam co przy tworzeniu draftu),
   4b. **bramka licznika dev patcha** — `patch_dev.json` podniesiony o 1 i opisany
@@ -90,13 +92,21 @@ PUNKT_WEJSCIA = "main.py"
 # `PREFIKSY_NIE_DEV` — musi być zmienialny w skróconej procedurze.
 PLIK_PATCH_DEV = "patch_dev.json"
 
+# Manifest zależności — osobna stała, bo od 2026-09-18 ma JEDEN wąski wyjątek
+# (patrz `manifest_tylko_granice`), a wyjątek porównujący się z literałem
+# w dwóch miejscach rozjechałby się przy pierwszej zmianie nazwy pliku.
+PLIK_MANIFESTU = "requirements.txt"
+
 # Ścieżki, których zmiana wymaga PEŁNEJ procedury, choć nie są modułem `.py`
 # osiągalnym z `main.py`. `VERSION` bo jest w bundlu (`datas` w spec) i decyduje
 # o numerze w GUI; `requirements.txt`, `*.spec` i `installer.iss` bo zmieniają
 # zawartość paczki; `dictionaries/` i `docs/` bo instalator shipuje je OBOK exe.
+# Manifest ma JEDEN wąski wyjątek — diff samych granic, patrz
+# `manifest_tylko_granice` — bo tam "zmiana zawartości paczki" dotyczy tego, co
+# zbudowałby REBUILD, a dev patch niczego nie buduje.
 PREFIKSY_NIE_DEV = (
     "VERSION",
-    "requirements.txt",
+    PLIK_MANIFESTU,
     "installer.iss",
     "dictionaries/",
     "docs/",
@@ -198,6 +208,61 @@ def domkniecie_runtime(punkt_wejscia: str = PUNKT_WEJSCIA) -> set[str]:
     return widziane
 
 
+def pakiety_manifestu(tekst: str) -> dict[str, str]:
+    """`requirements.txt` → `{nazwa dystrybucji: specyfikator}`.
+
+    Parser jest LOKALNY, a nie brany z `audyt_zaleznosci.wczytaj_manifest`:
+    ten skrypt leży w `.github/scripts/` i chodzi na runnerze, gdzie korzeń
+    repozytorium nie jest na `sys.path`, a dev-tooling nie jest instalowany.
+    Sześć linii regexa jest tu tańsze niż uzależnienie bramki publikującej
+    wydania od importowalności narzędzia, którego ta bramka nie potrzebuje.
+    """
+    pakiety: dict[str, str] = {}
+    for linia in tekst.splitlines():
+        wpis = linia.split("#", 1)[0].strip()
+        if not wpis or wpis.startswith("-"):
+            continue
+        dopasowanie = re.match(
+            r"^(?P<nazwa>[A-Za-z0-9._-]+)\s*(?:\[[^\]]*\])?\s*(?P<spec>.*)$", wpis)
+        if dopasowanie:
+            pakiety[dopasowanie.group("nazwa").lower()] = \
+                dopasowanie.group("spec").strip()
+    return pakiety
+
+
+def manifest_tylko_granice(tag: str) -> bool:
+    """Czy diff `requirements.txt` rusza WYŁĄCZNIE granice istniejących pakietów?
+
+    KANON ZACHOWAWCZY (2026-09-18) ma wariant, w którym po wydaniu przywracamy
+    zamrożoną wersję biblioteki, zostawiamy stałą granicę i publikujemy DEV
+    PATCH — bo zupgradowany i przywrócony bundle to w praktyce ten sam bundle.
+    Ten wariant był mechanicznie niewykonalny: `requirements.txt` stoi
+    w `PREFIKSY_NIE_DEV`, więc sam zapis decyzji blokował skróconą procedurę.
+
+    Zawężenie jest wąskie i sprawdzalne z SAMEGO GITA (runner nie ma naszych
+    zależności zainstalowanych, więc nie może pytać o wersje): dev patch wolno
+    puścić tylko wtedy, gdy ZBIÓR NAZW pakietów jest identyczny po obu stronach
+    zakresu, a zmieniły się jedynie specyfikatory. Dodanie albo usunięcie
+    pakietu znaczy, że drzewo źródłowe wymaga innego środowiska — i to zostaje
+    pełną procedurą. Granica NIE wchodzi do bundla (instalator pakuje `dist/`,
+    `dictionaries/` i `docs/`, nie manifest), a dev patch nie rebuilduje nic,
+    więc dla opublikowanego artefaktu taka zmiana jest bezprzedmiotowa.
+    """
+    poprzedni = uruchom(["git", "show", f"{tag}:{PLIK_MANIFESTU}"], check=False)
+    obecny = uruchom(["git", "show", f"HEAD:{PLIK_MANIFESTU}"], check=False)
+    # Oba końce bierzemy Z GITA, nie z drzewa roboczego: klasyfikowany jest
+    # zakres `tag..HEAD`, a lokalny preflight bywa odpalany przy niezacommitowanej
+    # edycji manifestu — wtedy porównanie z drzewem odpowiadałoby na inne pytanie.
+    if not poprzedni.strip() or not obecny.strip():
+        # Brak pliku po którejś stronie (albo nieczytelny) = nie ma z czym
+        # porównywać. „Nie wiem" idzie na stronę ostrożną: pełna procedura.
+        return False
+    przed, po = pakiety_manifestu(poprzedni), pakiety_manifestu(obecny)
+    if set(przed) != set(po):
+        return False
+    return przed != po
+
+
 def pliki_runtime_w_zakresie(tag: str) -> list[str]:
     """Pliki zmienione między tagiem a HEAD, które NIE są dev-tools-only.
 
@@ -213,6 +278,9 @@ def pliki_runtime_w_zakresie(tag: str) -> list[str]:
         normalna = sciezka.replace("\\", "/")
         if normalna in runtime:
             winowajcy.append(f"{normalna} (moduł osiągalny z {PUNKT_WEJSCIA})")
+        elif normalna == PLIK_MANIFESTU and manifest_tylko_granice(tag):
+            print(f"[*] {normalna}: wyłącznie granice istniejących pakietów "
+                  f"(kanon zachowawczy) — NIE wyklucza skróconej procedury")
         elif normalna.startswith(PREFIKSY_NIE_DEV):
             winowajcy.append(f"{normalna} (dane albo konfiguracja paczki)")
         elif normalna.endswith(SUFIKSY_NIE_DEV):

@@ -873,6 +873,20 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "stays active; only the last human-in-the-loop step is skipped. "
              "Use case: CI/CD or automation by an agent.",
     )
+    parser.add_argument(
+        "--no-strict",
+        dest="no_strict",
+        action="store_true",
+        help="Do NOT run the dependency audit at all (step 6b4). By default "
+             "the build applies the STRICT verdict of `audyt_zaleznosci.py` "
+             "and REFUSES to build while any dependency has a newer release "
+             "our manifest allows — that is a decision nobody has made yet, "
+             "and the manifest is what a contributor installs from. Use this "
+             "flag for a critical hotfix you want out WITHOUT touching "
+             "dependencies: the audit is then skipped entirely, so the build "
+             "log stays free of dependency lines you have deliberately "
+             "decided not to act on.",
+    )
     grupa_cleanup = parser.add_mutually_exclusive_group()
     grupa_cleanup.add_argument(
         "--no-cleanup",
@@ -1042,12 +1056,105 @@ def _regeneruj_dokumentacje_lub_przerwij() -> None:
     print(f"✅ Documentation regenerated ({len(wyniki_docs)} files, clean).\n")
 
 
+def _bramka_zaleznosci_lub_przerwij(args: argparse.Namespace) -> None:
+    """Krok 6b4: manifest × zainstalowane × PyPI, albo świadome pominięcie.
+
+    Wyodrębnione z `main()` w v19.4.0 razem z przepięciem na blokadę —
+    krok ma odtąd DWIE gałęzie decyzyjne, a gałęzi nie da się sprawdzić
+    wykonaniem, dopóki siedzi w środku funkcji, która na końcu woła
+    PyInstallera i ISCC. Test: `test_bramka_zaleznosci.py`.
+    """
+    # Bramka zależności (v18.32; BLOKUJĄCA DOMYŚLNIE od v19.4.0). Piąta
+    # w bloku 6b, stąd powrót do cyfr w numeracji: łańcuch primów
+    # (6b', 6b'', 6b''') przestał być czytelny. Pytanie: czy któraś
+    # zależność ma nowsze wydanie, które nasz manifest DOPUSZCZA — czyli
+    # takie, o którym nikt nie zdecydował?
+    #
+    # DO v19.3.1 BRAMKA TYLKO OSTRZEGAŁA, I TO BYŁ DEFEKT PROJEKTU, nie
+    # ostrożność. Rozumowanie za nie-fatalnością („nowe wydanie upstreamu nie
+    # mówi nic o poprawności NASZEGO kodu") jest prawdziwe i dlatego komunikat
+    # niżej NIE ma tonu FATAL — ale wniosek z niego był zły: ostrzeżenie w logu
+    # buildu jest jedną linią wśród kilkuset, a build trwa minuty, więc kolejność
+    # zdarzeń wychodziła odwrotna do zamierzonej — najpierw instalator, potem
+    # (jeśli ktoś pamiętał) lektura logu. Zmierzone 2026-09-17: maintainer
+    # zbudował instalator, po przejrzeniu logu skasował go, a przedmiotem był
+    # `openai` 3.14.1 → 3.15.0 dopuszczony granicą `<4`. Domyślnie stosujemy więc
+    # werdykt STRICT (jedna definicja, `audyt_zaleznosci.strict_przechodzi`)
+    # i ODMAWIAMY buildu, zanim cokolwiek się skompiluje.
+    #
+    # `--no-strict` NIE ODPALA audytu w ogóle — świadomie, nie „odpal i zignoruj":
+    # ta flaga jest dla krytycznego hotfixa wydawanego BEZ sprawdzania
+    # zależności, a wtedy tabela stanów w logu byłaby informacją, o której już
+    # zdecydowano, że się na nią nie reaguje. Jedna linia o pominięciu zostaje
+    # (standard „zero ciszy"): log buildu nie może udawać, że bramka była.
+    if getattr(args, "no_strict", False):
+        print("⏭️  Dependency gate SKIPPED entirely (--no-strict): this build "
+              "makes no claim about requirements.txt vs PyPI.\n")
+    else:
+        print("🔍 Dependency gate: requirements.txt vs the installed environment vs PyPI...")
+        try:
+            import audyt_zaleznosci
+        except ImportError as exc:
+            # Do v19.3.1 ta gałąź pisała „SKIPPED" i szła dalej — spójnie z tym,
+            # że bramka tylko ostrzegała. Przy blokadzie domyślnej taki skip
+            # byłby DZIURĄ o kształcie dokładnie tej klasy, którą bramka ściga:
+            # „nie wiem" udające „nic nie czeka". Kto buduje wydanie, ma pełne
+            # drzewo; brak modułu na godzinę przed zamrożeniem to sygnał, nie tło.
+            print(f"⛔ BUILD STOPPED: the dependency gate could not even start "
+                  f"({exc}) — so nothing here can say whether an upgrade is "
+                  f"pending. Restore `audyt_zaleznosci.py` (it lives in the "
+                  f"repo root), or build a critical hotfix with `--no-strict`, "
+                  f"which skips this audit on purpose.")
+            sys.exit(1)
+        else:
+            wynik_zal = audyt_zaleznosci.bramka()
+            if audyt_zaleznosci.strict_przechodzi(wynik_zal):
+                print(f"✅ Every dependency is either up to date or bounded on "
+                      f"purpose ({len(wynik_zal.stany)} package(s)).\n")
+            else:
+                # Ton celowo INNY niż „❌ FATAL" pozostałych bramek: tam zdanie
+                # znaczy „nasz kod/treść jest zepsuty". Tutaj nic nie jest
+                # zepsute — upstream wydał wersję, o której nie zdecydowaliśmy,
+                # a build zatrzymuje się po to, żeby decyzja zapadła PRZED
+                # zamrożeniem, nie po skasowaniu instalatora.
+                print("⛔ BUILD STOPPED by the dependency gate — nothing in our "
+                      "code is broken. Upstream released something we have not "
+                      "decided about, and a freeze is exactly the moment to "
+                      "decide.")
+                if wynik_zal.degradacja:
+                    print(f"   • The audit could not complete: "
+                          f"{wynik_zal.degradacja}. 'I do not know whether an "
+                          f"upgrade is pending' is not 'none is pending'.")
+                for s in (s for s in wynik_zal.stany if s.trafienie):
+                    if s.status == "brak":
+                        print(f"   • {s.nazwa}: declared in the manifest but NOT "
+                              f"installed here — the environment does not match "
+                              f"the manifest.")
+                    else:
+                        print(f"   • {s.nazwa}: {s.zainstalowana} → "
+                              f"{s.najnowsza} (our bound "
+                              f"`{s.specyfikator or 'none'}` allows it, so "
+                              f"a contributor gets it from pip)")
+                print("   Decide: `python audyt_zaleznosci.py` prints the full "
+                      "table and the decision rule (patch-level step → upgrade "
+                      "+ signature check; minor/major → conservative hold: ship "
+                      "as is, note it under 'what did not make it', freeze with "
+                      "`pip freeze`, set the bound one step below, and migrate "
+                      "AFTER the release).")
+                print("   Critical hotfix that must ship without touching "
+                      "dependencies: `python build_release.py --no-strict` "
+                      "(skips this audit entirely).")
+                sys.exit(1)
+
+
+
 def main(args: argparse.Namespace | None = None) -> None:
     # Allow main() to be called from CLI (with parser) or programmatically
     # (with `args=argparse.Namespace(yes=False, no_cleanup=False,
     # cleanup_only=False)` lub None → default).
     if args is None:
-        args = argparse.Namespace(yes=False, no_cleanup=False, cleanup_only=False)
+        args = argparse.Namespace(yes=False, no_cleanup=False,
+                                  cleanup_only=False, no_strict=False)
 
     # --- CLEANUP-ONLY MODE (no build, no gates) ---
     # Skrót po publikacji, żeby zwolnić miejsce bez ponownego uruchamiania
@@ -1297,41 +1404,11 @@ def main(args: argparse.Namespace | None = None) -> None:
                     print(f"      • {zakres} [{klasa}]: {szczegol}")
             sys.exit(1)
 
-    # 6b4. Dependency gate (v18.32). Fifth guard in this block, so the numbering
-    # goes back to digits: the chain of primes (6b', 6b'', 6b''') stopped being
-    # readable. Question: does any dependency have a newer release
-    # that our manifest still ALLOWS — i.e. one nobody decided about? Runs
-    # UNCONDITIONALLY before the freeze, because a library upgrade is exactly the
-    # kind of thing that turns a planned shortened (dev-tools-only) release into
-    # a full one: `requirements.txt` is not dev-tools-only.
-    # NON-FATAL on purpose. A new upstream release says nothing about OUR code
-    # being wrong, and blocking the build on it would mean no release can happen
-    # until every upgrade is migrated — the decision (upgrade + smoke test vs.
-    # a bound) belongs to the maintainer, and the gate exists so the decision is
-    # never made by silence. `--strict` (exit 1) is for the release procedure
-    # choice, not for the build.
-    print("🔍 Dependency gate: requirements.txt vs the installed environment vs PyPI...")
-    try:
-        import audyt_zaleznosci
-    except ImportError as exc:
-        print(f"⚠️  audyt_zaleznosci not available ({exc}) — dependency gate SKIPPED.\n")
-    else:
-        wynik_zal = audyt_zaleznosci.bramka()
-        if wynik_zal.degradacja:
-            print(f"⚠️  Dependency gate ran with REDUCED coverage: "
-                  f"{wynik_zal.degradacja}.")
-        trafienia_zal = [s for s in wynik_zal.stany if s.trafienie]
-        if trafienia_zal:
-            print(f"⚠️  {len(trafienia_zal)} dependency/dependencies have a newer "
-                  f"release our manifest allows — NOT blocking the build:")
-            for s in trafienia_zal:
-                print(f"      • {s.nazwa}: {s.zainstalowana or '[not installed]'} "
-                      f"→ {s.najnowsza or '?'}")
-            print("   Run `python audyt_zaleznosci.py` for the full table and the "
-                  "decision rule.\n")
-        else:
-            print(f"✅ Every dependency is either up to date or bounded on purpose "
-                  f"({len(wynik_zal.stany)} package(s)).\n")
+    # 6b4. Dependency gate — pytanie brzmi „czy zamrażam aplikację", nie „czy
+    # zmieniałem manifest": wejściem audytu jest PyPI, które rusza się bez nas.
+    # Cała treść kroku (oraz uzasadnienie blokady i flagi `--no-strict`) stoi
+    # w `_bramka_zaleznosci_lub_przerwij`.
+    _bramka_zaleznosci_lub_przerwij(args)
 
     # 6b5. Dev-patch counter gate: a FULL release resets it to zero.
     # `patch_dev.json` counts the shortened (dev-tools-only) releases published on

@@ -16,13 +16,46 @@ próbę upgrade'u zależności robimy przed KAŻDYM zamrożeniem aplikacji, tak�
 przy zmianach dev-tools-only — bo upgrade biblioteki potrafi podnieść planowane
 skrócone wydanie do pełnej procedury (`requirements.txt` jest na liście
 `PREFIKSY_NIE_DEV` w `sync_dev_release.py`, więc jego zmiana wyklucza skróconą
-drogę). Gdy po upgradzie coś się zmieni: smoke test funkcji zależnych od tej
+drogę — z JEDNYM wąskim wyjątkiem od 2026-09-18: diff ruszający wyłącznie
+SPECYFIKATORY istniejących pakietów, przy identycznym zbiorze nazw, skróconej
+drogi nie wyklucza, bo manifest nie wchodzi do bundla, a dev patch nic nie
+rebuilduje; patrz `sync_dev_release.manifest_tylko_granice`). Gdy po upgradzie coś się zmieni: smoke test funkcji zależnych od tej
 biblioteki albo co najmniej inspekcja sygnatury (kandydat pierwszy: SDK
 `elevenlabs`, gdzie wołamy `client.studio.projects.create/delete`
 i `client.user.subscription.get` — powierzchnia, którą ten SDK przemianowuje
 między minorami). Działa dalej albo wymagało drobnych poprawek → nota w sekcji
 „Pod maską". Wymaga refaktoru → rozważamy za i przeciw i albo go robimy, albo
 ustalamy granicę w `requirements.txt`.
+
+OD v19.4.0 ODRUCH NIE JEST JUŻ SAMĄ DYSCYPLINĄ: `build_release.py` stosuje
+werdykt STRICT (`strict_przechodzi`) DOMYŚLNIE i ODMAWIA buildu, dopóki jakaś
+zależność ma nowsze wydanie dopuszczone naszym manifestem. Do v19.3.1 bramka
+w buildzie tylko ostrzegała — i to wystarczyło, żeby pominięcie kosztowało
+zbudowany, a potem skasowany instalator (2026-09-17, `openai` 3.14.1 → 3.15.0
+w granicy `<4`): ostrzeżenie jest jedną linią w kilkusetlinijkowym logu,
+a lektura logu następuje PO buildzie. Komunikat blokady świadomie NIE ma tonu
+„FATAL" — nic naszego nie jest zepsute, upstream po prostu coś wydał. Furtką
+jest `build_release.py --no-strict`, która audytu NIE ODPALA w ogóle (krytyczny
+hotfix wydawany bez sprawdzania zależności).
+
+KANON ZACHOWAWCZY (2026-09-18) — co robić, gdy przyjęcie nowego wydania
+wymagałoby PRZESUNIĘCIA GRANICY na następny minor albo major (a nie zwykłego
+kroku patchowego w jej wnętrzu):
+  1. wydanie robimy JAK JEST — migracja SDK nie jest treścią tego wydania;
+  2. notujemy pozycję w „co nie weszło" (`Planned or deferred`), więc decyzja
+     zostaje widoczna zamiast rozpłynąć się w „zrobimy kiedyś";
+  3. mrozimy środowisko: `pip freeze > skrypty/zamrozone_<wersja>.txt`
+     (gitignored, obok raportu wydania) — to bilet powrotny;
+  4. PO wydaniu: przesuwamy granicę, upgradujemy, testujemy i dostrajamy,
+     a wynik wydajemy jako OSOBNY patch / minor / major — zależnie od tego, ile
+     się realnie ruszyło;
+  5. albo przywracamy wersję zamrożoną, zostawiamy stałą granicę i robimy DEV
+     PATCH, bo zupgradowany i przywrócony bundle to w praktyce ten sam bundle
+     (wykonalne od 2026-09-18 — wcześniej sam zapis granicy blokował skróconą
+     procedurę, patrz wyjątek wyżej).
+Wariant patchowy WEWNĄTRZ granicy zostaje tani i normalny: upgrade
++ `inspect.signature` wołanej powierzchni (zero zapytań do API) + nota
+w „Pod maską".
 
 CZTERY STANY per pakiet (rozróżnienie jest tu całą treścią bramki):
 
@@ -47,6 +80,8 @@ Bez sieci albo bez `packaging` bramka DEGRADUJE się głośno, nigdy się nie po
 Użycie:
   python audyt_zaleznosci.py                    # raport + werdykt
   python audyt_zaleznosci.py --strict           # exit 1 przy trafieniach
+  python build_release.py                       # ten sam werdykt, blokuje build
+  python build_release.py --no-strict           # hotfix: audytu nie odpala
   python audyt_zaleznosci.py --bez-sieci        # tylko manifest kontra zainstalowane
   python audyt_zaleznosci.py --pakiety anthropic,openai
 """
@@ -266,6 +301,23 @@ ETYKIETY = {
 }
 
 
+def strict_przechodzi(wynik: WynikBramki) -> bool:
+    """Czy wynik przechodzi w trybie STRICT (`--strict`, domyślny build).
+
+    JEDNA definicja słowa „strict" dla obu konsumentów: CLI tego narzędzia
+    i `build_release.py` (od v19.4.0 bramka blokuje build domyślnie). Zanim ta
+    funkcja powstała, build miał własny, luźniejszy warunek — ostrzegał i szedł
+    dalej — więc „strict" znaczyło dwie różne rzeczy w zależności od tego, kto
+    pyta, i pominięcie bramki kosztowało zbudowany, a potem wyrzucony instalator
+    (zmierzone 2026-09-17: `openai` 3.14.1 → 3.15.0 dopuszczone granicą `<4`).
+
+    DEGRADACJA JEST NIEPOWODZENIEM, nie neutralnym stanem: „nie wiem, czy czeka
+    upgrade" to nie to samo co „nie czeka". Bez sieci i bez `packaging` bramka
+    nie ma czym odpowiedzieć na pytanie, w którym cel jest zamrożenie wersji.
+    """
+    return wynik.czysto and not wynik.degradacja
+
+
 def raport(wynik: WynikBramki) -> None:
     """Tabela + werdykt na stdout."""
     szerokosc = max((len(s.nazwa) for s in wynik.stany), default=10)
@@ -293,11 +345,25 @@ def raport(wynik: WynikBramki) -> None:
             else:
                 print(f"      • {s.nazwa}: {s.zainstalowana} → {s.najnowsza} "
                       f"(manifest allows it)")
-        print("Decide per package: upgrade + smoke test (or at least inspect the "
-              "signature we call), then note it in the 'Pod maska' section; or "
-              "set a bound in requirements.txt. A bound change is NOT "
-              "dev-tools-only, so it escalates a shortened release to the full "
-              "procedure.")
+        print("Decide per package — and the size of the step decides which way:")
+        print("  • PATCH-level step, surface unchanged: upgrade + `inspect."
+              "signature` on the API we call (zero API calls, zero cost), then "
+              "note it under 'Pod maska'. This is the cheap, normal path.")
+        print("  • MINOR or MAJOR step: hold it. The CONSERVATIVE CANON "
+              "(2026-09-18) is to ship the release as it stands, note the "
+              "pending upgrade under 'what did not make it', freeze the "
+              "environment (`pip freeze > skrypty/zamrozone_<version>.txt`) and "
+              "set the bound one step below the new release — so the hold is "
+              "a RECORDED decision (status `bound excludes it`) and not "
+              "silence. AFTER the release: move the bound, upgrade, test, tune, "
+              "and ship that as its own patch / minor / major depending on how "
+              "much moved — or restore the frozen version, leave a fixed bound "
+              "and ship a dev patch, because an upgraded-then-restored bundle "
+              "is the same bundle.")
+        print("  • A `NOT INSTALLED` line is neither: the environment does not "
+              "match the manifest, so fix the environment first.")
+        print("A bound change is NOT dev-tools-only, so it escalates a "
+              "shortened release to the full procedure.")
     print("=====================================")
 
 
@@ -311,7 +377,10 @@ def main() -> int:
         help="Exit 1 when any package is in the `newer allowed` or `not "
              "installed` state, or when the audit could not be completed. Use "
              "it before deciding on the shortened (dev-tools-only) release "
-             "procedure: a pending upgrade escalates it to the full one.")
+             "procedure: a pending upgrade escalates it to the full one. Since "
+             "v19.4.0 `build_release.py` applies this same verdict by DEFAULT "
+             "and refuses to build; `build_release.py --no-strict` is the "
+             "hotfix escape hatch.")
     parser.add_argument(
         "--bez-sieci", dest="bez_sieci", action="store_true",
         help="Skip PyPI entirely: only checks that every manifest package is "
@@ -324,10 +393,12 @@ def main() -> int:
     wynik = bramka([p for p in args.pakiety.split(",") if p.strip()] or None,
                    bez_sieci=args.bez_sieci)
     raport(wynik)
-    if args.strict and (not wynik.czysto or wynik.degradacja):
+    if args.strict and not strict_przechodzi(wynik):
         # Świadomie surowo: `--strict` służy decyzji „czy wolno pójść skróconą
         # procedurą", a ta jest OPTYMALIZACJĄ. Kiedy nie wiemy, czy upgrade
-        # czeka, właściwą odpowiedzią jest pełna procedura, nie domysł.
+        # czeka, właściwą odpowiedzią jest pełna procedura, nie domysł. Warunek
+        # stoi w `strict_przechodzi`, bo od v19.4.0 ma DRUGIEGO konsumenta
+        # (`build_release`) i dwie kopie rozjechałyby się w pierwszej edycji.
         return 1
     return 0
 

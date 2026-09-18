@@ -22,7 +22,22 @@
 # ODRUCH: `python audyt_zaleznosci.py` przed KAŻDYM zamrożeniem aplikacji, także
 # przy zmianach dev-tools-only — zmiana tego pliku wyklucza skróconą procedurę
 # wydawniczą (`PREFIKSY_NIE_DEV` w `sync_dev_release.py`), więc upgrade
-# biblioteki potrafi podnieść planowane skrócone wydanie do pełnego.
+# biblioteki potrafi podnieść planowane skrócone wydanie do pełnego. WYJĄTEK
+# (od 2026-09-18): diff ruszający WYŁĄCZNIE granice istniejących pakietów, przy
+# identycznym zbiorze nazw, skróconej procedury nie wyklucza — manifest nie
+# wchodzi do bundla, a dev patch nie rebuilduje nic. Dodanie albo usunięcie
+# pakietu wyklucza ją nadal.
+#
+# OD v19.4.0 TEN ODRUCH JEST BRAMKĄ, NIE PAMIĘCIĄ: `build_release.py` odmawia
+# buildu, dopóki jakaś pozycja ma nowsze wydanie dopuszczone przez granicę
+# powyżej (`--no-strict` pomija audyt — dla krytycznego hotfixa).
+#
+# KANON ZACHOWAWCZY (2026-09-18): jeśli przyjęcie nowego wydania wymagałoby
+# przesunięcia granicy na następny MINOR albo MAJOR, wydanie idzie JAK JEST,
+# pozycja trafia do „co nie weszło", środowisko mrozimy (`pip freeze >
+# skrypty/zamrozone_<wersja>.txt`), a migracja jest OSOBNYM wydaniem po tym.
+# Krok patchowy wewnątrz granicy zostaje tani: upgrade + `inspect.signature`
+# wołanej powierzchni + nota w „Pod maską".
 
 # GUI całej aplikacji. 4.4 to następna linia minorowa fundamentu — podmiana
 # wymaga przejścia po panelach z czytnikiem ekranu, nie samego builda.
