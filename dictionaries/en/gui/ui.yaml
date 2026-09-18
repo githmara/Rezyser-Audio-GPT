@@ -1329,9 +1329,9 @@ updater:
   blad_pobierania_tresc: "Failed to download update:\n{tresc_bledu}"
   blad_uruchomienia_tytul: "Installer launch error"
   blad_uruchomienia_tresc: "Failed to launch installer:\n{sciezka_pliku}\n\n{tresc_bledu}"
-  co_nowego_online_pl: The full release page (online) is available in Polish.
+  co_nowego_online_uwaga: The full release page (online) is available in English.
   btn_szczegoly_online: '&Details online'
-  changelog_uwaga: The changelog of the new version will open as the file docs/changelog.md. It is in English and Polish — if you prefer another language, load this file into the Polyglot module (AI Translator) or any translator or chatbot.
+  changelog_uwaga: The changelog of the new version will open as the file docs/changelog.md. It is in English — if you prefer another language, load this file into the Polyglot module (AI Translator) or any translator or chatbot.
   changelog_naglowek: "# What's new in version {nowa_wersja}"
   changelog_blad: "Failed to save or open the changelog file:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 Version &Changelog {nowa_wersja}

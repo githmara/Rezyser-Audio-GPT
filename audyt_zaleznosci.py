@@ -23,9 +23,17 @@ rebuilduje; patrz `sync_dev_release.manifest_tylko_granice`). Gdy po upgradzie c
 biblioteki albo co najmniej inspekcja sygnatury (kandydat pierwszy: SDK
 `elevenlabs`, gdzie wołamy `client.studio.projects.create/delete`
 i `client.user.subscription.get` — powierzchnia, którą ten SDK przemianowuje
-między minorami). Działa dalej albo wymagało drobnych poprawek → nota w sekcji
-„Pod maską". Wymaga refaktoru → rozważamy za i przeciw i albo go robimy, albo
-ustalamy granicę w `requirements.txt`.
+między minorami). Działa dalej albo wymagało drobnych poprawek → nota
+w `### What's new` sekcji wydania w `RELEASE_NOTES.md`. Wymaga refaktoru →
+rozważamy za i przeciw i albo go robimy, albo ustalamy granicę
+w `requirements.txt`.
+
+RUBRYKA ZMIENIŁA SIĘ W v19.4.0, A TEN PLIK MÓWIŁ O NIEISTNIEJĄCEJ DO v19.4.1:
+nota szła dawniej do polskiej sekcji „Pod maską", a polska diagnostyka
+(`TL;DR → Co nowego → Pod maską → Co nie weszło → Walidacja`) została z nowych
+sekcji `RELEASE_NOTES.md` porzucona. Adres jest dziś jeden — angielskie
+`### What's new` — a diagnostykę, która nie jest treścią wydania, przyjmuje
+raport wydania (`skrypty/raport_wydania_<wersja>.md`).
 
 OD v19.4.0 ODRUCH NIE JEST JUŻ SAMĄ DYSCYPLINĄ: `build_release.py` stosuje
 werdykt STRICT (`strict_przechodzi`) DOMYŚLNIE i ODMAWIA buildu, dopóki jakaś
@@ -55,7 +63,7 @@ kroku patchowego w jej wnętrzu):
      procedurę, patrz wyjątek wyżej).
 Wariant patchowy WEWNĄTRZ granicy zostaje tani i normalny: upgrade
 + `inspect.signature` wołanej powierzchni (zero zapytań do API) + nota
-w „Pod maską".
+w `### What's new`.
 
 CZTERY STANY per pakiet (rozróżnienie jest tu całą treścią bramki):
 
@@ -348,7 +356,8 @@ def raport(wynik: WynikBramki) -> None:
         print("Decide per package — and the size of the step decides which way:")
         print("  • PATCH-level step, surface unchanged: upgrade + `inspect."
               "signature` on the API we call (zero API calls, zero cost), then "
-              "note it under 'Pod maska'. This is the cheap, normal path.")
+              "note it under `### What's new` in RELEASE_NOTES.md. This is the "
+              "cheap, normal path.")
         print("  • MINOR or MAJOR step: hold it. The CONSERVATIVE CANON "
               "(2026-09-18) is to ship the release as it stands, note the "
               "pending upgrade under 'what did not make it', freeze the "

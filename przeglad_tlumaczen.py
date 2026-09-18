@@ -460,6 +460,26 @@ _CHECKLIST_UI = """\
   (`test_komunikat_o_nazwie_poza_kanonem_mowi_POLSKA`, curated word list per
   pack); the gate does not generalize, so for any NEW key that names the
   language of a literal, of a file name or of a field, check this by hand.
+- A CLAIM ABOUT THE LANGUAGE OF SHIPPED CONTENT IS NOT A TRANSLATION PROBLEM
+  — its truth-maker lives OUTSIDE the pack, so a flawless translation can
+  still be a false sentence, and a review of the nine packs cannot tell.
+  Measured 2026-09-18 (opened by v19.4.0, closed in v19.4.1):
+  `updater.changelog_uwaga` said "It is in English and Polish" and
+  `updater.co_nowego_online_pl` said the release page "is available in
+  Polish", in all nine packs. Every rendering was correct; both sentences
+  became FALSE the moment the release body dropped its Polish half — and the
+  in-app "What's new" shows the LIVE release body, so the claim reached the
+  user right next to the English text it was describing. When a string names
+  a language, a file format, a bundled asset or the content behind a URL, ask
+  WHERE THAT FACT LIVES: if it lives outside `dictionaries/`
+  (`RELEASE_NOTES.md`, `requirements.txt`, `installer.iss`), no amount of
+  reading the packs can validate it, and the string needs a gate anchored on
+  that file. Gated for these two keys by `test_core_updater.py` — a curated
+  word per pack, plus a check that the CURRENT release section carries no
+  Polish diagnostics. A key name that encodes such a fact is the same smell
+  one level up: the `_pl` suffix of `co_nowego_online_pl` described the
+  content, aged with the canon, and the key is now
+  `co_nowego_online_uwaga`.
 - POLISH IDIOMS ARE TRAPS — reword the SOURCE, do not patch the eight outputs.
   Measured 2026-09-12 (v19.2): „brak zdania" means „no opinion" in Polish, and
   came back as „aucune phrase" (`fr`) and „nessuna frase" (`it`) — „no

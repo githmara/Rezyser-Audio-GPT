@@ -37,7 +37,8 @@
 # pozycja trafia do „co nie weszło", środowisko mrozimy (`pip freeze >
 # skrypty/zamrozone_<wersja>.txt`), a migracja jest OSOBNYM wydaniem po tym.
 # Krok patchowy wewnątrz granicy zostaje tani: upgrade + `inspect.signature`
-# wołanej powierzchni + nota w „Pod maską".
+# wołanej powierzchni + nota w `### What's new` sekcji wydania (polska sekcja
+# „Pod maską", do której ta nota szła do v19.4.0, już nie istnieje).
 
 # GUI całej aplikacji. 4.4 to następna linia minorowa fundamentu — podmiana
 # wymaga przejścia po panelach z czytnikiem ekranu, nie samego builda.

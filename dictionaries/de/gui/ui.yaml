@@ -1248,9 +1248,9 @@ updater:
   blad_pobierania_tresc: "Update konnte nicht heruntergeladen werden:\n{tresc_bledu}"
   blad_uruchomienia_tytul: "Fehler beim Starten des Installers"
   blad_uruchomienia_tresc: "Installer konnte nicht gestartet werden:\n{sciezka_pliku}\n\n{tresc_bledu}"
-  co_nowego_online_pl: Die vollständige Veröffentlichungsseite (online) ist auf Polnisch verfügbar.
+  co_nowego_online_uwaga: Die vollständige Veröffentlichungsseite (online) ist auf Englisch verfügbar.
   btn_szczegoly_online: '&Details online'
-  changelog_uwaga: Das Änderungsprotokoll der neuen Version wird als Datei docs/changelog.md geöffnet. Es ist auf Englisch und Polnisch — wenn Sie eine andere Sprache bevorzugen, laden Sie diese Datei in das Polyglott-Modul (AI-Übersetzer) oder einen beliebigen Übersetzer oder Chatbot.
+  changelog_uwaga: Das Änderungsprotokoll der neuen Version wird als Datei docs/changelog.md geöffnet. Es ist auf Englisch — wenn Sie eine andere Sprache bevorzugen, laden Sie diese Datei in das Polyglott-Modul (AI-Übersetzer) oder einen beliebigen Übersetzer oder Chatbot.
   changelog_naglowek: '# Was ist neu in Version {nowa_wersja}'
   changelog_blad: "Die Datei des Änderungsprotokolls konnte nicht gespeichert oder geöffnet werden:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Änderungsprotokoll der Version {nowa_wersja}

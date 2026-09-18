@@ -1510,13 +1510,15 @@ updater:
   # (= sekcja RELEASE_NOTES tej wersji, pobrana z GitHub API) zapisywany do
   # docs/changelog.md i otwierany przyciskiem domyślnym edytorem. Do v17.11 był
   # tu baked-in `co_nowego_tresc` opisujący wersję JUŻ ZAINSTALOWANĄ — nagłówek
-  # mówił o nowej, treść była stara (krytyczny bug, usunięty). Body jest EN+PL —
-  # changelog_uwaga kieruje nie-PL/EN usera do Poligloty/dowolnego tłumacza.
+  # mówił o nowej, treść była stara (krytyczny bug, usunięty). Body jest od v19.4.0
+  # SAMO ANGIELSKIE (kanon RELEASE_NOTES) — changelog_uwaga kieruje nie-EN usera
+  # do Poligloty/dowolnego tłumacza. Do v19.4.0 body było EN+PL i oba klucze niżej
+  # mówiły „po polsku" — patrz test_core_updater.py, bramka na tę klasę.
   # Literał „docs/changelog.md" zostaw 1:1 we wszystkich językach (ścieżka pliku).
-  changelog_uwaga:          "Changelog nowej wersji otworzy się jako plik docs/changelog.md. Jest po angielsku i polsku — jeśli wolisz inny język, wczytaj ten plik do modułu Poliglota (Tłumacz AI) albo dowolnego tłumacza lub chatbota."
+  changelog_uwaga:          "Changelog nowej wersji otworzy się jako plik docs/changelog.md. Jest po angielsku — jeśli wolisz inny język, wczytaj ten plik do modułu Poliglota (Tłumacz AI) albo dowolnego tłumacza lub chatbota."
   changelog_naglowek:       "# Co nowego w wersji {nowa_wersja}"
   changelog_blad:           "Nie udało się zapisać lub otworzyć pliku changelogu:\n{sciezka}\n\n{tresc_bledu}"
-  co_nowego_online_pl:      "Pełna strona wydania (online) jest dostępna po polsku."
+  co_nowego_online_uwaga:   "Pełna strona wydania (online) jest dostępna po angielsku."
   btn_szczegoly_online:     "&Szczegóły online"
   # Przyciski w DialogAktualizacji (akceleratory: &P, &C, &O, &A, &S — bez kolizji wewnątrz dialogu)
   btn_changelog:            "📄 &Changelog wersji {nowa_wersja}"

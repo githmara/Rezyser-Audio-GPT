@@ -816,8 +816,9 @@ class DialogAktualizacji(wx.Dialog):
         # dialog pokazywał baked-in `co_nowego_tresc` opisujący wersję JUŻ
         # zainstalowaną (nagłówek nowej, treść starej — krytyczny bug). Teraz
         # surowy changelog zapisujemy do `docs/changelog.md` i otwieramy z
-        # przycisku domyślnym edytorem (cross-platform). Body jest EN+PL — nota
-        # podpowiada nie-PL/EN userowi, by przetłumaczył plik w module Poliglota
+        # przycisku domyślnym edytorem (cross-platform). Body jest od v19.4.0
+        # SAMO ANGIELSKIE (kanon RELEASE_NOTES — polska diagnostyka porzucona), więc
+        # nota podpowiada nie-EN userowi, by przetłumaczył plik w module Poliglota
         # (Tłumacz AI) lub dowolnym tłumaczu/chatbocie. Świadoma decyzja o update.
         self._changelog = (getattr(info_aktualizacji, "changelog", "") or "").strip()
         self._nowa_wersja = info_aktualizacji.wersja
@@ -827,7 +828,7 @@ class DialogAktualizacji(wx.Dialog):
             sizer.Add(changelog_uwaga, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=12)
 
         if self._url_release:
-            uwaga_ctrl = wx.StaticText(self, label=t("updater.co_nowego_online_pl"))
+            uwaga_ctrl = wx.StaticText(self, label=t("updater.co_nowego_online_uwaga"))
             uwaga_ctrl.Wrap(560)
             sizer.Add(uwaga_ctrl, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=12)
 
@@ -942,7 +943,9 @@ class DialogAktualizacji(wx.Dialog):
     def _on_szczegoly_online(self, _event):
         """Otwiera stronę Release na GitHubie w domyślnej przeglądarce; dialog
         pozostaje otwarty (jak „Otwórz folder dictionaries"). Treść strony jest
-        po polsku — uprzedza o tym `co_nowego_online_pl` w samym dialogu."""
+        od v19.4.0 po angielsku (body Release = sekcja RELEASE_NOTES, już bez
+        polskiej diagnostyki) — uprzedza o tym `co_nowego_online_uwaga` w samym
+        dialogu. Klucz nosił do v19.4.1 nazwę `co_nowego_online_pl`."""
         if self._url_release:
             wx.LaunchDefaultBrowser(self._url_release)
         wx.CallAfter(self._btn_pobierz.SetFocus)

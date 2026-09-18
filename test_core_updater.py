@@ -126,6 +126,126 @@ def test_sprawdz_aktualizacje():
 
 
 # ---------------------------------------------------------------------------
+# 5. Kontrakt TRESCI: noty o jezyku changelogu i strony wydania
+# ---------------------------------------------------------------------------
+# Klasa dlugu domknieta w v19.4.1 (otwarta v19.4.0): dwa stringi runtime'u
+# opisywaly zachowanie, ktore przestalo istniec. `updater.changelog_uwaga`
+# mowil „Jest po angielsku i polsku", a `updater.co_nowego_online_pl` — „strona
+# wydania jest dostepna po polsku". Obie obietnice przestaly byc prawdziwe
+# w chwili, gdy sekcja `RELEASE_NOTES.md` stracila polska diagnostyke, bo
+# in-app „Co nowego" od v17.11 pokazuje ZYWE body Release. Zaden przeglad
+# tlumaczen tego nie lapal: stringi byly poprawnie przetlumaczone we wszystkich
+# dziewieciu paczkach — falszywe bylo ZDANIE, a jego prawdziwosc mieszka POZA
+# paczka, w kanonie `RELEASE_NOTES.md`. Dlatego bramka stoi po obu stronach:
+# sprawdza noty w paczkach ORAZ kanon, ktory je uprawdziwia.
+
+_DICT_UI = Path(__file__).parent / "dictionaries"
+
+# Mapy kuratorskie: slowo „polski" i slowo „angielski" w jezyku KAZDEJ paczki.
+# Dziesiaty jezyk projektu dopisze tu dwa slowa — i o tym, ze musi, dowie sie
+# z tego testu, nie od uzytkownika (wzorzec z `test_manager_kontrakt.py`).
+_SLOWO_POLSKI = {
+    "pl": "polsk", "en": "polish", "de": "polnisch", "es": "polac",
+    "fi": "puola", "fr": "polon", "is": "pólsk", "it": "polacc",
+    "ru": "польск",
+}
+_SLOWO_ANGIELSKI = {
+    "pl": "angielsk", "en": "english", "de": "englisch", "es": "ingl",
+    "fi": "englan", "fr": "anglais", "is": "ensku", "it": "ingles",
+    "ru": "английск",
+}
+
+# Naglowki porzuconej polskiej diagnostyki. Obecnosc ktoregokolwiek w sekcji
+# BIEZACEJ wersji znaczy, ze body Release znow nie jest samo angielskie — a wtedy
+# klamia noty, nie plik.
+_NAGLOWKI_PL = ("### TL;DR", "### Co nowego", "### Pod maska", "### Pod maską",
+                "### Co nie weszlo", "### Co nie weszło", "### Walidacja")
+
+_KLUCZE_NOT = ("updater.changelog_uwaga", "updater.co_nowego_online_uwaga")
+
+
+def _kody_paczek():
+    return sorted(k.name for k in _DICT_UI.iterdir()
+                  if (k / "gui" / "ui.yaml").is_file())
+
+
+def test_noty_o_jezyku_maja_klucze_pod_NOWA_nazwa():
+    """`co_nowego_online_uwaga` w kazdej paczce, `..._pl` w zadnej.
+
+    Przemianowanie w v19.4.1: sufiks `_pl` opisywal JEZYK TRESCI, a nie rzecz,
+    ktora klucz nazywa, wiec starzal sie razem z kanonem. Polowiczne
+    przemianowanie degraduje CICHO — kod pyta o nowy klucz, paczka ma stary,
+    `i18n.t` oddaje „[updater.co_nowego_online_uwaga]" i tyle widzi user.
+    """
+    import i18n
+    braki = []
+    for kod in _kody_paczek():
+        i18n.ustaw_jezyk(kod)
+        for klucz in _KLUCZE_NOT:
+            if i18n.t(klucz).startswith("["):
+                braki.append(f"{kod}: brak klucza {klucz}")
+        if not i18n.t("updater.co_nowego_online_pl").startswith("["):
+            braki.append(f"{kod}: zostal PRZEDAWNIONY klucz "
+                         f"updater.co_nowego_online_pl (przemianowany w v19.4.1)")
+    i18n.ustaw_jezyk("pl")
+    assert not braki, "\n".join(braki)
+
+
+def test_noty_o_jezyku_nie_obiecuja_polskiego():
+    """Obie noty nazywaja angielski i ZADNA nie nazywa polskiego.
+
+    Mechanicznie sprawdzalne jest tu dokladnie jedno: czy zdanie nazywa jezyk,
+    ktorego w tresci nie ma. Obietnica pozytywna jest w tej samej petli, bo
+    nota bez zadnej nazwy jezyka jest rownie bezuzyteczna dla nie-EN usera —
+    po to te dwa stringi istnieja.
+    """
+    import i18n
+    braki = []
+    for kod in _kody_paczek():
+        assert kod in _SLOWO_POLSKI and kod in _SLOWO_ANGIELSKI, (
+            f"{kod}: dopisz slowa „polski\" i „angielski\" w tym jezyku "
+            f"do map tego testu")
+        i18n.ustaw_jezyk(kod)
+        for klucz in _KLUCZE_NOT:
+            tekst = i18n.t(klucz).lower()
+            if _SLOWO_POLSKI[kod] in tekst:
+                braki.append(f"{kod}/{klucz}: nota nadal obiecuje polski "
+                             f"(znaleziono „{_SLOWO_POLSKI[kod]}\")")
+            if _SLOWO_ANGIELSKI[kod] not in tekst:
+                braki.append(f"{kod}/{klucz}: nota nie nazywa angielskiego "
+                             f"(szukano „{_SLOWO_ANGIELSKI[kod]}\")")
+    i18n.ustaw_jezyk("pl")
+    assert not braki, "\n".join(braki)
+
+
+def test_sekcja_biezacego_wydania_jest_bez_polskiej_diagnostyki():
+    """Kanon, ktory uprawdziwia noty wyzej: body Release = samo angielskie.
+
+    Body Release to CALA sekcja `## <wersja>` z RELEASE_NOTES.md (wycinana tym
+    samym ekstraktorem, ktorego uzywa `draft-release.yml`), zapisywana przez
+    dialog do `docs/changelog.md`. Powrot polskiej diagnostyki do sekcji
+    biezacej wersji nie jest wiec kosmetyka: uniewaznia dwa stringi w dziewieciu
+    paczkach, ktorych ta sekcja nawet nie widzi.
+    """
+    sys.path.insert(0, str(Path(__file__).parent / ".github" / "scripts"))
+    import release_notes_sekcja as rns
+
+    wersja = cu._odczytaj_wersje_lokalna().strip().lstrip("v")
+    tresc = (Path(__file__).parent / "RELEASE_NOTES.md").read_text(encoding="utf-8")
+    try:
+        sekcja = rns.wytnij_sekcje(tresc, wersja)
+    except rns.BladSekcji as exc:
+        pytest.skip(f"RELEASE_NOTES.md nie ma jeszcze sekcji {wersja} ({exc})")
+
+    trafienia = [n for n in _NAGLOWKI_PL if n in sekcja]
+    assert not trafienia, (
+        f"sekcja {wersja} ma naglowki porzuconej polskiej diagnostyki "
+        f"{trafienia} — body Release nie jest samo angielskie, wiec "
+        f"`updater.changelog_uwaga` i `updater.co_nowego_online_uwaga` "
+        f"w 9 paczkach klamia (patrz v19.4.0 i v19.4.1)")
+
+
+# ---------------------------------------------------------------------------
 # Uruchomienie jako skrypt — deleguje do pytesta.
 # ---------------------------------------------------------------------------
 # Wlasny harness sumujacy bool-e byl dokladnie tym, co zepsulo te testy pod

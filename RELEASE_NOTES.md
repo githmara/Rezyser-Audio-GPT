@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.4.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.4.1 „Wersja Wydawnicza"
+
+*Patch v19.4.1: dwa zdania w runtimie przestają obiecywać polski, którego w treści już nie ma. Od v19.4.0 body Release jest samo angielskie, ale nota o changelogu w dziewięciu paczkach nadal mówiła „Jest po angielsku i polsku", a druga — że strona wydania jest dostępna po polsku; klucz `co_nowego_online_pl` nosił ten fakt w samej nazwie i nazywa się teraz `co_nowego_online_uwaga`. Klasa jest nowa dla przeglądu tłumaczeń: wszystkie osiemnaście stringów było przetłumaczonych poprawnie, a fałszywe było ZDANIE, którego prawdziwość mieszka poza paczką — więc bramka w `test_core_updater.py` stoi po obu stronach kanonu. Przy okazji kanon zależności przestaje odsyłać do nieistniejącej rubryki „Pod maską".*
 
 *Release v19.4.0 - motyw przewodni: manager reguł nie ufa już naiwnie wpisanym danym, a brak folderu `dictionaries` może to w końcu ogłosić. Openai zaktualizowane do wersji 3.15.0, a bliskie cytaty, które mają być rozstrzygnięte przez native-speakerów dostały swój baseline, by nie ostrzegały przy każdym uruchomieniu `generuj_dokumentacje` w trybie --waliduj.*
 
@@ -77,6 +79,53 @@
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
 
 ---
+
+## 19.4.1 — patch release
+
+### What's new
+
+**The update dialog stops promising Polish.** Since v17.11 the in-app "What's
+new" shows the LIVE release body, and since v19.4.0 that body is English only —
+but two runtime strings still said otherwise, in all nine packs: the changelog
+note claimed the file "is in English and Polish", and a second note claimed the
+online release page "is available in Polish". A user who preferred neither
+language was being told to go and translate half of a text that was already
+entirely in one. Both sentences now name English, and the key that carried the
+claim in its own NAME is renamed: `updater.co_nowego_online_pl` became
+`updater.co_nowego_online_uwaga`, which says what the key IS instead of what
+language its value happened to mention.
+
+**A gate now stands where the translation review could not reach.** A sentence
+about the language of shipped content is not a translation defect: all eighteen
+strings were faithful renderings of their Polish source, and the thing that made
+them false lived in a different file. `test_core_updater.py` now checks the two
+notes in every installed pack — a curated word per pack, none may name Polish
+and each must name English — refuses a half-finished rename, and, from the other
+side, fails when the CURRENT release section in `RELEASE_NOTES.md` carries the
+headers of the abandoned Polish diagnostics, because their return would make
+those nine packs lie again. The class itself is written down for reviewers in
+`przeglad_tlumaczen.py`: ask where the fact LIVES, and when it lives outside
+`dictionaries/`, no amount of reading the packs can validate it.
+
+**The dependency canon points at a rubric that exists.** `audyt_zaleznosci.py`
+and `requirements.txt` told the maintainer to note an in-bound dependency
+upgrade "under Pod maską" — a Polish section that v19.4.0 dropped. Both now
+point at `### What's new`, which is where v19.4.0 in fact recorded the `openai`
+bump, and the denser diagnostics that used to fill the Polish half keep going to
+the release report on disk.
+
+### Planned or deferred
+
+* The 49 quotes ALMOST equal to a label stay baselined, not fixed. The call
+  belongs to a native speaker and `fi` is still the first candidate; shrinking
+  the baseline remains the good direction.
+* `diag.brak_zastrzezen` keeps its loose renderings in `en`, `de`, `es` and
+  `fr` — transparent to a reader, so not a debt.
+* `RELEASE_NOTES.md` is past 1.3 MB, and the GitHub Contents API already
+  refuses to return its content (`encoding:"none"`, `download_url` only). That
+  is harmless today, because every consumer in this repo reads the file from the
+  checkout; the split into `release_notes_archive.md` is still ahead, with the
+  50 MB repository warning some 70× further away.
 
 ## 19.4.0 — minor release
 

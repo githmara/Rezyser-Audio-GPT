@@ -1248,9 +1248,9 @@ updater:
   blad_pobierania_tresc: "Impossibile scaricare l'aggiornamento:\n{tresc_bledu}"
   blad_uruchomienia_tytul: "Errore di avvio dell'installatore"
   blad_uruchomienia_tresc: "Impossibile avviare l'installatore:\n{sciezka_pliku}\n\n{tresc_bledu}"
-  co_nowego_online_pl: La pagina completa della versione (online) è disponibile in polacco.
+  co_nowego_online_uwaga: La pagina completa della versione (online) è disponibile in inglese.
   btn_szczegoly_online: '&Dettagli online'
-  changelog_uwaga: Il changelog della nuova versione si aprirà come file docs/changelog.md. È in inglese e polacco — se preferisci un'altra lingua, carica questo file nel modulo Poliglotta (Traduttore AI) o in qualsiasi traduttore o chatbot.
+  changelog_uwaga: Il changelog della nuova versione si aprirà come file docs/changelog.md. È in inglese — se preferisci un'altra lingua, carica questo file nel modulo Poliglotta (Traduttore AI) o in qualsiasi traduttore o chatbot.
   changelog_naglowek: "# Cosa c'è di nuovo nella versione {nowa_wersja}"
   changelog_blad: "Impossibile salvare o aprire il file del changelog:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Changelog della versione {nowa_wersja}
