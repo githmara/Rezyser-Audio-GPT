@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.3.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.4.0 „Wersja Wydawnicza"
+
+*Release v19.4.0 - motyw przewodni: manager reguł nie ufa już naiwnie wpisanym danym, a brak folderu `dictionaries` może to w końcu ogłosić. Openai zaktualizowane do wersji 3.15.0, a bliskie cytaty, które mają być rozstrzygnięte przez native-speakerów dostały swój baseline, by nie ostrzegały przy każdym uruchomieniu `generuj_dokumentacje` w trybie --waliduj.*
 
 *Patch v19.3.1: dokument dla czytników ekranu przestaje mówić o sobie dwie różne rzeczy w dwóch kolejnych linijkach. Tytuł był sklejany z zaszytego polskiego sufiksu, a atrybut `<html lang>` linijkę wyżej brał język projektu — fiński projekt dostawał więc `lang="fi"` plus polski tytuł, a syntezator wykonywał polecenie dosłownie i czytał polskie słowa fińskim głosem; sąsiedni dispatch akcentów w TYM SAMYM module przeszedł na `jezyk_override` już w v17.9, tylko tytuł go nie dostał. Ciekawsza jest jednak druga połowa: przeciek nie był niewykryty, był ZBASELINE'OWANY — bramka literałów go widziała, a wpis stał w baseline jako zaakceptowany. Triaż wszystkich 110 trafień pokazał, że był jedyny w swojej klasie: każdy inny polski literał ma tam uzasadnienie (wyjątek dla dewelopera, regex, alfabet, kanon polskich nazw języków, prompt Managera Reguł, świadomie zaszyty dialog crashu, fallback klucza `baza.yaml`), a ten łączył dwie cechy naraz — bezwarunkowo wchodził do artefaktu użytkownika i nie miał żadnego źródła w YAML-u. Naprawa to klucz `rezyser.sr_html_tytul` w dziewięciu paczkach plus `jezyk_override`, przy czym brak klucza NIE odtwarza przecieku (`i18n.t` spada na EN, nigdy na PL — zmierzone na nieistniejącej paczce `sv`). Lekcja weszła jako bramka, nie akapit: `test_tytul_screen_readera.py` pilnuje, że tytuł jest dokładnie wartością paczki przepuszczoną przez `html.escape`, że polski sufiks nie trafia do dokumentu żadnego innego języka i że dziesiąty język nie wymaga Pythona — a sama bramka została zweryfikowana OD STRONY PORAŻKI (przywrócenie szablonu z v19.3.0 wywraca dwa z pięciu testów). Tryb chirurgiczny autotłumacza pokazał przy okazji swoją cenę: tłumaczenie jednego klucza nie daje modelowi rodzeństwa do przeczytania, więc wróciły trzy kalki rozjechane z własnymi paczkami (`de`, `it`, `ru`), poprawione ręcznie wobec kluczy `sr_*` i tabeli kanonu. Baseline literałów okazał się zwietrzały o dwa wydania — regeneracja usunęła dwa wpisy po literałach, które wypadły z kodu w v19.1/v19.3 — co złapał wyłącznie odruch czytania jego diffu w OBIE strony. Odrzucone w tym wydaniu: `pyperclip` (wx ma schowek natywnie, a repo już z niego korzysta w dwóch miejscach) oraz parser `IMIĘ: kwestia`, do którego wracamy wyłącznie po zgłoszeniu, bo `_RE_TAG` jest wspólny ze ścieżką wydającą pieniądze na render, a reguła zakresu mówi, że Reżyser przyjmuje to, co sam potrafi wyprodukować. Odruch zależnościowy przed zamrożeniem dołożył `openai` 3.14.0 → 3.14.1 — wydanie, które manifest już dopuszczał, więc granica została nietknięta, a cała wołana powierzchnia SDK potwierdzona wykonaniem, bez ani jednego zapytania do API. Dla użytkownika końcowego: plik `<projekt>_screen_reader.html` ma wreszcie tytuł w języku swojej treści.*
 
@@ -73,6 +75,99 @@
 *Release v18.8.0: owoce testu maintainera „polskie UI na fińskiej treści" (Poliglota offline) — jeden bug krytyczny plus dwa niedociągnięcia międzynarodowości. **(1) BUG KRYTYCZNY: tagi `lang` per akapit liczone na tekście JUŻ zniekształconym transformacją.** Silnik od 13.5 MA mechanizm detekcji języka per akapit wykonywanej PRZED transformacją (side-channel `opcje["_segmenty_wynikowe"]`), ale kanał był martwy od urodzenia: GUI wołało `przetworz(..., **opcje)`, Python REPAKOWAŁ kwargi do nowego słownika i mutacje silnika nigdy nie wracały do GUI — `zapisz_wynik` zawsze spadał na detekcję „na żywo" po wyniku. Dla typoglikemii na fińskim tekście lingua strzelała `lang="de"` na akapitach nagłówkowych (dowód: pochodne `explore_raport`); dla cezara fałszerstwo byłoby totalne. Ten sam martwy kanał ukrywał DWA bugi-rodzeństwo cezara z losowym przesunięciem: komunikat „wylosowano N" nigdy się nie pokazywał, a nazwa pliku traciła sufiks `±N` — czyli zaszyfrowany plik był praktycznie nieodwracalny dla usera. Fix: `przetworz` przyjmuje jawny, MUTOWALNY słownik `opcje=` (przez referencję); jeden korzeń naprawia trzy objawy. **(2) Lokalizacja sklejek nazw plików wynikowych.** Prefiksy `naprawiony_/oczyszczony_/_akcent_/_szyfr_/_tlumaczenie_/architektura_` były polskim hard-kodem — koszmar dla niepolskich syntezatorów (fińska Satu czytająca „tlumaczenie" jako [tumaksenije]). Teraz człony pochodzą z `ui.yaml` (klucze `filename_*` ×9 języków, w języku UI: fi `salaus/käännös/arkkitehtuuri`, is `dulkóðun/þýðing`, ru `шифр/перевод`…), z Unicode-safe sanityzacją i twardym fallbackiem na polskie defaulty; `id` wariantu pozostaje techniczne. Manuale zlokalizowane w ślad (przykłady `architektura_` → natywne). **(3) A11y: spin przesunięcia Cezara ukryty dla nie-cezarowych szyfrów** (NVDA nie ogłasza już martwego pola; wzorzec show/hide jak przy polu ISO naprawiacza). **(4) Dokumentacja user-facing przechodzi z .txt na HTML renderowany z Markdownu.** Szablony `dokumentacja/*.yaml` są od teraz pisane w MD (mechaniczna migracja: nagłówki `#`/`##` per sekcja + backticki wokół `<placeholderów>` ×9 języków, z autotestem integralności treści), a `generuj_dokumentacje.py` renderuje `docs/<id>.<iso>.html` (biblioteka `markdown`, nl2br + sane_lists) z pełnym dokumentem HTML5: `<html lang="<iso>">` przełącza syntezator czytnika ekranu na język treści, nagłówki dają nawigację klawiszami 1-6/h w NVDA, a minimalny CSS (z trybem ciemnym) czyta się dobrze też wzrokiem — koniec „obleśnego" gołego .txt w Notatniku. README bez zmian (surowy MD dla GitHuba). Menu Pomoc, `installer.iss` (checkbox „otwórz manual" + sprzątanie osieroconych `docs\*.txt` przy upgrade) i `build_release` przepięte; nowa bramka RAW-HTML w `--waliduj` pilnuje, żeby żaden surowy `<fragment>` z szablonu nie został połknięty przez przeglądarkę. Przy okazji naprawione martwe odwołanie w 9 manualach: przewodnik Opowieści to `tales.<iso>.html`, nie `opowiesci.pl.txt`/`tarinat.fi.txt`/`recits.fr.txt` (plik o tych nazwach nigdy nie istniał).*
 
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
+
+---
+
+## 19.4.0 — minor release
+
+### What's new
+
+**The Rule Manager stops trusting typed names.** A file name inside
+`dictionaries/` is the interface between a language pack and the engine, not user
+prose: if the engine reads the name, the name is an identifier. Four battle tests in
+the installed package produced four files the engine accepted and nobody flagged —
+an accent named `ucraine` for `iso: uk` (canon: `ukrainski`), an accent named
+`bulgarian` for `iso: bg`, a working tag repairer occupying `bulgarski.yaml`, and a
+copy of `zaczatki.yaml` that no loader ever reads. The Manager now derives the accent
+file name from the ISO code (read-only field), offers the three Polyglot tool names
+from a closed list, blocks a name that would be dead or would lie about the file's
+content, and warns where a file works but breaks a pack convention. Replacement
+ciphers and Director modes keep completely free names — their dispatch comes from
+fields, and that is the whole point of user-editable data.
+
+**An unfinished template no longer ships silently.** The wizard marks what it cannot
+fill with `<FILL …>` placeholders, and such a file is NOT dead code: the accent
+template carries two real rules and the engine dispatches on `kategoria`, so the pack
+would ship a live rule whose description is an English instruction for the model.
+The Rule Manager now lists such files after "Refresh tree", and the foundations gate
+refuses to build a release while any pack still carries one.
+
+**The app can finally say that it has nothing to say.** With `dictionaries/` deleted
+or moved, every label fell back to `[key]` and nothing explained why — the alarm
+built for exactly that case could not fire, because a MISSING file is deliberately
+not a file failure. Startup now shows a hard-coded PL+EN dialog naming both paths it
+looked at, and the Manager's "no dictionaries folder" line no longer waits inside the
+folder it describes.
+
+**Documentation and diagnostics stop promising things that are not true.** The rule
+report was titled "Skipped rules" while four of its reasons describe files that work;
+both alarms cited `[main.app_title]`, a key that exists in no pack; the wizard's note
+claimed the accent template has an empty replacement pipeline; the note on
+algorithmic ciphers named `_ALGORYTMY` and `_algorytm_*` instead of
+`_ALGORYTMY_SZYFROW` and `_algo_*`. All corrected, and the cited example key is now
+covered by a test.
+
+**A warning repeated at every run is not a verdict.** The GUI-LABEL gate has been
+printing 49 quotes ALMOST equal to a label since v18.26 — every one of them a case
+where the reader still understands the text and the "fix the quote or fix the label?"
+call belongs to a native speaker. That verdict lived only in one person's memory, so
+a 50th hit — possibly a genuinely dead quote, the class this gate exists for — would
+have drowned in the list. The verdicts now live in `bliskie_cytaty_baseline.json`:
+known quotes collapse to one summary line, a quote nobody has triaged yet fails the
+validation, and a baseline entry that no longer occurs is reported as a reason to
+shrink the file. Shrinking is the good direction — it means a native settled the
+naming canon.
+
+**The dependency gate stops asking politely.** Since v18.32 the build has audited
+`requirements.txt` against the installed environment and PyPI, telling a decision
+(a bound excludes the new release) apart from an omission (our manifest allows it, so
+a contributor gets it from pip) — but it only WARNED, and a warning is one line in
+a several-hundred-line build log that is read after the build. Measured the day after
+v19.3.1: an installer was built and then deleted, over `openai` 3.14.1 → 3.15.0 allowed
+by the `<4` bound. The build now applies the strict verdict by DEFAULT and refuses to
+compile, deliberately without the `FATAL` wording the other gates use: nothing in our
+code is broken, upstream simply released something nobody has decided about, and
+a freeze is the moment to decide. `build_release.py --no-strict` skips the audit
+ENTIRELY — not "run it and ignore it" — for a critical hotfix that must ship without
+touching dependencies. An unimportable audit module now blocks as well, because
+"I cannot tell" is not "nothing is pending".
+
+**A recorded decision no longer blocks the procedure that publishes it.** Setting
+a version bound is how the conservative canon records "not this release" — but
+`requirements.txt` was classified as always requiring the full release procedure, so
+writing the decision down blocked the dev patch meant to ship it. The classification is
+now narrow instead of absolute: a manifest diff passes the dev-tools-only gate when the
+SET of package names is identical on both sides of the range and only the specifiers
+moved. Adding or removing a package still forces the full procedure, because the source
+tree then needs a different environment. Both sides are read from git, never from the
+working tree, and "cannot tell" falls on the cautious side.
+
+**Openai upgraded to 3.15.0**. No source changes were required. The exe was built before writing this sentence to avoid a potential race - the upstream could release a patch and block the freeze again.
+
+### Planned or deferred
+
+* The `panel_name` of the Italian pack was the only accessible name that did not
+  repeat its own button label; normalized. The remaining term splits (`en`
+  "objections", `de` "Einschränkungen", `es`/`fr` loose renderings of the same
+  noun in `diag.brak_zastrzezen`) are transparent to a reader and were left alone —
+  see the comprehensibility criterion in the pillar.
+* The 49 quotes ALMOST equal to a label are now BASELINED, not fixed: the wording
+  itself is unchanged in all eight packs. Half of them are the manual being right and
+  the `ui.yaml` label being wrong (`de` "Senden an AI", `it` "Invia all'AI", `fr`
+  "pour AI"), half are inflection (`is` „Ný leikur" vs „Nýr leikur"). Fixing a label
+  is a nine-pack change and the call belongs to a native speaker, so the release ships
+  the verdicts, not the edits.
+* The Polish diagnostics. The full changelog of release bodies is already over a million characters long. Since it's not known at which point git or GitHub will refuse to track the file `release_notes.md`, the maintainer decided to abandon the Polish details entirely, noting the dependency upgrade in the `what's new` section. When absolutely necessary, a file `release_notes_archive.md` will be created to house older releases after crossing the limit. The string fixes that derive from this change (namely: note it in the "Pod Maską" section) are planned for the next release when something else comes up to fix or improve.
 
 ---
 
