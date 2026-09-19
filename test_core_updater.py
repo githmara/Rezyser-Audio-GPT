@@ -81,16 +81,104 @@ def test_github_api():
     except BLEDY_SIECI as exc:
         pytest.skip(f"GitHub API nieosiagalne ({type(exc).__name__}: {exc})")
 
-    assert isinstance(dane, dict), type(dane)
-    tag = dane.get("tag_name")
-    assert tag, f"odpowiedz API bez `tag_name`: {sorted(dane)[:10]}"
+    # Od v19.5 odpytujemy LISTE wydan, nie `releases/latest`: changelog ma
+    # obejmowac takze wydania pominiete przez uzytkownika.
+    assert isinstance(dane, list), type(dane)
+    assert dane, "API zwrocilo pusta liste wydan"
+
+    wydania = cu._wydania_publiczne(dane)
+    assert wydania, "po odsianiu szkicow i pre-release'ow nie zostalo nic"
+
+    # Sortowanie MALEJACE po numerze wersji — na tym stoi wybor celu.
+    numery = [cu._normalizuj_wersje(str(w["tag_name"])) for w in wydania]
+    assert numery == sorted(numery, reverse=True), numery
+
+    najnowsze = wydania[0]
+    tag = najnowsze.get("tag_name")
+    assert tag, f"wydanie bez `tag_name`: {sorted(najnowsze)[:10]}"
     assert cu._normalizuj_wersje(tag) != (0, 0, 0), f"tag nie parsuje sie: {tag!r}"
 
     # Wydanie MUSI miec instalator i jego sume — updater weryfikuje nia pobranie
     # (od v18.10), a bez sumy weryfikacja SHA256 jest po cichu pomijana.
-    nazwy = [a.get("name", "") for a in dane.get("assets", [])]
+    nazwy = [a.get("name", "") for a in najnowsze.get("assets", [])]
     assert any(n.endswith(".exe") for n in nazwy), f"brak assetu .exe: {nazwy}"
     assert any(n.endswith(".exe.sha256") for n in nazwy), f"brak sumy .sha256: {nazwy}"
+
+
+# ---------------------------------------------------------------------------
+# 3b. Agregacja changelogu — wydanie POMINIETE tez musi sie policzyc (v19.5)
+# ---------------------------------------------------------------------------
+# Te testy sa OFFLINE i syntetyczne: karmimy helpery ksztaltem odpowiedzi API,
+# bo mierzona wlasnosc jest regula sklejania, a nie stanem repozytorium.
+
+def _wydanie(tag, body, *, draft=False, prerelease=False, exe=True):
+    assets = []
+    if exe:
+        assets = [
+            {"name": f"Rezyser_Audio_{tag.lstrip('v')}_Installer.exe",
+             "browser_download_url": f"https://example.invalid/{tag}.exe",
+             "size": 123},
+            {"name": f"Rezyser_Audio_{tag.lstrip('v')}_Installer.exe.sha256",
+             "browser_download_url": f"https://example.invalid/{tag}.exe.sha256",
+             "size": 103},
+        ]
+    return {"tag_name": tag, "body": body, "draft": draft,
+            "prerelease": prerelease, "assets": assets,
+            "html_url": f"https://example.invalid/tag/{tag}",
+            "zipball_url": f"https://example.invalid/zip/{tag}"}
+
+
+def test_changelog_obejmuje_wydanie_pominiete():
+    """Uzytkownik 19.4.0 widzi TAKZE sekcje 19.4.1, nie tylko 19.4.2.
+
+    To jest cala usterka zamknieta w v19.5: `releases/latest` zwracal jedno
+    wydanie, wiec o poprawkach wydania posredniego nikt sie nie dowiadywal.
+    """
+    wydania = cu._wydania_publiczne([
+        _wydanie("v19.4.1", "## 19.4.1 — patch\nDruga rzecz."),
+        _wydanie("v19.4.2", "## 19.4.2 — patch\nPierwsza rzecz."),
+        _wydanie("v19.4.0", "## 19.4.0 — minor\nJUZ ZAINSTALOWANE."),
+    ])
+    sklejony = cu._sklej_changelog(wydania, "19.4.0")
+
+    assert "## 19.4.2" in sklejony, sklejony
+    assert "## 19.4.1" in sklejony, sklejony
+    assert "JUZ ZAINSTALOWANE" not in sklejony, "wlasna wersja nie nalezy do changelogu"
+    # Kolejnosc: najnowsze na gorze.
+    assert sklejony.index("## 19.4.2") < sklejony.index("## 19.4.1")
+    assert "---" in sklejony, "brak separatora miedzy sekcjami"
+
+
+def test_changelog_pusty_gdy_nie_ma_nic_nowszego():
+    wydania = cu._wydania_publiczne([_wydanie("v19.4.2", "## 19.4.2 — patch\nX.")])
+    assert cu._sklej_changelog(wydania, "19.4.2") == ""
+    assert cu._sklej_changelog(wydania, "19.5.0") == ""
+
+
+def test_szkice_i_prerelease_nie_wchodza_do_wyboru_celu():
+    """Draft i pre-release nie sa wydaniem dla end-usera — ani celem, ani trescia."""
+    wydania = cu._wydania_publiczne([
+        _wydanie("v20.0.0", "## 20.0.0 — draft", draft=True),
+        _wydanie("v19.9.9", "## 19.9.9 — rc", prerelease=True),
+        _wydanie("v19.4.2", "## 19.4.2 — patch\nRealne."),
+        _wydanie("nie-wersja", "## cos\nTag spoza workflow."),
+    ])
+    assert [w["tag_name"] for w in wydania] == ["v19.4.2"]
+    sklejony = cu._sklej_changelog(wydania, "19.4.0")
+    assert "20.0.0" not in sklejony and "19.9.9" not in sklejony, sklejony
+
+
+def test_cel_to_najwyzszy_numer_a_nie_najswiezsza_data():
+    """Hotfix wydany pozniej, a numerowany nizej, nie moze wygrac z nowszym.
+
+    `releases/latest` GitHuba wybiera po `created_at`, wiec taki uklad kazalby
+    updaterowi zaproponowac COFNIECIE wersji. My sortujemy po numerze.
+    """
+    wydania = cu._wydania_publiczne([
+        _wydanie("v18.9.1", "## 18.9.1 — hotfix starej linii"),
+        _wydanie("v19.4.2", "## 19.4.2 — patch"),
+    ])
+    assert wydania[0]["tag_name"] == "v19.4.2"
 
 
 # ---------------------------------------------------------------------------

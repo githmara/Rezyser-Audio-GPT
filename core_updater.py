@@ -37,7 +37,17 @@ import sciezki
 GITHUB_USER = "githmara"
 GITHUB_REPO = "Rezyser-Audio-GPT"
 
-_API_URL = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/releases/latest"
+# ILE wydań pobieramy jedną zapytką. Do v19.4.2 stało tu `/releases/latest`,
+# czyli JEDNO wydanie — i to wystarczało dokładnie do pytania „czy jest coś
+# nowszego". Nie wystarczało do pytania, które user zadaje naprawdę: „co się
+# zmieniło, odkąd nie aktualizuję". Kto siedział na 19.4.0, dostawał opis
+# 19.4.2 i o poprawkach z 19.4.1 nie dowiadywał się NIGDY — sekcja wydania
+# pośredniego nie miała jak do niego trafić, bo API jej nie zwracało.
+# Lista kosztuje tyle samo: JEDNA zapytka z budżetu 60/h.
+_ILE_WYDAN = 30
+_API_URL = (f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}"
+            f"/releases?per_page={_ILE_WYDAN}")
+_URL_WYDANIA_HTML = f"https://github.com/{GITHUB_USER}/{GITHUB_REPO}/releases"
 # VERSION liczony przez `sciezki.KATALOG_ZASOBOW`, TAK SAMO jak `i18n._PLIK_WERSJI`.
 # Historia: do v17.11 było tu `Path(__file__).with_name("VERSION")` — w paczce
 # PyInstaller `__file__` wskazuje WEWNĄTRZ bundla, więc plik nie był znajdowany →
@@ -69,8 +79,8 @@ _WZORZEC_INSTALATORA = re.compile(r"rezyser_audio.*installer.*\.exe", re.IGNOREC
 # z `raw.githubusercontent.com` **przy TAGU własnej wersji**, nie przy `main`:
 # tag jest tym, co przesuwa skrócona procedura i z czego generuje się archiwum
 # źródła, a `main` ogłaszałby jako dostępny WIP, którego nikt nie wydał. `raw`
-# zamiast API, bo nie zjada budżetu 60 zapytań/h (jedno już idzie na
-# `releases/latest`).
+# zamiast API, bo nie zjada budżetu 60 zapytań/h (jedno już idzie na listę
+# wydań).
 NAZWA_PLIKU_PATCH_DEV = "patch_dev.json"
 # NIE `KATALOG_ZASOBOW` (tam mieszka spakowany VERSION): ten plik świadomie nie
 # wchodzi do bundla, więc szukamy go tylko tam, gdzie ma sens — w drzewie repo.
@@ -100,12 +110,17 @@ class UpdateInfo:
                              # (dev / non-Windows): brak instalatora .exe, więc
                              # oferujemy źródło bez dodatkowej instalacji.
     changelog: str = ""      # (v17.11) treść Release (`body` z API) = sekcja
-                             # `RELEASE_NOTES ## <wersja>` NOWEJ wersji. Realny
-                             # changelog do świadomej decyzji o aktualizacji —
-                             # zapisywany do `docs/changelog.md` i otwierany z
-                             # dialogu. Do v17.11 dialog pokazywał baked-in opis
-                             # wersji JUŻ zainstalowanej (bug: nagłówek nowej,
-                             # treść starej). EN-lead + PL (format RELEASE_NOTES).
+                             # `RELEASE_NOTES ## <wersja>`. Realny changelog do
+                             # świadomej decyzji o aktualizacji — zapisywany do
+                             # `docs/changelog.md` i otwierany z dialogu. Do
+                             # v17.11 dialog pokazywał baked-in opis wersji JUŻ
+                             # zainstalowanej (bug: nagłówek nowej, treść
+                             # starej). Od v19.4.0 treść jest SAMA ANGIELSKA.
+                             # Od v19.5 to sekcje WSZYSTKICH wydań nowszych od
+                             # lokalnego, sklejone od najnowszego i rozdzielone
+                             # `---`: kto pominął wydanie pośrednie, dostawał
+                             # dotąd wyłącznie opis najnowszego i o tamtych
+                             # poprawkach nie dowiadywał się z aplikacji nigdy.
     url_sha256: str = ""     # (v18.10) link do assetu `<instalator>.sha256`
                              # (drugi asset Release, generowany przez
                              # build_release). Pusty dla starych wydań —
@@ -160,8 +175,12 @@ def _normalizuj_wersje(tekst: str) -> tuple[int, ...]:
     return krotka + (0,) * max(0, 3 - len(krotka))
 
 
-def _pobierz_json_api(url: str, token: Optional[str] = None) -> dict:
-    """Wykonuje GET na podany URL i zwraca JSON jako dict.
+def _pobierz_json_api(url: str, token: Optional[str] = None):
+    """Wykonuje GET na podany URL i zwraca zdekodowany JSON.
+
+    Typ wyniku zależy od endpointu: `releases` zwraca LISTĘ wydań,
+    `releases/latest` — pojedynczy obiekt. Funkcja nie narzuca żadnego
+    z nich, bo walidacja kształtu należy do wołającego.
 
     Args:
         token: Opcjonalny GitHub Personal Access Token (Bearer).
@@ -246,6 +265,69 @@ def _oczysc_changelog(body: str) -> str:
     return re.sub(r"\n+-{3,}[ \t]*$", "", (body or "").strip()).strip()
 
 
+_REGEX_TAG_WERSJI = re.compile(r"^v?\d+(?:\.\d+)*\s*$")
+
+
+def _wydania_publiczne(dane) -> list[dict]:
+    """Odsiewa szkice i pre-release'y, sortuje MALEJĄCO po numerze wersji.
+
+    Sortujemy po numerze, nie po dacie. `releases/latest` GitHuba wybiera po
+    `created_at`, więc hotfix wydany później, a numerowany niżej, wygrywałby
+    z wydaniem nowszym — updater zaproponowałby wtedy cofnięcie się.
+    """
+    if not isinstance(dane, list):
+        return []
+    publiczne = []
+    for wydanie in dane:
+        if not isinstance(wydanie, dict):
+            continue
+        if wydanie.get("draft") or wydanie.get("prerelease"):
+            continue
+        tag = str(wydanie.get("tag_name") or "")
+        # Tag MUSI zaczynać się numerem. `_normalizuj_wersje` nie rzuca na
+        # `snapshot-2026` — zwraca `(0, 0, 0)`, czyli wersję najstarszą
+        # z możliwych, więc taki tag wylądowałby na końcu listy zamiast
+        # wypaść z niej. Odsiewamy go wprost: takiego tagu nie wystawił nasz
+        # workflow wydawniczy i nie mamy jak go uszeregować.
+        if not _REGEX_TAG_WERSJI.match(tag):
+            continue
+        try:
+            numer = _normalizuj_wersje(tag)
+        except ValueError:
+            continue
+        publiczne.append((numer, wydanie))
+    publiczne.sort(key=lambda para: para[0], reverse=True)
+    return [wydanie for _, wydanie in publiczne]
+
+
+def _sklej_changelog(wydania: list[dict], wersja_lokalna: str) -> str:
+    """Skleja sekcje WSZYSTKICH wydań nowszych od lokalnego, od najnowszego.
+
+    Każde `body` pochodzi z `RELEASE_NOTES.md` i zaczyna się własnym
+    nagłówkiem `## <wersja> — …`, więc sklejenie daje czytelny, poprawnie
+    zatytułowany dokument bez dokładania czegokolwiek od siebie.
+
+    Po co w ogóle: user, który pominął dwa wydania, ma prawo wiedzieć, co
+    naprawiło to POMINIĘTE. Do v19.4.2 dostawał wyłącznie opis najnowszego
+    i o wydaniu pośrednim nie dowiadywał się z aplikacji nigdy.
+    """
+    lokalna = _normalizuj_wersje(wersja_lokalna)
+    nowsze = [w for w in wydania
+              if _normalizuj_wersje(str(w.get("tag_name") or "")) > lokalna]
+    sekcje = [s for s in (_oczysc_changelog(w.get("body", "")) for w in nowsze) if s]
+    if not sekcje:
+        return ""
+    if nowsze and len(nowsze) == len(wydania) >= _ILE_WYDAN:
+        # Cała strona okazała się nowsza od wersji użytkownika, więc jego
+        # własnego wydania na niej NIE MA — historia sięga dalej, niż zdążyliśmy
+        # zapytać. Mówimy o tym wprost: milczenie sugerowałoby, że to komplet.
+        sekcje.append(
+            f"_Only the {_ILE_WYDAN} most recent releases are listed here. "
+            f"Full history: {_URL_WYDANIA_HTML}_"
+        )
+    return "\n\n---\n\n".join(sekcje)
+
+
 # ---------------------------------------------------------------------------
 # Publiczne API
 # ---------------------------------------------------------------------------
@@ -260,15 +342,23 @@ def sprawdz_aktualizacje(token: Optional[str] = None) -> Optional[UpdateInfo]:
         UpdateInfo jeśli nowa wersja dostępna, None w przeciwnym razie
         (aktualna wersja, brak assetów instalatora, błąd sieci).
 
+    Celem aktualizacji jest wydanie o NAJWYŻSZYM numerze, a `changelog`
+    obejmuje sekcje wszystkich wydań nowszych od lokalnego — także tych
+    pominiętych po drodze (v19.5; wcześniej `releases/latest` zwracał jedno
+    wydanie i o poprawkach z wydania pośredniego nikt się nie dowiadywał).
+
     Raises:
         Nic — wszystkie wyjątki są łapane i zwracane jako None,
         żeby wątek tła nie wysypał aplikacji.
     """
     try:
         wersja_lokalna = _odczytaj_wersje_lokalna()
-        dane = _pobierz_json_api(_API_URL, token=token)
+        wydania = _wydania_publiczne(_pobierz_json_api(_API_URL, token=token))
+        if not wydania:
+            return None
 
-        tag = dane.get("tag_name", "")
+        cel = wydania[0]
+        tag = str(cel.get("tag_name") or "")
         if not tag:
             return None
 
@@ -277,11 +367,11 @@ def sprawdz_aktualizacje(token: Optional[str] = None) -> Optional[UpdateInfo]:
         if _normalizuj_wersje(wersja_zdalna) <= _normalizuj_wersje(wersja_lokalna):
             return None
 
-        asset = _znajdz_asset_instalatora(dane.get("assets", []))
+        asset = _znajdz_asset_instalatora(cel.get("assets", []))
         if asset is None:
             return None
 
-        asset_sha = _znajdz_asset_sha256(dane.get("assets", []), asset["name"])
+        asset_sha = _znajdz_asset_sha256(cel.get("assets", []), asset["name"])
 
         return UpdateInfo(
             tag=tag,
@@ -289,9 +379,9 @@ def sprawdz_aktualizacje(token: Optional[str] = None) -> Optional[UpdateInfo]:
             url_instalatora=asset["browser_download_url"],
             nazwa_pliku=asset["name"],
             rozmiar_bajtow=asset.get("size", 0),
-            url_release=dane.get("html_url", ""),
-            url_zrodla=dane.get("zipball_url", ""),
-            changelog=_oczysc_changelog(dane.get("body", "")),
+            url_release=cel.get("html_url", ""),
+            url_zrodla=cel.get("zipball_url", ""),
+            changelog=_sklej_changelog(wydania, wersja_lokalna),
             url_sha256=(asset_sha or {}).get("browser_download_url", ""),
         )
 
