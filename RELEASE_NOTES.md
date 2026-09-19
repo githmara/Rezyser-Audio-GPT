@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.4.2 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.5.0 „Wersja Wydawnicza"
+
+*Release v19.5.0: kanon diakrytyków — największy z długów otwartych w 19.4.2 — plus trzy rzeczy, które przy nim wyszły. **(1)** Pre-pass każdej z dziewięciu paczek kończył się tam, gdzie zaczyna się Latin Extended-A, więc 99 znaków (`č ď ě ğ ř š ž`) szło do syntezatora tak, jak stały w tekście, a Cezar zostawiał je w szyfrogramie jawnym tekstem; przyczyną był KIERUNEK pracy — kreator dawał pustą sekcję i prosił „uzupełnij", więc szablon dostaje odtąd całą tabelę, a zadaniem jest odejmowanie. **(2)** Paczka `pl` spłaszczała własne litery, przez co szyfrowanie polskiego tekstu nie było odwracalne, a akcent rosyjski — jedyny, który tych diakrytyków potrzebuje — musiał wyłączać pre-pass w całości i wpuszczał obcą łacinkę do cyrylicy. **(3)** Updater czytał wyłącznie najnowsze wydanie, więc kto pominął patcha, nie dowiadywał się o nim nigdy. **(4)** Zdjęte wstrzymanie dwóch SDK z 19.4.2. Manuale dziewięciu paczek opisują wreszcie noop akcentu i przestają zastrzegać stratę, której już nie ma.*
 
 *Patch v19.4.2: trzy klasy wyjęte z przeglądu edge-case'ów, każda zmierzona wykonaniem, zanim cokolwiek ruszyło. **(1)** Prompty Managera Reguł wyliczały legalne wartości `zakres:` własnym literałem i utknęły na dwóch z v18.12 — agent, który zobaczyłby w paczce `zakres: rekoncyliacja`, miał w ręku instrukcję mówiącą, że to wartość nielegalna, więc uznałby gotowe narzędzie Pamięci Długotrwałej za stub do obejścia; ta sama klasa kazała mu budować paczkę bez `opowiesci/`, czyli taką, którą silnik po cichu odfiltrowuje. Wyliczenia idą odtąd z modułu, który je egzekwuje. **(2)** Akapit napisany JUŻ w języku celu akcentu wywracał całe przetwarzanie — bo akcentu własnego języka w paczce nie ma i mieć nie będzie — a jedyne obejście, „wymuś język", zjadało takiemu akapitowi diakrytyki. Teraz przechodzi bez zmian. **(3)** Paczka z dwoma narzędziami pamięci (v18.14 dopuszcza je wprost) traciła rozróżnienie po jednym wczytaniu projektu, a automat progu alarmowego czytał z pliku wybranego przez reżysera i zapisywał do cudzego. Wszystkie trzy mają bramki, każda zweryfikowana mutacyjnie.*
 
@@ -79,6 +81,105 @@
 *Release v18.8.0: owoce testu maintainera „polskie UI na fińskiej treści" (Poliglota offline) — jeden bug krytyczny plus dwa niedociągnięcia międzynarodowości. **(1) BUG KRYTYCZNY: tagi `lang` per akapit liczone na tekście JUŻ zniekształconym transformacją.** Silnik od 13.5 MA mechanizm detekcji języka per akapit wykonywanej PRZED transformacją (side-channel `opcje["_segmenty_wynikowe"]`), ale kanał był martwy od urodzenia: GUI wołało `przetworz(..., **opcje)`, Python REPAKOWAŁ kwargi do nowego słownika i mutacje silnika nigdy nie wracały do GUI — `zapisz_wynik` zawsze spadał na detekcję „na żywo" po wyniku. Dla typoglikemii na fińskim tekście lingua strzelała `lang="de"` na akapitach nagłówkowych (dowód: pochodne `explore_raport`); dla cezara fałszerstwo byłoby totalne. Ten sam martwy kanał ukrywał DWA bugi-rodzeństwo cezara z losowym przesunięciem: komunikat „wylosowano N" nigdy się nie pokazywał, a nazwa pliku traciła sufiks `±N` — czyli zaszyfrowany plik był praktycznie nieodwracalny dla usera. Fix: `przetworz` przyjmuje jawny, MUTOWALNY słownik `opcje=` (przez referencję); jeden korzeń naprawia trzy objawy. **(2) Lokalizacja sklejek nazw plików wynikowych.** Prefiksy `naprawiony_/oczyszczony_/_akcent_/_szyfr_/_tlumaczenie_/architektura_` były polskim hard-kodem — koszmar dla niepolskich syntezatorów (fińska Satu czytająca „tlumaczenie" jako [tumaksenije]). Teraz człony pochodzą z `ui.yaml` (klucze `filename_*` ×9 języków, w języku UI: fi `salaus/käännös/arkkitehtuuri`, is `dulkóðun/þýðing`, ru `шифр/перевод`…), z Unicode-safe sanityzacją i twardym fallbackiem na polskie defaulty; `id` wariantu pozostaje techniczne. Manuale zlokalizowane w ślad (przykłady `architektura_` → natywne). **(3) A11y: spin przesunięcia Cezara ukryty dla nie-cezarowych szyfrów** (NVDA nie ogłasza już martwego pola; wzorzec show/hide jak przy polu ISO naprawiacza). **(4) Dokumentacja user-facing przechodzi z .txt na HTML renderowany z Markdownu.** Szablony `dokumentacja/*.yaml` są od teraz pisane w MD (mechaniczna migracja: nagłówki `#`/`##` per sekcja + backticki wokół `<placeholderów>` ×9 języków, z autotestem integralności treści), a `generuj_dokumentacje.py` renderuje `docs/<id>.<iso>.html` (biblioteka `markdown`, nl2br + sane_lists) z pełnym dokumentem HTML5: `<html lang="<iso>">` przełącza syntezator czytnika ekranu na język treści, nagłówki dają nawigację klawiszami 1-6/h w NVDA, a minimalny CSS (z trybem ciemnym) czyta się dobrze też wzrokiem — koniec „obleśnego" gołego .txt w Notatniku. README bez zmian (surowy MD dla GitHuba). Menu Pomoc, `installer.iss` (checkbox „otwórz manual" + sprzątanie osieroconych `docs\*.txt` przy upgrade) i `build_release` przepięte; nowa bramka RAW-HTML w `--waliduj` pilnuje, żeby żaden surowy `<fragment>` z szablonu nie został połknięty przez przeglądarkę. Przy okazji naprawione martwe odwołanie w 9 manualach: przewodnik Opowieści to `tales.<iso>.html`, nie `opowiesci.pl.txt`/`tarinat.fi.txt`/`recits.fr.txt` (plik o tych nazwach nigdy nie istniał).*
 
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
+
+---
+
+## 19.5.0 — minor release
+
+### What's new
+
+**The whole Latin script now leaves the pre-pass, in all nine packs.** Every
+`podstawy.yaml` covered Latin-1 and stopped where Latin Extended-A begins, so
+99 characters — `č ď ě ğ ı ň ő ř š ţ ů ű ž` and the rest — reached the speech
+synthesizer exactly as they stood in the text, and the Caesar cipher left them
+sitting in the ciphertext as plain, unencrypted letters (`Škoda` came out as
+`Šmqfc`). The gap was identical in every pack, because the cause was not the
+lists but the DIRECTION of the work: the Rule Manager handed the author an empty
+section and asked them to fill it in. Nobody can enumerate 190 characters of
+scripts they do not speak; everybody knows which letters are native to their own
+language. The template therefore now arrives with the whole table already filled
+in, and the job is SUBTRACTION — delete the pairs that are your own letters,
+keep the ones that grow under `.upper()` (`ß` becomes "SS"), retune a target
+where your phonetics demand it. The `alfabet` field arrives pre-filled too, with
+the 26 basic Latin letters to tune — and for a non-Latin script the template
+finally writes down the rule the Russian pack has followed since it shipped: put
+the native alphabet FIRST and keep A–Z behind it, because real text carries
+Latin names, and a letter missing from that string passes through the cipher
+unencrypted. One table feeds both the template and the new release gate, so the
+two cannot drift apart.
+
+**The Polish pack stops flattening its own letters, and the Caesar cipher gets
+nine of them back.** `pl/podstawy.yaml` opened its pre-pass by romanizing
+`ą` as "on", `ę` as "en", `ó` as "u" and six more — all of them letters the same
+file declares in `alfabet`. Two things paid for that. The cipher never saw nine
+of the thirty-five letters of its own alphabet, so encrypting a Polish text was
+not reversible — the manuals said so, and they were right. And because the
+pre-pass is shared by the whole pack, the one accent that NEEDS those diacritics
+— Russian, which transliterates them straight into Cyrillic — had to switch it
+off entirely, which let foreign Latin letters ride into the Cyrillic output as
+plain text. The romanization has not disappeared: it moved to the head of the
+replacement table in the seven accents that want it, where the pre-pass used to
+run anyway. Seven accents produce byte-identical output, Russian differs exactly
+where it should, and Polish ciphertext now round-trips character for character.
+As a side effect, "how does a Polish ą sound to this voice" is the accent's
+decision from now on, not the whole pack's.
+
+**The update dialog stops losing the releases you skipped.** It asked GitHub for
+the latest release only, so someone sitting on 19.4.0 was shown the description
+of 19.4.2 and never learned what 19.4.1 had fixed. It now reads the release list
+and joins the notes of every release newer than yours, newest first — for the
+same single API request. Two smaller things came with it: the update target is
+the highest VERSION NUMBER rather than the most recent date, so a hotfix for an
+older line can no longer offer you a downgrade; and a tag that did not come from
+the release workflow is ignored instead of being ranked as version zero.
+
+**Two held SDK upgrades are released.** v19.4.2 wrote that hold into the
+manifest rather than leaving it silent, and this is the cycle that lifts it:
+`anthropic` 1.6.0 to 1.7.0 and `openai` 3.15.0 to 3.16.2. Verified by running
+rather than by reading a changelog — the signatures of every call this project
+makes are identical before and after, a live Anthropic call returns, and an
+OpenAI-compatible client builds with the surface we use. The bounds go back to
+the major line.
+
+**The manuals catch up in all nine languages.** They now describe what happens
+to a paragraph already written in the accent's target language (it passes
+through untouched, and forcing the language is NOT a substitute — that would
+push it through the source pack's pre-pass and change the words the voice
+reads). And they drop the caveat about decryption not being fully faithful:
+it was already untrue for German since v18.19, and it is untrue for Polish as
+of this release.
+
+### If you are updating from 19.4.0 or 19.4.1
+
+The aggregation described above ships IN this release, so it cannot help you
+retroactively — the copy you are running still shows one release at a time.
+Briefly, what you missed:
+
+* **19.4.1** — two sentences in the application promised Polish that the content
+  no longer contains. The changelog note said the release description is "in
+  English and Polish", and a second one said the release page is available in
+  Polish. Both became false when release descriptions went English-only in
+  19.4.0.
+* **19.4.2** — three edge cases. The Rule Manager's prompts listed values and
+  folders from an engine two releases old, so an agent following them would
+  treat a shipped tool as a stub, or build a language pack the engine silently
+  drops. A paragraph already written in the accent's target language aborted the
+  whole document instead of passing through. And a pack with two Long-Term
+  Memory tools lost the distinction between them after a single project load,
+  while the alarm-threshold automation read from one file and wrote into the
+  other.
+
+From 19.5.0 on, the update dialog does this joining for you.
+
+### Planned or deferred
+
+* The 49 quotes ALMOST equal to a label stay baselined — unchanged since
+  v19.4.1, still a call for a native speaker (`fi` is the first candidate).
+* The accent audit carries four new notes (`pl/finski`, `pl/islandzki`): the
+  romanization of `ć` now feeds the accent's own `c` rule from the same file
+  instead of from the pre-pass. The cascade is deliberate and produces exactly
+  the output it produced before — the note exists so that the next reader asks
+  the question rather than assumes the answer.
 
 ---
 
