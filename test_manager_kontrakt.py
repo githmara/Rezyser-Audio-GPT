@@ -44,6 +44,7 @@ import jezyki_lingua as jl
 import manager_regul_kontrakt as mrk
 import manager_regul_szablony as mrs
 import opowiesci_ai as oai
+import przepisy_rezysera as pr
 
 _KORZEN = Path(__file__).parent
 _DICT = _KORZEN / "dictionaries"
@@ -311,6 +312,74 @@ def test_komunikaty_podstawiaja_parametry_w_kazdej_paczce():
                              f"{_RE_KLAMRA.findall(tekst)}")
     i18n.ustaw_jezyk("pl")
     assert not braki, "\n".join(braki)
+
+
+# ---------------------------------------------------------------------------
+# 6. Prompty Managera nie moga sie zestarzec wzgledem silnika
+# ---------------------------------------------------------------------------
+def test_prompt_postprodukcji_wylicza_zakresy_z_kodu():
+    """Prompt musi wymieniac KAZDY zakres z `pr.ZAKRESY_DOZWOLONE` i role pamieci.
+
+    Geneza (przeglad edge-case'ow 2026-09-19): prompt wyliczal zakresy wlasnym
+    literalem i utknal na dwoch z v18.12, choc silnik od v18.13 zna trzy. Agent,
+    ktory zobaczyl w paczce `zakres: rekoncyliacja`, mial wiec instrukcje
+    mowiaca, ze to wartosc NIELEGALNA - czyli ze gotowe narzedzie Pamieci
+    Dlugotrwalej jest stubem do obejscia wlasnym trybem. Tego nie widziala
+    zadna bramka, bo prompt jest tekstem, a nie danymi paczki.
+    """
+    tekst = mrs.prompt_postprodukcja("probny", "Probny", "pl")
+    # Sama obecnosc slowa `rekoncyliacja` gdziekolwiek w promptcie to za slaba
+    # asercja (opis bulletu zawiera je nawet wtedy, gdy WYLICZENIE sie cofnie),
+    # wiec zadamy, by prompt cytowal helper DOSLOWNIE - a helper czyta z kodu.
+    assert mrs._zakresy_postprodukcji() in tekst, (
+        "prompt nie cytuje `_zakresy_postprodukcji()` - wyliczenie zakresow "
+        "zyje wlasnym zyciem i zestarzeje sie przy nastepnym `ZAKRES_*`")
+    braki = [z for z in pr.ZAKRESY_DOZWOLONE if f"`{z}`" not in tekst]
+    assert not braki, f"prompt nie wymienia zakresow: {braki}"
+    assert pr.ROLA_PAMIEC_DLUGOTRWALA in tekst, (
+        "prompt nie mowi o roli `pamiec_dlugotrwala` - agent napisze narzedzie "
+        "streszczajace bez roli, wiec plik powstanie obok Pamieci Dlugotrwalej")
+    szablon = mrs.szablon_postprodukcja("probny", "Probny", "pl")
+    braki_szablonu = [z for z in pr.ZAKRESY_DOZWOLONE if z not in szablon]
+    assert not braki_szablonu, f"szablon nie wymienia zakresow: {braki_szablonu}"
+
+
+def test_prompt_jezyka_bazowego_wylicza_podfoldery_z_kodu():
+    """Prompt musi wymieniac KAZDY podfolder wymagany przez `_jezyk_kompletny`.
+
+    Do v19.4.1 wyliczal `gui/` zamiast `opowiesci/`, wiec agent budowal paczke,
+    ktora `dostepne_jezyki_bazowe()` po cichu odfiltrowuje - a user widzial
+    tylko „nowego jezyka nie ma w aplikacji", bez ani jednego komunikatu.
+    """
+    tekst = mrs.prompt_jezyk_bazowy("bg", "Balgarski")
+    assert mrs._podfoldery_jezykowe() in tekst, (
+        "prompt nie cytuje `_podfoldery_jezykowe()` - lista podfolderow zyje "
+        "wlasnym zyciem, a to ona decyduje, czy paczka w ogole sie pokaze")
+    braki = [f"{pod}/" for pod in cp._PODFOLDERY_JEZYKOWE
+             if f"`{pod}/`" not in tekst]
+    assert not braki, f"prompt nie wymienia podfolderow: {braki}"
+    assert "gui/ui.yaml" in tekst, "prompt nie wymienia wymaganego gui/ui.yaml"
+
+
+def test_prompty_nie_licza_plikow_paczki_literalem():
+    """Sklad `rezyser/` w promptach pochodzi z dysku, nie z recznej liczby.
+
+    Wersja literalowa mowila „4 files (3 modes + 1 postproduction)" jeszcze
+    w v19.4.1, gdy paczki mialy ich siedem.
+    """
+    # Dla paczki bazowej `de` helper liczy z `pl` (pomija paczke bazowa, zeby
+    # agent nie brał za wzor struktury, ktora wlasnie powstaje) - wiec TE liczby
+    # musza sie zgadzac z dyskiem `pl`.
+    pliki = len(list((_DICT / "pl" / "rezyser").glob("*.yaml")))
+    assert mrs._sklad_rezysera("de").startswith(f"{pliki} files"), \
+        mrs._sklad_rezysera("de")
+    # A prompty MUSZA cytowac helper, nie wlasna liczbe - niezaleznie od tego,
+    # ktora paczke helper wybierze dla danego jezyka bazowego.
+    sklad = mrs._sklad_rezysera("pl")
+    assert re.match(r"^\d+ files", sklad), sklad
+    for tekst in (mrs.prompt_postprodukcja("probny", "Probny", "pl"),
+                  mrs.prompt_tryb_rezysera("probny", "Probny", "pl")):
+        assert sklad in tekst, "prompt nie podaje realnego skladu `rezyser/`"
 
 
 if __name__ == "__main__":

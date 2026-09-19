@@ -34,8 +34,10 @@ import sys
 
 import yaml
 
+import core_poliglota
 import i18n
 import jezyki_lingua
+import przepisy_rezysera as pr
 import sciezki
 from przepisy_rezysera import (
     POWOD_KSZTALT,
@@ -439,6 +441,63 @@ def _paczki_referencyjne(jezyk_bazowy: str) -> str:
 
 
 # =============================================================================
+# Fakty o silniku WYLICZANE Z KODU — prompt nie ma prawa się zestarzeć
+# =============================================================================
+# Lekcja 2026-09-19 (przegląd edge-case'ów): prompt postprodukcji wyliczał legalne
+# wartości `zakres:` własnym literałem i utknął na DWÓCH z v18.12, choć silnik od
+# v18.13 zna trzy. Agent, który zobaczył w paczce `zakres: rekoncyliacja`, miał
+# więc w ręku instrukcję mówiącą, że to wartość nielegalna — czyli że gotowe
+# narzędzie Pamięci Długotrwałej jest stubem do obejścia własnym trybem. Ta sama
+# klasa błędu siedziała w promptcie języka bazowego (wyliczał `gui/` zamiast
+# `opowiesci/`, więc paczka wychodziła niekompletna i silnik ją filtrował).
+#
+# Odtąd KAŻDE wyliczenie wartości pola w promptach pochodzi z modułu, który je
+# egzekwuje, a nie z tekstu obok. Pilnuje tego `test_manager_kontrakt.py`.
+def _csv_kodu(wartosci) -> str:
+    """``a, b, c`` w backtickach — wspólny format wyliczeń w promptach."""
+    return ", ".join(f"`{w}`" for w in wartosci)
+
+
+def _zakresy_postprodukcji() -> str:
+    """Legalne wartości `zakres:` — z :data:`przepisy_rezysera.ZAKRESY_DOZWOLONE`."""
+    return _csv_kodu(pr.ZAKRESY_DOZWOLONE)
+
+
+def _podfoldery_jezykowe() -> str:
+    """Podfoldery wymagane przez ``core_poliglota._jezyk_kompletny`` (≥1 plik każdy)."""
+    return _csv_kodu(f"{p}/" for p in core_poliglota._PODFOLDERY_JEZYKOWE)
+
+
+def _sklad_rezysera(jezyk_bazowy: str) -> str:
+    """Realny skład `rezyser/` paczki referencyjnej, np. „7 files: `baza.yaml` + …".
+
+    Liczby idą z DYSKU (loader przepisów + `os.listdir`), bo prompt podaje je
+    agentowi jako punkt odniesienia „tak wygląda wdrożona paczka". Wersja
+    literałowa mówiła „4 files (3 modes + 1 postproduction)" jeszcze w v19.4.1,
+    gdy paczki miały ich siedem. Brak paczki referencyjnej (świeży projekt
+    z jedną paczką) → zdanie bez liczb, zamiast zmyślonych zer.
+    """
+    wzorcowa = _DICT_DIR / "pl" / "rezyser"
+    kod = "pl" if jezyk_bazowy != "pl" and wzorcowa.is_dir() else ""
+    if not kod:
+        for p in sorted(_DICT_DIR.iterdir()) if _DICT_DIR.is_dir() else []:
+            if p.name != jezyk_bazowy and (p / "rezyser").is_dir():
+                kod = p.name
+                break
+    if not kod:
+        return ("`baza.yaml` (shared LLM-context wrappers) + `tryb_*.yaml` modes "
+                "+ `postprod_*.yaml` tools")
+    tryby = [p.id for p in pr.lista_trybow(kod)]
+    postprod = [p.id for p in pr.lista_postprodukcji(kod)]
+    pliki = len([n for n in (_DICT_DIR / kod / "rezyser").glob("*.yaml")])
+    return (
+        f"{pliki} files — `baza.yaml` (shared LLM-context wrappers, tags 1:1 "
+        f"across packs) + {len(tryby)} modes ({', '.join(tryby) or 'none'}) + "
+        f"{len(postprod)} postproductions ({', '.join(postprod) or 'none'})"
+    )
+
+
+# =============================================================================
 # SZABLON 1: Akcent fonetyczny (wzorowany na dictionaries/pl/akcenty/finski.yaml)
 # =============================================================================
 def szablon_akcent(id_pliku: str, etykieta: str, iso: str,
@@ -512,17 +571,18 @@ def prompt_akcent(id_pliku: str, etykieta: str, iso: str,
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project (wxPython + Anthropic). You have tools: Read, Write, Edit, Glob, Grep,
-Bash. Your job: create a phonetic rule inside the project tree.
+project (wxPython + Anthropic). You have file tools (read / write / edit /
+glob / grep — whatever your host provides). Your job: create a phonetic
+rule inside the project tree.
 
 # PROJECT CONTEXT
 - `core_poliglota.py` — the phonetic engine. Accents are loaded from
   `dictionaries/<code>/akcenty/*.yaml` DYNAMICALLY (since v17.5): the
   Director mode dispatches by accent id on the fly, with no
   code-generation step — dropping in a YAML file is enough.
-- Deployed packs (as of 13.9): {inne_paczki} — these are your reference for
-  style and phonetics for similar goals (e.g. the Finnish accent exists in
-  each of them).
+- Deployed packs (scanned from `dictionaries/`): {inne_paczki} — these are
+  your reference for style and phonetics for similar goals (e.g. the
+  Finnish accent exists in each of them).
 - Base pack for this task: `dictionaries/{jezyk_bazowy}/`
   (language {natywna_baza}). Manager Reguł already created the structure.
 
@@ -659,7 +719,8 @@ def prompt_oczyszczenie(id_pliku: str, etykieta: str,
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: adapt a
+project. You have file tools (read / write / edit / glob / grep —
+whatever your host provides). Task: adapt a
 „cleaning accent" file (a TTS preprocessor) to a new language pack.
 
 # PROJECT CONTEXT
@@ -771,7 +832,8 @@ def prompt_naprawiacz(id_pliku: str, etykieta: str,
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: adapt a
+project. You have file tools (read / write / edit / glob / grep —
+whatever your host provides). Task: adapt a
 „tag fixer" file to a new language pack.
 
 # PROJECT CONTEXT
@@ -882,7 +944,8 @@ def prompt_szyfr_zamiany(id_pliku: str, etykieta: str,
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: create
+project. You have file tools (read / write / edit / glob / grep —
+whatever your host provides). Task: create
 a „pure replacements" cipher file inside the project tree.
 
 # PROJECT CONTEXT
@@ -895,8 +958,8 @@ a „pure replacements" cipher file inside the project tree.
   `zamiany:` list. Do NOT take them as a structure model. The only files in
   the project using the `kategoria` + `zamiany:` list format are ACCENTS
   (`akcenty/*.yaml`) — and those are your STRUCTURE model for this cipher.
-- Deployed packs (as of 13.9): {inne_paczki}. Their `cezar.yaml` files are
-  useful ONLY as a model of the LANGUAGE STYLE of the metadata
+- Deployed packs (scanned from `dictionaries/`): {inne_paczki}. Their
+  `cezar.yaml` files are useful ONLY as a model of the LANGUAGE STYLE of the metadata
   (native label/description/comments), not of the structure.
 - Pack for this task: `dictionaries/{jezyk_bazowy}/`
   (language {natywna_baza}).
@@ -1065,10 +1128,12 @@ def prompt_tryb_rezysera(id_pliku: str, etykieta: str,
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
+    sklad_rezysera = _sklad_rezysera(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: create
-a new Director mode (system prompt + trigger-word validation).
+project. You have file tools (read / write / edit / glob / grep — whatever
+your host provides). Task: create a new Director mode (system prompt +
+trigger-word validation).
 
 # PROJECT CONTEXT
 - `core_rezyser.py` — the AI-mode engine (assembles the prompt from
@@ -1076,9 +1141,11 @@ a new Director mode (system prompt + trigger-word validation).
 - `przepisy_rezysera.py` — the YAML loader for `dictionaries/<code>/rezyser/`.
   Modes are loaded dynamically; there is no extra script to run after
   adding a file.
-- Deployed packs (as of 13.9): {inne_paczki} — each has 4 files in
-  `rezyser/` (3 modes: audiobook/burza/skrypt + 1 postproduction). These
-  are your reference for the style and convention of prompt_systemowy.
+- Deployed packs (scanned from `dictionaries/`): {inne_paczki}. Their
+  `rezyser/` folder holds {sklad_rezysera}. The `tryb_*.yaml` files are your
+  reference for the style and convention of prompt_systemowy; `baza.yaml`
+  holds the shared context wrappers (structural anchor tags, identical in
+  every pack — do NOT translate them) and is not a mode.
 - Pack for this task: `dictionaries/{jezyk_bazowy}/`
   (language {natywna_baza}).
 
@@ -1182,8 +1249,9 @@ def prompt_tryb_opowiesci(id_pliku: str, etykieta: str,
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project (wxPython + Anthropic). You have tools: Read, Write, Edit, Glob, Grep,
-Bash. Task: add a new INTERACTIVE STORY mode (Opowieści). Unlike Director
+project (wxPython + Anthropic). You have file tools (read / write / edit /
+glob / grep — whatever your host provides). Task: add a new INTERACTIVE
+STORY mode (Opowieści). Unlike Director
 modes, a Story mode is NOT data-driven — it requires BOTH a YAML file AND
 several wiring changes in Python. Dropping in a YAML file alone is dead code.
 
@@ -1200,7 +1268,7 @@ one of those places, or it will not appear in the GUI and will crash on load.
   (e.g. the „fiolka" in the „Mniejsze Zło" mode).
 - Recipe YAMLs live in `dictionaries/<code>/opowiesci/*.yaml`
   (baza.yaml + tryb_*.yaml + zaczatki.yaml + streszczenie.yaml + …).
-- Deployed packs (as of 13.9): {inne_paczki}.
+- Deployed packs (scanned from `dictionaries/`): {inne_paczki}.
 - Pack for this task: `dictionaries/{jezyk_bazowy}/` (language {natywna_baza}).
 
 # TASK
@@ -1286,6 +1354,8 @@ def szablon_postprodukcja(id_pliku: str, etykieta: str,
                           jezyk_bazowy: str = "pl") -> str:
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
+    zakresy = _zakresy_postprodukcji()
+    rola_pamieci = pr.ROLA_PAMIEC_DLUGOTRWALA
     return f"""# -----------------------------------------------------------------------------
 #  <FILL NATIVELY in {natywna_baza}: file header, e.g. „NACHBEARBEITUNG"
 #   (DE) / „POSTPRODUZIONE" (IT) / „ПОСТОБРАБОТКА" (RU)>
@@ -1301,11 +1371,20 @@ kolejnosc: 20
 # Empty/omitted = every mode that writes to the project file.
 dla_trybow: [audiobook]
 
-# Processing scope:
-#   per_rozdzial – the engine iterates chapter by chapter (this template),
-#   calosc       – ONE call with the whole project file (report-style
-#                  tools; see the commented variant at the bottom).
+# Processing scope — the engine accepts exactly {zakresy}:
+#   per_rozdzial  – the engine iterates chapter by chapter (this template),
+#   calosc        – ONE call with the whole project file (report-style
+#                   tools; see the commented variant at the bottom),
+#   rekoncyliacja – ONE call whose input is ASSEMBLED (previous Long-Term
+#                   Memory + narration from its anchor); goes together with
+#                   `rola: {rola_pamieci}` — model: postprod_streszczenie.yaml.
 zakres: per_rozdzial
+
+# Result role. Omit it for a normal tool (result → dialog and optionally
+# a file). The only value the engine knows is `{rola_pamieci}`: the result IS
+# the project's Long-Term Memory, saved as file + meta anchor + in-RAM state.
+# Such a recipe REQUIRES a non-empty sufiks_pliku_wyniku below.
+# rola: {rola_pamieci}
 
 # Max output tokens per AI call (defaults: 256 per_rozdzial / 8000 calosc).
 max_tokens_wyjscia: 256
@@ -1383,28 +1462,53 @@ def prompt_postprodukcja(id_pliku: str, etykieta: str,
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
+    zakresy = _zakresy_postprodukcji()
+    rola_pamieci = pr.ROLA_PAMIEC_DLUGOTRWALA
+    sklad_rezysera = _sklad_rezysera(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: create
-a postproduction (an AI tool processing the saved project file).
+project. You have file tools (read / write / edit / glob / grep — whatever
+your host provides). Task: create a postproduction (an AI tool processing
+the saved project file).
 
 # PROJECT CONTEXT
 - `core_rezyser.py` + `przepisy_rezysera.py` — the AI-mode engine; it loads
   postproductions from `dictionaries/<code>/rezyser/postprod_*.yaml`.
-- Since v18.12 a postproduction has TWO processing scopes (`zakres:`):
+- A postproduction has THREE processing scopes (`zakres:`) — the engine
+  accepts exactly {zakresy}:
   * `per_rozdzial` — the engine splits the project file (.txt) by
     `regex_podzial_rozdzialow` and sends each chunk to the AI with
     `prompt_systemowy` + `prompt_uzytkownika_szablon` (placeholders
     `{{naglowek}}` and `{{probka}}`);
   * `calosc` — ONE call with the whole file (`prompt_uzytkownika_szablon`
     with the `{{tresc}}` placeholder; optional `prompt_ksiegi_szablon`
-    with `{{ksiega}}` prepends the World Book `skrypty/<project>.md`).
+    with `{{ksiega}}` prepends the World Book `skrypty/<project>.md`);
+  * `rekoncyliacja` (v18.13) — ONE call whose input is ASSEMBLED from three
+    parts instead of the whole file: the existing Long-Term Memory + the
+    narration from its meta anchor onward + the remainder. This is the
+    Long-Term Memory pattern: each new summary is INCREMENTAL, so the payload
+    does not grow linearly with the project. Use it ONLY together with
+    `rola: {rola_pamieci}` (below) — the scope reads the memory file, the role
+    writes it.
+- `rola:` (v18.13) — empty for a normal tool. The single non-empty value the
+  engine knows is `{rola_pamieci}`: the result IS the project's Long-Term
+  Memory, so the GUI saves it through `ProjektRezysera.zapisz_streszczenie`
+  (file + meta anchor + in-RAM state + the „Pamięć" field), not as a plain
+  result file. A tool that summarizes the project but omits the role produces
+  a file „next to" the memory and leaves the reconciliation anchor pointing at
+  the previous summary — the next run then re-sends material already
+  compressed. A recipe with this role MUST set `sufiks_pliku_wyniku:` (the
+  memory file name; the engine falls back to the historical `_streszczenie`).
+  A pack MAY ship more than one such tool (e.g. one memory „for the author",
+  one „for the AI"), each with its own suffix.
 - Visibility: `dla_trybow:` (list of mode ids) decides in which creative
   modes the GUI offers the tool; empty/omitted = all modes that write to
   the project file. Optional `sufiks_pliku_wyniku:` (e.g. "_audyt") saves
   the result to `skrypty/<project><suffix>.txt` besides the dialog.
-- Deployed packs (as of 13.9): {inne_paczki} — each has 1 postproduction
-  (`postprod_tytuly.yaml`, scope per_rozdzial). A style model.
+- Deployed packs (scanned from `dictionaries/`): {inne_paczki}. Their
+  `rezyser/` folder holds {sklad_rezysera} — open any of them as a style
+  model (`postprod_tytuly.yaml` for `per_rozdzial`, `postprod_publikacja.yaml`
+  for `calosc`, `postprod_streszczenie.yaml` for `rekoncyliacja`).
 - Pack for this task: `dictionaries/{jezyk_bazowy}/`
   (language {natywna_baza}).
 
@@ -1431,9 +1535,14 @@ a postproduction named **{etykieta}**.
    unambiguous across the pack.
 2. **`dla_trybow:`** list of creative-mode ids the tool belongs to (e.g.
    `[audiobook]`); empty/omitted = every mode that writes to the file.
-   **`zakres:`** `per_rozdzial` or `calosc` — pick per the task's nature
-   (short per-chapter output vs one report over the whole file). ONLY these
-   two values are valid — a typo makes the engine SKIP the whole file.
+   **`zakres:`** one of {zakresy} — pick per the task's nature (short
+   per-chapter output vs one report over the whole file vs incremental
+   Long-Term Memory). ONLY these values are valid — a typo makes the engine
+   SKIP the whole file.
+   **`rola:`** omit it, unless the tool IS the project's Long-Term Memory —
+   then `rola: {rola_pamieci}` plus `zakres: rekoncyliacja` plus a non-empty
+   `sufiks_pliku_wyniku:`. An unknown value is ignored with a warning (the
+   role only ADDS behaviour after success, so a typo cannot misroute work).
    **`max_tokens_wyjscia:`** output budget per call (defaults: 256 for
    per_rozdzial, 8000 for calosc). Optional **`sufiks_pliku_wyniku:`**
    (e.g. "_audyt") — no path separators or Windows-special characters.
@@ -1449,7 +1558,11 @@ a postproduction named **{etykieta}**.
    - calosc: uses the `{{tresc}}` placeholder (whole file); omit the field
      to send the raw file content (instruction lives in prompt_systemowy).
      Optional `prompt_ksiegi_szablon:` with `{{ksiega}}` prepends the
-     World Book block when `skrypty/<project>.md` exists.
+     World Book block when `skrypty/<project>.md` exists;
+   - rekoncyliacja: same `{{tresc}}` placeholder, but the engine fills it
+     with the ASSEMBLED input (previous memory + narration from the anchor),
+     not with the raw file. Copy the field set from
+     `postprod_streszczenie.yaml` rather than inventing one.
 6. **`regex_podzial_rozdzialow:`** (per_rozdzial only) matched to how
    chapters are named in the project .txt files in {natywna_baza}.
    Patterns per language:
@@ -1480,10 +1593,11 @@ the message fields (`etykieta_fragment_zbyt_krotki`,
    shell or that Python is on PATH).
 5. Postproductions are loaded dynamically — „Odśwież drzewo" in the Manager
    + restart the app.
-6. In your reply report: the chosen `zakres` and `dla_trybow`, the model,
-   the temperature, the `regex_podzial_rozdzialow` you used (per_rozdzial)
-   and whether `prompt_uzytkownika_szablon` contains the placeholders
-   required by that scope (`{{naglowek}}`+`{{probka}}` vs `{{tresc}}`).
+6. In your reply report: the chosen `zakres` and `dla_trybow`, whether you
+   set `rola:` and why, the model, the temperature, the
+   `regex_podzial_rozdzialow` you used (per_rozdzial) and whether
+   `prompt_uzytkownika_szablon` contains the placeholders required by that
+   scope (`{{naglowek}}`+`{{probka}}` vs `{{tresc}}`).
 """
 
 
@@ -1540,8 +1654,13 @@ opis: |
 
 polskie_znaki:
   # Pairs {{ wzor: "<diacritic>", zamiana: "<ASCII>" }} — lower and upper variant.
-  # <FILL IN: at minimum the diacritics of {natywna}, plus optionally other
-  # European ones (e.g. Polish ąęłóśćńżź) — model: dictionaries/de/podstawy.yaml>
+  # PRE-PASS: applied before the rules of every accent with
+  # `usun_polskie_znaki: true` and before every cipher. List the diacritics of
+  # FOREIGN loanwords here (é/ü/ñ/å/ø/ß…); the native letters of {natywna} do
+  # NOT belong here — they live in `alfabet` below and the target voice reads
+  # them (de keeps ä/ö/ü, fi keeps ä/å/ö, is keeps á/ð/þ).
+  # <FILL IN: the foreign diacritics this pack should flatten —
+  # model: dictionaries/de/podstawy.yaml>
   - {{ wzor: "?", zamiana: "?" }}
 
 # Full uppercase alphabet, no whitespace. Use the NATIVE alphabet in its
@@ -1574,22 +1693,28 @@ def prompt_jezyk_bazowy(kod_jezyka: str, etykieta_jezyka: str) -> str:
     natywna = _natywna_nazwa_jezyka(kod_jezyka)
     inne_paczki = _paczki_referencyjne(kod_jezyka)
     wskazowka_lingua = _wskazowka_lingua(kod_jezyka)
+    podfoldery = _podfoldery_jezykowe()
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project (wxPython + Anthropic). You have tools: Read, Write, Edit, Glob, Grep,
-Bash. Your job: create the base file for a new language and prepare the
-pack for engine verification.
+project (wxPython + Anthropic). You have file tools (read / write / edit /
+glob / grep — whatever your host provides). Your job: create the base file
+for a new language and prepare the pack for engine verification.
 
 # PROJECT CONTEXT
 - `core_poliglota.py` — the phonetic engine (accents + ciphers).
   The `_jezyk_kompletny(code)` function filters packs: it requires
-  `podstawy.yaml` + 4 subfolders (`akcenty/`, `szyfry/`, `rezyser/`,
-  `gui/`), each with ≥1 `*.yaml` file.
-- Deployed packs (as of 13.9): {inne_paczki} — these are your style models.
+  `podstawy.yaml` + `gui/ui.yaml` + these subfolders: {podfoldery} — each
+  with at least one `*.yaml` file. A pack missing ANY of them is dropped
+  silently by `dostepne_jezyki_bazowe()`: the language simply never appears
+  in the application, with no error message.
+- Deployed packs (scanned from `dictionaries/`): {inne_paczki} — these are
+  your style models.
 - Pack being created: `dictionaries/{kod_jezyka}/` — Manager Reguł already
-  created the four subfolders. Your task is ONLY `podstawy.yaml`.
-  You generate accents, ciphers, Director modes and the UI translation with
-  separate Manager prompts, or copy them from existing packs.
+  created the subfolders. Your task is ONLY `podstawy.yaml`.
+  You generate accents, ciphers, Director modes, Story recipes and the UI
+  translation with separate Manager prompts, or copy them from existing
+  packs — but until each of the subfolders above holds a file, the pack
+  stays invisible.
 
 # TASK
 Create the file `dictionaries/{kod_jezyka}/podstawy.yaml` for the language
@@ -1608,10 +1733,20 @@ presence/absence of diacritics such as ä/ö/ç/ß).
 # STRUCTURE REQUIREMENTS (engine)
 1. **`id: podstawy`** and **`jezyk: {kod_jezyka}`** — identifying fields.
 {wskazowka_lingua}
-3. **`polskie_znaki:`** — a list of `{{ wzor, zamiana }}` pairs describing
-   the diacritics of language {kod_jezyka} → ASCII. Each diacritic in both
-   variants: lower + upper. Letters that grow under `.upper()` (e.g. ß→SS)
-   ALWAYS go here, NEVER in `alfabet`.
+3. **`polskie_znaki:`** — a list of `{{ wzor, zamiana }}` pairs, diacritic →
+   ASCII, each in both variants: lower + upper. Despite the historical name,
+   this is the PRE-PASS run before the replacement table of every accent with
+   `usun_polskie_znaki: true`, and before every cipher. So it answers one
+   question: which characters must be gone BEFORE the rules of this pack start
+   working? In the deployed packs that means the diacritics of FOREIGN
+   loanwords (é/ü/ñ/å/ø/ß…) — the pack's OWN native letters stay untouched
+   there, because they are real letters of `alfabet` and the target voice
+   reads them (de keeps ä/ö/ü, fi keeps ä/å/ö, is keeps á/ð/þ, es keeps ñ).
+   Putting a native letter on this list takes it away from EVERY accent of the
+   pack at once (that is exactly why `pl/akcenty/rosyjski.yaml` has to run
+   with `usun_polskie_znaki: false` — the pl list flattens ś/ź, which the
+   Russian accent needs for its softening rules). Letters that grow under
+   `.upper()` (e.g. ß→SS) ALWAYS go here, NEVER in `alfabet`.
 4. **`alfabet:`** — a string of UPPERCASE letters with no spaces. Use the
    NATIVE alphabet of the language in its NATIVE ORDER. Accented letters go
    into the alphabet ONLY if they are genuinely distinct letters in that
@@ -1669,7 +1804,8 @@ def prompt_szyfr_algorytm(id_pliku: str, etykieta: str,
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: add a
+project. You have file tools (read / write / edit / glob / grep —
+whatever your host provides). Task: add a
 new algorithmic cipher to the project — this requires **two** changes: a
 YAML file + a Python function in `core_poliglota.py`.
 

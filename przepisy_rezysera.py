@@ -87,6 +87,17 @@ ZAKRES_PER_ROZDZIAL = "per_rozdzial"
 ZAKRES_CALOSC = "calosc"
 ZAKRES_REKONCYLIACJA = "rekoncyliacja"
 
+# JEDNO źródło listy legalnych zakresów. Czytają je dwa światy:
+# walidacja w :func:`_zbuduj_przepis` (literówka lingwisty pomija plik) ORAZ
+# prompty Managera Reguł (`manager_regul_szablony.prompt_postprodukcja`), które
+# wyliczają te wartości agentowi AI. Do v19.4.1 obie strony trzymały własny
+# literał i strona promptu została na dwóch wartościach z v18.12 — agent czytający
+# paczkę z `zakres: rekoncyliacja` miał w ręku instrukcję mówiącą, że to wartość
+# nielegalna, więc traktował gotowe narzędzie jak stub do obejścia.
+ZAKRESY_DOZWOLONE: tuple[str, ...] = (
+    ZAKRES_PER_ROZDZIAL, ZAKRES_CALOSC, ZAKRES_REKONCYLIACJA,
+)
+
 # Role postprodukcji (pole ``rola:`` w YAML, v18.13). Pusta = zwykłe narzędzie
 # (wynik do dialogu i opcjonalnie do pliku ``<nazwa><sufiks>.txt``).
 #   pamiec_dlugotrwala – wynik JEST Pamięcią Długotrwałą projektu: GUI zapisuje
@@ -598,12 +609,11 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     zakres = str(data.get("zakres") or "").strip().lower()
     if not zakres:
         zakres = _ZAKRES_LEGACY.get(str(id_), ZAKRES_CALOSC)
-    if kategoria == KATEGORIA_POSTPROD and zakres not in (
-            ZAKRES_PER_ROZDZIAL, ZAKRES_CALOSC, ZAKRES_REKONCYLIACJA):
+    if kategoria == KATEGORIA_POSTPROD and zakres not in ZAKRESY_DOZWOLONE:
         zglos_pominiecie(
             sciezka, POWOD_ZAKRES,
-            f"zakres={zakres!r} ∉ {{{ZAKRES_PER_ROZDZIAL!r}, "
-            f"{ZAKRES_CALOSC!r}, {ZAKRES_REKONCYLIACJA!r}}}",
+            f"zakres={zakres!r} ∉ "
+            f"{{{', '.join(repr(z) for z in ZAKRESY_DOZWOLONE)}}}",
         )
         return None
 

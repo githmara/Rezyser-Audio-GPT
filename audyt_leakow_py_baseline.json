@@ -104,22 +104,22 @@
     "POSSIBLE|znak-PL:Ż|=== REŻYSER AUDIO GPT — CRASH REPORT ==="
   ],
   "manager_regul_szablony.py": [
-    "POSSIBLE|znak-PL:ĄŁłśźż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi",
-    "POSSIBLE|znak-PL:ąćęłńśźż|# ============================================================================= # <FILL NATIVELY: file header in {…}, e.",
+    "POSSIBLE|znak-PL:ĄćęŁłśźż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have file tools (read / writ",
     "POSSIBLE|znak-PL:ąłż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project (wxPython + Anthropic). You have ",
-    "POSSIBLE|znak-PL:ąŻż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi",
-    "POSSIBLE|znak-PL:ąż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi",
+    "POSSIBLE|znak-PL:ąŻż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have file tools (read / writ",
+    "POSSIBLE|znak-PL:ąż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have file tools (read / writ",
     "POSSIBLE|znak-PL:ę|(brak — projekt ma tylko tę paczkę)",
-    "POSSIBLE|znak-PL:ęż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi",
+    "POSSIBLE|znak-PL:ęż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have file tools (read / writ",
     "POSSIBLE|znak-PL:ł|# ----------------------------------------------------------------------------- # <FILL NATIVELY in {…}: AKZENT {…} / AC",
     "POSSIBLE|znak-PL:ł|# ----------------------------------------------------------------------------- # <FILL NATIVELY in {…}: file header, e.",
     "POSSIBLE|znak-PL:ł|# ----------------------------------------------------------------------------- # <FILL NATIVELY in {…}: file header, e.",
+    "POSSIBLE|znak-PL:ł|# ============================================================================= # <FILL NATIVELY: file header in {…}, e.",
     "POSSIBLE|znak-PL:ł|Nieznany typ reguły: {…}",
     "POSSIBLE|znak-PL:łś|# ----------------------------------------------------------------------------- # <FILL NATIVELY in {…}: file header, e.",
+    "POSSIBLE|znak-PL:łśźż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project (wxPython + Anthropic). You have ",
     "POSSIBLE|znak-PL:łśż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project (wxPython + Anthropic). You have ",
-    "POSSIBLE|znak-PL:łśż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi",
-    "POSSIBLE|znak-PL:łż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project (wxPython + Anthropic). You have ",
-    "POSSIBLE|znak-PL:śż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi"
+    "POSSIBLE|znak-PL:łśż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have file tools (read / writ",
+    "POSSIBLE|znak-PL:śż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have file tools (read / writ"
   ],
   "opowiesci_ai.py": [
     "POSSIBLE|lingua:PL|(narracja zsynchronizowana z dysku)",
