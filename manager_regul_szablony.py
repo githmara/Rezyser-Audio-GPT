@@ -534,12 +534,39 @@ def _paczki_referencyjne(jezyk_bazowy: str) -> str:
     ją czytać, mógłby trafić na pustą/powstającą strukturę. Skan zastąpił dawną
     ręcznie synchronizowaną krotkę `_PACZKI_WDROZONE`.
     """
-    inne = []
-    if _DICT_DIR.is_dir():
-        for p in sorted(_DICT_DIR.iterdir()):
-            if p.is_dir() and p.name != jezyk_bazowy and (p / "podstawy.yaml").is_file():
-                inne.append(p.name)
+    inne = [k for k in _kody_paczek() if k != jezyk_bazowy]
     return ", ".join(inne) if inne else "(brak — projekt ma tylko tę paczkę)"
+
+
+def _kody_paczek() -> list[str]:
+    """Kody paczek OBECNYCH na dysku (kryterium: mają `podstawy.yaml`)."""
+    if not _DICT_DIR.is_dir():
+        return []
+    return [p.name for p in sorted(_DICT_DIR.iterdir())
+            if p.is_dir() and (p / "podstawy.yaml").is_file()]
+
+
+def _ile_paczek(jezyk_bazowy: str = "") -> int:
+    """Liczba wdrożonych paczek — LICZONA, nie wpisana.
+
+    Lekcja 2026-09-20: trzy prompty i docstring mówiły „all 7 deployed packs"
+    jeszcze przy dziewięciu na dysku, a dwa z nich renderowały tuż obok
+    policzoną listę `{inne_paczki}` — czyli sprzeczały się same ze sobą
+    w jednym akapicie. Liczebnik to też wyliczenie (§ „fakty o silniku
+    WYLICZANE Z KODU" wyżej).
+    """
+    return len([k for k in _kody_paczek() if k != jezyk_bazowy])
+
+
+def _etykiety_paczek() -> str:
+    """Wzorce pola `etykieta` z paczek na dysku — po jednej linii na paczkę.
+
+    Jedno źródło zamiast listy przepisanej do promptu: dawna wersja wyliczała
+    siedem paczek i nie znała `es` ani `fr`.
+    """
+    linie = [f"- {kod}: „{_wczytaj_yaml(_DICT_DIR / kod / 'podstawy.yaml').get('etykieta', '')}\""
+             for kod in _kody_paczek()]
+    return "\n".join(linie)
 
 
 # =============================================================================
@@ -785,7 +812,7 @@ def szablon_oczyszczenie(id_pliku: str, etykieta: str,
                          jezyk_bazowy: str) -> str:
     """Szablon dla `kategoria: oczyszczenie`.
 
-    Struktura jest stała we wszystkich 7 wdrożonych paczkach: pipeline ON
+    Struktura jest stała we wszystkich wdrożonych paczkach: pipeline ON
     (czysc_tekst_tts + normalizuj_liczby), pozostałe OFF, brak listy zamian.
     Zmienne między paczkami: tylko etykieta, opis i komentarze (natywne).
     """
@@ -826,6 +853,7 @@ def prompt_oczyszczenie(id_pliku: str, etykieta: str,
                         jezyk_bazowy: str) -> str:
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
+    ile_paczek = _ile_paczek(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project. You have file tools (read / write / edit / glob / grep —
@@ -836,9 +864,9 @@ whatever your host provides). Task: adapt a
 - „Cleaning" accents (`kategoria: oczyszczenie`) apply NO phonetics — they
   run only the `czysc_tekst_tts` pipeline plus optionally
   `normalizuj_liczby` (digits → words). The `zamiany:` list is empty.
-- The structure of these files is IDENTICAL across all 7 deployed packs
-  ({inne_paczki}); ONLY the label, description and YAML comments differ —
-  all native.
+- The structure of these files is IDENTICAL across all {ile_paczek} other
+  deployed packs ({inne_paczki}); ONLY the label, description and YAML
+  comments differ — all native.
 - Each pack ships two variants: `oczyszczenie.yaml` (with number
   normalization) and `oczyszczenie_bez_liczb.yaml` (without — for books
   with many dates, page numbers etc.).
@@ -938,6 +966,7 @@ def prompt_naprawiacz(id_pliku: str, etykieta: str,
                       jezyk_bazowy: str) -> str:
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
+    ile_paczek = _ile_paczek(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project. You have file tools (read / write / edit / glob / grep —
@@ -954,9 +983,9 @@ whatever your host provides). Task: adapt a
   correct language.
 - The ISO code is supplied by the user in the GUI (the „Kod ISO" field) —
   the `iso:` value in the file is empty (`iso: ""`).
-- The file structure is IDENTICAL across all 7 deployed packs
-  ({inne_paczki}); ONLY the label, description and YAML comments differ —
-  all native.
+- The file structure is IDENTICAL across all {ile_paczek} other deployed
+  packs ({inne_paczki}); ONLY the label, description and YAML comments
+  differ — all native.
 
 # TASK
 Create the file `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` —
@@ -1137,6 +1166,7 @@ def szablon_tryb_rezysera(id_pliku: str, etykieta: str,
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
     natywne_streszcz = _natywne_streszczenie_yaml(jezyk_bazowy)
+    model_domyslny = pr.MODEL_DOMYSLNY
     return f"""# -----------------------------------------------------------------------------
 #  <FILL NATIVELY in {natywna_baza}: file header, e.g. „MODUS HÖRBUCH"
 #   (DE) / „MODALITÀ AUDIOLIBRO" (IT) / „РЕЖИМ АУДИОКНИГА" (RU)>
@@ -1172,7 +1202,7 @@ struktura: rozdzialy
 format_wyjscia: tekst
 
 # --- AI model parameters ---
-model: claude-sonnet-5
+model: {model_domyslny}
 temperatura: 0.85
 jezyk_odpowiedzi: {natywny_jezyk_odp}
 
@@ -1245,6 +1275,7 @@ def prompt_tryb_rezysera(id_pliku: str, etykieta: str,
     natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
     sklad_rezysera = _sklad_rezysera(jezyk_bazowy)
+    model_domyslny = pr.MODEL_DOMYSLNY
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project. You have file tools (read / write / edit / glob / grep — whatever
@@ -1309,7 +1340,7 @@ a creative AI mode named **{etykieta}** (id stem `{id_pliku}` — must be NEW).
    (`rozdzialy`/`akty_sceny`/`brak`) and `format_wyjscia`
    (`tekst`/`skrypt_json`/`burza_json`) — REUSE existing values unless you are
    also adding the matching code (then you need source access).
-2. AI model parameters: `model: claude-sonnet-5`,
+2. AI model parameters: `model: {model_domyslny}`,
    `temperatura` (0.7-0.9 for literary, 0.5 for scripting),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}` (already matched to the pack),
    `zapis_do_pliku: true`.
@@ -1424,8 +1455,9 @@ wiring it into the Python engine + GUI.
    proofread).
 5. **`_model_dla_trybu`** in `gui_opowiesci.py`: since v18.1 every mode runs
    on one model — the method returns `oai.MODEL_NARRACJA` (`claude-sonnet-5`)
-   unconditionally (the per-mode OpenAI tiers `MODEL_QUALITY`/`MODEL_DOMYSLNY`
-   were retired). A new mode needs NO change here; leave it as is unless you
+   unconditionally (the per-mode OpenAI tier `MODEL_QUALITY` is gone;
+   `opowiesci_ai.MODEL_DOMYSLNY` still exists, but only as the token-cost
+   default from `core_tokeny`, not as a dispatch choice). A new mode needs NO change here; leave it as is unless you
    deliberately want a different model for this mode.
 6. **Choice buttons** (`gui_opowiesci.py`, the `_aktywuj_obszar_wyborow` /
    visibility condition `tryb in (TRYB_WYBOROW, TRYB_MNIEJSZE_ZLO)`): if the
@@ -1472,6 +1504,7 @@ def szablon_postprodukcja(id_pliku: str, etykieta: str,
     natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
     zakresy = _zakresy_postprodukcji()
     rola_pamieci = pr.ROLA_PAMIEC_DLUGOTRWALA
+    model_domyslny = pr.MODEL_DOMYSLNY
     return f"""# -----------------------------------------------------------------------------
 #  <FILL NATIVELY in {natywna_baza}: file header, e.g. „NACHBEARBEITUNG"
 #   (DE) / „POSTPRODUZIONE" (IT) / „ПОСТОБРАБОТКА" (RU)>
@@ -1510,7 +1543,7 @@ max_tokens_wyjscia: 256
 # sufiks_pliku_wyniku: "_raport"
 
 # --- AI model parameters ---
-model: claude-sonnet-5
+model: {model_domyslny}
 temperatura: 0.7
 jezyk_odpowiedzi: {natywny_jezyk_odp}
 
@@ -1581,6 +1614,7 @@ def prompt_postprodukcja(id_pliku: str, etykieta: str,
     zakresy = _zakresy_postprodukcji()
     rola_pamieci = pr.ROLA_PAMIEC_DLUGOTRWALA
     sklad_rezysera = _sklad_rezysera(jezyk_bazowy)
+    model_domyslny = pr.MODEL_DOMYSLNY
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project. You have file tools (read / write / edit / glob / grep — whatever
@@ -1662,7 +1696,7 @@ a postproduction named **{etykieta}**.
    **`max_tokens_wyjscia:`** output budget per call (defaults: 256 for
    per_rozdzial, 8000 for calosc). Optional **`sufiks_pliku_wyniku:`**
    (e.g. "_audyt") — no path separators or Windows-special characters.
-3. AI model parameters: `model: claude-sonnet-5`,
+3. AI model parameters: `model: {model_domyslny}`,
    `temperatura` 0.5-0.8 (we want stability),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}`.
 4. **`prompt_systemowy:`** the AI role, 1-2 sentences on the expected
@@ -1831,7 +1865,7 @@ alfabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 # -----------------------------------------------------------------------------
 # Words that trigger the accent parser in Director mode (since 13.3+).
-# core_rezyser.zastosuj_akcenty_uniwersalne builds a regex from this list that
+# core_rezyser.zbuduj_mape_akcentow builds a regex from this list that
 # catches phrases „<word> X" or „X <word>" (e.g. for PL „akcent włoski" /
 # „włoski akcent"). Entries MUST be in the native language, lowercase.
 # Models: PL ["akcent"]; IT ["accento", "accentato"]; RU ["акцент",
@@ -1848,6 +1882,7 @@ slowo_akcent:
 def prompt_jezyk_bazowy(kod_jezyka: str, etykieta_jezyka: str) -> str:
     natywna = _natywna_nazwa_jezyka(kod_jezyka)
     inne_paczki = _paczki_referencyjne(kod_jezyka)
+    etykiety_paczek = _etykiety_paczek()
     wskazowka_lingua = _wskazowka_lingua(kod_jezyka)
     podfoldery = _podfoldery_jezykowe()
     return f"""# ROLE
@@ -1937,14 +1972,8 @@ presence/absence of diacritics such as ä/ö/ç/ß).
 
 # NATIVE-LANGUAGE REQUIREMENTS
 You write the `etykieta:` and `opis:` fields and all YAML comments in the
-file in **{natywna}**. The label model from the 7 deployed packs:
-- pl: „Polski – podstawy fonetyczne"
-- en: „English – phonetic basics"
-- de: „Deutsch – phonetische Grundlagen"
-- it: „Italiano – fondamenti fonetici"
-- ru: „Русский – фонетические основы"
-- fi: „Suomi – foneettiset perusteet"
-- is: „Íslenska – hljóðfræðilegur grunnur"
+file in **{natywna}**. The label model from every deployed pack:
+{etykiety_paczek}
 Mixing Polish phrases with native ones (e.g. „French – podstawy fonetyczne")
 is a CRITICAL error.
 
@@ -2103,7 +2132,8 @@ def problematic_letters_in_alphabet(alfabet: str) -> list[str]:
     na WIĘCEJ niż jeden znak (ß→SS, ĳ→ĲIJ, ﬀ→FF, ﬃ→FFI), przez co
     indeksowanie listy liter w Cezarze wywraca się. Takie litery NIE
     powinny trafiać do pola ``alfabet`` w ``podstawy.yaml`` — patrz
-    „Zasada żelazna nr 5" w ``prompt_jezyk_bazowy``.
+    punkt „``alfabet:``" w STRUCTURE REQUIREMENTS promptu
+    ``prompt_jezyk_bazowy`` (oraz komentarz przy polu w ``szablon_podstawy``).
 
     Args:
         alfabet: ciąg znaków (np. ``"ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜß"``).
