@@ -85,6 +85,7 @@ from pathlib import Path
 
 import audyt_leakow as al
 import buduj_wielojezyczne_akcenty as bwa
+import core_poliglota as cp
 import dev_konsola
 import dev_yaml
 import jezyki_lingua
@@ -367,6 +368,44 @@ def _sprawdz_znaki(kod: str, dane: dict, dodaj) -> None:
                   f"the synthesizer's input")
 
 
+def _sprawdz_pokrycie_lacinki(kod: str, dane: dict, dodaj) -> None:
+    """Czy pre-pass tej paczki domyka CAŁY zakres łacinki (U+00C0–U+017F)?
+
+    Mierzymy REALNYM `core_poliglota._usun_polskie_znaki`, nie porównaniem list:
+    liczy się to, co wychodzi z pipeline'u do syntezatora, a nie to, co ktoś
+    wpisał do YAML-a. Znak jest znaleziskiem, gdy przeżyje pre-pass, a przy tym
+    NIE stoi w `alfabet` tej paczki — bo wtedy nie jest jej literą i nikt go dla
+    tego głosu nie zamawiał (kryterium z `alfabet ROZSTRZYGA, co jest LITERĄ`).
+
+    Do v19.4.2 dziura była realna i identyczna we wszystkich dziewięciu
+    paczkach: Latin-1 pokryte, Latin Extended-A (99 znaków) przepuszczane jawnym
+    tekstem — również przez szyfr Cezara, który nie ma ich w alfabecie, więc
+    zostawiał je nietknięte w szyfrogramie (`Škoda → Šmqfc`).
+
+    Bramka NIE wymaga zgodności z `mrs.TABELA_LACINKI` co do celu zamiany —
+    tabela jest domyślną dla nowej paczki, a transliteracja bywa fonetyką
+    (`fi: ā → aa`, `fr: ç → s`, `pl: ą → on`). Pytanie brzmi „czy znak w ogóle
+    wychodzi", nie „czy wychodzi dokładnie tak".
+    """
+    alfabet = str(dane.get("alfabet") or "")
+    litery_paczki = set(alfabet) | set(alfabet.lower())
+    lo, hi = mrs.ZAKRES_LACINKI
+    przepuszczone = [
+        znak for znak in (chr(c) for c in range(lo, hi + 1))
+        if znak.isalpha()
+        and znak not in litery_paczki
+        and cp._usun_polskie_znaki(znak, dane) == znak
+    ]
+    if przepuszczone:
+        dodaj("lacinka-dziura",
+              f"the pre-pass lets {len(przepuszczone)} character(s) of "
+              f"U+00C0–U+017F through unchanged, and none of them is a letter of "
+              f"this pack's `alfabet`: {''.join(przepuszczone)} — every accent "
+              f"with `usun_polskie_znaki: true` and every cipher hands them to "
+              f"the synthesizer as they are (default pairs: "
+              f"`manager_regul_szablony.TABELA_LACINKI`)")
+
+
 def _sprawdz_slowo_akcent(kod: str, dane: dict, pary: dict, dodaj) -> None:
     """`slowo_akcent` przeliczone REALNYM parserem Księgi Świata (v18.25).
 
@@ -504,6 +543,7 @@ def sprawdz_paczki() -> list[Znalezisko]:
         _sprawdz_lingua(kod, dane, dodaj)
         _sprawdz_alfabet(kod, dane, dodaj)
         _sprawdz_znaki(kod, dane, dodaj)
+        _sprawdz_pokrycie_lacinki(kod, dane, dodaj)
         _sprawdz_slowo_akcent(kod, dane, pary, dodaj)
         _sprawdz_etykieta(kod, dane, dodaj)
     return znaleziska

@@ -206,6 +206,108 @@ LISTA_TYPOW: list[str] = [
 
 
 # =============================================================================
+# KANON TRANSLITERACJI ŁACINKI — jedno źródło pre-passu (od v19.5)
+# =============================================================================
+# `podstawy.yaml::polskie_znaki` jest PRE-PASSEM każdego akcentu z flagą
+# `usun_polskie_znaki: true` oraz każdego szyfru, więc dziura w tej liście
+# zostawia diakrytyk w tekście podanym syntezatorowi — naraz we WSZYSTKICH
+# parach akcentowych paczki. Do v19.4.2 dziura była realna i identyczna
+# w dziewięciu paczkach: Latin-1 pokryte, a 99 znaków Latin Extended-A
+# (`č ď ě ğ ı ň ő ř š ţ ů ű ž …`) przechodziło jawnym tekstem — także przez
+# szyfr Cezara (`Škoda → Šmqfc`).
+#
+# Tabela niżej zamyka to jedną enumeracją dla DWÓCH stron umowy:
+#   * `szablon_podstawy` renderuje ją jako gotowy pre-pass nowej paczki
+#     (wykonawca tylko USUWA wzorce natywne dla swojego języka),
+#   * `audyt_podstaw._sprawdz_pokrycie_lacinki` liczy nią pokrycie paczek
+#     już wdrożonych.
+# Dwie kopie tej listy rozjechałyby się przy pierwszym nowym znaku — patrz
+# ten sam wzorzec przy `ZAKRESY_DOZWOLONE` (v19.4.2).
+#
+# TABELA JEST DOMYŚLNĄ, NIE PRZYMUSEM. Paczka ma prawo do świadomego
+# odstępstwa, bo transliteracja jest fonetyką, nie matematyką: `fi` czyta
+# `ā → aa` (długa samogłoska), `fr` czyta `ç → s`, `pl` romanizuje `ą → on`.
+# Bramka pokrycia pyta „czy znak w ogóle wychodzi z pre-passu", nie „czy
+# wychodzi dokładnie tak jak tutaj".
+#
+# ZAKRES: U+00C0–U+017F, czyli Latin-1 Supplement + Latin Extended-A. Wyżej
+# (Extended-B, IPA) nie schodzimy świadomie — to już nie są znaki pisowni
+# języków, dla których ktokolwiek zamawia głos w tej aplikacji.
+ZAKRES_LACINKI: tuple[int, int] = (0x00C0, 0x017F)
+
+# Klucz = mała litera, wartość = cel w ASCII. Wersaliki DERYWUJEMY niżej,
+# żeby nie utrzymywać dwóch równoległych list (pre-pass jest dosłownym
+# `str.replace`, więc brak wariantu wielkiej litery to dziura tej samej klasy).
+_LACINKA_MALE: dict[str, str] = {
+    # -- Latin-1 Supplement ---------------------------------------------------
+    "à": "a", "á": "a", "â": "a", "ã": "a", "ä": "a", "å": "a", "æ": "ae",
+    "ç": "c",
+    "è": "e", "é": "e", "ê": "e", "ë": "e",
+    "ì": "i", "í": "i", "î": "i", "ï": "i",
+    "ð": "d", "ñ": "n",
+    "ò": "o", "ó": "o", "ô": "o", "õ": "o", "ö": "o", "ø": "o",
+    "ù": "u", "ú": "u", "û": "u", "ü": "u",
+    "ý": "y", "ÿ": "y", "þ": "th", "ß": "ss",
+    # -- Latin Extended-A -----------------------------------------------------
+    "ā": "a", "ă": "a", "ą": "a",
+    "ć": "c", "ĉ": "c", "ċ": "c", "č": "c",
+    # `đ → d`, nie `dj`: cel ma być LITERĄ, którą głos przeczyta w miejscu
+    # oryginału. `dj` jest transkrypcją serbską i w chorwackim „Đakovo"
+    # dałoby „Djakovo" — poprawnie, ale już nie w wietnamskim „đông".
+    "ď": "d", "đ": "d",
+    "ē": "e", "ĕ": "e", "ė": "e", "ę": "e", "ě": "e",
+    "ĝ": "g", "ğ": "g", "ġ": "g", "ģ": "g",
+    "ĥ": "h", "ħ": "h",
+    # `ı` (tureckie bezkropkowe i) ma wersalik zwykłe ASCII `I`, więc pary
+    # nie potrzebuje; `İ` stoi w `_LACINKA_DUZE_JAWNE` niżej.
+    "ĩ": "i", "ī": "i", "ĭ": "i", "į": "i", "ı": "i",
+    "ĳ": "ij", "ĵ": "j",
+    # `ĸ` (grenlandzka kra) nie ma wersalika w Unicode — `.upper()` zwraca ją
+    # samą, więc derywacja jej nie zduplikuje.
+    "ķ": "k", "ĸ": "k",
+    "ĺ": "l", "ļ": "l", "ľ": "l", "ŀ": "l", "ł": "l",
+    # `ŋ → ng`: to fonem, nie ozdobnik — „ng" czyta się tak, jak wygląda.
+    # `ŉ` jest znakiem przestarzałym (n z apostrofem) i wersalika nie ma.
+    "ń": "n", "ņ": "n", "ň": "n", "ŉ": "n", "ŋ": "ng",
+    "ō": "o", "ŏ": "o", "ő": "o", "œ": "oe",
+    "ŕ": "r", "ŗ": "r", "ř": "r",
+    # `ſ` (długie s) to wariant typograficzny `s`; jego `.upper()` to ASCII `S`.
+    "ś": "s", "ŝ": "s", "ş": "s", "š": "s", "ſ": "s",
+    "ţ": "t", "ť": "t", "ŧ": "t",
+    "ũ": "u", "ū": "u", "ŭ": "u", "ů": "u", "ű": "u", "ų": "u",
+    "ŵ": "w", "ŷ": "y",
+    "ź": "z", "ż": "z", "ž": "z",
+}
+
+# Wersaliki, których derywacja z małej litery nie wyprodukuje.
+#   * `ẞ` — `ß`.upper() to dwuznak „SS", więc pętla ją pomija; cel wielkimi,
+#     bo ten znak pojawia się wyłącznie w tekście już złożonym wersalikami.
+#     (Leży poza `ZAKRES_LACINKI` — jest w Latin Extended Additional — ale
+#     do pre-passu należy, bo jest parą znaku, który w zakresie stoi.)
+#   * `İ` — tureckie I z kropką; jego `.lower()` to dwa znaki (i + U+0307),
+#     więc z żadnej małej litery nie powstanie.
+_LACINKA_DUZE_JAWNE: dict[str, str] = {"ẞ": "SS", "İ": "I"}
+
+
+def _zbuduj_tabele_lacinki() -> list[tuple[str, str]]:
+    """Rozwija `_LACINKA_MALE` o warianty wersalikowe i domyka jawnymi."""
+    pary: list[tuple[str, str]] = []
+    for mala, cel in _LACINKA_MALE.items():
+        pary.append((mala, cel))
+        duza = mala.upper()
+        # Pomijamy litery puchnące pod `.upper()` (`ß` → „SS") i te, których
+        # wersalik jest zwykłym ASCII (`ı` → „I") — pierwsze mają wpis jawny,
+        # drugie nie potrzebują reguły, bo transliterować nie ma czego.
+        if len(duza) == 1 and duza != mala and not duza.isascii():
+            pary.append((duza, cel.capitalize() if len(cel) > 1 else cel.upper()))
+    pary.extend(_LACINKA_DUZE_JAWNE.items())
+    return pary
+
+
+TABELA_LACINKI: list[tuple[str, str]] = _zbuduj_tabele_lacinki()
+
+
+# =============================================================================
 # Natywne dane językowe — ODCZYT DYNAMICZNY z dictionaries/ (od v18.5)
 # =============================================================================
 # Do v18.4 te wartości żyły jako zhardkodowane słowniki (`_NATYWNE_*`,
@@ -1604,9 +1706,25 @@ the message fields (`etykieta_fragment_zbyt_krotki`,
 # =============================================================================
 # SZABLON 5: podstawy.yaml dla nowego języka bazowego (minimum do startu)
 # =============================================================================
+
+def _pre_pass_domyslny(wciecie: str = "  ") -> str:
+    """Renderuje `TABELA_LACINKI` jako gotowe wpisy `polskie_znaki`.
+
+    Szablon `podstawy.yaml` dostaje pre-pass CAŁEJ łacinki wstępnie wypełniony,
+    bo praca przez ODEJMOWANIE jest tu jedyną, która się skaluje: wykonawca wie,
+    które litery są natywne dla JEGO języka, a nie potrafi z głowy wyliczyć
+    190 znaków, których nie zna. Odwrotna kolejność (pusta lista + „uzupełnij")
+    produkowała paczki pokrywające Latin-1 i gubiące Latin Extended-A —
+    dokładnie tak wyglądało dziewięć wdrożonych paczek do v19.4.2.
+    """
+    return "\n".join(f'{wciecie}- {{ wzor: "{w}", zamiana: "{z}" }}'
+                     for w, z in TABELA_LACINKI)
+
+
 def szablon_podstawy(kod_jezyka: str, etykieta_jezyka: str) -> str:
     natywna = _natywna_nazwa_jezyka(kod_jezyka)
     blok_lingua = _blok_lingua(kod_jezyka)
+    pre_pass = _pre_pass_domyslny()
     return f"""# =============================================================================
 #  <FILL NATIVELY: file header in {natywna}, e.g. for DE:
 #  „GRUNDLAGEN DER DEUTSCHEN SPRACHE"; for IT: „FONDAMENTI DELLA LINGUA ITALIANA">
@@ -1655,23 +1773,47 @@ opis: |
 polskie_znaki:
   # Pairs {{ wzor: "<diacritic>", zamiana: "<ASCII>" }} — lower and upper variant.
   # PRE-PASS: applied before the rules of every accent with
-  # `usun_polskie_znaki: true` and before every cipher. List the diacritics of
-  # FOREIGN loanwords here (é/ü/ñ/å/ø/ß…); the native letters of {natywna} do
-  # NOT belong here — they live in `alfabet` below and the target voice reads
-  # them (de keeps ä/ö/ü, fi keeps ä/å/ö, is keeps á/ð/þ).
-  # <FILL IN: the foreign diacritics this pack should flatten —
-  # model: dictionaries/de/podstawy.yaml>
-  - {{ wzor: "?", zamiana: "?" }}
+  # `usun_polskie_znaki: true` and before every cipher.
+  #
+  # PRE-FILLED with the WHOLE Latin script (U+00C0–U+017F: Scandinavian,
+  # Polish, Czech, Turkish, Baltic, Esperanto, Maltese, the macrons of
+  # romanised Japanese…), so your job here is SUBTRACTION, not invention:
+  #
+  #   * DELETE every pair whose `wzor` is a NATIVE letter of {natywna}. Such
+  #     a letter belongs in `alfabet` below and the target voice reads it
+  #     (de keeps ä/ö/ü, fi keeps ä/å/ö, is keeps á/ð/þ, es keeps ñ). Leaving
+  #     it here takes it away from EVERY accent of the pack at once.
+  #   * KEEP the pairs of letters that GROW under `.upper()` (`ß` → „SS"),
+  #     even when they ARE native: such a letter can never enter `alfabet`,
+  #     so the pre-pass is the only place that can deal with it.
+  #   * RETUNE a `zamiana` where this pack's phonetics say so — fi reads
+  #     `ā → aa` (long vowel), fr reads `ç → s`. The target must stay ASCII.
+  #
+  # The defaults below come from `manager_regul_szablony.TABELA_LACINKI`,
+  # the same table the release gate measures pack coverage with.
+{pre_pass}
 
-# Full uppercase alphabet, no whitespace. Use the NATIVE alphabet in its
-# NATIVE ORDER. An accented letter enters the alphabet ONLY if it is a
-# distinct letter in that language — and it sits where the native order puts
-# it, NOT automatically at the end (e.g. FI „...XYZÅÄÖ" — Å Ä Ö are native and
-# end the Finnish alphabet; ES Ñ sits between N and O). Accented forms that
-# are NOT distinct letters (e.g. FR é/à, IT à/è) do NOT enter the alphabet —
-# they pass through the Caesar cipher like digits. Letters that grow under
-# `.upper()` (e.g. ß→SS) are always omitted.
-alfabet: '<FILL IN: native alphabet in uppercase, in native order>'
+# Full uppercase alphabet, no whitespace — the string the Caesar cipher
+# shifts along. PRE-FILLED with the 26 letters of the basic Latin script,
+# which is a STARTING POINT, not an answer. Tune it:
+#
+#   * Latin-script language → add, remove and MOVE letters until the string
+#     is the NATIVE alphabet in NATIVE ORDER. An accented letter enters it
+#     ONLY if the language counts it as a distinct letter, and it sits where
+#     the native order puts it, NOT automatically at the end (FI
+#     „...XYZÅÄÖ" — Å Ä Ö are native and close the Finnish alphabet; ES Ñ
+#     sits between N and O; IT drops J K W X Y, keeping 21 letters).
+#     Accented forms that are NOT distinct letters (FR é/à, IT à/è) do NOT
+#     enter the alphabet — they pass through the cipher like digits.
+#   * Non-Latin script → PREPEND the native alphabet and KEEP A–Z behind it,
+#     the way `ru` does („АБВ…ЯABC…Z"). A Cyrillic or Greek pack still meets
+#     Latin names, quotations and brand names in real text, and a letter
+#     absent from this string passes through the cipher unshifted — visible
+#     in the ciphertext as plain, unencrypted words.
+#
+# Letters that grow under `.upper()` (`ß` → „SS") are always omitted — they
+# belong in `polskie_znaki` above.
+alfabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 # -----------------------------------------------------------------------------
 # Words that trigger the accent parser in Director mode (since 13.3+).
@@ -1733,30 +1875,46 @@ presence/absence of diacritics such as ä/ö/ç/ß).
 # STRUCTURE REQUIREMENTS (engine)
 1. **`id: podstawy`** and **`jezyk: {kod_jezyka}`** — identifying fields.
 {wskazowka_lingua}
-3. **`polskie_znaki:`** — a list of `{{ wzor, zamiana }}` pairs, diacritic →
-   ASCII, each in both variants: lower + upper. Despite the historical name,
-   this is the PRE-PASS run before the replacement table of every accent with
-   `usun_polskie_znaki: true`, and before every cipher. So it answers one
-   question: which characters must be gone BEFORE the rules of this pack start
-   working? In the deployed packs that means the diacritics of FOREIGN
-   loanwords (é/ü/ñ/å/ø/ß…) — the pack's OWN native letters stay untouched
-   there, because they are real letters of `alfabet` and the target voice
-   reads them (de keeps ä/ö/ü, fi keeps ä/å/ö, is keeps á/ð/þ, es keeps ñ).
-   Putting a native letter on this list takes it away from EVERY accent of the
-   pack at once (that is exactly why `pl/akcenty/rosyjski.yaml` has to run
-   with `usun_polskie_znaki: false` — the pl list flattens ś/ź, which the
-   Russian accent needs for its softening rules). Letters that grow under
-   `.upper()` (e.g. ß→SS) ALWAYS go here, NEVER in `alfabet`.
-4. **`alfabet:`** — a string of UPPERCASE letters with no spaces. Use the
-   NATIVE alphabet of the language in its NATIVE ORDER. Accented letters go
-   into the alphabet ONLY if they are genuinely distinct letters in that
-   language's order — and they belong wherever that order places them, not
-   automatically at the end (e.g. FI Å Ä Ö are native, so they sit at the
-   end as in Finnish; ES Ñ sits between N and O; IS keeps its full native
-   sequence). Accented forms that are NOT distinct letters (e.g. FR é/à, IT
-   à/è) do NOT enter `alfabet` at all — they pass through the Caesar cipher
-   unchanged, like digits. And any letter that grows under `.upper()`
-   (ß→SS) is omitted regardless. Used by the Caesar cipher.
+3. **`polskie_znaki:`** — the PRE-PASS: a list of `{{ wzor, zamiana }}`
+   pairs, diacritic → ASCII, each in both variants (lower + upper). Despite
+   the historical name it runs before the replacement table of every accent
+   with `usun_polskie_znaki: true`, and before every cipher — so it answers
+   one question: which characters must be gone BEFORE the rules of this pack
+   start working?
+   **The template already carries the WHOLE Latin script** (U+00C0–U+017F,
+   rendered from `manager_regul_szablony.TABELA_LACINKI`), so your work here
+   is SUBTRACTION, not invention:
+   * DELETE every pair whose `wzor` is a native letter of {natywna}. Such
+     a letter is a real letter of `alfabet` and the target voice reads it
+     (de keeps ä/ö/ü, fi keeps ä/å/ö, is keeps á/ð/þ, es keeps ñ); leaving
+     it here takes it away from EVERY accent of the pack at once.
+   * KEEP the pairs of letters that GROW under `.upper()` (`ß` → „SS") even
+     when they are native — such a letter can never enter `alfabet`, so the
+     pre-pass is the only place that can deal with it.
+   * RETUNE a `zamiana` only where this pack's phonetics demand it: fi reads
+     `ā → aa` (long vowel), fr reads `ç → s`. The target must stay ASCII.
+   Do NOT delete a pair merely because {natywna} „does not use" that letter.
+   Loanwords, quotations and foreign names arrive in real text, and every
+   character missing from this list reaches the synthesizer untouched —
+   including through the Caesar cipher, which leaves it unencrypted.
+4. **`alfabet:`** — a string of UPPERCASE letters with no spaces: the string
+   the Caesar cipher shifts along. The template pre-fills the 26 letters of
+   the basic Latin script, which is a STARTING POINT, not an answer.
+   * Latin-script language → add, remove and MOVE letters until the string
+     is the NATIVE alphabet in NATIVE ORDER. An accented letter belongs
+     there ONLY if the language counts it as a distinct letter, and it sits
+     wherever the native order puts it, not automatically at the end (FI
+     Å Ä Ö close the alphabet because Finnish puts them there; ES Ñ sits
+     between N and O; IT drops J K W X Y and keeps 21 letters; IS keeps its
+     full native sequence). Accented forms that are NOT distinct letters
+     (FR é/à, IT à/è) stay out — they pass through the cipher like digits.
+   * Non-Latin script → PREPEND the native alphabet and KEEP A–Z behind it,
+     the way `ru` does („АБВ…ЯABC…Z"). Real text in a Cyrillic or Greek pack
+     still carries Latin names, brands and quotations, and a letter absent
+     from this string passes through the cipher unshifted — plainly readable
+     inside the ciphertext.
+   Any letter that grows under `.upper()` (`ß` → „SS") is omitted regardless
+   of the script; it belongs in `polskie_znaki` above.
 5. **`slowo_akcent:`** (13.3+ contract) — a list of native words that
    trigger the accent parser in Director mode. All entries lowercase.
    Models: PL `["akcent"]`; DE `["akzent", "aussprache"]`;

@@ -382,6 +382,53 @@ def test_prompty_nie_licza_plikow_paczki_literalem():
         assert sklad in tekst, "prompt nie podaje realnego skladu `rezyser/`"
 
 
+def test_tabela_lacinki_domyka_swoj_zakres():
+    """`TABELA_LACINKI` pokrywa CALY `ZAKRES_LACINKI`, celami w ASCII.
+
+    Ta tabela jest orakulem dwoch stron umowy naraz: `szablon_podstawy`
+    renderuje ja jako pre-pass nowej paczki, a `audyt_podstaw` mierzy nia
+    pokrycie paczek juz wdrozonych. Dziura w niej jest wiec dziura w obu
+    miejscach jednoczesnie - i to cicha, bo bramka nie ma z czym porownac.
+    """
+    tabela = mrs.TABELA_LACINKI
+    mapa = dict(tabela)
+    assert len(mapa) == len(tabela), "tabela powtarza wzorzec"
+
+    lo, hi = mrs.ZAKRES_LACINKI
+    brak = [chr(c) for c in range(lo, hi + 1)
+            if chr(c).isalpha() and chr(c) not in mapa]
+    assert not brak, f"zakres niepokryty: {''.join(brak)}"
+
+    for wzor, cel in tabela:
+        assert cel.isascii(), f"`{wzor}` -> `{cel}`: cel nie jest ASCII"
+        assert cel, f"`{wzor}`: pusty cel"
+        assert wzor != cel, f"`{wzor}`: regula tozsamosciowa"
+
+    # Wersalik NIE moze byc pominiety: pre-pass to doslowny `str.replace`,
+    # wiec brak wariantu wielkiej litery przepuszcza znak do syntezatora.
+    # Wyjatki sa dwa i oba maja powod w Unicode, nie w niedbalstwie: litera
+    # puchnaca pod `.upper()` (`ss` -> „SS", wpis jawny `ẞ`) i litera, ktorej
+    # wersalik jest zwyklym ASCII (`ı` -> „I", transliterowac nie ma czego).
+    for wzor, _ in tabela:
+        duza = wzor.upper()
+        if len(duza) != 1 or duza == wzor or duza.isascii():
+            continue
+        assert duza in mapa, f"`{wzor}` nie ma wariantu `{duza}`"
+
+
+def test_szablon_podstaw_liczy_tabela_z_kodu():
+    """Szablon `podstawy.yaml` renderuje TABELE Z KODU, nie wlasna kopie.
+
+    Ten sam wzorzec co przy `ZAKRESY_DOZWOLONE` (v19.4.2): dwie kopie
+    wyliczenia rozjezdzaja sie przy pierwszym nowym znaku, a rozjazd widac
+    dopiero w paczce, ktora ktos juz wydal.
+    """
+    tekst = mrs.szablon_podstawy("sv", "szwedzki")
+    for wzor, cel in mrs.TABELA_LACINKI:
+        assert f'wzor: "{wzor}", zamiana: "{cel}"' in tekst,             f"szablon nie renderuje pary `{wzor}` -> `{cel}`"
+    assert yaml.safe_load(tekst) is not None
+
+
 if __name__ == "__main__":
     testy = [(nazwa, obiekt) for nazwa, obiekt in sorted(globals().items())
              if nazwa.startswith("test_") and callable(obiekt)]
