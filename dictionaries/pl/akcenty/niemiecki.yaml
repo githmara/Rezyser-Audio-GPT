@@ -19,6 +19,30 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
+  # -- Polska romanizacja fonetyczna (v19.5; dawniej `podstawy.yaml`) --
+  #    Pre-pass paczki biegnie PRZED tą listą, więc czoło `zamiany` jest
+  #    miejscem równoważnym co do znaku. Dlaczego przeniesione → komentarz
+  #    przy `polskie_znaki` w `dictionaries/pl/podstawy.yaml`.
+  #    Kaskada z regułami niżej (`ć` → `c`, a dalej `c` → coś innego) jest
+  #    ZAMIERZONA: pre-pass podawał im dokładnie ten sam wsad.
+  - { wzor: "ą", zamiana: "on" }
+  - { wzor: "ę", zamiana: "en" }
+  - { wzor: "ł", zamiana: "l" }
+  - { wzor: "ó", zamiana: "u" }
+  - { wzor: "ś", zamiana: "s" }
+  - { wzor: "ć", zamiana: "c" }
+  - { wzor: "ń", zamiana: "n" }
+  - { wzor: "ż", zamiana: "z" }
+  - { wzor: "ź", zamiana: "z" }
+  - { wzor: "Ą", zamiana: "On" }
+  - { wzor: "Ę", zamiana: "En" }
+  - { wzor: "Ł", zamiana: "L" }
+  - { wzor: "Ó", zamiana: "U" }
+  - { wzor: "Ś", zamiana: "S" }
+  - { wzor: "Ć", zamiana: "C" }
+  - { wzor: "Ń", zamiana: "N" }
+  - { wzor: "Ż", zamiana: "Z" }
+  - { wzor: "Ź", zamiana: "Z" }
   - { wzor: "sz", zamiana: "sch"  }
   - { wzor: "Sz", zamiana: "Sch"  }
   - { wzor: "SZ", zamiana: "SCH"  }

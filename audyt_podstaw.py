@@ -396,6 +396,26 @@ def _sprawdz_pokrycie_lacinki(kod: str, dane: dict, dodaj) -> None:
         and znak not in litery_paczki
         and cp._usun_polskie_znaki(znak, dane) == znak
     ]
+    # Strona odwrotna tej samej umowy: litera, którą paczka DEKLARUJE jako
+    # własną, nie może być spłaszczana przed regułami — to `alfabet`
+    # rozstrzyga, co jest literą języka. Taki wpis odbiera znak WSZYSTKIM
+    # akcentom paczki naraz i zmusza ten jeden, który go potrzebuje, do
+    # wyłączenia pre-passu w całości (tak żyła paczka `pl` do v19.4.2:
+    # romanizacja `ą → on` w pre-passie, a `rosyjski.yaml` z
+    # `usun_polskie_znaki: false` i obcą łacinką lecącą prosto do cyrylicy).
+    # Romanizacja własnych liter należy do `zamiany:` akcentu, który jej chce.
+    natywne = sorted({str(w.get("wzor", "")) for w in (dane.get("polskie_znaki") or [])
+                      if isinstance(w, dict)
+                      and str(w.get("wzor", "")) in litery_paczki})
+    if natywne:
+        dodaj("znaki-litera-natywna",
+              f"`polskie_znaki` flattens {natywne}, and `alfabet` declares the "
+              f"same letter(s) as this language's own — the pre-pass runs before "
+              f"the rules of EVERY accent in the pack and before every cipher, so "
+              f"the pack contradicts its own alphabet in both places at once "
+              f"(move the pair to the head of `zamiany:` in the accent that wants "
+              f"it; the pre-pass ran there anyway)")
+
     if przepuszczone:
         dodaj("lacinka-dziura",
               f"the pre-pass lets {len(przepuszczone)} character(s) of "

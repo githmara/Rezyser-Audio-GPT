@@ -37,9 +37,13 @@ kolejnosc: 45
 # --- Pipeline przetwarzania ---
 czysc_tekst_tts: true
 normalizuj_liczby: true
-# Nie usuwamy polskich diakrytyków „latynizująco" – zrobimy to ręcznie
-# w sekcji `zamiany`, zamieniając je na litery cyrylicy.
-usun_polskie_znaki: false
+# Polskich diakrytyków NIE latynizujemy — tę robotę wykonuje sekcja
+# `zamiany` niżej, zamieniając je wprost na litery cyrylicy.
+# Pre-pass jest mimo to WŁĄCZONY (v19.5): od kiedy `podstawy.yaml`
+# przestało spłaszczać własne litery paczki, ta flaga nie odbiera już
+# akcentowi ś/ź — czyści za to obcą łacinkę (é, ü, š, ř), która bez
+# niej wchodziła do cyrylicy jawnym tekstem.
+usun_polskie_znaki: true
 # Scalanie pojedynczych liter łacińskich jest bezsensowne po transliteracji
 # na cyrylicę (regex w `sklej_pojedyncze_litery` szuka klasy [a-z]).
 skleja_pojedyncze_litery: false

@@ -20,36 +20,41 @@ lingua: POLISH
 etykieta: "Polski – podstawy fonetyczne"
 opis: |
   Bazowe reguły dla języka polskiego:
-    1. Transliteracja polskich diakrytyków (ą→on, ę→en, ł→l, ó→u, ś→s,
-       ć→c, ń→n, ż→z, ź→z) – używana jako pierwszy krok przez większość
-       akcentów fonetycznych, gdy syntezator mowy nie obsługuje polskich
-       znaków specjalnych.
-    2. Alfabet polski (35 liter, wielkie) – używany przez szyfr Cezara.
+    1. Transliteracja diakrytyków OBCYCH (é, ü, ñ, å, ř, š…) na ASCII –
+       pierwszy krok każdego akcentu z flagą `usun_polskie_znaki: true`
+       oraz każdego szyfru. Polskich liter ta lista NIE spłaszcza: stoją
+       w alfabecie niżej, a ich romanizację (ą→on, ę→en, ó→u…) niosą na
+       czele listy `zamiany` te akcenty, które jej potrzebują.
+    2. Alfabet polski (35 liter, wielkie) – używany przez szyfr Cezara,
+       od v19.5 razem z dziewięcioma literami diakrytycznymi (szyfrowanie
+       polskiego tekstu jest odtąd w pełni odwracalne).
 
 # -----------------------------------------------------------------------------
-# Zamiana polskich znaków diakrytycznych na odpowiedniki łacińskie.
+# PRE-PASS paczki: zamiana OBCYCH znaków diakrytycznych na odpowiedniki ASCII.
 # Wykonywana PRZED listą `zamiany` danego akcentu (jeśli ten ma włączone
-# `usun_polskie_znaki: true`).
+# `usun_polskie_znaki: true`) oraz przed każdym szyfrem.
 # -----------------------------------------------------------------------------
 polskie_znaki:
-  - { wzor: "ą", zamiana: "on" }
-  - { wzor: "ę", zamiana: "en" }
-  - { wzor: "ł", zamiana: "l"  }
-  - { wzor: "ó", zamiana: "u"  }
-  - { wzor: "ś", zamiana: "s"  }
-  - { wzor: "ć", zamiana: "c"  }
-  - { wzor: "ń", zamiana: "n"  }
-  - { wzor: "ż", zamiana: "z"  }
-  - { wzor: "ź", zamiana: "z"  }
-  - { wzor: "Ą", zamiana: "On" }
-  - { wzor: "Ę", zamiana: "En" }
-  - { wzor: "Ł", zamiana: "L"  }
-  - { wzor: "Ó", zamiana: "U"  }
-  - { wzor: "Ś", zamiana: "S"  }
-  - { wzor: "Ć", zamiana: "C"  }
-  - { wzor: "Ń", zamiana: "N"  }
-  - { wzor: "Ż", zamiana: "Z"  }
-  - { wzor: "Ź", zamiana: "Z"  }
+  # -- Litery polskie: NIE MA ICH TUTAJ i to jest decyzja (v19.5) --
+  #    Do v19.4.2 ta lista otwierała się romanizacją własnych liter paczki
+  #    (`ą → on`, `ę → en`, `ó → u`, `ł ś ć ń ż ź`). Wszystkie dziewięć stoi
+  #    w `alfabet` niżej, a znak stojący w `alfabet` JEST literą tego języka —
+  #    spłaszczanie go w pre-passie łamało własną deklarację paczki i miało
+  #    dwa skutki naraz:
+  #      (1) szyfr Cezara nigdy nie zobaczył dziewięciu z trzydziestu pięciu
+  #          liter swojego alfabetu, więc deszyfracja polskiego tekstu nie
+  #          była wierna (ta sama klasa błędu co niemieckie Ä/Ö/Ü, v18.19);
+  #      (2) pre-pass jest WSPÓLNY dla całej paczki, więc akcent, który
+  #          polskich diakrytyków POTRZEBUJE, musiał wyłączać go w całości —
+  #          `rosyjski.yaml` chodził z `usun_polskie_znaki: false` i przez to
+  #          przepuszczał do cyrylicy całą obcą łacinkę (`é ü Å ö ë ñ ú á`).
+  #
+  #    Romanizacja nie zniknęła — przeniosła się na CZOŁO listy `zamiany:`
+  #    w siedmiu akcentach, które jej chcą (angielski, fiński, francuski,
+  #    hiszpański, islandzki, niemiecki, włoski). Pre-pass i tak biegł PRZED
+  #    `zamiany`, więc wynik jest równoważny co do znaku, a decyzja „jak
+  #    brzmi polskie ą dla tego głosu" należy odtąd do akcentu, nie do całej
+  #    paczki. Lista niżej zaczyna się więc od razu od znaków OBCYCH.
   # 13.3: rozszerzenie listy o diakrytyki europejskich zapożyczeń
   # (Pokémon, café, jalapeño, façade, Schrödinger, naïve...). Bez tych
   # reguł szyfr Cezara pomijał obce znaki, łamiąc spójność szyfrowania
