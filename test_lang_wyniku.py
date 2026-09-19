@@ -579,6 +579,64 @@ def test_j_nazwa_pliku_nie_klamie_o_jednym_jezyku() -> None:
         f"name for six codes: {duzo} — expected four codes plus an overflow count")
 
 
+def test_k_akcent_na_tekscie_juz_w_jezyku_celu_jest_noop() -> None:
+    """K: akapit, który JUŻ jest w języku celu akcentu, przechodzi bez zmian.
+
+    Akcent znaczy „przygotuj tekst dla głosu X", więc fragment napisany po
+    X-owemu nie wymaga niczego — a reguły `<iso>/akcenty/<ten akcent>.yaml`
+    nie ma i mieć nie będzie (zasada natywności: paczka `fi` nie ma
+    `finski.yaml`). Do v19.4.1 leciał tu `BrakRegulyDlaJezykaError`, który
+    ubijał CAŁY dokument, także jego akapity w języku paczki.
+
+    Język segmentu wymuszamy (`wymus_jezyk`), żeby bramka mierzyła REGUŁĘ,
+    a nie celność detektora na dziewięciu językach — dokument z realną
+    detekcją sprawdza kontrakt K2.
+    """
+    sprawdzonych = 0
+    for kod in cp.dostepne_jezyki_bazowe():
+        for cfg in cp.lista_wariantow(cp.TRYB_REZYSER, kod):
+            if cfg.get("kategoria") != "akcent":
+                continue
+            iso = str(cfg.get("iso") or "").strip()
+            opcje = {"wymus_jezyk": iso}
+            wynik = cp.przetworz(PROBKA_KROTKA, cp.TRYB_REZYSER, kod,
+                                 cfg["id"], opcje)
+            assert wynik == PROBKA_KROTKA, (
+                f"{kod}/{cfg['id']} (tekst juz w jezyku celu `{iso}`): silnik "
+                f"zmienil tresc na {wynik!r} — poprawna operacja to NIC")
+            iso_segmentow = {s[0] for s in opcje["_segmenty_wynikowe"] if s[2]}
+            assert iso_segmentow == {iso}, (
+                f"{kod}/{cfg['id']}: side-channel niesie {iso_segmentow}, "
+                f"a glos wyniku to `{iso}`")
+            sprawdzonych += 1
+    assert sprawdzonych >= 8 * 8, (
+        f"bramka objela tylko {sprawdzonych} par — za malo, zeby mowic "
+        f"o wszystkich paczkach")
+
+
+def test_k2_akapit_w_jezyku_celu_nie_ubija_dokumentu() -> None:
+    """K2: podręcznik do nauki języka — rdzeń pl + akapit fi, akcent fiński.
+
+    Realna detekcja: fiński akapit ma wyjść BAJT W BAJT (razem z ä/å, które
+    obejście „wymuś język pl" zjadało), polski — przetworzony, a cały plik
+    dostać jeden tag `lang="fi"`, bo to fiński głos ma go przeczytać.
+    """
+    fi = ("Hyvää huomenta! Minä olen suomalainen ja asun Helsingissä. Tämä on "
+          "erittäin tärkeä lause, joka pitää pysyä muuttumattomana.")
+    frag = "\n\n".join((PL, fi, PL))
+
+    opcje: dict = {}
+    wynik = cp.przetworz(frag, cp.TRYB_REZYSER, "pl", "finski", opcje)
+    assert fi in wynik, (
+        "finski akapit mial przejsc bez zmian, a w wyniku go nie ma — "
+        f"wynik: {wynik!r}")
+    assert PL not in wynik, "polski akapit mial przejsc przez reguly akcentu"
+
+    langi = _langi(_zapisz(cp.TRYB_REZYSER, "pl", "finski", ".md", frag))
+    assert set(langi) == {"fi"}, (
+        f"dokument mieszany z akapitem w jezyku celu: {langi} zamiast {{'fi'}}")
+
+
 if __name__ == "__main__":
     try:
         sys.stdout.reconfigure(encoding="utf-8")

@@ -1539,7 +1539,8 @@ def _przetworz_rezyser(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
         wymus_jezyk=opcje.get("wymus_jezyk"))
     wyniki = []
     zapisane = []
-    iso_sticky = str(cfg.get("iso") or jezyk).strip() or jezyk
+    iso_wariantu = str(cfg.get("iso") or "").strip()
+    iso_sticky = iso_wariantu or jezyk
     for jez_seg, fragment, czy_przetwarzac in segmenty_in:
         if not czy_przetwarzac:
             wyniki.append(fragment)
@@ -1547,6 +1548,22 @@ def _przetworz_rezyser(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
             continue
 
         cfg_jez = wariant_po_id(TRYB_REZYSER, jez_seg, wariant_id)
+        if cfg_jez is None and jez_seg == iso_wariantu:
+            # AKAPIT JUŻ JEST W JĘZYKU CELU — poprawną operacją jest NIC (v19.4.2).
+            # Akcent znaczy „przygotuj tekst dla głosu X", więc fragment, który
+            # po X-owemu już jest napisany, niczego nie potrzebuje. Reguły
+            # `<iso>/akcenty/<ten sam akcent>.yaml` nie ma i mieć nie będzie:
+            # zasada natywności wyklucza akcent własnego języka (paczka `fi` nie
+            # ma `finski.yaml`, `en` nie ma `angielski.yaml` — stąd N-1 plików).
+            # Do v19.4.1 leciał tu wyjątek ubijający CAŁY dokument, także jego
+            # polskie akapity, a jedyne obejście („wymuś język") przepuszczało
+            # fiński akapit pre-passem paczki pl i zjadało mu ä/å — czyli
+            # zmieniało słowa. Podręcznik do nauki języka i angielski cytat
+            # w polskim tekście to nie egzotyka, tylko typowe wejście Poligloty.
+            iso_sticky = jez_seg
+            wyniki.append(fragment)
+            zapisane.append((iso_sticky, fragment, True))
+            continue
         if cfg_jez is None:
             raise BrakRegulyDlaJezykaError(
                 jezyk_kod=jez_seg,
