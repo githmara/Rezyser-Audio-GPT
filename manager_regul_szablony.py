@@ -1014,11 +1014,12 @@ iso: {jezyk_bazowy}
 kategoria: szyfr
 kolejnosc: 100
 
-# Pipeline – for ciphers usually everything OFF except the replacements list.
-czysc_tekst_tts: false
-normalizuj_liczby: false
-usun_polskie_znaki: false
-skleja_pojedyncze_litery: false
+# NO pipeline flags here — the cipher path does not read them. The engine runs
+# the diacritic pre-pass (`podstawy.yaml::polskie_znaki`) and the full TTS
+# cleaning WITH number normalization before every cipher, algorithmic or not.
+# Two consequences for the list below: a pattern containing a character the
+# pre-pass flattens is DEAD (it is already gone), and digits never reach it
+# („2" arrives as the word). Deployed ciphers carry no pipeline flags either.
 
 # The actual replacements. The list is applied SEQUENTIALLY (str.replace) —
 # each rule operates on the OUTPUT of the previous one. Two consequences:
@@ -1052,8 +1053,13 @@ a „pure replacements" cipher file inside the project tree.
 
 # PROJECT CONTEXT
 - `core_poliglota.py` — the phonetic engine. „Pure replacements" ciphers
-  work like accents without the phonetic pipeline: only the `zamiany:`
-  list is applied to the text.
+  work like accents without the phonetic pipeline: the cipher dispatcher
+  (`_przetworz_szyfrant`) branches on the `algorytm:` field — present means
+  a Python algorithm, absent means YOUR `zamiany:` list is applied instead.
+- WHAT RUNS BEFORE YOUR LIST (and is NOT configurable): the diacritic
+  pre-pass from `podstawy.yaml::polskie_znaki` and the full TTS cleaning with
+  number normalization. Both are unconditional on the cipher path — the four
+  pipeline flags of an accent file are not read here at all.
 - CRITICAL about reference models: ALL 6 ciphers deployed in the packs
   (cezar, jakanie, odwracanie, samogloskowiec, typoglikemia, waz) are
   ALGORITHMIC ciphers — they have an `algorytm:` field and do NOT contain a
@@ -1087,13 +1093,15 @@ a „pure replacements" cipher named **{etykieta}**.
 # STRUCTURE REQUIREMENTS
 1. Fields: `id`, `etykieta`, `opis`, `iso: {jezyk_bazowy}`,
    `kategoria: szyfr`, `kolejnosc`.
-2. Pipeline (typically all OFF for ciphers):
-   `czysc_tekst_tts: false`, `normalizuj_liczby: false`,
-   `usun_polskie_znaki: false`, `skleja_pojedyncze_litery: false`.
+2. NO `algorytm:` field (its absence is what selects the `zamiany:` branch)
+   and NO pipeline flags — the cipher path ignores them.
 3. The `zamiany:` list ordered: digraphs/trigraphs BEFORE single letters.
-   For each pattern consider a `lowercase` and a `Capitalized` variant. If
-   the effect should also act on diacritics (à, é, ä, ё), include them
-   explicitly or add a pattern with `regex: true`.
+   For each pattern consider a `lowercase` and a `Capitalized` variant.
+   Do NOT write patterns on characters the pre-pass removes: check
+   `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki` and assume every
+   `wzor` listed there is already gone before your list runs. The letters the
+   pack keeps (its own, the ones standing in `alfabet`) are fair game — for
+   a Cyrillic or Greek pack that is the whole native script.
 
 # NATIVE-LANGUAGE REQUIREMENTS
 `etykieta`, `opis`, the file header, the YAML comments — in
@@ -1967,14 +1975,26 @@ whatever your host provides). Task: add a
 new algorithmic cipher to the project — this requires **two** changes: a
 YAML file + a Python function in `core_poliglota.py`.
 
+# BEFORE YOU START: DO YOU ACTUALLY NEED CODE?
+If the effect is a fixed replacement table (letter → letter, digraph →
+symbol), you do NOT need Python — that is the „pure replacements" cipher
+type, a YAML file with a `zamiany:` list and no `algorytm:` field, which
+works in the frozen app with no source access. Choose an algorithm only when
+the effect depends on POSITION, LENGTH, RANDOMNESS or the alphabet (Caesar
+shifting, word scrambling, reversal) — something a static table cannot express.
+
 # PROJECT CONTEXT
-- `core_poliglota.py` — the phonetic engine + algorithm dispatcher. The
-  `_ALGORYTMY` map maps a cipher `id` to the Python function implementing
-  the algorithm. A `kategoria: szyfr` YAML file with an `algorytm: <id>`
-  field tells the engine to call `_algorytm_<id>` instead of a `zamiany:`
-  list.
-- Existing algorithms (reference): odwracanie, typoglikemia, jakanie,
-  samogloskowiec, waz. All in `core_poliglota.py` as `_algorytm_*`.
+- `core_poliglota.py` — the phonetic engine + cipher dispatcher. The
+  `_ALGORYTMY_SZYFROW` map maps an algorithm NAME to the Python function
+  implementing it. A `kategoria: szyfr` YAML file with an `algorytm: <name>`
+  field tells the engine to call that function instead of applying
+  a `zamiany:` list.
+- Existing algorithms (reference): cezar, odwracanie, typoglikemia, jakanie,
+  samogloskowiec, waz. All in `core_poliglota.py` as `_algo_*`.
+- WHAT RUNS BEFORE YOUR FUNCTION (unconditional, not configurable): the
+  diacritic pre-pass from `podstawy.yaml::polskie_znaki` and the full TTS
+  cleaning with number normalization. Your function receives text that is
+  already cleaned and digit-free.
 - Pack for this task: `dictionaries/{jezyk_bazowy}/`
   (language {natywna_baza}).
 
@@ -1985,10 +2005,13 @@ EFFECT DESCRIPTION (from the user):
 > {opis_efektu}
 
 # REFERENCE FILES (open before writing)
-1. `core_poliglota.py` — look for the `_algorytm_*` functions (e.g.
-   `_algorytm_odwracanie`, `_algorytm_typoglikemia`) and the `_ALGORYTMY`
-   map. Note the signature `(tekst: str, regula: dict) -> str` and how
-   `random` is used.
+1. `core_poliglota.py` — look for the `_algo_*` functions (e.g.
+   `_algo_odwracanie`, `_algo_typoglikemia`) and the `_ALGORYTMY_SZYFROW`
+   map. Note the signature
+   `(tekst: str, cfg: dict, podstawy: dict, opcje: dict) -> str` — `cfg` is
+   the cipher's own YAML, `podstawy` the pack's `podstawy.yaml` (alphabet!),
+   `opcje` the kwargs the GUI passes to `przetworz` — and how `random`
+   is used.
 2. `dictionaries/pl/szyfry/odwracanie.yaml` — the model for the
    `rozwiniecia:` convention (regexes expanding abbreviations „itd." → „i
    tak dalej" BEFORE the main processing). Rules: word boundaries
@@ -2008,14 +2031,17 @@ kategoria: szyfr
 kolejnosc: 100
 algorytm: {id_pliku}
 
-# <Optional parameters read from regula['<key>'] by the Python function>
+# <Optional parameters read from cfg['<key>'] by the Python function>
 # parametr_1: value
 ```
 
 # PYTHON CODE REQUIREMENTS (`core_poliglota.py`)
-1. A function `_algorytm_{id_pliku}(tekst: str, regula: dict) -> str` —
-   the same signature as the existing algorithms.
-2. An entry in the `_ALGORYTMY` map: `"{id_pliku}": _algorytm_{id_pliku}`.
+1. A function `_algo_{id_pliku}(tekst: str, cfg: dict, podstawy: dict,
+   opcje: dict) -> str` — the EXACT signature of the existing algorithms
+   (all four parameters, even if you use only `tekst`; the dispatcher calls
+   them positionally).
+2. An entry in the `_ALGORYTMY_SZYFROW` map:
+   `"{id_pliku}": _algo_{id_pliku}`.
 3. **Idempotence**: running twice with the same seed returns the same
    result (unless randomness is intentional — then document it).
 4. Operate char-by-char or word-by-word, **preserve** whitespace and
@@ -2031,15 +2057,17 @@ docstring in `core_poliglota.py` stay in Polish (per the engine convention
 # PROCEDURE
 1. Open the reference files (Read).
 2. Design the algorithm in your head + any YAML-configurable parameters.
-3. Edit `core_poliglota.py` — add the `_algorytm_{id_pliku}` function and
-   the `_ALGORYTMY` entry.
+3. Edit `core_poliglota.py` — add the `_algo_{id_pliku}` function and
+   the `_ALGORYTMY_SZYFROW` entry.
 4. Write `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`.
 5. Validate that the YAML file parses using whatever YAML tooling you have
    available (any YAML loader/linter — do not assume a particular shell or
    that Python is on PATH).
 6. Confirm the dispatch wiring: `{id_pliku}` must be present as a key in
-   `core_poliglota._ALGORYTMY` (load the module with your Python tooling and
-   check, or grep the `_ALGORYTMY` map literal).
+   `core_poliglota._ALGORYTMY_SZYFROW` (load the module with your Python
+   tooling and check, or grep the map literal). A name missing from the map
+   raises at the first use; a YAML file with neither `algorytm:` nor
+   `zamiany:` raises too, and says which one is missing.
 7. Consider writing a unit test (idempotence, whitespace preservation).
 8. In your reply report: how many lines of code you added in
    `core_poliglota.py`, the algorithm parameters, and the idempotence test

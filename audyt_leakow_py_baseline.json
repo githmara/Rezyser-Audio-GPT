@@ -16,13 +16,15 @@
   "core_poliglota.py": [
     "POSSIBLE|lingua:PL|Nieznany tryb: „{…}”. Oczekiwano „Rezyser” lub „Szyfrant”.",
     "POSSIBLE|lingua:PL|Parametr `wariant` jest wymagany.",
+    "POSSIBLE|lingua:PL|nieznany algorytm szyfru: „{…}”",
+    "POSSIBLE|lingua:PL|plik nie ma ani pola `algorytm`, ani niepustej listy `zamiany`",
     "POSSIBLE|znak-PL:ĄąĘę|aeiouyąęóAEIOUYĄĘÓ",
     "POSSIBLE|znak-PL:ĄĆĘŁŃŚŹŻ|AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ",
     "POSSIBLE|znak-PL:ĄĘ|AEIYUĄĘÓ",
     "POSSIBLE|znak-PL:ąę|aeiyuąęó",
     "POSSIBLE|znak-PL:ę|Nie znaleziono wariantu „{…}” dla trybu „{…}” i języka „{…}”.",
-    "POSSIBLE|znak-PL:ę|Nieznany algorytm szyfru: „{…}” (plik dictionaries/{…}/szyfry/{…}.yaml). Dostępne: {…}",
     "POSSIBLE|znak-PL:ę|Nieznany algorytm szyfru: „{…}”. Dostępne: {…}",
+    "POSSIBLE|znak-PL:ę|Szyfr nie do uruchomienia — {…} (plik dictionaries/{…}/szyfry/{…}.yaml). Dostępne algorytmy: {…}",
     "POSSIBLE|znak-PL:ęłńś|Wykryto fragment w języku {…} (kod '{…}'), ale brakuje reguły '{…}' w folderze {…}. Utwórz plik {…}/{…}.yaml przed konty"
   ],
   "core_rezyser.py": [

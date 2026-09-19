@@ -1776,7 +1776,13 @@ _ALGORYTMY_SZYFROW: dict[str, Callable[[str, dict, dict, dict], str]] = {
 
 
 def _przetworz_szyfrant(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
-    """Szyfrant: dispatcher na algorytm – z dynamiczną detekcją języka per akapit.
+    """Szyfrant: dispatcher na algorytm ALBO listę zamian – z detekcją per akapit.
+
+    Dwie gałęzie, rozstrzygane polem ``algorytm``: jest → funkcja Pythona
+    z :data:`_ALGORYTMY_SZYFROW`; nie ma → lista ``zamiany`` (szyfr „czyste
+    zamiany", v19.6). Pre-pass diakrytyków i ``oczysc_tekst_tts`` biegną
+    BEZWARUNKOWO przed obiema — flagi pipeline z YAML-a szyfru nie są tu
+    czytane w ogóle (to pola akcentu).
 
     13.5: dla każdego akapitu pobierane są reguły z ``dictionaries/<jezyk>/
     szyfry/<wariant>.yaml`` (gdzie ``<jezyk>`` = wynik detekcji lingua,
@@ -1832,13 +1838,25 @@ def _przetworz_szyfrant(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
 
         nazwa_algo = cfg_jez.get("algorytm", "")
         funkcja = _ALGORYTMY_SZYFROW.get(nazwa_algo)
-        if funkcja is None:
+        if funkcja is not None:
+            wynik_fr = funkcja(fragment_czysty, cfg_jez, podstawy_jez, opcje)
+        elif not nazwa_algo and cfg_jez.get("zamiany"):
+            # v19.6: szyfr „czyste zamiany" — bez pola `algorytm`, cała treść
+            # w liście `zamiany` (dokładnie to, co wystawia Manager Reguł jako
+            # typ `szyfr_zamiany`). Do 19.5.0 taki plik ładował się do GUI
+            # i dopiero przy użyciu rzucał „Nieznany algorytm szyfru: „””,
+            # bo dispatcher znał WYŁĄCZNIE gałąź algorytmiczną — czyli jeden
+            # z dziewięciu typów kreatora produkował plik martwy z definicji.
+            wynik_fr = _zastosuj_zamiany(fragment_czysty, cfg_jez["zamiany"])
+        else:
+            brak = ("plik nie ma ani pola `algorytm`, ani niepustej listy "
+                    "`zamiany`" if not nazwa_algo
+                    else f"nieznany algorytm szyfru: „{nazwa_algo}”")
             raise ValueError(
-                f"Nieznany algorytm szyfru: „{nazwa_algo}” "
+                f"Szyfr nie do uruchomienia — {brak} "
                 f"(plik dictionaries/{jez_seg}/szyfry/{wariant_id}.yaml). "
-                f"Dostępne: {sorted(_ALGORYTMY_SZYFROW)}"
+                f"Dostępne algorytmy: {sorted(_ALGORYTMY_SZYFROW)}"
             )
-        wynik_fr = funkcja(fragment_czysty, cfg_jez, podstawy_jez, opcje)
         # v19.1: język WYNIKU z pola ``iso`` wariantu — ta sama reguła co
         # w akcencie. Dla szyfrów `iso` = własny język paczki, więc dziś
         # wychodzi na to samo co ``jez_seg``; reguła jest jedna po to, żeby
