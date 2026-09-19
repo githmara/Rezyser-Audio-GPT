@@ -48,7 +48,14 @@ wxpython<4.4
 # wołania (structured outputs, `stop_reason`, `max_tokens`) idą po API 1.x.
 # Przejście 0.x → 1.x kosztowało JEDNĄ zmianę: `temperature` wypadła z sygnatury
 # `messages.create` i jedzie odtąd przez `extra_body` (patrz `core_llm`).
-anthropic<2
+#
+# WSTRZYMANIE ZAPISANE GRANICĄ (v19.4.2, kanon zachowawczy): PyPI ma 1.7.0, czyli
+# krok MINOROWY — migracja SDK nie jest treścią tego patcha, a cisza („granica
+# `<2` to dopuszcza") oznaczałaby, że kontrybutor dostaje wersję, której nikt nie
+# sprawdził. Granica wyklucza ją świadomie i na czas określony: zdejmujemy ją
+# w osobnym cyklu — przesuń na `<2`, zupgraduj, potwierdź wołaną powierzchnię
+# (`inspect.signature` na `messages.create`), wydaj jako własny patch.
+anthropic<1.7
 # Most do Studio: wołamy `client.studio.projects.create/delete`
 # i `client.user.subscription.get` — dokładnie tę powierzchnię ten SDK
 # przemianowuje między wydaniami. 2.52 → 2.67 (15 minorów) przeszło bez zmian
@@ -112,4 +119,8 @@ markdown
 # `anthropic`: 4.x będzie nowym majorem SDK, a nasze wołania idą po API 3.x.
 # Przejście 2.x → 3.x nie wymagało żadnej zmiany — `chat.completions.create`
 # i `with_options` zostały, sprawdzone żywym wywołaniem przy migracji.
-openai<4
+#
+# WSTRZYMANIE ZAPISANE GRANICĄ (v19.4.2, kanon zachowawczy): PyPI ma 3.16.2 —
+# krok MINOROWY, ta sama decyzja i ten sam termin co przy `anthropic` wyżej.
+# Zdjęcie granicy (z powrotem na `<4`) jest treścią osobnego cyklu, nie tego.
+openai<3.16

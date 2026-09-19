@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.4.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.4.2 „Wersja Wydawnicza"
+
+*Patch v19.4.2: trzy klasy wyjęte z przeglądu edge-case'ów, każda zmierzona wykonaniem, zanim cokolwiek ruszyło. **(1)** Prompty Managera Reguł wyliczały legalne wartości `zakres:` własnym literałem i utknęły na dwóch z v18.12 — agent, który zobaczyłby w paczce `zakres: rekoncyliacja`, miał w ręku instrukcję mówiącą, że to wartość nielegalna, więc uznałby gotowe narzędzie Pamięci Długotrwałej za stub do obejścia; ta sama klasa kazała mu budować paczkę bez `opowiesci/`, czyli taką, którą silnik po cichu odfiltrowuje. Wyliczenia idą odtąd z modułu, który je egzekwuje. **(2)** Akapit napisany JUŻ w języku celu akcentu wywracał całe przetwarzanie — bo akcentu własnego języka w paczce nie ma i mieć nie będzie — a jedyne obejście, „wymuś język", zjadało takiemu akapitowi diakrytyki. Teraz przechodzi bez zmian. **(3)** Paczka z dwoma narzędziami pamięci (v18.14 dopuszcza je wprost) traciła rozróżnienie po jednym wczytaniu projektu, a automat progu alarmowego czytał z pliku wybranego przez reżysera i zapisywał do cudzego. Wszystkie trzy mają bramki, każda zweryfikowana mutacyjnie.*
 
 *Patch v19.4.1: dwa zdania w runtimie przestają obiecywać polski, którego w treści już nie ma. Od v19.4.0 body Release jest samo angielskie, ale nota o changelogu w dziewięciu paczkach nadal mówiła „Jest po angielsku i polsku", a druga — że strona wydania jest dostępna po polsku; klucz `co_nowego_online_pl` nosił ten fakt w samej nazwie i nazywa się teraz `co_nowego_online_uwaga`. Klasa jest nowa dla przeglądu tłumaczeń: wszystkie osiemnaście stringów było przetłumaczonych poprawnie, a fałszywe było ZDANIE, którego prawdziwość mieszka poza paczką — więc bramka w `test_core_updater.py` stoi po obu stronach kanonu. Przy okazji kanon zależności przestaje odsyłać do nieistniejącej rubryki „Pod maską".*
 
@@ -80,6 +82,80 @@
 
 ---
 
+## 19.4.2 — patch release
+
+### What's new
+
+**The Rule Manager stops teaching an engine that is two releases old.** Its
+prompt for a postproduction listed the legal values of `zakres:` as its own
+literal and had been stuck on the two from v18.12, although the engine has known
+three since v18.13. This is not a stale comment: an agent that greps the pack,
+finds `zakres: rekoncyliacja` and reads an instruction calling that value illegal
+will conclude the shipped Long-Term Memory tool is a stub — and route around it
+with a mode of its own, whose output then lands NEXT TO the memory file while the
+reconciliation anchor keeps pointing at the previous summary. The same class sat
+in the prompt for a new base language, which listed `gui/` where the engine
+requires `opowiesci/`: follow it and you build a pack that
+`dostepne_jezyki_bazowe()` filters out in silence, leaving the author with a
+language that simply never appears. Every enumeration in those prompts now comes
+from the module that enforces it — the allowed scopes, the memory role, the
+required subfolders, the recipe loader — and `test_manager_kontrakt.py` fails if
+a prompt stops quoting them.
+
+**A paragraph already written in the accent's target language no longer blows up
+the document.** Polyglot looks up the rule for each paragraph in the pack of the
+DETECTED language, and the nativeness rule means an accent for a pack's own
+language does not exist there (`fi/akcenty/` has no `finski.yaml`). A Finnish
+paragraph inside a Polish textbook therefore killed the whole run of the Finnish
+accent — Polish paragraphs included — with a message telling the user to create
+the missing file or delete the foreign text. The only workaround, "force
+language", was worse than the error: it pushed that paragraph through the Polish
+pre-pass and ate its ä/å, changing the words the voice would read. Such a segment
+now passes through untouched and keeps the target `lang` tag, so a language
+textbook comes out with its Polish rendered phonetically and its Finnish intact.
+A rule missing for a language that is NOT the target still raises the same error
+as before.
+
+**A pack may ship two Long-Term Memory tools — and now they survive each other.**
+v18.14 allows more than one recipe with the memory role ("one memory for the
+author, one for the AI"), and two things quietly contradicted that. Loading a
+project renamed the single file it found to the MAIN suffix — a migration written
+for localized suffixes, which could not tell a foreign pack's file from the second
+tool of this one, so a memory saved deliberately with tool B came back under tool
+A's name. And the alarm-threshold automation always ran the FIRST recipe, so with
+two tools it read the reconciliation input from the file the director had chosen
+and wrote the result into the other one: overwriting a memory nobody asked it to
+touch, and leaving the chosen one with a stale anchor, so the next reconciliation
+would re-send material already compressed. The project now knows which suffixes
+belong to live tools and migrates only what does not, and the automation runs the
+recipe that writes to the file resolved for this project. Measured on the real
+packs, `de` and `fi` still migrate a historical `_streszczenie` to their own
+suffix.
+
+### Planned or deferred
+
+* The diacritics canon is the one finding from this review left untouched, on
+  purpose — it is the only one that changes the phonetic OUTPUT of existing
+  accents. Measured: an accent with the pre-pass off (pl → Russian) passes every
+  foreign diacritic into Cyrillic (`цафé`, `Мüллэра`), accents with it on cover
+  Latin-1 but let all 101 letters of Latin Extended-A through (Dvořák, Erdoğan,
+  Győr), and the cipher path leaks the same characters as plain text through
+  Caesar. Eight of the nine packs already treat `polskie_znaki` as "diacritics
+  FOREIGN to this pack"; only `pl` flattens its own, which is why its Russian
+  accent has to run with the pre-pass off. The split, the Latin Extended-A fill
+  and a coverage gate get their own cycle.
+* The manuals do not yet describe what happens to a paragraph already in the
+  target language. The sentence they carry stays true, so this is an addition
+  rather than a correction.
+* The 49 quotes ALMOST equal to a label stay baselined — unchanged from v19.4.1,
+  still a call for a native speaker.
+* Two SDK upgrades are HELD, and the hold is written down rather than left
+  silent: `anthropic` 1.6.0 → 1.7.0 and `openai` 3.15.0 → 3.16.2 are both MINOR
+  steps, and an SDK migration is not the subject of this patch. The manifest
+  bounds now exclude them (`anthropic<1.7`, `openai<3.16`), so a contributor
+  installs exactly what this release was built and tested against, and the
+  environment is frozen alongside the release report. Moving the bounds back,
+  upgrading and confirming the surface we call is a cycle of its own.
 ## 19.4.1 — patch release
 
 ### What's new
