@@ -22,6 +22,5 @@ kolejnosc: 100
 # Special mode — DOES NOT run any text-processing stage.
 czysc_tekst_tts: false
 normalizuj_liczby: false
-usun_polskie_znaki: false
 skleja_pojedyncze_litery: false
 zamiany: []

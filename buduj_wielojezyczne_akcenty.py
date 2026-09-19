@@ -65,22 +65,17 @@ Bramki (błąd = blokada zapisu / niezerowy exit; uwaga = triaż recenzenta):
     wielka litera zastępuje granicę słowa (`Sp` → `Шп` w `de/rosyjski`), nosi
     tę granicę jawnie jako spację (` SP`), bo w tekście pisanym wersalikami
     proxy z wielkiej litery nie istnieje.
-  * **G9 tablica pre-passu vs. własne akcenty paczki** (v18.22) — wpis
-    `podstawy.yaml::polskie_znaki` obowiązuje w każdym akcencie z flagą
-    `usun_polskie_znaki: true`, więc jeśli akcenty z flagą `false` czytają ten
-    sam znak inaczej, paczka sobie przeczy. Porównanie po PIERWSZEJ literze
-    wyniku i tylko w obrębie jednego pisma; jednomyślny rozjazd = błąd. To ta
-    bramka nazywa francuską cedyllę: tablica dawała „c" (czyli /k/), a własne
-    akcenty — /s/.
 
 **PRE-PASS ZJADA REGUŁY — klasa defektu odkryta tym audytem.** Silnik stosuje
-`usun_polskie_znaki` PRZED listą `zamiany` (`core_poliglota` linie 1038-1044),
-a pole `polskie_znaki` w `podstawy.yaml` — wbrew historycznej nazwie — spłaszcza
-WSZYSTKIE diakrytyki paczki. Reguła, której `wzor` zawiera diakrytyk źródła,
-jest więc przy włączonej fladze NIEOSIĄGALNA: paczka `de` obiecuje w prozie
-„ä → e" (akcent polski), „ö → eu" (francuski), „ü → y" (fiński/islandzki),
-a silnik oddaje gołe a/o/u. Paczki `es` i `fr` znają to rozwiązanie i stawiają
-`usun_polskie_znaki: false` w akcentach, które potrzebują własnych diakrytyków.
+pre-pass `podstawy.yaml::polskie_znaki` PRZED listą `zamiany`, a od v19.6
+BEZWARUNKOWO (flaga `usun_polskie_znaki` zniknęła z plików akcentów: dawała
+dostęp do jednego znaku źródła kosztem przepuszczenia całej reszty łacinki).
+Reguła, której `wzor` pre-pass spłaszcza, jest więc NIEOSIĄGALNA — łapie ją
+G2. Jeśli taka reguła jest potrzebna, decyzja należy do tablicy paczki:
+albo znak stoi w `alfabet` (wtedy pre-pass go nie tyka — tak żyją ä/ö/ü w `de`
+i ä/å/ö w `fi`), albo przestrajamy CEL jego pary tak, by służył wszystkim
+akcentom (tak zamknięto francuską cedyllę: `ç → ss`, bo niemieckie „s" między
+samogłoskami czyta się /z/).
 
 Zależności: wspólny rdzeń :mod:`tlumacz_rdzen` (klient, round-trip, chunkowanie)
 i bramki :mod:`tlumacz_bramki` (anty-meta-skip, odcisk struktury). Moduł jest
@@ -158,7 +153,6 @@ KLASY_POL: dict[str, str] = {
     "opis": KLASA_OPIS,
     "czysc_tekst_tts": KLASA_PIPELINE,
     "normalizuj_liczby": KLASA_PIPELINE,
-    "usun_polskie_znaki": KLASA_PIPELINE,
     "skleja_pojedyncze_litery": KLASA_PIPELINE,
     "zamiany": KLASA_REGULY,
 }
@@ -480,6 +474,17 @@ def bramka_kontrakt(
         return zn
 
     nieznane = sorted(set(map(str, cfg)) - set(KLASY_POL))
+    if "usun_polskie_znaki" in nieznane:
+        # Pole ZNIESIONE w v19.6, nie zapomniane. Silnik go nie czyta, więc
+        # w pliku jest cichym kłamstwem: autor myśli, że wyłączył pre-pass,
+        # a pre-pass biegnie. Komunikat mówi to wprost, zamiast podpowiadać
+        # dopisanie pola z powrotem do KLASY_POL.
+        blad("pole `usun_polskie_znaki` zostało ZNIESIONE w v19.6 — pre-pass "
+             "biegnie w każdym akcencie bezwarunkowo i silnik tej flagi NIE "
+             "czyta. Usuń linię; jeśli akcent potrzebuje znaku, który pre-pass "
+             "spłaszcza, decyzja należy do `podstawy.yaml` (litera w `alfabet` "
+             "albo przestrojony CEL pary, wzorzec: `fr: ç → ss`)")
+        nieznane = [p for p in nieznane if p != "usun_polskie_znaki"]
     if nieznane:
         blad(f"nieznane pola {nieznane} — dopisz każde do KLASY_POL "
              f"(kontrakt / etykieta / opis / pipeline / reguly); narzędzie nie "
@@ -596,31 +601,43 @@ def bramka_martwe_reguly(
                         f"jednoznakami)", blad=True))
                     break
 
-    # Klasa 4: pre-pass diakrytyków.
-    if cfg.get("usun_polskie_znaki"):
-        podstawy = cp._zaladuj_podstawy(paczka)
-        for idx, para in enumerate(zamiany):
-            if not isinstance(para, dict) or para.get("regex"):
-                continue
-            wzor = str(para.get("wzor", ""))
-            if not wzor:
-                continue
-            po_prepass = cp._usun_polskie_znaki(wzor, podstawy)
-            if po_prepass == wzor:
-                continue
-            zamiana = str(para.get("zamiana", ""))
-            realna_strata = po_prepass != zamiana
-            zn.append(Znalezisko(
-                nazwa, "G2",
-                f"`zamiany[{idx}]`: {wzor!r} → {zamiana!r} jest NIEOSIĄGALNA — "
-                f"`usun_polskie_znaki: true` spłaszcza wzorzec do {po_prepass!r} "
-                f"PRZED listą `zamiany`"
-                + ("; reguła obiecywała inny wynik, więc to realna strata "
-                   "(napraw flagą `usun_polskie_znaki: false` jak paczki es/fr "
-                   "albo usuń regułę i prozę o niej)"
-                   if realna_strata else
-                   "; pre-pass daje ten sam wynik, więc to nieszkodliwy duplikat"),
-                blad=realna_strata))
+    # Klasa 4: pre-pass diakrytyków (od v19.6 biegnie w KAŻDYM akcencie).
+    podstawy = cp._zaladuj_podstawy(paczka)
+    wczesniejsze_wyniki = ""
+    for idx, para in enumerate(zamiany):
+        if not isinstance(para, dict) or para.get("regex"):
+            continue
+        wzor = str(para.get("wzor", ""))
+        zamiana = str(para.get("zamiana", ""))
+        if not wzor:
+            continue
+        po_prepass = cp._usun_polskie_znaki(wzor, podstawy)
+        if po_prepass == wzor:
+            wczesniejsze_wyniki += zamiana
+            continue
+        # Pre-pass działa na WEJŚCIU, a `zamiany` biegną sekwencyjnie — więc
+        # wzorzec ze znakiem, który WPROWADZA któraś z WCZEŚNIEJSZYCH reguł,
+        # żyje na tekście pośrednim i martwy nie jest. Tak działa łańcuch
+        # naprawczy `fr/niemiecki` (`u → ü`, potem `oü → u`): bez tego wyjątku
+        # bramka krzyczałaby na poprawny wzorzec projektowy.
+        znaki_zdjete = {z for z in wzor if cp._usun_polskie_znaki(z, podstawy) != z}
+        osiagalne_posrednio = znaki_zdjete <= set(wczesniejsze_wyniki)
+        wczesniejsze_wyniki += zamiana
+        if osiagalne_posrednio:
+            continue
+        realna_strata = po_prepass != zamiana
+        zn.append(Znalezisko(
+            nazwa, "G2",
+            f"`zamiany[{idx}]`: {wzor!r} → {zamiana!r} jest NIEOSIĄGALNA — "
+            f"pre-pass paczki spłaszcza wzorzec do {po_prepass!r} PRZED listą "
+            f"`zamiany`"
+            + ("; reguła obiecywała inny wynik, więc to realna strata. Napraw "
+               "w TABLICY paczki: albo znak należy do `alfabet` (pre-pass go "
+               "wtedy nie tyka), albo przestrój CEL jego pary tak, by służył "
+               "wszystkim akcentom (wzorzec: `fr: ç → ss`)"
+               if realna_strata else
+               "; pre-pass daje ten sam wynik, więc to nieszkodliwy duplikat"),
+            blad=realna_strata))
     return zn
 
 
@@ -894,73 +911,6 @@ def bramka_kolejnosc(pary: dict[tuple[str, str], dict]) -> list[Znalezisko]:
     return zn
 
 
-def _pierwsza_litera(tekst: str) -> str:
-    """Pierwsza litera napisu (małą literą) albo pusty napis."""
-    return next((z.lower() for z in tekst if z.isalpha()), "")
-
-
-def _pismo(znak: str) -> str:
-    """Nazwa pisma znaku (`LATIN`, `CYRILLIC`, …) — do odsiania cudzych alfabetów."""
-    return unicodedata.name(znak, " ").split()[0] if znak else ""
-
-
-def bramka_tablica_prepassu(pary: dict[tuple[str, str], dict]) -> list[Znalezisko]:
-    """G9: tablica pre-passu paczki wbrew opinii jej WŁASNYCH akcentów (18.22).
-
-    `podstawy.yaml::polskie_znaki` spłaszcza diakrytyki PRZED regułami akcentu,
-    więc jej wpis obowiązuje w każdym akcencie z `usun_polskie_znaki: true` —
-    a akcenty z flagą `false` mają o tym samym znaku opinię WŁASNĄ, wyrażoną
-    regułą. Rozjazd między jednym a drugim to defekt: paczka `fr` spłaszczała
-    „ç" do „c", choć jej własne akcenty (`niemiecki`, `polski`) czytają cedyllę
-    jako /s/ — i sześć par z pre-passem czytało „français" przez /k/, bo regułę
-    przejmowało „c" (dług C roadmapy, spłacony w 18.22).
-
-    Kryterium jest OBLICZALNE, nie ocenne — porównujemy PIERWSZĄ literę wyniku
-    (niemieckie „ss" i polskie „s" zapisują ten sam dźwięk, więc zgadzają się),
-    a opinie w innym piśmie odsiewamy (`pl/rosyjski` mapuje „ł" na „л" — to
-    nie spór o dźwięk, to inny alfabet). Jednomyślny rozjazd = BŁĄD (tablica
-    jest po prostu zła); podzielone opinie = uwaga (bywają zapisem celu).
-    """
-    zn: list[Znalezisko] = []
-    for paczka in sorted({p for p, _ in pary}):
-        tabela = {str(r.get("wzor", "")): str(r.get("zamiana", ""))
-                  for r in podstawy_paczki(paczka).get("polskie_znaki", [])
-                  if isinstance(r, dict)}
-        z_prepassem = sorted(a for (p, a), cfg in pary.items()
-                             if p == paczka and cfg.get("usun_polskie_znaki"))
-        if not tabela or not z_prepassem:
-            continue  # tablica nie działa w żadnym akcencie — nie ma o co pytać
-        opinie: dict[str, dict[str, str]] = defaultdict(dict)
-        for (p, akcent), cfg in pary.items():
-            if p != paczka or cfg.get("usun_polskie_znaki"):
-                continue
-            for regula in cfg.get("zamiany") or []:
-                if regula.get("regex"):
-                    continue
-                wzor = str(regula.get("wzor", ""))
-                if wzor in tabela:
-                    opinie[wzor][akcent] = str(regula.get("zamiana", ""))
-        for znak, per_akcent in sorted(opinie.items()):
-            z_tabeli = _pierwsza_litera(tabela[znak])
-            wazne = {a: z for a, z in per_akcent.items()
-                     if _pismo(_pierwsza_litera(z)) == _pismo(z_tabeli)}
-            sporne = {a: z for a, z in wazne.items()
-                      if _pierwsza_litera(z) != z_tabeli}
-            if not sporne:
-                continue
-            jednomyslnie = len(sporne) == len(wazne)
-            glosy = ", ".join(f"{a} → {z!r}" for a, z in sorted(sporne.items()))
-            zn.append(Znalezisko(
-                f"{paczka}/podstawy", "G9",
-                f"pre-pass spłaszcza {znak!r} do {tabela[znak]!r}, a własne akcenty "
-                f"paczki czytają ten znak inaczej ({glosy})"
-                + (f" — zgodnie, więc tablica obowiązująca w {len(z_prepassem)} "
-                   f"akcentach z pre-passem jest błędna" if jednomyslnie else
-                   " — opinie podzielone, sprawdź czy to zapis celu"),
-                blad=jednomyslnie))
-    return zn
-
-
 # ---------------------------------------------------------------------------
 # AUDYT — przebieg
 # ---------------------------------------------------------------------------
@@ -994,7 +944,6 @@ def audytuj(
         znaleziska += bramka_przyklady(pkg, akc, cfg, cp)
     if not kody_paczek and not akcenty:
         znaleziska += bramka_kolejnosc(pary)
-        znaleziska += bramka_tablica_prepassu(pary)
     return znaleziska, len(wybrane)
 
 
@@ -1305,7 +1254,6 @@ def tabele_precedensowe(
         wynik.append({
             "source_language": pkg,
             "rules": " ".join(reguly),
-            "removes_source_diacritics_first": bool(cfg.get("usun_polskie_znaki")),
         })
         if len(wynik) >= ile:
             break
@@ -1385,11 +1333,13 @@ def _PROMPT_GENERATORA(
         "regex, no lookaround, no context conditions — a rule that needs "
         "\"only at the start of a word\" cannot be expressed and must not be "
         "promised in the description.\n"
-        "2. **`source_diacritics_removed_first`, when present in the payload, "
-        "lists characters that a PRE-PASS strips BEFORE your table runs.** A "
-        "rule whose pattern contains one of them is unreachable — either do not "
-        "write it, or write it and say so in `notes`, and the parent script will "
-        "switch the pre-pass off for this pair.\n"
+        "2. **An unconditional PRE-PASS runs before your table.** Every "
+        "character that is NOT a letter of `source_alphabet` is flattened "
+        "first (é→e, š→s, ß→ss, and ç per that pack's own table); there is no "
+        "per-accent switch to turn it off. A pattern built on such a character "
+        "is therefore DEAD — build it on what the pre-pass leaves behind. If "
+        "the sound genuinely needs the original character, say so in `notes`: "
+        "that is a decision about the pack's table, not about your pair.\n"
         "3. **`target_alphabet` is the inventory the synthesizer reads "
         "natively.** Prefer replacements built from it. Letters outside it are "
         "allowed only when the target voice reads them correctly anyway.\n"
@@ -1493,19 +1443,20 @@ def _parsuj_reguly(surowa: str) -> tuple[list[dict[str, str]], list[str]]:
     return wpisy, uwagi
 
 
-def _flaga_prepass(wpisy: list[dict[str, str]], podstawy_zrodla: dict, cp: Any) -> bool:
-    """Czy `usun_polskie_znaki` może zostać włączone dla tej pary?
+def _zjadane_przez_prepass(wpisy: list[dict[str, str]], podstawy_zrodla: dict,
+                           cp: Any) -> list[str]:
+    """Wzorce, których pre-pass paczki nie dopuści do listy `zamiany`.
 
-    Wyprowadzenie z DANYCH, nie z gustu: jeśli którakolwiek reguła opiera się
-    na diakrytyku, który pre-pass spłaszcza, flaga MUSI być wyłączona — inaczej
-    reguła jest martwa. Dokładnie ten błąd żył w siedmiu parach paczki `de`
-    (43 martwe reguły) i w pięciu parach paczki `fr`.
+    Do v19.5 ta sama sytuacja WYŁĄCZAŁA pre-pass w generowanym pliku
+    (`usun_polskie_znaki: false`) — i tak właśnie powstawały akcenty
+    przepuszczające do syntezatora 170–188 znaków łacinki, bo jedna potrzebna
+    reguła kosztowała cały pre-pass. Flagi już nie ma: model dostaje w prompcie
+    zakaz opierania reguł na tych znakach, a tu tylko MIERZYMY, czy go dotrzymał.
+    Decyzja o znaku, którego akcent naprawdę potrzebuje, należy do tablicy
+    paczki (`alfabet` albo przestrojony CEL pary) — patrz bramka G2.
     """
-    for wpis in wpisy:
-        wzor = wpis["wzor"]
-        if cp._usun_polskie_znaki(wzor, podstawy_zrodla) != wzor:
-            return False
-    return True
+    return [w["wzor"] for w in wpisy
+            if cp._usun_polskie_znaki(w["wzor"], podstawy_zrodla) != w["wzor"]]
 
 
 def _naglowek_pary(paczka: str, akcent: str) -> str:
@@ -1528,7 +1479,7 @@ _NOTA_FINALIZACJI = (
 
 def _zbuduj_plik(
     paczka: str, akcent: str, iso_celu: str, kolejnosc: int,
-    etykieta: str, opis: str, wpisy: list[dict[str, str]], prepass: bool,
+    etykieta: str, opis: str, wpisy: list[dict[str, str]],
 ) -> str:
     """Składa treść pliku pary akcentowej (płaski YAML, bez round-tripu).
 
@@ -1555,7 +1506,6 @@ def _zbuduj_plik(
         "",
         "czysc_tekst_tts: true",
         "normalizuj_liczby: true",
-        f"usun_polskie_znaki: {'true' if prepass else 'false'}",
         "skleja_pojedyncze_litery: true",
         "",
         "# Kolejność JEST kontraktem: silnik stosuje reguły sekwencyjnie przez",
@@ -1622,16 +1572,10 @@ def generuj_pare(
               f"nothing to derive the rule from.")
         return False
 
-    zjadane = sorted({
-        str(p.get("wzor")) for p in podstawy_zrodla.get("polskie_znaki", [])
-        if len(str(p.get("wzor", ""))) == 1
-        and str(p.get("wzor")) in str(podstawy_zrodla.get("alfabet", "")).lower()
-    })
     glosy = glosy_konsensusu(pary, akcent)
     pola: dict[str, Any] = {
         "source_alphabet": str(podstawy_zrodla.get("alfabet", "")),
         "target_alphabet": str(podstawy_celu.get("alfabet", "")),
-        "source_diacritics_removed_first": zjadane,
         "native_prose_sample": korpus_paczki(paczka)[:1200],
     }
     if glosy:
@@ -1647,8 +1591,7 @@ def generuj_pare(
                     "description_style": str(cfg_wzor.get("opis", ""))[:600]}
 
     print(f"🧭 {paczka}/{akcent}: wyprowadzam regułę {nazwa_zrodla} → "
-          f"{nazwa_celu} (głosy: {glosy or 'brak konsensusu'}; "
-          f"pre-pass zjada {len(zjadane)} znaków)")
+          f"{nazwa_celu} (głosy: {glosy or 'brak konsensusu'})")
     if dry_run:
         print(f"    (dry-run) payload: {sorted(pola)} + "
               f"{'kontekst paczki' if kontekst else 'brak kontekstu'}; "
@@ -1700,12 +1643,13 @@ def generuj_pare(
                        f"least 6), or the label/description came back empty"]
             continue
 
-        prepass = _flaga_prepass(wpisy, podstawy_zrodla, cp)
-        if not prepass:
-            print(f"🔎 {paczka}/{akcent}: reguły opierają się na diakrytykach "
-                  f"źródła → `usun_polskie_znaki: false` (inaczej byłyby martwe).")
+        zjadane = _zjadane_przez_prepass(wpisy, podstawy_zrodla, cp)
+        if zjadane:
+            print(f"🔎 {paczka}/{akcent}: pre-pass paczki spłaszcza wzorce "
+                  f"{zjadane} PRZED listą zamian — reguły na nich są martwe "
+                  f"(bramka G2 rozstrzygnie, czy to strata, czy duplikat).")
         tresc = _zbuduj_plik(paczka, akcent, iso_celu, _wolna_kolejnosc(paczka),
-                             etykieta, opis, wpisy, prepass)
+                             etykieta, opis, wpisy)
         znaleziska = _zapisz_z_walidacja(paczka, akcent, tresc)
         bledy = [z for z in znaleziska if z.blad]
         for z in znaleziska:

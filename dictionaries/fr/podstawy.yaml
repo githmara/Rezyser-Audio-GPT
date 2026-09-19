@@ -9,7 +9,7 @@
 #  Structure analogue à `dictionaries/pl/podstawy.yaml`. Le champ
 #  `polskie_znaki`, malgré son nom historique, contient TOUS les signes
 #  diacritiques qui doivent être normalisés en ASCII avant l'application
-#  des chiffrements ou des règles d'accentuation (`usun_polskie_znaki: true`).
+#  des chiffrements ou des règles d'accentuation (le pre-pass du paquet).
 #
 #  Note spéciale : les ligatures « œ » et « æ » sont translittérées en
 #  « oe » et « ae » dans `polskie_znaki` — elles ne peuvent PAS figurer
@@ -43,21 +43,24 @@ polskie_znaki:
   - { wzor: "Œ", zamiana: "Oe" }
   - { wzor: "æ", zamiana: "ae" }
   - { wzor: "Æ", zamiana: "Ae" }
-  # -- Diacritiques français → ASCII (pour les moteurs d'accent avec
-  #    usun_polskie_znaki: true) --
+  # -- Diacritiques français → ASCII (pre-pass de TOUS les accents) --
   #    Les accents des voyelles ne changent pas le PHONÈME de la lettre de
   #    base : « é/è/ê » restent un /e/, « à/â » un /a/. La cédille, elle, le
-  #    change — « ç » se lit /s/, jamais /k/ — donc elle est aplatie en « s »
-  #    et NON en « c » (18.22 : avec « c », les six accents à pre-pass
-  #    lisaient « français » avec /k/, car leur règle « c » → /k/ prenait le
-  #    relais). Les accents qui ont besoin de la cédille telle quelle
-  #    (fr/niemiecki, fr/polski) gardent `usun_polskie_znaki: false`.
+  #    change — « ç » se lit /s/, jamais /k/ — donc elle n'est JAMAIS aplatie
+  #    en « c » (18.22 : avec « c », les accents à pre-pass lisaient
+  #    « français » avec /k/, car leur règle « c » → /k/ prenait le relais).
+  #    Cible « ss » et non « s » (19.6) : en allemand un « s » entre voyelles
+  #    se lit /z/, donc « garson » sortirait en /gaʁzɔn/ — c'est pour cela que
+  #    fr/niemiecki portait sa propre règle « ç → ss » et devait couper le
+  #    pre-pass en entier (au prix de 188 caractères latins laissés passer).
+  #    Pour toutes les autres voix (pl, fi, ru, it, es, en, is) « ss » se lit
+  #    /s/ exactement comme « s » : le réglage est gratuit ailleurs.
   - { wzor: "à", zamiana: "a"  }
   - { wzor: "À", zamiana: "A"  }
   - { wzor: "â", zamiana: "a"  }
   - { wzor: "Â", zamiana: "A"  }
-  - { wzor: "ç", zamiana: "s"  }
-  - { wzor: "Ç", zamiana: "S"  }
+  - { wzor: "ç", zamiana: "ss" }
+  - { wzor: "Ç", zamiana: "Ss" }
   - { wzor: "é", zamiana: "e"  }
   - { wzor: "É", zamiana: "E"  }
   - { wzor: "è", zamiana: "e"  }

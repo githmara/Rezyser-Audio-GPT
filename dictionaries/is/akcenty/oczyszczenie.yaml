@@ -15,6 +15,5 @@ kategoria: oczyszczenie
 kolejnosc: 20
 czysc_tekst_tts: true
 normalizuj_liczby: true
-usun_polskie_znaki: false
 skleja_pojedyncze_litery: false
 zamiany: []

@@ -38,7 +38,6 @@ kolejnosc: 60
 
 czysc_tekst_tts: true
 normalizuj_liczby: true
-usun_polskie_znaki: true
 skleja_pojedyncze_litery: false
 
 # -----------------------------------------------------------------------------
@@ -176,7 +175,7 @@ zamiany:
   - { wzor: "J",  zamiana: "Й" }
 
   # --- 7. Umlaute (v18.21: feinere Abbildung ю/ё/э statt flacher а/о/у) ---
-  # Bis v18.18 erledigte das `usun_polskie_znaki` in `podstawy.yaml` (ä→a→а).
+  # Bis v18.18 erledigte das der Vorab-Durchlauf in `podstawy.yaml` (ä→a→а).
   # Seit Ä/Ö/Ü dort — dem deutschen `alfabet` entsprechend — NICHT mehr
   # plattgemacht werden, bildet diese Tabelle sie selbst ab. v18.19 hielt die
   # flache Abbildung (а/о/у) bewusst bei, um den Klang nicht zu verändern;

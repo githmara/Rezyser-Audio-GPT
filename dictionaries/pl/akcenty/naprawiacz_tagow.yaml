@@ -21,6 +21,5 @@ kolejnosc: 100
 # Tryb specjalny – NIE uruchamia żadnego etapu przetwarzania tekstu.
 czysc_tekst_tts: false
 normalizuj_liczby: false
-usun_polskie_znaki: false
 skleja_pojedyncze_litery: false
 zamiany: []

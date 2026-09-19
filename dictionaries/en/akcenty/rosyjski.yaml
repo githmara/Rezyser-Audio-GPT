@@ -39,8 +39,8 @@ kolejnosc: 45
 # --- Pipeline ---
 czysc_tekst_tts: true
 normalizuj_liczby: true
-# Latin source has no polish diacritics to strip.
-usun_polskie_znaki: true
+# The pre-pass flattens foreign Latin diacritics (Müller, café) before the
+# rules below, so nothing reaches Cyrillic still wearing them.
 # `sklej_pojedyncze_litery` regex looks for [a-z]; meaningless after
 # transliteration to Cyrillic.
 skleja_pojedyncze_litery: false

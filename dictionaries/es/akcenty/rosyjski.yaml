@@ -21,7 +21,7 @@ opis: |
     - « rr » → « рр » sale de forma natural de « r » → « р ».
 
   Simplificaciones conscientes (impuestas por el pipeline): la etapa
-  previa `usun_polskie_znaki` quita las tildes ANTES de estas reglas
+  previa (el pre-pass del paquete) quita las tildes ANTES de estas reglas
   (á→a, …, ü→u), por lo que « güe/güi » pierde la /w/ (pingüino →
   пингино) y el acento tónico no se marca.
 iso: ru
@@ -31,7 +31,6 @@ kolejnosc: 60
 # --- Pipeline ---
 czysc_tekst_tts: true
 normalizuj_liczby: true
-usun_polskie_znaki: true
 skleja_pojedyncze_litery: false
 
 # -----------------------------------------------------------------------------

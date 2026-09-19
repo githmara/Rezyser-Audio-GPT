@@ -5,8 +5,8 @@
 #  Ten plik zawiera wspólne dane wykorzystywane przez WSZYSTKIE akcenty
 #  i szyfry w podfolderach akcenty/ i szyfry/.
 #
-#  Edytuj OSTROŻNIE – zmiana tutaj wpływa na każdy akcent z flagą
-#  `usun_polskie_znaki: true` oraz na szyfr Cezara.
+#  Edytuj OSTROŻNIE – zmiana tutaj wpływa na KAŻDY akcent paczki
+#  (pre-pass jest bezwarunkowy) oraz na szyfr Cezara.
 # =============================================================================
 
 id: podstawy
@@ -21,8 +21,7 @@ etykieta: "Polski – podstawy fonetyczne"
 opis: |
   Bazowe reguły dla języka polskiego:
     1. Transliteracja diakrytyków OBCYCH (é, ü, ñ, å, ř, š…) na ASCII –
-       pierwszy krok każdego akcentu z flagą `usun_polskie_znaki: true`
-       oraz każdego szyfru. Polskich liter ta lista NIE spłaszcza: stoją
+       pierwszy krok każdego akcentu oraz każdego szyfru. Polskich liter ta lista NIE spłaszcza: stoją
        w alfabecie niżej, a ich romanizację (ą→on, ę→en, ó→u…) niosą na
        czele listy `zamiany` te akcenty, które jej potrzebują.
     2. Alfabet polski (35 liter, wielkie) – używany przez szyfr Cezara,
@@ -31,8 +30,8 @@ opis: |
 
 # -----------------------------------------------------------------------------
 # PRE-PASS paczki: zamiana OBCYCH znaków diakrytycznych na odpowiedniki ASCII.
-# Wykonywana PRZED listą `zamiany` danego akcentu (jeśli ten ma włączone
-# `usun_polskie_znaki: true`) oraz przed każdym szyfrem.
+# Wykonywana PRZED listą `zamiany` KAŻDEGO akcentu oraz przed każdym
+# szyfrem — od v19.6 bezwarunkowo, bez flagi w pliku akcentu.
 # -----------------------------------------------------------------------------
 polskie_znaki:
   # -- Litery polskie: NIE MA ICH TUTAJ i to jest decyzja (v19.5) --
@@ -46,8 +45,9 @@ polskie_znaki:
   #          była wierna (ta sama klasa błędu co niemieckie Ä/Ö/Ü, v18.19);
   #      (2) pre-pass jest WSPÓLNY dla całej paczki, więc akcent, który
   #          polskich diakrytyków POTRZEBUJE, musiał wyłączać go w całości —
-  #          `rosyjski.yaml` chodził z `usun_polskie_znaki: false` i przez to
-  #          przepuszczał do cyrylicy całą obcą łacinkę (`é ü Å ö ë ñ ú á`).
+  #          `rosyjski.yaml` wyłączał go w całości i przez to przepuszczał
+  #          do cyrylicy obcą łacinkę (`é ü Å ö ë ñ ú á`). Wyłącznika już
+  #          nie ma (v19.6) — właśnie dlatego, że kosztował tyle.
   #
   #    Romanizacja nie zniknęła — przeniosła się na CZOŁO listy `zamiany:`
   #    w siedmiu akcentach, które jej chcą (angielski, fiński, francuski,

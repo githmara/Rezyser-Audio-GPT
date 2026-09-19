@@ -85,13 +85,16 @@ dictionaries/
 
 ## Jak działa pipeline akcentu?
 
-Każdy plik akcentu może włączyć lub wyłączyć cztery etapy przetwarzania:
+Każdy plik akcentu może włączyć lub wyłączyć trzy etapy przetwarzania.
+Czwarty — pre-pass diakrytyków z `podstawy.yaml` — biegnie ZAWSZE i flagi
+nie ma (v19.6): wyłącznik dawał akcentowi dostęp do jednego znaku źródła
+kosztem przepuszczenia całej reszty łacinki do syntezatora.
 
 | Flaga                          | Co robi                                                       |
 |--------------------------------|---------------------------------------------------------------|
 | `czysc_tekst_tts`              | usuwa nawiasowe didaskalia, gwiazdki, hashtagi, nagromadzenie kropek |
 | `normalizuj_liczby`            | zamienia cyfry na słowa (np. `123` → `sto dwadzieścia trzy`)  |
-| `usun_polskie_znaki`           | ą→on, ę→en, ł→l, ó→u, ś→s, ć→c, ń→n, ż→z, ź→z                 |
+| *(pre-pass, bez flagi)*        | spłaszcza diakrytyki OBCE dla paczki wg `podstawy.yaml::polskie_znaki` (`é→e`, `š→s`, `ß→ss`); własnych liter paczki — tych z `alfabet` — NIE rusza |
 | `zamiany`                      | właściwe reguły fonetyczne danego akcentu                     |
 | `skleja_pojedyncze_litery`     | scala wiszące pojedyncze litery (np. „w y s o k i” → „wysoki”)|
 
@@ -154,7 +157,7 @@ Zawiera **wspólne dane** dla wszystkich akcentów i szyfrów danego
 języka bazowego:
 
 - `polskie_znaki` – mapowanie diakrytyków na wersje łacińskie
-  (używane przez każdy akcent z flagą `usun_polskie_znaki: true`).
+  (pre-pass KAŻDEGO akcentu i każdego szyfru paczki).
 - `alfabet` – kompletny alfabet języka (używany przez szyfr Cezara
   i do podobnych celów).
 

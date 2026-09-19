@@ -22,6 +22,5 @@ kolejnosc: 100
 # Erikoistila — EI suorita yhtään tekstinkäsittelyvaihetta.
 czysc_tekst_tts: false
 normalizuj_liczby: false
-usun_polskie_znaki: false
 skleja_pojedyncze_litery: false
 zamiany: []

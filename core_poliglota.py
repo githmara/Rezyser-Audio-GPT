@@ -1417,7 +1417,7 @@ def _aplikuj_akcent_z_yaml(tekst: str, cfg: dict, podstawy: dict,
     Etapy (wykonywane w stałej kolejności):
         1. ``czysc_tekst_tts``
         2. ``normalizuj_liczby``      (gdy nie użyto pełnego czyszczenia)
-        3. ``usun_polskie_znaki``
+        3. pre-pass diakrytyków — BEZWARUNKOWY (v19.6)
         4. ``zamiany`` (właściwe reguły fonetyczne akcentu)
         5. ``skleja_pojedyncze_litery``
 
@@ -1434,8 +1434,18 @@ def _aplikuj_akcent_z_yaml(tekst: str, cfg: dict, podstawy: dict,
     elif cfg.get("normalizuj_liczby"):
         tekst = normalizuj_liczby(tekst, jezyk)
 
-    if cfg.get("usun_polskie_znaki"):
-        tekst = _usun_polskie_znaki(tekst, podstawy)
+    # v19.6: pre-pass BEZ FLAGI — dawne `usun_polskie_znaki: false` było
+    # jedynym sposobem, by akcent zobaczył diakrytyk źródła, i płaciło się za
+    # nie przepuszczeniem CAŁEJ reszty łacinki (zmierzone: 170–188 znaków ze
+    # 190 na akcent, w tym łacinka lecąca prosto do głosu cyrylickiego).
+    # Realnych beneficjentów flagi były w danych DWA (`fr` cedylla), a oba
+    # zamyka przestrojenie celu w tablicy paczki — decyzja „jak brzmi ten
+    # znak dla TEGO głosu" należy do `zamiany:` akcentu albo do tablicy,
+    # nigdy do wyłącznika całego pre-passu. Narzędzia (`oczyszczenie`,
+    # `naprawiacz`) tu nie docierają: `_przetworz_rezyser` zawraca je
+    # wcześniej, a `core_rezyser.rozwiaz_nazwe_akcentu` filtruje po
+    # `kategoria == "akcent"`.
+    tekst = _usun_polskie_znaki(tekst, podstawy)
 
     tekst = _zastosuj_zamiany(tekst, cfg.get("zamiany", []))
 
@@ -1469,16 +1479,14 @@ def zastosuj_reguly_fonetyczne(tekst: str, wariant: str,
     cfg = wariant_po_id(TRYB_REZYSER, jezyk, wariant) or {}
     podstawy = _zaladuj_podstawy(jezyk)
     # Audyt 18.12 (W-5): flagi YAML honorowane jak w `_aplikuj_akcent_z_yaml`
-    # (ścieżka Poligloty) — dawniej normalizacja/transliteracja/sklejanie
-    # szły tu BEZWARUNKOWO, więc ten sam akcent brzmiał inaczej w Reżyserze
-    # i Poliglocie (pl/rosyjski z `usun_polskie_znaki: false` gubił
-    # zmiękczenia: „jaźń”→„язн” zamiast „яжнь”, bo podstawy spłaszczały
-    # ś/ź przed transliteracją). Jedyna zamierzona różnica ścieżek to brak
-    # etapu `czysc_tekst_tts` (Reżyser zachowuje didaskalia).
+    # (ścieżka Poligloty) — dawniej normalizacja i sklejanie szły tu
+    # BEZWARUNKOWO, więc ten sam akcent brzmiał inaczej w Reżyserze
+    # i Poliglocie. Jedyna zamierzona różnica ścieżek to brak etapu
+    # `czysc_tekst_tts` (Reżyser zachowuje didaskalia). Pre-pass jest od
+    # v19.6 bezwarunkowy w obu — patrz `_aplikuj_akcent_z_yaml`.
     if cfg.get("normalizuj_liczby"):
         tekst = normalizuj_liczby(tekst, jezyk)
-    if cfg.get("usun_polskie_znaki"):
-        tekst = _usun_polskie_znaki(tekst, podstawy)
+    tekst = _usun_polskie_znaki(tekst, podstawy)
     tekst = _zastosuj_zamiany(tekst, cfg.get("zamiany", []))
     if cfg.get("skleja_pojedyncze_litery"):
         tekst = sklej_pojedyncze_litery(tekst)

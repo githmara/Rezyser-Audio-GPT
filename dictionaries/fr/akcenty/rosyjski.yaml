@@ -24,15 +24,14 @@ opis: |
       de façon fiable avec des remplacements séquentiels) ;
     - les nasales in/un/an/en restent voyelle + « н » (« эн » forcé
       casserait « une », « inutile », « cuisine ») ;
-    - l'étape `usun_polskie_znaki` aplatit ç→c et é/è/ê→e AVANT ces
-      règles, donc « ça » se lit « ка » et les e accentués → « е ».
+    - le pre-pass du paquet aplatit ç→ss et é/è/ê→e AVANT ces règles,
+      donc « ça » se lit « сса » et les e accentués → « е ».
 iso: ru
 kategoria: akcent
 kolejnosc: 60
 
 czysc_tekst_tts: true
 normalizuj_liczby: true
-usun_polskie_znaki: true
 skleja_pojedyncze_litery: false
 
 # -----------------------------------------------------------------------------

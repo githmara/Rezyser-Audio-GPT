@@ -20,6 +20,5 @@ kolejnosc: 100
 # Sondermodus — führt keine Textverarbeitungsphase aus.
 czysc_tekst_tts: false
 normalizuj_liczby: false
-usun_polskie_znaki: false
 skleja_pojedyncze_litery: false
 zamiany: []

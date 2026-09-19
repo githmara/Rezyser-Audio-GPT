@@ -9,7 +9,7 @@
 #  Estructura análoga a `dictionaries/pl/podstawy.yaml`. El campo
 #  `polskie_znaki`, pese a su nombre histórico, contiene TODOS los signos
 #  diacríticos que deben normalizarse a ASCII antes de aplicar los
-#  cifrados o las reglas de acentuación (`usun_polskie_znaki: true`).
+#  cifrados o las reglas de acentuación (el pre-pass del paquete).
 #
 #  Notas específicas del español:
 #    - La «ñ» SÍ se incluye en `alfabet`, porque `.upper()` la transforma
@@ -39,7 +39,7 @@ opis: |
 # Normalización de los signos diacríticos. Las vocales acentuadas españolas
 # (á, é, í, ó, ú) y la ü pierden el acento; «ñ» NO se normaliza (es letra
 # propia del alfabeto). Otros diacríticos europeos pasan a ASCII para que
-# los acentos extranjeros con `usun_polskie_znaki: true` vean una base
+# los acentos extranjeros vean, tras el pre-pass, una base
 # limpia antes de aplicar sus propias transliteraciones.
 # -----------------------------------------------------------------------------
 polskie_znaki:

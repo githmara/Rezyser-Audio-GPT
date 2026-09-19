@@ -687,13 +687,19 @@ disjoint, because one rewrites German spelling and the other Polish. Never
   pattern contained in it, and a rule that introduces a character a later rule
   consumes creates a cascade. Cascades are sometimes intended — say so in a
   comment when they are.
-- THE PRE-PASS RUNS FIRST AND EATS RULES. With `usun_polskie_znaki: true` the
-  engine flattens your language's own diacritics BEFORE `zamiany` (the field name
-  is historical; it removes ALL diacritics). A rule whose pattern contains one of
-  them is unreachable, and its promise in `opis` becomes a lie — this is how 43
-  German umlaut rules stayed dead across seven accents. Either set the flag to
-  `false` for that pair (as the Spanish and French packs do) or drop the rule and
-  the prose about it.
+- THE PRE-PASS RUNS FIRST AND EATS RULES. Before `zamiany`, the engine flattens
+  every character listed in your pack's `podstawy.yaml::polskie_znaki` (the field
+  name is historical; the list holds foreign diacritics, not Polish ones). Since
+  v19.6 this is UNCONDITIONAL — the old per-accent switch is gone, because
+  turning it off bought one source character at the price of letting 170–188
+  Latin characters through to the synthesizer untouched. A rule whose pattern
+  contains a flattened character is unreachable, and its promise in `opis`
+  becomes a lie — this is how 43 German umlaut rules stayed dead across seven
+  accents. The fix belongs to the PACK's table, never to one accent: either the
+  character is a real letter of your language (then it stands in `alfabet` and
+  the pre-pass leaves it alone), or you retune the TARGET of its pair so it
+  serves every accent at once (`fr: ç → ss`, because a German `s` between vowels
+  is read /z/). Dropping the rule and the prose about it is the third option.
 - CASE: give every letter rule its capitalized counterpart, and remember that
   ALL-CAPS text (headings) needs the fully upper-cased form of a digraph as a
   third rule — `Sz` does not catch `SZ`.

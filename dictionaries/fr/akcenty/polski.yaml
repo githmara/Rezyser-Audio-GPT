@@ -14,7 +14,8 @@ opis: |
     - « gn » fr = /ɲ/, « gn » pl = /gn/ → on écrit « ń ».
     - « ou » fr = /u/ → on écrit « u ».
     - « u »  fr = /y/, absent en polonais → on écrit « i » (approximation).
-    - « ç »  fr = /s/ → on écrit « s ».
+    - « ç »  fr = /s/ → « ss » (fait par le pre-pass du paquet ; le TTS
+      polonais lit « ss » comme un /s/ simple).
     - « qu » fr = /k/ → on écrit « k ».
     - « h »  fr muet, « h » pl = /x/ → on supprime.
 
@@ -29,7 +30,6 @@ kolejnosc: 35
 
 czysc_tekst_tts: true
 normalizuj_liczby: true
-usun_polskie_znaki: false
 skleja_pojedyncze_litery: true
 
 zamiany:
@@ -57,7 +57,5 @@ zamiany:
   - { wzor: "EU", zamiana: "E"  }
   - { wzor: "u",  zamiana: "i"  }
   - { wzor: "U",  zamiana: "I"  }
-  - { wzor: "ç",  zamiana: "s"  }
-  - { wzor: "Ç",  zamiana: "S"  }
   - { wzor: "h",  zamiana: ""   }
   - { wzor: "H",  zamiana: ""   }

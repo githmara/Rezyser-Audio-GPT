@@ -22,6 +22,5 @@ kolejnosc: 100
 # Modalità speciale — NON esegue alcuna fase di elaborazione del testo.
 czysc_tekst_tts: false
 normalizuj_liczby: false
-usun_polskie_znaki: false
 skleja_pojedyncze_litery: false
 zamiany: []

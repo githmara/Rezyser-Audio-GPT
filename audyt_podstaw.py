@@ -311,15 +311,16 @@ def _sprawdz_alfabet(kod: str, dane: dict, dodaj) -> None:
 def _sprawdz_znaki(kod: str, dane: dict, dodaj) -> None:
     """`polskie_znaki`: kształt par, cel w ASCII, warianty lower+upper.
 
-    Ta lista jest PRE-PASSEM każdego akcentu z `usun_polskie_znaki: true`, więc
+    Ta lista jest BEZWARUNKOWYM pre-passem każdego akcentu paczki (od v19.6
+    nie ma już flagi, którą dało się go wyłączyć) oraz każdego szyfru, więc
     jej dziura zostawia diakrytyk w tekście podanym syntezatorowi — i to
     w każdej parze akcentowej paczki naraz.
     """
     znaki = dane.get("polskie_znaki")
     if not isinstance(znaki, list) or not znaki:
         dodaj("znaki-ksztalt",
-              "no `polskie_znaki` list (accents with `usun_polskie_znaki: true` "
-              "would have nothing to strip)")
+              "no `polskie_znaki` list — the pre-pass of every accent and every "
+              "cipher of this pack would have nothing to strip")
         return
     wzory: list[str] = []
     for poz, wpis in enumerate(znaki, start=1):
@@ -401,8 +402,8 @@ def _sprawdz_pokrycie_lacinki(kod: str, dane: dict, dodaj) -> None:
     # rozstrzyga, co jest literą języka. Taki wpis odbiera znak WSZYSTKIM
     # akcentom paczki naraz i zmusza ten jeden, który go potrzebuje, do
     # wyłączenia pre-passu w całości (tak żyła paczka `pl` do v19.4.2:
-    # romanizacja `ą → on` w pre-passie, a `rosyjski.yaml` z
-    # `usun_polskie_znaki: false` i obcą łacinką lecącą prosto do cyrylicy).
+    # romanizacja `ą → on` w pre-passie, a `rosyjski.yaml` bez pre-passu
+    # i z obcą łacinką lecącą prosto do cyrylicy — wyłącznika nie ma od v19.6).
     # Romanizacja własnych liter należy do `zamiany:` akcentu, który jej chce.
     natywne = sorted({str(w.get("wzor", "")) for w in (dane.get("polskie_znaki") or [])
                       if isinstance(w, dict)
@@ -421,7 +422,7 @@ def _sprawdz_pokrycie_lacinki(kod: str, dane: dict, dodaj) -> None:
               f"the pre-pass lets {len(przepuszczone)} character(s) of "
               f"U+00C0–U+017F through unchanged, and none of them is a letter of "
               f"this pack's `alfabet`: {''.join(przepuszczone)} — every accent "
-              f"with `usun_polskie_znaki: true` and every cipher hands them to "
+              f"and every cipher of this pack hands them to "
               f"the synthesizer as they are (default pairs: "
               f"`manager_regul_szablony.TABELA_LACINKI`)")
 

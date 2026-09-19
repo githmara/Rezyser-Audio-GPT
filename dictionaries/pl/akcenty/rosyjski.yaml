@@ -38,12 +38,11 @@ kolejnosc: 45
 czysc_tekst_tts: true
 normalizuj_liczby: true
 # Polskich diakrytyków NIE latynizujemy — tę robotę wykonuje sekcja
-# `zamiany` niżej, zamieniając je wprost na litery cyrylicy.
-# Pre-pass jest mimo to WŁĄCZONY (v19.5): od kiedy `podstawy.yaml`
-# przestało spłaszczać własne litery paczki, ta flaga nie odbiera już
-# akcentowi ś/ź — czyści za to obcą łacinkę (é, ü, š, ř), która bez
-# niej wchodziła do cyrylicy jawnym tekstem.
-usun_polskie_znaki: true
+# `zamiany` niżej, zamieniając je wprost na litery cyrylicy. Pre-pass
+# paczki im nie szkodzi: od v19.5 `podstawy.yaml` nie spłaszcza własnych
+# liter paczki (stoją w `alfabet`), więc ś/ź docierają tu nietknięte.
+# Czyści za to obcą łacinkę (é, ü, š, ř), która bez niego wchodziła do
+# cyrylicy jawnym tekstem.
 # Scalanie pojedynczych liter łacińskich jest bezsensowne po transliteracji
 # na cyrylicę (regex w `sklej_pojedyncze_litery` szuka klasy [a-z]).
 skleja_pojedyncze_litery: false

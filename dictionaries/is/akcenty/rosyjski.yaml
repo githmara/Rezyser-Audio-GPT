@@ -33,8 +33,9 @@ kolejnosc: 45
 # --- Pipeline ---
 czysc_tekst_tts: true
 normalizuj_liczby: true
-# Séríslenskir stafir eru skráðir handvirkt í zamiany — EKKI sjálfvirkt.
-usun_polskie_znaki: false
+# Séríslenskir stafir standa í `alfabet`, svo pre-pass snertir þá ekki — þeir
+# eru skráðir handvirkt í zamiany hér fyrir neðan. Pre-pass hreinsar aðeins
+# erlenda latínustafi (é, š, ü) sem færu annars óbreyttir í kyrillískan texta.
 # Tengsl staka latneskra stafa virka ekki eftir kýrillíska þýðingu.
 skleja_pojedyncze_litery: false
 

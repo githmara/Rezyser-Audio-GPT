@@ -208,8 +208,8 @@ LISTA_TYPOW: list[str] = [
 # =============================================================================
 # KANON TRANSLITERACJI ŁACINKI — jedno źródło pre-passu (od v19.5)
 # =============================================================================
-# `podstawy.yaml::polskie_znaki` jest PRE-PASSEM każdego akcentu z flagą
-# `usun_polskie_znaki: true` oraz każdego szyfru, więc dziura w tej liście
+# `podstawy.yaml::polskie_znaki` jest BEZWARUNKOWYM pre-passem każdego akcentu
+# paczki (flaga zniesiona w v19.6) oraz każdego szyfru, więc dziura w tej liście
 # zostawia diakrytyk w tekście podanym syntezatorowi — naraz we WSZYSTKICH
 # parach akcentowych paczki. Do v19.4.2 dziura była realna i identyczna
 # w dziewięciu paczkach: Latin-1 pokryte, a 99 znaków Latin Extended-A
@@ -630,12 +630,15 @@ kolejnosc: 100
 # --- Processing pipeline (true/false) ---
 # czysc_tekst_tts        – removes parenthetical asides, markup, dot runs
 # normalizuj_liczby      – turns digits into words (per {natywna_baza} grammar)
-# usun_polskie_znaki     – strips the base-language ({jezyk_bazowy}) diacritics per
-#                          the map in `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki`
 # skleja_pojedyncze_litery – joins dangling single letters („w y s" → „wys")
+#
+# NOT a flag: the diacritic PRE-PASS from
+# `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki` runs before the
+# `zamiany` list of EVERY accent and before every cipher. Write the patterns
+# below for the text AFTER it (the pack's own letters — those standing in
+# `alfabet` — survive it; everything else arrives flattened).
 czysc_tekst_tts: true
 normalizuj_liczby: true
-usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 # --- The actual phonetic replacements ---
@@ -705,9 +708,9 @@ instead of „Akcent fonetyczny"). You cannot meaningfully write a
 
 # REFERENCE FILES (open before writing)
 1. `dictionaries/{jezyk_bazowy}/podstawy.yaml` — the alphabet and the
-   `polskie_znaki` diacritics map of the base pack. Your replacement
-   patterns MUST operate on the text after `usun_polskie_znaki: true`
-   (i.e. after the transliteration described in that file).
+   `polskie_znaki` diacritics map of the base pack. That map is an
+   unconditional PRE-PASS, so your replacement patterns MUST operate on the
+   text after it (i.e. after the transliteration described in that file).
 2. `dictionaries/<another pack>/akcenty/<any>.yaml` — a style reference.
    Pick the pack whose base is closest in character to {natywna_baza}
    (Latin/Cyrillic alphabet, presence/absence of diacritics). The glob
@@ -721,8 +724,8 @@ instead of „Akcent fonetyczny"). You cannot meaningfully write a
 # STRUCTURE REQUIREMENTS
 1. Fields `id`, `etykieta`, `iso`, `kategoria: akcent`, `kolejnosc`.
 2. Pipeline (boolean): `czysc_tekst_tts`, `normalizuj_liczby`,
-   `usun_polskie_znaki`, `skleja_pojedyncze_litery`. Default `true`
-   for typical phonetic accents.
+   `skleja_pojedyncze_litery`. Default `true` for typical phonetic accents.
+   There is NO flag for the diacritic pre-pass — it always runs (see 5).
 3. The `zamiany:` list ordered: TRIGRAPHS → DIGRAPHS → SINGLE LETTERS
    (otherwise `c → ts` breaks the `ch` / `cz` spellings). Every rule of
    two letters or more needs THREE case variants — `sz`, `Sz`, `SZ` —
@@ -734,16 +737,21 @@ instead of „Akcent fonetyczny"). You cannot meaningfully write a
    an all-caps word, so a single-letter rule with a multi-letter result
    (`Ж → Zh`) yields „ZHDAT" for „ЖДАТЬ" on its own.
 4. Regex: add `regex: true` on the replacement row.
-5. **The `usun_polskie_znaki: true` flag** (despite its historical name!)
-   strips the diacritics of language {jezyk_bazowy} per the map in
-   `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki`. Your
-   patterns MUST work ON THE TEXT AFTER that transliteration — i.e.
-   operate on the ASCII (or diacritic-free) equivalent of the
-   {natywna_baza} alphabet. If that map flattens a letter to a base letter
-   that SOUNDS DIFFERENT (French `ç` → `c`, which then reads /k/), the map
-   itself is the defect — flatten to the letter carrying the sound (`ç` →
-   `s`) instead of working around it in every accent, or turn the flag off
-   in the accent that needs the raw letter.
+5. **The diacritic PRE-PASS** (`dictionaries/{jezyk_bazowy}/podstawy.yaml::
+   polskie_znaki`, historical field name) runs before the `zamiany` list of
+   every accent and before every cipher, and it CANNOT be switched off per
+   accent. Your patterns MUST work ON THE TEXT AFTER it: the pack's own
+   letters — the ones standing in `alfabet` — come through untouched, and
+   everything else arrives flattened. A rule written on a flattened
+   character is dead code, and the release gate rejects it.
+   If a character reaches you flattened to a letter that SOUNDS DIFFERENT
+   (French `ç` → `c`, which then reads /k/), the defect is in the MAP, not
+   in your accent: flatten it to the letter carrying the sound, choosing a
+   target that serves EVERY accent of the pack at once (`fr: ç → ss`, so
+   that the German voice does not read the intervocalic `s` as /z/). The
+   old per-accent switch existed until v19.6 and bought one character at
+   the price of letting 170–188 Latin characters through to the
+   synthesizer untouched.
 
 # NATIVE-LANGUAGE REQUIREMENTS
 - `etykieta`, `opis`, the file header, the YAML comments — everything in
@@ -802,7 +810,6 @@ kategoria: oczyszczenie
 kolejnosc: 20
 czysc_tekst_tts: true
 normalizuj_liczby: {normalizuj_liczby}
-usun_polskie_znaki: false
 skleja_pojedyncze_litery: false
 # `zamiany:` stays empty in every shipped package. The engine cleans by
 # SHAPE only (markup, parenthetical asides, punctuation) and carries no
@@ -854,8 +861,7 @@ a cleaning accent in the {natywna_baza} pack, GUI-visible label:
 2. `iso: {jezyk_bazowy}` (operates on the base-pack text).
 3. Pipeline:
    - `oczyszczenie` (with number normalization): `czysc_tekst_tts: true`,
-     `normalizuj_liczby: true`, `usun_polskie_znaki: false`,
-     `skleja_pojedyncze_litery: false`.
+     `normalizuj_liczby: true`, `skleja_pojedyncze_litery: false`.
    - `oczyszczenie_bez_liczb`: as above but `normalizuj_liczby: false`.
 4. `zamiany: []` (empty list — this is not a phonetic accent).
 5. `kolejnosc: 20` (places it above the phonetic accents in the GUI).
@@ -916,10 +922,10 @@ iso: ""
 kategoria: naprawiacz
 kolejnosc: 100
 
-# Special mode — runs NO text-processing stage.
+# Special mode — runs NO text-processing stage. The engine returns the text
+# untouched for `kategoria: naprawiacz`, before any pipeline stage.
 czysc_tekst_tts: false
 normalizuj_liczby: false
-usun_polskie_znaki: false
 skleja_pojedyncze_litery: false
 zamiany: []
 """
@@ -966,8 +972,8 @@ a tag fixer in the {natywna_baza} pack, GUI-visible label:
 1. `kategoria: naprawiacz` — the engine detects the special mode by this
    value.
 2. `iso: ""` (empty string — the code is supplied by the user in the GUI).
-3. All pipeline flags `false`: `czysc_tekst_tts`,
-   `normalizuj_liczby`, `usun_polskie_znaki`, `skleja_pojedyncze_litery`.
+3. All pipeline flags `false`: `czysc_tekst_tts`, `normalizuj_liczby`,
+   `skleja_pojedyncze_litery`.
 4. `zamiany: []` (empty list — the engine applies no replacements).
 5. `kolejnosc: 100` (at the end of the GUI list).
 
@@ -1747,9 +1753,9 @@ def szablon_podstawy(kod_jezyka: str, etykieta_jezyka: str) -> str:
 #                         the 75 languages the detector knows: either filled
 #                         in below, or commented out because this language is
 #                         genuinely absent from `lingua`. Leave it as it is.
-#    2. polskie_znaki   – mapping of the „{kod_jezyka}" language diacritics
-#                         to ASCII letters (used by `usun_polskie_znaki:
-#                         true` in accents).
+#    2. polskie_znaki   – mapping of diacritics FOREIGN to „{kod_jezyka}" to
+#                         ASCII letters (the pre-pass of every accent and
+#                         every cipher of this pack).
 #    3. alfabet         – the full uppercase alphabet (used by the Caesar
 #                         cipher). NOTE: letters that grow under `.upper()`
 #                         (e.g. ß→SS) do NOT enter the alphabet.
@@ -1774,14 +1780,14 @@ opis: |
   <FILL NATIVELY in {natywna}: 2-4 sentences on what this file describes.
   PL model:
     Base rules for the <native name> language:
-      1. Transliteration of diacritics (...) — stripped by
-         `usun_polskie_znaki: true` in accents.
+      1. Transliteration of diacritics (...) — the pre-pass of every
+         accent and cipher.
       2. Alphabet (<N> letters, uppercase) — used by the Caesar cipher.>
 
 polskie_znaki:
   # Pairs {{ wzor: "<diacritic>", zamiana: "<ASCII>" }} — lower and upper variant.
-  # PRE-PASS: applied before the rules of every accent with
-  # `usun_polskie_znaki: true` and before every cipher.
+  # PRE-PASS: applied before the rules of EVERY accent of this pack and
+  # before every cipher. There is no flag to switch it off.
   #
   # PRE-FILLED with the WHOLE Latin script (U+00C0–U+017F: Scandinavian,
   # Polish, Czech, Turkish, Baltic, Esperanto, Maltese, the macrons of
@@ -1885,10 +1891,10 @@ presence/absence of diacritics such as ä/ö/ç/ß).
 {wskazowka_lingua}
 3. **`polskie_znaki:`** — the PRE-PASS: a list of `{{ wzor, zamiana }}`
    pairs, diacritic → ASCII, each in both variants (lower + upper). Despite
-   the historical name it runs before the replacement table of every accent
-   with `usun_polskie_znaki: true`, and before every cipher — so it answers
-   one question: which characters must be gone BEFORE the rules of this pack
-   start working?
+   the historical name it runs before the replacement table of EVERY accent
+   of the pack, and before every cipher, with no flag to switch it off — so
+   it answers one question: which characters must be gone BEFORE the rules
+   of this pack start working?
    **The template already carries the WHOLE Latin script** (U+00C0–U+017F,
    rendered from `manager_regul_szablony.TABELA_LACINKI`), so your work here
    is SUBTRACTION, not invention:

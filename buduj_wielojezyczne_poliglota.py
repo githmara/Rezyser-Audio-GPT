@@ -183,7 +183,6 @@ KLASY_SCIEZEK: dict[str, str] = {
     "max_syk": KLASA_TECHNICZNA,
     "czysc_tekst_tts": KLASA_TECHNICZNA,
     "normalizuj_liczby": KLASA_TECHNICZNA,
-    "usun_polskie_znaki": KLASA_TECHNICZNA,
     "skleja_pojedyncze_litery": KLASA_TECHNICZNA,
     # --- Proza
     "etykieta": KLASA_ETYKIETA,

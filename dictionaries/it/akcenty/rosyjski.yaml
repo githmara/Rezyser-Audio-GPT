@@ -41,7 +41,6 @@ czysc_tekst_tts: true
 normalizuj_liczby: true
 # Le vocali accentate italiane (à, è, é, ecc.) vengono normalizzate
 # alla forma base dalla pipeline (podstawy.yaml) PRIMA delle zamiany.
-usun_polskie_znaki: true
 # Dopo la conversione in cirillico il regex [a-z] non funziona più.
 skleja_pojedyncze_litery: false
 

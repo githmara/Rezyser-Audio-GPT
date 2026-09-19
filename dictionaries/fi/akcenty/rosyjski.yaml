@@ -50,9 +50,10 @@ kolejnosc: 45
 # --- Pipeline przetwarzania ---
 czysc_tekst_tts: true
 normalizuj_liczby: true
-# Ei poisteta suomen diakritiikaasia automaattisesti — tehdään manuaalisesti
-# zamiany-osiossa kartoittamalla ne kyrillisiksi kirjaimiksi.
-usun_polskie_znaki: false
+# Suomen omat kirjaimet (ä, å, ö) ovat `alfabet`-kentässä, joten pre-pass ei
+# koske niihin — ne kartoitetaan kyrillisiksi alla zamiany-osiossa. Pre-pass
+# siivoaa vain vieraan latinan (é, š, ü), joka muuten menisi kyrilliseen
+# tekstiin sellaisenaan.
 # Yksittäisten latinalaisten kirjainten yhdistäminen ei toimi
 # translitteroinnin jälkeen (regex etsii luokkaa [a-z]).
 skleja_pojedyncze_litery: false

@@ -34,7 +34,7 @@ opis: |
 # -----------------------------------------------------------------------------
 # Normalisierung diakritischer Zeichen. ß → ss (Schweizer Konvention),
 # Umlaute ä/ö/ü bleiben im Alphabet, werden aber auch für Akkzent-Engines
-# (usun_polskie_znaki: true) auf Basis-ASCII normalisiert.
+# (Vorab-Durchlauf jedes Akzents) auf Basis-ASCII normalisiert.
 # -----------------------------------------------------------------------------
 polskie_znaki:
   # -- ß → ss (rosnące przy .upper(): ß→SS — ZAKAZ w alfabet) --

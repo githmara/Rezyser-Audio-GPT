@@ -24,7 +24,6 @@ kolejnosc: 80
 
 czysc_tekst_tts: true
 normalizuj_liczby: true
-usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 # KOLEJNOŚĆ (sekwencyjny str.replace — patrz reguły architektury):

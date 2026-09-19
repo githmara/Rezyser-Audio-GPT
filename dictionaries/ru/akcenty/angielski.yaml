@@ -37,7 +37,6 @@ normalizuj_liczby: true
 # Латинские диакритики (заимствования) нормализуются podstawy.yaml::polskie_znaki
 # до плоской ASCII-латиницы ДО запуска `zamiany` — чтобы Müller, café, naïve
 # не остались с диакритикой, которую английский TTS произнесёт неуверенно.
-usun_polskie_znaki: true
 # Склейка одиночных латинских букв (regex [a-z]) актуальна — итог
 # транслитерации латиница, и иногда «А.B.C» нужно склеить.
 skleja_pojedyncze_litery: true
