@@ -270,13 +270,15 @@ def test_klasyfikacja_zaleznosci_rozdziela_decyzje_od_zaniedbania():
 def test_manifest_ma_granice_na_pieciu_pakietach():
     """Granice sa czescia kontraktu, nie ozdoba — trzymamy je pod asercja.
 
-    Wartosci zmieniaja sie WYLACZNIE decyzja: `anthropic<1.7` i `openai<3.16`
-    zapisuja wstrzymanie dwoch minorowych upgrade'ow (v19.4.2, kanon
-    zachowawczy). Test ma o tym KRZYCZEC przy kazdej takiej zmianie — to jego
-    zadanie, a nie uciazliwosc: granica ponizej najnowszego wydania znaczy
-    „ktos zdecydowal", a granica przestarzala znaczy „ktos zapomnial".
+    Wartosci zmieniaja sie WYLACZNIE decyzja: `anthropic<2` i `openai<4` to
+    zdjete w v19.5.0 wstrzymanie z v19.4.2 — oba minory przeszly bez zmian
+    w kodzie, potwierdzone `inspect.signature` na wolanej powierzchni, wiec
+    granica wrocila na linie majorowa. Test ma o tym KRZYCZEC przy kazdej
+    takiej zmianie — to jego zadanie, a nie uciazliwosc: granica ponizej
+    najnowszego wydania znaczy „ktos zdecydowal", a granica przestarzala
+    znaczy „ktos zapomnial".
     """
-    oczekiwane = {"wxpython": "<4.4", "anthropic": "<1.7", "openai": "<3.16",
+    oczekiwane = {"wxpython": "<4.4", "anthropic": "<2", "openai": "<4",
                   "elevenlabs": "<3", "lingua-language-detector": "<2.3"}
     manifest = {w.nazwa: w.specyfikator for w in az.wczytaj_manifest()}
     for nazwa, granica in oczekiwane.items():
