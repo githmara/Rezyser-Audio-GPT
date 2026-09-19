@@ -196,7 +196,8 @@ class RezyserPanel(wx.Panel):
         # PROJEKTU — patrz `_odswiez_kandydatow_pamieci`. Tu jeszcze nie ma
         # `_rb_mode`, więc startujemy od paczki interfejsu.
         self._projekt.ustaw_kandydatow_pamieci(
-            pr.sufiksy_pamieci_dlugotrwalej(self._postprodukcje))
+            pr.sufiksy_pamieci_dlugotrwalej(self._postprodukcje),
+            pr.sufiksy_narzedzi_pamieci(self._postprodukcje))
 
         # Skrajny przypadek: ani język UI, ani EN nie ma trybów — komunikat A11y.
         if not self._przepisy:
@@ -315,7 +316,8 @@ class RezyserPanel(wx.Panel):
         if not pr.przepisy_pamieci_dlugotrwalej(lista):
             lista = self._postprodukcje
         self._projekt.ustaw_kandydatow_pamieci(
-            pr.sufiksy_pamieci_dlugotrwalej(lista))
+            pr.sufiksy_pamieci_dlugotrwalej(lista),
+            pr.sufiksy_narzedzi_pamieci(lista))
 
     def _zapewnij_kod_jezyka_w_tle(self) -> None:
         """1b: dla aktywnego przepisu ZAPISU (Skrypt/Audiobook) ustala `kod_jezyka`
@@ -3697,6 +3699,32 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     # Auto-streszczenie po przekroczeniu progu alarmowego (v18.13)
     # ------------------------------------------------------------------
+    def _przepis_pamieci_dla_projektu(self) -> pr.PrzepisRezysera | None:
+        """Narzędzie pamięci piszące do pliku ROZSTRZYGNIĘTEGO dla projektu (v19.4.2).
+
+        Paczka może mieć kilka przepisów z rolą ``pamiec_dlugotrwala`` (v18.14),
+        a przy wczytaniu projektu to REŻYSER wskazuje, który z leżących na dysku
+        plików jest pamięcią tej historii. Automat progu ALARM brał jednak
+        zawsze PIERWSZY przepis, więc przy dwóch narzędziach czytał wejście
+        rekoncyliacji z pliku wybranego przez usera, a wynik zapisywał do
+        cudzego: nadpisywał bez pytania pamięć, o którą nikt nie prosił, i
+        zostawiał tę wybraną z anchorem sprzed automatu (kolejna rekoncyliacja
+        wciągnęłaby materiał już skompresowany).
+
+        Dopasowanie idzie po ``sufiks_pliku_wyniku``, bo to on rządzi nazwą
+        pliku. Brak dopasowania (rozstrzygnięty sufiks pochodzi z paczki, której
+        panel nie wyświetla) → pierwszy przepis, czyli dokładnie to, co dostałby
+        user klikając narzędzie ręcznie.
+        """
+        kandydaci = pr.przepisy_pamieci_dlugotrwalej(self._postprodukcje)
+        if not kandydaci:
+            return None
+        rozstrzygniety = self._projekt.sufiks_streszczenia
+        for przepis_pp in kandydaci:
+            if przepis_pp.sufiks_pliku_wyniku == rozstrzygniety:
+                return przepis_pp
+        return kandydaci[0]
+
     def _spawn_auto_pamiec(self) -> None:
         """Po udanej turze: przy poziomie ALARM sam zapisuje Pamięć Długotrwałą.
 
@@ -3710,6 +3738,12 @@ class RezyserPanel(wx.Panel):
         skasował YAML), brak API, trwa inny worker albo projekt nie ma jeszcze
         pliku na dysku. Auto-mechanizm nie ma prawa niczym rzucić ani niczego
         blokować — reżyser zawsze może kliknąć narzędzie ręcznie.
+
+        v19.4.2: narzędzie wybiera :meth:`_przepis_pamieci_dla_projektu`, czyli
+        to, które pisze do pliku ROZSTRZYGNIĘTEGO dla projektu — automat bez
+        dialogu nie może przekierować pamięci do innego pliku, niż wskazał
+        reżyser przy wczytaniu. Kandydatów przeliczamy tuż przed wyborem, żeby
+        sufiks i przepis pochodziły z jednego stanu.
         """
         if self._projekt.status_pamieci_modelu().poziom != cr.POZIOM_ALARM:
             return
@@ -3719,7 +3753,8 @@ class RezyserPanel(wx.Panel):
             return
         if self._auto_pamiec_wykonane:
             return
-        przepis_pp = pr.przepis_pamieci_dlugotrwalej(self._postprodukcje)
+        self._odswiez_kandydatow_pamieci()
+        przepis_pp = self._przepis_pamieci_dla_projektu()
         if przepis_pp is None:
             return
 

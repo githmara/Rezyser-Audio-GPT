@@ -1061,6 +1061,28 @@ def sufiksy_pamieci_dlugotrwalej(
     return kandydaci
 
 
+def sufiksy_narzedzi_pamieci(
+    postprodukcje: list[PrzepisRezysera] | None = None,
+) -> list[str]:
+    """Sufiksy należące do ŻYWYCH przepisów pamięci — bez zapasowych (v19.4.2).
+
+    :func:`sufiksy_pamieci_dlugotrwalej` dokleja na koniec ``_overview``
+    i historyczne ``_streszczenie``, więc po samej tamtej liście nie da się
+    powiedzieć, czy plik leżący pod danym sufiksem jest CELEM któregoś narzędzia
+    tej paczki, czy pamiątką po innej paczce. Różnica decyduje o migracji:
+    ``_rozstrzygnij_pamiec`` przenosi pamięć pod sufiks główny tylko wtedy, gdy
+    stary sufiks NIE jest celem żadnego narzędzia — inaczej paczka z dwoma
+    narzędziami pamięci (v18.14 dopuszcza je wprost: „pod siebie" i „pod AI")
+    traciłaby przy każdym wczytaniu projektu rozróżnienie, po co je stworzono.
+    """
+    lista = postprodukcje if postprodukcje is not None else lista_postprodukcji("pl")
+    sufiksy: list[str] = []
+    for p in przepisy_pamieci_dlugotrwalej(lista):
+        if p.sufiks_pliku_wyniku and p.sufiks_pliku_wyniku not in sufiksy:
+            sufiksy.append(p.sufiks_pliku_wyniku)
+    return sufiksy
+
+
 def sufiks_pamieci_dlugotrwalej(
     postprodukcje: list[PrzepisRezysera] | None = None,
 ) -> str:

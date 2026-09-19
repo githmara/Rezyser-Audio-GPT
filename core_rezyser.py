@@ -1126,8 +1126,17 @@ class ProjektRezysera:
         # do tego, w jakim języku user ma dziś menu.
         self.sufiksy_pamieci: list[str] = pr.sufiksy_pamieci_dlugotrwalej()
         self.sufiks_streszczenia: str = self.sufiksy_pamieci[0]
+        # v19.4.2: które z kandydatów są CELEM żywego narzędzia tej paczki.
+        # Tylko pozostałe (plik z obcej paczki, `_overview`, historyczne
+        # `_streszczenie`) wolno przemianować przy wczytaniu projektu — patrz
+        # `_rozstrzygnij_pamiec`.
+        self.sufiksy_narzedzi_pamieci: set[str] = set(pr.sufiksy_narzedzi_pamieci())
 
-    def ustaw_kandydatow_pamieci(self, sufiksy: "list[str] | tuple[str, ...]") -> None:
+    def ustaw_kandydatow_pamieci(
+        self,
+        sufiksy: "list[str] | tuple[str, ...]",
+        narzedzia: "list[str] | tuple[str, ...] | None" = None,
+    ) -> None:
         """Podmienia listę kandydatów na plik Pamięci Długotrwałej (v18.14).
 
         Wołane przez GUI, gdy zmieni się rozstrzygnięcie języka projektu
@@ -1144,11 +1153,20 @@ class ProjektRezysera:
         i pierwszy zapis poszedłby pod polską nazwę).
 
         Pusta lista jest ignorowana — bez kandydatów nie ma jak zbudować ścieżki.
+
+        ``narzedzia`` (v19.4.2) to te sufiksy z listy, które są CELEM żywego
+        przepisu z rolą pamięci (``pr.sufiksy_narzedzi_pamieci`` z tej samej
+        listy postprodukcji). Pominięcie argumentu zostawia poprzedni zbiór —
+        wywołujący, który zmienia kandydatów, powinien go podać razem z nimi,
+        inaczej migracja przy wczytaniu projektu sądziłaby o nowej paczce po
+        starej.
         """
         kandydaci = [s for s in sufiksy if s]
         if not kandydaci:
             return
         self.sufiksy_pamieci = kandydaci
+        if narzedzia is not None:
+            self.sufiksy_narzedzi_pamieci = {s for s in narzedzia if s}
         if not self.nazwa_pliku or self.sufiks_streszczenia not in kandydaci:
             self.sufiks_streszczenia = kandydaci[0]
 
@@ -1540,10 +1558,15 @@ class ProjektRezysera:
 
         * **brak kandydatów** → sufiks główny jako cel przyszłych zapisów;
         * **dokładnie jeden** → to jest pamięć projektu; jeśli leży pod sufiksem
-          innym niż główny, a pod głównym nic nie ma — przenosimy parę
-          plik + meta (v18.13 obiecywała to tylko dla historycznego
-          ``_streszczenie``; od v18.14 działa dla dowolnego obcego sufiksu, bo
-          każdy język ma własny). Nieudany rename → adopcja W MIEJSCU;
+          OBCYM (nie należącym do żadnego narzędzia tej paczki), a pod głównym
+          nic nie ma — przenosimy parę plik + meta (v18.13 obiecywała to tylko
+          dla historycznego ``_streszczenie``; od v18.14 działa dla dowolnego
+          obcego sufiksu, bo każdy język ma własny). Nieudany rename → adopcja
+          W MIEJSCU. **Sufiks, który JEST celem drugiego narzędzia pamięci tej
+          paczki (v19.4.2), zostaje na miejscu:** paczka ma prawo mieć osobną
+          pamięć „pod siebie" i „pod AI", a rename kasowałby to rozróżnienie po
+          jednym wczytaniu projektu — plik świadomie zapisany drugim narzędziem
+          wracałby pod nazwę pierwszego;
         * **kilku** → NIE zgadujemy i NIE zmieniamy nazw: pytamy usera
           (``wybor_pamieci``); brak callbacku (testy/headless) → najwyższy
           priorytet.
@@ -1567,7 +1590,8 @@ class ProjektRezysera:
 
         if len(znalezione) == 1:
             suf = znalezione[0][0]
-            if suf != glowny and self._przenies_pamiec(nazwa, suf, glowny):
+            obcy = suf not in self.sufiksy_narzedzi_pamieci
+            if suf != glowny and obcy and self._przenies_pamiec(nazwa, suf, glowny):
                 suf = glowny
             self.sufiks_streszczenia = suf
             return False
