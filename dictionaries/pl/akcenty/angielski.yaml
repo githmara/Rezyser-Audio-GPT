@@ -6,7 +6,9 @@ id: angielski
 etykieta: "Angielski (np. Samantha / Mark / Zira / Hazel)"
 opis: |
   Upodabnia polski tekst do angielskiej wymowy: „sz”→„sh”, „cz”→„ch”,
-  „rz”→„zh” (jak „zh” w „measure”), „ch”→„h”, „w”→„v”.
+  „rz”→„zh” i „ż”→„zh” (jak „zh” w „measure” — po polsku „morze”
+  i „może” brzmią tak samo, więc i tu wychodzą tak samo), „ch”→„h”,
+  „w”→„v”.
 iso: en
 kategoria: akcent
 kolejnosc: 40
@@ -22,6 +24,12 @@ zamiany:
   #    przy `polskie_znaki` w `dictionaries/pl/podstawy.yaml`.
   #    Kaskada z regułami niżej (`ć` → `c`, a dalej `c` → coś innego) jest
   #    ZAMIERZONA: pre-pass podawał im dokładnie ten sam wsad.
+  #    v19.7: `ż`/`ź` → `zh`, nie `z`. Angielski zapis dźwięku /ʒ/ to „zh"
+  #    i ten akcent już go zna — `rz` → `zh` stoi niżej od zawsze, więc
+  #    „morze" brzmiało poprawnie, a „może" gubiło dźwięk („moze"). Reguła
+  #    obsługuje teraz także obcy `ž`, który od v19.7 przychodzi z pre-passu
+  #    jako `ż` („Žižek" → „Zhizhek"). Kaskady nie ma: „zh" nie zawiera
+  #    wzorca żadnej reguły niżej, a zbitka „cż" w polszczyźnie nie występuje.
   - { wzor: "ą", zamiana: "on" }
   - { wzor: "ę", zamiana: "en" }
   - { wzor: "ł", zamiana: "l" }
@@ -29,8 +37,8 @@ zamiany:
   - { wzor: "ś", zamiana: "s" }
   - { wzor: "ć", zamiana: "c" }
   - { wzor: "ń", zamiana: "n" }
-  - { wzor: "ż", zamiana: "z" }
-  - { wzor: "ź", zamiana: "z" }
+  - { wzor: "ż", zamiana: "zh" }
+  - { wzor: "ź", zamiana: "zh" }
   - { wzor: "Ą", zamiana: "On" }
   - { wzor: "Ę", zamiana: "En" }
   - { wzor: "Ł", zamiana: "L" }
@@ -38,8 +46,8 @@ zamiany:
   - { wzor: "Ś", zamiana: "S" }
   - { wzor: "Ć", zamiana: "C" }
   - { wzor: "Ń", zamiana: "N" }
-  - { wzor: "Ż", zamiana: "Z" }
-  - { wzor: "Ź", zamiana: "Z" }
+  - { wzor: "Ż", zamiana: "Zh" }
+  - { wzor: "Ź", zamiana: "Zh" }
   # KOLEJNOŚĆ (audyt 18.12, W-4): "ch"→"h" MUSI iść PRZED regułami,
   # których WYNIK zawiera "ch" (szcz→shch, cz→ch) — inaczej sekwencyjny
   # str.replace dojadał je do "shh"/"h" ("czapka"→"hapka", "mecz"→"meh").
