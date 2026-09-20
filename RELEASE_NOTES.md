@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.5.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.6.0 „Wersja Wydawnicza"
+
+*Release v19.6.0: pole, które pozwalało akcentowi kupić jeden znak za cenę całej łacinki, zostało zniesione — plus dwie rzeczy, które wyszły przy proof readingu promptów Managera. **(1)** Flaga `usun_polskie_znaki` wyłączała pre-pass paczki w całości, więc akcent, który potrzebował zobaczyć diakrytyk źródła (francuska cedylla), płacił za to przepuszczeniem CAŁEJ reszty: zmierzone przed zmianą sześć akcentów z flagą `false` oddawało syntezatorowi 170–188 znaków zakresu U+00C0–U+017F nietkniętych, a `fi/rosyjski` i `is/rosyjski` wpuszczały gołą łacinkę do cyrylicy. Realnych beneficjentów flagi było w danych DWÓCH i oba to ta sama cedylla, z czego jeden czytał ją znak w znak tak samo jak pre-pass. Flaga znika z 99 plików, pre-pass biegnie bezwarunkowo jak w szyfrach, a łacinka przepuszczana przez 72 akcenty spada z 1134 do 30 znaków — i te 30 to wyłącznie litery WŁASNE paczki źródłowej plus `ü`, które akcent francusko-niemiecki sam produkuje. Cedylla rozstrzygnięta w tablicy paczki (`ç → ss`, bo niemieckie `s` między samogłoskami czyta się /z/, a dla pozostałych siedmiu głosów „ss" to zwykłe /s/), czyli kompromis wyszedł darmowy. **(2)** Typ „Szyfr (czyste zamiany)" — jedna z dziewięciu pozycji kreatora — produkował plik MARTWY od urodzenia: dispatcher szyfrów znał wyłącznie gałąź algorytmiczną, więc taki plik ładował się do listy w GUI i wywracał się przy pierwszym użyciu. Żadna bramka tego nie widziała, bo w paczkach nie ma ani jednego pliku tej gałęzi. **(3)** Prompt szyfru algorytmicznego uczył API, którego nie ma (`_ALGORYTMY` zamiast `_ALGORYTMY_SZYFROW`, `_algorytm_<id>` zamiast `_algo_<id>`, sygnatura dwuargumentowa zamiast czteroargumentowej), a trzy prompty i docstring mówiły „all 7 deployed packs", renderując tuż obok policzoną listę dziewięciu. Liczebniki, etykiety wzorcowe i nazwa modelu pochodzą odtąd z kodu, nie z literału w tekście.*
 
 *Release v19.5.0: kanon diakrytyków — największy z długów otwartych w 19.4.2 — plus trzy rzeczy, które przy nim wyszły. **(1)** Pre-pass każdej z dziewięciu paczek kończył się tam, gdzie zaczyna się Latin Extended-A, więc 99 znaków (`č ď ě ğ ř š ž`) szło do syntezatora tak, jak stały w tekście, a Cezar zostawiał je w szyfrogramie jawnym tekstem; przyczyną był KIERUNEK pracy — kreator dawał pustą sekcję i prosił „uzupełnij", więc szablon dostaje odtąd całą tabelę, a zadaniem jest odejmowanie. **(2)** Paczka `pl` spłaszczała własne litery, przez co szyfrowanie polskiego tekstu nie było odwracalne, a akcent rosyjski — jedyny, który tych diakrytyków potrzebuje — musiał wyłączać pre-pass w całości i wpuszczał obcą łacinkę do cyrylicy. **(3)** Updater czytał wyłącznie najnowsze wydanie, więc kto pominął patcha, nie dowiadywał się o nim nigdy. **(4)** Zdjęte wstrzymanie dwóch SDK z 19.4.2. Manuale dziewięciu paczek opisują wreszcie noop akcentu i przestają zastrzegać stratę, której już nie ma.*
 
@@ -81,6 +83,91 @@
 *Release v18.8.0: owoce testu maintainera „polskie UI na fińskiej treści" (Poliglota offline) — jeden bug krytyczny plus dwa niedociągnięcia międzynarodowości. **(1) BUG KRYTYCZNY: tagi `lang` per akapit liczone na tekście JUŻ zniekształconym transformacją.** Silnik od 13.5 MA mechanizm detekcji języka per akapit wykonywanej PRZED transformacją (side-channel `opcje["_segmenty_wynikowe"]`), ale kanał był martwy od urodzenia: GUI wołało `przetworz(..., **opcje)`, Python REPAKOWAŁ kwargi do nowego słownika i mutacje silnika nigdy nie wracały do GUI — `zapisz_wynik` zawsze spadał na detekcję „na żywo" po wyniku. Dla typoglikemii na fińskim tekście lingua strzelała `lang="de"` na akapitach nagłówkowych (dowód: pochodne `explore_raport`); dla cezara fałszerstwo byłoby totalne. Ten sam martwy kanał ukrywał DWA bugi-rodzeństwo cezara z losowym przesunięciem: komunikat „wylosowano N" nigdy się nie pokazywał, a nazwa pliku traciła sufiks `±N` — czyli zaszyfrowany plik był praktycznie nieodwracalny dla usera. Fix: `przetworz` przyjmuje jawny, MUTOWALNY słownik `opcje=` (przez referencję); jeden korzeń naprawia trzy objawy. **(2) Lokalizacja sklejek nazw plików wynikowych.** Prefiksy `naprawiony_/oczyszczony_/_akcent_/_szyfr_/_tlumaczenie_/architektura_` były polskim hard-kodem — koszmar dla niepolskich syntezatorów (fińska Satu czytająca „tlumaczenie" jako [tumaksenije]). Teraz człony pochodzą z `ui.yaml` (klucze `filename_*` ×9 języków, w języku UI: fi `salaus/käännös/arkkitehtuuri`, is `dulkóðun/þýðing`, ru `шифр/перевод`…), z Unicode-safe sanityzacją i twardym fallbackiem na polskie defaulty; `id` wariantu pozostaje techniczne. Manuale zlokalizowane w ślad (przykłady `architektura_` → natywne). **(3) A11y: spin przesunięcia Cezara ukryty dla nie-cezarowych szyfrów** (NVDA nie ogłasza już martwego pola; wzorzec show/hide jak przy polu ISO naprawiacza). **(4) Dokumentacja user-facing przechodzi z .txt na HTML renderowany z Markdownu.** Szablony `dokumentacja/*.yaml` są od teraz pisane w MD (mechaniczna migracja: nagłówki `#`/`##` per sekcja + backticki wokół `<placeholderów>` ×9 języków, z autotestem integralności treści), a `generuj_dokumentacje.py` renderuje `docs/<id>.<iso>.html` (biblioteka `markdown`, nl2br + sane_lists) z pełnym dokumentem HTML5: `<html lang="<iso>">` przełącza syntezator czytnika ekranu na język treści, nagłówki dają nawigację klawiszami 1-6/h w NVDA, a minimalny CSS (z trybem ciemnym) czyta się dobrze też wzrokiem — koniec „obleśnego" gołego .txt w Notatniku. README bez zmian (surowy MD dla GitHuba). Menu Pomoc, `installer.iss` (checkbox „otwórz manual" + sprzątanie osieroconych `docs\*.txt` przy upgrade) i `build_release` przepięte; nowa bramka RAW-HTML w `--waliduj` pilnuje, żeby żaden surowy `<fragment>` z szablonu nie został połknięty przez przeglądarkę. Przy okazji naprawione martwe odwołanie w 9 manualach: przewodnik Opowieści to `tales.<iso>.html`, nie `opowiesci.pl.txt`/`tarinat.fi.txt`/`recits.fr.txt` (plik o tych nazwach nigdy nie istniał).*
 
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
+
+---
+
+## 19.6.0 — minor release
+
+### What's new
+
+**An accent can no longer buy one character at the price of the whole Latin
+script.** Every accent file carried a `usun_polskie_znaki` flag that switched
+the pack's diacritic pre-pass off. It existed for one reason: an accent that
+needs to see a source diacritic — French `ç`, for instance — cannot see it once
+the pre-pass has flattened it. The price, though, was never one character. With
+the flag off, NOTHING was flattened, so the rest of the Latin script rode
+straight into the speech synthesizer: measured before this release, the six
+accents that switched it off passed between 170 and 188 characters of the
+U+00C0–U+017F range through untouched, and two of them (`fi/rosyjski`,
+`is/rosyjski`) let bare Latin letters into Cyrillic output. Against that stood
+exactly two rules in the whole project that actually wanted the raw character —
+both of them the French cedilla, and one of the two produced the very same
+result the pre-pass already produced. The flag is gone from all 99 accent files
+and the pre-pass now runs unconditionally, exactly as it always has for ciphers.
+Across the 72 accent pairs, the Latin characters reaching the synthesizer
+unchanged drop from 1134 to 30 — and all 30 are letters the source pack declares
+as its own (`de` ä/ö, `fi` ä/å/ö, `is` á/é/í/ó/ú/ö) plus the `ü` the
+French-to-German accent deliberately writes itself.
+
+**The cedilla is settled in the pack's table, where it serves every voice at
+once.** French flattened `ç` to `s`, which reads correctly almost everywhere but
+not in German, where an `s` between vowels is voiced: "garson" would come out
+as /gaʁzɔn/. That single mismatch was the reason the French-to-German accent
+carried its own `ç → ss` rule and had to disable the pre-pass to reach it. The
+pack now flattens `ç` to "ss" for everyone; the Polish, Finnish, Russian,
+Italian, Spanish, English and Icelandic voices read "ss" as a plain /s/, so the
+compromise turned out to cost nothing. Twelve of the 72 accents change their
+output in this release, and they are exactly the twelve that should: the four
+that used to disable the pre-pass, and the eight French ones that go through the
+new cedilla.
+
+**If you wrote your own accent file, check it for that flag.** The engine no
+longer reads `usun_polskie_znaki` — a line saying `false` in a hand-made accent
+is now a statement the program ignores, not a switch, so the pre-pass will run
+where it used to be skipped. The fix for a rule that needs a flattened character
+belongs to `podstawy.yaml`: either the character is a real letter of the
+language and belongs in `alfabet` (the pre-pass leaves those alone), or you
+retune the target of its pair so that every accent of the pack gets the same
+benefit. The release gate for accent pairs reports a leftover flag by name and
+says as much.
+
+**The Rule Manager's "substitution cipher" finally produces a file that runs.**
+One of the nine types the wizard offers writes a `szyfry/*.yaml` with no
+`algorytm:` field and all of its content in a `zamiany:` list. The cipher
+dispatcher only ever branched on `algorytm:`, so such a file loaded into the
+cipher list in the GUI and then failed on first use with "unknown cipher
+algorithm" — the type had been dead since the day it was offered, and no gate
+saw it, because not one file in the shipped packs uses that branch. The
+dispatcher now has it. A file with neither field is still an error, but the
+message names the missing field instead of blaming an unknown algorithm.
+
+**The Manager's prompts stop describing an engine that does not exist.** The
+prompt for an algorithmic cipher taught a map called `_ALGORYTMY` (the engine
+has `_ALGORYTMY_SZYFROW`), functions named `_algorytm_<id>` (they are
+`_algo_<id>`; the old form appears nowhere in the project), and a two-argument
+signature where the engine passes four — an agent following it to the letter got
+a `TypeError` on the first run. The cipher template listed four pipeline flags
+that the cipher path never reads, and advised writing patterns on diacritics
+that the pre-pass has already removed. Three prompts and a docstring still spoke
+of "all 7 deployed packs" while rendering the list of nine right next to that
+sentence, and the prompt for a new base language offered seven sample labels
+without knowing the Spanish or French pack. Counts and label samples are now
+computed from the packs on disk, and the model name comes from the constant the
+engine uses, not from a literal in the text.
+
+### Planned or deferred
+
+* The 49 quotes ALMOST equal to a label stay baselined — unchanged since
+  v19.4.1, still a call for a native speaker (`fi` is the first candidate).
+* The four accent-audit notes introduced in v19.5.0 (`pl/finski`,
+  `pl/islandzki`) stand unchanged and deliberately: the romanization of `ć`
+  feeds the accent's own `c` rule from the same file.
+* The gate that rejects an accent rule the pre-pass would eat now has one
+  documented exception — a pattern built on a character an EARLIER rule of the
+  same table introduces is alive, because the pre-pass works on the input while
+  the rules run in sequence. This is how the French-to-German umlaut repair
+  chain works (`u → ü`, then `oü → u`), and it is the only shape of that
+  exception the project uses today.
 
 ---
 
