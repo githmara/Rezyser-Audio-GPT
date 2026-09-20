@@ -577,7 +577,14 @@ def generuj_burze(
     timeout:   float = 120.0,
     max_retry: int = 2,
 ) -> WynikBurzy:
-    """Wysyła Burzę z ``response_format=json_object`` i waliduje JSON-schemę.
+    """Wysyła Burzę ze schematem structured outputs i waliduje JSON-schemę.
+
+    Kształt odpowiedzi wymusza API, nie sam prompt (v18.23): gałąź Anthropic
+    dostaje :data:`SCHEMA_BURZA_API` w ``output_config.format``, a gałąź
+    ``openai_compat`` — ``response_format={"type": "json_object"}``, bo
+    schematu nie przyjmuje. Walidacja ``jsonschema`` + retry niżej zostają
+    DRUGĄ linią: wchodzą, gdy model albo endpoint odrzuci format i
+    ``core_llm`` ponowi wywołanie bez ``output_config``.
 
     Wzorzec self-correction via error feedback — z ``opowiesci_ai.generuj_ture``.
     Przy halucynacji struktury (brak klucza, zły typ) appendujemy poprzedni
@@ -856,10 +863,13 @@ def generuj_skrypt(
     ``max_retry`` powtórzeń (default 2 → łącznie 3 wywołania).
 
     WYMÓG: ``przepis.prompt_systemowy`` MUSI instruować model, by zwracał JSON
-    zgodny ze :data:`SCHEMA_SKRYPT`. Na Claude egzekwujemy to przez prompt +
-    walidację ``jsonschema`` + retry (nie ma odpowiednika OpenAI
-    ``response_format={"type": "json_object"}``). To zadanie przepisu YAML
-    (Etap E3), nie tego modułu.
+    zgodny ze :data:`SCHEMA_SKRYPT` — i to zadanie przepisu YAML (Etap E3),
+    nie tego modułu. Prompt nie jest już jednak JEDYNYM egzekutorem kształtu:
+    od v18.23 wysyłamy :data:`SCHEMA_SKRYPT_API` jako ``output_config.format``
+    (structured outputs Anthropic; gałąź ``openai_compat`` dostaje
+    ``response_format={"type": "json_object"}``, bo schematu nie przyjmuje).
+    Walidacja ``jsonschema`` + retry niżej to DRUGA linia — na wypadek, gdy
+    model albo endpoint odrzuci format i ``core_llm`` ponowi bez niego.
 
     Args:
         klient:    Klient Anthropic (Claude).

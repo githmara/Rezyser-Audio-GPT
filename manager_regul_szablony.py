@@ -597,6 +597,75 @@ def _podfoldery_jezykowe() -> str:
     return _csv_kodu(f"{p}/" for p in core_poliglota._PODFOLDERY_JEZYKOWE)
 
 
+def _algorytmy_szyfrow() -> str:
+    """Nazwy algorytmów, które silnik REALNIE zna — z `_ALGORYTMY_SZYFROW`.
+
+    Prompty wyliczały tę szóstkę literałem w dwóch miejscach naraz, a jest to
+    mapa w kodzie: dołożenie siódmego algorytmu zostawiłoby oba teksty
+    kłamiące, i to kłamiące wybiórczo (agent nie zobaczyłby wzorca, który ma
+    pod ręką). Ta sama klasa co `_sklad_rezysera` i `_regexy_rozdzialow`.
+    """
+    return _csv_kodu(sorted(core_poliglota._ALGORYTMY_SZYFROW))
+
+
+def _szyfry_wdrozone() -> str:
+    """Ile szyfrów leży w paczkach i ile z nich ma pole `algorytm:`.
+
+    Prompt „czystych zamian" opiera na tym całą swoją radę o modelach
+    strukturalnych („nie bierz ich za wzór, wszystkie są algorytmiczne"),
+    więc zdanie musi znać STAN DYSKU, a nie stan z dnia, w którym je
+    napisano — pierwszy wdrożony szyfr zamian ma je unieważnić sam.
+    """
+    algo, zamiany = set(), set()
+    for plik in sorted(_DICT_DIR.glob("*/szyfry/*.yaml")) if _DICT_DIR.is_dir() else []:
+        # `_wczytaj_yaml` melduje awarię do rejestru pominięć zamiast milczeć
+        # (standard „zero ciszy") i zwraca `{}` — plik nie do odczytania nie
+        # jest więc ani algorytmem, ani zamianami, a użytkownik dowiaduje się
+        # dlaczego.
+        dane = _wczytaj_yaml(plik)
+        if not dane:
+            continue
+        (algo if dane.get("algorytm") else zamiany).add(plik.stem)
+    if not algo and not zamiany:
+        return "the ciphers deployed in the packs"
+    czesci = [f"all {len(algo)} cipher(s) deployed in the packs "
+              f"({', '.join(sorted(algo))}) are ALGORITHMIC ciphers"]
+    if zamiany:
+        czesci.append(f"while {len(zamiany)} already use the `zamiany:` branch "
+                      f"({', '.join(sorted(zamiany))}) and ARE a structure model")
+    return ", ".join(czesci)
+
+
+def _regexy_rozdzialow(wciecie: str = "     ") -> str:
+    """Realne `regex_podzial_rozdzialow` wdrożonych paczek, po jednym na linię.
+
+    Prompt postprodukcji wyliczał te wzorce LITERAŁEM i wyliczał je źle: znał
+    pięć języków (PL/DE/IT/EN/RU), gdy paczek jest dziewięć — autor nowej
+    postprodukcji dla `es` albo `fr` nie widział więc wzorca swojej własnej
+    paczki, choć ten leży na dysku. Ta sama klasa co `_sklad_rezysera`: prompt
+    nie powtarza tego, co kod umie policzyć.
+
+    Paczka bez `postprod_tytuly.yaml` po prostu nie wchodzi na listę — to
+    przykłady, nie kontrakt, więc brak jednej pozycji nie może wywalić
+    kreatora. Plik, który JEST, ale się nie parsuje, melduje się w rejestrze
+    pominięć przez :func:`_wczytaj_yaml` (standard „zero ciszy").
+    """
+    linie = []
+    if _DICT_DIR.is_dir():
+        for folder in sorted(_DICT_DIR.iterdir()):
+            plik = folder / "rezyser" / "postprod_tytuly.yaml"
+            if not plik.is_file():
+                continue
+            # Jak wyżej: awaria parsera idzie do rejestru pominięć, nie
+            # w próżnię — paczka wypada wtedy z listy przykładów, ale
+            # użytkownik wie, która i dlaczego.
+            dane = _wczytaj_yaml(plik)
+            wzor = str(dane.get("regex_podzial_rozdzialow") or "").strip()
+            if wzor:
+                linie.append(f"{wciecie}- {folder.name.upper()}: `{wzor}`")
+    return chr(10).join(linie) or f"{wciecie}- (no deployed pack to read it from)"
+
+
 def _sklad_rezysera(jezyk_bazowy: str) -> str:
     """Realny skład `rezyser/` paczki referencyjnej, np. „7 files: `baza.yaml` + …".
 
@@ -1059,8 +1128,11 @@ kolejnosc: 100
 # the diacritic pre-pass (`podstawy.yaml::polskie_znaki`) and the full TTS
 # cleaning WITH number normalization before every cipher, algorithmic or not.
 # Two consequences for the list below: a pattern containing a character the
-# pre-pass flattens is DEAD (it is already gone), and digits never reach it
-# („2" arrives as the word). Deployed ciphers carry no pipeline flags either.
+# pre-pass transliterates is DEAD (that character is already gone), and digits
+# never reach it („2" arrives as the word). Worth checking WHAT it turns into,
+# not only that it goes: since v19.7 the target may be one of this pack's own
+# letters (`pl: š → sz`, `ru: ž → ж`), so the useful pattern is the one the
+# pre-pass PRODUCES. Deployed ciphers carry no pipeline flags either.
 
 # The actual replacements. The list is applied SEQUENTIALLY (str.replace) —
 # each rule operates on the OUTPUT of the previous one. Two consequences:
@@ -1086,6 +1158,7 @@ def prompt_szyfr_zamiany(id_pliku: str, etykieta: str,
                          jezyk_bazowy: str) -> str:
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
+    szyfry_wdrozone = _szyfry_wdrozone()
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project. You have file tools (read / write / edit / glob / grep —
@@ -1101,10 +1174,9 @@ a „pure replacements" cipher file inside the project tree.
   pre-pass from `podstawy.yaml::polskie_znaki` and the full TTS cleaning with
   number normalization. Both are unconditional on the cipher path — the four
   pipeline flags of an accent file are not read here at all.
-- CRITICAL about reference models: ALL 6 ciphers deployed in the packs
-  (cezar, jakanie, odwracanie, samogloskowiec, typoglikemia, waz) are
-  ALGORITHMIC ciphers — they have an `algorytm:` field and do NOT contain a
-  `zamiany:` list. Do NOT take them as a structure model. The only files in
+- CRITICAL about reference models: {szyfry_wdrozone} — they have an
+  `algorytm:` field and do NOT contain a `zamiany:` list, so do NOT take
+  them as a structure model. The only files in
   the project using the `kategoria` + `zamiany:` list format are ACCENTS
   (`akcenty/*.yaml`) — and those are your STRUCTURE model for this cipher.
 - Deployed packs (scanned from `dictionaries/`): {inne_paczki}. Their
@@ -1140,9 +1212,12 @@ a „pure replacements" cipher named **{etykieta}**.
    For each pattern consider a `lowercase` and a `Capitalized` variant.
    Do NOT write patterns on characters the pre-pass removes: check
    `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki` and assume every
-   `wzor` listed there is already gone before your list runs. The letters the
-   pack keeps (its own, the ones standing in `alfabet`) are fair game — for
-   a Cyrillic or Greek pack that is the whole native script.
+   `wzor` listed there is already gone before your list runs. Read the
+   `zamiana` column too — since v19.7 a pair may land on one of this pack's
+   OWN letters (`pl: š → sz`, `ru: ž → ж`), and THAT is the character your
+   rule can catch. The letters the pack keeps (its own, the ones standing in
+   `alfabet`) are fair game — for a Cyrillic or Greek pack that is the whole
+   native script.
 
 # NATIVE-LANGUAGE REQUIREMENTS
 `etykieta`, `opis`, the file header, the YAML comments — in
@@ -1196,14 +1271,24 @@ kolejnosc: 40
 #     burza_json  – 3 plot options (reuses the Brainstorm parser, no file save)
 #   A NEW JSON schema (other than the two above) needs CODE (a parser in
 #   rezyser_ai.py) — and therefore source access, like a Story (Opowieści) mode.
-#   WHY A JSON format_wyjscia MATTERS (since v18.5.1): skrypt_json / burza_json
-#   make the engine REQUEST structured output (response_format=json_object) when
-#   the user points the app at an OpenAI-compatible endpoint
-#   (LLM_PROVIDER=openai_compat) — that is what keeps the reply parseable on
-#   non-Anthropic models. The default Anthropic path ignores the flag and
-#   enforces the schema through the prompt instead. So: if this mode emits JSON,
-#   pick skrypt_json/burza_json (NOT tekst), and DOUBLE the braces of any literal
-#   JSON example in prompt_systemowy — see the system-prompt note below.
+#   WHY A JSON format_wyjscia MATTERS: it is what makes the engine ASK THE API
+#   for a parseable reply instead of hoping the prompt is persuasive. Both
+#   provider branches act on it, each with what it supports (since v18.23):
+#     * Anthropic (default) — sends the mode's JSON Schema as
+#       `output_config.format`, i.e. real structured outputs. The schema also
+#       carries the REFUSAL branch under the `typ` discriminator, so a model
+#       that will not answer has a legal shape to answer WITH.
+#     * openai_compat — sends `response_format={{"type":"json_object"}}` (that
+#       branch cannot take a schema), plus tolerant parsing on our side.
+#   The prompt is the SECOND line of defence, not the first: `core_llm` drops
+#   `output_config` and retries without it when a model or endpoint rejects the
+#   format, and only then does the schema live in the prompt alone. Same for
+#   the refusal: the `[ODRZUCENIE_AI]` clause (appended automatically by
+#   `przepisy_rezysera.buduj_prompt_systemowy`) is the fallback for the branch
+#   the schema would otherwise provide.
+#   So: if this mode emits JSON, pick skrypt_json/burza_json (NOT tekst), and
+#   DOUBLE the braces of any literal JSON example in prompt_systemowy — see
+#   the system-prompt note below.
 struktura: rozdzialy
 format_wyjscia: tekst
 
@@ -1511,6 +1596,9 @@ def szablon_postprodukcja(id_pliku: str, etykieta: str,
     zakresy = _zakresy_postprodukcji()
     rola_pamieci = pr.ROLA_PAMIEC_DLUGOTRWALA
     model_domyslny = pr.MODEL_DOMYSLNY
+    tok_rozdzial = pr.MAX_TOKENS_PER_ROZDZIAL_DOMYSLNE
+    tok_calosc = pr.MAX_TOKENS_CALOSC_DOMYSLNE
+    regexy = _regexy_rozdzialow("#   ")
     return f"""# -----------------------------------------------------------------------------
 #  <FILL NATIVELY in {natywna_baza}: file header, e.g. „NACHBEARBEITUNG"
 #   (DE) / „POSTPRODUZIONE" (IT) / „ПОСТОБРАБОТКА" (RU)>
@@ -1541,8 +1629,9 @@ zakres: per_rozdzial
 # Such a recipe REQUIRES a non-empty sufiks_pliku_wyniku below.
 # rola: {rola_pamieci}
 
-# Max output tokens per AI call (defaults: 256 per_rozdzial / 8000 calosc).
-max_tokens_wyjscia: 256
+# Max output tokens per AI call (engine defaults: {tok_rozdzial} for
+# per_rozdzial, {tok_calosc} for calosc — omit the field to take them).
+max_tokens_wyjscia: {tok_rozdzial}
 
 # Optional: save the result to skrypty/<project><suffix>.txt (the GUI asks
 # before overwriting). Empty/omitted = result shown only in a dialog.
@@ -1569,11 +1658,10 @@ prompt_uzytkownika_szablon: |
     {{probka}}>
 
 # --- Project-file iteration parameters ---
-# Regex matching chapter headers. Adapt the PATTERN to the language:
-#   PL: "(?i)\\\\n*(Prolog|Rozdział \\\\d+|Epilog)\\\\n*"
-#   DE: "(?i)\\\\n*(Prolog|Kapitel \\\\d+|Epilog)\\\\n*"
-#   IT: "(?i)\\\\n*(Prologo|Capitolo \\\\d+|Epilogo)\\\\n*"
-#   EN: "(?i)\\\\n*(Prologue|Chapter \\\\d+|Epilogue)\\\\n*"
+# Regex matching chapter headers. Adapt the PATTERN to the language.
+# The patterns the deployed packs really use (read from their own
+# `postprod_tytuly.yaml`, so this list cannot drift from the packs):
+{regexy}
 regex_podzial_rozdzialow: '<FILL IN: regex matching chapter headers in {natywna_baza}>'
 min_dlugosc_fragmentu: 50
 max_dlugosc_probki: 6000
@@ -1587,7 +1675,7 @@ etykieta_bled_brak_kredytow: '<FILL NATIVELY: e.g. (Error – no API credits)>'
 # (report-style tools, e.g. an audit). Replace the fields above with:
 #
 # zakres: calosc
-# max_tokens_wyjscia: 8000
+# max_tokens_wyjscia: {tok_calosc}
 # sufiks_pliku_wyniku: "_audyt"
 #
 # # User template uses the {{tresc}} placeholder (whole file) instead of
@@ -1621,6 +1709,9 @@ def prompt_postprodukcja(id_pliku: str, etykieta: str,
     rola_pamieci = pr.ROLA_PAMIEC_DLUGOTRWALA
     sklad_rezysera = _sklad_rezysera(jezyk_bazowy)
     model_domyslny = pr.MODEL_DOMYSLNY
+    tok_rozdzial = pr.MAX_TOKENS_PER_ROZDZIAL_DOMYSLNE
+    tok_calosc = pr.MAX_TOKENS_CALOSC_DOMYSLNE
+    regexy = _regexy_rozdzialow("     ")
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project. You have file tools (read / write / edit / glob / grep — whatever
@@ -1676,9 +1767,9 @@ a postproduction named **{etykieta}**.
 1. `dictionaries/{jezyk_bazowy}/rezyser/postprod_tytuly.yaml` — if it
    exists, a ready-made convention model in {natywna_baza}.
 2. `dictionaries/<another pack>/rezyser/postprod_tytuly.yaml` — a
-   convention reference for the deployed packs (PL/DE/IT/RU/FI/IS/EN). Note
-   the native `regex_podzial_rozdzialow` (PL: Rozdział, DE: Kapitel,
-   IT: Capitolo, RU: Глава, EN: Chapter).
+   convention reference for the deployed packs ({inne_paczki}). Note the
+   native `regex_podzial_rozdzialow` — every pack names its chapters its
+   own way, and the real patterns are listed under point 6 below.
 3. (Optional) The user's `.txt` project files — if you have access to
    examples, open one to verify how chapter headers are actually named in
    {natywna_baza}.
@@ -1699,8 +1790,8 @@ a postproduction named **{etykieta}**.
    then `rola: {rola_pamieci}` plus `zakres: rekoncyliacja` plus a non-empty
    `sufiks_pliku_wyniku:`. An unknown value is ignored with a warning (the
    role only ADDS behaviour after success, so a typo cannot misroute work).
-   **`max_tokens_wyjscia:`** output budget per call (defaults: 256 for
-   per_rozdzial, 8000 for calosc). Optional **`sufiks_pliku_wyniku:`**
+   **`max_tokens_wyjscia:`** output budget per call (engine defaults:
+   {tok_rozdzial} for per_rozdzial, {tok_calosc} for calosc). Optional **`sufiks_pliku_wyniku:`**
    (e.g. "_audyt") — no path separators or Windows-special characters.
 3. AI model parameters: `model: {model_domyslny}`,
    `temperatura` 0.5-0.8 (we want stability),
@@ -1722,15 +1813,12 @@ a postproduction named **{etykieta}**.
 6. **`regex_podzial_rozdzialow:`** (per_rozdzial only) matched to how
    chapters are named in the project .txt files in {natywna_baza}.
    Patterns per language:
-     - PL: `(?i)\\n*(Prolog|Rozdział \\d+|Epilog)\\n*`
-     - DE: `(?i)\\n*(Prolog|Kapitel \\d+|Epilog)\\n*`
-     - IT: `(?i)\\n*(Prologo|Capitolo \\d+|Epilogo)\\n*`
-     - EN: `(?i)\\n*(Prologue|Chapter \\d+|Epilogue)\\n*`
-     - RU: `(?i)\\n*(Пролог|Глава \\d+|Эпилог)\\n*`
+{regexy}
 7. `min_dlugosc_fragmentu` (per_rozdzial; typically 50 chars — shorter
    chunks are skipped with the `etykieta_fragment_zbyt_krotki` message).
-8. `max_dlugosc_probki` (per_rozdzial; typically 4000-8000 chars — the
-   context budget sent to the API).
+8. `max_dlugosc_probki` (per_rozdzial) — the per-chunk context budget sent
+   to the API. Every deployed pack uses the SAME value, so read it from the
+   reference file instead of picking a number out of a range.
 
 # NATIVE-LANGUAGE REQUIREMENTS
 All „human-facing" text in the file — label, header, YAML comments,
@@ -2056,11 +2144,15 @@ presence/absence of diacritics such as ä/ö/ç/ß).
      cipher only ever sees the letter they became and shifts THAT. They do
      not „pass through" — and neither do digits, which the cipher path turns
      into words before shifting anything.
-   * Non-Latin script → PREPEND the native alphabet and KEEP A–Z behind it,
-     the way `ru` does („АБВ…ЯABC…Z"). Real text in a Cyrillic or Greek pack
-     still carries Latin names, brands and quotations, and a letter absent
-     from this string passes through the cipher unshifted — plainly readable
-     inside the ciphertext.
+   * Non-Latin ALPHABETIC script (Cyrillic, Greek, Armenian, Georgian)
+     → PREPEND the native alphabet and KEEP A–Z behind it, the way `ru`
+     does („АБВ…ЯABC…Z"). Real text in such a pack still carries Latin
+     names, brands and quotations, and a letter absent from this string
+     passes through the cipher unshifted — plainly readable inside the
+     ciphertext.
+   * Script with NO alphabet → you should not be here: see SCRIPT CHECK
+     above. Leaving the pre-filled A–Z is a declared compromise the
+     maintainer has to accept first, not a default you may take silently.
    Any letter that grows under `.upper()` (`ß` → „SS") is omitted regardless
    of the script; it belongs in `polskie_znaki` above.
 5. **`slowo_akcent:`** (13.3+ contract) — a list of native words that
@@ -2102,6 +2194,7 @@ def prompt_szyfr_algorytm(id_pliku: str, etykieta: str,
                           opis_efektu: str,
                           jezyk_bazowy: str = "pl") -> str:
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
+    algorytmy = _algorytmy_szyfrow()
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project. You have file tools (read / write / edit / glob / grep —
@@ -2123,8 +2216,9 @@ shifting, word scrambling, reversal) — something a static table cannot express
   implementing it. A `kategoria: szyfr` YAML file with an `algorytm: <name>`
   field tells the engine to call that function instead of applying
   a `zamiany:` list.
-- Existing algorithms (reference): cezar, odwracanie, typoglikemia, jakanie,
-  samogloskowiec, waz. All in `core_poliglota.py` as `_algo_*`.
+- Algorithms the engine knows (read from `_ALGORYTMY_SZYFROW`, so this list
+  cannot drift): {algorytmy}. Each is a `_algo_*` function in
+  `core_poliglota.py` — open one as your reference.
 - WHAT RUNS BEFORE YOUR FUNCTION (unconditional, not configurable): the
   diacritic pre-pass from `podstawy.yaml::polskie_znaki` and the full TTS
   cleaning with number normalization. Your function receives text that is
