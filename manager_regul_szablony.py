@@ -663,7 +663,8 @@ kolejnosc: 100
 # `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki` runs before the
 # `zamiany` list of EVERY accent and before every cipher. Write the patterns
 # below for the text AFTER it (the pack's own letters — those standing in
-# `alfabet` — survive it; everything else arrives flattened).
+# `alfabet` — survive it; everything else arrives transliterated, either to
+# ASCII or to one of those own letters, whichever `podstawy.yaml` chose).
 czysc_tekst_tts: true
 normalizuj_liczby: true
 skleja_pojedyncze_litery: true
@@ -775,9 +776,14 @@ instead of „Akcent fonetyczny"). You cannot meaningfully write a
    (French `ç` → `c`, which then reads /k/), the defect is in the MAP, not
    in your accent: flatten it to the letter carrying the sound, choosing a
    target that serves EVERY accent of the pack at once (`fr: ç → ss`, so
-   that the German voice does not read the intervocalic `s` as /z/). The
-   old per-accent switch existed until v19.6 and bought one character at
-   the price of letting 170–188 Latin characters through to the
+   that the German voice does not read the intervocalic `s` as /z/).
+   The target does NOT have to be ASCII — it has to be readable by THIS
+   pack, so a letter standing in `alfabet` is fair game and usually better
+   (`pl: š → sz`, `ru: ž → ж`). Written that way the character arrives at
+   your list as something you already have a rule for, instead of as a bare
+   `s`/`z` that lost the distinction on the way in.
+   The old per-accent switch existed until v19.6 and bought one character
+   at the price of letting 170–188 Latin characters through to the
    synthesizer untouched.
 
 # NATIVE-LANGUAGE REQUIREMENTS
@@ -1787,9 +1793,9 @@ def szablon_podstawy(kod_jezyka: str, etykieta_jezyka: str) -> str:
 #                         the 75 languages the detector knows: either filled
 #                         in below, or commented out because this language is
 #                         genuinely absent from `lingua`. Leave it as it is.
-#    2. polskie_znaki   – mapping of diacritics FOREIGN to „{kod_jezyka}" to
-#                         ASCII letters (the pre-pass of every accent and
-#                         every cipher of this pack).
+#    2. polskie_znaki   – phonetic map of diacritics FOREIGN to „{kod_jezyka}"
+#                         onto letters THIS pack can read (the pre-pass of
+#                         every accent and every cipher of this pack).
 #    3. alfabet         – the full uppercase alphabet (used by the Caesar
 #                         cipher). NOTE: letters that grow under `.upper()`
 #                         (e.g. ß→SS) do NOT enter the alphabet.
@@ -1834,8 +1840,25 @@ polskie_znaki:
   #   * KEEP the pairs of letters that GROW under `.upper()` (`ß` → „SS"),
   #     even when they ARE native: such a letter can never enter `alfabet`,
   #     so the pre-pass is the only place that can deal with it.
-  #   * RETUNE a `zamiana` where this pack's phonetics say so — fi reads
-  #     `ā → aa` (long vowel), fr reads `ç → s`. The target must stay ASCII.
+  #   * RETUNE a `zamiana` wherever this pack's phonetics can do better. This
+  #     is the part of the file that pays off most. The defaults below are
+  #     deliberately NEUTRAL (plain ASCII) because whoever wrote the template
+  #     does not know your language — you do. The target may leave ASCII, but
+  #     only for a letter standing in `alfabet` below: your OWN script, never
+  #     a third language's. When a foreign letter maps STABLY onto a sound
+  #     your language also writes, spell it YOUR way:
+  #        pl: `š → sz`, `ž → ż`, `č → cz`, `ř → rz`
+  #        ru: `š → ш`, `ž → ж`, `č → ч`
+  #        fi: `ā → aa` (a long vowel Finnish really writes; Finnish has no
+  #            ž/š of its own, so THERE the ASCII default is the honest answer)
+  #        fr: `ç → s`
+  #     Why it pays: the pre-pass runs BEFORE every accent of the pack, so
+  #     `š → sz` hands the English accent a digraph it already has a rule for
+  #     (`sz → sh`) and the Russian accent one it maps to `ш`. Flattening to
+  #     a bare `s` throws that knowledge away before any accent sees it.
+  #     When two languages pull a character in different directions, pick the
+  #     spelling YOUR reader meets more often — this is one shared list for
+  #     the whole pack, not a per-text decision.
   #
   # The defaults below come from `manager_regul_szablony.TABELA_LACINKI`,
   # the same table the release gate measures pack coverage with.
@@ -1851,13 +1874,25 @@ polskie_znaki:
 #     the native order puts it, NOT automatically at the end (FI
 #     „...XYZÅÄÖ" — Å Ä Ö are native and close the Finnish alphabet; ES Ñ
 #     sits between N and O; IT drops J K W X Y, keeping 21 letters).
-#     Accented forms that are NOT distinct letters (FR é/à, IT à/è) do NOT
-#     enter the alphabet — they pass through the cipher like digits.
-#   * Non-Latin script → PREPEND the native alphabet and KEEP A–Z behind it,
-#     the way `ru` does („АБВ…ЯABC…Z"). A Cyrillic or Greek pack still meets
-#     Latin names, quotations and brand names in real text, and a letter
-#     absent from this string passes through the cipher unshifted — visible
-#     in the ciphertext as plain, unencrypted words.
+#     Accented forms that are NOT distinct letters (FR é/à, IT à/è) stay
+#     out: the pre-pass above reaches them first, so the cipher only ever
+#     sees the letter they became, and shifts THAT. (They do not „pass
+#     through" — and neither do digits, which the cipher path turns into
+#     words before shifting anything.)
+#   * Non-Latin ALPHABETIC script (Cyrillic, Greek, Armenian, Georgian)
+#     → PREPEND the native alphabet and KEEP A–Z behind it, the way `ru`
+#     does („АБВ…ЯABC…Z"). Such a pack still meets Latin names, quotations
+#     and brands in real text, and a letter absent from this string passes
+#     through the cipher unshifted — visible in the ciphertext as plain,
+#     unencrypted words.
+#   * Script with NO ALPHABET (logographic Chinese, a syllabary, an abjad)
+#     → this language cannot feed the Caesar cipher at all, and leaving the
+#     Latin A–Z above is a DECLARED COMPROMISE, not an answer: the cipher
+#     then shifts only the Latin insertions in the text and leaves the rest
+#     readable. Do not stop at this field — several other rules are hit by
+#     the same gap. Read „SCRIPT CHECK" in the Manager Reguł prompt for this
+#     rule type: shipping such a pack with those rules HIDDEN is a decision
+#     for the maintainer, not something to settle inside this file.
 #
 # Letters that grow under `.upper()` (`ß` → „SS") are always omitted — they
 # belong in `polskie_znaki` above.
@@ -1907,6 +1942,49 @@ for a new language and prepare the pack for engine verification.
   packs — but until each of the subfolders above holds a file, the pack
   stays invisible.
 
+# SCRIPT CHECK — settle this BEFORE you write anything
+Polyglot works on the WRITTEN form of a language, so what it can deliver
+depends on the SCRIPT, not on how widely the language is spoken. Place
+{natywna} in one of the groups below.
+
+**Ready today, data only (no Python).** Alphabetic scripts written WITH
+SPACES between words, whose letters map one-to-one to sounds: Latin,
+Cyrillic, Greek, Armenian, Georgian. The `ru` pack is the proof that
+a non-Latin alphabet needs no engine change at all. → Carry on with the
+task below.
+
+**STOP and write a report instead** — these four groups need ENGINE work,
+and part of Polyglot would have to be HIDDEN for the language rather than
+shipped broken:
+  * **No spaces between words** — Chinese, Japanese, Thai, Khmer, Lao. The
+    word-based cipher algorithms (the stutter's minimum word length,
+    Typoglycemia's „keep the first and last letter", single-letter merging)
+    have nothing to cut on, so the engine would need a word segmenter — a
+    heavy new dependency inside the frozen build.
+  * **No written vowels** — Arabic, Hebrew, Persian, Urdu. The vowel cipher
+    has nothing to replace, and the reverse-the-sentence cipher plus the
+    screen-reader HTML both need right-to-left handling (`dir`), which the
+    output layer does not emit yet.
+  * **Syllable blocks or combining vowel marks** — Korean, Hindi, Bengali,
+    Tamil. The letters exist but are composed into one character, so a rule
+    for a single letter never matches until the text is decomposed first.
+    The smallest of the four gaps.
+  * **Logographic** — Chinese. On top of the spacing problem, the Caesar
+    cipher needs an alphabet and the vowel cipher needs vowels; neither
+    exists.
+
+WHAT „STOP" MEANS HERE. Do not improvise a workaround, and above all do NOT
+simply leave `alfabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'` standing because
+nothing rejects it. A Latin alphabet in a pack whose text carries no Latin
+letters is a Caesar cipher that silently ciphers nothing, and the user ends
+up with a copy of the English pack wearing translated labels — a defect
+they would only discover by reading their own ciphertext. Instead write the
+user a short issue draft they can paste into the project's issue tracker:
+the language and its ISO code, which of the four groups it falls into,
+which rules would have to be hidden, and the question the maintainer has to
+answer (ship the pack with those rules hidden, or wait for engine work?).
+Then stop — shipping such a pack is the maintainer's call, not yours.
+
 # TASK
 Create the file `dictionaries/{kod_jezyka}/podstawy.yaml` for the language
 **{etykieta_jezyka}** (ISO 639-1 code: `{kod_jezyka}`, endonym:
@@ -1925,7 +2003,8 @@ presence/absence of diacritics such as ä/ö/ç/ß).
 1. **`id: podstawy`** and **`jezyk: {kod_jezyka}`** — identifying fields.
 {wskazowka_lingua}
 3. **`polskie_znaki:`** — the PRE-PASS: a list of `{{ wzor, zamiana }}`
-   pairs, diacritic → ASCII, each in both variants (lower + upper). Despite
+   pairs, foreign diacritic → a letter THIS pack can read, each in both
+   variants (lower + upper). Despite
    the historical name it runs before the replacement table of EVERY accent
    of the pack, and before every cipher, with no flag to switch it off — so
    it answers one question: which characters must be gone BEFORE the rules
@@ -1940,8 +2019,25 @@ presence/absence of diacritics such as ä/ö/ç/ß).
    * KEEP the pairs of letters that GROW under `.upper()` (`ß` → „SS") even
      when they are native — such a letter can never enter `alfabet`, so the
      pre-pass is the only place that can deal with it.
-   * RETUNE a `zamiana` only where this pack's phonetics demand it: fi reads
-     `ā → aa` (long vowel), fr reads `ç → s`. The target must stay ASCII.
+   * RETUNE a `zamiana` wherever {natywna} can do better than ASCII — this
+     is where the file earns its keep. The defaults are deliberately neutral
+     because the template's author does not know this language; you are
+     expected to. The target MAY leave ASCII, but only for a letter standing
+     in `alfabet`: this pack's own script, never a third language's.
+     A foreign letter that maps STABLY onto a sound {natywna} also writes
+     should be spelled the native way — `pl: š → sz, ž → ż, č → cz, ř → rz`;
+     `ru: š → ш, ž → ж, č → ч`; `fi: ā → aa` (a long vowel Finnish really
+     writes — Finnish has no ž/š of its own, so there the ASCII default is
+     the honest answer); `fr: ç → s`.
+     This is not cosmetics. The pre-pass runs BEFORE the `zamiany` list of
+     every accent, so `š → sz` hands the English accent a digraph it already
+     maps (`sz → sh`) and the Russian accent one it maps to `ш`; measured on
+     the `pl` pack, „Škoda Žižek Dvořák" goes from „Скода Зизэк Дворак" to
+     „Шкода Жижэк Двожак" on that change alone. Flattening to a bare `s`
+     throws the knowledge away before any accent can use it.
+     Where two languages pull one character apart (a Vietnamese letter
+     inside a Serbian-looking name), pick the spelling THIS pack's reader
+     meets more often — the list is shared by the whole pack.
    Do NOT delete a pair merely because {natywna} „does not use" that letter.
    Loanwords, quotations and foreign names arrive in real text, and every
    character missing from this list reaches the synthesizer untouched —
@@ -1956,7 +2052,10 @@ presence/absence of diacritics such as ä/ö/ç/ß).
      Å Ä Ö close the alphabet because Finnish puts them there; ES Ñ sits
      between N and O; IT drops J K W X Y and keeps 21 letters; IS keeps its
      full native sequence). Accented forms that are NOT distinct letters
-     (FR é/à, IT à/è) stay out — they pass through the cipher like digits.
+     (FR é/à, IT à/è) stay out: the pre-pass reaches them first, so the
+     cipher only ever sees the letter they became and shifts THAT. They do
+     not „pass through" — and neither do digits, which the cipher path turns
+     into words before shifting anything.
    * Non-Latin script → PREPEND the native alphabet and KEEP A–Z behind it,
      the way `ru` does („АБВ…ЯABC…Z"). Real text in a Cyrillic or Greek pack
      still carries Latin names, brands and quotations, and a letter absent

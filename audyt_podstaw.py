@@ -309,12 +309,30 @@ def _sprawdz_alfabet(kod: str, dane: dict, dodaj) -> None:
 
 
 def _sprawdz_znaki(kod: str, dane: dict, dodaj) -> None:
-    """`polskie_znaki`: kształt par, cel w ASCII, warianty lower+upper.
+    """`polskie_znaki`: kształt par, cel w PIŚMIE PACZKI, warianty lower+upper.
 
     Ta lista jest BEZWARUNKOWYM pre-passem każdego akcentu paczki (od v19.6
     nie ma już flagi, którą dało się go wyłączyć) oraz każdego szyfru, więc
     jej dziura zostawia diakrytyk w tekście podanym syntezatorowi — i to
     w każdej parze akcentowej paczki naraz.
+
+    CEL ZAMIANY: ASCII **albo litera z `alfabet` tej paczki** (v19.7). Do
+    v19.6 kryterium brzmiało „cel MUSI być ASCII" i było przybliżeniem —
+    dobrym dla ośmiu paczek łacińskich, fałszywym dla `ru`, gdzie `ж` nie
+    jest „diakrytykiem zostawionym syntezatorowi", tylko literą, którą ten
+    głos czyta. Orakułem jest `alfabet`, dokładnie jak w `znaki-litera-natywna`
+    i `_sprawdz_pokrycie_lacinki`: to on rozstrzyga, co jest LITERĄ tego
+    języka. Kryterium zostaje twarde — `ž → ř` w paczce `pl` dalej jest
+    błędem, bo `ř` polską literą nie jest.
+
+    Po co to komu (zmierzone na `pl`, tekst „Škoda Žižek Dvořák"): przy celu
+    `š → sz`, `ž → ż`, `ř → rz` pre-pass podaje akcentowi POLSKI DWUZNAK,
+    a akcent ma na niego regułę od zawsze (`sz → sh`, `rz → zh` w angielskim;
+    `sz → ш`, `ż → ж` w rosyjskim). Wynik rosyjski rośnie z „Скода Зизэк
+    Дворак" do „Шкода Жижэк Двожак". Spłaszczenie do gołego `s`/`z` wyrzucało
+    tę wiedzę do kosza PRZED akcentem. Szablon kreatora zostaje przy mapie na
+    ASCII (`manager_regul_szablony.TABELA_LACINKI`) — neutralnej dla języka,
+    którego autor szablonu nie zna; dostrojenie fonetyczne należy do paczki.
     """
     znaki = dane.get("polskie_znaki")
     if not isinstance(znaki, list) or not znaki:
@@ -322,6 +340,11 @@ def _sprawdz_znaki(kod: str, dane: dict, dodaj) -> None:
               "no `polskie_znaki` list — the pre-pass of every accent and every "
               "cipher of this pack would have nothing to strip")
         return
+    # Orakuł „co jest literą tej paczki" — ten sam, na którym stoi
+    # `znaki-litera-natywna` i pokrycie łacinki. Paczka bez `alfabet` (osobne
+    # znalezisko `alfabet-brak`) zachowuje się tu jak dawniej: zostaje ASCII.
+    alfabet = str(dane.get("alfabet") or "")
+    litery_paczki = set(alfabet) | set(alfabet.lower())
     wzory: list[str] = []
     for poz, wpis in enumerate(znaki, start=1):
         if not isinstance(wpis, dict) or "wzor" not in wpis or "zamiana" not in wpis:
@@ -334,11 +357,16 @@ def _sprawdz_znaki(kod: str, dane: dict, dodaj) -> None:
             dodaj("znaki-ksztalt", f"`polskie_znaki` entry #{poz} has an empty `wzor`")
             continue
         wzory.append(wzor)
-        if not zamiana.isascii():
-            dodaj("znaki-cel-nieascii",
-                  f"`{wzor}` → `{zamiana}`: the replacement is not ASCII, so the "
-                  f"pre-pass leaves a diacritic in the text handed to the "
-                  f"synthesizer")
+        obce = sorted({z for z in zamiana
+                       if not z.isascii() and z not in litery_paczki})
+        if obce:
+            dodaj("znaki-cel-obcy",
+                  f"`{wzor}` → `{zamiana}`: the replacement brings in {obce}, "
+                  f"and `alfabet` does not declare it a letter of this language "
+                  f"— the pre-pass would hand the synthesizer a character this "
+                  f"voice was never told to read. A target OUTSIDE ASCII is "
+                  f"allowed, but only from this pack's own script (`ru: ž → ж`, "
+                  f"`pl: š → sz`)")
         if wzor == zamiana:
             dodaj("znaki-tozsamosc",
                   f"`{wzor}` → `{zamiana}`: a rule that replaces a character with "
@@ -385,8 +413,9 @@ def _sprawdz_pokrycie_lacinki(kod: str, dane: dict, dodaj) -> None:
 
     Bramka NIE wymaga zgodności z `mrs.TABELA_LACINKI` co do celu zamiany —
     tabela jest domyślną dla nowej paczki, a transliteracja bywa fonetyką
-    (`fi: ā → aa`, `fr: ç → s`, `pl: ą → on`). Pytanie brzmi „czy znak w ogóle
-    wychodzi", nie „czy wychodzi dokładnie tak".
+    (`fi: ā → aa`, `fr: ç → s`, `pl: ą → on`, a od v19.7 także `pl: š → sz`
+    i `ru: ž → ж`, bo cel wolno pisać własnym pismem paczki → `_sprawdz_znaki`).
+    Pytanie brzmi „czy znak w ogóle wychodzi", nie „czy wychodzi dokładnie tak".
     """
     alfabet = str(dane.get("alfabet") or "")
     litery_paczki = set(alfabet) | set(alfabet.lower())
