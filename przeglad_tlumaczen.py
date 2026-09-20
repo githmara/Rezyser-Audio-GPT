@@ -700,6 +700,22 @@ disjoint, because one rewrites German spelling and the other Polish. Never
   the pre-pass leaves it alone), or you retune the TARGET of its pair so it
   serves every accent at once (`fr: ç → ss`, because a German `s` between vowels
   is read /z/). Dropping the rule and the prose about it is the third option.
+- THE PRE-PASS TARGET MAY BE YOUR OWN SCRIPT, AND NO GATE WILL ASK YOU FOR IT.
+  Since v19.7 a pair in `podstawy.yaml` may land on any letter standing in that
+  pack's `alfabet`, not only on ASCII (`pl: š → sz, ž → ż, ř → rz`;
+  `ru: š → ш, ž → ж, ř → рж`). This matters because the pre-pass runs BEFORE
+  your `zamiany`: given `sz`, an English accent already has `sz → sh` and a
+  Russian one `sz → ш`, so the distinction survives — flattened to a bare `s`
+  it is gone before you can act on it (measured: „Dvořák" → „Dvozhak" instead
+  of „Dvorak"). The GATE only checks the BOUNDARY — a target must be ASCII or
+  a letter of this pack (`audyt_podstaw`, class `znaki-cel-obcy`) — and it can
+  never tell you that a plain `s` was the poorer of two legal answers. That
+  judgement is yours, and it belongs to the review of the PACK's table, not of
+  one accent. Two rules of thumb: take the native spelling only where the
+  foreign letter maps STABLY onto a sound your language writes (`ä` is German
+  /ɛ/ but Finnish /æ/ — leave it in ASCII), and where two languages pull one
+  character apart, follow the spelling your readers meet more often, because
+  the list is shared by the whole pack.
 - CASE: give every letter rule its capitalized counterpart, and remember that
   ALL-CAPS text (headings) needs the fully upper-cased form of a digraph as a
   third rule — `Sz` does not catch `SZ`.

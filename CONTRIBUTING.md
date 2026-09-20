@@ -230,7 +230,17 @@ it report green — a skip is visible in the summary, a false pass is not.
 
 1. Create `dictionaries/<code>/` with at least `podstawy.yaml` (incl. the native
    `etykieta`) and the four language sub-folders (`akcenty/`, `szyfry/`,
-   `rezyser/`, `opowiesci/`).
+   `rezyser/`, `opowiesci/`). The `polskie_znaki` list in that file (historical
+   name; it holds FOREIGN diacritics) is a phonetic map, not an ASCII
+   flattener: its target may be any letter standing in your `alfabet`, and
+   should be, wherever a foreign character maps stably onto a sound your
+   language writes (`pl: š → sz, ž → ż`; `ru: š → ш, ž → ж`). The list runs
+   before every accent of the pack, so a native spelling hands each accent
+   something it already has a rule for, while a bare `s` throws the
+   distinction away. Leave the ASCII default where the mapping is NOT stable
+   (`ä` is German /ɛ/ but Finnish /æ/). `python audyt_podstaw.py --bramka`
+   checks the boundary — ASCII or your own letters, never a third
+   language's — but it cannot judge which of two legal targets sounds better.
 2. `python refresh_languages.py` — registers the new code.
 3. `python buduj_wielojezyczne_ui.py -l <code>` then
    `python buduj_wielojezyczne_docs.py -l <code>` — translate UI + manuals.
