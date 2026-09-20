@@ -33,56 +33,86 @@ opis: |
        и читатель не теряет половину названия после декодирования.
 
 # -----------------------------------------------------------------------------
-# 13.5: нормализация латинских диакритиков → плоская латиница (ASCII).
-# Кириллица сюда НЕ входит — это нативные буквы, и каждый акцент
-# `dictionaries/ru/akcenty/<jezyk>.yaml` сам решает, как транслитерировать
-# их в нужную целевую латиницу. Эта таблица срабатывает только для
-# акцентов — она выполняется ДО `zamiany`, благодаря
-# чему нерусские диакритики (заимствования: Pokémon, café, Müller, naïve)
-# имеют единственный, плоский ASCII-вариант перед фонетической обработкой.
+# 13.5: нормализация латинских диакритиков перед фонетической обработкой.
+# Кириллица не может стоять СЛЕВА (в `wzor`) — это нативные буквы пакета,
+# и каждый акцент `dictionaries/ru/akcenty/<jezyk>.yaml` сам решает, как
+# транслитерировать их в нужную целевую латиницу. Таблица выполняется ДО
+# `zamiany` каждого акцента и перед каждым шифром, без выключателя.
+#
+# -- v19.7: ЦЕЛЬ ЗАМЕНЫ — КИРИЛЛИЦА, А НЕ ПЛОСКАЯ ЛАТИНИЦА --
+#    До v19.6 каждый чужой знак сводился к «простейшему ASCII», и это было
+#    обеднением, а не упрощением. Пре-пасс идёт ПЕРЕД списком `zamiany`
+#    любого акцента, поэтому `š`, сплющенное в голое `s`, отнимало у
+#    акцентов правило, которое у них есть всегда (`ш → sh` в английском,
+#    `ш → SZ` в польском): знание выбрасывалось до того, как акцент успевал
+#    его увидеть. Теперь чужая буква со СТАБИЛЬНЫМ звучанием получает
+#    русское написание — то самое, которым её передаёт практическая
+#    транскрипция:
+#      č ĉ ċ ć → ч     š ş ŝ → ш     ž ĵ → ж     ř → рж
+#      ň ñ ņ → нь      đ ĝ ġ → дж    ţ → ц       ç → с
+#      ü → ю   ö ø → ё   å → о   þ → т   ð → д   ß → сс
+#      польские: ą → он, ę → эн, ł → л, ń → нь, ó → у, ś → сь, ź → зь, ż → ж
+#    Измерено: «Dvořák Đoković Müller Göring» выходит английским акцентом
+#    как «Dvorzhak Dzhokovich Myuller Gyoring» вместо «Dvorak Dokovic
+#    Muller Goring», а «Wałęsa» — как «Walensa» вместо «Walesa».
+#
+#    Смешение скриптов внутри слова («Шkoda») наружу не выходит: пре-пасс
+#    доступен только акцентам и шифрам, а акцент пакета `ru` переводит
+#    кириллицу целиком (`oczyszczenie` и `naprawiacz` сюда не доходят —
+#    `core_poliglota._przetworz_rezyser` разворачивает их раньше).
+#
+#    Остальной список остаётся в ASCII, и это ТОЖЕ решение: у знака без
+#    устойчивого русского соответствия (`ä` — то немецкое /ɛ/, то финское
+#    /æ/; `æ` — то датское /ɛ/, то исландское /ai/) догадка хуже упрощения.
+#    Когда один знак тянут два языка, побеждает тот, который читатель
+#    встретит ЧАЩЕ: список общий для всего пакета.
+#
+#    Границу держит шлюз `audyt_podstaw` (класс `znaki-cel-obcy`): цель
+#    пишется либо в ASCII, либо буквой из `alfabet` ниже — но никогда
+#    буквой третьего языка.
 # -----------------------------------------------------------------------------
 polskie_znaki:
   # -- Польские диакритики (заимствования) --
-  - { wzor: "ą", zamiana: "a"  }
-  - { wzor: "ć", zamiana: "c"  }
-  - { wzor: "ę", zamiana: "e"  }
-  - { wzor: "ł", zamiana: "l"  }
-  - { wzor: "ń", zamiana: "n"  }
-  - { wzor: "ó", zamiana: "o"  }
-  - { wzor: "ś", zamiana: "s"  }
-  - { wzor: "ź", zamiana: "z"  }
-  - { wzor: "ż", zamiana: "z"  }
-  - { wzor: "Ą", zamiana: "A"  }
-  - { wzor: "Ć", zamiana: "C"  }
-  - { wzor: "Ę", zamiana: "E"  }
-  - { wzor: "Ł", zamiana: "L"  }
-  - { wzor: "Ń", zamiana: "N"  }
-  - { wzor: "Ó", zamiana: "O"  }
-  - { wzor: "Ś", zamiana: "S"  }
-  - { wzor: "Ź", zamiana: "Z"  }
-  - { wzor: "Ż", zamiana: "Z"  }
+  - { wzor: "ą", zamiana: "он" }
+  - { wzor: "ć", zamiana: "ч"  }
+  - { wzor: "ę", zamiana: "эн" }
+  - { wzor: "ł", zamiana: "л"  }
+  - { wzor: "ń", zamiana: "нь" }
+  - { wzor: "ó", zamiana: "у"  }
+  - { wzor: "ś", zamiana: "сь" }
+  - { wzor: "ź", zamiana: "зь" }
+  - { wzor: "ż", zamiana: "ж"  }
+  - { wzor: "Ą", zamiana: "Он" }
+  - { wzor: "Ć", zamiana: "Ч"  }
+  - { wzor: "Ę", zamiana: "Эн" }
+  - { wzor: "Ł", zamiana: "Л"  }
+  - { wzor: "Ń", zamiana: "Нь" }
+  - { wzor: "Ó", zamiana: "У"  }
+  - { wzor: "Ś", zamiana: "Сь" }
+  - { wzor: "Ź", zamiana: "Зь" }
+  - { wzor: "Ż", zamiana: "Ж"  }
   # -- → a --
   - { wzor: "á", zamiana: "a"  }
   - { wzor: "à", zamiana: "a"  }
   - { wzor: "â", zamiana: "a"  }
   - { wzor: "ã", zamiana: "a"  }
   - { wzor: "ä", zamiana: "a"  }
-  - { wzor: "å", zamiana: "a"  }
+  - { wzor: "å", zamiana: "о"  }
   - { wzor: "Á", zamiana: "A"  }
   - { wzor: "À", zamiana: "A"  }
   - { wzor: "Â", zamiana: "A"  }
   - { wzor: "Ã", zamiana: "A"  }
   - { wzor: "Ä", zamiana: "A"  }
-  - { wzor: "Å", zamiana: "A"  }
+  - { wzor: "Å", zamiana: "О"  }
   # -- → ae --
   - { wzor: "æ", zamiana: "ae" }
   - { wzor: "Æ", zamiana: "Ae" }
   # -- → c --
-  - { wzor: "ç", zamiana: "c"  }
-  - { wzor: "Ç", zamiana: "C"  }
+  - { wzor: "ç", zamiana: "с"  }
+  - { wzor: "Ç", zamiana: "С"  }
   # -- → d (исландский Ð/ð) --
-  - { wzor: "ð", zamiana: "d"  }
-  - { wzor: "Ð", zamiana: "D"  }
+  - { wzor: "ð", zamiana: "д"  }
+  - { wzor: "Ð", zamiana: "Д"  }
   # -- → e --
   - { wzor: "é", zamiana: "e"  }
   - { wzor: "è", zamiana: "e"  }
@@ -102,36 +132,36 @@ polskie_znaki:
   - { wzor: "Î", zamiana: "I"  }
   - { wzor: "Ï", zamiana: "I"  }
   # -- → n --
-  - { wzor: "ñ", zamiana: "n"  }
-  - { wzor: "Ñ", zamiana: "N"  }
+  - { wzor: "ñ", zamiana: "нь" }
+  - { wzor: "Ñ", zamiana: "Нь" }
   # -- → o --
   - { wzor: "ò", zamiana: "o"  }
   - { wzor: "ô", zamiana: "o"  }
   - { wzor: "õ", zamiana: "o"  }
-  - { wzor: "ö", zamiana: "o"  }
-  - { wzor: "ø", zamiana: "o"  }
+  - { wzor: "ö", zamiana: "ё"  }
+  - { wzor: "ø", zamiana: "ё"  }
   - { wzor: "Ò", zamiana: "O"  }
   - { wzor: "Ô", zamiana: "O"  }
   - { wzor: "Õ", zamiana: "O"  }
-  - { wzor: "Ö", zamiana: "O"  }
-  - { wzor: "Ø", zamiana: "O"  }
+  - { wzor: "Ö", zamiana: "Ё"  }
+  - { wzor: "Ø", zamiana: "Ё"  }
   # -- → oe --
   - { wzor: "œ", zamiana: "oe" }
   - { wzor: "Œ", zamiana: "Oe" }
   # -- → ss (немецкий) --
-  - { wzor: "ß", zamiana: "ss" }
+  - { wzor: "ß", zamiana: "сс" }
   # -- → th (исландский Þ/þ) --
-  - { wzor: "þ", zamiana: "th" }
-  - { wzor: "Þ", zamiana: "Th" }
+  - { wzor: "þ", zamiana: "т"  }
+  - { wzor: "Þ", zamiana: "Т"  }
   # -- → u --
   - { wzor: "ú", zamiana: "u"  }
   - { wzor: "ù", zamiana: "u"  }
   - { wzor: "û", zamiana: "u"  }
-  - { wzor: "ü", zamiana: "u"  }
+  - { wzor: "ü", zamiana: "ю"  }
   - { wzor: "Ú", zamiana: "U"  }
   - { wzor: "Ù", zamiana: "U"  }
   - { wzor: "Û", zamiana: "U"  }
-  - { wzor: "Ü", zamiana: "U"  }
+  - { wzor: "Ü", zamiana: "Ю"  }
   # -- → y --
   - { wzor: "ý", zamiana: "y"  }
   - { wzor: "ÿ", zamiana: "y"  }
@@ -152,28 +182,28 @@ polskie_znaki:
   #    Пары по умолчанию: `manager_regul_szablony.TABELA_LACINKI`.
   - { wzor: "ă", zamiana: "a" }
   - { wzor: "Ă", zamiana: "A" }
-  - { wzor: "ĉ", zamiana: "c" }
-  - { wzor: "Ĉ", zamiana: "C" }
-  - { wzor: "ċ", zamiana: "c" }
-  - { wzor: "Ċ", zamiana: "C" }
-  - { wzor: "č", zamiana: "c" }
-  - { wzor: "Č", zamiana: "C" }
+  - { wzor: "ĉ", zamiana: "ч" }
+  - { wzor: "Ĉ", zamiana: "Ч" }
+  - { wzor: "ċ", zamiana: "ч" }
+  - { wzor: "Ċ", zamiana: "Ч" }
+  - { wzor: "č", zamiana: "ч" }
+  - { wzor: "Č", zamiana: "Ч" }
   - { wzor: "ď", zamiana: "d" }
   - { wzor: "Ď", zamiana: "D" }
-  - { wzor: "đ", zamiana: "d" }
-  - { wzor: "Đ", zamiana: "D" }
+  - { wzor: "đ", zamiana: "дж" }
+  - { wzor: "Đ", zamiana: "Дж" }
   - { wzor: "ĕ", zamiana: "e" }
   - { wzor: "Ĕ", zamiana: "E" }
   - { wzor: "ė", zamiana: "e" }
   - { wzor: "Ė", zamiana: "E" }
   - { wzor: "ě", zamiana: "e" }
   - { wzor: "Ě", zamiana: "E" }
-  - { wzor: "ĝ", zamiana: "g" }
-  - { wzor: "Ĝ", zamiana: "G" }
+  - { wzor: "ĝ", zamiana: "дж" }
+  - { wzor: "Ĝ", zamiana: "Дж" }
   - { wzor: "ğ", zamiana: "g" }
   - { wzor: "Ğ", zamiana: "G" }
-  - { wzor: "ġ", zamiana: "g" }
-  - { wzor: "Ġ", zamiana: "G" }
+  - { wzor: "ġ", zamiana: "дж" }
+  - { wzor: "Ġ", zamiana: "Дж" }
   - { wzor: "ģ", zamiana: "g" }
   - { wzor: "Ģ", zamiana: "G" }
   - { wzor: "ĥ", zamiana: "h" }
@@ -189,8 +219,8 @@ polskie_znaki:
   - { wzor: "ı", zamiana: "i" }
   - { wzor: "ĳ", zamiana: "ij" }
   - { wzor: "Ĳ", zamiana: "Ij" }
-  - { wzor: "ĵ", zamiana: "j" }
-  - { wzor: "Ĵ", zamiana: "J" }
+  - { wzor: "ĵ", zamiana: "ж" }
+  - { wzor: "Ĵ", zamiana: "Ж" }
   - { wzor: "ķ", zamiana: "k" }
   - { wzor: "Ķ", zamiana: "K" }
   - { wzor: "ĸ", zamiana: "k" }
@@ -202,10 +232,10 @@ polskie_znaki:
   - { wzor: "Ľ", zamiana: "L" }
   - { wzor: "ŀ", zamiana: "l" }
   - { wzor: "Ŀ", zamiana: "L" }
-  - { wzor: "ņ", zamiana: "n" }
-  - { wzor: "Ņ", zamiana: "N" }
-  - { wzor: "ň", zamiana: "n" }
-  - { wzor: "Ň", zamiana: "N" }
+  - { wzor: "ņ", zamiana: "нь" }
+  - { wzor: "Ņ", zamiana: "Нь" }
+  - { wzor: "ň", zamiana: "нь" }
+  - { wzor: "Ň", zamiana: "Нь" }
   - { wzor: "ŉ", zamiana: "n" }
   - { wzor: "ŋ", zamiana: "ng" }
   - { wzor: "Ŋ", zamiana: "Ng" }
@@ -217,17 +247,17 @@ polskie_znaki:
   - { wzor: "Ŕ", zamiana: "R" }
   - { wzor: "ŗ", zamiana: "r" }
   - { wzor: "Ŗ", zamiana: "R" }
-  - { wzor: "ř", zamiana: "r" }
-  - { wzor: "Ř", zamiana: "R" }
-  - { wzor: "ŝ", zamiana: "s" }
-  - { wzor: "Ŝ", zamiana: "S" }
-  - { wzor: "ş", zamiana: "s" }
-  - { wzor: "Ş", zamiana: "S" }
-  - { wzor: "š", zamiana: "s" }
-  - { wzor: "Š", zamiana: "S" }
+  - { wzor: "ř", zamiana: "рж" }
+  - { wzor: "Ř", zamiana: "Рж" }
+  - { wzor: "ŝ", zamiana: "ш" }
+  - { wzor: "Ŝ", zamiana: "Ш" }
+  - { wzor: "ş", zamiana: "ш" }
+  - { wzor: "Ş", zamiana: "Ш" }
+  - { wzor: "š", zamiana: "ш" }
+  - { wzor: "Š", zamiana: "Ш" }
   - { wzor: "ſ", zamiana: "s" }
-  - { wzor: "ţ", zamiana: "t" }
-  - { wzor: "Ţ", zamiana: "T" }
+  - { wzor: "ţ", zamiana: "ц" }
+  - { wzor: "Ţ", zamiana: "Ц" }
   - { wzor: "ť", zamiana: "t" }
   - { wzor: "Ť", zamiana: "T" }
   - { wzor: "ŧ", zamiana: "t" }
@@ -246,9 +276,9 @@ polskie_znaki:
   - { wzor: "Ŵ", zamiana: "W" }
   - { wzor: "ŷ", zamiana: "y" }
   - { wzor: "Ŷ", zamiana: "Y" }
-  - { wzor: "ž", zamiana: "z" }
-  - { wzor: "Ž", zamiana: "Z" }
-  - { wzor: "ẞ", zamiana: "SS" }
+  - { wzor: "ž", zamiana: "ж" }
+  - { wzor: "Ž", zamiana: "Ж" }
+  - { wzor: "ẞ", zamiana: "СС" }
   - { wzor: "İ", zamiana: "I" }
 
 # -----------------------------------------------------------------------------

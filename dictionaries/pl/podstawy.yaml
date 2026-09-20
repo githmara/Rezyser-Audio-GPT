@@ -58,27 +58,54 @@ polskie_znaki:
   # 13.3: rozszerzenie listy o diakrytyki europejskich zapożyczeń
   # (Pokémon, café, jalapeño, façade, Schrödinger, naïve...). Bez tych
   # reguł szyfr Cezara pomijał obce znaki, łamiąc spójność szyfrowania
-  # tekstów wielojęzycznych. Każdy znak mapowany do najprostszej
-  # reprezentacji ASCII zgodnie z polską intuicją czytelnika.
+  # tekstów wielojęzycznych.
+  #
+  # -- v19.7: CELEM ZAMIANY JEST POLSZCZYZNA, NIE ASCII --
+  #    Do v19.6 każdy obcy znak schodził do „najprostszej reprezentacji
+  #    ASCII" i to było zubożenie, nie uproszczenie. Pre-pass biegnie PRZED
+  #    listą `zamiany` KAŻDEGO akcentu, więc spłaszczenie `š` do gołego `s`
+  #    odbierało akcentom regułę, którą mają od zawsze (angielski `sz → sh`,
+  #    rosyjski `sz → ш`) — wiedza lądowała w koszu, zanim akcent zdążył
+  #    ją zobaczyć. Odtąd obcy znak, który STABILNIE brzmi jak dźwięk
+  #    zapisywany po polsku, dostaje polski zapis:
+  #      č ĉ ċ → cz     š ş ŝ → sz     ž ĵ → ż     ř → rz
+  #      ň ñ ņ → ń      đ → dź         ĝ ġ → dż    ŭ → ł
+  #      ţ → c   (rumuńskie ț to /ts/, nigdy /t/)
+  #      ç → s   (francuskie /s/ w „garçon"; dawne `c` czytało się /ts/)
+  #      å → o   (skandynawskie /oː/: „Ångström" brzmi „ongstrem")
+  #    Zmierzone: „Dvořák" wychodzi akcentem angielskim jako „Dvozhak"
+  #    zamiast „Dvorak", a rosyjskim jako „Двожак" zamiast „Дворак".
+  #
+  #    Reszta listy zostaje przy ASCII i to TEŻ jest decyzja. Znak bez
+  #    stabilnego polskiego odpowiednika zgaduje gorzej, niż upraszcza:
+  #    `ä` jest raz niemieckim /ɛ/, raz fińskim /æ/; `æ` raz duńskim /ɛ/,
+  #    raz islandzkim /ai/; `ü` i `ö` nie mają w polszczyźnie nic bliskiego.
+  #    Gdy jeden znak ciągną dwa języki, wygrywa ten, który polski czytelnik
+  #    spotka CZĘŚCIEJ — lista jest wspólna dla całej paczki, nie zależy od
+  #    konkretnego tekstu.
+  #
+  #    Granicy pilnuje bramka `audyt_podstaw` (klasa `znaki-cel-obcy`): cel
+  #    wolno pisać znakiem ASCII albo literą stojącą w `alfabet` niżej —
+  #    nigdy literą trzeciego języka. `ž → ř` to błąd, nie wariant.
   # -- → a --
   - { wzor: "á", zamiana: "a"  }
   - { wzor: "à", zamiana: "a"  }
   - { wzor: "â", zamiana: "a"  }
   - { wzor: "ã", zamiana: "a"  }
   - { wzor: "ä", zamiana: "a"  }
-  - { wzor: "å", zamiana: "a"  }
+  - { wzor: "å", zamiana: "o"  }
   - { wzor: "Á", zamiana: "A"  }
   - { wzor: "À", zamiana: "A"  }
   - { wzor: "Â", zamiana: "A"  }
   - { wzor: "Ã", zamiana: "A"  }
   - { wzor: "Ä", zamiana: "A"  }
-  - { wzor: "Å", zamiana: "A"  }
+  - { wzor: "Å", zamiana: "O"  }
   # -- → ae --
   - { wzor: "æ", zamiana: "ae" }
   - { wzor: "Æ", zamiana: "Ae" }
   # -- → c --
-  - { wzor: "ç", zamiana: "c"  }
-  - { wzor: "Ç", zamiana: "C"  }
+  - { wzor: "ç", zamiana: "s"  }
+  - { wzor: "Ç", zamiana: "S"  }
   # -- → d --
   - { wzor: "ð", zamiana: "d"  }
   - { wzor: "Ð", zamiana: "D"  }
@@ -101,8 +128,8 @@ polskie_znaki:
   - { wzor: "Î", zamiana: "I"  }
   - { wzor: "Ï", zamiana: "I"  }
   # -- → n --
-  - { wzor: "ñ", zamiana: "n"  }
-  - { wzor: "Ñ", zamiana: "N"  }
+  - { wzor: "ñ", zamiana: "ń"  }
+  - { wzor: "Ñ", zamiana: "Ń"  }
   # -- → o (zachowane ó→u w sekcji polskiej powyżej; obce → o) --
   - { wzor: "ò", zamiana: "o"  }
   - { wzor: "ô", zamiana: "o"  }
@@ -151,28 +178,28 @@ polskie_znaki:
   #    Domyślne pary: `manager_regul_szablony.TABELA_LACINKI`.
   - { wzor: "ă", zamiana: "a" }
   - { wzor: "Ă", zamiana: "A" }
-  - { wzor: "ĉ", zamiana: "c" }
-  - { wzor: "Ĉ", zamiana: "C" }
-  - { wzor: "ċ", zamiana: "c" }
-  - { wzor: "Ċ", zamiana: "C" }
-  - { wzor: "č", zamiana: "c" }
-  - { wzor: "Č", zamiana: "C" }
+  - { wzor: "ĉ", zamiana: "cz" }
+  - { wzor: "Ĉ", zamiana: "Cz" }
+  - { wzor: "ċ", zamiana: "cz" }
+  - { wzor: "Ċ", zamiana: "Cz" }
+  - { wzor: "č", zamiana: "cz" }
+  - { wzor: "Č", zamiana: "Cz" }
   - { wzor: "ď", zamiana: "d" }
   - { wzor: "Ď", zamiana: "D" }
-  - { wzor: "đ", zamiana: "d" }
-  - { wzor: "Đ", zamiana: "D" }
+  - { wzor: "đ", zamiana: "dź" }
+  - { wzor: "Đ", zamiana: "Dź" }
   - { wzor: "ĕ", zamiana: "e" }
   - { wzor: "Ĕ", zamiana: "E" }
   - { wzor: "ė", zamiana: "e" }
   - { wzor: "Ė", zamiana: "E" }
   - { wzor: "ě", zamiana: "e" }
   - { wzor: "Ě", zamiana: "E" }
-  - { wzor: "ĝ", zamiana: "g" }
-  - { wzor: "Ĝ", zamiana: "G" }
+  - { wzor: "ĝ", zamiana: "dż" }
+  - { wzor: "Ĝ", zamiana: "Dż" }
   - { wzor: "ğ", zamiana: "g" }
   - { wzor: "Ğ", zamiana: "G" }
-  - { wzor: "ġ", zamiana: "g" }
-  - { wzor: "Ġ", zamiana: "G" }
+  - { wzor: "ġ", zamiana: "dż" }
+  - { wzor: "Ġ", zamiana: "Dż" }
   - { wzor: "ģ", zamiana: "g" }
   - { wzor: "Ģ", zamiana: "G" }
   - { wzor: "ĥ", zamiana: "h" }
@@ -188,8 +215,8 @@ polskie_znaki:
   - { wzor: "ı", zamiana: "i" }
   - { wzor: "ĳ", zamiana: "ij" }
   - { wzor: "Ĳ", zamiana: "Ij" }
-  - { wzor: "ĵ", zamiana: "j" }
-  - { wzor: "Ĵ", zamiana: "J" }
+  - { wzor: "ĵ", zamiana: "ż" }
+  - { wzor: "Ĵ", zamiana: "Ż" }
   - { wzor: "ķ", zamiana: "k" }
   - { wzor: "Ķ", zamiana: "K" }
   - { wzor: "ĸ", zamiana: "k" }
@@ -201,10 +228,10 @@ polskie_znaki:
   - { wzor: "Ľ", zamiana: "L" }
   - { wzor: "ŀ", zamiana: "l" }
   - { wzor: "Ŀ", zamiana: "L" }
-  - { wzor: "ņ", zamiana: "n" }
-  - { wzor: "Ņ", zamiana: "N" }
-  - { wzor: "ň", zamiana: "n" }
-  - { wzor: "Ň", zamiana: "N" }
+  - { wzor: "ņ", zamiana: "ń" }
+  - { wzor: "Ņ", zamiana: "Ń" }
+  - { wzor: "ň", zamiana: "ń" }
+  - { wzor: "Ň", zamiana: "Ń" }
   - { wzor: "ŉ", zamiana: "n" }
   - { wzor: "ŋ", zamiana: "ng" }
   - { wzor: "Ŋ", zamiana: "Ng" }
@@ -216,25 +243,25 @@ polskie_znaki:
   - { wzor: "Ŕ", zamiana: "R" }
   - { wzor: "ŗ", zamiana: "r" }
   - { wzor: "Ŗ", zamiana: "R" }
-  - { wzor: "ř", zamiana: "r" }
-  - { wzor: "Ř", zamiana: "R" }
-  - { wzor: "ŝ", zamiana: "s" }
-  - { wzor: "Ŝ", zamiana: "S" }
-  - { wzor: "ş", zamiana: "s" }
-  - { wzor: "Ş", zamiana: "S" }
-  - { wzor: "š", zamiana: "s" }
-  - { wzor: "Š", zamiana: "S" }
+  - { wzor: "ř", zamiana: "rz" }
+  - { wzor: "Ř", zamiana: "Rz" }
+  - { wzor: "ŝ", zamiana: "sz" }
+  - { wzor: "Ŝ", zamiana: "Sz" }
+  - { wzor: "ş", zamiana: "sz" }
+  - { wzor: "Ş", zamiana: "Sz" }
+  - { wzor: "š", zamiana: "sz" }
+  - { wzor: "Š", zamiana: "Sz" }
   - { wzor: "ſ", zamiana: "s" }
-  - { wzor: "ţ", zamiana: "t" }
-  - { wzor: "Ţ", zamiana: "T" }
+  - { wzor: "ţ", zamiana: "c" }
+  - { wzor: "Ţ", zamiana: "C" }
   - { wzor: "ť", zamiana: "t" }
   - { wzor: "Ť", zamiana: "T" }
   - { wzor: "ŧ", zamiana: "t" }
   - { wzor: "Ŧ", zamiana: "T" }
   - { wzor: "ũ", zamiana: "u" }
   - { wzor: "Ũ", zamiana: "U" }
-  - { wzor: "ŭ", zamiana: "u" }
-  - { wzor: "Ŭ", zamiana: "U" }
+  - { wzor: "ŭ", zamiana: "ł" }
+  - { wzor: "Ŭ", zamiana: "Ł" }
   - { wzor: "ů", zamiana: "u" }
   - { wzor: "Ů", zamiana: "U" }
   - { wzor: "ű", zamiana: "u" }
@@ -245,8 +272,8 @@ polskie_znaki:
   - { wzor: "Ŵ", zamiana: "W" }
   - { wzor: "ŷ", zamiana: "y" }
   - { wzor: "Ŷ", zamiana: "Y" }
-  - { wzor: "ž", zamiana: "z" }
-  - { wzor: "Ž", zamiana: "Z" }
+  - { wzor: "ž", zamiana: "ż" }
+  - { wzor: "Ž", zamiana: "Ż" }
   - { wzor: "ẞ", zamiana: "SS" }
   - { wzor: "İ", zamiana: "I" }
 
