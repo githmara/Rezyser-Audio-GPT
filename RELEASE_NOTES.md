@@ -169,6 +169,31 @@ engine uses, not from a literal in the text.
   chain works (`u → ü`, then `oü → u`), and it is the only shape of that
   exception the project uses today.
 
+### Dev Patch 1
+
+**The release commit can no longer take `VERSION` without `patch_dev.json`.** A full
+release resets the dev-patch counter to zero for its own version, because a new release
+starts a new tag and the count of shortened releases on the previous one stops meaning
+anything. That rule was enforced by a single gate — inside `build_release.py`, which runs
+at BUILD time, after all the translation and documentation work is done. The two files
+drifted apart in two consecutive cycles (19.5.0 paid for it with an amend; 19.6.0 was
+caught by a question, one step before the build), so the signal now also exists at the
+moment the fix is free: the repository's `pre-commit` hook refuses a commit that stages
+`VERSION` without `patch_dev.json`, and equally refuses one where the staged counter
+describes a different version or is not zero. It refuses rather than repairs — unlike the
+debug-flag layer above it, which knows the right value — because the correct counter
+depends on WHICH procedure is running, and the hook cannot know that. It knows only that
+a commit moving `VERSION` alone is neither of them. The shortened procedure, which raises
+the counter WITHOUT touching `VERSION`, passes untouched.
+
+The hook lives in `hooks/pre-commit` and is activated per clone with
+`git config core.hooksPath hooks`; the guard in `build_release.py` remains the second,
+independent layer for anyone who has not activated it. `test_patch_dev.py` gains five
+assertions that drive a REAL `git commit` in a throwaway repository — the subject is the
+behaviour of git and of a shell script, not a regular expression — and the layer was also
+verified from the failure side: the same commit passes with the previous version of the
+hook.
+
 ---
 
 ## 19.5.0 — minor release

@@ -17,6 +17,14 @@ pliki w katalogu tymczasowym):
   3. DWIE BRAMKI-LUSTRA. Pelne wydanie wymaga licznika wyzerowanego dla swojej
      wersji (`build_release`), a klasyfikacja zaleznosci rozdziela decyzje
      (nowsze wydanie wykluczone granica) od zaniedbania (nowsze dopuszczone).
+  4. TRZECIE LUSTRO: HOOK `pre-commit` (19.6.0 dev 1). Obie bramki wyzej stoja
+     PO calej robocie wydawniczej — `build_release` dowiaduje sie o rozjezdzie
+     dopiero przy buildzie. Rozejscie sie `VERSION` i `patch_dev.json` zdarzylo
+     sie w dwoch kolejnych cyklach, wiec sygnal przesunieto na moment commita,
+     gdzie poprawka jest darmowa. Mierzone PRAWDZIWYM `git commit` w repozytorium
+     tymczasowym z `core.hooksPath` wskazujacym nasz plik — przedmiotem jest
+     zachowanie gita i skryptu sh, nie regex (ten sam wzorzec, co w
+     `test_bramka_zaleznosci.py`).
 
 Uruchom:  .venv/Scripts/python test_patch_dev.py
 """
@@ -25,6 +33,7 @@ import contextlib
 import io
 import json
 import shutil
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -307,6 +316,87 @@ def test_zadna_granica_nie_wyklucza_tego_co_mamy_zainstalowane():
             continue
         assert Version(mam) in SpecifierSet(wpis.specyfikator), (
             f"{wpis.nazwa}: granica {wpis.specyfikator} wyklucza zainstalowane {mam}")
+
+
+# ---------------------------------------------------------------------------
+# 4. Trzecie lustro: hook `pre-commit` odmawia commita rozjezdzajacego pliki
+# ---------------------------------------------------------------------------
+HOOK = Path(__file__).parent / "hooks" / "pre-commit"
+
+# Tozsamosc podajemy przez `-c` przy KAZDYM wywolaniu zamiast `git config`:
+# lekcja v18.31.0 — `git config` bez `--global` w skrypcie zapisal sie kiedys
+# na stale do klonu maintainera. Tu repozytorium jest tymczasowe, ale odruch
+# zostaje, bo nie kosztuje nic.
+_TOZSAMOSC = ["-c", "user.email=test@example.invalid", "-c", "user.name=Test"]
+
+
+def _git(katalog: Path, *args: str):
+    """`git` w podanym katalogu, z naszym hookiem i bez dotykania konfiguracji."""
+    return subprocess.run(
+        ["git", *_TOZSAMOSC, "-c", f"core.hooksPath={HOOK.parent.as_posix()}", *args],
+        cwd=katalog, capture_output=True, text=True, encoding="utf-8", errors="replace")
+
+
+@contextlib.contextmanager
+def _repo_z_hookiem(pliki: dict):
+    """Swieze repozytorium z zaindeksowanymi plikami — gotowe do `git commit`."""
+    katalog = Path(tempfile.mkdtemp())
+    try:
+        _git(katalog, "init", "-q")
+        for nazwa, tresc in pliki.items():
+            (katalog / nazwa).write_text(tresc, encoding="utf-8")
+            _git(katalog, "add", nazwa)
+        yield katalog
+    finally:
+        shutil.rmtree(katalog, ignore_errors=True)
+
+
+def _licznik(wersja: str, n: int = 0) -> str:
+    return json.dumps({"wersja": wersja, "patch_dev": n}, indent=2) + "\n"
+
+
+def test_hook_odmawia_bumpa_VERSION_bez_licznika():
+    with _repo_z_hookiem({"VERSION": "19.7.0"}) as katalog:
+        wynik = _git(katalog, "commit", "-m", "bump")
+        assert wynik.returncode != 0, "hook mial odmowic commita"
+        assert "patch_dev.json" in wynik.stderr, wynik.stderr
+        assert "19.7.0" in wynik.stderr, wynik.stderr
+        # Odmowa znaczy: commita NIE MA (a nie „jest, ale z ostrzezeniem").
+        assert _git(katalog, "log", "--oneline").returncode != 0
+
+
+def test_hook_przepuszcza_bump_z_wyzerowanym_licznikiem():
+    with _repo_z_hookiem({"VERSION": "19.7.0",
+                          "patch_dev.json": _licznik("19.7.0")}) as katalog:
+        wynik = _git(katalog, "commit", "-m", "bump")
+        assert wynik.returncode == 0, wynik.stderr
+        # Git kieruje WYJSCIE HOOKA na stderr (zmierzone), takze te potwierdzajace
+        # — wiec tu nie ma co szukac go w stdout commita.
+        assert "19.7.0" in wynik.stderr, wynik.stderr
+
+
+def test_hook_lapie_licznik_z_innej_wersji():
+    with _repo_z_hookiem({"VERSION": "19.7.0",
+                          "patch_dev.json": _licznik("19.6.0")}) as katalog:
+        wynik = _git(katalog, "commit", "-m", "bump")
+        assert wynik.returncode != 0, "rozjazd wersji mial zatrzymac commit"
+        assert "19.6.0" in wynik.stderr and "19.7.0" in wynik.stderr, wynik.stderr
+
+
+def test_hook_lapie_niewyzerowany_licznik():
+    with _repo_z_hookiem({"VERSION": "19.7.0",
+                          "patch_dev.json": _licznik("19.7.0", 3)}) as katalog:
+        wynik = _git(katalog, "commit", "-m", "bump")
+        assert wynik.returncode != 0, "niewyzerowany licznik mial zatrzymac commit"
+        assert "'3'" in wynik.stderr, wynik.stderr
+
+
+def test_hook_nie_rusza_skroconej_procedury():
+    """Dev patch podnosi SAM licznik — `VERSION` nie wchodzi do commita."""
+    with _repo_z_hookiem({"patch_dev.json": _licznik("19.6.0", 1)}) as katalog:
+        wynik = _git(katalog, "commit", "-m", "dev patch 1")
+        assert wynik.returncode == 0, wynik.stderr
+        assert "ODMOWA" not in wynik.stdout + wynik.stderr
 
 
 if __name__ == "__main__":

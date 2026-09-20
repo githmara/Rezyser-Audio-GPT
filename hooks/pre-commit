@@ -1,7 +1,10 @@
 #!/bin/sh
 # =============================================================================
-# pre-commit — auto-reset flag debugowych do False (od 18.3)
+# pre-commit — dwie niezależne warstwy:
+#   1. auto-reset flag debugowych do False (od 18.3),
+#   2. `VERSION` nie idzie do commita bez `patch_dev.json` (od 19.6.0 dev 1).
 # =============================================================================
+# WARSTWA 1 — flagi debugowe.
 # Niektóre funkcje techniczne są ukryte za stałą boolean zaszytą w źródle
 # (np. EDYCJA_STANU_GRY_WIDOCZNA w gui_opowiesci.py), domyślnie False. Deweloper
 # przełącza ją na True, by poeksperymentować lokalnie, i łatwo zapomnieć cofnąć.
@@ -36,6 +39,46 @@ done
 
 if [ "$zmieniono" -eq 1 ]; then
     echo "pre-commit: flagi debug zabezpieczone; kontynuuję commit."
+fi
+
+# =============================================================================
+# WARSTWA 2 — bump `VERSION` bez resetu `patch_dev.json` (od 19.6.0 dev 1)
+# =============================================================================
+# Procedura pełna żąda OBU plików w JEDNYM commicie: nowe wydanie zaczyna nowy
+# tag, więc licznik skróconych wydań poprzedniego tagu przestaje cokolwiek
+# znaczyć, a niewyzerowany zostałby punktem odniesienia dla pierwszej skróconej
+# procedury po wydaniu. Pilnowała tego JEDNA bramka — `build_release.py`
+# (krok 6b5) — czyli dowiadujesz się dopiero przy buildzie, po całej robocie
+# tłumaczeniowej i dokumentacyjnej. Rozejście się tych dwóch plików zdarzyło się
+# w DWÓCH kolejnych cyklach (v19.5.0: amend; v19.6.0: złapane pytaniem), więc
+# ta warstwa przesuwa sygnał na moment, w którym poprawka jest darmowa.
+#
+# Odmawiamy zamiast poprawiać (inaczej niż warstwa 1): wartość licznika zależy
+# od tego, KTÓRA procedura trwa, a hook tego nie wie. Wie tylko, że commit
+# ruszający `VERSION` bez `patch_dev.json` nie jest żadną z nich.
+if git diff --cached --name-only | grep -qx "VERSION"; then
+    wersja=$(git show ":VERSION" 2>/dev/null | tr -d ' \t\r\n')
+    if ! git diff --cached --name-only | grep -qx "patch_dev.json"; then
+        echo "pre-commit: ODMOWA — commit rusza VERSION (${wersja}), a nie rusza patch_dev.json." >&2
+        echo "  Pełna procedura wymaga OBU plików w tym samym commicie:" >&2
+        echo "    printf '{\\n  \"wersja\": \"${wersja}\",\\n  \"patch_dev\": 0\\n}\\n' > patch_dev.json && git add patch_dev.json" >&2
+        echo "  Jeśli to NIE jest bump wydania, wyjmij VERSION z indeksu: git restore --staged VERSION" >&2
+        exit 1
+    fi
+    licznik_json=$(git show ":patch_dev.json" 2>/dev/null | tr -d '\n')
+    wersja_licznika=$(printf '%s' "$licznik_json" | sed -n 's/.*"wersja"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+    licznik=$(printf '%s' "$licznik_json" | sed -n 's/.*"patch_dev"[[:space:]]*:[[:space:]]*\([0-9][0-9]*\).*/\1/p')
+    if [ "$wersja_licznika" != "$wersja" ]; then
+        echo "pre-commit: ODMOWA — patch_dev.json opisuje wersję '${wersja_licznika}', a VERSION mówi '${wersja}'." >&2
+        echo "  Ten sam warunek sprawdza build_release.py (krok 6b5) i zatrzymuje build." >&2
+        exit 1
+    fi
+    if [ "$licznik" != "0" ]; then
+        echo "pre-commit: ODMOWA — patch_dev.json ma 'patch_dev': '${licznik}'; pełne wydanie zeruje licznik." >&2
+        echo "  Niewyzerowany byłby punktem odniesienia dla pierwszej skróconej procedury po tym wydaniu." >&2
+        exit 1
+    fi
+    echo "pre-commit: VERSION ${wersja} idzie razem z wyzerowanym patch_dev.json."
 fi
 
 exit 0
