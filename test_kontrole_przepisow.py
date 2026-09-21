@@ -30,8 +30,11 @@ Uruchom:  .venv/Scripts/python -m pytest test_kontrole_przepisow.py -q
 Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_kontrole_przepisow.py
 """
 
+import inspect
 import re
+import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -214,6 +217,109 @@ def test_wszystkie_shippowane_paczki_przechodza():
         assert pr.lista_postprodukcji(kod), f"{kod}: zero postprodukcji"
     zastrzezenia = [(w.sciezka, w.powod, w.szczegol) for w in pr.pominiete_pliki()]
     assert not zastrzezenia, zastrzezenia
+
+
+# ---------------------------------------------------------------------------
+# 4. Kontrola bez odbiorcy to polowa roboty (v19.7 runda 4)
+# ---------------------------------------------------------------------------
+# Loader ma racje od etapu 8, ale mowi ja do rejestru — a rejestr czyta ten,
+# kto zada pytanie. W Managerze Regul pyta przycisk „Odswiez" i do v19.7 pytal
+# o paczke JEZYKA INTERFEJSU, podczas gdy autor pracuje w paczce z filtra
+# drzewa. Zmierzone: UI `pl`, literowka w `de` → „brak zastrzezen".
+_ZLA_STRUKTURA = ("kategoria: tryb", "kategoria: tryb\nstruktura: rozdzialty")
+
+
+def _paczki_probne(katalog: Path, *kody: str) -> None:
+    """Kopia realnych trybow dwoch paczek do katalogu tymczasowego."""
+    for kod in kody:
+        (katalog / kod / "rezyser").mkdir(parents=True)
+        for plik in ("tryb_skrypt.yaml", "tryb_audiobook.yaml"):
+            shutil.copy(_DICT / kod / "rezyser" / plik,
+                        katalog / kod / "rezyser" / plik)
+
+
+def _zepsuj(sciezka: Path) -> None:
+    sciezka.write_text(sciezka.read_text(encoding="utf-8").replace(*_ZLA_STRUKTURA, 1),
+                       encoding="utf-8")
+
+
+@pytest.fixture()
+def paczki_tymczasowe(tmp_path, monkeypatch):
+    """Podmienia `dictionaries/` w obu loaderach na kopie robocza.
+
+    SPRZATANIE OBEJMUJE CACHE, nie tylko sciezke. `monkeypatch` cofa stala, ale
+    loadery trzymaja juz WCZYTANA tresc z katalogu tymczasowego — bez czyszczenia
+    kolejne testy w tej samej sesji dostawaly dwie paczki zamiast dziewieciu
+    (zmierzone: 11 czerwonych plikow po pierwszej wersji tej fikstury).
+    """
+    import core_poliglota as cp
+    import gui_diagnostyka as gd
+    import i18n
+
+    jezyk_pierwotny = i18n.aktualny_jezyk()
+    katalog = tmp_path / "dictionaries"
+    _paczki_probne(katalog, "pl", "de")
+    monkeypatch.setattr(pr, "DICTIONARIES_DIR", str(katalog))
+    monkeypatch.setattr(cp, "DICTIONARIES_DIR", str(katalog))
+    yield katalog
+    monkeypatch.undo()
+    i18n.ustaw_jezyk(jezyk_pierwotny)
+    gd._swiezy_start()
+    pr.wyczysc_pominiecia()
+
+
+def test_skan_po_jezyku_ui_nie_widzi_paczki_z_drzewa(paczki_tymczasowe):
+    """Defekt wstrzykniety: literowka w `de`, interfejs po polsku."""
+    import gui_diagnostyka as gd
+    import i18n
+
+    _zepsuj(paczki_tymczasowe / "de" / "rezyser" / "tryb_audiobook.yaml")
+    i18n.ustaw_jezyk("pl")
+    assert gd.przeskanuj_reguly() == (), (
+        "skan po jezyku interfejsu nagle widzi obca paczke — "
+        "to zmienia sens `przeskanuj_reguly` dla paneli runtime")
+
+
+def test_skan_w_zakresie_drzewa_lapie_literowke(paczki_tymczasowe):
+    """Kontrola tej samej sytuacji przez wejscie, ktorego uzywa Manager."""
+    import gui_diagnostyka as gd
+
+    _zepsuj(paczki_tymczasowe / "de" / "rezyser" / "tryb_audiobook.yaml")
+    wpisy = gd.przeskanuj_reguly_paczek(["de"])
+    trafienia = [w for w in wpisy if w.powod == pr.POWOD_WARTOSC]
+    assert len(trafienia) == 1, [(w.sciezka, w.powod) for w in wpisy]
+    assert Path(trafienia[0].sciezka).name == "tryb_audiobook.yaml"
+    assert "rozdzialty" in trafienia[0].szczegol
+
+
+def test_zakres_drzewa_nie_zglasza_paczki_zdrowej(paczki_tymczasowe):
+    """Kontrola odwrotna: nietkniete paczki nie produkuja trafien."""
+    import gui_diagnostyka as gd
+
+    assert gd.przeskanuj_reguly_paczek(["pl", "de"]) == ()
+    assert gd.przeskanuj_reguly_paczek(["nie_ma_takiej"]) == ()
+
+
+def test_pusty_zakres_spada_do_jezyka_interfejsu(paczki_tymczasowe):
+    """Przycisk, ktory po nacisnieciu nie sprawdza niczego, jest gorszy od braku przycisku."""
+    import gui_diagnostyka as gd
+    import i18n
+
+    _zepsuj(paczki_tymczasowe / "pl" / "rezyser" / "tryb_audiobook.yaml")
+    i18n.ustaw_jezyk("pl")
+    wpisy = gd.przeskanuj_reguly_paczek([])
+    assert [w.powod for w in wpisy] == [pr.POWOD_WARTOSC]
+
+
+def test_manager_daje_obu_skanom_ten_sam_zakres():
+    """Rdzen usterki: dwa skany pod jednym przyciskiem, dwa rozne zbiory plikow."""
+    import gui_manager_regul as gmr
+
+    zrodlo = inspect.getsource(gmr.ManagerRegulPanel._on_odswiez)
+    assert "przeskanuj_reguly_paczek(kody)" in zrodlo, (
+        "skan regul wrocil do zakresu z jezyka interfejsu")
+    assert "przeskanuj_szkice(kody)" in zrodlo, (
+        "skan szkicow przestal brac zakres z drzewa")
 
 
 # Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno

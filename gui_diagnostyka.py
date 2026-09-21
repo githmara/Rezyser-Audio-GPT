@@ -57,11 +57,16 @@ def przeskanuj_reguly(jezyk: str | None = None) -> tuple[pr.PominietyPlik, ...]:
     """Czyta paczkę od nowa i zwraca wszystkie powody pominięcia.
 
     Rejestr powodów wypełnia się LENIWIE — panel zgłasza tylko to, co sam
-    próbował wczytać. Manager Reguł potrzebuje odpowiedzi „czy moje pliki są
+    próbował wczytać. Diagnostyka potrzebuje odpowiedzi „czy moje pliki są
     dobre" NIEZALEŻNIE od tego, w które narzędzia użytkownik zdążył wejść, więc
     tutaj czyścimy cache (to zarazem naprawa bez restartu aplikacji: po poprawce
     kolejne wejście do panelu weźmie świeżą treść z dysku) i wczytujemy paczkę
     jawnie.
+
+    **ZAKRES: paczka RUNTIME-owa.** Od v19.7 Manager Reguł woła zamiast tego
+    :func:`przeskanuj_reguly_paczek` (zakres z drzewa), a ta funkcja odpowiada
+    na pytanie „czy działa to, czego ta aplikacja właśnie używa" — i zostaje
+    zakresem awaryjnym, gdy drzewo nie wskazuje żadnej paczki.
 
     Skanujemy paczkę JĘZYKA INTERFEJSU, a ``en`` dokładamy dopiero wtedy, gdy
     ta paczka nie dała ani jednego trybu — czyli DOKŁADNIE w sytuacji, w której
@@ -77,6 +82,60 @@ def przeskanuj_reguly(jezyk: str | None = None) -> tuple[pr.PominietyPlik, ...]:
     jego nowa paczka wypadła z rozpoznawania po treści.
     """
     jezyk = jezyk or aktualny_jezyk()
+    _swiezy_start()
+
+    _skanuj_paczke(jezyk)
+    if jezyk != "en" and not pr.lista_trybow(jezyk):
+        _skanuj_paczke("en")
+    cp.jezyki_w_detekcji()      # patrz docstring: klasa GLOBALNA, nie per paczka
+    return pr.pominiete_pliki()
+
+
+def przeskanuj_reguly_paczek(kody: list[str]) -> tuple[pr.PominietyPlik, ...]:
+    """To samo co :func:`przeskanuj_reguly`, ale w zakresie PODANYCH paczek (v19.7).
+
+    Powód jest ten sam, co przy :func:`przeskanuj_szkice`, i ta sama zasada
+    rozstrzyga zakres: **autor paczki pracuje tam, gdzie patrzy**, a patrzy
+    w drzewo Managera Reguł, nie w swój język interfejsu. Skan po języku UI
+    odpowiada na pytanie użytkownika RUNTIME-owego („czy to, czego używam,
+    działa"); w Managerze pytanie brzmi „czy plik, który właśnie zrobiłem, jest
+    dobry", a plik ten leży w paczce z filtra drzewa.
+
+    Zmierzone przed zmianą (UI ``pl``, literówka ``struktura: rozdzialty``
+    w ``de/rezyser/tryb_audiobook.yaml``): :func:`przeskanuj_reguly` zwracała
+    PUSTY rejestr, czyli „Odśwież" potwierdzał brak zastrzeżeń nad plikiem,
+    który silnik pomija. Loader miał rację od etapu 8 v19.7 — nie miał jej kto
+    posłuchać.
+
+    Bez fallbacku na ``en``: tam jest odwzorowaniem miękkiego fallbacku paneli
+    („paczka nie dała trybów, aplikacja weźmie angielską"), a tu byłby raportem
+    o paczce, której autor nie tknął i nie ma w drzewie.
+
+    Args:
+        kody: kody paczek do przeskanowania. **Pusta lista = zakres z języka
+              interfejsu** (:func:`przeskanuj_reguly`), bo przycisk, który po
+              naciśnięciu nie sprawdza niczego, jest gorszy od braku przycisku.
+
+    Returns:
+        Snapshot rejestru po skanie.
+    """
+    if not kody:
+        return przeskanuj_reguly()
+    _swiezy_start()
+    for kod in kody:
+        _skanuj_paczke(kod)
+    cp.jezyki_w_detekcji()      # klasa GLOBALNA — jeden detektor na aplikację
+    return pr.pominiete_pliki()
+
+
+def _swiezy_start() -> None:
+    """Czyści cache wszystkich loaderów przed skanem (wspólne dla obu zakresów).
+
+    Czyszczenie JEST naprawą bez restartu: po poprawce kolejne wejście do panelu
+    bierze świeżą treść z dysku. Kasuje też ``_POKAZANE`` — po naprawie (albo po
+    zepsuciu pliku na nowo TYM SAMYM sposobem) panele muszą mieć prawo pokazać
+    raport ponownie.
+    """
     pr.wyczysc_cache()
     cp.wyczysc_cache()
     oai._zaladuj_przepis.cache_clear()
@@ -86,15 +145,7 @@ def przeskanuj_reguly(jezyk: str | None = None) -> tuple[pr.PominietyPlik, ...]:
     # w `dostepne_jezyki_ui()` od razu, a wtedy parser struktury musi poznać
     # jej słowa bez restartu.
     cr.wyczysc_cache_naglowkow()
-    # Skan to świeży start diagnostyki: po naprawie (albo po zepsuciu pliku na
-    # nowo TYM SAMYM sposobem) panele muszą mieć prawo pokazać raport ponownie.
     _POKAZANE.clear()
-
-    _skanuj_paczke(jezyk)
-    if jezyk != "en" and not pr.lista_trybow(jezyk):
-        _skanuj_paczke("en")
-    cp.jezyki_w_detekcji()      # patrz docstring: klasa GLOBALNA, nie per paczka
-    return pr.pominiete_pliki()
 
 
 def _skanuj_paczke(kod: str) -> None:

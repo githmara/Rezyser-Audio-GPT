@@ -541,15 +541,23 @@ class ManagerRegulPanel(wx.Panel):
         reguł, bo tamten czyści rejestr, i obejmuje paczki z filtra języka,
         a nie język interfejsu — szkic jest własną, niedokończoną robotą autora
         paczki, prowadzoną tam, gdzie on patrzy.
+
+        v19.7 rozciąga TEN SAM zakres na skan reguł. Do tej wersji jechał on po
+        języku INTERFEJSU, więc dwa skany pod jednym przyciskiem odpowiadały
+        o dwóch różnych zbiorach plików: autor paczki `de` z polskim UI słyszał
+        o swoich szkicach, ale o literówce w polu sterującym — już nie
+        (zmierzone: „brak zastrzeżeń" nad plikiem, który silnik pomija).
+        Walidacja w loaderze bez odbiorcy w kreatorze jest połową roboty.
         """
         self._zaladuj_drzewo()
         gd.pokaz_alarm_ui(self, i18n.sprawdz_pliki_ui())
-        gd.przeskanuj_reguly()
-        wpisy = gd.przeskanuj_szkice(self._kody_do_skanu_szkicow())
+        kody = self._kody_do_skanu_szkicow()
+        gd.przeskanuj_reguly_paczek(kody)
+        wpisy = gd.przeskanuj_szkice(kody)
         gd.pokaz_raport_lub_potwierdzenie(self, wpisy)
 
     def _kody_do_skanu_szkicow(self) -> list[str]:
-        """Paczki, których dotyczy skan szkiców = to, co pokazuje drzewo.
+        """Paczki, których dotyczą OBA skany „Odśwież" = to, co pokazuje drzewo.
 
         Filtr „Wszystkie" (widok autora paczek językowych) daje wszystkie kody
         z dysku; filtr konkretnego języka — tylko jego. Dzięki temu przycisk
