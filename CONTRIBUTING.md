@@ -202,6 +202,7 @@ Two facts decide what that means, and both are easy to get backwards:
 | any `dictionaries/**/gui/dokumentacja/*.yaml` or `gui/ui.yaml` | `generuj_dokumentacje.py --waliduj` **and** `audyt_leakow.py --bramka` |
 | any other `dictionaries/**` (engine data: accents, ciphers, modes, tales) | `audyt_podstaw.py --bramka` + `audyt_ciszy.py --bramka` |
 | a new or renamed `.py` in the repo root | `audyt_leakow.py --bramka-py` (the build is otherwise the first place this fires) |
+| a new `test_*.py` | `pytest test_kanon_testow.py` (checks how every test file runs, not what it tests) |
 | `requirements.txt`, or before any freeze | `audyt_zaleznosci.py` (the build runs it too, and stops on a hit unless you pass `--no-strict`) |
 
 The mapping comes from the test files' own imports (`grep -oE '^(import\|from) [a-z_]+'`),
@@ -225,6 +226,27 @@ with its own bool-summing harness). Pytest 9 reports this as
 `PytestReturnNotNoneWarning`; treat that warning as a failure. Use `assert`, and for a
 check that needs the network use `pytest.skip()` on a connection error rather than letting
 it report green — a skip is visible in the summary, a false pass is not.
+
+**Every `test_*.py` ends with the same three lines, and that is a rule with a gate.**
+
+```python
+if __name__ == "__main__":
+    sys.exit(pytest.main([__file__, "-v"]))
+```
+
+Running a test file directly (`.venv/Scripts/python test_something.py`) is a habit worth
+keeping while you iterate, and the block above is what makes it honest. Two failure modes
+made it a rule in 19.7. A file with **no** `__main__` block at all defines its functions,
+exits 0 and prints nothing — measured on two files, and an empty exit 0 reads exactly like
+a pass. A file with its **own** harness (a loop over `globals()` wrapped in
+`except AssertionError`, which 24 files carried) is the second way of reporting the same
+run, and the quiet one: it catches assertions only, so `pytest.skip()` — which raises
+`Skipped`, a `BaseException`, not an `AssertionError` — blows up the whole run instead of
+showing up as a skip, and `@pytest.mark.parametrize` and fixtures (`tmp_path`,
+`monkeypatch`, `capsys`) are invisible to it, so it calls the function with no arguments
+and gets a `TypeError`. One mechanism, one way of reporting. `test_kanon_testow.py`
+enforces the delegation (not byte-identity: `test_core_updater.py`, where the rule was
+first written, also prints whether `GITHUB_TOKEN` is set before it hands over).
 
 ## Adding a UI language
 

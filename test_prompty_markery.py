@@ -21,10 +21,14 @@ mechanicznie sprawdzalne, więc od 19.2.2 mają bramkę zamiast noty:
    przebiegu każdego języka, a przy tym łamiąca niezmiennik 1.
 
 Testy są bez API: budują same prompty i tokenizują realną wartość z paczki.
+
+Uruchom:  .venv/Scripts/python -m pytest test_prompty_markery.py -q
+Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_prompty_markery.py
 """
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
 import pytest
@@ -115,3 +119,12 @@ def test_numer_wersji_nie_dochodzi_do_modelu() -> None:
         f"the tokenized value {tok!r} carries a digit outside the frozen markers — "
         "what the model receives must be free of the version number."
     )
+
+
+# Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
+# raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
+# więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
+# dla niego niewidzialne.
+
+if __name__ == "__main__":
+    sys.exit(pytest.main([__file__, "-v"]))

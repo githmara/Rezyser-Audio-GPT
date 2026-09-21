@@ -24,13 +24,16 @@ i ze nauke o nieznanym modelu zapamietuje RAZ, a nie co chunk.
 
 Mock SDK, zero wywolan API.
 
-Uruchom:  .venv/Scripts/python test_json_structured.py
+Uruchom:  .venv/Scripts/python -m pytest test_json_structured.py -q
+Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_json_structured.py
 """
 
 import json
 import sys
 from pathlib import Path
 from types import SimpleNamespace
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -560,16 +563,10 @@ def test_opis_srodowiska_jest_nietresciowy():
     assert "helsinki" not in opis.lower() and "\\" not in opis
 
 
+# Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
+# raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
+# więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
+# dla niego niewidzialne.
+
 if __name__ == "__main__":
-    testy = [(nazwa, obiekt) for nazwa, obiekt in sorted(globals().items())
-             if nazwa.startswith("test_") and callable(obiekt)]
-    bledy = []
-    for nazwa, funkcja in testy:
-        try:
-            funkcja()
-            print(f"  OK   {nazwa}")
-        except AssertionError as exc:
-            bledy.append(nazwa)
-            print(f"  FAIL {nazwa}: {exc}")
-    print(f"\n{len(testy) - len(bledy)}/{len(testy)} zaliczonych.")
-    sys.exit(1 if bledy else 0)
+    sys.exit(pytest.main([__file__, "-v"]))

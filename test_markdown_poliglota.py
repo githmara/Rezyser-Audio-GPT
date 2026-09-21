@@ -33,7 +33,8 @@ Cztery kontrakty, mierzone WYKONANIEM pełnej ścieżki (render → `przetworz` 
 Bajtowej zgodności `docs/` po wydzieleniu renderera pilnuje osobno procedura
 wydawnicza (regeneracja + pusty `git diff docs/` przed commitem docs).
 
-Uruchom:  .venv/Scripts/python test_markdown_poliglota.py
+Uruchom:  .venv/Scripts/python -m pytest test_markdown_poliglota.py -q
+Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_markdown_poliglota.py
 """
 
 import collections
@@ -41,6 +42,8 @@ import re
 import sys
 import tempfile
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -173,20 +176,10 @@ def test_d_wspolny_renderer_dwie_konfiguracje() -> None:
         "`core_markdown.ROZSZERZENIA` ma byc jednym zrodlem prawdy")
 
 
+# Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
+# raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
+# więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
+# dla niego niewidzialne.
+
 if __name__ == "__main__":
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:                                       # pragma: no cover
-        pass
-    testy = [(nazwa, obiekt) for nazwa, obiekt in sorted(globals().items())
-             if nazwa.startswith("test_") and callable(obiekt)]
-    bledy = []
-    for nazwa, funkcja in testy:
-        try:
-            funkcja()
-            print(f"  OK   {nazwa}")
-        except AssertionError as exc:
-            bledy.append(nazwa)
-            print(f"  FAIL {nazwa}: {exc}")
-    print(f"\n{len(testy) - len(bledy)}/{len(testy)} zaliczonych.")
-    sys.exit(1 if bledy else 0)
+    sys.exit(pytest.main([__file__, "-v"]))

@@ -36,7 +36,8 @@ z samego gita (runner nie ma naszych zaleznosci): ZBIOR NAZW pakietow musi byc
 identyczny, zmieniac sie moga tylko specyfikatory. Testy robia prawdziwe repo
 w katalogu tymczasowym, bo przedmiotem jest zachowanie GITA, nie regexa.
 
-Uruchom:  .venv/Scripts/python test_bramka_zaleznosci.py
+Uruchom:  .venv/Scripts/python -m pytest test_bramka_zaleznosci.py -q
+Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_bramka_zaleznosci.py
 """
 
 import argparse
@@ -50,6 +51,8 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+import pytest
 
 _KORZEN = Path(__file__).parent
 sys.path.insert(0, str(_KORZEN / ".github" / "scripts"))
@@ -361,16 +364,10 @@ def test_klasyfikacja_uzywa_wyjatku_tylko_dla_manifestu():
          sdr.manifest_tylko_granice) = oryginalne
 
 
+# Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
+# raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
+# więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
+# dla niego niewidzialne.
+
 if __name__ == "__main__":
-    testy = [(nazwa, obiekt) for nazwa, obiekt in sorted(globals().items())
-             if nazwa.startswith("test_") and callable(obiekt)]
-    bledy = []
-    for nazwa, funkcja in testy:
-        try:
-            funkcja()
-            print(f"  OK   {nazwa}")
-        except AssertionError as exc:
-            bledy.append(nazwa)
-            print(f"  FAIL {nazwa}: {exc}")
-    print(f"\n{len(testy) - len(bledy)}/{len(testy)} zaliczonych.")
-    sys.exit(1 if bledy else 0)
+    sys.exit(pytest.main([__file__, "-v"]))

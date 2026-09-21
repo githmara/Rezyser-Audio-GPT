@@ -7,10 +7,13 @@ tak samo zielona bylaby bramka, ktora nie sprawdza nic. Dlatego kazda z osmiu
 klas dostaje tu WSTRZYKNIETY defekt i musi zostac zlapana po nazwie klasy.
 
 Uruchom:  .venv/Scripts/python -m pytest test_audyt_kreatora.py -q
+Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_audyt_kreatora.py
 """
 
 import sys
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -192,3 +195,12 @@ def test_szablon_trybu_cytuje_pelne_zbiory_wartosci():
     for wartosc in (*pr.STRUKTURY, *pr.FORMATY_WYJSCIA):
         assert wartosc in pakiet["yaml"], f"szablon nie zna `{wartosc}`"
         assert wartosc in pakiet["prompt"], f"prompt nie zna `{wartosc}`"
+
+
+# Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
+# raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
+# więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
+# dla niego niewidzialne.
+
+if __name__ == "__main__":
+    sys.exit(pytest.main([__file__, "-v"]))

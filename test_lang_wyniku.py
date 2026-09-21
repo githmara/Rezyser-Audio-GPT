@@ -49,7 +49,8 @@ w 30 akapitach), kontrakt B pada na każdym powrocie detekcji do ścieżki
 zapisu, a kontrakt D pilnuje, żeby lekarstwo („jeden język na dokument") nie
 zjadło przypadku, w którym różne akapity naprawdę mają różne `iso`.
 
-Uruchom:  .venv/Scripts/python test_lang_wyniku.py
+Uruchom:  .venv/Scripts/python -m pytest test_lang_wyniku.py -q
+Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_lang_wyniku.py
 """
 
 import collections
@@ -57,6 +58,8 @@ import re
 import sys
 import tempfile
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -637,20 +640,10 @@ def test_k2_akapit_w_jezyku_celu_nie_ubija_dokumentu() -> None:
         f"dokument mieszany z akapitem w jezyku celu: {langi} zamiast {{'fi'}}")
 
 
+# Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
+# raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
+# więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
+# dla niego niewidzialne.
+
 if __name__ == "__main__":
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:                                       # pragma: no cover
-        pass
-    testy = [(nazwa, obiekt) for nazwa, obiekt in sorted(globals().items())
-             if nazwa.startswith("test_") and callable(obiekt)]
-    bledy = []
-    for nazwa, funkcja in testy:
-        try:
-            funkcja()
-            print(f"  OK   {nazwa}")
-        except AssertionError as exc:
-            bledy.append(nazwa)
-            print(f"  FAIL {nazwa}: {exc}")
-    print(f"\n{len(testy) - len(bledy)}/{len(testy)} zaliczonych.")
-    sys.exit(1 if bledy else 0)
+    sys.exit(pytest.main([__file__, "-v"]))

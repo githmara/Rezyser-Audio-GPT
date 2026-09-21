@@ -21,11 +21,14 @@ Niezmienniki pilnowane tutaj:
   G4 - plik bez `algorytm` I bez `zamiany` dalej jest bledem, ale komunikat
        nazywa brak po imieniu zamiast mowic o "nieznanym algorytmie".
 
-Uruchom:  .venv/Scripts/python test_szyfr_zamiany.py
+Uruchom:  .venv/Scripts/python -m pytest test_szyfr_zamiany.py -q
+Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_szyfr_zamiany.py
 """
 
 import sys
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -104,16 +107,10 @@ def test_g4_brak_obu_pol_to_blad_nazwany_po_imieniu():
         raise AssertionError("a cipher with neither field must raise")
 
 
+# Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
+# raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
+# więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
+# dla niego niewidzialne.
+
 if __name__ == "__main__":
-    testy = [(nazwa, obiekt) for nazwa, obiekt in sorted(globals().items())
-             if nazwa.startswith("test_") and callable(obiekt)]
-    bledy = []
-    for nazwa, funkcja in testy:
-        try:
-            funkcja()
-            print(f"  OK   {nazwa}")
-        except AssertionError as exc:
-            bledy.append(nazwa)
-            print(f"  FAIL {nazwa}: {exc}")
-    print(f"\n{len(testy) - len(bledy)}/{len(testy)} zaliczonych.")
-    sys.exit(1 if bledy else 0)
+    sys.exit(pytest.main([__file__, "-v"]))

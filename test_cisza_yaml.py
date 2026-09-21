@@ -16,13 +16,16 @@ zostanie wylaczona po tygodniu.
 Wszystko dzieje sie w katalogu tymczasowym; paczki `dictionaries/` sa czytane
 tylko do odczytu albo kopiowane.
 
-Uruchom:  .venv/Scripts/python test_cisza_yaml.py
+Uruchom:  .venv/Scripts/python -m pytest test_cisza_yaml.py -q
+Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_cisza_yaml.py
 """
 
 import shutil
 import sys
 import tempfile
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -631,16 +634,10 @@ def test_drzewo_jest_czyste():
     assert aktualne == {}, aktualne
 
 
+# Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
+# raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
+# więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
+# dla niego niewidzialne.
+
 if __name__ == "__main__":
-    testy = [(nazwa, obiekt) for nazwa, obiekt in sorted(globals().items())
-             if nazwa.startswith("test_") and callable(obiekt)]
-    bledy = []
-    for nazwa, funkcja in testy:
-        try:
-            funkcja()
-            print(f"  OK   {nazwa}")
-        except AssertionError as exc:
-            bledy.append(nazwa)
-            print(f"  FAIL {nazwa}: {exc}")
-    print(f"\n{len(testy) - len(bledy)}/{len(testy)} zaliczonych.")
-    sys.exit(1 if bledy else 0)
+    sys.exit(pytest.main([__file__, "-v"]))

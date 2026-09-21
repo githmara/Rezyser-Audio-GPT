@@ -15,12 +15,15 @@ bez dotykania kodu.
 Testy sa hermetyczne: pakiet-atrapa wstrzykiwany przez podmiane `i18n`
 (`dostepne_jezyki_ui` + `t`), z przywracaniem stanu i czyszczeniem cache.
 
-Uruchom:  .venv/Scripts/python test_naglowki_paczek.py
+Uruchom:  .venv/Scripts/python -m pytest test_naglowki_paczek.py -q
+Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_naglowki_paczek.py
 """
 
 import re
 import sys
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -210,16 +213,10 @@ def test_prolog_i_epilog_bez_wlasnego_hardkodu():
         assert projekt.epilog_ma_tresc
 
 
+# Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
+# raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
+# więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
+# dla niego niewidzialne.
+
 if __name__ == "__main__":
-    testy = [(nazwa, obiekt) for nazwa, obiekt in sorted(globals().items())
-             if nazwa.startswith("test_") and callable(obiekt)]
-    bledy = []
-    for nazwa, funkcja in testy:
-        try:
-            funkcja()
-            print(f"  OK   {nazwa}")
-        except AssertionError as exc:
-            bledy.append(nazwa)
-            print(f"  FAIL {nazwa}: {exc}")
-    print(f"\n{len(testy) - len(bledy)}/{len(testy)} zaliczonych.")
-    sys.exit(1 if bledy else 0)
+    sys.exit(pytest.main([__file__, "-v"]))
