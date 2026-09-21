@@ -2010,6 +2010,17 @@ polskie_znaki:
   # SUGGESTS IT — and the difference is audible, which is the only court of
   # appeal that counts. Same pack, same logic for `æ → ae` (two vowels) where
   # Finnish already owns `ä` = [æ] (one letter, the right sound).
+  # Two traps that recur, both measured:
+  #   * A DIGRAPH MUST NOT ADD A SYLLABLE. `en: ñ → ny` is safe (Spanish never
+  #     ends a word in `ñ`), but the same target would turn „Poznań" into the
+  #     four-syllable „Poznany", so Polish `ń` keeps a bare `n` there — and
+  #     becomes `nj` in `de`, where a final `nj` adds no vowel. One letter,
+  #     two right answers, one per pack.
+  #   * A NEW DIGRAPH IS A DEBT THE ACCENTS OF YOUR PACK PAY. An accent that
+  #     transliterates into another script has a rule per single letter, so a
+  #     digraph it does not know as a unit splits („zh" reached the Russian
+  #     accent as „з"+„х"). Give that accent one unit rule, placed BEFORE any
+  #     shorter pattern contained in the digraph.
   # Expect to think hard here: settling these pairs for a new language is
   # a series of compromises, not a lookup.
   #
@@ -2208,8 +2219,17 @@ presence/absence of diacritics such as ä/ö/ç/ß).
      FORCES the sound beats a letter that only suggests it, and the
      difference is audible — which is the only court of appeal that counts.
      Same pack: `æ → ae` yields two vowels where Finnish already owns
-     `ä` = [æ]. Expect to think hard; these pairs are compromises, not
-     lookups.
+     `ä` = [æ]. Two further traps, both measured: a digraph must not ADD
+     A SYLLABLE (`ñ → ny` is safe in English because Spanish never ends
+     a word in `ñ`, while the same target turns „Poznań" into the
+     four-syllable „Poznany", so Polish `ń` keeps a bare `n` there and
+     becomes `nj` in German, where a final `nj` adds no vowel); and a new
+     digraph is a DEBT THE ACCENTS OF THIS PACK PAY, because an accent
+     transliterating into another script maps single letters and splits
+     a digraph it does not know („zh" reached the Russian accent as
+     „з"+„х") — give that accent one unit rule, before any shorter
+     pattern inside the digraph. Expect to think hard; these pairs are
+     compromises, not lookups.
    Do NOT delete a pair merely because {natywna} „does not use" that letter.
    Loanwords, quotations and foreign names arrive in real text, and every
    character missing from this list reaches the synthesizer untouched —

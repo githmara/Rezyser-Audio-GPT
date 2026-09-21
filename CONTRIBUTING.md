@@ -255,7 +255,14 @@ it report green — a skip is visible in the summary, a false pass is not.
    `python audyt_podstaw.py --bramka` checks the boundary — ASCII or your own
    letters, never a third language's — but it cannot judge which of two legal
    targets sounds better. Expect to weigh compromises rather than look
-   answers up.
+   answers up. Two that recur: a digraph must not ADD A SYLLABLE (`en: ñ → ny`
+   is safe because Spanish never ends a word in `ñ`, while Polish `ń` would
+   turn „Poznań" into the four-syllable „Poznany" — so `ń` keeps a bare `n` in
+   `en` and becomes `nj` in `de`, where a final `nj` adds no vowel); and a new
+   digraph is a DEBT THE PACK'S ACCENTS PAY, because an accent transliterating
+   into another script maps single letters and will split an unknown digraph
+   („zh" reached the Russian accent as „з"+„х"). Give that accent one unit
+   rule, placed before any shorter pattern inside the digraph.
 2. `python refresh_languages.py` — registers the new code.
 3. `python buduj_wielojezyczne_ui.py -l <code>` then
    `python buduj_wielojezyczne_docs.py -l <code>` — translate UI + manuals.

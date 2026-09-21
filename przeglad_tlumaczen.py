@@ -733,6 +733,29 @@ disjoint, because one rewrites German spelling and the other Polish. Never
   `ä` = [æ]. A digraph that FORCES the sound beats a letter that merely
   suggests it. Read the pair out loud through the target voice before you
   approve it — that is the only court of appeal this class has.
+- A DIGRAPH MUST NOT ADD A SYLLABLE — position decides what the sound alone
+  cannot. `en: ñ → ny` is right, because Spanish never ends a word in `ñ`
+  („mañana" → „manyana", three syllables either way), while Polish `ń`, Czech
+  `ň` and Latvian `ņ` — the same /ɲ/ — keep a bare `n`: they stand word-finally
+  all the time (Poznań, Plzeň) and an English final `y` is read as a vowel, so
+  „Poznany" gains a syllable the name never had. A wrong syllable count changes
+  the SHAPE of a word; a lost palatalisation only its colour. German reads `nj`
+  without adding a vowel, so the `de` pack takes `ń → nj` — one letter, two
+  right answers, one per pack.
+- A NEW DIGRAPH IN THE PRE-PASS IS A DEBT THE PACK'S ACCENTS PAY. An accent
+  that TRANSLITERATES (into Cyrillic) has a rule for every single letter, so a
+  digraph it does not know as a UNIT falls apart into one: measured
+  `zh → з + х` in the Russian accent of the `en` pack („Жижек" arrived as
+  „Зхизхэк") and `dsch → д + ш` in the Russian accent of `de`. Fix the ACCENT,
+  not the pre-pass — one unit rule (`zh → ж`, `dsch → дж`) placed BEFORE any
+  shorter pattern contained in it. Such a rule usually repays an older debt as
+  well, because the digraph already arrived in ordinary text („Zhivago",
+  „Dschungel"). No gate does this for you, and that is measured rather than
+  assumed: most multi-character targets ARE compositional (`ae ng on ss ts
+  aa`), so a mechanical „does this accent know that target" yields about a
+  hundred hits across the nine packs, of which a handful matter. Latin-script
+  accents hand an unknown digraph to their synthesizer, exactly as they already
+  do for native words.
 - CASE: give every letter rule its capitalized counterpart, and remember that
   ALL-CAPS text (headings) needs the fully upper-cased form of a digraph as a
   third rule — `Sz` does not catch `SZ`.
