@@ -99,6 +99,15 @@ zamiany:
   - { wzor: "yu",  zamiana: "ю"  }
   - { wzor: "Yu",  zamiana: "Ю"  }
   - { wzor: "YU",  zamiana: "Ю"  }
+  # `yi` cerraba mal la serie: la `y` española ante vocal es la consonante [ʝ]
+  # y las cuatro reglas de arriba lo dicen, pero ante `i` faltaba la quinta, así
+  # que la letra caía a la regla vocálica de abajo („Yiyek" → „Ииек", dos
+  # vocales donde hay una consonante). Desde v19.7 el pre-pass del paquete
+  # manda aquí `ž ĵ đ ĝ ġ` convertidas en `y`, así que la laguna se nota más.
+  - { wzor: "yi",  zamiana: "йи" }
+  - { wzor: "Yi",  zamiana: "Йи" }
+  - { wzor: "YI",  zamiana: "ЙИ" }
+  # `y` suelta (final de palabra o ante consonante) = vocal [i]: „hoy", „muy"
   - { wzor: "y",   zamiana: "и"  }
   - { wzor: "Y",   zamiana: "И"  }
 

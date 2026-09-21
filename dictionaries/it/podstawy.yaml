@@ -36,21 +36,80 @@ opis: |
 # viene mappata al suo equivalente ASCII più vicino. Le vocali accentate
 # italiane (à, è, é, ì, ò, ù) vanno alle vocali base senza accento.
 # -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# v19.7: L'OBIETTIVO È L'ITALIANO, NON LA LETTERA BASE NUDA. Fino alla v19.6
+# ogni lettera straniera cadeva sulla propria lettera base, e quello era un
+# impoverimento e non una semplificazione: questo pre-pass gira PRIMA della
+# lista `zamiany` di OGNI accento del pacchetto, quindi appiattire una lettera
+# buttava via la regola che gli accenti hanno da sempre — sei degli otto file
+# di `akcenty/` portano una regola per `gn`, sette per `ci` e `sci`, perché
+# sono i digrammi dell'italiano (il francese non ne ha bisogno per `gn`: il suo
+# `gn` è già [ɲ]).
+#     ñ → gn    đ ĝ ġ ĵ → gi    ł ŭ → u    ç → ss    þ → t    å → o
+#     ą → on    ę → en    ţ → ts    ĳ → ei    ŵ → u    ŷ → i
+#   Misurato: „Đoković señor mañana" esce come „Giokovic segnor magnana" e non
+#   come „Dokovic senor manana"; con l'accento russo „Джокович" invece di
+#   „Доковик", e „Тингвеллир" invece di „Тхингвеллир".
+#
+# QUATTRO DECISIONI CHE SONO IL CONTENUTO DI QUESTA LISTA:
+#   1. `ñ → gn` E `đ ĝ ġ ĵ → gi` SONO LA SCRITTURA ITALIANA DI QUEI SUONI (gn
+#      È [ɲ], gi davanti ad a/o/u È [dʒ]), e quasi tutti gli accenti del
+#      pacchetto le leggono già: l'accento russo rende `gn` come „нь" e `gi`
+#      come „дж".
+#   2. `š č ž ś ź ż` RESTANO COME ERANO, E QUESTA È LA DECISIONE PIÙ LUNGA DA
+#      SPIEGARE. L'italiano scrive [ʃ] e [tʃ] SOLO in modo posizionale — „sci",
+#      „sce", „ci", „ce" — e una resa fissa aggiunge una vocale proprio dove
+#      queste lettere vivono davvero, cioè in fine di parola: „Đoković →
+#      Giokovici" avrebbe quattro sillabe invece di tre, e i cognomi in -ić
+#      sono il caso più frequente. Lo stesso per `ž` davanti a i („Žižek →
+#      Giigiek", con la vocale raddoppiata). Una sillaba sbagliata cambia la
+#      FORMA della parola; una consonante approssimata ne cambia solo il
+#      colore. Nota che la stessa regola dà la risposta OPPOSTA per `đ`: quella
+#      lettera sta all'inizio di parola e davanti a vocale, mai in fine.
+#   3. `ł ŭ → u` PERCHÉ L'ITALIANO SCRIVE DAVVERO [w], con la u in dittongo, e
+#      in tutte e due le posizioni: „uomo" [wɔ], „auto" [aw]. La ł polacca è
+#      [w] in tutte e due („Michał → Michau", „Łódź → Uodz").
+#   4. `ç → ss` E NON `s`: fra due vocali la s singola è [z] in mezza Italia,
+#      mentre `ss` è [s] ovunque — è la stessa ragione per cui il pacchetto
+#      francese scrive „garsson" dalla v19.6. E `þ → t` invece di `th`: l'acca
+#      italiana è muta, quindi „th" era già solo [t], ma l'accento russo lo
+#      spezzava in „т" + „х" („Тхингвеллир").
+#
+# IL RESTO RESTA ASCII E ANCHE QUELLO È UNA DECISIONE. Il criterio ha due
+# facce: l'ORIGINE deve significare un suono nelle lingue da cui viene (`ä` è
+# [ɛ] tedesca e [æ] finlandese; `ó` è [u] polacca, [ou] islandese e [o] tonica
+# spagnola), e l'OBIETTIVO deve essere qualcosa che la voce di QUESTO
+# pacchetto legge sempre allo stesso modo.
+#
+# UNA NOTA SULL'ALFABETO DI 21 LETTERE. J, K, W, X, Y non ci sono, quindi il
+# cifrario di Cesare non le sposta: una lettera del genere prodotta qui
+# uscirebbe in chiaro dal crittogramma (la falla chiusa nella v19.4.2 per tutto
+# il latino esteso). Per questo `ĵ → gi`, `ĳ → ei`, `ŵ → u`, `ŷ → i` — e sono
+# anche foneticamente più giuste. `ķ ĸ → k` resta l'unica eccezione, di
+# proposito: quelle due lettere sono [k], e ogni scrittura italiana di [k] è
+# posizionale (`c` davanti ad a/o/u, `ch` davanti a e/i), quindi una resa
+# fissa sbaglierebbe più spesso della k stessa.
+#
+# Il limite è sorvegliato da `audyt_podstaw` (classe `znaki-cel-obcy`):
+# l'obiettivo può essere ASCII o una lettera dell'`alfabet` qui sotto, mai la
+# lettera di una terza lingua.
+# -----------------------------------------------------------------------------
 polskie_znaki:
-  # -- Polish loans → plain ASCII --
-  - { wzor: "ą", zamiana: "a"  }
+  # -- Lettere polacche: `ć ś ź ż` restano (vedi l'intestazione: l'italiano
+  #    scrive quei suoni solo in modo posizionale), `ł` diventa u --
+  - { wzor: "ą", zamiana: "on" }
   - { wzor: "ć", zamiana: "c"  }
-  - { wzor: "ę", zamiana: "e"  }
-  - { wzor: "ł", zamiana: "l"  }
+  - { wzor: "ę", zamiana: "en" }
+  - { wzor: "ł", zamiana: "u"  }
   - { wzor: "ń", zamiana: "n"  }
   - { wzor: "ó", zamiana: "o"  }
   - { wzor: "ś", zamiana: "s"  }
   - { wzor: "ź", zamiana: "z"  }
   - { wzor: "ż", zamiana: "z"  }
-  - { wzor: "Ą", zamiana: "A"  }
+  - { wzor: "Ą", zamiana: "On" }
   - { wzor: "Ć", zamiana: "C"  }
-  - { wzor: "Ę", zamiana: "E"  }
-  - { wzor: "Ł", zamiana: "L"  }
+  - { wzor: "Ę", zamiana: "En" }
+  - { wzor: "Ł", zamiana: "U"  }
   - { wzor: "Ń", zamiana: "N"  }
   - { wzor: "Ó", zamiana: "O"  }
   - { wzor: "Ś", zamiana: "S"  }
@@ -62,19 +121,21 @@ polskie_znaki:
   - { wzor: "â", zamiana: "a"  }
   - { wzor: "ã", zamiana: "a"  }
   - { wzor: "ä", zamiana: "a"  }
-  - { wzor: "å", zamiana: "a"  }
   - { wzor: "Á", zamiana: "A"  }
   - { wzor: "À", zamiana: "A"  }
   - { wzor: "Â", zamiana: "A"  }
   - { wzor: "Ã", zamiana: "A"  }
   - { wzor: "Ä", zamiana: "A"  }
-  - { wzor: "Å", zamiana: "A"  }
+  # -- → o (la å svedese/norvegese è [o], non [a]) --
+  - { wzor: "å", zamiana: "o"  }
+  - { wzor: "Å", zamiana: "O"  }
   # -- → ae --
   - { wzor: "æ", zamiana: "ae" }
   - { wzor: "Æ", zamiana: "Ae" }
-  # -- → c --
-  - { wzor: "ç", zamiana: "c"  }
-  - { wzor: "Ç", zamiana: "C"  }
+  # -- → ss (la cediglia francese è [s]; davanti ad a/o/u la c è [k], e la s
+  #    singola fra vocali è [z] in mezza Italia) --
+  - { wzor: "ç", zamiana: "ss" }
+  - { wzor: "Ç", zamiana: "Ss" }
   # -- → d (Icelandic Ð/ð) --
   - { wzor: "ð", zamiana: "d"  }
   - { wzor: "Ð", zamiana: "D"  }
@@ -96,9 +157,10 @@ polskie_znaki:
   - { wzor: "Ì", zamiana: "I"  }
   - { wzor: "Î", zamiana: "I"  }
   - { wzor: "Ï", zamiana: "I"  }
-  # -- → n --
-  - { wzor: "ñ", zamiana: "n"  }
-  - { wzor: "Ñ", zamiana: "N"  }
+  # -- → gn (il gn italiano È [ɲ]: España → Espagna). Le ń/ň/ņ restano `n`:
+  #    finiscono la parola di continuo (Poznań, Plzeň) --
+  - { wzor: "ñ", zamiana: "gn" }
+  - { wzor: "Ñ", zamiana: "Gn" }
   # -- → o --
   - { wzor: "ò", zamiana: "o"  }
   - { wzor: "ô", zamiana: "o"  }
@@ -115,9 +177,10 @@ polskie_znaki:
   - { wzor: "Œ", zamiana: "Oe" }
   # -- → ss (German) --
   - { wzor: "ß", zamiana: "ss" }
-  # -- → th (Icelandic Þ/þ) --
-  - { wzor: "þ", zamiana: "th" }
-  - { wzor: "Þ", zamiana: "Th" }
+  # -- → t (islandese Þ/þ): l'acca italiana è muta, quindi „th" era già solo
+  #    [t], ma l'accento russo lo spezzava in „т" + „х" --
+  - { wzor: "þ", zamiana: "t"  }
+  - { wzor: "Þ", zamiana: "T"  }
   # -- → u --
   - { wzor: "ú", zamiana: "u"  }
   - { wzor: "ù", zamiana: "u"  }
@@ -155,20 +218,20 @@ polskie_znaki:
   - { wzor: "Č", zamiana: "C" }
   - { wzor: "ď", zamiana: "d" }
   - { wzor: "Ď", zamiana: "D" }
-  - { wzor: "đ", zamiana: "d" }
-  - { wzor: "Đ", zamiana: "D" }
+  - { wzor: "đ", zamiana: "gi" }
+  - { wzor: "Đ", zamiana: "Gi" }
   - { wzor: "ĕ", zamiana: "e" }
   - { wzor: "Ĕ", zamiana: "E" }
   - { wzor: "ė", zamiana: "e" }
   - { wzor: "Ė", zamiana: "E" }
   - { wzor: "ě", zamiana: "e" }
   - { wzor: "Ě", zamiana: "E" }
-  - { wzor: "ĝ", zamiana: "g" }
-  - { wzor: "Ĝ", zamiana: "G" }
+  - { wzor: "ĝ", zamiana: "gi" }
+  - { wzor: "Ĝ", zamiana: "Gi" }
   - { wzor: "ğ", zamiana: "g" }
   - { wzor: "Ğ", zamiana: "G" }
-  - { wzor: "ġ", zamiana: "g" }
-  - { wzor: "Ġ", zamiana: "G" }
+  - { wzor: "ġ", zamiana: "gi" }
+  - { wzor: "Ġ", zamiana: "Gi" }
   - { wzor: "ģ", zamiana: "g" }
   - { wzor: "Ģ", zamiana: "G" }
   - { wzor: "ĥ", zamiana: "h" }
@@ -182,10 +245,10 @@ polskie_znaki:
   - { wzor: "į", zamiana: "i" }
   - { wzor: "Į", zamiana: "I" }
   - { wzor: "ı", zamiana: "i" }
-  - { wzor: "ĳ", zamiana: "ij" }
-  - { wzor: "Ĳ", zamiana: "Ij" }
-  - { wzor: "ĵ", zamiana: "j" }
-  - { wzor: "Ĵ", zamiana: "J" }
+  - { wzor: "ĳ", zamiana: "ei" }
+  - { wzor: "Ĳ", zamiana: "Ei" }
+  - { wzor: "ĵ", zamiana: "gi" }
+  - { wzor: "Ĵ", zamiana: "Gi" }
   - { wzor: "ķ", zamiana: "k" }
   - { wzor: "Ķ", zamiana: "K" }
   - { wzor: "ĸ", zamiana: "k" }
@@ -221,8 +284,8 @@ polskie_znaki:
   - { wzor: "š", zamiana: "s" }
   - { wzor: "Š", zamiana: "S" }
   - { wzor: "ſ", zamiana: "s" }
-  - { wzor: "ţ", zamiana: "t" }
-  - { wzor: "Ţ", zamiana: "T" }
+  - { wzor: "ţ", zamiana: "ts" }
+  - { wzor: "Ţ", zamiana: "Ts" }
   - { wzor: "ť", zamiana: "t" }
   - { wzor: "Ť", zamiana: "T" }
   - { wzor: "ŧ", zamiana: "t" }
@@ -237,10 +300,10 @@ polskie_znaki:
   - { wzor: "Ű", zamiana: "U" }
   - { wzor: "ų", zamiana: "u" }
   - { wzor: "Ų", zamiana: "U" }
-  - { wzor: "ŵ", zamiana: "w" }
-  - { wzor: "Ŵ", zamiana: "W" }
-  - { wzor: "ŷ", zamiana: "y" }
-  - { wzor: "Ŷ", zamiana: "Y" }
+  - { wzor: "ŵ", zamiana: "u" }
+  - { wzor: "Ŵ", zamiana: "U" }
+  - { wzor: "ŷ", zamiana: "i" }
+  - { wzor: "Ŷ", zamiana: "I" }
   - { wzor: "ž", zamiana: "z" }
   - { wzor: "Ž", zamiana: "Z" }
   - { wzor: "ẞ", zamiana: "SS" }

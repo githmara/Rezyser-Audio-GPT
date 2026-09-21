@@ -83,6 +83,14 @@ zamiany:
   - { wzor: "EI",  zamiana: "Е"  }
 
   # --- 3. Digrammes consonantiques ---
+  # `tch` AVANT `ch` : c'est ainsi que le français écrit [tʃ] (Tchekhov,
+  # Tchaïkovski, Djokovitch), et le russe a une lettre pour ce son. Sans cette
+  # règle le trigramme se cassait en `т` + `ш` — une suite que le russe n'a
+  # pas. Depuis v19.7 le pre-pass du paquet envoie ici `č ĉ ċ ć` transformées
+  # en `tch`, mais la dette est plus ancienne : « Tchekhov » arrivait déjà.
+  - { wzor: "tch", zamiana: "ч"  }
+  - { wzor: "Tch", zamiana: "Ч"  }
+  - { wzor: "TCH", zamiana: "Ч"  }
   - { wzor: "ch",  zamiana: "ш"  }
   - { wzor: "Ch",  zamiana: "Ш"  }
   - { wzor: "CH",  zamiana: "Ш"  }
