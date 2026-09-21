@@ -1257,7 +1257,12 @@ def nadaj_tytuly_rozdzialom(
     system_prompt = pr.buduj_prompt_systemowy(przepis_tytuly)
 
     for step, i in enumerate(iter_idx, start=1):
-        naglowek = fragmenty[i].strip()
+        # `re.split` wstawia None za grupę, która NIE uczestniczyła
+        # w dopasowaniu — wzorzec z jedną grupą w alternatywie
+        # (`(?:(Prolog)|Epilog)`) przechodzi bramkę loadera i nadal potrafi to
+        # zrobić. Bez tego `.strip()` pada AttributeError w wątku
+        # postprodukcji, a siatka `_tytuly_worker` pokazuje go jako BŁĄD AI.
+        naglowek = (fragmenty[i] or "").strip()
         tresc = fragmenty[i + 1].strip() if i + 1 < len(fragmenty) else ""
         percent = int(step / total * 100)
 

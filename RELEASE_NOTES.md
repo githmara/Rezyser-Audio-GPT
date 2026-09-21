@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.6.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.7.0 „Wersja Wydawnicza"
+
+*Release v19.7.0: dziewięć paczek przestaje wyrzucać dźwięk do kosza, zanim akcent zdąży go zobaczyć — plus pięć rzeczy, które przy tym wyszły, w tym dwie z audytu przed zamknięciem. **(1)** Tablica diakrytyków paczki (pre-pass) biegnie PRZED listą `zamiany` każdego jej akcentu, a spłaszczała obcy znak do najbliższej gołej litery: `š` docierało do akcentu jako `s`, choć angielski ma `sz → sh` od zawsze, rosyjski `sz → ш`, a niemieckie `sch` stoi w ośmiu regułach. Celem pary jest odtąd zapis, który przeczyta głos TEJ paczki — zwykle dwuznak, bo dwuznak WYMUSZA dźwięk, który pojedyncza litera tylko sugeruje, i zwykle konwencja rodzima, a nie wymyślona transkrypcja (zalecenie Kotusa dla fińskiego, żywe tökuorð dla islandzkiego, stuletnia praktyka prasowa dla francuskiego, własne zapożyczenia dla hiszpańskiego). Zmierzone na „Škoda Žižek Dvořák Đoković" przez akcent rosyjski: `en` „Скода Зизэк Дворак Докович" → „Шкода Жижэк Дворжак Джокович", `fr` „Скода Зизек Дворак Доковик" → „Шкода Жижек Дворжак Джокович", `fi` „Скода Зизэк Дворак Доковиц" → „Шкода Жижэк Дворжак Джокович"; sam pre-pass paczki `de` pisze „Schkoda Schischek Dvorschak Dschokovitsch". Bramka celu ustąpiła przy tym z „musi być ASCII" — przybliżenia dobrego dla ośmiu paczek i fałszywego dla `ru`, gdzie `ж` nie jest diakrytykiem zostawionym syntezatorowi, tylko literą, którą ten głos czyta — na „musi stać w `alfabet` paczki", twardo i bez baseline'u. Kryterium wyboru między dwoma LEGALNYMI celami brzmi „to jest najlepiej, jak głos TEJ paczki może przeczytać ten znak", a nie „jak zapisałby to językoznawca": stabilność ma dwie strony, a recenzenci sprawdzają tylko pierwszą — litera, którą język trzyma wyłącznie dla zapożyczeń, ma niestabilny CEL, choć stoi w alfabecie i dlatego przechodzi każdą bramkę. **(2)** Runda wyprodukowała trzy reguły, których żadna bramka nie sprawdzi, i wszystkie trzy trafiły tam, gdzie czyta je autor paczki (szablon podstaw, prompt `jezyk_bazowy` kreatora, krok 1 `CONTRIBUTING.md`, checklista recenzenta): dwuznak nie może dołożyć sylaby, bo rozstrzyga POZYCJA, nie dźwięk (`ñ → ny` jest bezpieczne w `en`, bo hiszpański nie kończy wyrazu na `ñ`, ale polskie `ń` zostaje tam przy gołym `n`, bo „Poznany" ma sylabę za dużo — zła liczba sylab zmienia KSZTAŁT słowa, utrata zmiękczenia tylko jego barwę); nowy dwuznak w pre-passie to DŁUG, który spłaca akcent transliterujący, regułą jednostkową przed każdym krótszym wzorcem w niej zawartym (zmierzone: `zh` rozpadało się na `з + х`, `dsch` na `д + ш`); cel nie może przepisywać litery obok, bo pre-pass to sekwencyjny `str.replace` wewnątrz wyrazu (`fr: œ → eu` zrobiłoby z „cœur" → „ceur", a z [k] → [s], dlatego francuska paczka zostaje przy `œ → oe`, choć `ø ö ő` bierze `eu`). Czwarta klasa jest bramkowalna i została zmierzona: alfabet paczki jest TAKŻE pierścieniem Cezara, więc cel spoza `alfabet` zostaje w szyfrogramie jawnym tekstem — ta sama klasa, którą v19.4.2 zamknęła dla całej łacinki, otwierana z powrotem po jednej parze (`is: ŵ → w` oraz cztery pary w 21-literowym alfabecie `it`). **(3)** Literówka w polu sterującym Reżyserem przestała być cicha: pięć kontroli, każda z pomiaru, nie z przeglądu — `struktura: akty_scen` wczytywała się BEZ zgłoszenia i spłaszczała markery pamięci z zagnieżdżenia akt→scena do płaskiej listy, więc Reżyser „widział rozdziały" w projekcie Skryptu z powodu jednej zgubionej litery, a pusty `regex_podzial_rozdzialow` dawał 636 znaków → 638 fragmentów, czyli 319 płatnych wywołań po jednym znaku. Kontrole dostały przy tym wreszcie ODBIORCĘ, bo `przeskanuj_reguly` — jedyny wołający w kodzie produkcyjnym, czyli „Odśwież" Managera Reguł — skanował paczkę języka INTERFEJSU: zmierzone przed zmianą UI `pl`, literówka w `de/rezyser/tryb_audiobook.yaml`, rejestr PUSTY i komunikat „brak zastrzeżeń" nad plikiem, który silnik pomija. Pod jednym przyciskiem jechały dwa skany o dwóch różnych zakresach, a przy domyślnym filtrze zakresy się pokrywają i dlatego nikt tego nie widział. **(4)** Dwie nowe bramki. `audyt_kreatora`: szablony i prompty Managera OPISUJĄ silnik, ale nic ich nie wykonuje, więc zmiana w kodzie nie łamie ich w żaden widoczny sposób — opis po prostu zaczyna kłamać i kłamie do następnego przeczytania przez człowieka, a agent AI, któremu użytkownik wkleja prompt, wykona fałszywe zdanie dosłownie, czyli fałsz zamieni się w gotowy plik, a nie w pytanie; bramka jest bez baseline'u, bo kłamiący opis nie ma dopuszczalnej postaci. `test_kanon_testow`: plik testowy uruchomiony jako skrypt przestaje kończyć się cichym zerem — dwa pliki nie miały bloku `__main__` w ogóle, a pozostałe 24 niosły własny harness, czyli DRUGI sposób raportowania wyniku, i ten cichy (łapie wyłącznie `AssertionError`, więc legalny `pytest.skip` wywróciłby cały przebieg, a `parametrize` i fixture są dla niego niewidzialne); 25 plików dostało kanon `sys.exit(pytest.main([__file__, "-v"]))` z v19.2.1. **(5)** Audyt przed zamknięciem zarobił na siebie w bramce, którą to samo wydanie dopiero co dodało. Wzorzec DOPASOWUJĄCY pusty łańcuch to nie to samo, co wzorzec pusty: wiszący `|` w liście natywnych nazw rozdziałów — a szablon wprost prosi autora o dostosowanie właśnie tej listy — kompiluje się, ma grupę i przechodził wszystkie trzy kontrole, po czym `re.split` tnie między każdym znakiem; zmierzone 101 płatnych wywołań na 138 znakach, czyli koszt LINIOWY w długości narracji, z pustymi tytułami i bez przycisku „Przerwij" gdziekolwiek w postprodukcji. Druga dziura to znów klasa z v19.2.0: bramka żądała „min. jednej grupy", a `re.split` zwraca krok `1 + liczba_grup`, gdy pętla rozdziałów chodzi krokiem 2 — więc kontraktem jest DOKŁADNIE jedna. Ujęcie numeru rozdziału we własną grupę, które docstring samej bramki nazywa naturalnym odruchem, albo przesuwało dane po cichu (treści rozdziałów wracały jako „nagłówki"), albo wywracało wątek postprodukcji `AttributeError`, który siatka bezpieczeństwa pokazuje jako BŁĄD AI: komunikat o modelu za usterkę własnego pliku użytkownika. Przy okazji ta sama kontrola okazała się JEDYNYM miejscem loadera wstrzykującym angielskie ZDANIE do rejestru „Pominięte reguły", który user czyta w dziewięciu językach, choć sąsiednie pola niosą tam samą formułę i mają przy sobie komentarz wyjaśniający dlaczego — werdykt jest znów symboliczny (`groups=2 ≠ 1`, `match('') ≠ None`), klasę tłumaczy `diag.powod.wartosc`, a proza przeniosła się do szablonu i promptu kreatora, które wyliczają teraz wszystkie pięć odrzucanych kształtów, wyprowadzając je URUCHOMIENIEM kontroli silnika. Pięć dalszych znalezisk audytu siedziało w tekstach i bramkach: nowa bramka znała wyłącznie `Exception`, więc `SystemExit` z jej ścieżki dawał zero wyjścia i exit 0, a w buildzie zakończyłby `build_release.py` „sukcesem" bez PyInstallera i ISCC (ta sama klasa, co defekt bramki kontraktu z v18.32.0); ta sama bramka meldowała pełne pokrycie nad modelem pól, który po cichu się skurczył na nieparsowalnym pliku referencyjnym; akapit o modelach strukturalnych dla szyfru był wyprowadzany z dysku w pierwszej połowie i literałem w drugiej, więc pierwszy wdrożony szyfr zamian uczyniłby go wewnętrznie sprzecznym; dwa przykłady rozjechały się z paczkami, które opisują (`fr: ç → s`, poprawione na `ss` już w v19.6, oraz `it: ĵ → j`, naprawione w tym właśnie wydaniu); a bramka celu nie umiała wyrazić litery, którą paczka ma OBOWIĄZEK trzymać poza alfabetem — niemieckie `ß` puchnie pod `.upper()`, więc `alfabet-puchnie` je wygania, a orakuł nazywał je potem obcym. Dla użytkownika końcowego: obce nazwy docierają do syntezatora w kształcie, który wybrany głos umie wymówić, w każdej paczce i każdym akcencie, a polskie „ż" i „ź" dostają w akcencie angielskim ten sam zapis co „rz" — „morze" i „może" brzmią po polsku tak samo, a angielski głos czytał jedno jako „mozhe", a drugie jako „moze".*
 
 *Release v19.6.0: pole, które pozwalało akcentowi kupić jeden znak za cenę całej łacinki, zostało zniesione — plus dwie rzeczy, które wyszły przy proof readingu promptów Managera. **(1)** Flaga `usun_polskie_znaki` wyłączała pre-pass paczki w całości, więc akcent, który potrzebował zobaczyć diakrytyk źródła (francuska cedylla), płacił za to przepuszczeniem CAŁEJ reszty: zmierzone przed zmianą sześć akcentów z flagą `false` oddawało syntezatorowi 170–188 znaków zakresu U+00C0–U+017F nietkniętych, a `fi/rosyjski` i `is/rosyjski` wpuszczały gołą łacinkę do cyrylicy. Realnych beneficjentów flagi było w danych DWÓCH i oba to ta sama cedylla, z czego jeden czytał ją znak w znak tak samo jak pre-pass. Flaga znika z 99 plików, pre-pass biegnie bezwarunkowo jak w szyfrach, a łacinka przepuszczana przez 72 akcenty spada z 1134 do 30 znaków — i te 30 to wyłącznie litery WŁASNE paczki źródłowej plus `ü`, które akcent francusko-niemiecki sam produkuje. Cedylla rozstrzygnięta w tablicy paczki (`ç → ss`, bo niemieckie `s` między samogłoskami czyta się /z/, a dla pozostałych siedmiu głosów „ss" to zwykłe /s/), czyli kompromis wyszedł darmowy. **(2)** Typ „Szyfr (czyste zamiany)" — jedna z dziewięciu pozycji kreatora — produkował plik MARTWY od urodzenia: dispatcher szyfrów znał wyłącznie gałąź algorytmiczną, więc taki plik ładował się do listy w GUI i wywracał się przy pierwszym użyciu. Żadna bramka tego nie widziała, bo w paczkach nie ma ani jednego pliku tej gałęzi. **(3)** Prompt szyfru algorytmicznego uczył API, którego nie ma (`_ALGORYTMY` zamiast `_ALGORYTMY_SZYFROW`, `_algorytm_<id>` zamiast `_algo_<id>`, sygnatura dwuargumentowa zamiast czteroargumentowej), a trzy prompty i docstring mówiły „all 7 deployed packs", renderując tuż obok policzoną listę dziewięciu. Liczebniki, etykiety wzorcowe i nazwa modelu pochodzą odtąd z kodu, nie z literału w tekście.*
 
@@ -83,6 +85,219 @@
 *Release v18.8.0: owoce testu maintainera „polskie UI na fińskiej treści" (Poliglota offline) — jeden bug krytyczny plus dwa niedociągnięcia międzynarodowości. **(1) BUG KRYTYCZNY: tagi `lang` per akapit liczone na tekście JUŻ zniekształconym transformacją.** Silnik od 13.5 MA mechanizm detekcji języka per akapit wykonywanej PRZED transformacją (side-channel `opcje["_segmenty_wynikowe"]`), ale kanał był martwy od urodzenia: GUI wołało `przetworz(..., **opcje)`, Python REPAKOWAŁ kwargi do nowego słownika i mutacje silnika nigdy nie wracały do GUI — `zapisz_wynik` zawsze spadał na detekcję „na żywo" po wyniku. Dla typoglikemii na fińskim tekście lingua strzelała `lang="de"` na akapitach nagłówkowych (dowód: pochodne `explore_raport`); dla cezara fałszerstwo byłoby totalne. Ten sam martwy kanał ukrywał DWA bugi-rodzeństwo cezara z losowym przesunięciem: komunikat „wylosowano N" nigdy się nie pokazywał, a nazwa pliku traciła sufiks `±N` — czyli zaszyfrowany plik był praktycznie nieodwracalny dla usera. Fix: `przetworz` przyjmuje jawny, MUTOWALNY słownik `opcje=` (przez referencję); jeden korzeń naprawia trzy objawy. **(2) Lokalizacja sklejek nazw plików wynikowych.** Prefiksy `naprawiony_/oczyszczony_/_akcent_/_szyfr_/_tlumaczenie_/architektura_` były polskim hard-kodem — koszmar dla niepolskich syntezatorów (fińska Satu czytająca „tlumaczenie" jako [tumaksenije]). Teraz człony pochodzą z `ui.yaml` (klucze `filename_*` ×9 języków, w języku UI: fi `salaus/käännös/arkkitehtuuri`, is `dulkóðun/þýðing`, ru `шифр/перевод`…), z Unicode-safe sanityzacją i twardym fallbackiem na polskie defaulty; `id` wariantu pozostaje techniczne. Manuale zlokalizowane w ślad (przykłady `architektura_` → natywne). **(3) A11y: spin przesunięcia Cezara ukryty dla nie-cezarowych szyfrów** (NVDA nie ogłasza już martwego pola; wzorzec show/hide jak przy polu ISO naprawiacza). **(4) Dokumentacja user-facing przechodzi z .txt na HTML renderowany z Markdownu.** Szablony `dokumentacja/*.yaml` są od teraz pisane w MD (mechaniczna migracja: nagłówki `#`/`##` per sekcja + backticki wokół `<placeholderów>` ×9 języków, z autotestem integralności treści), a `generuj_dokumentacje.py` renderuje `docs/<id>.<iso>.html` (biblioteka `markdown`, nl2br + sane_lists) z pełnym dokumentem HTML5: `<html lang="<iso>">` przełącza syntezator czytnika ekranu na język treści, nagłówki dają nawigację klawiszami 1-6/h w NVDA, a minimalny CSS (z trybem ciemnym) czyta się dobrze też wzrokiem — koniec „obleśnego" gołego .txt w Notatniku. README bez zmian (surowy MD dla GitHuba). Menu Pomoc, `installer.iss` (checkbox „otwórz manual" + sprzątanie osieroconych `docs\*.txt` przy upgrade) i `build_release` przepięte; nowa bramka RAW-HTML w `--waliduj` pilnuje, żeby żaden surowy `<fragment>` z szablonu nie został połknięty przez przeglądarkę. Przy okazji naprawione martwe odwołanie w 9 manualach: przewodnik Opowieści to `tales.<iso>.html`, nie `opowiesci.pl.txt`/`tarinat.fi.txt`/`recits.fr.txt` (plik o tych nazwach nigdy nie istniał).*
 
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
+
+---
+
+## 19.7.0 — minor release
+
+### What's new
+
+**Nine language packs stop throwing a sound away before any accent can see it.**
+Every pack carries a diacritic table — the pre-pass — that runs BEFORE the
+substitution list of each of that pack's accents. Until this release the table
+answered a narrower question than it should have: a foreign character was
+flattened to the nearest bare letter, so `š` reached the accent as plain `s`.
+That is information thrown in the bin one step before the place that knew what
+to do with it — the English accent has had `sz → sh` for as long as it has
+existed, the Russian one `sz → ш`, the German ones `sch` in eight rules. The
+target of a pre-pass pair is now the spelling the voice of THAT pack actually
+reads, which is usually a digraph, because a digraph FORCES a sound that a
+single letter only suggests. Measured on the engine with "Škoda Žižek Dvořák
+Đoković" through the Russian accent: `en` went from "Скода Зизэк Дворак
+Докович" to "Шкода Жижэк Дворжак Джокович", `fr` from "Скода Зизек Дворак
+Доковик" to "Шкода Жижек Дворжак Джокович", `fi` from "Скода Зизэк Дворак
+Доковиц" to "Шкода Жижэк Дворжак Джокович". These are the packs' own
+conventions, not an invented transcription: Finnish follows the Kotus
+recommendation (`sh`, `zh`, `tsh`, `dzh`), Icelandic its living tökuorð
+(sjampó, djass, Tsjetsjenía), French a century of press spelling
+(Chostakovitch, Tchekhov, Djokovic), Spanish its own loanwords (champú), German
+writes Schischek, Dworschak and Dschokowitsch.
+
+**The guiding sentence for that table is not "what character is this" but "this
+is the best the voice of THIS pack can read it".** A pack is a phonetic
+foundation FOR A SCREEN READER. Neither the synthesizer nor this engine parses
+sentence context — the rules are a sequential `str.replace` — so perfection is
+not available and is not the goal. One consequence is worth spelling out:
+"stability" has two sides and reviewers usually check only the first. A stable
+SOURCE means the character carries one sound in the languages it arrives from;
+a stable TARGET means the pack's own voice reads that spelling the same way
+every time. A letter a language keeps solely for loanwords often fails the
+second test while passing every gate, because it does stand in the pack's
+alphabet.
+
+**The gate guarding the target was an approximation true for eight packs and
+false for the ninth.** `audyt_podstaw` demanded plain ASCII, which is a
+reasonable stand-in for "do not leave a diacritic for the synthesizer to guess"
+— except in `ru`, where `ж` is not a leftover diacritic but a letter that voice
+reads. The class `znaki-cel-nieascii` gives way to `znaki-cel-obcy`, which asks
+what the rest of that gate asks: does the character stand in the pack's
+`alfabet`. The criterion stays hard and stays without a baseline — `ž → ř` in
+the `pl` pack is still an error — and the Rule Manager stops assuming that
+every writing system has an alphabet to offer.
+
+**Three rules came out of this round that no gate will ever check.** They now
+live in the four places a pack author actually reads: the `podstawy.yaml`
+template, the `jezyk_bazowy` prompt of the Rule Manager, step 1 of
+`CONTRIBUTING.md`, and the reviewer checklist in `przeglad_tlumaczen.py`.
+*(1) A digraph must not add a syllable, and POSITION decides, not the sound.*
+`ñ → ny` is safe in the `en` pack because Spanish never ends a word in `ñ`; the
+same target turns "Poznań" into a four-syllable "Poznany", so Polish `ń` stays
+at bare `n` there and becomes `nj` in `de`. One letter, two packs, two correct
+answers — a wrong syllable count changes the SHAPE of a word, a lost palatal
+only its colour. *(2) A new digraph in the pre-pass is a debt, and the pack's
+accents pay it.* A transliterating accent has a rule for every single letter,
+so a digraph it does not know AS A WHOLE falls apart: measured `zh → з + х` in
+the Russian accent of `en`, `dsch → д + ш` in `de`. The repair belongs in the
+accent — one rule for the whole sequence, placed BEFORE every shorter pattern
+contained in it. *(3) The target must not rewrite the letter next to it.* The
+pre-pass is a sequential replace inside a word, so a pair can change how an
+already-correct neighbour is read: `fr: œ → eu` would turn "cœur" into "ceur"
+and its [k] into [s], which is why the French pack keeps `œ → oe` while `ø ö ő`
+take `eu`.
+
+**A pack's alphabet is also the ring of the Caesar cipher, so an ASCII target
+can be a hole too.** The boundary gate lets any ASCII character through, but
+the cipher only shifts characters standing in `alfabet` — a target outside that
+list stays in the cryptogram as PLAIN TEXT. This is the class v19.4.2 closed
+for the Latin script as a whole, reopened one pair at a time. Measured and
+fixed here: `is: ŵ → w`, which is not an Icelandic letter, and four pairs in
+`it`, whose alphabet has 21 letters and which was producing `j`, `w` and `y`.
+
+**A typo in a field that steers the Director stops being silent.** The recipe
+loader enforced `kategoria`, `zakres`, `rola` and `sufiks_pliku_wyniku`, and
+took the remaining control fields as they came. Five checks are added, each
+from a measurement rather than a review. `struktura` and `format_wyjscia`
+outside their permitted sets now skip the file instead of loading it: before
+this change `struktura: akty_scen` — one lost letter — loaded silently and
+flattened the memory markers from act→scene nesting to a flat list, so the
+Director "saw chapters" in a Script project. A `regex_podzial_rozdzialow` that
+is empty, uncompilable or has no capturing group skips the file, because
+`re.split("", text)` cuts between every character (measured: 636 characters →
+638 fragments, i.e. 319 paid calls one character long) and a pattern without a
+group loses the headings and shifts the pairing of titles. A `temperatura`
+outside 0.0–2.0 skips the file rather than sending every call with a value the
+provider will reject. The skipped file announces itself in the "Skipped rules"
+registry under a new reason, translated in all nine packs.
+
+**"Refresh" in the Rule Manager now asks about the pack in the tree, not about
+the interface language.** Those checks had no listener: `przeskanuj_reguly` —
+the only caller in production code, i.e. that button — scanned the pack of the
+INTERFACE language. Measured before the change: interface `pl`, the typo
+`struktura: rozdzialty` sitting in `de/rezyser/tryb_audiobook.yaml`, registry
+empty, "no objections" reported over a file the engine skips. Two scans ran
+under one button with two different scopes — the draft scan has taken its packs
+from the tree filter since v19.4, the rule scan took the UI language — and with
+the default filter the two scopes overlap, which is why nobody saw it. The
+scope is now computed once and handed to both scans; an empty scope falls back
+to the runtime scope, because a button that checks nothing when pressed is
+worse than no button.
+
+**A new gate: the Rule Manager's own texts cannot describe an engine that does
+not exist.** The creator's templates and prompts DESCRIBE the engine, but
+nothing executes them — a change in the code does not break them in any visible
+way, the description simply starts lying and keeps lying until the next human
+reads it. The addressee cannot check it either: a user of the installed package
+does not see the sources, and an AI agent handed such a prompt will carry out
+the false sentence literally, so the falsehood turns into a finished file
+rather than into a question. `audyt_kreatora.py` renders all nine creator types
+and checks the result against the code itself — unknown module, unknown symbol,
+a pattern file absent from the reference pack, a field the template writes but
+no loader reads, and further classes of the same shape. It runs inside
+`build_release.py`, before the dependency gate. The proof-reading pass that
+preceded it (all nine types, every claim verified by execution) had already put
+the enumerations back where they belong: counts, sample labels, model names and
+API signatures now come from the code, not from a literal in the text.
+
+**A test file run as a script no longer ends in silent green.** Two files had no
+`__main__` block at all: launched the classic way they defined their functions
+and exited 0 without a single line of output — an empty green indistinguishable
+from a passing run. The other 24 carried a hand-written harness, i.e. a SECOND
+way of reporting the result, and a quiet one: it catches `AssertionError` only,
+so a legitimate `pytest.skip` would overturn the whole run, while `parametrize`
+and fixtures are invisible to it. Neither trap was firing yet, and that is the
+point of closing it now. The canon is what v19.2.1 wrote into
+`test_core_updater.py`: `sys.exit(pytest.main([__file__, "-v"]))`. Twenty-five
+files adopt it, the docstrings are unified, and `test_kanon_testow.py` (eight
+tests, AST-based) keeps it that way — verified from the failure side with a
+planted file that has no block.
+
+**The audit before closing found two holes in the gate this very release had
+added.** The check on `regex_podzial_rozdzialow` promised to answer "can
+`re.split` use this pattern", and let through two shapes that produce exactly
+the disasters it exists to prevent. First: a pattern that MATCHES the empty
+string is not the same thing as an empty pattern. A trailing `|` in the list of
+native chapter names — and the template asks the author to adapt precisely that
+list — compiles, has a group, and still makes `re.split` cut between every
+character. Measured: 101 paid calls on 138 characters, i.e. a cost linear in the
+length of the narration, with empty titles and no "Cancel" button anywhere in
+post-production. Second, the v19.2.0 class once more: the gate demanded "at
+least one capturing group", while `re.split` returns one entry per group and the
+chapter loop reads every second entry as a header — so the contract is exactly
+one. Wrapping the chapter number in a group of its own, which the gate's own
+docstring calls the natural reflex, either shifted the data silently (chapter
+bodies arriving as "headers") or crashed the post-production thread with an
+`AttributeError` that the safety net presents as an AI error: a message about
+the model for a defect in the user's own file. Both shapes are now rejected with
+their own wording, the chapter loop tolerates a group that did not participate
+in the match, and seven new tests cover them — all seven red against the code
+from before the fix.
+
+**The reason a skipped file gives is symbolic again.** That same check was the
+one place in the loader that wrote an English sentence into the detail of a
+skip, and the "Skipped rules" registry is read by the user in all nine
+languages; the neighbouring fields (`struktura`, `zakres`, `rola`,
+`sufiks_pliku_wyniku`) carry a formula and nothing else, with a comment saying
+why. The verdict is now `groups=2 ≠ 1` or `match('') ≠ None`, the class is
+explained by the localised `diag.powod.wartosc`, and the prose moved to where
+the pack author reads it: the creator template and prompt, which now enumerate
+all five rejected shapes — derived by running the engine's own check, so a
+control removed from the engine removes its line from the prompt.
+
+**Five further findings, all of them in texts and gates rather than in the
+product.** The new creator-text gate caught eight injected mutations but knew
+only `Exception`, so a `SystemExit` anywhere on its path — `argparse` ends a
+process by CALLING, not by raising — gave zero output and exit 0, and inside the
+build would have ended `build_release.py` in "success" without PyInstaller or
+ISCC; that is the v18.32.0 class rebuilt, and it is now closed on both sides.
+The same gate reported full coverage over a field model that had silently shrunk
+when a reference file would not parse; it now says so out loud, per the rule
+that a gate degrades rather than quietly passes. The paragraph about reference
+models for a cipher was derived from disk in its first half and a literal in its
+second, so the first deployed substitution cipher would have made it contradict
+itself inside one sentence. Two examples had drifted from the packs they
+described (`fr: ç → s`, fixed to `ss` in v19.6 and still contradicting the
+neighbouring prompt; `it: ĵ → j`, fixed in this very release). And the target
+gate could not express a letter a pack is REQUIRED to keep out of its alphabet:
+German `ß` swells under `.upper()`, so `alfabet-puchnie` banishes it, and the
+oracle then called it foreign — no live hit in nine packs, a false alarm waiting
+for the tenth.
+
+**For the end user, two audible changes.** Foreign names now reach the
+synthesizer in a shape the chosen voice can actually pronounce, in every pack
+and every accent. And in the Polish pack, `ż` and `ź` finally get the same
+English spelling as `rz` already had: "morze" and "może" sound identical in
+Polish, yet the English accent used to render one as "mozhe" and the other as
+"moze". Both are "mozhe" now, which describes the facts rather than unifying
+them by force.
+
+### Planned or deferred
+
+* **No gate for "a new digraph is a debt of the pack's accents", and that is a
+  measurement rather than a convenience.** Asking mechanically whether a given
+  accent knows a given target, across nine packs, produced about 100 hits, of
+  which a handful matter: most multi-character targets are COMPOSITIONAL
+  (`ae ng on ss ts aa`) and fall apart harmlessly, and telling one case from the
+  other is done by ear. The class goes to the reviewer's checklist, per the
+  project rule that a gate is written when the property can be checked by
+  running something.
+* The 49 quotes ALMOST equal to a label stay baselined — unchanged since
+  v19.4.1, still a call for a native speaker (`fi` is the first candidate).
+* The four accent-audit notes introduced in v19.5.0 (`pl/finski`,
+  `pl/islandzki`) stand unchanged and deliberately.
+* `it: ķ ĸ → k` stays as it is, on purpose: every Italian spelling of [k] is
+  positional, so a fixed target would be wrong more often than the bare letter.
+* The tenth language pack remains the open invitation, and nothing in this
+  release requires Python for it.
 
 ---
 

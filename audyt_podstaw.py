@@ -345,6 +345,20 @@ def _sprawdz_znaki(kod: str, dane: dict, dodaj) -> None:
     # znalezisko `alfabet-brak`) zachowuje się tu jak dawniej: zostaje ASCII.
     alfabet = str(dane.get("alfabet") or "")
     litery_paczki = set(alfabet) | set(alfabet.lower())
+    # Litery PUCHNĄCE (`.upper()` dłuższy niż znak) mają ZAKAZ wstępu do
+    # `alfabet` — pilnuje tego `alfabet-puchnie` w tym samym module, bo
+    # zniszczyłyby indeksowanie pierścienia Cezara. Sam orakuł „co jest literą
+    # tej paczki" nie mógł ich więc wyrazić: niemieckie `ß` JEST literą
+    # niemiecką, a cel `ſ → ß` dostawał `znaki-cel-obcy` (audyt przed v19.7.0,
+    # dziś fałszywy alarm bez trafienia w dziewięciu paczkach, jutro problem
+    # dziesiątej paczki albo strojenia `de`). Paczka deklaruje je tam, gdzie
+    # `alfabet-puchnie` każe — po stronie `wzor` własnej tablicy — i to jest
+    # deklaracja wystarczająca.
+    litery_paczki |= {
+        str(w.get("wzor", "")) for w in znaki
+        if isinstance(w, dict) and len(str(w.get("wzor", ""))) == 1
+        and len(str(w.get("wzor", "")).upper()) > 1
+    }
     wzory: list[str] = []
     for poz, wpis in enumerate(znaki, start=1):
         if not isinstance(wpis, dict) or "wzor" not in wpis or "zamiana" not in wpis:
@@ -413,7 +427,7 @@ def _sprawdz_pokrycie_lacinki(kod: str, dane: dict, dodaj) -> None:
 
     Bramka NIE wymaga zgodności z `mrs.TABELA_LACINKI` co do celu zamiany —
     tabela jest domyślną dla nowej paczki, a transliteracja bywa fonetyką
-    (`fi: ā → aa`, `fr: ç → s`, `pl: ą → on`, a od v19.7 także `pl: š → sz`
+    (`fi: ā → aa`, `fr: ç → ss`, `pl: ą → on`, a od v19.7 także `pl: š → sz`
     i `ru: ž → ж`, bo cel wolno pisać własnym pismem paczki → `_sprawdz_znaki`).
     Pytanie brzmi „czy znak w ogóle wychodzi", nie „czy wychodzi dokładnie tak".
     """

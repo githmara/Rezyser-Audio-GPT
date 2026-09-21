@@ -113,16 +113,57 @@ def test_wzorzec_rozdzialow_niekompilowalny_pomija_plik():
     assert "re.error" in powody[0].szczegol, powody[0].szczegol
 
 
-def test_powod_bledu_wzorca_nazywa_trzy_ksztalty():
-    """Trzy ksztalty usterki maja ROZNE opisy - jeden komunikat nie uczy niczego."""
+@pytest.mark.parametrize("wzor", [
+    r"(?i)\n*(Prolog|Rozdzial \d+|Epilog|)\n*",   # wiszacy | w liscie nazw
+    r"(?i)\n*(Rozdzial \d+)?\n*",                 # caly wzorzec opcjonalny
+    "()",                                          # grupa pusta
+])
+def test_wzorzec_dopasowujacy_pustke_pomija_plik(wzor):
+    """„Pusty" to za waskie pytanie - tnie `re.split`, nie tekst pola (v19.7 audyt)."""
+    przepis, powody = _postprodukcja(regex_podzial_rozdzialow=wzor)
+    assert przepis is None, f"wzorzec matchujacy pustke wszedl do GUI: {wzor!r}"
+    assert [w.powod for w in powody] == [pr.POWOD_WARTOSC], powody
+
+
+def test_wzorzec_z_dwiema_grupami_pomija_plik():
+    """Obie strony umowy musza liczyc JEDNA enumeracja (kanon v19.2.0)."""
+    przepis, powody = _postprodukcja(
+        regex_podzial_rozdzialow=r"(?i)\n*(Prolog|Rozdzial (\d+)|Epilog)\n*")
+    assert przepis is None, "wzorzec z druga grupa wszedl do GUI"
+    assert [w.powod for w in powody] == [pr.POWOD_WARTOSC], powody
+    assert "groups=2 ≠ 1" in powody[0].szczegol, powody[0].szczegol
+
+
+def test_powod_bledu_wzorca_nazywa_kazdy_ksztalt():
+    """Piec ksztaltow usterki ma ROZNE opisy - jeden komunikat nie uczy niczego."""
     opisy = {
         "pusty": pr._blad_wzorca_rozdzialow(""),
         "zly": pr._blad_wzorca_rozdzialow("(Rozdzial"),
         "bez_grupy": pr._blad_wzorca_rozdzialow(r"Rozdzial \d+"),
+        "dwie_grupy": pr._blad_wzorca_rozdzialow(r"(Rozdzial (\d+))"),
+        "pustka": pr._blad_wzorca_rozdzialow(r"(Rozdzial \d+)?"),
     }
     assert all(opisy.values()), opisy
-    assert len(set(opisy.values())) == 3, opisy
+    assert len(set(opisy.values())) == 5, opisy
     assert pr._blad_wzorca_rozdzialow(r"(Rozdzial \d+)") == ""
+
+
+def test_werdykt_wzorca_nie_niesie_prozy():
+    """Ten tekst czyta user w DZIEWIECIU jezykach, wiec nie ma w nim zdania.
+
+    `szczegol` pominiecia idzie 1:1 do rejestru „Pominiete reguly"
+    (`gui_diagnostyka` -> `t("diag.szczegol", …)`), a klase tlumaczy klucz
+    `diag.powod.wartosc`. Sasiednie pola (`struktura`, `zakres`, `rola`,
+    `sufiks_pliku_wyniku`) sa symboliczne wlasnie dlatego - ta kontrola przez
+    caly cykl v19.7 byla jedynym wyjatkiem i wstrzykiwala tam angielska proze.
+    Wyjatkiem zostaje `re.error`, bo komunikat pisze Python, nie my.
+    """
+    for wzor in ("", r"Rozdzial \d+", r"(Rozdzial (\d+))", r"(Rozdzial \d+)?"):
+        werdykt = pr._blad_wzorca_rozdzialow(wzor)
+        assert werdykt, f"brak werdyktu dla {wzor!r}"
+        slowa = re.findall(r"[A-Za-z]{2,}", werdykt)
+        assert len(slowa) <= 2, (wzor, werdykt)
+        assert "—" not in werdykt, werdykt
 
 
 # ---------------------------------------------------------------------------
@@ -142,6 +183,36 @@ def test_split_bez_grupy_gubi_naglowki():
     assert "Rozdzial 1" not in bez_grupy, bez_grupy
     # Pusty wzorzec: kazdy znak staje sie osobnym, platnym „rozdzialem".
     assert len(re.split("", tekst)) == len(tekst) + 2
+
+
+def test_split_dopasowujacy_pustke_kosztuje_liniowo():
+    """Koszt wisi na DLUGOSCI tekstu, nie na liczbie rozdzialow - stad bramka.
+
+    Wzorzec z wiszacym `|` kompiluje sie, ma grupe i przechodzil trzy kontrole
+    z v19.7. `re.split` tnie wtedy miedzy kazdym znakiem, a iteracja tytulow
+    czyta `fragmenty[1::2]`, wiec liczba PLATNYCH wywolan rosnie razem z plikiem
+    - i nie ma jej jak przerwac (postprodukcja nie ma przycisku „Przerwij").
+    """
+    tekst = "Rozdzial 1\ntresc pierwsza\nRozdzial 2\ntresc druga\n"
+    zdrowy = re.split(r"(?i)\n*(Rozdzial \d+)\n*", tekst)
+    chory = re.split(r"(?i)\n*(Rozdzial \d+|)\n*", tekst)
+    assert len(zdrowy[1::2]) == 2, zdrowy
+    assert len(chory[1::2]) > len(tekst) // 2, len(chory[1::2])
+    assert pr._blad_wzorca_rozdzialow(r"(?i)\n*(Rozdzial \d+|)\n*") != ""
+
+
+def test_split_z_dwiema_grupami_przesuwa_dane():
+    """Krok `re.split` to `1 + liczba_grup`, a petla tytulow chodzi krokiem 2.
+
+    Rozjazd nie podnosi wyjatku - przesuwa dane: jako „naglowki" ida tresci
+    rozdzialow i gole numery, a przebieg jest normalnie platny. Gdy druga grupa
+    nie uczestniczy w dopasowaniu, `re.split` wstawia `None`.
+    """
+    tekst = "Rozdzial 1\ntresc pierwsza\nRozdzial 2\ntresc druga\n"
+    dwie = re.split(r"(?i)\n*(Rozdzial (\d+))\n*", tekst)
+    assert dwie[1::2] != ["Rozdzial 1", "Rozdzial 2"], dwie
+    z_alternatywa = re.split(r"(?i)\n*(Prolog|Rozdzial (\d+))\n*", "Prolog\ntresc\n")
+    assert None in z_alternatywa, z_alternatywa
 
 
 # ---------------------------------------------------------------------------
@@ -309,6 +380,40 @@ def test_pusty_zakres_spada_do_jezyka_interfejsu(paczki_tymczasowe):
     i18n.ustaw_jezyk("pl")
     wpisy = gd.przeskanuj_reguly_paczek([])
     assert [w.powod for w in wpisy] == [pr.POWOD_WARTOSC]
+
+
+def test_naglowek_z_niedopasowanej_grupy_nie_wywraca_iteracji(monkeypatch):
+    """Jedna grupa w alternatywie PRZECHODZI bramke i nadal daje `None`.
+
+    `(?:(Prolog)|Epilog)` ma dokladnie jedna grupe i nie matchuje pustki, wiec
+    loader przyjmuje go slusznie - ale przy trafieniu w „Epilog" grupa nie
+    uczestniczy w dopasowaniu i `re.split` wstawia `None`. Przed utwardzeniem
+    `.strip()` padal `AttributeError` W WATKU postprodukcji, gdzie siatka
+    `gui_rezyser._tytuly_worker` pokazuje go jako BLAD AI: uzytkownik dostawal
+    komunikat o modelu za ksztalt wlasnego pliku.
+    """
+    import core_llm as cl
+    import rezyser_ai as rai
+
+    wzor = r"(?i)\n*(?:(Prolog)|Epilog)\n*"
+    assert pr._blad_wzorca_rozdzialow(wzor) == "", "bramka odrzucila legalny wzorzec"
+    przepis, powody = _postprodukcja(regex_podzial_rozdzialow=wzor,
+                                     min_dlugosc_fragmentu=1)
+    assert przepis is not None, powody
+
+    wywolania = []
+
+    def _atrapa(_klient, **kwargi):
+        wywolania.append(kwargi)
+        return "Tytul", "end_turn"
+
+    monkeypatch.setattr(cl, "wywolaj_llm", _atrapa)
+    wynik = rai.nadaj_tytuly_rozdzialom(
+        object(), przepis, "Prolog\naaa bbb ccc\nEpilog\nddd eee fff\n")
+
+    assert not wynik.przerwano_bledem, wynik.blad
+    assert len(wynik.tytuly) == 2, wynik.tytuly
+    assert len(wywolania) == 2, wywolania
 
 
 def test_manager_daje_obu_skanom_ten_sam_zakres():

@@ -604,9 +604,10 @@ def _markery_szkicu(tekst: str) -> list[str]:
 def _blad_wzorca_rozdzialow(wzor: str) -> str:
     """Czy `regex_podzial_rozdzialow` da się użyć w ``re.split`` (v19.7)?
 
-    Zwraca techniczny opis usterki albo ``""``, gdy wzorzec jest w porządku.
-    Trzy kształty, każdy zmierzony na realnym ``re.split`` — i każdy MILCZĄCY
-    albo kłamliwy przed tą kontrolą:
+    Zwraca symboliczny werdykt usterki albo ``""``, gdy wzorzec jest w porządku.
+    PIĘĆ kształtów (trzy z etapu 8, dwa z audytu przed zamknięciem), każdy
+    zmierzony na realnym ``re.split`` — i każdy MILCZĄCY albo kłamliwy przed tą
+    kontrolą. Pierwsze trzy:
 
     * **pusty** — ``re.split("", tekst)`` tnie MIĘDZY KAŻDYM ZNAKIEM: 636-znakowy
       test dał 638 fragmentów, czyli 319 wywołań LLM po jednym znaku. Na realnej
@@ -621,20 +622,49 @@ def _blad_wzorca_rozdzialow(wzor: str) -> str:
       pozycje jako nagłówki: tytuły powstają dla przesuniętego fragmentu,
       nagłówki znikają, a przebieg jest normalnie płatny.
 
+    Dwa dalsze kształty dołożył audyt przed zamknięciem v19.7 — oba przechodziły
+    trzy kontrole wyżej, a dawały DOKŁADNIE te skutki, które ta bramka ma
+    likwidować:
+
+    * **dopasowujący pusty łańcuch** — „pusty" to za wąskie pytanie, bo tnie nie
+      tekst pola, tylko ``re.split``. Wiszący ``|`` w liście natywnych nazw
+      rozdziałów (``…|Epilog|``) albo cały wzorzec opcjonalny (``(…)?``)
+      kompiluje się, ma grupę i matchuje pustkę — zmierzone 101 wywołań LLM na
+      138 znakach, czyli koszt LINIOWY w długości narracji, z pustymi tytułami
+      i bez przycisku „Przerwij" w postprodukcji. Podpowiedź w GUI wprost prosi
+      autora o dostosowanie tej listy alternatyw, więc wiszący ``|`` to nie
+      egzotyka;
+    * **więcej niż jedna grupa** — obie strony umowy muszą liczyć JEDNĄ
+      enumeracją (kanon v19.2.0). ``re.split`` zwraca krok ``1 + liczba_grup``,
+      a `nadaj_tytuly_rozdzialom` chodzi krokiem 2: przy dwóch grupach dane
+      przesuwają się po cichu (jako „nagłówki" idą treści rozdziałów i gołe
+      numery), a gdy druga grupa nie uczestniczy w dopasowaniu — ``re.split``
+      wstawia ``None`` i wątek postprodukcji pada `AttributeError`, który
+      siatka `gui_rezyser._tytuly_worker` pokaże jako BŁĄD AI. Ujęcie numeru
+      rozdziału we własną grupę (``(Prolog|Rozdzial (\\d+)|Epilog)``) jest przy
+      tym wzorcu naturalnym odruchem.
+
     Niewypełniony szablon kreatora jest z tej kontroli WYŁĄCZONY przez
     wołającego (marker ``<FILL …>`` kompiluje się i ma zero grup): mówi o nim
     kanał :data:`POWOD_SZKIC`, a szkic ma prawo żyć (kanon v19.4).
+
+    **Werdykt jest SYMBOLICZNY, bez ani jednego zdania** — tak samo jak przy
+    ``sufiks_pliku_wyniku`` i ``struktura`` obok, i z tego samego powodu: ten
+    tekst ląduje w ``szczegol`` pominięcia, a rejestr „Pominięte reguły" czyta
+    user w każdym z dziewięciu języków (klasę tłumaczy klucz
+    ``diag.powod.wartosc``). Prozą tłumaczy tę klasę ten docstring oraz szablon
+    i prompt kreatora, czyli teksty, które czyta AUTOR paczki.
     """
     if not wzor.strip():
-        return ("empty pattern — `re.split` cuts between every character, "
-                "so every character becomes a paid chapter")
+        return "len=0"
     try:
         skompilowany = re.compile(wzor)
     except re.error as exc:
         return f"re.error: {exc}"
-    if skompilowany.groups < 1:
-        return ("no capturing group — `re.split` drops the headers instead of "
-                "returning them, so titles land on the wrong fragment")
+    if skompilowany.groups != 1:
+        return f"groups={skompilowany.groups} ≠ 1"
+    if skompilowany.match("") is not None:
+        return "match('') ≠ None"
     return ""
 
 

@@ -1417,7 +1417,17 @@ def main(args: argparse.Namespace | None = None) -> None:
         print(f"⚠️  audyt_kreatora not available ({exc}) — creator-text gate SKIPPED.")
         print()
     else:
-        wynik_kreator = audyt_kreatora.bramka()
+        try:
+            wynik_kreator = audyt_kreatora.bramka()
+        except SystemExit as exc:
+            # Bramka woła kod, który importuje moduły nazwane w prozie promptu.
+            # `sys.exit`/`parser.error` gdziekolwiek na tej ścieżce zakończyłby
+            # CAŁY build — i to `SystemExit(0)`, czyli „sukcesem", bez
+            # PyInstallera i bez ISCC (audyt przed v19.7.0, ta sama klasa co
+            # defekt bramki kontraktu z v18.32.0).
+            print(f"❌ FATAL: creator-text gate exited the process "
+                  f"(SystemExit: {exc.code}) instead of returning a verdict.")
+            sys.exit(1)
         if wynik_kreator.degradacja:
             print(f"⚠️  Creator-text gate ran with REDUCED coverage: "
                   f"{wynik_kreator.degradacja}.")

@@ -1,4 +1,8 @@
 {
+  "audyt_kreatora.py": [
+    "baner|znak-PL:ł|===== CREATOR-TEXT SYNC GATE (Manager Reguł) =====",
+    "cli:description|znak-PL:ł|Gate over the Manager Reguł creator texts: every template and prompt must describe the engine that actually exists. Chec"
+  ],
   "buduj_wielojezyczne_docs.py": [
     "baner|znak-PL:ęłśźż|# ============================================================================= # {…} # # Plik wygenerowany automatyczni"
   ],

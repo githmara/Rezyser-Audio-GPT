@@ -170,15 +170,32 @@ def _pola_modelu(docelowy: str) -> set[str]:
     wzor = (f"dictionaries/{SONDA_PACZKA}/{podfolder}/*.yaml" if podfolder
             else f"dictionaries/{SONDA_PACZKA}/podstawy.yaml")
     znalezione = False
+    nieczytelne: list[str] = []
     for plik in ROOT.glob(wzor):
         znalezione = True
         # `mrs._wczytaj_yaml` melduje awarię do wspólnego rejestru pominięć
         # i zwraca `{}` — ten sam loader, którego używa moduł szablonów, więc
         # bramka nie ma własnej, cichszej ścieżki czytania tych samych plików.
-        pola |= set(mrs._wczytaj_yaml(plik))
+        dane = mrs._wczytaj_yaml(plik)
+        if not dane:
+            # Plik JEST, ale nie da się z niego odczytać pól. Powód poszedł już
+            # na stdout przez rejestr pominięć, tyle że werdykt bramki i tak
+            # brzmiałby „every field … exists" — nad orakułem, który się po
+            # cichu skurczył (audyt przed v19.7.0). Kanon `WynikBramki`: bramka
+            # bywa DEGRADOWANA, nigdy „pominięta po cichu".
+            nieczytelne.append(plik.name)
+            continue
+        pola |= set(dane)
     if not znalezione:
         nota = (f"no reference file matched `{wzor}` — the field model for "
                 f"that folder came from code only")
+        if nota not in _NOTY_DEGRADACJI:
+            _NOTY_DEGRADACJI.append(nota)
+    if nieczytelne:
+        nota = (f"{len(nieczytelne)} reference file(s) matching `{wzor}` could "
+                f"not be read ({', '.join(sorted(nieczytelne))}) — the field "
+                f"model for that folder is incomplete, so `pole-nieznane` may "
+                f"be missing hits or reporting false ones")
         if nota not in _NOTY_DEGRADACJI:
             _NOTY_DEGRADACJI.append(nota)
     return pola
@@ -293,10 +310,24 @@ def zbierz() -> dict[str, list[str]]:
 
         try:
             pakiet = _pakiet(typ)
-        except Exception as exc:                               # noqa: BLE001
+        except KeyboardInterrupt:
+            raise
+        except BaseException as exc:                           # noqa: BLE001
             # KAŻDY wyjątek, bo chodzi o to, że typ nie da się w ogóle wystawić
             # użytkownikowi — a najczęstsza przyczyna (`ValueError` z
             # `str.format`) niczym się nie wyróżnia spośród innych.
+            #
+            # `BaseException`, nie `Exception` (audyt przed v19.7.0): komunikat
+            # fatalny bywa nie-`raise`. `argparse` kończy proces WYWOŁANIEM
+            # (`parser.error` → `SystemExit`), tak samo `sys.exit` w dowolnym
+            # module, który ta bramka importuje z prozy promptu — a `SystemExit`
+            # dziedziczy po `BaseException`. Zmierzone przed zmianą:
+            # `sys.exit(0)` na ścieżce renderu dawał ZERO wyjścia i exit 0,
+            # czyli bramkę nie do odróżnienia od czystego przebiegu, a w
+            # buildzie zakończyłby `build_release.py` „sukcesem" bez
+            # PyInstallera i ISCC. Ta sama klasa co defekt bramki kontraktu
+            # zamknięty w v18.32.0. `KeyboardInterrupt` przepuszczamy wyżej —
+            # przerwanie przez użytkownika nie jest werdyktem o tekstach.
             zglos("render-blad",
                   f"`zbuduj_wynik({typ!r})` raised {type(exc).__name__}: {exc} "
                   f"— this type cannot be produced in the GUI at all")

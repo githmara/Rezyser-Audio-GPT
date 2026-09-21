@@ -226,7 +226,7 @@ LISTA_TYPOW: list[str] = [
 #
 # TABELA JEST DOMYŚLNĄ, NIE PRZYMUSEM. Paczka ma prawo do świadomego
 # odstępstwa, bo transliteracja jest fonetyką, nie matematyką: `fi` czyta
-# `ā → aa` (długa samogłoska), `fr` czyta `ç → s`, `pl` romanizuje `ą → on`.
+# `ā → aa` (długa samogłoska), `fr` czyta `ç → ss`, `pl` romanizuje `ą → on`.
 # Bramka pokrycia pyta „czy znak w ogóle wychodzi z pre-passu", nie „czy
 # wychodzi dokładnie tak jak tutaj".
 #
@@ -615,6 +615,15 @@ def _szyfry_wdrozone() -> str:
     strukturalnych („nie bierz ich za wzór, wszystkie są algorytmiczne"),
     więc zdanie musi znać STAN DYSKU, a nie stan z dnia, w którym je
     napisano — pierwszy wdrożony szyfr zamian ma je unieważnić sam.
+
+    **Funkcja oddaje CAŁĄ radę, nie jej pierwszą połowę.** Audyt przed
+    v19.7.0 zmierzył, że do tego wyliczenia doklejony był w szablonie
+    literał („they have an `algorytm:` field and do NOT contain a `zamiany:`
+    list… The only files using that format are ACCENTS"), więc po wdrożeniu
+    pierwszego szyfru zamian prompt mówiłby w jednym zdaniu, że ten plik JEST
+    modelem struktury i że NIM NIE JEST — a tuż po wymienieniu go z nazwy, że
+    żaden szyfr tego formatu nie używa. Obie gałęzie mają odtąd własne
+    brzmienie i własne wskazanie modelu.
     """
     algo, zamiany = set(), set()
     for plik in sorted(_DICT_DIR.glob("*/szyfry/*.yaml")) if _DICT_DIR.is_dir() else []:
@@ -626,14 +635,26 @@ def _szyfry_wdrozone() -> str:
         if not dane:
             continue
         (algo if dane.get("algorytm") else zamiany).add(plik.stem)
+    ogon = ("The only files in the project using the `kategoria` + `zamiany:` "
+            "list format are ACCENTS (`akcenty/*.yaml`) — and those are your "
+            "STRUCTURE model for this cipher.")
     if not algo and not zamiany:
-        return "the ciphers deployed in the packs"
-    czesci = [f"all {len(algo)} cipher(s) deployed in the packs "
-              f"({', '.join(sorted(algo))}) are ALGORITHMIC ciphers"]
-    if zamiany:
-        czesci.append(f"while {len(zamiany)} already use the `zamiany:` branch "
-                      f"({', '.join(sorted(zamiany))}) and ARE a structure model")
-    return ", ".join(czesci)
+        return ("no cipher is deployed in the packs yet, so there is nothing "
+                f"to copy a structure from. {ogon}")
+    if not zamiany:
+        return (f"all {len(algo)} cipher(s) deployed in the packs "
+                f"({', '.join(sorted(algo))}) are ALGORITHMIC — they have an "
+                f"`algorytm:` field and do NOT contain a `zamiany:` list, so "
+                f"do NOT take them as a structure model. {ogon}")
+    return (f"{len(algo)} of the ciphers deployed in the packs "
+            f"({', '.join(sorted(algo))}) are ALGORITHMIC — they have an "
+            f"`algorytm:` field and no `zamiany:` list, so they are NOT a "
+            f"structure model for you. But {len(zamiany)} "
+            f"{'already uses' if len(zamiany) == 1 else 'already use'} the "
+            f"`zamiany:` branch ({', '.join(sorted(zamiany))}) and "
+            f"{'IS' if len(zamiany) == 1 else 'ARE'} the right model — copy "
+            f"the structure from the closest one, and fall "
+            f"back to ACCENTS (`akcenty/*.yaml`) only if none fits.")
 
 
 def _regexy_rozdzialow(wciecie: str = "     ") -> str:
@@ -664,6 +685,51 @@ def _regexy_rozdzialow(wciecie: str = "     ") -> str:
             if wzor:
                 linie.append(f"{wciecie}- {folder.name.upper()}: `{wzor}`")
     return chr(10).join(linie) or f"{wciecie}- (no deployed pack to read it from)"
+
+
+# Sondy dla :func:`_ksztalty_odrzucane_wzorca` — po jednej na kontrolę
+# w `przepisy_rezysera._blad_wzorca_rozdzialow`. Opis jest po naszej stronie,
+# WERDYKT po stronie silnika: zdjęcie kontroli usuwa wiersz z promptu samo.
+_SONDY_WZORCA = (
+    (r"", "an EMPTY pattern — `re.split` then cuts between every character, "
+          "i.e. one paid AI call per character of the project file"),
+    (r"(Rozdzial", "a pattern that DOES NOT COMPILE — without this check the "
+                   "`re.error` surfaces in the post-production thread, where "
+                   "the safety net reports it as an AI error"),
+    (r"Rozdzial \d+", "a pattern with NO capturing group — `re.split` keeps the "
+                      "headers only when they are captured, so every title "
+                      "would describe the wrong fragment"),
+    (r"(Rozdzial (\d+))",
+     "a pattern with MORE THAN ONE capturing group — `re.split` returns one "
+     "entry per group, while the chapter loop reads every second entry as a "
+     "header; wrap everything except the header itself in `(?:…)`"),
+    (r"(Rozdzial \d+)?",
+     "a pattern that can MATCH THE EMPTY STRING — a trailing `|` in the list "
+     "of chapter names, or the whole pattern made optional, does this, and the "
+     "cost is the same as for an empty pattern"),
+)
+
+
+def _ksztalty_odrzucane_wzorca(wciecie: str = "   ") -> str:
+    """Kształty `regex_podzial_rozdzialow`, które loader ODRZUCA — sprawdzone wykonaniem.
+
+    Prompt nie powtarza tego, co kod umie rozstrzygnąć: każda sonda idzie przez
+    :func:`przepisy_rezysera._blad_wzorca_rozdzialow`, więc wiersz pojawia się
+    wyłącznie wtedy, gdy kontrola naprawdę stoi w silniku. Ta sama klasa co
+    :func:`_regexy_rozdzialow`.
+
+    **Powód istnienia jest zmierzony.** Do audytu przed v19.7.0 oba teksty
+    kreatora mówiły wyłącznie „it MUST contain a capturing group", a silnik
+    odrzucał wtedy trzy kształty — a po audycie pięć. Autor paczki, który
+    czytał zdanie dosłownie, pisał naturalne ``(Prolog|Rozdział (\\d+)|Epilog)``
+    i dostawał plik POMINIĘTY przez silnik, bez zdania o tym w tekście, który
+    właśnie przeczytał.
+    """
+    linie = []
+    for sonda, opis in _SONDY_WZORCA:
+        if pr._blad_wzorca_rozdzialow(sonda):
+            linie.append(f"{wciecie}- {opis}.")
+    return chr(10).join(linie) or f"{wciecie}- (the loader rejects nothing here)"
 
 
 def _sklad_rezysera(jezyk_bazowy: str) -> str:
@@ -1178,11 +1244,7 @@ a „pure replacements" cipher file inside the project tree.
   pre-pass from `podstawy.yaml::polskie_znaki` and the full TTS cleaning with
   number normalization. Both are unconditional on the cipher path — the four
   pipeline flags of an accent file are not read here at all.
-- CRITICAL about reference models: {szyfry_wdrozone} — they have an
-  `algorytm:` field and do NOT contain a `zamiany:` list, so do NOT take
-  them as a structure model. The only files in
-  the project using the `kategoria` + `zamiany:` list format are ACCENTS
-  (`akcenty/*.yaml`) — and those are your STRUCTURE model for this cipher.
+- CRITICAL about reference models: {szyfry_wdrozone}
 - Deployed packs (scanned from `dictionaries/`): {inne_paczki}. Their
   `cezar.yaml` files are useful ONLY as a model of the LANGUAGE STYLE of the metadata
   (native label/description/comments), not of the structure.
@@ -1622,6 +1684,7 @@ def szablon_postprodukcja(id_pliku: str, etykieta: str,
     tok_rozdzial = pr.MAX_TOKENS_PER_ROZDZIAL_DOMYSLNE
     tok_calosc = pr.MAX_TOKENS_CALOSC_DOMYSLNE
     regexy = _regexy_rozdzialow("#   ")
+    ksztalty_wzorca = _ksztalty_odrzucane_wzorca("#   ")
     temp_min, temp_max = pr.TEMPERATURA_MIN, pr.TEMPERATURA_MAX
     return f"""# -----------------------------------------------------------------------------
 #  <FILL NATIVELY in {natywna_baza}: file header, e.g. „NACHBEARBEITUNG"
@@ -1685,12 +1748,11 @@ prompt_uzytkownika_szablon: |
 
 # --- Project-file iteration parameters ---
 # Regex matching chapter headers. Adapt the PATTERN to the language.
-# It MUST contain a capturing group around the header itself: the engine
-# splits with `re.split`, which returns the headers only when they are
-# CAPTURED. A pattern without a group (or an empty one) makes the loader skip
-# the file — without a group the titles would land on the wrong fragment, and
-# an empty pattern cuts between every character, i.e. one paid AI call per
-# character of the project file.
+# It MUST contain EXACTLY ONE capturing group, around the header itself: the
+# engine splits with `re.split`, which returns the headers only when they are
+# CAPTURED, and the chapter loop then reads every second entry as a header.
+# The loader SKIPS the whole file for any of these shapes:
+{ksztalty_wzorca}
 # The patterns the deployed packs really use (read from their own
 # `postprod_tytuly.yaml`, so this list cannot drift from the packs):
 {regexy}
@@ -1744,6 +1806,7 @@ def prompt_postprodukcja(id_pliku: str, etykieta: str,
     tok_rozdzial = pr.MAX_TOKENS_PER_ROZDZIAL_DOMYSLNE
     tok_calosc = pr.MAX_TOKENS_CALOSC_DOMYSLNE
     regexy = _regexy_rozdzialow("     ")
+    ksztalty_wzorca = _ksztalty_odrzucane_wzorca("   ")
     temp_min, temp_max = pr.TEMPERATURA_MIN, pr.TEMPERATURA_MAX
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
@@ -1846,11 +1909,11 @@ a postproduction named **{etykieta}**.
      `postprod_streszczenie.yaml` rather than inventing one.
 6. **`regex_podzial_rozdzialow:`** (per_rozdzial only) matched to how
    chapters are named in the project .txt files in {natywna_baza}.
-   It MUST capture the header in a group — `re.split` keeps headers only
-   when they are captured, and since v19.7 a group-less or empty pattern
-   makes the loader skip the file (without a group every title would
-   describe the wrong fragment; with an empty one every character of the
-   project becomes a paid AI call).
+   It MUST capture the header in EXACTLY ONE group — `re.split` keeps headers
+   only when they are captured, and the chapter loop reads every second entry
+   as a header. Since v19.7 the loader SKIPS the whole file for any of these
+   shapes:
+{ksztalty_wzorca}
    Patterns per language:
 {regexy}
 7. `min_dlugosc_fragmentu` (per_rozdzial; typically 50 chars — shorter
@@ -1978,7 +2041,8 @@ polskie_znaki:
   #        ru: `š → ш`, `ž → ж`, `č → ч`
   #        fi: `ā → aa` (a long vowel Finnish really writes; Finnish has no
   #            ž/š of its own, so THERE the ASCII default is the honest answer)
-  #        fr: `ç → s`
+  #        fr: `ç → ss` (not `s`: a German `s` between vowels reads /z/,
+  #            and this one table serves every accent of the pack)
   #     Why it pays: the pre-pass runs BEFORE every accent of the pack, so
   #     `š → sz` hands the English accent a digraph it already has a rule for
   #     (`sz → sh`) and the Russian accent one it maps to `ш`. Flattening to
@@ -2036,7 +2100,8 @@ polskie_znaki:
   #     keeps `œ → oe` while `ø ö ő` do take `eu`.
   #   * YOUR ALPHABET IS ALSO THE CAESAR RING. An ASCII target outside it
   #     passes the gate and still leaves that letter in clear text inside the
-  #     cryptogram (`it: ĵ → j`, in an alphabet of 21 letters).
+  #     cryptogram (until v19.7 the `it` pack had `ĵ → j` in an alphabet
+  #     of 21 letters; it now writes `gi`).
   # Expect to think hard here: settling these pairs for a new language is
   # a series of compromises, not a lookup.
   #
@@ -2208,7 +2273,8 @@ presence/absence of diacritics such as ä/ö/ç/ß).
      should be spelled the native way — `pl: š → sz, ž → ż, č → cz, ř → rz`;
      `ru: š → ш, ž → ж, č → ч`; `fi: ā → aa` (a long vowel Finnish really
      writes — Finnish has no ž/š of its own, so there the ASCII default is
-     the honest answer); `fr: ç → s`.
+     the honest answer); `fr: ç → ss` (not `s` — a German `s` between
+     vowels reads /z/, and this one table serves every accent at once).
      This is not cosmetics. The pre-pass runs BEFORE the `zamiany` list of
      every accent, so `š → sz` hands the English accent a digraph it already
      maps (`sz → sh`) and the Russian accent one it maps to `ш`; measured on
@@ -2258,7 +2324,8 @@ presence/absence of diacritics such as ä/ö/ç/ß).
      `œ → oe`), and it must stand in your `alfabet` if the Caesar cipher
      is to shift it at all — an ASCII target outside that string passes
      the boundary gate and still comes out of the cryptogram in clear
-     text (`it: ĵ → j`, alphabet of 21 letters). Expect to think hard;
+     text (until v19.7 the `it` pack had `ĵ → j` in its 21-letter
+     alphabet; it now writes `gi`). Expect to think hard;
      these pairs are compromises, not lookups.
    Do NOT delete a pair merely because {natywna} „does not use" that letter.
    Loanwords, quotations and foreign names arrive in real text, and every
