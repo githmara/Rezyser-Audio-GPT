@@ -50,6 +50,7 @@ Moduł NIE zależy od wxPython ani od żadnego SDK modelu (OpenAI/Anthropic)
 from __future__ import annotations
 
 import os
+import re
 import sys
 import threading
 from dataclasses import dataclass, field
@@ -114,10 +115,14 @@ ROLA_PAMIEC_DLUGOTRWALA = "pamiec_dlugotrwala"
 # w `if`-ach (`gui_rezyser` dla `format_wyjscia`, `core_rezyser.wyliczy_markery`
 # i panel struktury dla `struktura`) oraz w literałach szablonu i promptu
 # Managera Reguł. Cztery egzemplarze jednej prawdy, z czego dwa poza kodem —
-# dokładnie ten układ, w którym opis przeżywa zmianę dispatchu. Stałe są
-# DEKLARACJĄ, nie walidacją: loader ich nie egzekwuje (literówka dalej
-# degraduje do zachowania domyślnego), pilnuje ich natomiast `audyt_kreatora`
-# po stronie tekstów kreatora.
+# dokładnie ten układ, w którym opis przeżywa zmianę dispatchu. Od v19.7 są
+# też WALIDACJĄ: wartość spoza zbioru pomija plik (:data:`POWOD_WARTOSC`),
+# dokładnie jak przy `zakres`. Do v19.6 były samą deklaracją, a literówka
+# schodziła cicho do zachowania domyślnego — zmierzone na `struktura:
+# akty_scen`: plik wczytywał się BEZ ani jednego zgłoszenia, a markery pamięci
+# spłaszczały się z zagnieżdżenia akt→scena do płaskiej listy nagłówków. Tryb
+# wyglądał na sprawny i mylił się w jednym miejscu, którego użytkownik nie ma
+# jak powiązać z literówką. Teksty kreatora pilnuje osobno `audyt_kreatora`.
 FORMATY_WYJSCIA: tuple[str, ...] = ("tekst", "skrypt_json", "burza_json")
 STRUKTURY: tuple[str, ...] = ("rozdzialy", "akty_sceny", "brak")
 
@@ -143,6 +148,22 @@ SUFIKS_PAMIECI_MIEDZYNARODOWY = "_overview"
 # to jedna linia; raport całościowy to kilka stron).
 MAX_TOKENS_PER_ROZDZIAL_DOMYSLNE = 256
 MAX_TOKENS_CALOSC_DOMYSLNE = 8_000
+
+# Domyślny budżet próbki rozdziału, gdy postprodukcja `per_rozdzial` nie podaje
+# `max_dlugosc_probki:` (wartość wszystkich dziewięciu shippowanych paczek).
+# Do v19.6 brak pola dawał `0`, a `tresc[:0]` to PUSTY łańcuch — model dostawał
+# sam nagłówek i wymyślał tytuł rozdziału, którego nie przeczytał. Wpadka
+# możliwa tylko w YAML-u pisanym ręcznie (szablon kreatora pole ma), ale
+# milcząca i płatna: przebieg kosztuje tyle samo, co przebieg poprawny.
+MAX_DLUGOSC_PROBKI_DOMYSLNA = 6_000
+
+# Dozwolony zakres `temperatura:`. Wspólny mianownik obu gałęzi providerów
+# (Anthropic 0–1, OpenAI-compat 0–2), więc bierzemy szerszy — zawężanie do 1
+# odrzucałoby plik, który na endpoincie usera działa. Poza tym zakresem API
+# odpowiada 400 przy KAŻDYM wywołaniu, a użytkownik widzi błąd sieciowy,
+# nie literówkę (`temperatura: 85` zamiast `0.85` to jeden zgubiony znak).
+TEMPERATURA_MIN = 0.0
+TEMPERATURA_MAX = 2.0
 
 # Znaki zakazane w ``sufiks_pliku_wyniku:`` — sufiks trafia wprost do nazwy
 # pliku ``skrypty/<nazwa><sufiks>.txt``, więc separatory ścieżek i znaki
@@ -207,7 +228,10 @@ class PrzepisRezysera:
         kolejnosc:        Sortowanie wyświetlania (rosnąco).
         model:            Nazwa modelu AI (np. ``"claude-sonnet-5"``);
                           pominięte w YAML → :data:`MODEL_DOMYSLNY` (Anthropic).
-        temperatura:      Parametr ``temperature`` wywołania API.
+        temperatura:      Parametr ``temperature`` wywołania API. Dozwolone
+                          :data:`TEMPERATURA_MIN`–:data:`TEMPERATURA_MAX`;
+                          poza zakresem → plik pominięty (każde wywołanie tego
+                          przepisu kończyłoby się błędem 400).
         jezyk_odpowiedzi: Rzeczownik w miejscowniku (``"polsku"``,
                           ``"angielsku"``) wstawiany jako placeholder
                           ``{jezyk_odpowiedzi}`` w promptach.
@@ -251,12 +275,19 @@ class PrzepisRezysera:
                           ``{probka}``.
         regex_podzial_rozdzialow:
                           (tylko postprodukcja tytułów) Regex dzielący
-                          plik projektu na nagłówki + treści.
+                          plik projektu na nagłówki + treści. MUSI mieć grupę
+                          przechwytującą (``re.split`` inaczej zgubi nagłówki)
+                          i nie może być pusty; niekompilowalny, pusty albo
+                          bezgrupowy → plik pominięty
+                          (:func:`_blad_wzorca_rozdzialow`).
         min_dlugosc_fragmentu:
                           (tylko postprodukcja) Fragmenty krótsze → skip.
         max_dlugosc_probki:
                           (tylko postprodukcja) Ile znaków próbki
                           przekazujemy modelowi z każdego rozdziału.
+                          Pominięte/0 przy zakresie ``per_rozdzial`` →
+                          :data:`MAX_DLUGOSC_PROBKI_DOMYSLNA` (``0`` znaczyłoby
+                          pustą próbkę, czyli tytuł z niczego).
         etykieta_fragment_zbyt_krotki:
                           (tylko postprodukcja) Napis zastępczy gdy
                           rozdział jest za krótki by generować tytuł.
@@ -412,6 +443,7 @@ POWOD_KSZTALT   = "ksztalt"     # plik parsuje się, ale nie do mapy (skalar/lis
 POWOD_BRAK_POL  = "brak_pol"    # brak wymaganych `id` / `etykieta` / `kategoria`
 POWOD_KATEGORIA = "kategoria"   # `kategoria:` poza zbiorem rozumianym przez silnik
 POWOD_ZAKRES    = "zakres"      # `zakres:` poza zbiorem (postprodukcja)
+POWOD_WARTOSC   = "wartosc"     # pole steruje silnikiem, a wartości nie da się użyć
 POWOD_SUFIKS    = "sufiks"      # niedozwolone znaki w `sufiks_pliku_wyniku`
 POWOD_POLE      = "pole"        # zły typ/wartość pola (TypeError/ValueError)
 POWOD_DUPLIKAT  = "duplikat"    # dwa pliki o tym samym `id` w jednej kategorii
@@ -552,6 +584,60 @@ _ZAKRES_LEGACY: dict[str, str] = {
 # =============================================================================
 # Wczytywanie YAML-i
 # =============================================================================
+def _markery_szkicu(tekst: str) -> list[str]:
+    """``manager_regul_szablony.znajdz_markery_szkicu`` przez leniwy import.
+
+    Import siedzi w ciele funkcji, bo `manager_regul_szablony` importuje TEN
+    moduł (czyta :data:`FORMATY_WYJSCIA` i :data:`STRUKTURY` do szablonów
+    kreatora), więc import w drugą stronę na poziomie modułu byłby cyklem.
+    Dla analizy PyInstallera to nadal import statyczny (zmierzone w 18.24), więc
+    paczka release nic nie traci. Wzorzec markera zostaje w JEDNYM miejscu —
+    tam, gdzie mieszkają szablony, które go wypisują.
+    """
+    try:
+        import manager_regul_szablony as mrs
+    except ImportError:  # pragma: no cover — moduł jest w paczce i w repo
+        return []
+    return mrs.znajdz_markery_szkicu(tekst)
+
+
+def _blad_wzorca_rozdzialow(wzor: str) -> str:
+    """Czy `regex_podzial_rozdzialow` da się użyć w ``re.split`` (v19.7)?
+
+    Zwraca techniczny opis usterki albo ``""``, gdy wzorzec jest w porządku.
+    Trzy kształty, każdy zmierzony na realnym ``re.split`` — i każdy MILCZĄCY
+    albo kłamliwy przed tą kontrolą:
+
+    * **pusty** — ``re.split("", tekst)`` tnie MIĘDZY KAŻDYM ZNAKIEM: 636-znakowy
+      test dał 638 fragmentów, czyli 319 wywołań LLM po jednym znaku. Na realnej
+      narracji to rachunek za dziesiątki tysięcy wywołań i żaden z nich nie jest
+      rozdziałem. Pole pomija się łatwo: postprodukcję `per_rozdzial` da się
+      napisać ręcznie bez ani jednej wzmianki o wzorcu;
+    * **niekompilowalny** — ``re.error`` leci dopiero z wątku postprodukcji,
+      gdzie siatka bezpieczeństwa `gui_rezyser._tytuly_worker` pokazuje go jako
+      BŁĄD AI. Użytkownik dostaje komunikat o modelu za usterkę swojego pliku;
+    * **bez grupy przechwytującej** — ``re.split`` zwraca wtedy same treści
+      MIĘDZY nagłówkami, a `rezyser_ai.nadaj_tytuly_rozdzialom` czyta nieparzyste
+      pozycje jako nagłówki: tytuły powstają dla przesuniętego fragmentu,
+      nagłówki znikają, a przebieg jest normalnie płatny.
+
+    Niewypełniony szablon kreatora jest z tej kontroli WYŁĄCZONY przez
+    wołającego (marker ``<FILL …>`` kompiluje się i ma zero grup): mówi o nim
+    kanał :data:`POWOD_SZKIC`, a szkic ma prawo żyć (kanon v19.4).
+    """
+    if not wzor.strip():
+        return ("empty pattern — `re.split` cuts between every character, "
+                "so every character becomes a paid chapter")
+    try:
+        skompilowany = re.compile(wzor)
+    except re.error as exc:
+        return f"re.error: {exc}"
+    if skompilowany.groups < 1:
+        return ("no capturing group — `re.split` drops the headers instead of "
+                "returning them, so titles land on the wrong fragment")
+    return ""
+
+
 def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     """Konwertuje słownik z YAML na :class:`PrzepisRezysera`.
 
@@ -611,6 +697,25 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     struktura = str(data.get("struktura", "")).strip().lower()
     if not struktura:
         struktura = _STRUKTURA_LEGACY.get(str(id_), "brak")
+
+    # Obie osie dispatchu trybu sprawdzamy wtedy, gdy silnik je CZYTA, czyli
+    # dla `kategoria: tryb` (postprodukcja nie dispatchuje po żadnej z nich —
+    # pomijanie jej działającego narzędzia za martwe pole byłoby hałasem).
+    # Literówka zmienia tu ŚCIEŻKĘ, nie wygląd, więc odpowiedź jest ta sama,
+    # co przy `zakres`: plik pominięty z powodem, zamiast trybu, który pracuje
+    # inaczej, niż mówi jego własny YAML.
+    if kategoria == KATEGORIA_TRYB:
+        for pole, wartosc, dozwolone in (
+            ("format_wyjscia", format_wyjscia, FORMATY_WYJSCIA),
+            ("struktura", struktura, STRUKTURY),
+        ):
+            if wartosc not in dozwolone:
+                zglos_pominiecie(
+                    sciezka, POWOD_WARTOSC,
+                    f"{pole}={wartosc!r} ∉ "
+                    f"{{{', '.join(repr(w) for w in dozwolone)}}}",
+                )
+                return None
 
     # Pola generalizacji postprodukcji (v18.12). `zakres` wybiera ścieżkę
     # silnika (iteracja vs jeden call z całym plikiem), więc literówka
@@ -687,13 +792,43 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
                 if zakres == ZAKRES_PER_ROZDZIAL
                 else MAX_TOKENS_CALOSC_DOMYSLNE
             )
+        # Temperatura jedzie do KAŻDEGO wywołania tego przepisu, więc wartość
+        # spoza zakresu providera nie psuje jednej funkcji, tylko cały tryb —
+        # i to komunikatem o API, nie o pliku.
+        temperatura = float(data.get("temperatura", 0.85))
+        if not TEMPERATURA_MIN <= temperatura <= TEMPERATURA_MAX:
+            zglos_pominiecie(
+                sciezka, POWOD_WARTOSC,
+                f"temperatura={temperatura!r} ∉ "
+                f"<{TEMPERATURA_MIN}, {TEMPERATURA_MAX}>",
+            )
+            return None
+
+        # Wzorzec podziału i budżet próbki czyta WYŁĄCZNIE iteracja
+        # `per_rozdzial` (`rezyser_ai.nadaj_tytuly_rozdzialom`), więc tam je
+        # sprawdzamy. Szkic kreatora zostaje żywy — o nim mówi `POWOD_SZKIC`.
+        regex_podzial_rozdzialow = str(data.get("regex_podzial_rozdzialow", ""))
+        max_dlugosc_probki = int(data.get("max_dlugosc_probki") or 0)
+        if kategoria == KATEGORIA_POSTPROD and zakres == ZAKRES_PER_ROZDZIAL:
+            if not _markery_szkicu(regex_podzial_rozdzialow):
+                usterka = _blad_wzorca_rozdzialow(regex_podzial_rozdzialow)
+                if usterka:
+                    zglos_pominiecie(
+                        sciezka, POWOD_WARTOSC,
+                        f"regex_podzial_rozdzialow="
+                        f"{regex_podzial_rozdzialow!r} | {usterka}",
+                    )
+                    return None
+            if max_dlugosc_probki <= 0:
+                max_dlugosc_probki = MAX_DLUGOSC_PROBKI_DOMYSLNA
+
         return PrzepisRezysera(
             id=str(id_),
             etykieta=str(etykieta),
             kategoria=str(kategoria),
             kolejnosc=int(data.get("kolejnosc", 0)),
             model=str(data.get("model", MODEL_DOMYSLNY)),
-            temperatura=float(data.get("temperatura", 0.85)),
+            temperatura=temperatura,
             jezyk_odpowiedzi=str(data.get("jezyk_odpowiedzi", "polsku")),
             kod_jezyka=str(data.get("kod_jezyka", "")).strip().lower(),
             prompt_systemowy=str(data.get("prompt_systemowy", "")),
@@ -712,9 +847,9 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
             doklejka_celu_sceny=str(data.get("doklejka_celu_sceny", "")),
             prompt_uzytkownika_szablon=str(
                 data.get("prompt_uzytkownika_szablon", "")),
-            regex_podzial_rozdzialow=str(data.get("regex_podzial_rozdzialow", "")),
+            regex_podzial_rozdzialow=regex_podzial_rozdzialow,
             min_dlugosc_fragmentu=int(data.get("min_dlugosc_fragmentu", 0)),
-            max_dlugosc_probki=int(data.get("max_dlugosc_probki", 0)),
+            max_dlugosc_probki=max_dlugosc_probki,
             etykieta_fragment_zbyt_krotki=str(
                 data.get("etykieta_fragment_zbyt_krotki", "")),
             etykieta_bled_brak_kredytow=str(

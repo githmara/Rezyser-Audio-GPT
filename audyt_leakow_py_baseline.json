@@ -139,6 +139,7 @@
   ],
   "przepisy_rezysera.py": [
     "POSSIBLE|lingua:PL|id, etykieta, kategoria",
+    "POSSIBLE|lingua:PL|regex_podzial_rozdzialow={…} | {…}",
     "POSSIBLE|lingua:PL|sufiks_pliku_wyniku={…} | {…}"
   ],
   "refresh_languages.py": [

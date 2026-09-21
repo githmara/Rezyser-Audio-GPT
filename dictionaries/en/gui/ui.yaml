@@ -125,6 +125,7 @@ diag:
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
     szkic: "The file is an unfinished template from the Rule Manager wizard – it still\ncontains \"<FILL …>\" markers in places meant to be completed by an AI agent\nor a linguist (the details show their count and the beginning of the first\none). The rule WORKS, so it shows up in the application's lists, but it does\nsomething different from what you intend: the accent template has only two\nsample replacements, and the description that anyone who receives this file\nwill read is an English instruction for the model. Finish the file – the\nwizard's prompt does this for you – or delete it."
+    wartosc: "The field listed in the details has a value that the engine cannot use,\nand it is this value that determines what happens to your text. The file was skipped\nso that the mode or tool would not behave differently than you intend.\nThe most common cause is a typo: the details contain a value,\nand next to it the set or range that the engine expects."
 main:
   menu:
     narzedzia: "&Tools"

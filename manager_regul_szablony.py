@@ -1254,6 +1254,7 @@ def szablon_tryb_rezysera(id_pliku: str, etykieta: str,
     model_domyslny = pr.MODEL_DOMYSLNY
     struktury = _csv_kodu(pr.STRUKTURY)
     formaty = _csv_kodu(pr.FORMATY_WYJSCIA)
+    temp_min, temp_max = pr.TEMPERATURA_MIN, pr.TEMPERATURA_MAX
     return f"""# -----------------------------------------------------------------------------
 #  <FILL NATIVELY in {natywna_baza}: file header, e.g. „MODUS HÖRBUCH"
 #   (DE) / „MODALITÀ AUDIOLIBRO" (IT) / „РЕЖИМ АУДИОКНИГА" (RU)>
@@ -1297,10 +1298,16 @@ kolejnosc: 40
 #   So: if this mode emits JSON, pick skrypt_json/burza_json (NOT tekst), and
 #   DOUBLE the braces of any literal JSON example in prompt_systemowy — see
 #   the system-prompt note below.
+# A value OUTSIDE those two sets is NOT a soft fallback: since v19.7 the loader
+# SKIPS the whole file and says why in the Rule Manager report („Reservations
+# about rules"). Copy the values above character for character.
 struktura: rozdzialy
 format_wyjscia: tekst
 
 # --- AI model parameters ---
+# temperatura: the engine accepts {temp_min}–{temp_max}; a value outside that
+# range skips the file (a lost dot, `85` instead of `0.85`, would otherwise
+# turn every call of this mode into an API error).
 model: {model_domyslny}
 temperatura: 0.85
 jezyk_odpowiedzi: {natywny_jezyk_odp}
@@ -1377,6 +1384,7 @@ def prompt_tryb_rezysera(id_pliku: str, etykieta: str,
     model_domyslny = pr.MODEL_DOMYSLNY
     struktury = _csv_kodu(pr.STRUKTURY)
     formaty = _csv_kodu(pr.FORMATY_WYJSCIA)
+    temp_min, temp_max = pr.TEMPERATURA_MIN, pr.TEMPERATURA_MAX
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project. You have file tools (read / write / edit / glob / grep — whatever
@@ -1442,9 +1450,12 @@ a creative AI mode named **{etykieta}** (id stem `{id_pliku}` — must be NEW).
    REUSE existing values unless you are also adding the matching code (then
    you need source access). Both lists are read from
    `przepisy_rezysera.STRUKTURY` / `.FORMATY_WYJSCIA`, so they cannot drift
-   from the dispatch.
+   from the dispatch. Since v19.7 the loader ENFORCES them: a value outside
+   the set skips the whole file (the user sees the reason in the rules
+   report), so do not invent a value and do not translate these two.
 2. AI model parameters: `model: {model_domyslny}`,
-   `temperatura` (0.7-0.9 for literary, 0.5 for scripting),
+   `temperatura` (0.7-0.9 for literary, 0.5 for scripting; the engine
+   accepts {temp_min}-{temp_max} and skips the file outside that range),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}` (already matched to the pack),
    `zapis_do_pliku: true`.
 3. **`prompt_systemowy:`** appended to every AI call. It MUST contain
@@ -1611,6 +1622,7 @@ def szablon_postprodukcja(id_pliku: str, etykieta: str,
     tok_rozdzial = pr.MAX_TOKENS_PER_ROZDZIAL_DOMYSLNE
     tok_calosc = pr.MAX_TOKENS_CALOSC_DOMYSLNE
     regexy = _regexy_rozdzialow("#   ")
+    temp_min, temp_max = pr.TEMPERATURA_MIN, pr.TEMPERATURA_MAX
     return f"""# -----------------------------------------------------------------------------
 #  <FILL NATIVELY in {natywna_baza}: file header, e.g. „NACHBEARBEITUNG"
 #   (DE) / „POSTPRODUZIONE" (IT) / „ПОСТОБРАБОТКА" (RU)>
@@ -1650,6 +1662,8 @@ max_tokens_wyjscia: {tok_rozdzial}
 # sufiks_pliku_wyniku: "_raport"
 
 # --- AI model parameters ---
+# temperatura: the engine accepts {temp_min}–{temp_max}; outside that range
+# the loader skips the file instead of letting every call fail on the API.
 model: {model_domyslny}
 temperatura: 0.7
 jezyk_odpowiedzi: {natywny_jezyk_odp}
@@ -1671,6 +1685,12 @@ prompt_uzytkownika_szablon: |
 
 # --- Project-file iteration parameters ---
 # Regex matching chapter headers. Adapt the PATTERN to the language.
+# It MUST contain a capturing group around the header itself: the engine
+# splits with `re.split`, which returns the headers only when they are
+# CAPTURED. A pattern without a group (or an empty one) makes the loader skip
+# the file — without a group the titles would land on the wrong fragment, and
+# an empty pattern cuts between every character, i.e. one paid AI call per
+# character of the project file.
 # The patterns the deployed packs really use (read from their own
 # `postprod_tytuly.yaml`, so this list cannot drift from the packs):
 {regexy}
@@ -1724,6 +1744,7 @@ def prompt_postprodukcja(id_pliku: str, etykieta: str,
     tok_rozdzial = pr.MAX_TOKENS_PER_ROZDZIAL_DOMYSLNE
     tok_calosc = pr.MAX_TOKENS_CALOSC_DOMYSLNE
     regexy = _regexy_rozdzialow("     ")
+    temp_min, temp_max = pr.TEMPERATURA_MIN, pr.TEMPERATURA_MAX
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project. You have file tools (read / write / edit / glob / grep — whatever
@@ -1806,7 +1827,8 @@ a postproduction named **{etykieta}**.
    {tok_rozdzial} for per_rozdzial, {tok_calosc} for calosc). Optional **`sufiks_pliku_wyniku:`**
    (e.g. "_audyt") — no path separators or Windows-special characters.
 3. AI model parameters: `model: {model_domyslny}`,
-   `temperatura` 0.5-0.8 (we want stability),
+   `temperatura` 0.5-0.8 (we want stability; the engine accepts
+   {temp_min}-{temp_max} and skips the file outside that range),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}`.
 4. **`prompt_systemowy:`** the AI role, 1-2 sentences on the expected
    output format. PL model: „Jesteś redaktorem audiobooków. Twoja odpowiedź
@@ -1824,6 +1846,11 @@ a postproduction named **{etykieta}**.
      `postprod_streszczenie.yaml` rather than inventing one.
 6. **`regex_podzial_rozdzialow:`** (per_rozdzial only) matched to how
    chapters are named in the project .txt files in {natywna_baza}.
+   It MUST capture the header in a group — `re.split` keeps headers only
+   when they are captured, and since v19.7 a group-less or empty pattern
+   makes the loader skip the file (without a group every title would
+   describe the wrong fragment; with an empty one every character of the
+   project becomes a paid AI call).
    Patterns per language:
 {regexy}
 7. `min_dlugosc_fragmentu` (per_rozdzial; typically 50 chars — shorter

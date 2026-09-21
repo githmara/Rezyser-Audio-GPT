@@ -104,6 +104,12 @@ diag:
        Pole „zakres” ma wartość spoza dozwolonego zbioru, a od niego zależy
        sposób przetwarzania tekstu (rozdział po rozdziale czy całość naraz).
        Narzędzie zostało pominięte, żeby nie zadziałało inaczej, niż zamierzasz.
+    wartosc: |-
+       Pole wypisane w szczegółach ma wartość, której silnik nie umie użyć,
+       a to od niej zależy, co zrobi z Twoim tekstem. Plik został pominięty,
+       żeby tryb albo narzędzie nie zadziałały inaczej, niż zamierzasz.
+       Najczęstsza przyczyna to literówka: w szczegółach jest wpisana wartość,
+       a obok niej zbiór albo zakres, którego oczekuje silnik.
     sufiks: |-
        Pole „sufiks_pliku_wyniku” zawiera znaki niedozwolone w nazwie pliku,
        więc wynik nie miałby gdzie się zapisać. Narzędzie zostało pominięte.
