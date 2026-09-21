@@ -24,6 +24,12 @@ opis: |
     - Ð/ð → д   (/ð/ → /d/)
     - h   → х   (rússneskt /x/ sterkara en íslenskt /h/ — hreimáhrif)
 
+  Íslenskir tvístafir fyrir erlend hljóð (Á UNDAN öllu öðru):
+    - sj  → ш   (sjampó, sjeik; einnig markmið forkeyrslunnar fyrir š/ž)
+    - tsj → ч   (Tsjetsjenía; markmið forkeyrslunnar fyrir č/ć)
+    - dj  → дж  (djass, djús; markmið forkeyrslunnar fyrir đ/ĝ/ġ)
+    Án þeirra sundrast tvístafurinn í staka stafi (`sj` → `с` + `й`).
+
   Staðlaðar latneskur → kýrillískt: sömu reglur og finnska.
   j + sérhljóð (ja/je/jo/ju) → jótaðar rúnar ÁÐUR EN j → й-reglan.
 iso: ru
@@ -41,6 +47,7 @@ skleja_pojedyncze_litery: false
 
 # -----------------------------------------------------------------------------
 # KRITIKAL RÖÐUN SKIPTA:
+#   0. Tvístafir (tsj/sj/dj) Á UNDAN öllu öðru — lengsti fyrst.
 #   1. Séríslenskir stafir (Þ/þ, Ð/ð, Æ/æ, Á/á, É/é, Í/í, Ó/ó, Ú/ú, Ý/ý, Ö/ö)
 #      ÁÐUR EN venjulegar latneskur → kýrillískt (til að koma í veg fyrir
 #      tvöfaldar skiptingar).
@@ -50,6 +57,24 @@ skleja_pojedyncze_litery: false
 #   5. Samhljóðar → kýrillískt (h → х skapar hreiminn).
 # -----------------------------------------------------------------------------
 zamiany:
+  # --- 0. Tvístafir fyrir hljóð sem íslenskan á ekki ein og sér ---
+  # Íslenskan skrifar [ʃ], [tʃ] og [dʒ] með sj, tsj og dj (sjampó, Tsjetsjenía,
+  # djass), og frá v19.7 er þetta líka markmið forkeyrslu pakkans: `Škoda`
+  # kemur hingað sem `Sjkoda`. Listinn hér að neðan kortleggur STAKA stafi, svo
+  # án þessara þriggja reglna sundrast tvístafurinn (`с` + `й`) — og rússneskan
+  # á einmitt stafina ш, ч og дж fyrir þessi hljóð. `tsj` á undan `sj`, annars
+  # tæki styttra mynstrið halann; `dj` á undan ja/je/jo/ju, annars breytti
+  # `jo`-reglan „Djokovitsj" í „Дёковитсй".
+  - { wzor: "tsj", zamiana: "ч"   }
+  - { wzor: "Tsj", zamiana: "Ч"   }
+  - { wzor: "TSJ", zamiana: "Ч"   }
+  - { wzor: "sj",  zamiana: "ш"   }
+  - { wzor: "Sj",  zamiana: "Ш"   }
+  - { wzor: "SJ",  zamiana: "Ш"   }
+  - { wzor: "dj",  zamiana: "дж"  }
+  - { wzor: "Dj",  zamiana: "Дж"  }
+  - { wzor: "DJ",  zamiana: "ДЖ"  }
+
   # --- 1a. Séríslenskt tvíhljóð: Æ/æ → ай ---
   - { wzor: "Æ",  zamiana: "Ай"  }
   - { wzor: "æ",  zamiana: "ай"  }

@@ -30,6 +30,13 @@ opis: |
     - v  → в   b→б, c→ц, d→д, f→ф, g→г, k→к, l→л, m→м, n→н,
                p→п, q→к, r→р, s→с, t→т, w→в, x→кс, z→з
 
+  Suomalaiset vierasperäiset digrafit (ENNEN kaikkea muuta):
+    - sh  → ш   (shakki, Shanghai; myös paketin pre-passin kohde š/ś)
+    - tsh → ч   (tshekki, Tshaikovski; pre-passin kohde č/ć)
+    - zh  → ж   (Zhirinovski; pre-passin kohde ž/ź/ż, ja dzh = д + ж)
+    Ilman näitä sääntöjä digrafi hajoaa yksittäisiksi kirjaimiksi
+    (`sh` → `с` + `х`), eli äänteeksi, jota venäjässä ei ole.
+
   j + vokaali-yhdistelmät (ENNEN j → й -sääntöä):
     - ja → я   (jotisoinut а)
     - je → е   (jotisoinut э)
@@ -60,6 +67,7 @@ skleja_pojedyncze_litery: false
 
 # -----------------------------------------------------------------------------
 # KORVAUSJÄRJESTYS — KRIITTINEN:
+#   0. Digrafit (tsh/sh/zh) ENNEN kaikkea muuta — pisin ensin
 #   1. j + päävokaalit (ja/je/jo/ju) ENNEN j → й -sääntöä
 #   2. j → й (jää ennen ä/ö/y/i tai konsonanttia)
 #   3. Yksittäiset vokaalit (a/e/i/o/u/ä/ö/å/y)
@@ -67,6 +75,23 @@ skleja_pojedyncze_litery: false
 # Monogrammit ENNEN yksittäisiä kirjaimia — muuten j → й rikkoisi ja/je/jo/ju.
 # -----------------------------------------------------------------------------
 zamiany:
+  # --- 0. Vierasperäiset digrafit ---
+  # Suomi kirjoittaa [ʃ]:n ja [tʃ]:n muodoilla sh ja tsh (Kotuksen suositus
+  # š/ž:n korvaajiksi), ja v19.7 alkaen ne ovat myös paketin pre-passin kohde:
+  # `Škoda` saapuu tänne muodossa `Shkoda`. Tämä lista kartoittaa YKSITTÄISIÄ
+  # kirjaimia, joten ilman näitä kolmea sääntöä digrafi hajoaa (`с` + `х`) —
+  # äänneyhdistelmäksi, jota venäjässä ei ole. `tsh` ennen `sh`:ta, muuten
+  # lyhyempi kuvio veisi hännän; `dzh` syntyy itsestään (`д` + `ж`).
+  - { wzor: "tsh", zamiana: "ч"  }
+  - { wzor: "Tsh", zamiana: "Ч"  }
+  - { wzor: "TSH", zamiana: "Ч"  }
+  - { wzor: "sh",  zamiana: "ш"  }
+  - { wzor: "Sh",  zamiana: "Ш"  }
+  - { wzor: "SH",  zamiana: "Ш"  }
+  - { wzor: "zh",  zamiana: "ж"  }
+  - { wzor: "Zh",  zamiana: "Ж"  }
+  - { wzor: "ZH",  zamiana: "Ж"  }
+
   # --- 1. j + päävokaalit (jotisoidut kirjaimet) ---
   - { wzor: "ja",  zamiana: "я"  }
   - { wzor: "Ja",  zamiana: "Я"  }

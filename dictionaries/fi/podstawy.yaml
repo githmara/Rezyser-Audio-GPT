@@ -30,30 +30,94 @@ opis: |
        Caesar-salakirjoituksen käyttämä.
 
 # -----------------------------------------------------------------------------
-# Diakriittisten merkkien normalisointi. Jokainen ei-suomalainen latinankielinen
-# kirjain mapataan lähimpään ASCII-vastineeseensa. Suomalaiset Å, Ä, Ö EIVÄT ole
-# tällä listalla — ne ovat natiivit aakkoston kirjaimet ja Caesar salaa ne.
+# Diakriittisten merkkien normalisointi. Jokainen ei-suomalainen latinalainen
+# kirjain mapataan muotoon, jonka Caesar ja korostussäännöt osaavat käsitellä,
+# eli sellaiseen, joka kirjoitetaan alla olevan `alfabet`-kentän kirjaimilla.
+# Suomalaiset Å, Ä, Ö EIVÄT ole tällä listalla — ne ovat natiivit aakkoston
+# kirjaimet ja Caesar salaa ne suoraan.
+#
+# v19.7: KOHTEENA ON SUOMI, EI PALJAS PERUSKIRJAIN. Versioon v19.6 asti jokainen
+# vieras kirjain putosi peruskirjaimekseen, ja se oli köyhdyttämistä eikä
+# yksinkertaistamista: pre-pass ajetaan ENNEN jokaisen tämän paketin korostuksen
+# `zamiany`-listaa, joten litistäminen `š → s` heitti roskiin koko tiedon
+# äänteestä, ennen kuin yksikään korostus ehti nähdä sitä. Vieras kirjain, joka
+# kantaa VAKAASTI äänteen, jolle suomella on oma kirjoitusasu, saa nyt sen
+# kirjoitusasun — eikä asuja tarvitse keksiä: Kotuksen suositus antaa ne
+# suoraan (kun š:ää ja ž:aa ei voi kirjoittaa, ne korvataan muodoilla sh ja zh;
+# samoin tš → tsh ja dž → dzh — šakki → shakki, Tšekki → Tshekki):
+#     š ş ŝ ś → sh    č ĉ ċ ć → tsh    ž ĵ ź ż → zh    đ ĝ ġ → dzh
+#     ř → rzh    ñ → nj    ţ → ts    ç → s    ą → on    ę → en
+#     ø œ ő → ö       ü ű → y         ł ŭ → v
+#   Mitattuna: „Škoda Žižek Dvořák Đoković" → „Shkoda Zhizhek Dvorzhak
+#   Dzhokovitsh" eikä „Skoda Zizek Dvorak Dokovic"; „garçon Müller" →
+#   „garson Myller" eikä „garcon Muller".
+#
+# KOLME PÄÄTÖSTÄ, JOTKA OVAT TÄMÄN LISTAN SISÄLTÖÄ:
+#   1. `ü ű → y` ja `ø œ ő → ö` osuvat TÄMÄN PAKETIN OMIIN KIRJAIMIIN (v19.7
+#      sallii sen: molemmat ovat `alfabet`-kentässä). Suomen y ON [y] eli sama
+#      äänne kuin saksan ü, ja ö ON [ø] eli sama kuin tanskan ø — „Müller →
+#      Myller" ja „Søren → Sören" ovat tarkempia kuin „Muller" ja „Soren", ja
+#      samalla ne herättävät henkiin korostusten ä/ö/y-säännöt, jotka eivät
+#      saksalaiselle tai tanskalaiselle tekstille koskaan käynnistyneet.
+#      Espanjan ü (pingüino) on treema eikä [y], mutta saksa, turkki ja unkari
+#      vievät tämän merkin selvällä enemmistöllä.
+#   2. `ł ŭ → v`, VAIKKA SAKSALAINEN PAKETTI PITÄÄ `ł → l`. Puolan ł on [w],
+#      eikä suomessa ole [w]:tä — mutta suomen v on approksimantti [ʋ], ja se
+#      on juuri se äänne, jolla suomi lukee englannin w:n (Washington, Wales).
+#      Saksassa w on frikatiivi, joten siellä ei ole mihin tähdätä; tässä on.
+#      Sama kirjain, kaksi pakettia, kaksi oikeaa vastausta.
+#   3. `ñ → nj`, MUTTA `ń ň ņ → n`. Kaikki neljä ovat [ɲ], joten äänne ei
+#      ratkaise — ASEMA ratkaisee. Espanjan kieli ei koskaan päätä sanaa ñ:ään
+#      (mañana → manjana, España → Espanja: suomen oma vakiintunut asu), kun
+#      taas puolan, tšekin ja latvian vastineet seisovat sananlopussa jatkuvasti
+#      (Poznań, Plzeň). Suomi ei salli sananloppuista konsonanttiyhtymää, joten
+#      ääni joko nielaisee j:n tai lisää vokaalin — kumpikin muuttaa nimen
+#      HAHMOA, mikä on suurempi virhe kuin liudennuksen menetys.
+#
+# LOPPU PYSYY ASCII:NA, JA SEKIN ON PÄÄTÖS. Kriteerillä on kaksi puolta ja
+# molempien on pidettävä: LÄHTEEN on tarkoitettava yhtä äännettä niissä
+# kielissä, joista se tulee (`ä` on kerran saksan [ɛ] ja kerran suomen [æ],
+# `æ` tanskan [ɛ] ja islannin [ai], `ó` puolan [u], islannin [ou] ja espanjan
+# painollinen [o] — siksi ne jäävät ennalleen), ja KOHTEEN on oltava jotain,
+# jonka TÄMÄN paketin ääni lukee joka kerta samalla tavalla. Islannin ð pysyy
+# d:nä: suomessa ei ole [ð] eikä sille kirjoitusasua (þ → th on eri asia — se
+# on vakiintunut suomalainen asu).
+#
+# UUSI DIGRAFI ON VELKA, JONKA PAKETIN KOROSTUKSET MAKSAVAT. Translitteroiva
+# korostus (kyrilliseen) kartoittaa yksittäisiä kirjaimia, joten sille
+# tuntematon digrafi hajoaa: `sh` päätyi venäläiselle korostukselle muodossa
+# `с` + `х`. Korjaus kuuluu KOROSTUKSEEN — yksi yksikkösääntö ennen jokaista
+# lyhyempää siihen sisältyvää kuviota (`akcenty/rosyjski.yaml`). Se maksaa
+# samalla vanhan velan, sillä sh ja tsh saapuivat jo ennestään tavallisessa
+# suomenkielisessä tekstissä (shakki, tshekki).
+#
+# Rajaa vartioi `audyt_podstaw` (luokka `znaki-cel-obcy`): kohde saa olla
+# ASCII tai alla olevan `alfabet`-kentän kirjain — ei koskaan kolmannen kielen
+# kirjain.
 # -----------------------------------------------------------------------------
 polskie_znaki:
-  # -- Polish loans → plain ASCII --
-  - { wzor: "ą", zamiana: "a"  }
-  - { wzor: "ć", zamiana: "c"  }
-  - { wzor: "ę", zamiana: "e"  }
-  - { wzor: "ł", zamiana: "l"  }
-  - { wzor: "ń", zamiana: "n"  }
-  - { wzor: "ó", zamiana: "o"  }
-  - { wzor: "ś", zamiana: "s"  }
-  - { wzor: "ź", zamiana: "z"  }
-  - { wzor: "ż", zamiana: "z"  }
-  - { wzor: "Ą", zamiana: "A"  }
-  - { wzor: "Ć", zamiana: "C"  }
-  - { wzor: "Ę", zamiana: "E"  }
-  - { wzor: "Ł", zamiana: "L"  }
-  - { wzor: "Ń", zamiana: "N"  }
-  - { wzor: "Ó", zamiana: "O"  }
-  - { wzor: "Ś", zamiana: "S"  }
-  - { wzor: "Ź", zamiana: "Z"  }
-  - { wzor: "Ż", zamiana: "Z"  }
+  # -- Puolan kirjaimet: jokainen niistä tarkoittaa puolassa YHTÄ äännettä ja
+  #    jokaiselle suomella on kirjoitusasu, joten kirjoitamme asun sen sijaan
+  #    että pudottaisimme tarkkeen. Poikkeukset: `ó` (lähde ei ole vakaa) ja
+  #    `ń` (sananloppuinen asema — ks. otsikko) --
+  - { wzor: "ą", zamiana: "on"  }
+  - { wzor: "ć", zamiana: "tsh" }
+  - { wzor: "ę", zamiana: "en"  }
+  - { wzor: "ł", zamiana: "v"   }
+  - { wzor: "ń", zamiana: "n"   }
+  - { wzor: "ó", zamiana: "o"   }
+  - { wzor: "ś", zamiana: "sh"  }
+  - { wzor: "ź", zamiana: "zh"  }
+  - { wzor: "ż", zamiana: "zh"  }
+  - { wzor: "Ą", zamiana: "On"  }
+  - { wzor: "Ć", zamiana: "Tsh" }
+  - { wzor: "Ę", zamiana: "En"  }
+  - { wzor: "Ł", zamiana: "V"   }
+  - { wzor: "Ń", zamiana: "N"   }
+  - { wzor: "Ó", zamiana: "O"   }
+  - { wzor: "Ś", zamiana: "Sh"  }
+  - { wzor: "Ź", zamiana: "Zh"  }
+  - { wzor: "Ż", zamiana: "Zh"  }
   # -- → a (NOTE: å, ä are NATIVE Finnish letters — NOT mapped here) --
   - { wzor: "á", zamiana: "a"  }
   - { wzor: "à", zamiana: "a"  }
@@ -66,9 +130,9 @@ polskie_znaki:
   # -- → ae --
   - { wzor: "æ", zamiana: "ae" }
   - { wzor: "Æ", zamiana: "Ae" }
-  # -- → c --
-  - { wzor: "ç", zamiana: "c"  }
-  - { wzor: "Ç", zamiana: "C"  }
+  # -- → s (ranskan ç on [s]; suomalainen ääni lukisi c:n [k]:na) --
+  - { wzor: "ç", zamiana: "s"  }
+  - { wzor: "Ç", zamiana: "S"  }
   # -- → d (Icelandic Ð/ð) --
   - { wzor: "ð", zamiana: "d"  }
   - { wzor: "Ð", zamiana: "D"  }
@@ -90,21 +154,22 @@ polskie_znaki:
   - { wzor: "Ì", zamiana: "I"  }
   - { wzor: "Î", zamiana: "I"  }
   - { wzor: "Ï", zamiana: "I"  }
-  # -- → n --
-  - { wzor: "ñ", zamiana: "n"  }
-  - { wzor: "Ñ", zamiana: "N"  }
+  # -- → nj (espanjan ñ; suomen vakiintunut asu: España → Espanja) --
+  - { wzor: "ñ", zamiana: "nj" }
+  - { wzor: "Ñ", zamiana: "Nj" }
   # -- → o (NOTE: ö is NATIVE Finnish letter — NOT mapped here) --
   - { wzor: "ò", zamiana: "o"  }
   - { wzor: "ô", zamiana: "o"  }
   - { wzor: "õ", zamiana: "o"  }
-  - { wzor: "ø", zamiana: "o"  }
   - { wzor: "Ò", zamiana: "O"  }
   - { wzor: "Ô", zamiana: "O"  }
   - { wzor: "Õ", zamiana: "O"  }
-  - { wzor: "Ø", zamiana: "O"  }
-  # -- → oe --
-  - { wzor: "œ", zamiana: "oe" }
-  - { wzor: "Œ", zamiana: "Oe" }
+  # -- → ö (tanskan/norjan ø ja ranskan œ ovat sama pyöreä etuvokaali kuin
+  #    suomen natiivi ö; kohde on siis tämän paketin oma kirjain) --
+  - { wzor: "ø", zamiana: "ö"  }
+  - { wzor: "Ø", zamiana: "Ö"  }
+  - { wzor: "œ", zamiana: "ö"  }
+  - { wzor: "Œ", zamiana: "Ö"  }
   # -- → ss (German) --
   - { wzor: "ß", zamiana: "ss" }
   # -- → th (Icelandic Þ/þ) --
@@ -114,11 +179,12 @@ polskie_znaki:
   - { wzor: "ú", zamiana: "u"  }
   - { wzor: "ù", zamiana: "u"  }
   - { wzor: "û", zamiana: "u"  }
-  - { wzor: "ü", zamiana: "u"  }
   - { wzor: "Ú", zamiana: "U"  }
   - { wzor: "Ù", zamiana: "U"  }
   - { wzor: "Û", zamiana: "U"  }
-  - { wzor: "Ü", zamiana: "U"  }
+  # -- → y (saksan, turkin ja unkarin ü on [y] eli juuri suomen y) --
+  - { wzor: "ü", zamiana: "y"  }
+  - { wzor: "Ü", zamiana: "Y"  }
   # -- → y --
   - { wzor: "ý", zamiana: "y"  }
   - { wzor: "ÿ", zamiana: "y"  }
@@ -140,28 +206,28 @@ polskie_znaki:
   #    Oletusparit: `manager_regul_szablony.TABELA_LACINKI`.
   - { wzor: "ă", zamiana: "a" }
   - { wzor: "Ă", zamiana: "A" }
-  - { wzor: "ĉ", zamiana: "c" }
-  - { wzor: "Ĉ", zamiana: "C" }
-  - { wzor: "ċ", zamiana: "c" }
-  - { wzor: "Ċ", zamiana: "C" }
-  - { wzor: "č", zamiana: "c" }
-  - { wzor: "Č", zamiana: "C" }
+  - { wzor: "ĉ", zamiana: "tsh" }
+  - { wzor: "Ĉ", zamiana: "Tsh" }
+  - { wzor: "ċ", zamiana: "tsh" }
+  - { wzor: "Ċ", zamiana: "Tsh" }
+  - { wzor: "č", zamiana: "tsh" }
+  - { wzor: "Č", zamiana: "Tsh" }
   - { wzor: "ď", zamiana: "d" }
   - { wzor: "Ď", zamiana: "D" }
-  - { wzor: "đ", zamiana: "d" }
-  - { wzor: "Đ", zamiana: "D" }
+  - { wzor: "đ", zamiana: "dzh" }
+  - { wzor: "Đ", zamiana: "Dzh" }
   - { wzor: "ĕ", zamiana: "e" }
   - { wzor: "Ĕ", zamiana: "E" }
   - { wzor: "ė", zamiana: "e" }
   - { wzor: "Ė", zamiana: "E" }
   - { wzor: "ě", zamiana: "e" }
   - { wzor: "Ě", zamiana: "E" }
-  - { wzor: "ĝ", zamiana: "g" }
-  - { wzor: "Ĝ", zamiana: "G" }
+  - { wzor: "ĝ", zamiana: "dzh" }
+  - { wzor: "Ĝ", zamiana: "Dzh" }
   - { wzor: "ğ", zamiana: "g" }
   - { wzor: "Ğ", zamiana: "G" }
-  - { wzor: "ġ", zamiana: "g" }
-  - { wzor: "Ġ", zamiana: "G" }
+  - { wzor: "ġ", zamiana: "dzh" }
+  - { wzor: "Ġ", zamiana: "Dzh" }
   - { wzor: "ģ", zamiana: "g" }
   - { wzor: "Ģ", zamiana: "G" }
   - { wzor: "ĥ", zamiana: "h" }
@@ -177,8 +243,8 @@ polskie_znaki:
   - { wzor: "ı", zamiana: "i" }
   - { wzor: "ĳ", zamiana: "ij" }
   - { wzor: "Ĳ", zamiana: "Ij" }
-  - { wzor: "ĵ", zamiana: "j" }
-  - { wzor: "Ĵ", zamiana: "J" }
+  - { wzor: "ĵ", zamiana: "zh" }
+  - { wzor: "Ĵ", zamiana: "Zh" }
   - { wzor: "ķ", zamiana: "k" }
   - { wzor: "Ķ", zamiana: "K" }
   - { wzor: "ĸ", zamiana: "k" }
@@ -199,43 +265,43 @@ polskie_znaki:
   - { wzor: "Ŋ", zamiana: "Ng" }
   - { wzor: "ŏ", zamiana: "o" }
   - { wzor: "Ŏ", zamiana: "O" }
-  - { wzor: "ő", zamiana: "o" }
-  - { wzor: "Ő", zamiana: "O" }
+  - { wzor: "ő", zamiana: "ö" }
+  - { wzor: "Ő", zamiana: "Ö" }
   - { wzor: "ŕ", zamiana: "r" }
   - { wzor: "Ŕ", zamiana: "R" }
   - { wzor: "ŗ", zamiana: "r" }
   - { wzor: "Ŗ", zamiana: "R" }
-  - { wzor: "ř", zamiana: "r" }
-  - { wzor: "Ř", zamiana: "R" }
-  - { wzor: "ŝ", zamiana: "s" }
-  - { wzor: "Ŝ", zamiana: "S" }
-  - { wzor: "ş", zamiana: "s" }
-  - { wzor: "Ş", zamiana: "S" }
-  - { wzor: "š", zamiana: "s" }
-  - { wzor: "Š", zamiana: "S" }
+  - { wzor: "ř", zamiana: "rzh" }
+  - { wzor: "Ř", zamiana: "Rzh" }
+  - { wzor: "ŝ", zamiana: "sh" }
+  - { wzor: "Ŝ", zamiana: "Sh" }
+  - { wzor: "ş", zamiana: "sh" }
+  - { wzor: "Ş", zamiana: "Sh" }
+  - { wzor: "š", zamiana: "sh" }
+  - { wzor: "Š", zamiana: "Sh" }
   - { wzor: "ſ", zamiana: "s" }
-  - { wzor: "ţ", zamiana: "t" }
-  - { wzor: "Ţ", zamiana: "T" }
+  - { wzor: "ţ", zamiana: "ts" }
+  - { wzor: "Ţ", zamiana: "Ts" }
   - { wzor: "ť", zamiana: "t" }
   - { wzor: "Ť", zamiana: "T" }
   - { wzor: "ŧ", zamiana: "t" }
   - { wzor: "Ŧ", zamiana: "T" }
   - { wzor: "ũ", zamiana: "u" }
   - { wzor: "Ũ", zamiana: "U" }
-  - { wzor: "ŭ", zamiana: "u" }
-  - { wzor: "Ŭ", zamiana: "U" }
+  - { wzor: "ŭ", zamiana: "v" }
+  - { wzor: "Ŭ", zamiana: "V" }
   - { wzor: "ů", zamiana: "u" }
   - { wzor: "Ů", zamiana: "U" }
-  - { wzor: "ű", zamiana: "u" }
-  - { wzor: "Ű", zamiana: "U" }
+  - { wzor: "ű", zamiana: "y" }
+  - { wzor: "Ű", zamiana: "Y" }
   - { wzor: "ų", zamiana: "u" }
   - { wzor: "Ų", zamiana: "U" }
   - { wzor: "ŵ", zamiana: "w" }
   - { wzor: "Ŵ", zamiana: "W" }
   - { wzor: "ŷ", zamiana: "y" }
   - { wzor: "Ŷ", zamiana: "Y" }
-  - { wzor: "ž", zamiana: "z" }
-  - { wzor: "Ž", zamiana: "Z" }
+  - { wzor: "ž", zamiana: "zh" }
+  - { wzor: "Ž", zamiana: "Zh" }
   - { wzor: "ẞ", zamiana: "SS" }
   - { wzor: "İ", zamiana: "I" }
 

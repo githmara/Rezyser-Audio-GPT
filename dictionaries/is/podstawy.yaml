@@ -31,45 +31,99 @@ opis: |
        notað af Caesar-dulmálinu.
 
 # -----------------------------------------------------------------------------
-# Umritun broddstafa. Sérhver ekki-íslenskur latneskur broddstafur er
-# tengdur við næsta ASCII jafngildi. Íslenskir broddstafir Á, É, Í, Ó, Ú, Ý,
-# Þ, Æ, Ö, Ð EKKI eru á þessum lista — þeir eru hluti stafrófsins.
+# Umritun broddstafa. Sérhver ekki-íslenskur latneskur stafur er tengdur við
+# rithátt sem Caesar og hreimsreglurnar ráða við, þ.e. rithátt sem er skrifaður
+# með stöfunum í `alfabet` hér að neðan. Íslenskir broddstafir Á, É, Í, Ó, Ú,
+# Ý, Þ, Æ, Ö, Ð eru EKKI á þessum lista — þeir eru hluti stafrófsins.
+#
+# v19.7: MARKMIÐIÐ ER ÍSLENSKA, EKKI NAKINN GRUNNSTAFUR. Fram að v19.6 féll
+# sérhver erlendur stafur niður í grunnstaf sinn, og það var rýrnun en
+# ekki einföldun: forkeyrslan (pre-pass) gengur Á UNDAN `zamiany`-lista HVERS
+# hreims pakkans, svo `š → s` henti öllu sem vitað var um hljóðið áður en
+# nokkur hreimur fékk að sjá það. Erlendur stafur sem ber STÖÐUGT hljóð sem
+# íslenskan skrifar sjálf fær héðan í frá íslenska ritháttinn — og þá rithætti
+# á íslenskan þegar til í tökuorðum (sjampó, sjeik, sjokk, djass, djús,
+# Tsjetsjenía), svo hér er engin transkripsjón fundin upp:
+#     š ş ŝ ś ž ĵ ź ż → sj    č ĉ ċ ć → tsj    đ ĝ ġ → dj    ř → rsj
+#     ñ → nj    ţ → ts    ç → s    ą → on    ę → en    å → o    ø œ ő → ö
+#   Mælt: „Škoda Žižek Dvořák Đoković" verður „Sjkoda Sjisjek Dvorsják
+#   Djokovitsj" í stað „Skoda Zizek Dvorák Dokovic", og „garçon Søren cœur"
+#   verður „garson Sören cöur" í stað „garcon Soren coeur".
+#
+# ÞRJÁR ÁKVARÐANIR SEM ERU INNIHALD ÞESSA LISTA:
+#   1. RADDAÐ OG ÓRADDAÐ RENNUR SAMAN, OG ÞAÐ ER ENGIN TÖPUN. Íslenskan á
+#      hvorki [z] né [ʒ], svo bæði `š` og `ž` fá `sj`: röddunin var hvort eð er
+#      hljóð sem þessi rödd getur ekki myndað. Viðmiðið spyr um RÖDD ÞESSA
+#      PAKKA, ekki um upprunamálið.
+#   2. `ø œ ő → ö` HITTIR EIGIN STAF PAKKANS (v19.7 leyfir það: Ö stendur í
+#      `alfabet`). Danska ø og íslenska ö eru sami kringdi framgómsstafurinn,
+#      svo „Søren → Sören" er réttara en „Soren" — og um leið vakna ö-reglur
+#      hreimanna, sem fóru aldrei í gang fyrir danskan texta. Sama hugsun
+#      liggur að baki `å → o`.
+#   3. `ł → l` STENDUR ÁFRAM, ÞÓTT FINNSKI PAKKINN TAKI `ł → v`. Pólska ł er
+#      [w]; finnskan á [ʋ], nálgunarhljóð sem hún notar sjálf fyrir enskt w,
+#      en íslenska v er önghljóð og hér er ekkert að miða á. Sami stafur, tveir
+#      pakkar, tvö rétt svör. Af sömu ástæðu helst `ŭ → u`.
+#   `ñ → nj` en `ń ň ņ → n`: allir fjórir eru [ɲ], svo hljóðið sker ekki úr —
+#   STAÐAN gerir það. Spænska endar aldrei orð á ñ (mañana → manjana), en
+#   pólska, tékkneska og lettneska gera það stöðugt (Poznań, Plzeň), og
+#   íslenskt orð endar ekki á -nj.
+#
+# AFGANGURINN HELST ASCII OG ÞAÐ ER LÍKA ÁKVÖRÐUN. Viðmiðið hefur tvær hliðar
+# og báðar verða að halda: UPPRUNINN verður að merkja eitt hljóð í þeim málum
+# sem hann kemur úr (`ä` er þýskt [ɛ] í eitt skipti og finnskt [æ] það næsta),
+# og MARKMIÐIÐ verður að vera eitthvað sem rödd ÞESSA pakka les eins í hvert
+# sinn. Pólska `ó` er ekki á listanum yfirleitt — það rekst á íslenska Ó
+# (athugasemdin hér að neðan er óbreytt frá 15.x).
+#
+# NÝR TVÍSTAFUR ER SKULD SEM HREIMAR PAKKANS GREIÐA. Hreimur sem umritar (yfir
+# í kýrillískt letur) hefur reglu fyrir hvern EINSTAKAN staf, svo tvístafur sem
+# hann þekkir ekki sem HEILD sundrast. Þrjár einingarreglur í
+# `akcenty/rosyjski.yaml` greiða þá skuld — og um leið eldri skuld, því sj, tsj
+# og dj komu þegar fyrir í venjulegum íslenskum texta (sjampó, djús).
+#
+# Mörkin ver `audyt_podstaw` (flokkur `znaki-cel-obcy`): markmiðið má vera
+# ASCII eða stafur úr `alfabet` hér að neðan — aldrei stafur þriðja málsins.
 # -----------------------------------------------------------------------------
 polskie_znaki:
-  # -- Polish loans → plain ASCII --
-  - { wzor: "ą", zamiana: "a"  }
-  - { wzor: "ć", zamiana: "c"  }
-  - { wzor: "ę", zamiana: "e"  }
-  - { wzor: "ł", zamiana: "l"  }
-  - { wzor: "ń", zamiana: "n"  }
-  - { wzor: "ś", zamiana: "s"  }
-  - { wzor: "ź", zamiana: "z"  }
-  - { wzor: "ż", zamiana: "z"  }
-  - { wzor: "Ą", zamiana: "A"  }
-  - { wzor: "Ć", zamiana: "C"  }
-  - { wzor: "Ę", zamiana: "E"  }
-  - { wzor: "Ł", zamiana: "L"  }
-  - { wzor: "Ń", zamiana: "N"  }
-  - { wzor: "Ś", zamiana: "S"  }
-  - { wzor: "Ź", zamiana: "Z"  }
-  - { wzor: "Ż", zamiana: "Z"  }
+  # -- Pólskir stafir: hver þeirra merkir EITT hljóð í pólsku og fyrir hvert
+  #    þeirra á íslenskan rithátt, svo við skrifum ritháttinn í stað þess að
+  #    fella broddinn burt. Undantekningar: `ł` (ekkert [w] í íslensku) og
+  #    `ń` (staðan í orðslok — sjá haus) --
+  - { wzor: "ą", zamiana: "on"  }
+  - { wzor: "ć", zamiana: "tsj" }
+  - { wzor: "ę", zamiana: "en"  }
+  - { wzor: "ł", zamiana: "l"   }
+  - { wzor: "ń", zamiana: "n"   }
+  - { wzor: "ś", zamiana: "sj"  }
+  - { wzor: "ź", zamiana: "sj"  }
+  - { wzor: "ż", zamiana: "sj"  }
+  - { wzor: "Ą", zamiana: "On"  }
+  - { wzor: "Ć", zamiana: "Tsj" }
+  - { wzor: "Ę", zamiana: "En"  }
+  - { wzor: "Ł", zamiana: "L"   }
+  - { wzor: "Ń", zamiana: "N"   }
+  - { wzor: "Ś", zamiana: "Sj"  }
+  - { wzor: "Ź", zamiana: "Sj"  }
+  - { wzor: "Ż", zamiana: "Sj"  }
   # NOTE: Polish "ó/Ó" NOT mapped here — collides with native Icelandic Ó.
-  # An Icelandic reader of "Łódź" would see "Lódz" → Caesar encrypts the Ó
+  # An Icelandic reader of "Łódź" sees "Lódsj" → Caesar encrypts the Ó
   # natively. Acceptable; full ASCII reduction would lose the Icelandic Ó.
   # -- → a (NOT á — native) --
   - { wzor: "à", zamiana: "a"  }
   - { wzor: "â", zamiana: "a"  }
   - { wzor: "ã", zamiana: "a"  }
   - { wzor: "ä", zamiana: "a"  }
-  - { wzor: "å", zamiana: "a"  }
   - { wzor: "À", zamiana: "A"  }
   - { wzor: "Â", zamiana: "A"  }
   - { wzor: "Ã", zamiana: "A"  }
   - { wzor: "Ä", zamiana: "A"  }
-  - { wzor: "Å", zamiana: "A"  }
-  # -- → c --
-  - { wzor: "ç", zamiana: "c"  }
-  - { wzor: "Ç", zamiana: "C"  }
+  # -- → o (sænskt/norskt å er [o], ekki [a]: Ångström → Ongström) --
+  - { wzor: "å", zamiana: "o"  }
+  - { wzor: "Å", zamiana: "O"  }
+  # -- → s (franskt ç er [s]; c er ekki í íslenska stafrófinu) --
+  - { wzor: "ç", zamiana: "s"  }
+  - { wzor: "Ç", zamiana: "S"  }
   # -- → e (NOT é — native) --
   - { wzor: "è", zamiana: "e"  }
   - { wzor: "ê", zamiana: "e"  }
@@ -84,21 +138,22 @@ polskie_znaki:
   - { wzor: "Ì", zamiana: "I"  }
   - { wzor: "Î", zamiana: "I"  }
   - { wzor: "Ï", zamiana: "I"  }
-  # -- → n --
-  - { wzor: "ñ", zamiana: "n"  }
-  - { wzor: "Ñ", zamiana: "N"  }
+  # -- → nj (spænskt ñ; íslenskan skrifar þetta hljóð svona: kanjón) --
+  - { wzor: "ñ", zamiana: "nj" }
+  - { wzor: "Ñ", zamiana: "Nj" }
   # -- → o (NOT ó — native; NOT ö — native) --
   - { wzor: "ò", zamiana: "o"  }
   - { wzor: "ô", zamiana: "o"  }
   - { wzor: "õ", zamiana: "o"  }
-  - { wzor: "ø", zamiana: "o"  }
   - { wzor: "Ò", zamiana: "O"  }
   - { wzor: "Ô", zamiana: "O"  }
   - { wzor: "Õ", zamiana: "O"  }
-  - { wzor: "Ø", zamiana: "O"  }
-  # -- → oe --
-  - { wzor: "œ", zamiana: "oe" }
-  - { wzor: "Œ", zamiana: "Oe" }
+  # -- → ö (danskt ø og franskt œ eru sami kringdi framgómsstafurinn og
+  #    íslenska ö; markmiðið er því eigin stafur pakkans) --
+  - { wzor: "ø", zamiana: "ö"  }
+  - { wzor: "Ø", zamiana: "Ö"  }
+  - { wzor: "œ", zamiana: "ö"  }
+  - { wzor: "Œ", zamiana: "Ö"  }
   # -- → ss (German) --
   - { wzor: "ß", zamiana: "ss" }
   # -- → u (NOT ú — native) --
@@ -126,28 +181,28 @@ polskie_znaki:
   #    Sjálfgefin pör: `manager_regul_szablony.TABELA_LACINKI`.
   - { wzor: "ă", zamiana: "a" }
   - { wzor: "Ă", zamiana: "A" }
-  - { wzor: "ĉ", zamiana: "c" }
-  - { wzor: "Ĉ", zamiana: "C" }
-  - { wzor: "ċ", zamiana: "c" }
-  - { wzor: "Ċ", zamiana: "C" }
-  - { wzor: "č", zamiana: "c" }
-  - { wzor: "Č", zamiana: "C" }
+  - { wzor: "ĉ", zamiana: "tsj" }
+  - { wzor: "Ĉ", zamiana: "Tsj" }
+  - { wzor: "ċ", zamiana: "tsj" }
+  - { wzor: "Ċ", zamiana: "Tsj" }
+  - { wzor: "č", zamiana: "tsj" }
+  - { wzor: "Č", zamiana: "Tsj" }
   - { wzor: "ď", zamiana: "d" }
   - { wzor: "Ď", zamiana: "D" }
-  - { wzor: "đ", zamiana: "d" }
-  - { wzor: "Đ", zamiana: "D" }
+  - { wzor: "đ", zamiana: "dj" }
+  - { wzor: "Đ", zamiana: "Dj" }
   - { wzor: "ĕ", zamiana: "e" }
   - { wzor: "Ĕ", zamiana: "E" }
   - { wzor: "ė", zamiana: "e" }
   - { wzor: "Ė", zamiana: "E" }
   - { wzor: "ě", zamiana: "e" }
   - { wzor: "Ě", zamiana: "E" }
-  - { wzor: "ĝ", zamiana: "g" }
-  - { wzor: "Ĝ", zamiana: "G" }
+  - { wzor: "ĝ", zamiana: "dj" }
+  - { wzor: "Ĝ", zamiana: "Dj" }
   - { wzor: "ğ", zamiana: "g" }
   - { wzor: "Ğ", zamiana: "G" }
-  - { wzor: "ġ", zamiana: "g" }
-  - { wzor: "Ġ", zamiana: "G" }
+  - { wzor: "ġ", zamiana: "dj" }
+  - { wzor: "Ġ", zamiana: "Dj" }
   - { wzor: "ģ", zamiana: "g" }
   - { wzor: "Ģ", zamiana: "G" }
   - { wzor: "ĥ", zamiana: "h" }
@@ -163,8 +218,8 @@ polskie_znaki:
   - { wzor: "ı", zamiana: "i" }
   - { wzor: "ĳ", zamiana: "ij" }
   - { wzor: "Ĳ", zamiana: "Ij" }
-  - { wzor: "ĵ", zamiana: "j" }
-  - { wzor: "Ĵ", zamiana: "J" }
+  - { wzor: "ĵ", zamiana: "sj" }
+  - { wzor: "Ĵ", zamiana: "Sj" }
   - { wzor: "ķ", zamiana: "k" }
   - { wzor: "Ķ", zamiana: "K" }
   - { wzor: "ĸ", zamiana: "k" }
@@ -185,23 +240,23 @@ polskie_znaki:
   - { wzor: "Ŋ", zamiana: "Ng" }
   - { wzor: "ŏ", zamiana: "o" }
   - { wzor: "Ŏ", zamiana: "O" }
-  - { wzor: "ő", zamiana: "o" }
-  - { wzor: "Ő", zamiana: "O" }
+  - { wzor: "ő", zamiana: "ö" }
+  - { wzor: "Ő", zamiana: "Ö" }
   - { wzor: "ŕ", zamiana: "r" }
   - { wzor: "Ŕ", zamiana: "R" }
   - { wzor: "ŗ", zamiana: "r" }
   - { wzor: "Ŗ", zamiana: "R" }
-  - { wzor: "ř", zamiana: "r" }
-  - { wzor: "Ř", zamiana: "R" }
-  - { wzor: "ŝ", zamiana: "s" }
-  - { wzor: "Ŝ", zamiana: "S" }
-  - { wzor: "ş", zamiana: "s" }
-  - { wzor: "Ş", zamiana: "S" }
-  - { wzor: "š", zamiana: "s" }
-  - { wzor: "Š", zamiana: "S" }
+  - { wzor: "ř", zamiana: "rsj" }
+  - { wzor: "Ř", zamiana: "Rsj" }
+  - { wzor: "ŝ", zamiana: "sj" }
+  - { wzor: "Ŝ", zamiana: "Sj" }
+  - { wzor: "ş", zamiana: "sj" }
+  - { wzor: "Ş", zamiana: "Sj" }
+  - { wzor: "š", zamiana: "sj" }
+  - { wzor: "Š", zamiana: "Sj" }
   - { wzor: "ſ", zamiana: "s" }
-  - { wzor: "ţ", zamiana: "t" }
-  - { wzor: "Ţ", zamiana: "T" }
+  - { wzor: "ţ", zamiana: "ts" }
+  - { wzor: "Ţ", zamiana: "Ts" }
   - { wzor: "ť", zamiana: "t" }
   - { wzor: "Ť", zamiana: "T" }
   - { wzor: "ŧ", zamiana: "t" }
@@ -216,12 +271,14 @@ polskie_znaki:
   - { wzor: "Ű", zamiana: "U" }
   - { wzor: "ų", zamiana: "u" }
   - { wzor: "Ų", zamiana: "U" }
-  - { wzor: "ŵ", zamiana: "w" }
-  - { wzor: "Ŵ", zamiana: "W" }
+  # -- → ú (velska ŵ er [uː]; `w` stendur ekki í íslenska stafrófinu, svo það
+  #    slyppi ódulritað gegnum Caesar — sama hola og lagfærð var í v19.4.2) --
+  - { wzor: "ŵ", zamiana: "ú" }
+  - { wzor: "Ŵ", zamiana: "Ú" }
   - { wzor: "ŷ", zamiana: "y" }
   - { wzor: "Ŷ", zamiana: "Y" }
-  - { wzor: "ž", zamiana: "z" }
-  - { wzor: "Ž", zamiana: "Z" }
+  - { wzor: "ž", zamiana: "sj" }
+  - { wzor: "Ž", zamiana: "Sj" }
   - { wzor: "ẞ", zamiana: "SS" }
   - { wzor: "İ", zamiana: "I" }
   # NOTE: æ/Æ, þ/Þ, ð/Ð are NATIVE Icelandic letters — NOT mapped here.
