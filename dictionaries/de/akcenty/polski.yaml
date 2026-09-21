@@ -36,6 +36,12 @@ zamiany:
   - { wzor: "tsch", zamiana: "cz"  }
   - { wzor: "Tsch", zamiana: "Cz"  }
   - { wzor: "TSCH", zamiana: "CZ"  }
+  # `dsch` = niemieckie /dʒ/ („Dschungel") i cel pre-passu dla `đ ĝ ġ`
+  # (v19.7). Polski zapisuje ten dźwięk przez `dż`; bez tej pary trigram
+  # rozpadał się na `d` + `sz`. Stoi PRZED `sch`, żeby nie stracić ogona.
+  - { wzor: "dsch", zamiana: "dż"  }
+  - { wzor: "Dsch", zamiana: "Dż"  }
+  - { wzor: "DSCH", zamiana: "DŻ"  }
   # --- Digramme ---
   - { wzor: "sch",  zamiana: "sz"  }
   - { wzor: "Sch",  zamiana: "Sz"  }

@@ -32,12 +32,40 @@ opis: |
        verwendet vom Caesar-Chiffre.
 
 # -----------------------------------------------------------------------------
-# Normalisierung diakritischer Zeichen. ß → ss (Schweizer Konvention),
-# Umlaute ä/ö/ü bleiben im Alphabet, werden aber auch für Akkzent-Engines
-# (Vorab-Durchlauf jedes Akzents) auf Basis-ASCII normalisiert.
+# Normalisierung diakritischer Zeichen. ß → ss (Schweizer Konvention);
+# ä/ö/ü stehen im Alphabet und werden hier NICHT plattgemacht (v18.19).
+#
+# v19.7: DAS ZIEL IST DEUTSCH, NICHT DER NACKTE GRUNDBUCHSTABE. Bis v19.6 fiel
+# jedes fremde Zeichen auf seinen Grundbuchstaben — das war Verarmung, keine
+# Vereinfachung: der Vorab-Durchlauf läuft VOR der Liste `zamiany` JEDES
+# Akzents dieses Pakets, also warf `š → s` genau die Regel weg, die die
+# Akzente seit jeher haben (`sch → ш` im Russischen, `sch → sz` im Polnischen,
+# `tsch → ч`/`cz`). Ein fremdes Zeichen, das STABIL einen Laut trägt, den das
+# Deutsche selbst schreibt, bekommt ab jetzt die deutsche Schreibung — meist
+# eine Buchstabengruppe, denn eine Gruppe ERZWINGT den Laut, den ein einzelner
+# Buchstabe nur nahelegt:
+#     š ş ŝ ž ĵ ś ź ż → sch      č ĉ ċ ć → tsch      đ ĝ ġ → dsch
+#     ř → rsch    ñ ń ň ņ → nj    ţ → z (deutsches z ist /ts/)
+#     ç → ss      ą → on    ę → en    å → o    ø œ ő → ö    ű → ü
+#   Gemessen: „Škoda Žižek Dvořák Đoković" wird zu „Schkoda Schischek
+#   Dvorschak Dschokovitsch" statt „Skoda Zizek Dvorak Dokovic", und
+#   „Ångström garçon" zu „Ongström garsson" statt „Angstrom garcon".
+#
+# DER REST BLEIBT ASCII, UND AUCH DAS IST EINE ENTSCHEIDUNG. Das Kriterium hat
+# zwei Seiten und beide müssen halten: die QUELLE muss in den Sprachen, aus
+# denen sie kommt, einen Laut meinen (`æ` ist einmal dänisch /ɛ/ und einmal
+# isländisch /ai/, `ó` polnisch /u/, isländisch /ou/ und spanisch betontes
+# /o/ — deshalb bleiben beide beim Grundbuchstaben), und das ZIEL muss die
+# Stimme DIESES Pakets jedes Mal gleich lesen. Deshalb `ł → l`: das Deutsche
+# hat kein /w/, und es gibt nichts, worauf man zielen könnte.
+#
+# Die Grenze bewacht `audyt_podstaw` (Klasse `znaki-cel-obcy`): das Ziel darf
+# ASCII sein oder ein Buchstabe aus `alfabet` weiter unten (deshalb ist `ö`
+# hier erlaubt) — niemals ein Buchstabe einer dritten Sprache.
 # -----------------------------------------------------------------------------
 polskie_znaki:
-  # -- ß → ss (rosnące przy .upper(): ß→SS — ZAKAZ w alfabet) --
+  # -- ß → ss: beim `.upper()` wächst es (ß → SS), darum steht es NICHT
+  #    im `alfabet` (dort sind nur Buchstaben mit einer Großform erlaubt) --
   - { wzor: "ß", zamiana: "ss" }
   - { wzor: "ẞ", zamiana: "SS" }
   # -- Ä/Ö/Ü: BEWUSST NICHT normalisiert (Korrektur v18.19) --
@@ -50,40 +78,44 @@ polskie_znaki:
   #    Akzentdateien unerreichbar waren (26 tote Regeln; der Text versprach
   #    „ä → e", die Engine lieferte „a"). „ß" bleibt oben normalisiert — es
   #    steht bewusst NICHT im `alfabet`.
-  # -- Polnische Zeichen → ASCII --
-  - { wzor: "ą", zamiana: "a"  }
-  - { wzor: "ć", zamiana: "c"  }
-  - { wzor: "ę", zamiana: "e"  }
+  # -- Polnische Zeichen: jeder dieser Buchstaben meint im Polnischen EINEN
+  #    Laut, und für jeden hat das Deutsche eine Schreibung — also schreiben
+  #    wir sie, statt das Diakritikum fallen zu lassen. `ó` und `ł` bleiben:
+  #    das erste ist nicht nur polnisch /u/, das zweite ist /w/, und das
+  #    Deutsche hat diesen Laut nicht --
+  - { wzor: "ą", zamiana: "on" }
+  - { wzor: "ć", zamiana: "tsch" }
+  - { wzor: "ę", zamiana: "en" }
   - { wzor: "ł", zamiana: "l"  }
-  - { wzor: "ń", zamiana: "n"  }
+  - { wzor: "ń", zamiana: "nj" }
   - { wzor: "ó", zamiana: "o"  }
-  - { wzor: "ś", zamiana: "s"  }
-  - { wzor: "ź", zamiana: "z"  }
-  - { wzor: "ż", zamiana: "z"  }
-  - { wzor: "Ą", zamiana: "A"  }
-  - { wzor: "Ć", zamiana: "C"  }
-  - { wzor: "Ę", zamiana: "E"  }
+  - { wzor: "ś", zamiana: "sch" }
+  - { wzor: "ź", zamiana: "sch" }
+  - { wzor: "ż", zamiana: "sch" }
+  - { wzor: "Ą", zamiana: "On" }
+  - { wzor: "Ć", zamiana: "Tsch" }
+  - { wzor: "Ę", zamiana: "En" }
   - { wzor: "Ł", zamiana: "L"  }
-  - { wzor: "Ń", zamiana: "N"  }
+  - { wzor: "Ń", zamiana: "Nj" }
   - { wzor: "Ó", zamiana: "O"  }
-  - { wzor: "Ś", zamiana: "S"  }
-  - { wzor: "Ź", zamiana: "Z"  }
-  - { wzor: "Ż", zamiana: "Z"  }
+  - { wzor: "Ś", zamiana: "Sch" }
+  - { wzor: "Ź", zamiana: "Sch" }
+  - { wzor: "Ż", zamiana: "Sch" }
   # -- Weitere europäische Diakritika → ASCII --
   - { wzor: "á", zamiana: "a"  }
   - { wzor: "à", zamiana: "a"  }
   - { wzor: "â", zamiana: "a"  }
   - { wzor: "ã", zamiana: "a"  }
-  - { wzor: "å", zamiana: "a"  }
+  - { wzor: "å", zamiana: "o" }
   - { wzor: "Á", zamiana: "A"  }
   - { wzor: "À", zamiana: "A"  }
   - { wzor: "Â", zamiana: "A"  }
   - { wzor: "Ã", zamiana: "A"  }
-  - { wzor: "Å", zamiana: "A"  }
+  - { wzor: "Å", zamiana: "O" }
   - { wzor: "æ", zamiana: "ae" }
   - { wzor: "Æ", zamiana: "Ae" }
-  - { wzor: "ç", zamiana: "c"  }
-  - { wzor: "Ç", zamiana: "C"  }
+  - { wzor: "ç", zamiana: "ss" }
+  - { wzor: "Ç", zamiana: "Ss" }
   - { wzor: "ð", zamiana: "d"  }
   - { wzor: "Ð", zamiana: "D"  }
   - { wzor: "é", zamiana: "e"  }
@@ -102,18 +134,18 @@ polskie_znaki:
   - { wzor: "Ì", zamiana: "I"  }
   - { wzor: "Î", zamiana: "I"  }
   - { wzor: "Ï", zamiana: "I"  }
-  - { wzor: "ñ", zamiana: "n"  }
-  - { wzor: "Ñ", zamiana: "N"  }
+  - { wzor: "ñ", zamiana: "nj" }
+  - { wzor: "Ñ", zamiana: "Nj" }
   - { wzor: "ò", zamiana: "o"  }
   - { wzor: "ô", zamiana: "o"  }
   - { wzor: "õ", zamiana: "o"  }
-  - { wzor: "ø", zamiana: "o"  }
+  - { wzor: "ø", zamiana: "ö" }
   - { wzor: "Ò", zamiana: "O"  }
   - { wzor: "Ô", zamiana: "O"  }
   - { wzor: "Õ", zamiana: "O"  }
-  - { wzor: "Ø", zamiana: "O"  }
-  - { wzor: "œ", zamiana: "oe" }
-  - { wzor: "Œ", zamiana: "Oe" }
+  - { wzor: "Ø", zamiana: "Ö" }
+  - { wzor: "œ", zamiana: "ö" }
+  - { wzor: "Œ", zamiana: "Ö" }
   - { wzor: "þ", zamiana: "th" }
   - { wzor: "Þ", zamiana: "Th" }
   - { wzor: "ú", zamiana: "u"  }
@@ -141,28 +173,28 @@ polskie_znaki:
   #    Standardpaare: `manager_regul_szablony.TABELA_LACINKI`.
   - { wzor: "ă", zamiana: "a" }
   - { wzor: "Ă", zamiana: "A" }
-  - { wzor: "ĉ", zamiana: "c" }
-  - { wzor: "Ĉ", zamiana: "C" }
-  - { wzor: "ċ", zamiana: "c" }
-  - { wzor: "Ċ", zamiana: "C" }
-  - { wzor: "č", zamiana: "c" }
-  - { wzor: "Č", zamiana: "C" }
+  - { wzor: "ĉ", zamiana: "tsch" }
+  - { wzor: "Ĉ", zamiana: "Tsch" }
+  - { wzor: "ċ", zamiana: "tsch" }
+  - { wzor: "Ċ", zamiana: "Tsch" }
+  - { wzor: "č", zamiana: "tsch" }
+  - { wzor: "Č", zamiana: "Tsch" }
   - { wzor: "ď", zamiana: "d" }
   - { wzor: "Ď", zamiana: "D" }
-  - { wzor: "đ", zamiana: "d" }
-  - { wzor: "Đ", zamiana: "D" }
+  - { wzor: "đ", zamiana: "dsch" }
+  - { wzor: "Đ", zamiana: "Dsch" }
   - { wzor: "ĕ", zamiana: "e" }
   - { wzor: "Ĕ", zamiana: "E" }
   - { wzor: "ė", zamiana: "e" }
   - { wzor: "Ė", zamiana: "E" }
   - { wzor: "ě", zamiana: "e" }
   - { wzor: "Ě", zamiana: "E" }
-  - { wzor: "ĝ", zamiana: "g" }
-  - { wzor: "Ĝ", zamiana: "G" }
+  - { wzor: "ĝ", zamiana: "dsch" }
+  - { wzor: "Ĝ", zamiana: "Dsch" }
   - { wzor: "ğ", zamiana: "g" }
   - { wzor: "Ğ", zamiana: "G" }
-  - { wzor: "ġ", zamiana: "g" }
-  - { wzor: "Ġ", zamiana: "G" }
+  - { wzor: "ġ", zamiana: "dsch" }
+  - { wzor: "Ġ", zamiana: "Dsch" }
   - { wzor: "ģ", zamiana: "g" }
   - { wzor: "Ģ", zamiana: "G" }
   - { wzor: "ĥ", zamiana: "h" }
@@ -178,8 +210,8 @@ polskie_znaki:
   - { wzor: "ı", zamiana: "i" }
   - { wzor: "ĳ", zamiana: "ij" }
   - { wzor: "Ĳ", zamiana: "Ij" }
-  - { wzor: "ĵ", zamiana: "j" }
-  - { wzor: "Ĵ", zamiana: "J" }
+  - { wzor: "ĵ", zamiana: "sch" }
+  - { wzor: "Ĵ", zamiana: "Sch" }
   - { wzor: "ķ", zamiana: "k" }
   - { wzor: "Ķ", zamiana: "K" }
   - { wzor: "ĸ", zamiana: "k" }
@@ -191,32 +223,32 @@ polskie_znaki:
   - { wzor: "Ľ", zamiana: "L" }
   - { wzor: "ŀ", zamiana: "l" }
   - { wzor: "Ŀ", zamiana: "L" }
-  - { wzor: "ņ", zamiana: "n" }
-  - { wzor: "Ņ", zamiana: "N" }
-  - { wzor: "ň", zamiana: "n" }
-  - { wzor: "Ň", zamiana: "N" }
+  - { wzor: "ņ", zamiana: "nj" }
+  - { wzor: "Ņ", zamiana: "Nj" }
+  - { wzor: "ň", zamiana: "nj" }
+  - { wzor: "Ň", zamiana: "Nj" }
   - { wzor: "ŉ", zamiana: "n" }
   - { wzor: "ŋ", zamiana: "ng" }
   - { wzor: "Ŋ", zamiana: "Ng" }
   - { wzor: "ŏ", zamiana: "o" }
   - { wzor: "Ŏ", zamiana: "O" }
-  - { wzor: "ő", zamiana: "o" }
-  - { wzor: "Ő", zamiana: "O" }
+  - { wzor: "ő", zamiana: "ö" }
+  - { wzor: "Ő", zamiana: "Ö" }
   - { wzor: "ŕ", zamiana: "r" }
   - { wzor: "Ŕ", zamiana: "R" }
   - { wzor: "ŗ", zamiana: "r" }
   - { wzor: "Ŗ", zamiana: "R" }
-  - { wzor: "ř", zamiana: "r" }
-  - { wzor: "Ř", zamiana: "R" }
-  - { wzor: "ŝ", zamiana: "s" }
-  - { wzor: "Ŝ", zamiana: "S" }
-  - { wzor: "ş", zamiana: "s" }
-  - { wzor: "Ş", zamiana: "S" }
-  - { wzor: "š", zamiana: "s" }
-  - { wzor: "Š", zamiana: "S" }
+  - { wzor: "ř", zamiana: "rsch" }
+  - { wzor: "Ř", zamiana: "Rsch" }
+  - { wzor: "ŝ", zamiana: "sch" }
+  - { wzor: "Ŝ", zamiana: "Sch" }
+  - { wzor: "ş", zamiana: "sch" }
+  - { wzor: "Ş", zamiana: "Sch" }
+  - { wzor: "š", zamiana: "sch" }
+  - { wzor: "Š", zamiana: "Sch" }
   - { wzor: "ſ", zamiana: "s" }
-  - { wzor: "ţ", zamiana: "t" }
-  - { wzor: "Ţ", zamiana: "T" }
+  - { wzor: "ţ", zamiana: "z" }
+  - { wzor: "Ţ", zamiana: "Z" }
   - { wzor: "ť", zamiana: "t" }
   - { wzor: "Ť", zamiana: "T" }
   - { wzor: "ŧ", zamiana: "t" }
@@ -227,16 +259,16 @@ polskie_znaki:
   - { wzor: "Ŭ", zamiana: "U" }
   - { wzor: "ů", zamiana: "u" }
   - { wzor: "Ů", zamiana: "U" }
-  - { wzor: "ű", zamiana: "u" }
-  - { wzor: "Ű", zamiana: "U" }
+  - { wzor: "ű", zamiana: "ü" }
+  - { wzor: "Ű", zamiana: "Ü" }
   - { wzor: "ų", zamiana: "u" }
   - { wzor: "Ų", zamiana: "U" }
   - { wzor: "ŵ", zamiana: "w" }
   - { wzor: "Ŵ", zamiana: "W" }
   - { wzor: "ŷ", zamiana: "y" }
   - { wzor: "Ŷ", zamiana: "Y" }
-  - { wzor: "ž", zamiana: "z" }
-  - { wzor: "Ž", zamiana: "Z" }
+  - { wzor: "ž", zamiana: "sch" }
+  - { wzor: "Ž", zamiana: "Sch" }
   - { wzor: "İ", zamiana: "I" }
 
 # -----------------------------------------------------------------------------

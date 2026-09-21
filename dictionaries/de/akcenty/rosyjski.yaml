@@ -53,7 +53,14 @@ skleja_pojedyncze_litery: false
 # frühere Ergebnisse nicht mehr beschädigen.
 # -----------------------------------------------------------------------------
 zamiany:
-  # --- 1. tsch / sch ---
+  # --- 1. dsch / tsch / sch ---
+  # `dsch` to niemiecki zapis /dʒ/ („Dschungel", „Dschihad") i cel pre-passu
+  # paczki dla `đ ĝ ġ` od v19.7. Bez tej pary trigram rozpada się na `д` + `ш`
+  # („Дшокофич"), a rosyjski ma na ten dźwięk własne `дж`. Trigram MUSI stać
+  # przed `sch`, inaczej `sch → ш` zabierze mu ogon.
+  - { wzor: "dsch", zamiana: "дж" }
+  - { wzor: "Dsch", zamiana: "Дж" }
+  - { wzor: "DSCH", zamiana: "ДЖ" }
   - { wzor: "tsch", zamiana: "ч" }
   - { wzor: "Tsch", zamiana: "Ч" }
   - { wzor: "TSCH", zamiana: "Ч" }
