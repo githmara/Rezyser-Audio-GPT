@@ -72,6 +72,12 @@ skleja_pojedyncze_litery: true
 #   12: Final-E truncation in words ≥4 chars (regex: true) — last.
 zamiany:
   # --- 1-4. Core digraph rewrites ---
+  # `zh` = English /ʒ/ (Zhivago, Zhang) and the pre-pass target of `ž`/`ř`
+  # since v19.7. Polish writes that sound `ż`; left alone the digraph reaches
+  # the synthesizer as `z` + `h`, which Polish reads as two separate letters.
+  - { wzor: "zh", zamiana: "ż" }
+  - { wzor: "Zh", zamiana: "Ż" }
+  - { wzor: "ZH", zamiana: "Ż" }
   - { wzor: "sh", zamiana: "sz" }
   - { wzor: "Sh", zamiana: "Sz" }
   - { wzor: "SH", zamiana: "SZ" }
@@ -85,7 +91,10 @@ zamiany:
   - { wzor: "Wh", zamiana: "Ł"  }
   - { wzor: "WH", zamiana: "Ł"  }
 
-  # --- 5-6. Hardening of digraph-i clusters (after sh→sz, ch→cz) ---
+  # --- 5-6. Hardening of digraph-i clusters (after sh→sz, ch→cz, zh→ż) ---
+  - { wzor: "żi", zamiana: "ży" }
+  - { wzor: "Żi", zamiana: "Ży" }
+  - { wzor: "ŻI", zamiana: "ŻY" }
   - { wzor: "szi", zamiana: "szy" }
   - { wzor: "Szi", zamiana: "Szy" }
   - { wzor: "SZI", zamiana: "SZY" }

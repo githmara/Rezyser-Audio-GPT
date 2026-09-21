@@ -30,57 +30,104 @@ opis: |
     2. English alphabet (26 uppercase letters) – used by the Caesar cipher.
 
 # -----------------------------------------------------------------------------
-# Diacritic normalisation. Every non-English Latin letter is mapped to its
-# closest ASCII equivalent so the Caesar cipher and accent rules can operate
-# on the 26-letter alphabet without skipping characters. Without this list,
-# "Pokémon" + Caesar(3) → "Srnéprq" (é stays unencrypted) — a real bug fixed
-# in 13.3.
+# Diacritic normalisation. Every non-English Latin letter is mapped to a form
+# the Caesar cipher and the accent rules can work on, i.e. one written with the
+# 26 letters of `alfabet` below. Without this list, "Pokémon" + Caesar(3) →
+# "Srnéprq" (é stays unencrypted) — a real bug fixed in 13.3.
+#
+# v19.7: THE TARGET IS ENGLISH, NOT THE POOREST ASCII SHAPE. Up to v19.6 every
+# foreign letter fell to its bare base letter, and that was impoverishment
+# rather than simplification: the pre-pass runs BEFORE the `zamiany` list of
+# EVERY accent of this pack, so flattening `š` to a plain `s` threw away the
+# rule the accents have always had (`sh → ш`, `ch → ч` in rosyjski.yaml) before
+# the accent could see anything at all. A foreign letter that STABLY carries a
+# sound English already writes now gets the English spelling — usually a
+# digraph, because a digraph FORCES the sound a single letter only suggests:
+#     š ş ŝ → sh    č ĉ ċ → ch    ž ĵ → zh    ř → rzh    ñ → ny
+#     đ ĝ ġ → j     ţ → ts        ŭ ł → w     ç → s      ð → th    å → o
+#   Polish letters follow the same rule: ą → on, ę → en, ć → ch, ś → sh,
+#   ź ż → zh. Measured: "Wałęsa Żeromski" now comes out as "Wawensa
+#   Zheromski" instead of "Walesa Zeromski", and "Dvořák Đoković" as
+#   "Dvorzhak Jokovic" instead of "Dvorak Dokovic".
+#
+#   A DIGRAPH MAY NOT INVENT A SYLLABLE, and that is why `ñ → ny` while
+#   Polish `ń`, Czech `ň` and Latvian `ņ` keep the plain `n`. All four are
+#   /ɲ/, so the sound argues for one target — but position decides: Spanish
+#   never ends a word in `ñ` (mañana → manyana, three syllables both ways),
+#   while the other three stand at the end constantly (Poznań, Plzeň). There
+#   a final `y` is read as a vowel, so "Poznany" gains a syllable the name
+#   does not have — a bigger error than the lost palatalisation, because it
+#   changes the shape of the word rather than its colour. The engine applies
+#   a sequential `str.replace` and cannot see the next character, so this is
+#   a choice made once for the whole pack.
+#
+# THE REST STAYS ASCII AND THAT IS ALSO A DECISION. The criterion has two
+# sides and both must hold: the SOURCE has to mean one sound in the languages
+# it comes from (`ä` is German /ɛ/ once and Finnish /æ/ the next, `æ` Danish
+# /ɛ/ and Icelandic /ai/), and the TARGET has to be something THIS pack's
+# voice reads the same way every time. The second half is why `ó → o` stays:
+# `ó` is Polish /u/, Icelandic /ou/ and Spanish stressed /o/ at once, so there
+# is nothing stable to aim at. Where two languages pull one character, the one
+# an English reader meets more often wins (`ç` French /s/ over Turkish /tʃ/;
+# `ż` Polish /ʐ/ over Maltese /z/) — this list is shared by the whole pack and
+# cannot look at the text.
+#
+# The boundary is enforced by `audyt_podstaw` (class `znaki-cel-obcy`): the
+# target may use ASCII or a letter standing in `alfabet` below — never a letter
+# of a third language.
 #
 # Categories: Polish, French/European, Spanish, Scandinavian, Icelandic, German.
 # -----------------------------------------------------------------------------
 polskie_znaki:
-  # -- Polish (PL letters in EN texts go to plain ASCII; no nasal expansion
-  #    like in pl/podstawy.yaml — an English reader doesn't know about /ɔ̃/) --
-  - { wzor: "ą", zamiana: "a"  }
-  - { wzor: "ć", zamiana: "c"  }
-  - { wzor: "ę", zamiana: "e"  }
-  - { wzor: "ł", zamiana: "l"  }
+  # -- Polish: every letter here means ONE sound in Polish and English has a
+  #    spelling for it, so we write that spelling instead of dropping the
+  #    diacritic. `ó` is the exception: Polish /u/, but Icelandic /ou/ and
+  #    Spanish stressed /o/ as well, so the source is not stable and the plain
+  #    `o` stays. Nasals go to `on`/`en` — a reader needs no /ɔ̃/ in the
+  #    description to read "Wawensa" closer than "Walesa" --
+  - { wzor: "ą", zamiana: "on" }
+  - { wzor: "ć", zamiana: "ch" }
+  - { wzor: "ę", zamiana: "en" }
+  - { wzor: "ł", zamiana: "w"  }
   - { wzor: "ń", zamiana: "n"  }
   - { wzor: "ó", zamiana: "o"  }
-  - { wzor: "ś", zamiana: "s"  }
-  - { wzor: "ź", zamiana: "z"  }
-  - { wzor: "ż", zamiana: "z"  }
-  - { wzor: "Ą", zamiana: "A"  }
-  - { wzor: "Ć", zamiana: "C"  }
-  - { wzor: "Ę", zamiana: "E"  }
-  - { wzor: "Ł", zamiana: "L"  }
+  - { wzor: "ś", zamiana: "sh" }
+  - { wzor: "ź", zamiana: "zh" }
+  - { wzor: "ż", zamiana: "zh" }
+  - { wzor: "Ą", zamiana: "On" }
+  - { wzor: "Ć", zamiana: "Ch" }
+  - { wzor: "Ę", zamiana: "En" }
+  - { wzor: "Ł", zamiana: "W"  }
   - { wzor: "Ń", zamiana: "N"  }
   - { wzor: "Ó", zamiana: "O"  }
-  - { wzor: "Ś", zamiana: "S"  }
-  - { wzor: "Ź", zamiana: "Z"  }
-  - { wzor: "Ż", zamiana: "Z"  }
+  - { wzor: "Ś", zamiana: "Sh" }
+  - { wzor: "Ź", zamiana: "Zh" }
+  - { wzor: "Ż", zamiana: "Zh" }
   # -- → a (French/Spanish/Portuguese/Scandinavian/German) --
   - { wzor: "á", zamiana: "a"  }
   - { wzor: "à", zamiana: "a"  }
   - { wzor: "â", zamiana: "a"  }
   - { wzor: "ã", zamiana: "a"  }
   - { wzor: "ä", zamiana: "a"  }
-  - { wzor: "å", zamiana: "a"  }
+  - { wzor: "å", zamiana: "o"  }
   - { wzor: "Á", zamiana: "A"  }
   - { wzor: "À", zamiana: "A"  }
   - { wzor: "Â", zamiana: "A"  }
   - { wzor: "Ã", zamiana: "A"  }
   - { wzor: "Ä", zamiana: "A"  }
-  - { wzor: "Å", zamiana: "A"  }
+  - { wzor: "Å", zamiana: "O"  }
   # -- → ae --
   - { wzor: "æ", zamiana: "ae" }
   - { wzor: "Æ", zamiana: "Ae" }
-  # -- → c --
-  - { wzor: "ç", zamiana: "c"  }
-  - { wzor: "Ç", zamiana: "C"  }
-  # -- → d (Icelandic Ð/ð) --
-  - { wzor: "ð", zamiana: "d"  }
-  - { wzor: "Ð", zamiana: "D"  }
+  # -- → s (the French cedilla is /s/ in "garçon"; a bare `c` before `o`
+  #    reads /k/, which is the one sound the cedilla exists to rule out) --
+  - { wzor: "ç", zamiana: "s"  }
+  - { wzor: "Ç", zamiana: "S"  }
+  # -- → th (Icelandic Ð/ð is /ð/ — the sound English `th` carries in "the".
+  #    `þ` below takes the voiceless one, exactly as English writes both with
+  #    the same digraph) --
+  - { wzor: "ð", zamiana: "th" }
+  - { wzor: "Ð", zamiana: "Th" }
   # -- → e --
   - { wzor: "é", zamiana: "e"  }
   - { wzor: "è", zamiana: "e"  }
@@ -99,9 +146,9 @@ polskie_znaki:
   - { wzor: "Ì", zamiana: "I"  }
   - { wzor: "Î", zamiana: "I"  }
   - { wzor: "Ï", zamiana: "I"  }
-  # -- → n --
-  - { wzor: "ñ", zamiana: "n"  }
-  - { wzor: "Ñ", zamiana: "N"  }
+  # -- → ny (Spanish /ɲ/, the sound English writes in "canyon") --
+  - { wzor: "ñ", zamiana: "ny" }
+  - { wzor: "Ñ", zamiana: "Ny" }
   # -- → o --
   - { wzor: "ò", zamiana: "o"  }
   - { wzor: "ô", zamiana: "o"  }
@@ -147,31 +194,37 @@ polskie_znaki:
   - { wzor: "Ō", zamiana: "O"  }
   - { wzor: "Ū", zamiana: "U"  }
   # -- Latin Extended-A: diacritics FOREIGN to this pack (v19.5) --
-  #    Default pairs: `manager_regul_szablony.TABELA_LACINKI`.
+  #    Default pairs: `manager_regul_szablony.TABELA_LACINKI` — a map to bare
+  #    ASCII, neutral for a language whose author the template does not know.
+  #    v19.7 tunes the ones whose sound English writes on its own (see the
+  #    section note above); the rest keep the neutral default, because a letter
+  #    without a stable English spelling guesses worse than it simplifies
+  #    (`ď ť ľ ģ ķ ļ` are palatal consonants English has no digraph for, and
+  #    `ğ` only lengthens the Turkish vowel in front of it).
   - { wzor: "ă", zamiana: "a" }
   - { wzor: "Ă", zamiana: "A" }
-  - { wzor: "ĉ", zamiana: "c" }
-  - { wzor: "Ĉ", zamiana: "C" }
-  - { wzor: "ċ", zamiana: "c" }
-  - { wzor: "Ċ", zamiana: "C" }
-  - { wzor: "č", zamiana: "c" }
-  - { wzor: "Č", zamiana: "C" }
+  - { wzor: "ĉ", zamiana: "ch" }
+  - { wzor: "Ĉ", zamiana: "Ch" }
+  - { wzor: "ċ", zamiana: "ch" }
+  - { wzor: "Ċ", zamiana: "Ch" }
+  - { wzor: "č", zamiana: "ch" }
+  - { wzor: "Č", zamiana: "Ch" }
   - { wzor: "ď", zamiana: "d" }
   - { wzor: "Ď", zamiana: "D" }
-  - { wzor: "đ", zamiana: "d" }
-  - { wzor: "Đ", zamiana: "D" }
+  - { wzor: "đ", zamiana: "j" }
+  - { wzor: "Đ", zamiana: "J" }
   - { wzor: "ĕ", zamiana: "e" }
   - { wzor: "Ĕ", zamiana: "E" }
   - { wzor: "ė", zamiana: "e" }
   - { wzor: "Ė", zamiana: "E" }
   - { wzor: "ě", zamiana: "e" }
   - { wzor: "Ě", zamiana: "E" }
-  - { wzor: "ĝ", zamiana: "g" }
-  - { wzor: "Ĝ", zamiana: "G" }
+  - { wzor: "ĝ", zamiana: "j" }
+  - { wzor: "Ĝ", zamiana: "J" }
   - { wzor: "ğ", zamiana: "g" }
   - { wzor: "Ğ", zamiana: "G" }
-  - { wzor: "ġ", zamiana: "g" }
-  - { wzor: "Ġ", zamiana: "G" }
+  - { wzor: "ġ", zamiana: "j" }
+  - { wzor: "Ġ", zamiana: "J" }
   - { wzor: "ģ", zamiana: "g" }
   - { wzor: "Ģ", zamiana: "G" }
   - { wzor: "ĥ", zamiana: "h" }
@@ -187,8 +240,8 @@ polskie_znaki:
   - { wzor: "ı", zamiana: "i" }
   - { wzor: "ĳ", zamiana: "ij" }
   - { wzor: "Ĳ", zamiana: "Ij" }
-  - { wzor: "ĵ", zamiana: "j" }
-  - { wzor: "Ĵ", zamiana: "J" }
+  - { wzor: "ĵ", zamiana: "zh" }
+  - { wzor: "Ĵ", zamiana: "Zh" }
   - { wzor: "ķ", zamiana: "k" }
   - { wzor: "Ķ", zamiana: "K" }
   - { wzor: "ĸ", zamiana: "k" }
@@ -215,25 +268,25 @@ polskie_znaki:
   - { wzor: "Ŕ", zamiana: "R" }
   - { wzor: "ŗ", zamiana: "r" }
   - { wzor: "Ŗ", zamiana: "R" }
-  - { wzor: "ř", zamiana: "r" }
-  - { wzor: "Ř", zamiana: "R" }
-  - { wzor: "ŝ", zamiana: "s" }
-  - { wzor: "Ŝ", zamiana: "S" }
-  - { wzor: "ş", zamiana: "s" }
-  - { wzor: "Ş", zamiana: "S" }
-  - { wzor: "š", zamiana: "s" }
-  - { wzor: "Š", zamiana: "S" }
+  - { wzor: "ř", zamiana: "rzh" }
+  - { wzor: "Ř", zamiana: "Rzh" }
+  - { wzor: "ŝ", zamiana: "sh" }
+  - { wzor: "Ŝ", zamiana: "Sh" }
+  - { wzor: "ş", zamiana: "sh" }
+  - { wzor: "Ş", zamiana: "Sh" }
+  - { wzor: "š", zamiana: "sh" }
+  - { wzor: "Š", zamiana: "Sh" }
   - { wzor: "ſ", zamiana: "s" }
-  - { wzor: "ţ", zamiana: "t" }
-  - { wzor: "Ţ", zamiana: "T" }
+  - { wzor: "ţ", zamiana: "ts" }
+  - { wzor: "Ţ", zamiana: "Ts" }
   - { wzor: "ť", zamiana: "t" }
   - { wzor: "Ť", zamiana: "T" }
   - { wzor: "ŧ", zamiana: "t" }
   - { wzor: "Ŧ", zamiana: "T" }
   - { wzor: "ũ", zamiana: "u" }
   - { wzor: "Ũ", zamiana: "U" }
-  - { wzor: "ŭ", zamiana: "u" }
-  - { wzor: "Ŭ", zamiana: "U" }
+  - { wzor: "ŭ", zamiana: "w" }
+  - { wzor: "Ŭ", zamiana: "W" }
   - { wzor: "ů", zamiana: "u" }
   - { wzor: "Ů", zamiana: "U" }
   - { wzor: "ű", zamiana: "u" }
@@ -244,8 +297,8 @@ polskie_znaki:
   - { wzor: "Ŵ", zamiana: "W" }
   - { wzor: "ŷ", zamiana: "y" }
   - { wzor: "Ŷ", zamiana: "Y" }
-  - { wzor: "ž", zamiana: "z" }
-  - { wzor: "Ž", zamiana: "Z" }
+  - { wzor: "ž", zamiana: "zh" }
+  - { wzor: "Ž", zamiana: "Zh" }
   - { wzor: "ẞ", zamiana: "SS" }
   - { wzor: "İ", zamiana: "I" }
 

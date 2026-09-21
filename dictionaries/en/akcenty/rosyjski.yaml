@@ -57,6 +57,13 @@ skleja_pojedyncze_litery: false
 # -----------------------------------------------------------------------------
 zamiany:
   # --- 1. Digraphs ---
+  # `zh` is how English writes /ʒ/ in names it borrowed (Zhivago, Zhang,
+  # Brezhnev) and what the pack pre-pass makes of `ž`/`ř` since v19.7. Without
+  # the pair below the digraph decomposes into `з` + `х` — a sound sequence
+  # Russian does not have, in a name the reader knows by heart.
+  - { wzor: "zh", zamiana: "ж"  }
+  - { wzor: "Zh", zamiana: "Ж"  }
+  - { wzor: "ZH", zamiana: "Ж"  }
   - { wzor: "th", zamiana: "з"  }
   - { wzor: "Th", zamiana: "З"  }
   - { wzor: "TH", zamiana: "З"  }
