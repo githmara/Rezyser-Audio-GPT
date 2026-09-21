@@ -959,7 +959,9 @@ a cleaning accent in the {natywna_baza} pack, GUI-visible label:
    style convention of the base pack.
 
 # STRUCTURE REQUIREMENTS
-1. `kategoria: oczyszczenie` (the engine treats such files as a
+1. `id: {id_pliku}` — the identifier the engine and the GUI use; keep the
+   value the creator put in the template, and keep it unique in the pack.
+   `kategoria: oczyszczenie` (the engine treats such files as a
    preprocessor, not a phonetic accent).
 2. `iso: {jezyk_bazowy}` (operates on the base-pack text).
 3. Pipeline:
@@ -1073,7 +1075,9 @@ a tag fixer in the {natywna_baza} pack, GUI-visible label:
    + comments translated into {natywna_baza}.
 
 # STRUCTURE REQUIREMENTS (engine)
-1. `kategoria: naprawiacz` — the engine detects the special mode by this
+1. `id: {id_pliku}` — the identifier the engine and the GUI use; keep the
+   value the creator put in the template, and keep it unique in the pack.
+   `kategoria: naprawiacz` — the engine detects the special mode by this
    value.
 2. `iso: ""` (empty string — the code is supplied by the user in the GUI).
 3. All pipeline flags `false`: `czysc_tekst_tts`, `normalizuj_liczby`,
@@ -1248,6 +1252,8 @@ def szablon_tryb_rezysera(id_pliku: str, etykieta: str,
     natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
     natywne_streszcz = _natywne_streszczenie_yaml(jezyk_bazowy)
     model_domyslny = pr.MODEL_DOMYSLNY
+    struktury = _csv_kodu(pr.STRUKTURY)
+    formaty = _csv_kodu(pr.FORMATY_WYJSCIA)
     return f"""# -----------------------------------------------------------------------------
 #  <FILL NATIVELY in {natywna_baza}: file header, e.g. „MODUS HÖRBUCH"
 #   (DE) / „MODALITÀ AUDIOLIBRO" (IT) / „РЕЖИМ АУДИОКНИГА" (RU)>
@@ -1260,12 +1266,14 @@ kolejnosc: 40
 
 # --- Mode behavior (data-driven; REUSING an existing value needs NO Python) ---
 # struktura: how the project .txt is segmented into memory anchor points AND
-#   which structure buttons appear in the GUI:
+#   which structure buttons appear in the GUI. The engine accepts exactly
+#   {struktury} (read from `przepisy_rezysera.STRUKTURY`):
 #     rozdzialy  – flat chapter list (prose; like Audiobook)  ← default here
 #     akty_sceny – Acts with nested Scenes (read-theatre; like Skrypt)
 #     brak       – no file structure (planning / ephemeral modes)
 #   A NEW header type (beyond Prolog/Akt/Scena/Rozdział/Epilog) needs CODE.
-# format_wyjscia: how the engine parses the AI reply:
+# format_wyjscia: how the engine parses the AI reply. The engine accepts
+#   exactly {formaty} (read from `przepisy_rezysera.FORMATY_WYJSCIA`):
 #     tekst       – plain prose, no JSON                       ← default here
 #     skrypt_json – {{"tury":[{{mowca,tekst}}]}} (reuses the Script parser)
 #     burza_json  – 3 plot options (reuses the Brainstorm parser, no file save)
@@ -1367,6 +1375,8 @@ def prompt_tryb_rezysera(id_pliku: str, etykieta: str,
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
     sklad_rezysera = _sklad_rezysera(jezyk_bazowy)
     model_domyslny = pr.MODEL_DOMYSLNY
+    struktury = _csv_kodu(pr.STRUKTURY)
+    formaty = _csv_kodu(pr.FORMATY_WYJSCIA)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project. You have file tools (read / write / edit / glob / grep — whatever
@@ -1427,10 +1437,12 @@ a creative AI mode named **{etykieta}** (id stem `{id_pliku}` — must be NEW).
 # STRUCTURE REQUIREMENTS (engine)
 1. Identifying fields: `id` (NEW, unique — see DATA-DRIVEN VS CODE),
    `etykieta`, `kategoria: tryb`, `kolejnosc` (int 10-90; 30 = audiobook,
-   40 = brainstorm, 50 = script). Behavior fields: `struktura`
-   (`rozdzialy`/`akty_sceny`/`brak`) and `format_wyjscia`
-   (`tekst`/`skrypt_json`/`burza_json`) — REUSE existing values unless you are
-   also adding the matching code (then you need source access).
+   40 = brainstorm, 50 = script). Behavior fields: `struktura` (the engine
+   accepts exactly {struktury}) and `format_wyjscia` (exactly {formaty}) —
+   REUSE existing values unless you are also adding the matching code (then
+   you need source access). Both lists are read from
+   `przepisy_rezysera.STRUKTURY` / `.FORMATY_WYJSCIA`, so they cannot drift
+   from the dispatch.
 2. AI model parameters: `model: {model_domyslny}`,
    `temperatura` (0.7-0.9 for literary, 0.5 for scripting),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}` (already matched to the pack),

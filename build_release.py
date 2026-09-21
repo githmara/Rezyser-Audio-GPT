@@ -1404,6 +1404,42 @@ def main(args: argparse.Namespace | None = None) -> None:
                     print(f"      • {zakres} [{klasa}]: {szczegol}")
             sys.exit(1)
 
+    # 6b3b. Creator-text sync gate (v19.7). Szablony i prompty Managera Reguł
+    # OPISUJĄ silnik, ale nic ich nie wykonuje — zmiana w kodzie nie łamie ich
+    # w żaden widoczny sposób, opis po prostu zaczyna kłamać. Adresat nie ma
+    # jak tego sprawdzić: użytkownik zainstalowanej paczki nie widzi źródeł,
+    # a agent AI wykona fałszywe zdanie dosłownie. BEZ baseline'u — kłamiący
+    # opis nie ma dopuszczalnej postaci.
+    print("🔍 Creator-text sync gate: Manager Reguł templates and prompts vs the engine...")
+    try:
+        import audyt_kreatora
+    except ImportError as exc:
+        print(f"⚠️  audyt_kreatora not available ({exc}) — creator-text gate SKIPPED.")
+        print()
+    else:
+        wynik_kreator = audyt_kreatora.bramka()
+        if wynik_kreator.degradacja:
+            print(f"⚠️  Creator-text gate ran with REDUCED coverage: "
+                  f"{wynik_kreator.degradacja}.")
+        if wynik_kreator.czysto:
+            print(f"✅ All {len(audyt_kreatora.mrs.LISTA_TYPOW)} creator type(s) "
+                  f"render, and every symbol, pack file, field and enumerated "
+                  f"value they cite exists in the engine.")
+            print()
+        else:
+            ile = sum(len(v) for v in wynik_kreator.nowe.values())
+            print(f"❌ FATAL: {ile} creator text(s) describe an engine that is "
+                  f"not there — refusing to build.")
+            print("A template or prompt is read by someone who CANNOT verify it. "
+                  "Fix the text, or interpolate the value from code the way "
+                  "`_sklad_rezysera` / `_regexy_rozdzialow` / `_algorytmy_szyfrow` "
+                  "already do. Run `python audyt_kreatora.py` for the full report.")
+            for zakres, powody in sorted(wynik_kreator.nowe.items()):
+                for pw in powody:
+                    klasa, _, szczegol = pw.partition("|")
+                    print(f"      • {zakres} [{klasa}]: {szczegol}")
+            sys.exit(1)
+
     # 6b4. Dependency gate — pytanie brzmi „czy zamrażam aplikację", nie „czy
     # zmieniałem manifest": wejściem audytu jest PyPI, które rusza się bez nas.
     # Cała treść kroku (oraz uzasadnienie blokady i flagi `--no-strict`) stoi

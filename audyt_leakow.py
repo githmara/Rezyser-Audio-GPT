@@ -1056,6 +1056,11 @@ DEV_TOOLE = {
     # v18.32.0: bramka zależności (manifest kontra środowisko kontra PyPI).
     # Ta sama klasa co dwie wyżej.
     "audyt_zaleznosci.py",
+    # v19.7: bramka synchronizacji tekstów Managera Reguł z kodem. Ta sama
+    # klasa co trzy wyżej — importuje `manager_regul_szablony`, ale sama nie
+    # wchodzi do bundla (woła ją tylko `build_release` i CLI ze źródła),
+    # a „Manager Reguł" w jej nagłówku to nazwa własna narzędzia.
+    "audyt_kreatora.py",
 }
 
 # `jezyki_lingua.py` CELOWO NIE JEST na liście wyżej i to jest decyzja, nie

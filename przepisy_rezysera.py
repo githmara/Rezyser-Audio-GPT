@@ -109,6 +109,18 @@ ZAKRESY_DOZWOLONE: tuple[str, ...] = (
 #                        nieaktualnego nagłówka.
 ROLA_PAMIEC_DLUGOTRWALA = "pamiec_dlugotrwala"
 
+# Legalne wartości dwóch pól, po których dispatchuje GUI i silnik. Do v19.6
+# nie istniały jako zbiór — wartości żyły w komentarzach `PrzepisRezysera`,
+# w `if`-ach (`gui_rezyser` dla `format_wyjscia`, `core_rezyser.wyliczy_markery`
+# i panel struktury dla `struktura`) oraz w literałach szablonu i promptu
+# Managera Reguł. Cztery egzemplarze jednej prawdy, z czego dwa poza kodem —
+# dokładnie ten układ, w którym opis przeżywa zmianę dispatchu. Stałe są
+# DEKLARACJĄ, nie walidacją: loader ich nie egzekwuje (literówka dalej
+# degraduje do zachowania domyślnego), pilnuje ich natomiast `audyt_kreatora`
+# po stronie tekstów kreatora.
+FORMATY_WYJSCIA: tuple[str, ...] = ("tekst", "skrypt_json", "burza_json")
+STRUKTURY: tuple[str, ...] = ("rozdzialy", "akty_sceny", "brak")
+
 # Sufiks pliku Pamięci Długotrwałej używany, gdy paczka nie ma przepisu z rolą
 # :data:`ROLA_PAMIEC_DLUGOTRWALA` (np. user skasował YAML albo paczka jest sprzed
 # v18.13). Historyczna wartość — pliki `<nazwa>_streszczenie.txt` istnieją
