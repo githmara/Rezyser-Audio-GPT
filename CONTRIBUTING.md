@@ -284,7 +284,22 @@ first written, also prints whether `GITHUB_TOKEN` is set before it hands over).
    digraph is a DEBT THE PACK'S ACCENTS PAY, because an accent transliterating
    into another script maps single letters and will split an unknown digraph
    („zh" reached the Russian accent as „з"+„х"). Give that accent one unit
-   rule, placed before any shorter pattern inside the digraph.
+   rule, placed before any shorter pattern inside the digraph — though that
+   debt belongs to an IMPORTED spelling, and a digraph your own language
+   writes is usually already in every accent, because they had to learn it to
+   read your own text. Which is the shortest way to say the rest: LOOK THE
+   SPELLING UP BEFORE YOU INVENT IT. A language that meets foreign names has
+   already decided how to write the sounds it lacks — Finnish officially
+   (Kotus: `sh`, `zh`, `tsh`, `dzh`), Icelandic in live loanwords (sjampó,
+   djass, Tsjetsjenía), French in a century of press (Chostakovitch, Tchekhov,
+   Jivago, Djokovic) — and that spelling is both the one your reader
+   recognises and the one your accents can read. Two limits on any target you
+   choose: it may not REWRITE THE LETTER NEXT TO IT (`fr: œ → eu` would make
+   „cœur" into „ceur" and the [k] into an [s], so that pack keeps `œ → oe`),
+   and it should stand in your `alfabet` if the Caesar cipher is to shift it —
+   an ASCII target outside that string passes `audyt_podstaw` and still leaves
+   the letter in clear text inside the cryptogram (`it: ĵ → j`, in an alphabet
+   of 21 letters).
 2. `python refresh_languages.py` — registers the new code.
 3. `python buduj_wielojezyczne_ui.py -l <code>` then
    `python buduj_wielojezyczne_docs.py -l <code>` — translate UI + manuals.

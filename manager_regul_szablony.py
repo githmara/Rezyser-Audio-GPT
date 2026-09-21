@@ -2020,7 +2020,23 @@ polskie_znaki:
   #     transliterates into another script has a rule per single letter, so a
   #     digraph it does not know as a unit splits („zh" reached the Russian
   #     accent as „з"+„х"). Give that accent one unit rule, placed BEFORE any
-  #     shorter pattern contained in the digraph.
+  #     shorter pattern contained in the digraph. The debt belongs to an
+  #     IMPORTED spelling: aim at a digraph your own language writes and the
+  #     accents usually know it already, because they had to learn it to read
+  #     your own text.
+  #   * LOOK THE SPELLING UP BEFORE YOU INVENT IT. A language that meets
+  #     foreign names has already decided how to write the sounds it does not
+  #     own: Finnish officially (Kotus: sh, zh, tsh, dzh), Icelandic in live
+  #     loanwords (sjampó, djass, Tsjetsjenía), French in a century of press
+  #     (Chostakovitch, Tchekhov, Jivago, Djokovic), Spanish in its own
+  #     borrowings (champú: /ʃ/ arrives as /tʃ/). Ask what your language
+  #     WRITES, not what a transcription table says.
+  #   * A TARGET MAY NOT REWRITE THE LETTER NEXT TO IT. Measured: `fr: œ → eu`
+  #     would turn „cœur" into „ceur" and the [k] into an [s], so that pack
+  #     keeps `œ → oe` while `ø ö ő` do take `eu`.
+  #   * YOUR ALPHABET IS ALSO THE CAESAR RING. An ASCII target outside it
+  #     passes the gate and still leaves that letter in clear text inside the
+  #     cryptogram (`it: ĵ → j`, in an alphabet of 21 letters).
   # Expect to think hard here: settling these pairs for a new language is
   # a series of compromises, not a lookup.
   #
@@ -2228,8 +2244,22 @@ presence/absence of diacritics such as ä/ö/ç/ß).
      transliterating into another script maps single letters and splits
      a digraph it does not know („zh" reached the Russian accent as
      „з"+„х") — give that accent one unit rule, before any shorter
-     pattern inside the digraph. Expect to think hard; these pairs are
-     compromises, not lookups.
+     pattern inside the digraph. That debt belongs to an IMPORTED
+     spelling: aim at a digraph {natywna} writes itself and the accents
+     usually know it already. Which is the same trap from the other
+     side: LOOK THE SPELLING UP BEFORE YOU INVENT IT, because a language
+     that meets
+     foreign names has already decided how to write the sounds it lacks
+     (Finnish officially — Kotus: sh, zh, tsh, dzh; Icelandic in live
+     loanwords — sjampó, djass, Tsjetsjenía; French in a century of
+     press — Chostakovitch, Tchekhov, Jivago, Djokovic). And two limits
+     on any target: it may not REWRITE THE LETTER NEXT TO IT („cœur →
+     ceur" would turn the [k] into an [s], so the French pack keeps
+     `œ → oe`), and it must stand in your `alfabet` if the Caesar cipher
+     is to shift it at all — an ASCII target outside that string passes
+     the boundary gate and still comes out of the cryptogram in clear
+     text (`it: ĵ → j`, alphabet of 21 letters). Expect to think hard;
+     these pairs are compromises, not lookups.
    Do NOT delete a pair merely because {natywna} „does not use" that letter.
    Loanwords, quotations and foreign names arrive in real text, and every
    character missing from this list reaches the synthesizer untouched —

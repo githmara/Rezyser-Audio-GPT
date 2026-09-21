@@ -732,7 +732,46 @@ disjoint, because one rewrites German spelling and the other Polish. Never
   digraph `ts`; likewise `æ → ae` gives two vowels where Finnish already owns
   `ä` = [æ]. A digraph that FORCES the sound beats a letter that merely
   suggests it. Read the pair out loud through the target voice before you
-  approve it — that is the only court of appeal this class has.
+  approve it — that is the only court of appeal this class has. Two shapes this
+  takes, both measured in 19.7: a SILENT letter kills a target (Spanish `h` is
+  mute, so `th` and `zh` reach that voice as [t] and [θ] — while `þ → z` is
+  right there, because the Castilian `z` IS [θ]), and a POSITIONAL spelling
+  cannot be frozen (Italian writes [tʃ] only as `ci`/`ce`, so a fixed `ci` adds
+  a vowel exactly where those letters live, at the end of the word:
+  „Đoković → Giokovici", four syllables for three. The `it` pack therefore
+  keeps `č ć` as `c` and says why in the file — and the SAME rule sends `đ` the
+  other way, to `gi`, because that letter only ever opens a word).
+- LOOK THE SPELLING UP BEFORE YOU INVENT IT. A language that meets foreign
+  names has already decided how to write the sounds it does not own, and that
+  decision beats anything you would derive: Finnish has an official one (Kotus
+  — when the caron is unavailable `š`/`ž` become `sh`/`zh`, `tš` → `tsh`,
+  `dž` → `dzh`: šakki/shakki, Tšekki/tshekki), Icelandic has it in live
+  loanwords (sjampó, sjeik, djass, djús, Tsjetsjenía → `sj`, `dj`, `tsj`),
+  French in a century of press (Chostakovitch, Tchekhov, Jivago, Djokovic →
+  `ch`, `tch`, `j`, `dj`), Spanish in its own borrowings (champú, chalé: /ʃ/
+  arrives as /tʃ/ and is written `ch`). Two payoffs, both measured in 19.7: the
+  reader recognises the shape, and the pack's accents usually have a rule for
+  it already — see the debt entry below. Ask what your language WRITES, not
+  what a transcription table says.
+- A TARGET MAY NOT REWRITE THE LETTER NEXT TO IT. The pre-pass is a sequential
+  `str.replace` inside the word, so a pair can change how the letter BESIDE it
+  is read — a letter that was already right. Measured: `fr: œ → eu` would turn
+  „cœur" into „ceur" and the [k] into an [s] (c before o vs. c before e), which
+  is why that pack keeps `œ → oe`, its own ASCII fallback, while `ø ö ő` do take
+  `eu`. Same shape in `es`, where `ł → u` is right everywhere except after g/q,
+  because „gue"/„gui" swallow the [w] („Głębocki → Guenbocki"). Take such a
+  blind spot only after you have counted how often it fires, and write the
+  count into the file.
+- YOUR `alfabet` IS ALSO THE CAESAR RING, SO AN ASCII TARGET CAN STILL BE A
+  HOLE. The boundary gate accepts any ASCII target, but the cipher shifts only
+  characters standing in `alfabet`: a target outside it leaves that letter in
+  CLEAR TEXT inside the cryptogram — the class v19.4.2 closed for the whole
+  Latin range, reopened one pair at a time. Measured in 19.7: `is: ŵ → w` (no W
+  in Icelandic; Welsh `ŵ` is [uː], so `ú` is both truer and shiftable) and four
+  pairs in `it`, whose alphabet has 21 letters (`ĵ → j`, `ĳ → ij`, `ŵ → w`,
+  `ŷ → y`, now `gi`, `ei`, `u`, `i`). Grep your own table for targets outside
+  your alphabet. Where every native spelling of that sound is positional, keep
+  the foreign letter ON PURPOSE and say so in a comment (`it: ķ ĸ → k`).
 - A DIGRAPH MUST NOT ADD A SYLLABLE — position decides what the sound alone
   cannot. `en: ñ → ny` is right, because Spanish never ends a word in `ñ`
   („mañana" → „manyana", three syllables either way), while Polish `ń`, Czech
@@ -755,7 +794,17 @@ disjoint, because one rewrites German spelling and the other Polish. Never
   aa`), so a mechanical „does this accent know that target" yields about a
   hundred hits across the nine packs, of which a handful matter. Latin-script
   accents hand an unknown digraph to their synthesizer, exactly as they already
-  do for native words.
+  do for native words. THE DEBT IS USUALLY NOT INCURRED WHEN YOU AIM AT A
+  DIGRAPH YOUR OWN LANGUAGE WRITES: the accents had to learn it to read their
+  own text, so the rule is already there. Measured across the three Romance
+  packs of 19.7, which took `ch`, `gn`, `j`, `dj` and `gi` — one single new
+  rule was needed in all three together (`fr: tch → ч`, a TRIGRAM none of them
+  writes as a unit). The debt is a property of an IMPORTED spelling
+  (`fi: sh`), not of length. One neighbouring case is worth knowing: the
+  pre-pass can also expose a HOLE in an accent's own series rather than a debt
+  — `es/rosyjski` mapped ya/ye/yo/yu but not `yi`, so a `y` before `i` fell
+  through to the VOWEL rule („Ииек" for what should be „Йиек"); the fix is
+  the missing member of the series, and it is right for Spanish anyway.
 - CASE: give every letter rule its capitalized counterpart, and remember that
   ALL-CAPS text (headings) needs the fully upper-cased form of a digraph as a
   third rule — `Sz` does not catch `SZ`.
