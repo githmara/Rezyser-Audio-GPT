@@ -716,6 +716,23 @@ disjoint, because one rewrites German spelling and the other Polish. Never
   /ɛ/ but Finnish /æ/ — leave it in ASCII), and where two languages pull one
   character apart, follow the spelling your readers meet more often, because
   the list is shared by the whole pack.
+- THE PRE-PASS ANSWERS ONE QUESTION: "this is the best THIS pack's voice can
+  read that character." Not what the character is, not how a linguist would
+  transcribe it. The packs are phonetic groundwork for a screen reader, and
+  neither the synthesizer nor this engine reads the sentence around a word, so
+  perfection is unavailable and is not the target. Practical consequence:
+  "stable" has TWO sides and reviewers check only the first. Stable SOURCE =
+  the character means one sound across the languages it comes from. Stable
+  TARGET = your own voice reads what you wrote the same way every time — and
+  a letter your language keeps only for loanwords usually fails that, even
+  though it stands in `alfabet` and therefore passes the gate. Measured in the
+  `fi` pack: `ç ć ĉ ċ č → c` is accepted by everything, yet a Finnish voice
+  reads a lone `c` as [k] in one word and [s] in another, while the sound
+  those letters carry, [ts], is one Finnish writes unambiguously as the
+  digraph `ts`; likewise `æ → ae` gives two vowels where Finnish already owns
+  `ä` = [æ]. A digraph that FORCES the sound beats a letter that merely
+  suggests it. Read the pair out loud through the target voice before you
+  approve it — that is the only court of appeal this class has.
 - CASE: give every letter rule its capitalized counterpart, and remember that
   ALL-CAPS text (headings) needs the fully upper-cased form of a digraph as a
   third rule — `Sz` does not catch `SZ`.

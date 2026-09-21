@@ -237,10 +237,25 @@ it report green — a skip is visible in the summary, a false pass is not.
    language writes (`pl: š → sz, ž → ż`; `ru: š → ш, ž → ж`). The list runs
    before every accent of the pack, so a native spelling hands each accent
    something it already has a rule for, while a bare `s` throws the
-   distinction away. Leave the ASCII default where the mapping is NOT stable
-   (`ä` is German /ɛ/ but Finnish /æ/). `python audyt_podstaw.py --bramka`
-   checks the boundary — ASCII or your own letters, never a third
-   language's — but it cannot judge which of two legal targets sounds better.
+   distinction away. The question the list answers is always the same one:
+   **"this is the best my pack's voice can read that character"** — not what
+   the character *is*, and not how a linguist would transcribe it. These packs
+   are phonetic groundwork for a screen reader, and neither the synthesizer
+   nor this engine reads the sentence around a word, so perfection is not on
+   the table; the best your voice can do is the target. Check both sides of
+   "stable": the SOURCE (does the character mean one sound across the
+   languages it comes from? `ä` is German /ɛ/ but Finnish /æ/, so it keeps the
+   ASCII default) and the TARGET (will your own voice read what you wrote the
+   same way every time?). The second side is the one people miss. Measured in
+   the `fi` pack: `C` is in the Finnish alphabet for loanwords, so nothing
+   rejects `ç ć ĉ ċ č → c` — yet a Finnish voice reads a lone `c` as [k] in
+   one word and [s] in another, while [ts], the sound those letters carry, is
+   one Finnish writes unambiguously as `ts`. A digraph that forces the sound
+   beats a letter that only suggests it, and the difference is audible.
+   `python audyt_podstaw.py --bramka` checks the boundary — ASCII or your own
+   letters, never a third language's — but it cannot judge which of two legal
+   targets sounds better. Expect to weigh compromises rather than look
+   answers up.
 2. `python refresh_languages.py` — registers the new code.
 3. `python buduj_wielojezyczne_ui.py -l <code>` then
    `python buduj_wielojezyczne_docs.py -l <code>` — translate UI + manuals.

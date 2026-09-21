@@ -1960,6 +1960,32 @@ polskie_znaki:
   #     spelling YOUR reader meets more often — this is one shared list for
   #     the whole pack, not a per-text decision.
   #
+  # THE ONE QUESTION THIS LIST ANSWERS:
+  #   „This is the best MY pack's voice can read that character."
+  # Not „what is this character", not „how would a linguist transcribe it".
+  # These packs are PHONETIC GROUNDWORK FOR A SCREEN READER, and neither the
+  # synthesizer nor this engine reads the sentence around a word — the rules
+  # are a sequential `str.replace`. Perfection is not available here and is
+  # not the target; the best your voice can do IS the target.
+  #
+  # That question has TWO sides, and the second one is the one people miss:
+  #   * the SOURCE must be stable — the character means the same sound in the
+  #     languages it comes from (`š` is /ʃ/ wherever it appears; `ä` is
+  #     German /ɛ/ but Finnish /æ/, so `ä` gets no native spelling here);
+  #   * the TARGET must be stable — YOUR voice must read what you wrote the
+  #     same way every time. A letter that your language only uses in
+  #     loanwords is usually NOT stable, even when it stands in `alfabet`.
+  # Worked example, measured in the `fi` pack: `C` is in the Finnish alphabet
+  # (loanwords), so nothing rejects `ç ć ĉ ċ č → c` — and yet a Finnish voice
+  # reads a lone `c` sometimes [k], sometimes [s], depending on the word. The
+  # sound those letters carry, [ts], is one Finnish writes unambiguously as
+  # the digraph `ts`. A DIGRAPH THAT FORCES THE SOUND BEATS A LETTER THAT ONLY
+  # SUGGESTS IT — and the difference is audible, which is the only court of
+  # appeal that counts. Same pack, same logic for `æ → ae` (two vowels) where
+  # Finnish already owns `ä` = [æ] (one letter, the right sound).
+  # Expect to think hard here: settling these pairs for a new language is
+  # a series of compromises, not a lookup.
+  #
   # The defaults below come from `manager_regul_szablony.TABELA_LACINKI`,
   # the same table the release gate measures pack coverage with.
 {pre_pass}
@@ -2138,6 +2164,25 @@ presence/absence of diacritics such as ä/ö/ç/ß).
      Where two languages pull one character apart (a Vietnamese letter
      inside a Serbian-looking name), pick the spelling THIS pack's reader
      meets more often — the list is shared by the whole pack.
+     THE ONE QUESTION THIS LIST ANSWERS: „this is the best THIS pack's voice
+     can read that character". Not „what is this character", and not „how
+     would a linguist transcribe it". These packs are phonetic groundwork
+     for a SCREEN READER, and neither the synthesizer nor this engine reads
+     the sentence around a word — the rules are a sequential `str.replace`.
+     Perfection is not on the table and is not the target; the best your
+     voice can do IS the target. So check BOTH sides of „stable": the SOURCE
+     (does the character mean one sound across the languages it comes from?)
+     and the TARGET (will your own voice read what you wrote the same way
+     every time?). The second side is the one people miss. Measured in the
+     `fi` pack: `C` stands in the Finnish alphabet for loanwords, so nothing
+     rejects `ç ć ĉ ċ č → c` — yet a Finnish voice reads a lone `c` as [k]
+     in one word and [s] in another, while the sound those letters carry,
+     [ts], is one Finnish writes unambiguously as `ts`. A digraph that
+     FORCES the sound beats a letter that only suggests it, and the
+     difference is audible — which is the only court of appeal that counts.
+     Same pack: `æ → ae` yields two vowels where Finnish already owns
+     `ä` = [æ]. Expect to think hard; these pairs are compromises, not
+     lookups.
    Do NOT delete a pair merely because {natywna} „does not use" that letter.
    Loanwords, quotations and foreign names arrive in real text, and every
    character missing from this list reaches the synthesizer untouched —
