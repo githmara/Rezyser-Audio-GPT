@@ -1513,6 +1513,11 @@ class PoliglotaPanel(wx.Panel):
         # metryki cache) leciał dotąd do `threading.excepthook`, czyli w paczce
         # windowed donikąd — `_btn_process` zostawał wyłączony do restartu.
         try:
+            # 19.8: nazwa języka rozpoznana deterministycznie (kanon lingua po
+            # polsku/angielsku, natywna nazwa wdrożonej paczki) = kod znany
+            # i mikrocall ISO pominięty; `""` = silnik pyta model jak dawniej.
+            # W wątku, bo resolver skanuje `dictionaries/`.
+            kod_iso = core_poliglota.kod_iso_z_nazwy_jezyka(target_lang)
             wynik = tlumacz_ai.tlumacz_dlugi_tekst(
                 tresc=content,
                 jezyk_docelowy=target_lang,
@@ -1525,6 +1530,7 @@ class PoliglotaPanel(wx.Panel):
                 slowo_tlumaczenie=core_poliglota.bezpieczny_czlon_nazwy(
                     t("poliglota.filename_tlumaczenie"), "tlumaczenie"),
                 tryb_quality=tryb_quality,
+                kod_iso=kod_iso,
             )
         except ct.BladTokenizeraOffline as exc:
             # v18.10: brak tabel BPE (chunking tiktoken) = brak Internetu —

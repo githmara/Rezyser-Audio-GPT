@@ -34,6 +34,7 @@ Szczegółowy przebieg:
   5. Na końcu wywoływana jest druga, krótka konsultacja (``model_iso``)
      w celu ustalenia kodu języka BCP-47 (dwuliterowy ISO 639-1,
      dla odmian regionalnych/pisma z podtagiem, np. ``pt-BR``, ``zh-Hans``).
+     Od 19.8 pomijana, gdy wołający zna kod i poda go w ``kod_iso``.
 
 Migracja na Anthropic (v18.x, Opcja A): silnik woła Claude Messages API
 (``klient.messages.create``) zamiast OpenAI ``chat.completions``. Klient
@@ -614,6 +615,7 @@ def tlumacz_dlugi_tekst(
     slowo_tlumaczenie: str = "tlumaczenie",
     zachowaj_cache: bool = False,
     tryb_quality: bool = False,
+    kod_iso: str = "",
 ) -> WynikTlumaczenia | None:
     """Tłumaczy długi tekst przez Anthropic Claude z wznawianiem po przerwaniu.
 
@@ -664,6 +666,14 @@ def tlumacz_dlugi_tekst(
                            cache ``temp_*.jsonl`` pozostaje kompatybilny
                            (wznowienie może zmieszać bloki z obu trybów —
                            akceptowalne, to wciąż to samo tłumaczenie).
+        kod_iso:           19.8. Kod języka celu znany wołającemu (BWD: kod
+                           z `-l`; GUI: nazwa rozwiązana deterministycznie
+                           przez ``core_poliglota.kod_iso_z_nazwy_jezyka``).
+                           Poprawny kod BCP-47 = mikrocall ISO pominięty, bo
+                           jego jedynym zadaniem byłoby odgadnąć to, co już
+                           wiemy. Pusty albo nieparsowalny = dawna ścieżka
+                           (mikrocall + miękkie ostrzeżenie), więc wołający
+                           bez tej wiedzy nie traci niczego.
         zachowaj_cache:    18.9. Nie kasuj ``temp_*.jsonl`` po sukcesie —
                            dla wołających, którzy tłumaczą WIELE jednostek
                            i zapisują plik wynikowy dopiero na końcu
@@ -824,7 +834,11 @@ def tlumacz_dlugi_tekst(
             return None
 
     # -------- Pobranie kodu ISO -----------------------------------------
-    if on_postep:
+    # Kod podany przez wołającego wygrywa: płacenie za mikrocall, który ma
+    # odgadnąć znaną już odpowiedź, jest tym samym jałowym kosztem, co dawne
+    # przekazywanie `temperature` modelowi, który jej nie przyjmuje.
+    kod_znany = normalizuj_kod_jezyka(kod_iso) if kod_iso else ""
+    if on_postep and not kod_znany:
         on_postep(InfoPostepu(
             "ai_postep_iso", 95,
             detal="Generowanie tagu językowego dla czytników ekranu…",
@@ -858,22 +872,25 @@ def tlumacz_dlugi_tekst(
                 klucz_tytul="ai_ostrzezenie_cache_tytul",
             ))
 
-    try:
-        iso_code_pobrany, surowa = _pobierz_iso(klient, jezyk_docelowy, model_iso)
-        if iso_code_pobrany:
-            iso_code = iso_code_pobrany
-        else:
+    if kod_znany:
+        iso_code = kod_znany
+    else:
+        try:
+            iso_code_pobrany, surowa = _pobierz_iso(klient, jezyk_docelowy, model_iso)
+            if iso_code_pobrany:
+                iso_code = iso_code_pobrany
+            else:
+                _ostrzezenie_iso(
+                    surowa,
+                    f"ISO autodetect returned no valid code; defaulted to 'pl'. "
+                    f"Model response: {surowa}",
+                )
+        except Exception as iso_exc:  # noqa: BLE001
             _ostrzezenie_iso(
-                surowa,
-                f"ISO autodetect returned no valid code; defaulted to 'pl'. "
-                f"Model response: {surowa}",
+                str(iso_exc),
+                f"ISO autodetect raised an exception; defaulted to 'pl'. "
+                f"Details: {iso_exc}",
             )
-    except Exception as iso_exc:  # noqa: BLE001
-        _ostrzezenie_iso(
-            str(iso_exc),
-            f"ISO autodetect raised an exception; defaulted to 'pl'. "
-            f"Details: {iso_exc}",
-        )
 
     # -------- Posprzątanie cache'u i złożenie wyniku --------------------
     # `zachowaj_cache` = wołający zapisuje plik wynikowy dopiero po wielu

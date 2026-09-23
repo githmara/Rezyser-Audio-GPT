@@ -830,6 +830,50 @@ def lista_wspieranych_jezykow_natywnie(jezyk_pierwszy: str | None = None) -> str
     return ", ".join(natywne)
 
 
+def _mapa_nazw_jezykow() -> dict[str, str]:
+    """Nazwa języka (sfoldowana) → kod ISO; klucze niejednoznaczne wypadają.
+
+    Trzy źródła, wszystkie DETERMINISTYCZNE: polska nazwa z kanonu lingua
+    („fiński"), nazwa enuma jako angielski przymiotnik („finnish") i natywna
+    nazwa z etykiety podstaw — ta ostatnia WYŁĄCZNIE dla paczek wdrożonych,
+    bo tylko tam etykieta jest sprawdzonym źródłem („suomi", „íslenska").
+    Klucz, który dwa źródła przypisują różnym kodom, usuwamy w całości:
+    wołający ma wtedy zapytać model, a nie dostać wynik zależny od kolejności
+    pętli. Mapa nie ma cache'u — buduje się raz na kliknięcie „Przetwórz",
+    więc paczka dodana w Managerze Reguł jest widoczna od razu.
+    """
+    kandydaci: dict[str, set[str]] = {}
+
+    def _dodaj(nazwa: str, kod: str) -> None:
+        klucz = jezyki_lingua.fold_nazwy(nazwa.strip())
+        if klucz:
+            kandydaci.setdefault(klucz, set()).add(kod)
+
+    for kod, (enum, polska) in jezyki_lingua.KANON.items():
+        _dodaj(polska, kod)
+        _dodaj(enum, kod)
+    for kod in dostepne_jezyki_bazowe():
+        nazwa = natywna_nazwa(kod)
+        if nazwa and nazwa != kod:
+            _dodaj(nazwa, kod)
+    return {k: next(iter(v)) for k, v in kandydaci.items() if len(v) == 1}
+
+
+def kod_iso_z_nazwy_jezyka(nazwa: str) -> str:
+    """Kod ISO dla nazwy języka wpisanej w Tłumaczu AI albo ``""`` (19.8).
+
+    ``""`` nie jest błędem, tylko sygnałem „nie wiem na pewno" — Tłumacz AI
+    wraca wtedy do mikrocallu ISO. Dopasowanie jest DOKŁADNE (po foldzie
+    wielkości liter i diakrytyków): „Fiński", „finski", „Finnish", „Suomi"
+    → ``fi``; „Norwegian", „pt-BR" czy „brazylijski portugalski" → ``""``,
+    bo zgadywanie częściowych dopasowań dawałoby dokładnie te pomyłki, przed
+    którymi ostrzega granica lingua (`NORWEGIAN` nie jest enumem).
+    """
+    if not isinstance(nazwa, str) or not nazwa.strip():
+        return ""
+    return _mapa_nazw_jezykow().get(jezyki_lingua.fold_nazwy(nazwa.strip()), "")
+
+
 # Minimalna długość tekstu (po strip), przy której uznajemy detekcję za
 # wiarygodną. Lingua dla krótszych próbek miewa fałszywe alarmy (np. „OK"
 # bywa klasyfikowane jako fiński). Niżej operujemy na sticky-fallbacku: zbyt

@@ -1084,6 +1084,9 @@ def _tlumacz_pojedyncza_sekcje(
             # 39 opłaconych cache'ów i rerun płacił za nie ponownie. Sprzątamy je
             # w `tlumacz_szablon` dopiero po faktycznym zapisie pliku.
             zachowaj_cache=True,
+            # 19.8: kod celu znamy z `-l`, więc mikrocall ISO (płatny, per
+            # sekcja i per próba, a jego wyniku BWD i tak nie czyta) odpada.
+            kod_iso=kod,
             # Domyślne chunkowanie (~2 500 tok/blok): duża sekcja może rozpaść się
             # na wiele bloków — bezpieczne, bo nie ma już META, której wielokrotny
             # marker po podziale psułby sklejkę (dawny override 4 000 wymuszał
