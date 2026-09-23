@@ -63,20 +63,26 @@ def _generuj():
     return rai.generuj_skrypt(None, przepis, snapshot, "Scena na peronie.")
 
 
-@pytest.mark.parametrize("surowy,tury,ucieta", [
+@pytest.mark.parametrize("surowy,tury,ucieta,urwano", [
     (_uciety('{"mowca": "Johanna", "tekst": "Idę do'), 2,
-     {"mowca": "Johanna", "tekst": "Idę do"}),
-    (_uciety('{"mowca": "Joha'), 2, None),              # ucięty mówca
-    (_uciety('{"mowca": "Johanna", "tekst": "'), 2, None),   # tekst się nie zaczął
+     {"mowca": "Johanna", "tekst": "Idę do"}, True),
+    (_uciety('{"mowca": "Joha'), 2, None, True),              # ucięty mówca
+    (_uciety('{"mowca": "Johanna", "tekst": "'), 2, None, True),   # tekst się nie zaczął
     (_uciety('{"mowca": "Johanna", "tekst": "Znak \\u00'), 2,
-     {"mowca": "Johanna", "tekst": "Znak "}),            # ucięta sekwencja \u
-    ('{"typ": "tura", "tury": [', 0, None),
-    ("", 0, None),
+     {"mowca": "Johanna", "tekst": "Znak "}, True),            # ucięta sekwencja \u
+    (POCZATEK, 2, None, False),                               # cięcie MIĘDZY turami
+    ('{"typ": "tura", "tury": [', 0, None, False),
+    ("", 0, None, False),
+    # openai_compat: dosłowny znak nowej linii w pełnej turze nie może zabrać
+    # kolejnych (F5 audytu 19.8).
+    ('{"tury":[{"mowca":"N","tekst":"a\nb"},{"mowca":"B","tekst":"xyz."}, '
+     '{"mowca":"C","tekst":"cut', 2, {"mowca": "C", "tekst": "cut"}, True),
 ])
-def test_odzysk_przyrostowy(surowy, tury, ucieta):
-    wynik_tury, wynik_ucieta = rai.odzyskaj_tury_ucietego_skryptu(surowy)
+def test_odzysk_przyrostowy(surowy, tury, ucieta, urwano):
+    wynik_tury, wynik_ucieta, wynik_urwano = rai.odzyskaj_tury_ucietego_skryptu(surowy)
     assert len(wynik_tury) == tury
     assert wynik_ucieta == ucieta
+    assert wynik_urwano is urwano
 
 
 def test_ucieta_kwestia_domknieta():
@@ -124,6 +130,45 @@ def test_urwany_audio_tag_zdjety_przed_domknieciem():
     assert ogony == [], "kwestia kończy się pełnym zdaniem — nie ma czego domykać"
 
 
+def test_niepoprawna_tura_nie_spala_retry_struktury():
+    """F1 audytu: pusta kwestia (API nie niesie minLength) = odrzut tury, nie 3 pełne calle."""
+    with _stub('{"typ":"tura","tury":[{"mowca":"N","tekst":""},'
+               '{"mowca":"A","tekst":"Pełna."},{"mowca":"B","tekst":"cut') as w:
+        wynik = _generuj()
+    assert w.count("glowne") == 1, w
+    assert [t.mowca for t in wynik.tury] == ["A", "B"]
+    assert wynik.ostrzezenie == i18n.t("rezyser.ostrzezenie_skrypt_wycieto")
+
+
+def test_pelny_tag_w_ogonie_nie_idzie_do_mikrocallu():
+    """F2 audytu: `[whispers]` po ostatniej granicy zdania zostaje w kwestii."""
+    ogony: list[str] = []
+
+    def _llm(klient, *, model, system, messages, **_kw):
+        if "cut off mid-sentence" in system:
+            ogony.append(messages[0]["content"])
+            return "Idę do domu.", "end_turn"
+        return _uciety('{"mowca": "A", "tekst": "Dobrze. [whispers] Idę do'), "max_tokens"
+
+    stary_llm, stary_jezyk = cl.wywolaj_llm, rai._wykryty_inny_jezyk
+    cl.wywolaj_llm, rai._wykryty_inny_jezyk = _llm, (lambda *_a, **_k: None)
+    try:
+        wynik = _generuj()
+    finally:
+        cl.wywolaj_llm, rai._wykryty_inny_jezyk = stary_llm, stary_jezyk
+    assert ogony == ["Idę do"], ogony
+    assert wynik.tekst_odpowiedzi.splitlines()[-1] == "[A] Dobrze. [whispers] Idę do domu."
+
+
+def test_ciecie_miedzy_turami_nie_twierdzi_ze_cos_przepadlo():
+    """F3 audytu: nic nie wycięto -> neutralny komunikat, nie „pominięta kwestia"."""
+    with _stub(POCZATEK) as w:
+        wynik = _generuj()
+    assert w == ["glowne"]
+    assert len(wynik.tury) == 2
+    assert wynik.ostrzezenie == i18n.t("rezyser.ostrzezenie_skrypt_limit")
+
+
 def test_bez_zadnej_tury_zostaje_dawny_blad():
     with _stub('{"typ": "tura", "tury": [{"mowca": "Na'):
         with pytest.raises(rai.BladDlugosciOdpowiedzi):
@@ -139,7 +184,8 @@ def test_klucze_ostrzezen_w_kazdej_paczce():
     for kod in cp.dostepne_jezyki_bazowe():
         plik = Path(__file__).parent / "dictionaries" / kod / "gui" / "ui.yaml"
         sekcja = yaml.safe_load(plik.read_text(encoding="utf-8"))["rezyser"]
-        for klucz in ("ostrzezenie_skrypt_domknieto", "ostrzezenie_skrypt_wycieto"):
+        for klucz in ("ostrzezenie_skrypt_domknieto", "ostrzezenie_skrypt_wycieto",
+                      "ostrzezenie_skrypt_limit"):
             assert str(sekcja.get(klucz, "")).strip(), (kod, klucz)
 
 

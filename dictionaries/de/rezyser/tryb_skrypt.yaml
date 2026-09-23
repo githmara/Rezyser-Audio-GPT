@@ -90,7 +90,6 @@ slowa_wyzwalajace:
     - fasse zusammen
     - Zusammenfassung
     - zusammenfassen
-    - Überblick
 
 # Hinweis zur KI-Ablehnungserkennung:
 # Seit 13.0 erzwingt der Motor den universellen `[ODRZUCENIE_AI]`-Tag via

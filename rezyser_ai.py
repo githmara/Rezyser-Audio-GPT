@@ -1156,21 +1156,31 @@ def _dekoduj_uciety_napis(surowy: str) -> str:
     if (len(surowy) - len(surowy.rstrip("\\"))) % 2:
         surowy = surowy[:-1]
     try:
-        return json.loads(f'"{surowy}"')
+        return json.loads(f'"{surowy}"', strict=False)
     except json.JSONDecodeError:
         return ""
 
 
-def odzyskaj_tury_ucietego_skryptu(surowy: str) -> tuple[list[dict], dict | None]:
-    """Z uciętego JSON-a Skryptu: ``(kompletne_tury, ucieta_tura | None)``.
+def odzyskaj_tury_ucietego_skryptu(
+    surowy: str,
+) -> tuple[list[dict], dict | None, bool]:
+    """Z uciętego JSON-a: ``(kompletne_tury, ucieta_tura | None, urwano_ture)``.
 
     ``ucieta_tura`` to ``{"mowca", "tekst"}`` z częściowym tekstem — tylko gdy
-    mówca jest kompletny i tekst się zaczął. Brak tablicy ``tury`` = ``([], None)``.
+    mówca jest kompletny i tekst się zaczął. ``urwano_ture`` mówi, czy ucięcie
+    padło W ŚRODKU obiektu tury (a nie między turami) — od tego zależy, czy
+    ostrzeżenie może twierdzić, że jakaś kwestia przepadła. Brak tablicy
+    ``tury`` = ``([], None, False)``.
+
+    Dekoder jest NIEścisły (`strict=False`): gałąź `openai_compat` bywa hojna
+    w dosłownych znakach nowej linii wewnątrz napisu, a ścisły `raw_decode`
+    uznawał wtedy pełną, wcześniejszą turę za uciętą i gubił wszystkie
+    kolejne (audyt 19.8).
     """
     m = re.search(r'"tury"\s*:\s*\[', surowy)
     if not m:
-        return [], None
-    dekoder = json.JSONDecoder()
+        return [], None, False
+    dekoder = json.JSONDecoder(strict=False)
     tury: list[dict] = []
     i = m.end()
     while i < len(surowy):
@@ -1183,15 +1193,21 @@ def odzyskaj_tury_ucietego_skryptu(surowy: str) -> tuple[list[dict], dict | None
         except json.JSONDecodeError:
             reszta = _RE_UCIETA_TURA.match(surowy, i)
             if not reszta:
-                return tury, None
+                return tury, None, True
             mowca = _dekoduj_uciety_napis(reszta.group(1))
             tekst = _dekoduj_uciety_napis(reszta.group(2))
             if mowca.strip() and tekst.strip():
-                return tury, {"mowca": mowca, "tekst": tekst}
-            return tury, None
+                return tury, {"mowca": mowca, "tekst": tekst}, True
+            return tury, None, True
         if isinstance(obiekt, dict):
             tury.append(obiekt)
-    return tury, None
+    return tury, None, False
+
+
+# Kompletne audio-tagi na POCZĄTKU uciętego ogona (`Dobrze. [whispers] Idę do`).
+# Mikro-call domykający dostaje instrukcję o PROZIE, więc tag przepisałby na
+# słowa albo zgubił — przenosimy go do nietykanej części kwestii (audyt 19.8).
+_RE_TAGI_NA_POCZATKU = re.compile(r"\s*(?:\[[^\]\n]*\]\s*)+")
 
 
 def _domknij_ucieta_kwestie(
@@ -1201,8 +1217,27 @@ def _domknij_ucieta_kwestie(
     tekst = _RE_URWANY_TAG.sub("", tekst).rstrip()
     if not tekst:
         return None
-    domkniety, doszyto = _domknij_urwane_zdanie(klient, przepis, tekst, timeout)
-    return domkniety if doszyto and domkniety.strip() else None
+    granica = _ostatnia_granica_zdania(tekst)
+    glowa, ogon = tekst[:granica], tekst[granica:]
+    tagi = _RE_TAGI_NA_POCZATKU.match(ogon)
+    if tagi:
+        glowa, ogon = glowa + ogon[:tagi.end()], ogon[tagi.end():]
+    if not ogon.strip():
+        return tekst   # kwestia kończy się pełnym zdaniem (ew. + tagiem)
+    domkniety, doszyto = _domknij_urwane_zdanie(klient, przepis, ogon.strip(), timeout)
+    if not doszyto or not domkniety.strip():
+        return None
+    if glowa and not glowa[-1].isspace():
+        glowa += " "
+    return glowa + domkniety.strip()
+
+
+# Schemat JEDNEJ tury — odzysk przepuszcza wyłącznie tury, które go spełniają.
+# `SCHEMA_SKRYPT_API` (structured outputs) nie niesie `minLength`/`maxLength`,
+# więc tura z pustym tekstem jest osiągalna także na Anthropic; bez tego filtra
+# trafiała do walidacji całości i spalała retry struktury — kolejne PEŁNE,
+# płatne wywołania, każde znów ucięte (zmierzone: 3 zamiast 1, audyt 19.8).
+_SCHEMA_TURY = SCHEMA_SKRYPT["properties"]["tury"]["items"]
 
 
 def _uratuj_uciety_skrypt(
@@ -1213,13 +1248,19 @@ def _uratuj_uciety_skrypt(
     Rzuca :class:`BladDlugosciOdpowiedzi`, gdy nie ma ani jednej tury do
     zapisania — wtedy nie ma czego ratować i obowiązuje dawne zachowanie.
     """
-    tury, ucieta = odzyskaj_tury_ucietego_skryptu(surowy)
-    klucz = "rezyser.ostrzezenie_skrypt_wycieto"
+    surowe, ucieta, urwano = odzyskaj_tury_ucietego_skryptu(surowy)
+    tury = [t for t in surowe if jsonschema.Draft7Validator(_SCHEMA_TURY).is_valid(t)]
+    # Klucz ostrzeżenia mówi prawdę o losie ostatniej kwestii: przepadła tylko
+    # wtedy, gdy ucięcie padło W ŚRODKU tury albo odpadła tura niepoprawna.
+    klucz = ("rezyser.ostrzezenie_skrypt_wycieto"
+             if urwano or len(tury) < len(surowe) else
+             "rezyser.ostrzezenie_skrypt_limit")
     if ucieta is not None:
         domknieta = _domknij_ucieta_kwestie(klient, przepis, ucieta["tekst"], timeout)
         if domknieta is not None:
             tury.append({"mowca": ucieta["mowca"], "tekst": domknieta})
-            klucz = "rezyser.ostrzezenie_skrypt_domknieto"
+            if len(tury) == len(surowe) + 1:
+                klucz = "rezyser.ostrzezenie_skrypt_domknieto"
     if not tury:
         raise BladDlugosciOdpowiedzi(
             "The model hit its max_tokens limit — the Script response was cut "
@@ -1227,7 +1268,7 @@ def _uratuj_uciety_skrypt(
             "max_tokens."
         )
     _dev_log(f"Skrypt: ucięty na max_tokens — odzyskano {len(tury)} tur(y), "
-             f"ostatnia {'domknięta' if klucz.endswith('domknieto') else 'wycięta'}.")
+             f"ostrzeżenie: {klucz}.")
     return {"tury": tury}, i18n.t(klucz)
 
 

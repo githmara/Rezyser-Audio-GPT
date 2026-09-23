@@ -38,16 +38,22 @@ def test_zakres_nie_jest_pusty():
 
 
 @pytest.mark.parametrize("tekst", [
-    "Gib mir eine Zusammenfassung", "kurzer ÜBERBLICK bitte", "fasse zusammen",
+    "Gib mir eine Zusammenfassung", "ZUSAMMENFASSUNG bitte", "fasse zusammen",
 ])
 def test_wyzwalacz_z_wielkiej_litery_trafia(tekst):
     przepis = pr.zaladuj_przepis("skrypt", "de")
     assert pr.prosi_o_streszczenie(przepis, tekst), tekst
 
 
-def test_zwykla_instrukcja_nie_jest_prosba_o_streszczenie():
+@pytest.mark.parametrize("tekst", [
+    "Väinö betritt das Lager.",
+    # Audyt 19.8: `Überblick` to zwykły rzeczownik — po poprawce wielkości liter
+    # zaczął blokować zwykłe instrukcje sceny, więc wypadł z list paczki de.
+    "Der Kommissar verschafft sich einen Überblick über den Tatort.",
+])
+def test_zwykla_instrukcja_nie_jest_prosba_o_streszczenie(tekst):
     przepis = pr.zaladuj_przepis("skrypt", "de")
-    assert not pr.prosi_o_streszczenie(przepis, "Väinö betritt das Lager.")
+    assert not pr.prosi_o_streszczenie(przepis, tekst)
 
 
 def test_kazdy_wyzwalacz_kazdej_paczki_trafia_w_samego_siebie():
