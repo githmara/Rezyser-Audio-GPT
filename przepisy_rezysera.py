@@ -1450,6 +1450,19 @@ def wykryto_odrzucenie(tekst: str) -> bool:
     return TAG_ODRZUCENIA_AI in (tekst or "")
 
 
+def prosi_o_streszczenie(przepis: PrzepisRezysera, tekst: str) -> bool:
+    """Czy instrukcja zawiera słowo-wyzwalacz ``slowa_wyzwalajace.streszczenie``?
+
+    Dopasowanie jest podciągiem, OBIE strony małymi literami (19.8). Do tej
+    pory GUI obniżało tylko tekst użytkownika, więc słowo zapisane w paczce
+    z wielkiej litery (de: `Zusammenfassung`, `Überblick`) nie mogło trafić
+    nigdy — a wielkość liter w danych nie ma prawa wyłączać reguły po cichu.
+    """
+    niski = (tekst or "").lower()
+    return any(str(s).lower() in niski
+               for s in przepis.slowa_wyzwalajace.get("streszczenie", []) if s)
+
+
 def buduj_sufiks(przepis: PrzepisRezysera, nazwa: str, **extra: Any) -> str:
     """Zwraca tekst sufiksu ``nazwa`` lub pusty string, jeśli go nie ma.
 

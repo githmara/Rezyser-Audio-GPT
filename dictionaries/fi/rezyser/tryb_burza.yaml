@@ -65,9 +65,9 @@ prompt_systemowy: |
   {{
     "opcje": [
       {{
-        "tytul": "Lyhyt vaihtoehdon otsikko (enintään ~80 merkkiä, kielellä {jezyk_odpowiedzi})",
-        "opis": "Looginen kuvaus tämän vaihtoehdon tapahtumista — 1-3 lausetta, kielellä {jezyk_odpowiedzi}.",
-        "cel_sceny": "Yksityiskohtainen kuvaus toiminnasta/dialogista, jonka olet keksinyt tähän vaihtoehtoon. Tämä menee pelaajan Ohjeet-kenttään muodossa [CEL SCENY]. Kirjoita konkreettisesti, kielellä {jezyk_odpowiedzi}."
+        "tytul": "Lyhyt vaihtoehdon otsikko (enintään ~80 merkkiä, {jezyk_odpowiedzi})",
+        "opis": "Looginen kuvaus tämän vaihtoehdon tapahtumista — 1-3 lausetta, {jezyk_odpowiedzi}.",
+        "cel_sceny": "Yksityiskohtainen kuvaus toiminnasta/dialogista, jonka olet keksinyt tähän vaihtoehtoon. Tämä menee pelaajan Ohjeet-kenttään muodossa [CEL SCENY]. Kirjoita konkreettisesti, {jezyk_odpowiedzi}."
       }},
       {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }},
       {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }}

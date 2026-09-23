@@ -552,6 +552,15 @@ more than style here.
   propagated, read that one sentence across ALL packs side by side, and if the
   packs split, disambiguate the Polish source too (`zwrotów akcji`), not just
   the targets.
+- `{jezyk_odpowiedzi}` IS SUBSTITUTED, so read the sentence WITH the pack's value
+  in place. The value is often already an adverbial phrase (`polsku` after
+  `po`, `suomeksi`, `á íslensku`, `по-русски`, `на русском`), and a template
+  that adds its own preposition renders nonsense the model reads verbatim —
+  measured in 19.8: `w polsku`, `język polsku`, `kielellä suomeksi`,
+  `на по-русски`, `на на русском`, `á á íslensku`. `test_jezyk_odpowiedzi.py`
+  catches only the DOUBLED word; the rest needs a reader. Note the value is
+  per recipe: two recipes of one pack may carry different forms
+  (`á íslensku` vs `íslensku`), so check each file against its own value.
 - COMMENTS are documentation for the linguist maintaining the pack — they should
   read natively, but keep code identifiers, YAML key names, file names and
   decoration lines (`---`, `===`) unchanged.

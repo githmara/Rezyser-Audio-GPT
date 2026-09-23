@@ -65,9 +65,9 @@ prompt_systemowy: |
   {{
     "opcje": [
       {{
-        "tytul": "Krótki tytuł opcji (max ~80 znaków, język {jezyk_odpowiedzi})",
-        "opis": "Logiczny opis tego co się wydarzy w tej opcji — 1-3 zdania, w {jezyk_odpowiedzi}.",
-        "cel_sceny": "Szczegółowy opis akcji/dialogu który wymyśliłeś dla tej opcji. To trafi do pola Instrukcji gracza jako [CEL SCENY]. Pisz konkretnie, w {jezyk_odpowiedzi}."
+        "tytul": "Krótki tytuł opcji (max ~80 znaków, po {jezyk_odpowiedzi})",
+        "opis": "Logiczny opis tego co się wydarzy w tej opcji — 1-3 zdania, po {jezyk_odpowiedzi}.",
+        "cel_sceny": "Szczegółowy opis akcji/dialogu który wymyśliłeś dla tej opcji. To trafi do pola Instrukcji gracza jako [CEL SCENY]. Pisz konkretnie, po {jezyk_odpowiedzi}."
       }},
       {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }},
       {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }}

@@ -44,13 +44,13 @@ prompt_systemowy: |
   Þú skilar **aðeins** JSON-hlut af gerðinni:
   {{"tury": [{{"mowca": "<nafn>", "tekst": "<lína>"}}, ...]}}
   - `mowca` — HREINT nafn mælanda: `Sögumaður` eða nafn persónu. ENGIN hornklofi, ENGIN tvípunktur, ENGIN tilfinningalýsing. Forritið vefur nafnið sjálft í hornklofa.
-  - `tekst` — innihald línunnar á {jezyk_odpowiedzi}.
+  - `tekst` — innihald línunnar {jezyk_odpowiedzi}.
   - Röð tagga í fylkinu = töluð röð í atriðinu. Hver ræða er eigin taggi; sama persóna sem talar tvisvar í röð = tveir taggar.
   - Þú býrð EKKI til fyrirsagnir (Prolog/Þáttur/Atriði/Epilog) — leikstjórinn setur þær inn handvirkt. Taggir þínir eru aðeins frásögn og samtal.
   - Enginn texti utan JSON-hlutarins (engin athugasemd, ekkert ```).
 
   ### 🎙️ TJÁNING — ElevenLabs v3 HLJÓÐTAGGAR (í stað leturfræði):
-  Þú tjáir EKKI tilfinningu með hástöfum, úrfellingum eða bandstrikum — TTS-vélin hunsar það. Þú tjáir hana með **enskum v3 hljóðtöggum** ofnum inn í `tekst`. Taggar ALLTAF á ensku (þeir virka óháð töluðu tungumáli); innihald línunnar á {jezyk_odpowiedzi}. Notaðu SPARLEGA: 0–2 taggar á línu — ofnotkun rýrir gerðina.
+  Þú tjáir EKKI tilfinningu með hástöfum, úrfellingum eða bandstrikum — TTS-vélin hunsar það. Þú tjáir hana með **enskum v3 hljóðtöggum** ofnum inn í `tekst`. Taggar ALLTAF á ensku (þeir virka óháð töluðu tungumáli); innihald línunnar {jezyk_odpowiedzi}. Notaðu SPARLEGA: 0–2 taggar á línu — ofnotkun rýrir gerðina.
   Litaspjald:
   - tilfinningar: [happy] [joyful] [excited] [sad] [sorrowful] [heartbroken] [angry] [furious] [indignant] [annoyed] [frustrated] [nervous] [anxious] [fearful] [terrified] [desperate] [sarcastic] [mocking] [contemptuous] [curious] [surprised] [confused] [suspicious] [disappointed] [resigned] [weary] [ashamed] [jealous] [disgusted] [calm] [gentle] [tender] [reassuring] [sincere] [solemn] [coldly] [hesitant] [shy] [flirtatious] [pleading] [relieved] [mischievously] [dramatic] [urgent]
   - flutningur: [whispers] [shouting] [mutters] [murmurs] [stammers] [trembling] [breathless] [through gritted teeth]

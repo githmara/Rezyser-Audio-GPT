@@ -2247,8 +2247,9 @@ class RezyserPanel(wx.Panel):
             self._txt_ksiega_swiata.SetFocus()
             return
 
-        slowa_streszczenia = przepis.slowa_wyzwalajace.get("streszczenie", [])
-        if tryb_zapisu and any(s in user_text.lower() for s in slowa_streszczenia):
+        # 19.8: dopasowanie w `przepisy_rezysera.prosi_o_streszczenie` (obie
+        # strony małymi literami — de `Zusammenfassung` nie trafiało nigdy).
+        if tryb_zapisu and pr.prosi_o_streszczenie(przepis, user_text):
             wx.MessageBox(
                 t("rezyser.blad_trybu_tresc"),
                 t("rezyser.blad_trybu_tytul"),

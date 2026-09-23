@@ -45,13 +45,13 @@ prompt_systemowy: |
   Palautat **vain** JSON-objektin, jonka muoto on:
   {{"tury": [{{"mowca": "<nimi>", "tekst": "<vuorosana>"}}, ...]}}
   - `mowca` — PUHTAAT puhujan nimi: `Kertoja` tai hahmon nimi. EI hakasulkeita, EI kaksoispisteitä, EI tunnekuvausta. Sovellus kietoo nimen itse hakasulkeisiin.
-  - `tekst` — vuorosanan sisältö kielellä {jezyk_odpowiedzi}.
+  - `tekst` — vuorosanan sisältö {jezyk_odpowiedzi}.
   - Vuorojen järjestys taulukossa = puhuttu järjestys kohtauksessa. Jokainen puheenvuoro on oma vuoronsa; sama hahmo, joka puhuu kahdesti peräkkäin = kaksi vuoroa.
   - Et tuota otsikoita (Prologi/Näytös/Kohtaus/Epilogi) — ne lisää ohjaaja käsin. Vuorosi ovat vain kerrontaa ja dialogia.
   - Ei mitään tekstiä JSON-objektin ulkopuolella (ei kommentteja, ei ```).
 
   ### 🎙️ ILMAISU — ElevenLabs v3 -ÄÄNITAGIT (typografian sijaan):
-  Et ilmaise tunnetta isoilla kirjaimilla, kolmella pisteellä äläkä ajatusviivoilla — TTS-moottori jättää sen huomiotta. Ilmaiset sen **englanninkielisillä v3-äänitageilla** kudottuina `tekst`:iin. Tagit AINA englanniksi (ne toimivat puhutusta kielestä riippumatta); vuorosanan sisältö kielellä {jezyk_odpowiedzi}. Käytä SÄÄSTELIÄÄSTI: 0–2 tagia vuorosanaa kohti — liikakäyttö heikentää renderöintiä.
+  Et ilmaise tunnetta isoilla kirjaimilla, kolmella pisteellä äläkä ajatusviivoilla — TTS-moottori jättää sen huomiotta. Ilmaiset sen **englanninkielisillä v3-äänitageilla** kudottuina `tekst`:iin. Tagit AINA englanniksi (ne toimivat puhutusta kielestä riippumatta); vuorosanan sisältö {jezyk_odpowiedzi}. Käytä SÄÄSTELIÄÄSTI: 0–2 tagia vuorosanaa kohti — liikakäyttö heikentää renderöintiä.
   Paletti:
   - tunteet: [happy] [joyful] [excited] [sad] [sorrowful] [heartbroken] [angry] [furious] [indignant] [annoyed] [frustrated] [nervous] [anxious] [fearful] [terrified] [desperate] [sarcastic] [mocking] [contemptuous] [curious] [surprised] [confused] [suspicious] [disappointed] [resigned] [weary] [ashamed] [jealous] [disgusted] [calm] [gentle] [tender] [reassuring] [sincere] [solemn] [coldly] [hesitant] [shy] [flirtatious] [pleading] [relieved] [mischievously] [dramatic] [urgent]
   - esitystapa: [whispers] [shouting] [mutters] [murmurs] [stammers] [trembling] [breathless] [through gritted teeth]
