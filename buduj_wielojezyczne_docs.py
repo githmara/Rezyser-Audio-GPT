@@ -695,8 +695,21 @@ _SYGNATURY_PREAMBULY = ("U+27E6", "U+27E7")
 # `wykryj_wyciek_preambuly` (sygnał dokładny), a nie zamiast niej.
 PROG_ROZDMUCHANIA = 1.40
 
+# Jawne progi per język (19.8) z `jezyki_docelowe.yaml` — pole
+# `prog_rozdmuchania` wpisu-słownika. Język bez pola dostaje zmierzone wyżej
+# 1.40. Próg wyższy wpisuje się dopiero po sygnale z rejestru ilorazów sekcji
+# przyjętych ręcznie (`--przyjmij-probe`) — nie „na zapas".
+PROGI_ROZDMUCHANIA: dict[str, float] = tlumacz_rdzen.wczytaj_progi_rozdmuchania(
+    ROOT, KOD_ZRODLOWY)
 
-def _doklejka_nacisku(zarzuty: list[str], znakow_zrodla: int) -> str:
+
+def prog_rozdmuchania(kod: str) -> float:
+    """Próg rozdmuchania dla języka `kod`: jawny z rejestru albo domyślny."""
+    return PROGI_ROZDMUCHANIA.get(kod, PROG_ROZDMUCHANIA)
+
+
+def _doklejka_nacisku(zarzuty: list[str], znakow_zrodla: int,
+                      prog: float = PROG_ROZDMUCHANIA) -> str:
     """Blok nacisku doklejany do promptu systemowego przy POWTÓRCE.
 
     Pisany pod DOWOLNY model, nie pod jednego dostawcę — builder docs jako
@@ -728,7 +741,7 @@ def _doklejka_nacisku(zarzuty: list[str], znakow_zrodla: int) -> str:
         "line of your answer must already be the translation of the first line "
         "of the source.\n"
         f"3. The source is {znakow_zrodla} characters long. Your answer must "
-        f"stay close to that; anything above {PROG_ROZDMUCHANIA:.2f}x it is "
+        f"stay close to that; anything above {prog:.2f}x it is "
         "rejected again.\n"
         "4. Everything else (markers, placeholders, headings, numbered list "
         "structure) stays exactly as instructed above."
@@ -1042,7 +1055,8 @@ def _tlumacz_pojedyncza_sekcje(
     for proba in (1, 2):
         prompt_proby = prompt_dodatkowy
         if zarzuty:
-            prompt_proby += _doklejka_nacisku(zarzuty, len(tresc_tok))
+            prompt_proby += _doklejka_nacisku(
+                zarzuty, len(tresc_tok), prog_rozdmuchania(kod))
             # Cache pierwszej próby jest ODRZUCONY, więc musi przestać być
             # używalny: przy `zachowaj_cache=True` wznowienie oddałoby po prostu
             # tę samą, zakwestionowaną treść, doklejka nacisku nie dotarłaby do
@@ -1137,11 +1151,12 @@ def _tlumacz_pojedyncza_sekcje(
 
         zarzuty = wykryj_wyciek_preambuly(tresc_tok, tekst_wy)
         iloraz = tlumacz_bramki.stosunek_dlugosci(tresc_tok, tekst_wy)
-        if iloraz > PROG_ROZDMUCHANIA:
+        prog = prog_rozdmuchania(kod)
+        if iloraz > prog:
             zarzuty.append(
                 f"the translation is {iloraz:.2f}x the length of the source "
                 f"({len(tresc_tok)} -> {len(tekst_wy)} characters), above the "
-                f"{PROG_ROZDMUCHANIA:.2f}x limit — a section that long carries "
+                f"{prog:.2f}x limit — a section that long carries "
                 f"material the source does not have")
         if not zarzuty:
             return True, detokenizuj(tekst_wy, mapa)

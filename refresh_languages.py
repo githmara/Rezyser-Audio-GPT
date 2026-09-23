@@ -84,6 +84,14 @@ NAGLOWEK = """\
 #   * ZACHOWUJE istniejące wpisy (w tym ręcznie dopieszczone nazwy — możesz
 #     zmienić „Chinese" na „简体中文" itp., refresh tego nie nadpisze).
 #
+# PRÓG ROZDMUCHANIA (19.8, opcjonalny): język, któremu zaakceptowano większą
+# tolerancję długości przekładu podręczników, dostaje wpis-słownik:
+#   fi:
+#     nazwa: fiński
+#     prog_rozdmuchania: 1.55
+# Brak pola = domyślne `PROG_ROZDMUCHANIA` z `buduj_wielojezyczne_docs.py`.
+# Wartość wpisuje się świadomie, po sygnale z rejestru ilorazów przyjętych sekcji.
+#
 # `buduj_wielojezyczne_docs.py` czyta ten plik jako `MAPA_JEZYKOW`. Gdy pliku
 # brak — używa wbudowanego fallbacku. `pl` to język ŹRÓDŁOWY (nie cel) i celowo
 # NIE występuje tutaj. NIE edytuj kluczy ręcznie — od tego jest refresh; nazwy
@@ -169,24 +177,42 @@ def skanuj_jezyki() -> list[str]:
     return kody
 
 
-def wczytaj_rejestr() -> dict[str, str]:
+def wczytaj_rejestr() -> dict[str, str | dict]:
     """Wczytuje istniejący `jezyki_docelowe.yaml` (pusty dict TYLKO gdy brak pliku).
 
     Nieczytelny albo niebędący mapą rejestr przerywa pracę (`dev_yaml`), bo
     inaczej narzędzie skasowałoby ręcznie dopieszczone nazwy — patrz docstring
     modułu. Brak pliku to normalny pierwszy przebieg; woła o nim `main`.
+
+    Wpis-słownik (`nazwa` + `prog_rozdmuchania`, 19.8) wraca jako słownik:
+    dawne `str(v)` zamieniało go w napis „{'nazwa': …}", który zapis
+    utrwalał — refresh niszczyłby zaakceptowany próg przy pierwszej zmianie
+    zestawu paczek.
     """
     dane = dev_yaml.wczytaj_jesli_jest(REJESTR, narzedzie=NARZEDZIE)
     if dane is None:
         return {}
-    return {str(k): str(v) for k, v in dane.items() if isinstance(k, str)}
+    wynik: dict[str, str | dict] = {}
+    for kod, wartosc in dane.items():
+        if not isinstance(kod, str):
+            continue
+        wpis = dev_yaml.waliduj_wpis_rejestru(
+            REJESTR, kod, wartosc, narzedzie=NARZEDZIE)
+        wynik[kod] = wpis if len(wpis) > 1 else wpis["nazwa"]
+    return wynik
 
 
-def zapisz_rejestr(mapa: dict[str, str]) -> None:
-    """Zapisuje rejestr: nagłówek-komentarz + wpisy `kod: nazwa` (sort po kodzie)."""
+def zapisz_rejestr(mapa: dict[str, str | dict]) -> None:
+    """Zapisuje rejestr: nagłówek + wpisy `kod: nazwa` albo wpis-słownik (sort po kodzie)."""
     linie = [NAGLOWEK]
     for kod in sorted(mapa):
-        linie.append(f"{kod}: {mapa[kod]}")
+        wpis = mapa[kod]
+        if isinstance(wpis, dict):
+            linie.append(f"{kod}:")
+            linie += [f"  {pole}: {wpis[pole]}"
+                      for pole in dev_yaml.POLA_WPISU_REJESTRU if pole in wpis]
+        else:
+            linie.append(f"{kod}: {wpis}")
     REJESTR.write_text("\n".join(linie) + "\n", encoding="utf-8", newline="\n")
 
 

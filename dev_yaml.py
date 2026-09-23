@@ -147,6 +147,57 @@ def wczytaj_jesli_jest(
                               parser=parser)
 
 
+# Pola dozwolone we wpisie-słowniku rejestru (19.8). `nazwa` jest obowiązkowa,
+# reszta opcjonalna. Klucz spoza listy przerywa pracę: literówka w nazwie pola
+# (`prog_rozdmuchnia`) wyłączałaby próg PO CICHU, a próg per język istnieje po
+# to, żeby jego obecność była jawną, zaakceptowaną decyzją.
+POLA_WPISU_REJESTRU = ("nazwa", "prog_rozdmuchania")
+
+
+def waliduj_wpis_rejestru(rejestr: Path | str, kod: str, wartosc: Any, *,
+                          narzedzie: str) -> dict[str, Any]:
+    """Wpis `jezyki_docelowe.yaml` w postaci znormalizowanej ``{"nazwa": …, …}``.
+
+    Dwa kształty (19.8): dawny `kod: nazwa` oraz słownik z polem `nazwa` i
+    opcjonalnym `prog_rozdmuchania` — jawnym, zaakceptowanym ilorazem długości,
+    który `buduj_wielojezyczne_docs` stosuje zamiast domyślnego
+    `PROG_ROZDMUCHANIA` (decyzja maintainera 2026-09-23: próg per język żyje
+    TU, a nie w Pythonie ani w `podstawy.yaml`). Każdy inny kształt przerywa
+    pracę — do 19.8 wpis nie-napisowy był po cichu POMIJANY, czyli język
+    wypadał z propagacji całej rodziny bez słowa.
+    """
+    if isinstance(wartosc, str) and wartosc.strip():
+        return {"nazwa": wartosc}
+    if isinstance(wartosc, dict):
+        obce = sorted(str(k) for k in wartosc if k not in POLA_WPISU_REJESTRU)
+        nazwa = wartosc.get("nazwa")
+        prog = wartosc.get("prog_rozdmuchania")
+        if obce:
+            padnij_na_pliku(
+                rejestr, f"entry `{kod}` has unknown field(s) {obce}; allowed: "
+                         f"{list(POLA_WPISU_REJESTRU)}", narzedzie=narzedzie)
+        if not (isinstance(nazwa, str) and nazwa.strip()):
+            padnij_na_pliku(
+                rejestr, f"entry `{kod}` is a mapping without a `nazwa:` string",
+                narzedzie=narzedzie)
+        if prog is not None and (isinstance(prog, bool)
+                                 or not isinstance(prog, (int, float))
+                                 or not prog > 1.0):
+            padnij_na_pliku(
+                rejestr, f"entry `{kod}`: `prog_rozdmuchania` must be a number "
+                         f"above 1.0 (a length ratio), got {prog!r}",
+                narzedzie=narzedzie)
+        return dict(wartosc)
+    padnij_na_pliku(
+        rejestr, f"entry `{kod}` must be `code: name` or a mapping with `nazwa:`, "
+                 f"got {type(wartosc).__name__}", narzedzie=narzedzie)
+
+
+# Mieszka tutaj, a nie w `tlumacz_rdzen`, bo czyta go także `refresh_languages`,
+# który trzyma zależności wąsko (bez `core_llm`) — jedna walidacja dla czytelnika
+# i dla pisarza rejestru.
+
+
 def _jednolinijkowo(exc: Exception) -> str:
     """Wyjątek parsera jako JEDNA linia (surowy `str` pyyaml ma ich cztery)."""
     problem = getattr(exc, "problem", "") or ""

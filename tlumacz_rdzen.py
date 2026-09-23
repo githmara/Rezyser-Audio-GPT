@@ -88,6 +88,30 @@ FALLBACK_JEZYKOW: dict[str, str] = {
 }
 
 
+def wczytaj_progi_rozdmuchania(root: Path, kod_zrodlowy: str = "pl") -> dict[str, float]:
+    """Jawne progi rozdmuchania per język z `jezyki_docelowe.yaml` (19.8).
+
+    Zwraca wyłącznie języki, które pole MAJĄ — brak pola to próg domyślny
+    wołającego, nie zero. Brak rejestru = brak progów (fallback nazw i tak
+    ostrzega w :func:`wczytaj_mape_jezykow`).
+    """
+    rejestr = root / NAZWA_REJESTRU
+    dane = dev_yaml.wczytaj_jesli_jest(
+        rejestr, narzedzie=NARZEDZIE, parser=_PARSER_YAML)
+    if dane is None:
+        return {}
+    progi: dict[str, float] = {}
+    for kod, wartosc in dane.items():
+        if not isinstance(kod, str) or kod == kod_zrodlowy:
+            continue
+        wpis = dev_yaml.waliduj_wpis_rejestru(
+            rejestr, kod, wartosc, narzedzie=NARZEDZIE)
+        prog = wpis.get("prog_rozdmuchania")
+        if prog is not None:
+            progi[kod] = float(prog)
+    return progi
+
+
 def wczytaj_mape_jezykow(root: Path, kod_zrodlowy: str = "pl") -> dict[str, str]:
     """Wczytuje `jezyki_docelowe.yaml` jako ISO→nazwa (bez języka źródłowego).
 
@@ -105,9 +129,9 @@ def wczytaj_mape_jezykow(root: Path, kod_zrodlowy: str = "pl") -> dict[str, str]
               f"Run `python refresh_languages.py` to rebuild the registry.")
         return dict(FALLBACK_JEZYKOW)
     mapa = {
-        str(k): str(v)
+        k: dev_yaml.waliduj_wpis_rejestru(rejestr, k, v, narzedzie=NARZEDZIE)["nazwa"]
         for k, v in dane.items()
-        if isinstance(k, str) and isinstance(v, str) and k != kod_zrodlowy
+        if isinstance(k, str) and k != kod_zrodlowy
     }
     if not mapa:
         dev_yaml.padnij_na_pliku(
