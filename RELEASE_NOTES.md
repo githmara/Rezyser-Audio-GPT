@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.7.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.8.0 „Wersja Wydawnicza"
+
+*Release v19.8.0: scena kończy się tam, gdzie wskazuje jej cel, a nie na wymyślonym haku — plus pięć rzeczy, które przy tym wyszły, i dziewięć poprawek z dwóch audytów przed zamknięciem. **(1)** Anti-closure w trybach piszących jest ZAKAZEM domknięcia, nie nakazem dopisania zdarzenia: z `[CEL SCENY]` scena kończy się w punkcie celu, bez trzasków i kroków spoza niego (zweryfikowane żywo, potem 9 paczek; audiobook ×8 odzyskał brakującą piątą zasadę). **(2)** Skrypt ucięty na limicie długości zapisuje odzyskane kwestie zamiast wyrzucać opłaconą generację: ostatnią domyka mikro-call, a gdy się nie da — wycina, zawsze z ostrzeżeniem. **(3)** Tłumacz AI nie płaci za mikrocall ISO, gdy kod jest znany (BWD: z `-l`; Poliglota: deterministyczny resolver nazw). **(4)** Blokada streszczenia widzi słowa z wielkiej litery, a `{jezyk_odpowiedzi}` nie dubluje przyimka. **(5)** Sekcja ubita przez bramkę rozdmuchania zostaje w `skrypty/` do oceny i `--przyjmij-probe`, a język może dostać jawny próg w `jezyki_docelowe.yaml`.*
 
 *Release v19.7.0: dziewięć paczek przestaje wyrzucać dźwięk do kosza, zanim akcent zdąży go zobaczyć — plus pięć rzeczy, które przy tym wyszły, w tym dwie z audytu przed zamknięciem. **(1)** Tablica diakrytyków paczki (pre-pass) biegnie PRZED listą `zamiany` każdego jej akcentu, a spłaszczała obcy znak do najbliższej gołej litery: `š` docierało do akcentu jako `s`, choć angielski ma `sz → sh` od zawsze, rosyjski `sz → ш`, a niemieckie `sch` stoi w ośmiu regułach. Celem pary jest odtąd zapis, który przeczyta głos TEJ paczki — zwykle dwuznak, bo dwuznak WYMUSZA dźwięk, który pojedyncza litera tylko sugeruje, i zwykle konwencja rodzima, a nie wymyślona transkrypcja (zalecenie Kotusa dla fińskiego, żywe tökuorð dla islandzkiego, stuletnia praktyka prasowa dla francuskiego, własne zapożyczenia dla hiszpańskiego). Zmierzone na „Škoda Žižek Dvořák Đoković" przez akcent rosyjski: `en` „Скода Зизэк Дворак Докович" → „Шкода Жижэк Дворжак Джокович", `fr` „Скода Зизек Дворак Доковик" → „Шкода Жижек Дворжак Джокович", `fi` „Скода Зизэк Дворак Доковиц" → „Шкода Жижэк Дворжак Джокович"; sam pre-pass paczki `de` pisze „Schkoda Schischek Dvorschak Dschokovitsch". Bramka celu ustąpiła przy tym z „musi być ASCII" — przybliżenia dobrego dla ośmiu paczek i fałszywego dla `ru`, gdzie `ж` nie jest diakrytykiem zostawionym syntezatorowi, tylko literą, którą ten głos czyta — na „musi stać w `alfabet` paczki", twardo i bez baseline'u. Kryterium wyboru między dwoma LEGALNYMI celami brzmi „to jest najlepiej, jak głos TEJ paczki może przeczytać ten znak", a nie „jak zapisałby to językoznawca": stabilność ma dwie strony, a recenzenci sprawdzają tylko pierwszą — litera, którą język trzyma wyłącznie dla zapożyczeń, ma niestabilny CEL, choć stoi w alfabecie i dlatego przechodzi każdą bramkę. **(2)** Runda wyprodukowała trzy reguły, których żadna bramka nie sprawdzi, i wszystkie trzy trafiły tam, gdzie czyta je autor paczki (szablon podstaw, prompt `jezyk_bazowy` kreatora, krok 1 `CONTRIBUTING.md`, checklista recenzenta): dwuznak nie może dołożyć sylaby, bo rozstrzyga POZYCJA, nie dźwięk (`ñ → ny` jest bezpieczne w `en`, bo hiszpański nie kończy wyrazu na `ñ`, ale polskie `ń` zostaje tam przy gołym `n`, bo „Poznany" ma sylabę za dużo — zła liczba sylab zmienia KSZTAŁT słowa, utrata zmiękczenia tylko jego barwę); nowy dwuznak w pre-passie to DŁUG, który spłaca akcent transliterujący, regułą jednostkową przed każdym krótszym wzorcem w niej zawartym (zmierzone: `zh` rozpadało się na `з + х`, `dsch` na `д + ш`); cel nie może przepisywać litery obok, bo pre-pass to sekwencyjny `str.replace` wewnątrz wyrazu (`fr: œ → eu` zrobiłoby z „cœur" → „ceur", a z [k] → [s], dlatego francuska paczka zostaje przy `œ → oe`, choć `ø ö ő` bierze `eu`). Czwarta klasa jest bramkowalna i została zmierzona: alfabet paczki jest TAKŻE pierścieniem Cezara, więc cel spoza `alfabet` zostaje w szyfrogramie jawnym tekstem — ta sama klasa, którą v19.4.2 zamknęła dla całej łacinki, otwierana z powrotem po jednej parze (`is: ŵ → w` oraz cztery pary w 21-literowym alfabecie `it`). **(3)** Literówka w polu sterującym Reżyserem przestała być cicha: pięć kontroli, każda z pomiaru, nie z przeglądu — `struktura: akty_scen` wczytywała się BEZ zgłoszenia i spłaszczała markery pamięci z zagnieżdżenia akt→scena do płaskiej listy, więc Reżyser „widział rozdziały" w projekcie Skryptu z powodu jednej zgubionej litery, a pusty `regex_podzial_rozdzialow` dawał 636 znaków → 638 fragmentów, czyli 319 płatnych wywołań po jednym znaku. Kontrole dostały przy tym wreszcie ODBIORCĘ, bo `przeskanuj_reguly` — jedyny wołający w kodzie produkcyjnym, czyli „Odśwież" Managera Reguł — skanował paczkę języka INTERFEJSU: zmierzone przed zmianą UI `pl`, literówka w `de/rezyser/tryb_audiobook.yaml`, rejestr PUSTY i komunikat „brak zastrzeżeń" nad plikiem, który silnik pomija. Pod jednym przyciskiem jechały dwa skany o dwóch różnych zakresach, a przy domyślnym filtrze zakresy się pokrywają i dlatego nikt tego nie widział. **(4)** Dwie nowe bramki. `audyt_kreatora`: szablony i prompty Managera OPISUJĄ silnik, ale nic ich nie wykonuje, więc zmiana w kodzie nie łamie ich w żaden widoczny sposób — opis po prostu zaczyna kłamać i kłamie do następnego przeczytania przez człowieka, a agent AI, któremu użytkownik wkleja prompt, wykona fałszywe zdanie dosłownie, czyli fałsz zamieni się w gotowy plik, a nie w pytanie; bramka jest bez baseline'u, bo kłamiący opis nie ma dopuszczalnej postaci. `test_kanon_testow`: plik testowy uruchomiony jako skrypt przestaje kończyć się cichym zerem — dwa pliki nie miały bloku `__main__` w ogóle, a pozostałe 24 niosły własny harness, czyli DRUGI sposób raportowania wyniku, i ten cichy (łapie wyłącznie `AssertionError`, więc legalny `pytest.skip` wywróciłby cały przebieg, a `parametrize` i fixture są dla niego niewidzialne); 25 plików dostało kanon `sys.exit(pytest.main([__file__, "-v"]))` z v19.2.1. **(5)** Audyt przed zamknięciem zarobił na siebie w bramce, którą to samo wydanie dopiero co dodało. Wzorzec DOPASOWUJĄCY pusty łańcuch to nie to samo, co wzorzec pusty: wiszący `|` w liście natywnych nazw rozdziałów — a szablon wprost prosi autora o dostosowanie właśnie tej listy — kompiluje się, ma grupę i przechodził wszystkie trzy kontrole, po czym `re.split` tnie między każdym znakiem; zmierzone 101 płatnych wywołań na 138 znakach, czyli koszt LINIOWY w długości narracji, z pustymi tytułami i bez przycisku „Przerwij" gdziekolwiek w postprodukcji. Druga dziura to znów klasa z v19.2.0: bramka żądała „min. jednej grupy", a `re.split` zwraca krok `1 + liczba_grup`, gdy pętla rozdziałów chodzi krokiem 2 — więc kontraktem jest DOKŁADNIE jedna. Ujęcie numeru rozdziału we własną grupę, które docstring samej bramki nazywa naturalnym odruchem, albo przesuwało dane po cichu (treści rozdziałów wracały jako „nagłówki"), albo wywracało wątek postprodukcji `AttributeError`, który siatka bezpieczeństwa pokazuje jako BŁĄD AI: komunikat o modelu za usterkę własnego pliku użytkownika. Przy okazji ta sama kontrola okazała się JEDYNYM miejscem loadera wstrzykującym angielskie ZDANIE do rejestru „Pominięte reguły", który user czyta w dziewięciu językach, choć sąsiednie pola niosą tam samą formułę i mają przy sobie komentarz wyjaśniający dlaczego — werdykt jest znów symboliczny (`groups=2 ≠ 1`, `match('') ≠ None`), klasę tłumaczy `diag.powod.wartosc`, a proza przeniosła się do szablonu i promptu kreatora, które wyliczają teraz wszystkie pięć odrzucanych kształtów, wyprowadzając je URUCHOMIENIEM kontroli silnika. Pięć dalszych znalezisk audytu siedziało w tekstach i bramkach: nowa bramka znała wyłącznie `Exception`, więc `SystemExit` z jej ścieżki dawał zero wyjścia i exit 0, a w buildzie zakończyłby `build_release.py` „sukcesem" bez PyInstallera i ISCC (ta sama klasa, co defekt bramki kontraktu z v18.32.0); ta sama bramka meldowała pełne pokrycie nad modelem pól, który po cichu się skurczył na nieparsowalnym pliku referencyjnym; akapit o modelach strukturalnych dla szyfru był wyprowadzany z dysku w pierwszej połowie i literałem w drugiej, więc pierwszy wdrożony szyfr zamian uczyniłby go wewnętrznie sprzecznym; dwa przykłady rozjechały się z paczkami, które opisują (`fr: ç → s`, poprawione na `ss` już w v19.6, oraz `it: ĵ → j`, naprawione w tym właśnie wydaniu); a bramka celu nie umiała wyrazić litery, którą paczka ma OBOWIĄZEK trzymać poza alfabetem — niemieckie `ß` puchnie pod `.upper()`, więc `alfabet-puchnie` je wygania, a orakuł nazywał je potem obcym. Dla użytkownika końcowego: obce nazwy docierają do syntezatora w kształcie, który wybrany głos umie wymówić, w każdej paczce i każdym akcencie, a polskie „ż" i „ź" dostają w akcencie angielskim ten sam zapis co „rz" — „morze" i „może" brzmią po polsku tak samo, a angielski głos czytał jedno jako „mozhe", a drugie jako „moze".*
 
@@ -85,6 +87,119 @@
 *Release v18.8.0: owoce testu maintainera „polskie UI na fińskiej treści" (Poliglota offline) — jeden bug krytyczny plus dwa niedociągnięcia międzynarodowości. **(1) BUG KRYTYCZNY: tagi `lang` per akapit liczone na tekście JUŻ zniekształconym transformacją.** Silnik od 13.5 MA mechanizm detekcji języka per akapit wykonywanej PRZED transformacją (side-channel `opcje["_segmenty_wynikowe"]`), ale kanał był martwy od urodzenia: GUI wołało `przetworz(..., **opcje)`, Python REPAKOWAŁ kwargi do nowego słownika i mutacje silnika nigdy nie wracały do GUI — `zapisz_wynik` zawsze spadał na detekcję „na żywo" po wyniku. Dla typoglikemii na fińskim tekście lingua strzelała `lang="de"` na akapitach nagłówkowych (dowód: pochodne `explore_raport`); dla cezara fałszerstwo byłoby totalne. Ten sam martwy kanał ukrywał DWA bugi-rodzeństwo cezara z losowym przesunięciem: komunikat „wylosowano N" nigdy się nie pokazywał, a nazwa pliku traciła sufiks `±N` — czyli zaszyfrowany plik był praktycznie nieodwracalny dla usera. Fix: `przetworz` przyjmuje jawny, MUTOWALNY słownik `opcje=` (przez referencję); jeden korzeń naprawia trzy objawy. **(2) Lokalizacja sklejek nazw plików wynikowych.** Prefiksy `naprawiony_/oczyszczony_/_akcent_/_szyfr_/_tlumaczenie_/architektura_` były polskim hard-kodem — koszmar dla niepolskich syntezatorów (fińska Satu czytająca „tlumaczenie" jako [tumaksenije]). Teraz człony pochodzą z `ui.yaml` (klucze `filename_*` ×9 języków, w języku UI: fi `salaus/käännös/arkkitehtuuri`, is `dulkóðun/þýðing`, ru `шифр/перевод`…), z Unicode-safe sanityzacją i twardym fallbackiem na polskie defaulty; `id` wariantu pozostaje techniczne. Manuale zlokalizowane w ślad (przykłady `architektura_` → natywne). **(3) A11y: spin przesunięcia Cezara ukryty dla nie-cezarowych szyfrów** (NVDA nie ogłasza już martwego pola; wzorzec show/hide jak przy polu ISO naprawiacza). **(4) Dokumentacja user-facing przechodzi z .txt na HTML renderowany z Markdownu.** Szablony `dokumentacja/*.yaml` są od teraz pisane w MD (mechaniczna migracja: nagłówki `#`/`##` per sekcja + backticki wokół `<placeholderów>` ×9 języków, z autotestem integralności treści), a `generuj_dokumentacje.py` renderuje `docs/<id>.<iso>.html` (biblioteka `markdown`, nl2br + sane_lists) z pełnym dokumentem HTML5: `<html lang="<iso>">` przełącza syntezator czytnika ekranu na język treści, nagłówki dają nawigację klawiszami 1-6/h w NVDA, a minimalny CSS (z trybem ciemnym) czyta się dobrze też wzrokiem — koniec „obleśnego" gołego .txt w Notatniku. README bez zmian (surowy MD dla GitHuba). Menu Pomoc, `installer.iss` (checkbox „otwórz manual" + sprzątanie osieroconych `docs\*.txt` przy upgrade) i `build_release` przepięte; nowa bramka RAW-HTML w `--waliduj` pilnuje, żeby żaden surowy `<fragment>` z szablonu nie został połknięty przez przeglądarkę. Przy okazji naprawione martwe odwołanie w 9 manualach: przewodnik Opowieści to `tales.<iso>.html`, nie `opowiesci.pl.txt`/`tarinat.fi.txt`/`recits.fr.txt` (plik o tych nazwach nigdy nie istniał).*
 
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
+
+---
+
+## 19.8.0 — minor release
+
+### What's new
+
+**A scene now ends where its goal says it ends.** The Brainstorm's scene goal
+already defines the ending ("end the scene at a clear crossroads…"), but the
+writing modes closed every request with "BRUTAL ANTI-CLOSURE: cut the scene in
+a split second when something bad is happening". That reminder sits last, where
+the model listens hardest, so it won: scenes ended on an invented hook — a door
+slammed open, hurried footsteps — that was never in the goal, and the next
+Brainstorm dutifully planned all three options around that hook. A scene
+heading could no longer be inserted without editing the text by hand.
+Anti-closure is now a BAN rather than an ORDER: no resolving the conflict, no
+summary, no moral, no conclusions drawn by the characters — but no new event
+either. With `[CEL SCENY]` the scene stops exactly where the goal points; without
+it, the cut falls inside an action that is already happening; an external
+threat signal tacked on as a hook is forbidden in both. The counter-argument
+that weaker models need the brutal wording is answered by the project's own
+audit of GPT-4o: under that exact wording it produced exactly that cheap hook.
+Verified live in the Script mode (three turns, two from Brainstorm options
+separated by a scene heading, zero manual edits), then carried to all nine
+packs. The eight foreign Audiobook recipes also gain the rule they were
+missing: all of them had four rules where the Polish source has five (the
+cliché blacklist).
+
+**A Script cut off at the length limit keeps what was already paid for.**
+Until now `stop_reason == "max_tokens"` threw away the whole Script response,
+although structured outputs guarantee the shape of every closed turn and only
+the last one is ever cut. Complete turns are now recovered incrementally; the
+cut line is finished with the same one-sentence call the Audiobook's guard
+uses, and it is dropped when the cut fell inside the speaker's name or the
+finishing call failed. The director is warned in every case, because a cut
+response most likely did not reach the end of the scene goal — three messages,
+in nine languages, saying truthfully whether the last line was finished,
+dropped, or whether the cut fell between lines. With no complete turn at all,
+the old error stands. Tales are deliberately unchanged: they carry many more
+fields and a state that is the source of truth.
+
+**The AI translator stops paying to guess what it already knows.** Every
+translation ended with a separate micro-call asking the model for the language
+code. The docs builder paid for it on every section and every retry and never
+read the answer; it now passes the target code it was given. The Polyglot
+resolves the typed language name deterministically — the Polish name from the
+lingua canon, the English name, or the native name of a DEPLOYED pack — and
+falls back to the micro-call only when a name is ambiguous or unknown
+("Norwegian" is not a lingua enum, "pt-BR" is a variant).
+
+**The summary block in writing modes now sees capitalised trigger words, and
+`{jezyk_odpowiedzi}` no longer doubles a preposition.** The GUI lowered only the
+user's text, so the German pack's `Zusammenfassung` never blocked anything; the
+comparison now lowers both sides. Rendering the prompts with each recipe's own
+value found templates that read "на на русском", "á á íslensku", "kielellä
+suomeksi" and, in the Polish source itself, "w polsku". Two trigger words that
+are also ordinary words were removed on the audit's advice: German `Überblick`
+(the fix above had just switched it on) and Finnish `kertaa` ("kaksi kertaa" =
+"twice").
+
+**A section rejected by the docs length gate is kept for review, and a
+language can be given its own threshold.** The 1.40 ratio was measured on nine
+packs; nobody knows whether it holds for every language lingua knows. A section
+killed after its retry now leaves both attempts in
+`skrypty/odrzut_*.md`; after reviewing and fixing the better one,
+`--przyjmij-probe N` re-runs the hard gates, records the length ratio and
+stores the text, so the next normal run takes it without an API call. Two
+accepted sections above a language's threshold print a ready entry for
+`jezyki_docelowe.yaml`, where an entry may now be `{nazwa, prog_rozdmuchania}`.
+The field is written by a person, never by the tool; no language has it today.
+
+**The recipe translator learned from its own propagation run.** A trailing
+comment returned on two lines no longer breaks the YAML; skipped units get one
+retry of just the missing ones; a quoted structure heading goes to the model as
+an anchor holding the TARGET pack's word (without it Icelandic was rejected
+three times running for a missing "Atriði"); JSON field names such as
+`mowca=` survive translation, on a word boundary only. A new gate refuses
+invisible characters (soft hyphen, zero-width space, word joiner, BOM) in every
+file the engine reads — it found two that had sat in the Finnish pack for a long
+time. The lesson for maintainers: a one-rule change in a Polish recipe is
+propagated by splicing the reviewed fragments into the existing files, not by
+retranslating whole files, which regressed dozens of reviewed lines.
+
+**Before closing, two execution-proven audits** found and fixed nine defects
+(none high): a salvaged empty turn that burned three paid retries, an audio tag
+lost by the finishing call, a warning claiming a line was dropped when none was,
+a strict JSON decoder losing every turn after a raw newline, a registry read with
+two different YAML parsers (the key `no` became `False`), unquoted registry
+names cut at `#`, a field-name anchor matching inside `kontekst=`, stale
+rejection artifacts that could overwrite a good translation, and a heading
+frozen in Polish whenever the anchor oracle was inactive. Five changes of this
+cycle had no test at all; they do now, and each test was checked to fail on the
+defect it guards.
+
+### Planned or deferred
+
+* **Two SDK upgrades are held on purpose, and the hold is recorded as a bound,
+  not left to silence.** PyPI offers `anthropic` 1.8.0 and `openai` 3.19.0,
+  both MINOR steps above what this release was built and tested with (1.7.0,
+  3.16.2). Per the project's conservative canon, an SDK migration is not the
+  content of this release: `requirements.txt` now reads `anthropic<1.8` and
+  `openai<3.17`, the environment is frozen, and lifting the bounds — upgrade,
+  compare the called surface with `inspect.signature`, test — ships as its
+  own cycle, as it did in v19.5.0.
+* `buduj_wielojezyczne_tryby.py` has no surgical `-k` mode like the docs
+  builder. Until it does, propagating a small change means running the tool for
+  drafts and splicing the reviewed fragments by hand.
+* `--slowniki` redirects the recipe translator's dictionaries but not its
+  review checklist, which is always written to the repository's `skrypty/`.
+* The 49 quotes ALMOST equal to a label stay baselined — unchanged since
+  v19.4.1, still a call for a native speaker.
+* The tenth language pack remains the open invitation, and nothing in this
+  release requires Python for it.
 
 ---
 

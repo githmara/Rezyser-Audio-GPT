@@ -54,7 +54,13 @@ wxpython<4.4
 # `Anthropic.__init__` (16 parametrów) i `messages.create` (22) dało ZBIORY
 # IDENTYCZNE przed i po, `with_options` na miejscu. Granica wraca więc na linię
 # majorową — tam, gdzie stoi realna przewidywana niezgodność.
-anthropic<2
+#
+# WSTRZYMANIE ZAPISANE GRANICĄ (v19.8.0, kanon zachowawczy): PyPI ma 1.8.0, czyli
+# krok MINOROWY — migracja SDK nie jest treścią tego wydania. Zdjęcie granicy
+# (z powrotem na `<2` po `inspect.signature` na `Anthropic.__init__`
+# i `messages.create`, jak w v19.5.0) to treść osobnego cyklu. Bilet powrotny:
+# `skrypty/zamrozone_19.8.0.txt`.
+anthropic<1.8
 # Most do Studio: wołamy `client.studio.projects.create/delete`
 # i `client.user.subscription.get` — dokładnie tę powierzchnię ten SDK
 # przemianowuje między wydaniami. 2.52 → 2.67 (15 minorów) przeszło bez zmian
@@ -123,4 +129,9 @@ markdown
 # w kodzie, tym samym dowodem co `anthropic` wyżej — `OpenAI.__init__` (18
 # parametrów) i `chat.completions.create` (42) to zbiory identyczne przed i po,
 # `with_options` na miejscu. Granica wraca na linię majorową.
-openai<4
+#
+# WSTRZYMANIE ZAPISANE GRANICĄ (v19.8.0, kanon zachowawczy): PyPI ma 3.19.0 —
+# krok MINOROWY (trzy minory ponad zainstalowane 3.16.2), ta sama decyzja i ten
+# sam termin co przy `anthropic` wyżej. Granica stoi tuż nad zainstalowaną linią,
+# żeby 3.17/3.18 też nie wchodziły bez sprawdzenia.
+openai<3.17

@@ -48,7 +48,7 @@ jobs:
           # Gorne granice MUSZA zgadzac sie z requirements.txt — runner
           # instaluje z PyPI, wiec bez tego bot jedzie na innym majorze SDK niz
           # reszta projektu. Pilnuje tego test_intake_zalaczniki.py.
-          pip install --upgrade "openai>=1.40,<4"
+          pip install --upgrade "openai>=1.40,<3.17"
           pip install "lingua-language-detector<2.3" pyyaml
 
       - name: Zbierz etykiety issue do CSV
