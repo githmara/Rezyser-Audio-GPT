@@ -541,6 +541,17 @@ more than style here.
   where that term is native. Finnish must NOT read
   `suomenruotsalaiset (ruotsinkieliset suomalaiset)`. Drop the gloss or replace it
   with something the target reader really lacks.
+- POLYSEMOUS SOURCE WORDS split across packs: when a Polish word has two
+  readings, the model picks one per language and the packs quietly disagree.
+  Measured in 19.8 on the anti-closure rule: `zwrotów` (meant: plot twists) came
+  back as "lines/phrases" in six packs (`phrases`, `répliques`, `battute`,
+  `реплик`, `repliikkejä`, `orðatiltækjum`) and correctly only in two
+  (`giros`, `Wendungen`); `przed ciosem` (before a blow) became
+  `coup de théâtre` / `colpo di scena` (a plot twist) in fr/it. Nothing
+  mechanical sees this — every pack is grammatical. When a NEW rule is
+  propagated, read that one sentence across ALL packs side by side, and if the
+  packs split, disambiguate the Polish source too (`zwrotów akcji`), not just
+  the targets.
 - COMMENTS are documentation for the linguist maintaining the pack — they should
   read natively, but keep code identifiers, YAML key names, file names and
   decoration lines (`---`, `===`) unchanged.

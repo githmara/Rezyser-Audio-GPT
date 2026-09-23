@@ -283,11 +283,34 @@ def _kotwice_z_silnika() -> tuple[str, ...]:
         print(f"⚠️  Cannot import `rezyser_ai` ({exc}) — publication-card validator "
               f"anchors now rest on the heuristic + oracle alone.")
         return ()
-    return tuple(
+    kotwice = [
         getattr(rezyser_ai, nazwa)
         for nazwa in dir(rezyser_ai)
         if nazwa.startswith("KOTWICA_") and isinstance(getattr(rezyser_ai, nazwa), str)
-    )
+    ]
+    # Nazwy pól JSON, które parser czyta ze strukturyzowanej odpowiedzi (19.8).
+    # Zmierzone: wszystkie osiem paczek oddało `mowca="Narrator"` jako
+    # `hablante=`/`speaker=` — orakuł nie zamroził tego kształtu, bo imię
+    # narratora paczki legalnie lokalizują („Narrador"), więc literał nie był
+    # jednomyślny. Zamrażamy WYŁĄCZNIE kształty kodowe (`"pole"`, `` `pole` ``,
+    # `pole=`) — goły `tekst` to też zwykłe polskie słowo w prozie promptu.
+    for schemat in (getattr(rezyser_ai, "SCHEMA_BURZA", None),
+                    getattr(rezyser_ai, "SCHEMA_SKRYPT", None)):
+        for pole in _pola_schematu(schemat):
+            kotwice += [f'"{pole}"', f"`{pole}`", f"{pole}="]
+    return tuple(dict.fromkeys(kotwice))
+
+
+def _pola_schematu(schemat: Any) -> list[str]:
+    """Nazwy wszystkich `properties` schematu JSON, rekurencyjnie."""
+    if isinstance(schemat, dict):
+        pola = list(schemat.get("properties", {}) or {})
+        for wartosc in schemat.values():
+            pola += _pola_schematu(wartosc)
+        return pola
+    if isinstance(schemat, list):
+        return [p for w in schemat for p in _pola_schematu(w)]
+    return []
 
 
 def _wartosci_slowne() -> tuple[str, ...]:
@@ -369,6 +392,9 @@ def waliduj_jednostke(
     tam, gdzie cytuje dane techniczne — reszta logu narzędzia jest polska.
     """
     problemy: list[str] = tlumacz_rdzen.parzystosc_tokenow(src_tok, tgt)
+    # 19.8: niewidoczny znak w jednostce = powtórka z zarzutem, a nie plik,
+    # który przejdzie walidację silnika i zepsuje dopasowanie literału po cichu.
+    problemy += tlumacz_bramki.znaki_niewidoczne(tgt)
 
     if klasa in (KLASA_PROMPT, KLASA_MAPA_TEKSTOW):
         # Przepis jest materiałem sztywnym: TU naruszenia miękkie (pogrubienia,
@@ -979,13 +1005,63 @@ def _klucze_cytowanych_naglowkow(
     znalezione: list[str] = []
     for klucz, slowo in slowa_pl.items():
         for m in re.finditer(rf"\b{re.escape(slowo)}\b", tekst):
-            po = tekst[m.end():m.end() + 3]
-            przed = tekst[max(0, m.start() - 1):m.start()]
-            if (re.match(r"\s*[\d{]", po) or po.startswith("/")
-                    or przed in "/„\"«(»"):
+            if _czy_cytat_naglowka(tekst, m.start(), m.end()):
                 znalezione.append(klucz)
                 break
     return znalezione
+
+
+def _czy_cytat_naglowka(tekst: str, start: int, koniec: int) -> bool:
+    """Kontekst cytatu nagłówka — jedna definicja dla bramki i dla zamrażania.
+
+    `⟦` po słowie to numer albo placeholder już zamrożony tokenem (zamrażanie
+    chodzi po tokenizacji, bramka po detokenizacji — obie muszą widzieć to samo).
+    """
+    po = tekst[koniec:koniec + 3]
+    przed = tekst[max(0, start - 1):start]
+    return bool(re.match(r"\s*[\d{⟦]", po) or po.startswith("/")
+                or (przed and przed in "/„\"«(»"))
+
+
+def zamroz_cytowane_naglowki(
+    tekst_tok: str, mapa: dict[str, str], kod: str,
+) -> str:
+    """Cytat nagłówka struktury idzie do modelu jako token o DOCELOWEJ treści.
+
+    Bramka :func:`_sprawdz_naglowki_struktury` zna słowo, które silnik wpisze
+    do pliku projektu (`ui.yaml::rezyser.naglowek_*` paczki docelowej), ale
+    model go nie znał — tłumaczył „Scena 2" na własne słowo, a bramka
+    odrzucała plik. Zmierzone 19.8: `is/tryb_audiobook` odrzucony trzy razy
+    z rzędu za brak „Atriði". Skoro odpowiedź jest wyliczalna z danych, nie
+    pytamy o nią modelu: cytowany nagłówek zamieniamy na token kotwicy, który
+    detokenizuje się do słowa paczki docelowej. Proza („Scena nie może dziać
+    się w próżni") zostaje do przetłumaczenia — liczy się wyłącznie cytat.
+    """
+    zrodlowe = naglowki_struktury(KOD_ZRODLOWY)
+    docelowe = naglowki_struktury(kod)
+    if not zrodlowe or not docelowe:
+        return tekst_tok   # bramka i tak powie o braku nagłówków (zero ciszy)
+    numery = [int(n) for n in re.findall(r"K(\d+)", " ".join(mapa))]
+    licznik = max(numery, default=-1) + 1
+    for klucz in sorted(zrodlowe, key=lambda k: -len(zrodlowe[k])):
+        slowo_pl, slowo_cel = zrodlowe[klucz], docelowe.get(klucz)
+        if not slowo_cel:
+            continue
+        tok: str | None = None
+        czesci: list[str] = []
+        poz = 0
+        for m in re.finditer(rf"\b{re.escape(slowo_pl)}\b", tekst_tok):
+            if not _czy_cytat_naglowka(tekst_tok, m.start(), m.end()):
+                continue
+            if tok is None:
+                tok = TOKEN_KOTWICA.format(licznik)
+                mapa[tok.strip("⟦⟧")] = slowo_cel
+                licznik += 1
+            czesci += [tekst_tok[poz:m.start()], tok]
+            poz = m.end()
+        if tok is not None:
+            tekst_tok = "".join(czesci) + tekst_tok[poz:]
+    return tekst_tok
 
 
 def waliduj_silnikiem(
@@ -1240,6 +1316,8 @@ def tlumacz_plik(
 
     for j in jednostki:
         j.zrodlo_tok, j.mapa = tokenizuj(j.zrodlo, kotwice)
+        if j.rodzaj == "prompt":
+            j.zrodlo_tok = zamroz_cytowane_naglowki(j.zrodlo_tok, j.mapa, kod)
 
     liczba_tokenow = sum(len(j.mapa) for j in jednostki)
     print(
@@ -1275,7 +1353,28 @@ def tlumacz_plik(
             print(f"❌ {kod}/{nazwa_pliku}: LLM error in chunk {nr}/{len(chunki)} — {exc}")
             return False, []
 
-    brakujace = {j.id for j in jednostki} - set(mapa_tgt)
+    # Id, o które nie pytaliśmy, nie mają prawa wejść do wyniku. Zmierzone 19.8
+    # (`is/tryb_audiobook`, 3 z 4 prób): model oddawał jednostki 0–1, po czym
+    # zamykał tablicę atrapą `{"id": 999, "target": "placeholder"}`.
+    ids_zadane = {j.id for j in jednostki}
+    mapa_tgt = {k: v for k, v in mapa_tgt.items() if k in ids_zadane}
+    brakujace = ids_zadane - set(mapa_tgt)
+    if brakujace:
+        # Ta sama klasa porażki jest LOSOWA (czwarta próba oddała komplet), więc
+        # jedna dogrywka samych brakujących jednostek jest tańsza od ponownego
+        # przebiegu całego przepisu — i nie udaje niczego: bramki poniżej
+        # sprawdzają dograne jednostki tak samo jak resztę.
+        print(f"⚠️  {kod}/{nazwa_pliku}: the model skipped {len(brakujace)} "
+              f"unit(s) — asking once more for just those.")
+        pozycje = [(j.id, j.rodzaj, j.zrodlo_tok) for j in jednostki
+                   if j.id in brakujace]
+        try:
+            dogrywka = wywolaj_llm(klient, model, nazwa_cel, kod, pozycje)
+        except RuntimeError as exc:
+            print(f"❌ {kod}/{nazwa_pliku}: LLM error in the retry call — {exc}")
+            return False, []
+        mapa_tgt.update({k: v for k, v in dogrywka.items() if k in brakujace})
+        brakujace = ids_zadane - set(mapa_tgt)
     if brakujace:
         print(f"❌ {kod}/{nazwa_pliku}: the model skipped id {sorted(brakujace)[:20]} "
               f"(total {len(brakujace)}). NOT saving.")
@@ -1407,8 +1506,17 @@ def tlumacz_plik(
             print(f"⚠️  {kod}/{nazwa_pliku}: trailing comment #{idx} does not match "
                   f"PL — leaving the Polish one in place.")
             continue
+        # Komentarz końcowy żyje w JEDNEJ linii za wartością. Model potrafi
+        # oddać jego przekład złamany na dwie linie, a wtedy druga ląduje
+        # w YAML-u bez `#` i parser odrzuca cały plik (zmierzone 19.8: en/it,
+        # potem is/ru `tryb_skrypt` padały na `could not find expected ':'`).
+        tresc_kom = tlum_koncowe[idx].strip()
+        if "\n" in tresc_kom:
+            print(f"⚠️  {kod}/{nazwa_pliku}: trailing comment #{idx} came back "
+                  f"on several lines — joined into one.")
+            tresc_kom = " ".join(tresc_kom.split())
         linie[wpis["linia"]] = (
-            f"{wpis['przed']}{wpis['odstep']}# {tlum_koncowe[idx].strip()}")
+            f"{wpis['przed']}{wpis['odstep']}# {tresc_kom}")
     dump_cel = "\n".join(linie)
 
     zawartosc = _baner_draftu(kod, nazwa_pliku) + dump_cel

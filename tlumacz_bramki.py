@@ -130,6 +130,36 @@ def _zaczyna_sie_artefaktem(tekst: str) -> bool:
     return tekst.lstrip().startswith(_PREFIKSY_ARTEFAKTU)
 
 
+# Znaki niewidoczne, które w pliku czytanym przez SILNIK nie mają żadnej legalnej
+# roli: dzielą słowo tam, gdzie oko go nie widzi, więc psują dopasowanie literału
+# (`str.replace`, kotwice, słowa-wyzwalacze) i odczyt czytnika ekranu. Zmierzone
+# 19.8: `is/tryb_audiobook` wrócił z U+00AD wewnątrz „nákvæmlega". Lista jest
+# CELOWO wąska — ZWNJ/ZWJ i znaczniki kierunku (U+200C/D, U+200E/F) są legalną
+# ortografią perskiego czy arabskiego, więc ich tu nie ma.
+ZNAKI_NIEWIDOCZNE: dict[str, str] = {
+    "­": "SOFT HYPHEN (U+00AD)",
+    "​": "ZERO WIDTH SPACE (U+200B)",
+    "⁠": "WORD JOINER (U+2060)",
+    "﻿": "ZERO WIDTH NO-BREAK SPACE / BOM (U+FEFF)",
+}
+
+
+def znaki_niewidoczne(tekst: str) -> list[str]:
+    """Diagnostyka znaków z :data:`ZNAKI_NIEWIDOCZNE` w tekście (pusta = czysto).
+
+    Bez porównania ze źródłem: żaden z tych znaków nie ma prawa stać w pliku
+    silnika, więc nawet „przepisany" ze źródła jest usterką źródła.
+    """
+    wynik: list[str] = []
+    for znak, nazwa in ZNAKI_NIEWIDOCZNE.items():
+        poz = tekst.find(znak)
+        if poz >= 0:
+            kontekst = tekst[max(0, poz - 20):poz + 20].replace(znak, "¦")
+            wynik.append(f"invisible {nazwa} ×{tekst.count(znak)}, "
+                         f"e.g. {kontekst!r} (¦ marks it)")
+    return wynik
+
+
 def stosunek_dlugosci(src: str, tgt: str, *, prog: int = 200) -> float:
     """Iloraz długości tłumaczenia do źródła. ``0.0`` = źródło krótsze niż `prog`.
 
