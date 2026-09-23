@@ -813,6 +813,10 @@ class WynikSkryptu:
         surowy_json:      Sucha odpowiedź modelu (log / debug).
         liczba_prob:      Ile wywołań LLM zużyto (1 = bez retry). Sygnał do
                           diagnostyki „struktura sypie się przy N% kontekstu".
+        ostrzezenie:      v19.8 — niepusty, gdy odpowiedź ucięła się na
+                          ``max_tokens`` i skrypt złożono z odzyskanych tur
+                          (ostatnia domknięta albo wycięta). GUI pokazuje go po
+                          zapisie, jak ostrzeżenie urwanej prozy audiobooka.
     """
     tekst_odpowiedzi: str = ""
     tury:             list[TuraSkryptu] = field(default_factory=list)
@@ -820,6 +824,7 @@ class WynikSkryptu:
     uzyty_sufiks:     str | None = None
     surowy_json:      str = ""
     liczba_prob:      int = 0
+    ostrzezenie:      str = ""
 
 
 def renderuj_skrypt(tury: list[TuraSkryptu]) -> str:
@@ -884,8 +889,10 @@ def generuj_skrypt(
         gdy ``przepis.stosuj_akcenty_fonetyczne``) i surową listą ``tury``.
 
     Raises:
-        RuntimeError: wyczerpane retry (halucynacja struktury) ALBO
-                      stop_reason="max_tokens" (ucięty JSON).
+        BladStrukturyJSON: wyczerpane retry (halucynacja struktury).
+        BladDlugosciOdpowiedzi: ucięcie na ``max_tokens``, z którego nie dało
+                      się odzyskać ani jednej kompletnej tury. Ucięcie z choćby
+                      jedną turą (v19.8) zwraca wynik z ``ostrzezenie``.
         Wyjątki Anthropic (RateLimitError, APITimeoutError, ...) — propagowane.
     """
     system, messages, segmenty, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
@@ -916,13 +923,6 @@ def generuj_skrypt(
         wywolan += 1
         ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
 
-        if stop_reason == "max_tokens":
-            raise BladDlugosciOdpowiedzi(
-                "The model hit its max_tokens limit — the Script response was cut "
-                "off before the JSON could be closed. Shorten the context or raise "
-                "max_tokens."
-            )
-
         # v18.23: odmowa klasyfikatora (pusta treść) — bez tej gałęzi zużywała
         # retry i kończyła się „błędem struktury". Patrz `generuj_burze`.
         if stop_reason == cl.STOP_ODRZUCENIE:
@@ -945,16 +945,24 @@ def generuj_skrypt(
             )
 
         try:
-            dane = json.loads(cl.napraw_luzny_json(surowy_text))
-            odmowa, dane, powod = cl.rozpakuj_dyskryminator(dane)
-            if odmowa:
-                cl.zaloguj_odmowe(powod, "skrypt")
-                return WynikSkryptu(
-                    odrzucone=True,
-                    uzyty_sufiks=sufiks_nazwa,
-                    surowy_json=surowy_text,
-                    liczba_prob=wywolan,
-                )
+            if stop_reason == "max_tokens":
+                # v19.8: ucięcie nie wyrzuca już opłaconej generacji — patrz
+                # sekcja „Odzysk uciętego Skryptu". Ostrzeżenie ustawiane per
+                # przebieg pętli: korekta językowa może dać odpowiedź pełną.
+                dane, ostrzezenie = _uratuj_uciety_skrypt(
+                    klient, przepis, surowy_text, timeout)
+            else:
+                ostrzezenie = ""
+                dane = json.loads(cl.napraw_luzny_json(surowy_text))
+                odmowa, dane, powod = cl.rozpakuj_dyskryminator(dane)
+                if odmowa:
+                    cl.zaloguj_odmowe(powod, "skrypt")
+                    return WynikSkryptu(
+                        odrzucone=True,
+                        uzyty_sufiks=sufiks_nazwa,
+                        surowy_json=surowy_text,
+                        liczba_prob=wywolan,
+                    )
             jsonschema.validate(instance=dane, schema=SCHEMA_SKRYPT)
         except (json.JSONDecodeError, jsonschema.ValidationError) as exc:
             proby_struktury += 1
@@ -1009,6 +1017,7 @@ def generuj_skrypt(
             uzyty_sufiks=sufiks_nazwa,
             surowy_json=surowy_text,
             liczba_prob=wywolan,
+            ostrzezenie=ostrzezenie,
         )
 
 
@@ -1108,6 +1117,118 @@ def _domknij_urwane_zdanie(
         return tekst, False
 
     return tekst[:granica] + sep + domkniete, True
+
+
+# =============================================================================
+# Odzysk uciętego Skryptu (v19.8)
+# =============================================================================
+# Do v19.7 `stop_reason == "max_tokens"` w Skrypcie od razu rzucał
+# `BladDlugosciOdpowiedzi` — cała OPŁACONA generacja przepadała, choć structured
+# outputs gwarantują kształt każdej zamkniętej tury, a ucięta bywa tylko ostatnia.
+# Decyzja maintainera (2026-09-23): kompletne tury bierzemy, ostatnią domykamy
+# tym samym mikro-callem co audiobook (`_domknij_urwane_zdanie`), a gdy ucięcie
+# padło w nazwie mówcy albo domknięcie zawiedzie — turę wycinamy. Reżyser dostaje
+# ostrzeżenie w obu przypadkach: ucięta odpowiedź najpewniej nie zrealizowała celu
+# sceny do końca, niezależnie od losu ostatniej linii.
+#
+# Odzysk jest PRZYROSTOWY (`raw_decode` obiekt po obiekcie w tablicy `tury`),
+# nie „dopisz nawiasy i spróbuj": tura, która się sparsowała, jest kompletna
+# z definicji, a o losie reszty decyduje jedna, jawna reguła.
+
+# Ucięta tura: kompletny `mowca`, a po nim początek `tekst` bez zamykającego
+# cudzysłowu. Kolejność pól to kolejność schematu (structured outputs jej
+# pilnuje); tura w odwrotnej kolejności albo z uciętym mówcą nie pasuje
+# i zostaje wycięta — to jest fallback, nie luka.
+_RE_UCIETA_TURA = re.compile(
+    r'\{\s*"mowca"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*"tekst"\s*:\s*"((?:[^"\\]|\\.)*)',
+    re.S,
+)
+# Niedomknięty audio-tag na końcu uciętej kwestii (`… [whisp`) — zdejmujemy go
+# PRZED domknięciem zdania, bo mikro-call przepisałby go na prozę.
+_RE_URWANY_TAG = re.compile(r"\s*\[[^\]]*$")
+
+
+def _dekoduj_uciety_napis(surowy: str) -> str:
+    """Treść napisu JSON uciętego w środku (bez zamykającego cudzysłowu)."""
+    # Ucięcie w środku sekwencji ucieczki: nieparzysta liczba `\` na końcu albo
+    # niepełne `\uXXXX` — zdejmujemy niedokończoną sekwencję.
+    surowy = re.sub(r"\\u[0-9a-fA-F]{0,3}$", "", surowy)
+    if (len(surowy) - len(surowy.rstrip("\\"))) % 2:
+        surowy = surowy[:-1]
+    try:
+        return json.loads(f'"{surowy}"')
+    except json.JSONDecodeError:
+        return ""
+
+
+def odzyskaj_tury_ucietego_skryptu(surowy: str) -> tuple[list[dict], dict | None]:
+    """Z uciętego JSON-a Skryptu: ``(kompletne_tury, ucieta_tura | None)``.
+
+    ``ucieta_tura`` to ``{"mowca", "tekst"}`` z częściowym tekstem — tylko gdy
+    mówca jest kompletny i tekst się zaczął. Brak tablicy ``tury`` = ``([], None)``.
+    """
+    m = re.search(r'"tury"\s*:\s*\[', surowy)
+    if not m:
+        return [], None
+    dekoder = json.JSONDecoder()
+    tury: list[dict] = []
+    i = m.end()
+    while i < len(surowy):
+        while i < len(surowy) and surowy[i] in " \t\r\n,":
+            i += 1
+        if i >= len(surowy) or surowy[i] != "{":
+            break
+        try:
+            obiekt, i = dekoder.raw_decode(surowy, i)
+        except json.JSONDecodeError:
+            reszta = _RE_UCIETA_TURA.match(surowy, i)
+            if not reszta:
+                return tury, None
+            mowca = _dekoduj_uciety_napis(reszta.group(1))
+            tekst = _dekoduj_uciety_napis(reszta.group(2))
+            if mowca.strip() and tekst.strip():
+                return tury, {"mowca": mowca, "tekst": tekst}
+            return tury, None
+        if isinstance(obiekt, dict):
+            tury.append(obiekt)
+    return tury, None
+
+
+def _domknij_ucieta_kwestie(
+    klient: Any, przepis: pr.PrzepisRezysera, tekst: str, timeout: float,
+) -> str | None:
+    """Domyka uciętą kwestię Skryptu albo ``None`` (wołający wycina turę)."""
+    tekst = _RE_URWANY_TAG.sub("", tekst).rstrip()
+    if not tekst:
+        return None
+    domkniety, doszyto = _domknij_urwane_zdanie(klient, przepis, tekst, timeout)
+    return domkniety if doszyto and domkniety.strip() else None
+
+
+def _uratuj_uciety_skrypt(
+    klient: Any, przepis: pr.PrzepisRezysera, surowy: str, timeout: float,
+) -> tuple[dict, str]:
+    """``(dane {"tury": …}, ostrzeżenie)`` z uciętej odpowiedzi Skryptu.
+
+    Rzuca :class:`BladDlugosciOdpowiedzi`, gdy nie ma ani jednej tury do
+    zapisania — wtedy nie ma czego ratować i obowiązuje dawne zachowanie.
+    """
+    tury, ucieta = odzyskaj_tury_ucietego_skryptu(surowy)
+    klucz = "rezyser.ostrzezenie_skrypt_wycieto"
+    if ucieta is not None:
+        domknieta = _domknij_ucieta_kwestie(klient, przepis, ucieta["tekst"], timeout)
+        if domknieta is not None:
+            tury.append({"mowca": ucieta["mowca"], "tekst": domknieta})
+            klucz = "rezyser.ostrzezenie_skrypt_domknieto"
+    if not tury:
+        raise BladDlugosciOdpowiedzi(
+            "The model hit its max_tokens limit — the Script response was cut "
+            "off before even one complete turn. Shorten the context or raise "
+            "max_tokens."
+        )
+    _dev_log(f"Skrypt: ucięty na max_tokens — odzyskano {len(tury)} tur(y), "
+             f"ostatnia {'domknięta' if klucz.endswith('domknieto') else 'wycięta'}.")
+    return {"tury": tury}, i18n.t(klucz)
 
 
 # =============================================================================

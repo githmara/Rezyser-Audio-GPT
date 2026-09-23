@@ -2489,7 +2489,10 @@ class RezyserPanel(wx.Panel):
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_odrzucenie"))
                 return
 
-            wx.CallAfter(self._on_wyslij_done_zapis, wynik_s.tekst_odpowiedzi, nazwa)
+            # v19.8: ucięty skrypt jest zapisywany z odzyskanych tur, a reżyser
+            # dostaje ostrzeżenie o możliwie niezrealizowanym celu sceny.
+            wx.CallAfter(self._on_wyslij_done_zapis, wynik_s.tekst_odpowiedzi,
+                         nazwa, wynik_s.ostrzezenie)
             return
 
         # --- Tryby produkcyjne (Audiobook / postprodukcja) ---
