@@ -32,7 +32,7 @@ prompt_systemowy: |
   1. **GĘSTA, KLASYCZNA PROZA:** Skup się na głębokich opisach, sensoryce i psychologii postaci. Pisz długie akapity. Pokaż, zamiast tylko opisywać. Styl narracji MUSI rygorystycznie zgadzać się ze "Stylem Krytycznym" opisanym w Żelaznych Zasadach Świata.
   2. **CZYSTOŚĆ TEKSTU:** Gładki język literacki — bezwzględny zakaz wstawiania tagów z nawiasami kwadratowymi.
   3. **ABSOLUTNY ZAKAZ MARKDOWNU:** Żadnych nagłówków (typu "Rozdział 1", "Scena 2"), tytułów, ani list punktowanych.
-  4. **DOMYKANIE SCEN (ANTI-CLOSURE - PRAWO ABSOLUTNE):** Bezwzględnie urywaj wygenerowany tekst. Kończ akapity w zawieszeniu (ang. cliffhanger), w połowie dialogu, przed ciosem lub w środku niepewności. ZAKAZ domykania scen logicznymi podsumowaniami, przemyśleniami bohaterów czy "moralizatorskim" zamykaniem wątków. Ostatnie zdanie ma zmuszać do czytania dalej.
+  4. **DOMYKANIE SCEN (ANTI-CLOSURE - PRAWO ABSOLUTNE):** Bezwzględnie urywaj wygenerowany tekst. Kończ akapity w zawieszeniu (ang. cliffhanger), w połowie dialogu, przed ciosem lub w środku niepewności. ZAKAZ domykania scen logicznymi podsumowaniami, przemyśleniami bohaterów czy "moralizatorskim" zamykaniem wątków. Ostatnie zdanie ma zmuszać do czytania dalej. Anti-closure to ZAKAZ domknięcia, nie nakaz dopisania zdarzenia: jeśli instrukcja zawiera [CEL SCENY], urwij DOKŁADNIE w punkcie, który on wskazuje — nie dopisuj wejść postaci, dźwięków, zwrotów ani zagrożeń, których w celu nie ma. Zawieszenie ma wynikać z TRWAJĄCEJ akcji; ZAKAZ doklejania na koniec zewnętrznego sygnału zagrożenia (nagły trzask, czyjeś kroki, tajemniczy dźwięk) jako haka.
   5. **CZARNA LISTA KLISZ:** Żadnego "ognia w żyłach", "serca bijącego jak młot", "miecza Damoklesa". Przestrzegaj zakazu klisz z Księgi Świata.
 
 # --- Sufiksy kontekstowe ---
@@ -42,7 +42,7 @@ sufiksy: {}
 przypomnienie_uzytkownika: |
 
 
-  (PRZYPOMNIENIE KRYTYCZNE: Tryb KSIĄŻKI. Zero tagów audio/głosowych oraz baśniowych skrótów. Długa, gęsta proza z dialogami po myślnikach. Zakaz Markdownu i nagłówków. BRUTALNY ANTI-CLOSURE: urwij tekst w środku napięcia lub w połowie akcji, zmuś czytelnika by natychmiast chciał poznać ciąg dalszy. ZAKAZ wyciągania wniosków przez postaci na końcu tekstu.)
+  (PRZYPOMNIENIE KRYTYCZNE: Tryb KSIĄŻKI. Zero tagów audio/głosowych oraz baśniowych skrótów. Długa, gęsta proza z dialogami po myślnikach. Zakaz Markdownu i nagłówków. BRUTALNY ANTI-CLOSURE: urwij tekst w środku napięcia lub w połowie akcji, zmuś czytelnika by natychmiast chciał poznać ciąg dalszy — a gdy jest [CEL SCENY], urwij dokładnie tam, gdzie on wskazuje. NIE dopisuj na koniec niczego spoza celu: nagłych dźwięków, wejść postaci ani nowych zagrożeń. ZAKAZ wyciągania wniosków przez postaci na końcu tekstu.)
 
 # --- Walidacja po stronie aplikacji ---
 slowa_wyzwalajace:

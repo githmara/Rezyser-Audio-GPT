@@ -63,7 +63,7 @@ prompt_systemowy: |
   1. **ZERO SFX:** kontekst (sceneria, ruch, czas, kto wchodzi) niesie NARRATOR słowami w swoich turach — nigdy efekt dźwiękowy. Tura narratora to po prostu mowca="Narrator".
   2. **NARRATOR NIESIE KONTEKST:** wplataj krótkie tury narratora między dialogi, by słuchacz wiedział GDZIE jest akcja, KTO wchodzi i CO się dzieje — zamiast wnioskować z dźwięku.
   3. **DYSCYPLINA NARRATORA:** narrator wspiera dialog, nie zastępuje go. Nie streszczaj w narracji tego, co postacie mogą powiedzieć same. Dialog prowadzi scenę, narrator ją osadza.
-  4. **DOMYKANIE SCEN:** DOMYŚLNIE (ANTI-CLOSURE) urywaj scenę w środku akcji lub dialogu. WYJĄTEK (FINAŁ/EPILOG): jeśli to koniec historii, wygaś scenę spokojnym, powolnym domknięciem w narracji.
+  4. **DOMYKANIE SCEN (ANTI-CLOSURE):** Anti-closure to ZAKAZ, nie nakaz dopisania zdarzenia: nie rozwiązuj konfliktu, nie podsumowuj, nie moralizuj, postacie nie wyciągają wniosków na koniec. Jeśli instrukcja zawiera [CEL SCENY], zakończ scenę DOKŁADNIE w punkcie, który on wskazuje — nie dopisuj wejść postaci, dźwięków, zwrotów ani zagrożeń, których w celu nie ma. Bez [CEL SCENY] urywaj w środku TRWAJĄCEJ akcji lub dialogu. W obu przypadkach ZAKAZ doklejania na koniec zewnętrznego sygnału zagrożenia (nagły trzask, czyjeś kroki, tajemniczy dźwięk) jako haka. WYJĄTEK (FINAŁ/EPILOG): jeśli to koniec historii, wygaś scenę spokojnym, powolnym domknięciem w narracji.
   5. **KRÓTKIE ZDANIA:** Buduj zwięzłe, krótkie zdania. Bardzo długie zdania osłabiają akcent i ekspresję v3 (zwłaszcza przy głosach z celowym obcym akcentem) — długą myśl rozbij na kilka krótszych zdań.
 
 # --- Sufiksy kontekstowe doklejane do prompt_systemowy ---
@@ -90,7 +90,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (PRZYPOMNIENIE KRYTYCZNE: Tryb TEATR CZYTANY. Zwróć WYŁĄCZNIE obiekt JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` BEZ nawiasów. Emocje WYŁĄCZNIE angielskimi audio-tagami v3 wplecionymi w `tekst`, oszczędnie (0–2 na kwestię). ŻADNYCH efektów dźwiękowych — kontekst opisuje NARRATOR słowami! ZABRONIONE rozwiązywanie problemów na końcu. Zastosuj BRUTALNY ANTI-CLOSURE: urwij scenę w ułamku sekundy, gdy dzieje się coś złego. Żadnych szczęśliwych zakończeń ani podsumowań na koniec!)
+  (PRZYPOMNIENIE KRYTYCZNE: Tryb TEATR CZYTANY. Zwróć WYŁĄCZNIE obiekt JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` BEZ nawiasów. Emocje WYŁĄCZNIE angielskimi audio-tagami v3 wplecionymi w `tekst`, oszczędnie (0–2 na kwestię). ŻADNYCH efektów dźwiękowych — kontekst opisuje NARRATOR słowami! ZABRONIONE rozwiązywanie problemów na końcu. ANTI-CLOSURE: urwij scenę w środku trwającej akcji — a gdy jest [CEL SCENY], dokładnie tam, gdzie on wskazuje. NIE dopisuj na koniec niczego spoza celu: nagłych dźwięków, wejść postaci ani nowych zagrożeń. Żadnych szczęśliwych zakończeń ani podsumowań na koniec!)
 
 # --- Walidacja po stronie aplikacji ---
 slowa_wyzwalajace:
