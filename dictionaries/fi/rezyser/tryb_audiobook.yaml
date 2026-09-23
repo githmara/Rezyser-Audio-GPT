@@ -55,7 +55,6 @@ slowa_wyzwalajace:
     - tiivistä
     - tee yhteenveto
     - yhteenveto
-    - kertaa
 
 # Huomio tekoälyn hylkäystunnistuksesta:
 # Versiosta 13.0 lähtien tunnistus tapahtuu universaalin `[ODRZUCENIE_AI]`-tagin

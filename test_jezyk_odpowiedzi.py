@@ -56,6 +56,14 @@ def test_zwykla_instrukcja_nie_jest_prosba_o_streszczenie(tekst):
     assert not pr.prosi_o_streszczenie(przepis, tekst)
 
 
+@pytest.mark.parametrize("tryb", ["skrypt", "audiobook"])
+def test_fi_kertaa_nie_blokuje_zwyklej_instrukcji(tryb):
+    """Decyzja maintainera 19.8: `kertaa` to też partytyw od *kerta* („kaksi
+    kertaa" = dwa razy), więc jako podciąg blokował zwykłe instrukcje sceny."""
+    przepis = pr.zaladuj_przepis(tryb, "fi")
+    assert not pr.prosi_o_streszczenie(przepis, "Hän koputtaa oveen kaksi kertaa.")
+
+
 def test_kazdy_wyzwalacz_kazdej_paczki_trafia_w_samego_siebie():
     """Slowo z paczki wpisane dokladnie tak, jak stoi w pliku, MUSI blokowac."""
     for kod, przepis in _wszystkie_przepisy():
