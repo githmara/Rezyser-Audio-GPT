@@ -491,6 +491,26 @@ def wykryj_kotwice(
     return sorted(kandydaci, key=lambda s: (-len(s), s))
 
 
+def _wzor_kotwicy_na_granicy(literal: str) -> re.Pattern[str] | None:
+    """Wzorzec dla kotwicy dopasowywanej TYLKO na granicy słowa, albo ``None``.
+
+    Dotyczy kształtu `pole=` (nazwa pola JSON jako kotwica, v19.8): goły
+    podciąg robił z `kontekst=` „kon⟦K0⟧" i kazał walidacji szukać `tekst=`
+    w przekładzie (audyt 19.8). Pozostałe kotwice zostają dosłowne, jak u
+    wszystkich braci od początku — jedna definicja dla tokenizera
+    i dla liczenia wystąpień (:func:`wystapienia_kotwicy`).
+    """
+    if literal.endswith("=") and (literal[0].isalnum() or literal[0] == "_"):
+        return re.compile(rf"(?<!\w){re.escape(literal)}")
+    return None
+
+
+def wystapienia_kotwicy(literal: str, tekst: str) -> int:
+    """Liczba wystąpień kotwicy w tekście — tą samą regułą co :func:`tokenizuj`."""
+    wzor = _wzor_kotwicy_na_granicy(literal)
+    return len(wzor.findall(tekst)) if wzor is not None else tekst.count(literal)
+
+
 def tokenizuj(tekst: str, kotwice: list[str]) -> tuple[str, dict[str, str]]:
     """Zamraża placeholdery i kotwice. Zwraca (tekst_z_tokenami, token→literał).
 
@@ -523,8 +543,15 @@ def tokenizuj(tekst: str, kotwice: list[str]) -> tuple[str, dict[str, str]]:
     # 2. Kotwice — od najdłuższej (lista już posortowana). Zwykły `str.replace`,
     #    bo literały są dosłowne (żadnych regexów użytkownika w tym miejscu).
     for literal in kotwice:
-        if literal in tekst:
-            tekst = tekst.replace(literal, _token(literal, TOKEN_KOTWICA, licznik_k))
+        if literal not in tekst:
+            continue
+        wzor = _wzor_kotwicy_na_granicy(literal)
+        if wzor is not None:
+            if wzor.search(tekst):
+                tok = _token(literal, TOKEN_KOTWICA, licznik_k)
+                tekst = wzor.sub(lambda _m, t=tok: t, tekst)
+            continue
+        tekst = tekst.replace(literal, _token(literal, TOKEN_KOTWICA, licznik_k))
 
     return tekst, mapa
 

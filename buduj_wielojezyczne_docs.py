@@ -1417,6 +1417,11 @@ def _tlumacz_pojedyncza_sekcje(
                 f"{prog:.2f}x limit — a section that long carries "
                 f"material the source does not have")
         if not zarzuty:
+            # Audyt 19.8: odrzut z WCZEŚNIEJSZEGO przebiegu nie ma prawa przeżyć
+            # sukcesu — jego odcisk źródła wciąż pasuje, więc `--przyjmij-probe`
+            # podmieniłby dobry przekład starym, rozdmuchanym.
+            for n in (1, 2):
+                sciezka_odrzutu(kod, rdzen, klucz_sekcji, n).unlink(missing_ok=True)
             return True, detokenizuj(tekst_wy, mapa)
         proby_odrzucone.append({"proba": proba, "zarzuty": list(zarzuty),
                                 "iloraz": iloraz,

@@ -116,17 +116,31 @@ def test_resolver_nie_zgaduje(nazwa):
     assert cp.kod_iso_z_nazwy_jezyka(nazwa) == ""
 
 
-def test_natywne_nazwy_tylko_z_paczek_wdrozonych():
-    """Natywna nazwa spoza `dostepne_jezyki_bazowe()` nie ma prawa trafic."""
-    mapa = cp._mapa_nazw_jezykow()
+def test_natywne_nazwy_tylko_z_paczek_wdrozonych(monkeypatch):
+    """Natywna nazwa spoza `dostepne_jezyki_bazowe()` nie ma prawa trafic.
+
+    Audyt 19.8: dawna wersja sprawdzala „svenska", ktorej nie ma jak wpasc do
+    mapy (`natywna_nazwa('sv')` zwraca po prostu `'sv'`) - asercja nie mogla
+    pasc. Teraz wycofujemy WDROZONA paczke `fi` i patrzymy, czy „Suomi" znika.
+    """
     wdrozone = set(cp.dostepne_jezyki_bazowe())
     for kod in wdrozone:
         nazwa = cp.natywna_nazwa(kod)
         assert cp.kod_iso_z_nazwy_jezyka(nazwa) == kod, (kod, nazwa)
-    # „Svenska" nie jest ani polska nazwa kanonu, ani enumem - szwedzkiej paczki
-    # nie ma, wiec nie ma tez zrodla, ktore mogloby ja rozstrzygnac.
-    assert "sv" not in wdrozone
-    assert "svenska" not in mapa
+    assert cp.kod_iso_z_nazwy_jezyka("Suomi") == "fi"
+    monkeypatch.setattr(cp, "dostepne_jezyki_bazowe",
+                        lambda: sorted(wdrozone - {"fi"}))
+    assert cp.kod_iso_z_nazwy_jezyka("Suomi") == ""
+    assert cp.kod_iso_z_nazwy_jezyka("fiński") == "fi", "kanon lingua zostaje"
+
+
+def test_klucz_niejednoznaczny_wypada(monkeypatch):
+    """Nazwa wskazujaca na dwa kody = „zapytaj model", nie wynik kolejnosci petli."""
+    oryginal = cp.natywna_nazwa
+    monkeypatch.setattr(cp, "natywna_nazwa",
+                        lambda kod: "Fiński" if kod == "is" else oryginal(kod))
+    assert cp.kod_iso_z_nazwy_jezyka("fiński") == ""
+    assert cp.kod_iso_z_nazwy_jezyka("Finnish") == "fi"
 
 
 # Uruchomienie jako skrypt - deleguje do pytesta (kanon v19.2.1, §6.11).

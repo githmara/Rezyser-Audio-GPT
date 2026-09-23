@@ -25,8 +25,8 @@ gdy dispatch akcentów stał się dynamiczny) zdejmuje tę barierę:
 
 Język źródłowy `pl` jest celowo pomijany (to źródło, nie cel tłumaczenia).
 
-Narzędzie jest SAMOWYSTARCZALNE — czyta YAML-e wprost (`pyyaml` przez
-`dev_yaml`), nie importuje silnika (`core_poliglota` ciągnie `python-docx`), więc działa nawet
+Narzędzie jest SAMOWYSTARCZALNE — czyta YAML-e wprost (przez `dev_yaml`; rejestr
+parserem ruamel jak `tlumacz_rdzen`), nie importuje silnika (`core_poliglota` ciągnie `python-docx`), więc działa nawet
 w okrojonym środowisku kontrybutora.
 
 ZEPSUTY PLIK = STOP (standard `dev_yaml`, od v18.28.0). Do v18.27.0 oba loadery
@@ -47,6 +47,7 @@ Użycie:
 from __future__ import annotations
 
 import argparse
+import json
 import re
 from pathlib import Path
 
@@ -189,7 +190,12 @@ def wczytaj_rejestr() -> dict[str, str | dict]:
     utrwalał — refresh niszczyłby zaakceptowany próg przy pierwszej zmianie
     zestawu paczek.
     """
-    dane = dev_yaml.wczytaj_jesli_jest(REJESTR, narzedzie=NARZEDZIE)
+    # Ten sam parser co czytelnik `tlumacz_rdzen` (ruamel, YAML 1.2). Domyślny
+    # pyyaml (YAML 1.1) czyta klucz `no` (ISO norweskiego) jako `False`, więc
+    # refresh widział wpis jako brakujący, „dodawał” go co przebieg i niszczył
+    # zaakceptowany próg (audyt 19.8).
+    dane = dev_yaml.wczytaj_jesli_jest(
+        REJESTR, narzedzie=NARZEDZIE, parser=dev_yaml.parser_ruamel_safe())
     if dane is None:
         return {}
     wynik: dict[str, str | dict] = {}
@@ -202,6 +208,22 @@ def wczytaj_rejestr() -> dict[str, str | dict]:
     return wynik
 
 
+def _skalar(wartosc: object) -> str:
+    """Wartość wpisu jako bezpieczny skalar YAML.
+
+    Nazwa bez cudzysłowu ginęła za `#` („中文 #简体” → „中文”), a `yes` czy
+    `- …` robiły z rejestru plik nieczytelny przy następnym przebiegu (audyt
+    19.8). Napis JSON jest poprawnym skalarem YAML; zwykła nazwa zostaje
+    bez cudzysłowu, żeby nie ruszać diffu istniejących wpisów.
+    """
+    if not isinstance(wartosc, str):
+        return str(wartosc)
+    if re.fullmatch(r"[^\W\d_][\w ]*", wartosc) and wartosc.lower() not in (
+            "yes", "no", "on", "off", "true", "false", "null", "y", "n"):
+        return wartosc
+    return json.dumps(wartosc, ensure_ascii=False)
+
+
 def zapisz_rejestr(mapa: dict[str, str | dict]) -> None:
     """Zapisuje rejestr: nagłówek + wpisy `kod: nazwa` albo wpis-słownik (sort po kodzie)."""
     linie = [NAGLOWEK]
@@ -209,10 +231,10 @@ def zapisz_rejestr(mapa: dict[str, str | dict]) -> None:
         wpis = mapa[kod]
         if isinstance(wpis, dict):
             linie.append(f"{kod}:")
-            linie += [f"  {pole}: {wpis[pole]}"
+            linie += [f"  {pole}: {_skalar(wpis[pole])}"
                       for pole in dev_yaml.POLA_WPISU_REJESTRU if pole in wpis]
         else:
-            linie.append(f"{kod}: {wpis}")
+            linie.append(f"{kod}: {_skalar(wpis)}")
     REJESTR.write_text("\n".join(linie) + "\n", encoding="utf-8", newline="\n")
 
 

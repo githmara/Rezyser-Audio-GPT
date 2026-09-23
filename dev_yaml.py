@@ -152,6 +152,7 @@ def wczytaj_jesli_jest(
 # (`prog_rozdmuchnia`) wyłączałaby próg PO CICHU, a próg per język istnieje po
 # to, żeby jego obecność była jawną, zaakceptowaną decyzją.
 POLA_WPISU_REJESTRU = ("nazwa", "prog_rozdmuchania")
+PROG_ROZDMUCHANIA_MAX = 3.0
 
 
 def waliduj_wpis_rejestru(rejestr: Path | str, kod: str, wartosc: Any, *,
@@ -180,12 +181,17 @@ def waliduj_wpis_rejestru(rejestr: Path | str, kod: str, wartosc: Any, *,
             padnij_na_pliku(
                 rejestr, f"entry `{kod}` is a mapping without a `nazwa:` string",
                 narzedzie=narzedzie)
+        # Górna granica (audyt 19.8): `.inf` albo `1e9` przechodziły jako
+        # „liczba > 1.0" i po cichu WYŁĄCZAŁY bramkę rozdmuchania dla języka.
+        # 3.0 to z zapasem ponad dwukrotność zmierzonego maksimum legalnej
+        # sekcji (1.29) — próg wyżej to już nie tolerancja, tylko brak bramki.
         if prog is not None and (isinstance(prog, bool)
                                  or not isinstance(prog, (int, float))
-                                 or not prog > 1.0):
+                                 or not 1.0 < prog <= PROG_ROZDMUCHANIA_MAX):
             padnij_na_pliku(
-                rejestr, f"entry `{kod}`: `prog_rozdmuchania` must be a number "
-                         f"above 1.0 (a length ratio), got {prog!r}",
+                rejestr, f"entry `{kod}`: `prog_rozdmuchania` must be a length "
+                         f"ratio above 1.0 and at most {PROG_ROZDMUCHANIA_MAX}, "
+                         f"got {prog!r}",
                 narzedzie=narzedzie)
         return dict(wartosc)
     padnij_na_pliku(

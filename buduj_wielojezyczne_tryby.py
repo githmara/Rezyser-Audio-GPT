@@ -1144,7 +1144,8 @@ def waliduj_silnikiem(
         norm_pl, norm_cel = _RE_SPACJA_PRZED_DWUKROPKIEM.sub(":", t_pl), \
             _RE_SPACJA_PRZED_DWUKROPKIEM.sub(":", t_cel)
         for kotwica in kotwice:
-            ile_pl, ile_cel = norm_pl.count(kotwica), norm_cel.count(kotwica)
+            ile_pl = tlumacz_rdzen.wystapienia_kotwicy(kotwica, norm_pl)
+            ile_cel = tlumacz_rdzen.wystapienia_kotwicy(kotwica, norm_cel)
             if ile_pl != ile_cel:
                 bledy.append(
                     f"pole `{nazwa}`: kotwica {kotwica!r} — PL {ile_pl}×, "
@@ -1154,7 +1155,8 @@ def waliduj_silnikiem(
         # przynajmniej raz — `rezyser_ai._fragment_po_kotwicy` szuka dokładnie
         # tego napisu w odpowiedzi modelu, a prompt jest jego jedynym wzorcem.
         for kotwica in _kotwice_z_silnika():
-            if kotwica in t_pl and kotwica not in t_cel:
+            if (tlumacz_rdzen.wystapienia_kotwicy(kotwica, t_pl)
+                    and not tlumacz_rdzen.wystapienia_kotwicy(kotwica, t_cel)):
                 bledy.append(
                     f"pole `{nazwa}`: kotwica walidatora {kotwica!r} nie występuje "
                     f"w {kod} w formie dosłownej — Python nie znajdzie tego pola "
@@ -1303,6 +1305,15 @@ def tlumacz_plik(
     odniesienia = {k: v for k, v in orakuly.items() if k != kod}
     kotwice = wykryj_kotwice(
         [j.zrodlo for j in jednostki], odniesienia, kotwice_extra)
+    # Kotwica, która CYTUJE nagłówek struktury (`"Rozdział 1"`), zamroziłaby go
+    # po polsku i bramka nagłówków odrzuciłaby plik niezależnie od modelu —
+    # zmierzone 19.8 przy nieaktywnym orakule (nowy przepis, żadna paczka go nie
+    # ma, więc zamrażane są WSZYSTKIE kandydatki). Nagłówek bierze wtedy
+    # `zamroz_cytowane_naglowki` ze słowem paczki docelowej, resztę tłumaczy model.
+    if naglowki_struktury(kod):
+        zrodlowe_naglowki = naglowki_struktury(KOD_ZRODLOWY)
+        kotwice = [k for k in kotwice
+                   if not _klucze_cytowanych_naglowkow(k, zrodlowe_naglowki)]
     if not odniesienia:
         print(
             f"⚠️  {kod}/{nazwa_pliku}: no other pack has this recipe — the anchor "
@@ -1366,14 +1377,17 @@ def tlumacz_plik(
         # sprawdzają dograne jednostki tak samo jak resztę.
         print(f"⚠️  {kod}/{nazwa_pliku}: the model skipped {len(brakujace)} "
               f"unit(s) — asking once more for just those.")
-        pozycje = [(j.id, j.rodzaj, j.zrodlo_tok) for j in jednostki
-                   if j.id in brakujace]
-        try:
-            dogrywka = wywolaj_llm(klient, model, nazwa_cel, kod, pozycje)
-        except RuntimeError as exc:
-            print(f"❌ {kod}/{nazwa_pliku}: LLM error in the retry call — {exc}")
-            return False, []
-        mapa_tgt.update({k: v for k, v in dogrywka.items() if k in brakujace})
+        # Przez `_chunkuj`, jak przebieg główny (audyt 19.8): jedna dogrywka
+        # z wszystkimi brakami potrafiła przekroczyć `BATCH_MAX_ZNAKOW` i skończyć
+        # się ucięciem, którego wskazówka („zmniejsz BATCH_MAX_ZNAKOW") kłamała.
+        for chunk in _chunkuj([j for j in jednostki if j.id in brakujace]):
+            pozycje = [(j.id, j.rodzaj, j.zrodlo_tok) for j in chunk]
+            try:
+                dogrywka = wywolaj_llm(klient, model, nazwa_cel, kod, pozycje)
+            except RuntimeError as exc:
+                print(f"❌ {kod}/{nazwa_pliku}: LLM error in the retry call — {exc}")
+                return False, []
+            mapa_tgt.update({k: v for k, v in dogrywka.items() if k in brakujace})
         brakujace = ids_zadane - set(mapa_tgt)
     if brakujace:
         print(f"❌ {kod}/{nazwa_pliku}: the model skipped id {sorted(brakujace)[:20]} "
