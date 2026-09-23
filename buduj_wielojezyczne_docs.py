@@ -76,6 +76,8 @@ Moduł NIE zależy od wxPython — uruchamialny w CLI / CI bez inicjalizacji GUI
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import re
 import sys
 from collections import Counter
@@ -787,6 +789,224 @@ def wykryj_wyciek_preambuly(src: str, tgt: str) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
+# ODRZUTY I SEKCJE PRZYJĘTE RĘCZNIE (19.8)
+# ---------------------------------------------------------------------------
+# Próg 1.40 jest zmierzony na dziewięciu paczkach — nie wiemy, czy wystarczy dla
+# każdego języka z kanonu lingua. Mechanizm zachowawczy: sekcja ubita po powtórce
+# NIE przepada. Każda próba, która doszła do etapu zarzutów (czyli przeszła
+# twarde bramki parzystości i odcisku), ląduje w `skrypty/` jako markdown do
+# oceny. Człowiek wybiera lepszą, poprawia ją (wymyślone sekcje, leaki) i woła
+# `--przyjmij-probe N`: narzędzie sprawdza twarde bramki OD NOWA, mierzy iloraz
+# (raportowany, nie blokujący — tę decyzję człowiek już podjął), zapisuje wynik
+# do magazynu sekcji przyjętych i kasuje artefakty. Następny zwykły przebieg
+# bierze sekcję z magazynu zamiast płacić za API.
+#
+# Dlaczego osobny magazyn, a nie podrobiony `temp_*.jsonl`: cache wznawiania
+# wraca przez te same bramki, więc bramka rozdmuchania odrzuciłaby go znowu,
+# unieważniła i zapłaciła za powtórkę; do tego jest pocięty na bloki ŹRÓDŁA,
+# a przekładu nie da się uczciwie pociąć na te same bloki.
+#
+# Każde przyjęcie dopisuje wiersz do rejestru ilorazów — to jest sygnał, że dla
+# danego języka trzeba wpisać jawny `prog_rozdmuchania` w `jezyki_docelowe.yaml`.
+KATALOG_ODRZUTOW = ROOT / "skrypty"
+_RE_NAGLOWEK_ODRZUTU = re.compile(r"^<!-- odrzut-bwd (\{.*\}) -->$")
+# Ile przyjętych sekcji ponad próg danego języka wystarcza, żeby zasugerować próg
+# jawny. Jedna to jeszcze wyjątek (np. sekcja, która w tym języku ma legalnie
+# więcej przykładów), dwie to już wzorzec.
+PROG_SYGNALU_PRZYJEC = 2
+
+
+def _odcisk_sekcji(tresc_pl: str) -> str:
+    """Odcisk polskiego źródła sekcji — przyjęcie wiąże się z TĄ wersją treści."""
+    return hashlib.sha256(tresc_pl.encode("utf-8")).hexdigest()[:16]
+
+
+def sciezka_odrzutu(kod: str, rdzen: str, klucz: str, proba: int) -> Path:
+    return KATALOG_ODRZUTOW / f"odrzut_{kod}_{rdzen}_{klucz.strip('_')}_proba{proba}.md"
+
+
+def sciezka_przyjetej(cache_key: str) -> Path:
+    return RUNTIME_DIR / "przyjete_sekcje" / f"{cache_key}.json"
+
+
+def _sciezka_rejestru_ilorazow() -> Path:
+    return RUNTIME_DIR / "ilorazy_przyjete.jsonl"
+
+
+def zapisz_odrzuty(
+    kod: str, nazwa_pliku: str, rdzen: str, klucz: str, tresc_pl: str,
+    proby: list[dict],
+) -> list[Path]:
+    """Zapisuje próby odrzuconej sekcji jako `skrypty/odrzut_*.md`. Zwraca ścieżki.
+
+    Pierwsza linia pliku to komentarz HTML z metadanymi (JSON) — markdown go nie
+    renderuje, a `--przyjmij-probe` odcina go przed walidacją. Reszta to przekład
+    z przywróconymi `{placeholderami}`, gotowy do edycji. Rozszerzenie `.md`,
+    nie `.txt`: Reżyser listuje `skrypty/*.txt` jako projekty.
+    """
+    KATALOG_ODRZUTOW.mkdir(parents=True, exist_ok=True)
+    sciezki: list[Path] = []
+    for p in proby:
+        meta = {
+            "kod": kod, "plik": nazwa_pliku, "klucz": klucz, "proba": p["proba"],
+            "odcisk": _odcisk_sekcji(tresc_pl), "iloraz": round(p["iloraz"], 3),
+            "zarzuty": p["zarzuty"],
+        }
+        cel = sciezka_odrzutu(kod, rdzen, klucz, p["proba"])
+        cel.write_text(
+            f"<!-- odrzut-bwd {json.dumps(meta, ensure_ascii=False)} -->\n\n"
+            + p["tekst"].rstrip() + "\n",
+            encoding="utf-8", newline="\n")
+        sciezki.append(cel)
+    return sciezki
+
+
+def wczytaj_odrzut(sciezka: Path) -> tuple[dict, str]:
+    """(metadane, tekst przekładu) z pliku `odrzut_*.md`; ValueError przy złym kształcie."""
+    linie = sciezka.read_text(encoding="utf-8").split("\n")
+    m = _RE_NAGLOWEK_ODRZUTU.match(linie[0]) if linie else None
+    if not m:
+        raise ValueError(f"{sciezka.name}: the first line is not the "
+                         f"`<!-- odrzut-bwd {{…}} -->` metadata comment — restore it "
+                         f"from the original file")
+    return json.loads(m.group(1)), "\n".join(linie[1:]).strip("\n")
+
+
+def bramki_przyjetego_tekstu(tresc_pl: str, tekst: str) -> list[str]:
+    """Twarde bramki dla tekstu przyjętego ręcznie (pusta lista = czysto).
+
+    Te same klasy, które przy zwykłym przebiegu ubijają sekcję bez powtórki
+    (placeholdery, odcisk struktury), plus preambuła — człowiek miał ją
+    usunąć, więc jej obecność jest błędem przyjęcia. Rozdmuchania NIE ma na tej
+    liście: to jedyna decyzja, którą przyjęcie z definicji przejmuje.
+    """
+    problemy: list[str] = []
+    zrodlo, cel = (Counter(PLACEHOLDER_REGEX.findall(t)) for t in (tresc_pl, tekst))
+    if zrodlo != cel:
+        problemy.append(f"placeholders differ from the source: missing "
+                        f"{sorted((zrodlo - cel).elements())}, extra "
+                        f"{sorted((cel - zrodlo).elements())}")
+    twarde, _miekkie = tlumacz_bramki.waliduj_odcisk(tresc_pl, tekst)
+    problemy += twarde
+    problemy += wykryj_wyciek_preambuly(tresc_pl, tekst)
+    return problemy
+
+
+def wczytaj_przyjeta(
+    cache_key: str, tresc_pl: str, etykieta: str,
+) -> tuple[bool, str | None]:
+    """Sekcja z magazynu przyjętych: ``(ok, tekst)``.
+
+    ``(True, None)`` = brak wpisu (albo wpis dla INNEJ wersji źródła — wtedy
+    głośno ignorowany, bo przekład starej treści byłby cichym kłamstwem);
+    ``(True, tekst)`` = bierzemy; ``(False, None)`` = wpis jest, ale nie
+    przechodzi twardych bramek — sekcja staje, zamiast płacić za nowy przekład
+    obok zepsutego pliku, który ktoś ręcznie edytował.
+    """
+    plik = sciezka_przyjetej(cache_key)
+    if not plik.is_file():
+        return True, None
+    try:
+        wpis = json.loads(plik.read_text(encoding="utf-8"))
+        tekst = wpis["tekst"]
+        odcisk = wpis["odcisk"]
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"❌  {etykieta}: the accepted-section file is unreadable ({exc}).\n"
+              f"     Fix or delete it: {plik}")
+        return False, None
+    if odcisk != _odcisk_sekcji(tresc_pl):
+        print(f"⚠️  {etykieta}: an accepted translation exists, but for an OLDER "
+              f"version of the Polish section — ignoring it and translating anew.\n"
+              f"     {plik}")
+        return True, None
+    problemy = bramki_przyjetego_tekstu(tresc_pl, tekst)
+    if problemy:
+        print(f"❌  {etykieta}: the accepted translation fails the hard gates:")
+        for p in problemy:
+            print(f"     {p}")
+        print(f"     Fix or delete it: {plik}")
+        return False, None
+    print(f"📥  {etykieta}: taken from the accepted sections "
+          f"(ratio {wpis.get('iloraz', '?')}, attempt {wpis.get('proba', '?')}) — "
+          f"no API call.")
+    return True, tekst
+
+
+def _sygnal_progu(kod: str) -> None:
+    """Drukuje sugestię jawnego progu, gdy przyjęcia ponad próg tworzą wzorzec."""
+    rejestr = _sciezka_rejestru_ilorazow()
+    if not rejestr.is_file():
+        return
+    prog = prog_rozdmuchania(kod)
+    nad: list[float] = []
+    for linia in rejestr.read_text(encoding="utf-8").splitlines():
+        try:
+            w = json.loads(linia)
+        except ValueError:
+            continue
+        if w.get("kod") == kod and float(w.get("iloraz", 0)) > prog:
+            nad.append(float(w["iloraz"]))
+    if len(nad) >= PROG_SYGNALU_PRZYJEC:
+        print(f"📈  {kod}: {len(nad)} accepted sections are above the current "
+              f"{prog:.2f}x threshold (max {max(nad):.2f}x). If they are all "
+              f"legitimate, give this language an explicit threshold in "
+              f"jezyki_docelowe.yaml:\n"
+              f"       {kod}:\n         nazwa: {MAPA_JEZYKOW.get(kod, kod)}\n"
+              f"         prog_rozdmuchania: {max(nad) + 0.05:.2f}")
+
+
+def przyjmij_probe(
+    kod: str, nazwa_pliku: str, rdzen: str, klucz: str, tresc_pl: str, proba: int,
+) -> bool:
+    """`--przyjmij-probe N`: odrzut → magazyn sekcji przyjętych (zero API)."""
+    etykieta = f"{kod}/{nazwa_pliku} ({klucz})"
+    plik = sciezka_odrzutu(kod, rdzen, klucz, proba)
+    if not plik.is_file():
+        print(f"❌  {etykieta}: no artifact for attempt {proba}: {plik}")
+        return False
+    try:
+        meta, tekst = wczytaj_odrzut(plik)
+    except ValueError as exc:
+        print(f"❌  {exc}")
+        return False
+    if meta.get("odcisk") != _odcisk_sekcji(tresc_pl):
+        print(f"❌  {etykieta}: the Polish section changed after this attempt was "
+              f"rejected — the artifact translates an older text. Re-run the "
+              f"translation instead of accepting it.")
+        return False
+    problemy = bramki_przyjetego_tekstu(tresc_pl, tekst)
+    if problemy:
+        print(f"❌  {etykieta}: attempt {proba} still fails the hard gates — fix "
+              f"it in {plik.name} and run again:")
+        for p in problemy:
+            print(f"     {p}")
+        return False
+    iloraz = tlumacz_bramki.stosunek_dlugosci(tresc_pl, tekst)
+    prog = prog_rozdmuchania(kod)
+    cache_key = _cache_key_sekcji(rdzen, klucz, kod)
+    cel = sciezka_przyjetej(cache_key)
+    cel.parent.mkdir(parents=True, exist_ok=True)
+    wpis = {"kod": kod, "plik": nazwa_pliku, "klucz": klucz, "proba": proba,
+            "odcisk": _odcisk_sekcji(tresc_pl), "iloraz": round(iloraz, 3),
+            "tekst": tekst}
+    cel.write_text(json.dumps(wpis, ensure_ascii=False, indent=1),
+                   encoding="utf-8", newline="\n")
+    with open(_sciezka_rejestru_ilorazow(), "a", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps({"kod": kod, "plik": nazwa_pliku, "klucz": klucz,
+                             "iloraz": round(iloraz, 3), "prog": prog,
+                             "znaki_zrodla": len(tresc_pl)},
+                            ensure_ascii=False) + "\n")
+    for n in (1, 2):
+        sciezka_odrzutu(kod, rdzen, klucz, n).unlink(missing_ok=True)
+    stan = "ABOVE" if iloraz > prog else "within"
+    print(f"✅  {etykieta}: attempt {proba} accepted — ratio {iloraz:.2f}x "
+          f"({stan} the {prog:.2f}x threshold). The next normal run takes it "
+          f"from {cel.relative_to(ROOT) if ROOT in cel.parents else cel}.")
+    _sygnal_progu(kod)
+    return True
+
+
+# ---------------------------------------------------------------------------
 # Budowanie wynikowego YAML-a (block scalar `|` + nagłówek-komentarz)
 # ---------------------------------------------------------------------------
 def _wcetnij_blok_scalar(tresc: str, wciecie: int = 2) -> list[str]:
@@ -1051,7 +1271,42 @@ def _tlumacz_pojedyncza_sekcje(
     # od pierwszej próby), przeniesiony na kanał, jaki ma builder docs —
     # `prompt_dodatkowy`. Parzystość ⟦i⟧ i odcisk struktury zostają TWARDE bez
     # powtórki, jak przed tym wydaniem.
+    # 19.8: sekcja przyjęta ręcznie (`--przyjmij-probe`) dla TEJ wersji źródła
+    # wygrywa z API — patrz sekcja „ODRZUTY I SEKCJE PRZYJĘTE RĘCZNIE".
+    ok_przyjetej, przyjeta = wczytaj_przyjeta(
+        cache_key, tresc_pl, f"{kod}/{nazwa_pliku}{sufiks}")
+    if not ok_przyjetej:
+        return False, None
+    if przyjeta is not None:
+        return True, przyjeta
+
     zarzuty: list[str] = []
+    # Próby, które doszły do etapu zarzutów (twarde bramki przeszły) — przy
+    # ubiciu sekcji lądują w `skrypty/` zamiast przepadać.
+    proby_odrzucone: list[dict] = []
+
+    def _zachowaj_proby() -> None:
+        """Zapisuje próby odrzucone do `skrypty/` (no-op, gdy żadnej nie ma).
+
+        Wołana przy KAŻDYM wyjściu z porażką po pierwszej próbie, nie tylko po
+        drugim odrzuceniu: powtórka, która padnie na parzystości, odcisku albo
+        błędzie API, nie ma prawa zabrać ze sobą próby 1.
+        """
+        if not proby_odrzucone:
+            return
+        try:
+            artefakty = zapisz_odrzuty(kod, nazwa_pliku, rdzen, klucz_sekcji,
+                                       tresc_pl, proby_odrzucone)
+        except OSError as exc:
+            print(f"     ⚠️ Could not save the rejected attempt(s) for review: {exc}")
+            return
+        print("     Rejected attempt(s) saved for review:")
+        for a in artefakty:
+            print(f"       {a.relative_to(ROOT) if ROOT in a.parents else a}")
+        numery = "|".join(str(p["proba"]) for p in proby_odrzucone)
+        print(f"     If a rejection was wrong, fix the attempt in place and run:\n"
+              f"       python buduj_wielojezyczne_docs.py -l {kod} -t {nazwa_pliku} "
+              f"-k {klucz_sekcji} --przyjmij-probe <{numery}>")
     for proba in (1, 2):
         prompt_proby = prompt_dodatkowy
         if zarzuty:
@@ -1109,6 +1364,7 @@ def _tlumacz_pojedyncza_sekcje(
         if wynik is None:
             komunikat = blad_kryt["msg"] or "unknown error from the tlumacz_ai.py engine"
             print(f"❌  {kod}/{nazwa_pliku}{sufiks}: translation aborted.\n    {komunikat.splitlines()[0]}")
+            _zachowaj_proby()
             return False, None
 
         # Wynik idzie do bramek TAKI, JAKI PRZYSZEDŁ (v18.32.0). Do v18.31 stało
@@ -1127,6 +1383,7 @@ def _tlumacz_pojedyncza_sekcje(
                 print(f"     {diag}")
             if len(problemy) > 10:
                 print(f"     ... (+{len(problemy) - 10} more)")
+            _zachowaj_proby()
             return False, None
 
         # Odcisk struktury (v18.16) — druga bramka tej samej klasy co parzystość, tylko
@@ -1143,6 +1400,7 @@ def _tlumacz_pojedyncza_sekcje(
                   f"(the model may have executed the text instead of translating it).")
             for diag in twarde:
                 print(f"     {diag}")
+            _zachowaj_proby()
             return False, None
         if miekkie:
             print(f"⚠️  {kod}/{nazwa_pliku}{sufiks}: shape drift (review, not blocking):")
@@ -1160,6 +1418,9 @@ def _tlumacz_pojedyncza_sekcje(
                 f"material the source does not have")
         if not zarzuty:
             return True, detokenizuj(tekst_wy, mapa)
+        proby_odrzucone.append({"proba": proba, "zarzuty": list(zarzuty),
+                                "iloraz": iloraz,
+                                "tekst": detokenizuj(tekst_wy, mapa)})
         etap = "attempt 1" if proba == 1 else "the retry"
         print(f"{'⚠️ ' if proba == 1 else '❌'}  {kod}/{nazwa_pliku}{sufiks}: "
               f"{len(zarzuty)} problem(s) after {etap}:")
@@ -1168,6 +1429,7 @@ def _tlumacz_pojedyncza_sekcje(
 
     print(f"❌  {kod}/{nazwa_pliku}{sufiks}: still rejected after the retry — "
           f"NOT saving this section.")
+    _zachowaj_proby()
     return False, None
 
 
@@ -1308,6 +1570,9 @@ def tlumacz_szablon(
         # metryka cache'u zna wersję chunkowania i liczbę bloków, nie treść
         # źródła, więc niezabrany plik wznowi się jako przekład POPRZEDNIEJ
         # wersji sekcji, jeśli edycja nie zmieniła liczby bloków.
+        # 19.8: przyjęta sekcja jest skonsumowana razem z cache'em wznawiania.
+        sciezka_przyjetej(
+            _cache_key_sekcji(rdzen, klucz_sekcji, kod)).unlink(missing_ok=True)
         blad_cache = uniewaznij_cache_tlumaczenia(sciezka_cache)
         if blad_cache:
             print(f"⚠️  {kod}/{nazwa_pliku}: resume-cache left usable on disk — "
@@ -1916,6 +2181,17 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "workflow stay exactly as they are. Use case: CI/CD or automation by "
              "an agent, where there is nobody to answer the prompt.",
     )
+    parser.add_argument(
+        "--przyjmij-probe", type=int, choices=(1, 2), metavar="N",
+        help="ACCEPT a rejected attempt (zero API). When a section fails the "
+             "bloat/preamble gate twice, both attempts are saved as "
+             "skrypty/odrzut_<code>_<file>_<key>_proba<N>.md. Review them, fix "
+             "the better one in place, then pass exactly one -l, one -t and one "
+             "-k with this flag. The hard gates are re-run, the length ratio is "
+             "recorded (a signal for an explicit per-language "
+             "`prog_rozdmuchania` in jezyki_docelowe.yaml), the artifacts are "
+             "deleted, and the next normal run uses the accepted text.",
+    )
     args = parser.parse_args()
     if args.audyt and (args.klucz or args.skip_existing or args.dry_run
                        or args.finalizuj):
@@ -2113,6 +2389,25 @@ def main() -> int:
         print("\n========== SUMMARY (--finalizuj) ==========")
         print(f"✅ Finalized: {zmienione} | ⏭️ already canonical: {nie_drafty} | ⚠️ missing file: {braki}")
         return 0
+
+    # --przyjmij-probe: odrzut → magazyn sekcji przyjętych. Zero API, więc też
+    # przed inicjalizacją klienta. Dokładnie jedna sekcja — przyjęcie jest
+    # decyzją człowieka o konkretnym tekście, nie operacją hurtową.
+    if args.przyjmij_probe:
+        klucze = [k.strip() for k in (args.klucz or "").split(",") if k.strip()]
+        if len(kody) != 1 or len(szablony) != 1 or len(klucze) != 1:
+            print("❌ --przyjmij-probe needs exactly one -l, one -t and one -k "
+                  f"(got {len(kody)} language(s), {len(szablony)} template(s), "
+                  f"{len(klucze)} key(s)).")
+            return 2
+        nazwa_pliku, _id, sekcje_pl = szablony[0]
+        if klucze[0] not in sekcje_pl:
+            print(f"❌ {nazwa_pliku}: unknown key `{klucze[0]}`. "
+                  f"Available: {sorted(sekcje_pl)}")
+            return 2
+        ok = przyjmij_probe(kody[0], nazwa_pliku, nazwa_pliku.rsplit(".", 1)[0],
+                            klucze[0], sekcje_pl[klucze[0]], args.przyjmij_probe)
+        return 0 if ok else 1
 
     klient: Any = None if args.dry_run else _zainicjuj_klienta(potwierdz=not args.yes)
 

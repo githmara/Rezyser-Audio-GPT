@@ -146,7 +146,7 @@
     "POSSIBLE|lingua:PL|➖ USUWAM (brak folderu/podstawy):",
     "POSSIBLE|lingua:PL|📁 Na dysku (dictionaries/, poza pl): {…}",
     "POSSIBLE|znak-PL:ą|📒 W rejestrze przed synchronizacją: {…}",
-    "POSSIBLE|znak-PL:ąćęŁłśŹż|# ============================================================================= # jezyki_docelowe.yaml — rejestr języków",
+    "POSSIBLE|znak-PL:ąćęŁłńśŹż|# ============================================================================= # jezyki_docelowe.yaml — rejestr języków",
     "POSSIBLE|znak-PL:Ę|➕ DODAJĘ:"
   ],
   "rezyser_ai.py": [

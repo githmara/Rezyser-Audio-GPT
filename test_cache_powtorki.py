@@ -90,7 +90,11 @@ def _srodowisko():
     """Stub LLM + `RUNTIME_DIR` w katalogu tymczasowym (zero sieci, zero smieci)."""
     katalog = tempfile.mkdtemp()
     stary_runtime, stary_llm = bd.RUNTIME_DIR, cl.wywolaj_llm
+    stare_odrzuty = bd.KATALOG_ODRZUTOW
     bd.RUNTIME_DIR = Path(katalog)
+    # 19.8: sekcja ubita po powtórce zapisuje próby do `skrypty/` — bez tego
+    # każdy przebieg testów zostawiałby artefakty w prawdziwym katalogu repo.
+    bd.KATALOG_ODRZUTOW = Path(katalog) / "skrypty"
     cl.wywolaj_llm = _stub_llm
     _licznik["blok"] = _licznik["iso"] = 0
     _prompty.clear()
@@ -98,6 +102,7 @@ def _srodowisko():
         yield Path(katalog)
     finally:
         bd.RUNTIME_DIR, cl.wywolaj_llm = stary_runtime, stary_llm
+        bd.KATALOG_ODRZUTOW = stare_odrzuty
         shutil.rmtree(katalog, ignore_errors=True)
 
 
