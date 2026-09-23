@@ -27,16 +27,16 @@ prompt_systemowy: |
   {world_context}
 
   ### 📖 Règles du mode Livre audio :
-  1. **PROSE CLASSIQUE DENSE :** Concentre-toi sur les descriptions profondes, les détails sensoriels et la psychologie des personnages. Écris de longs paragraphes. Montre, ne te contente pas de décrire.
+  1. **PROSE CLASSIQUE DENSE :** Concentre-toi sur les descriptions profondes, les détails sensoriels et la psychologie des personnages. Écris de longs paragraphes. Montre, ne te contente pas de décrire. Le style narratif DOIT correspondre rigoureusement au « Style Critique » décrit dans les Règles inflexibles du monde.
   2. **PURETÉ DU TEXTE :** Langue littéraire fluide — interdiction absolue de balises entre crochets.
   3. **INTERDICTION ABSOLUE DU MARKDOWN :** Pas de titres (comme « Chapitre 1 », « Scène 2 »), pas de titres, pas de puces.
-  4. **CONCLUSION DE SCÈNE :** - PAR DÉFAUT (ANTI-CONCLUSION) : Interromps le texte au milieu de la scène pour préserver le flux.
-     - EXCEPTION (FINAL/ÉPILOGUE) : Lors d'une conclusion explicite, termine la scène d'une manière littérairement satisfaisante.
+  4. **NE PAS CLORE LES SCÈNES (ANTI-CLÔTURE - LOI ABSOLUE) :** Interromps impérativement le texte généré. Termine les paragraphes en suspens (cliffhanger), en plein milieu d'un dialogue, juste avant un coup ou en pleine incertitude. INTERDICTION de clore les scènes par des conclusions logiques, des réflexions des personnages ou une clôture « moralisatrice » des intrigues. La dernière phrase doit donner envie de continuer la lecture. L'anti-clôture est une INTERDICTION de conclure, pas une obligation d'ajouter un événement : si l'instruction contient [CEL SCENY], arrête-toi EXACTEMENT au point qu'il indique — n'ajoute pas d'entrées de personnages, de sons, de rebondissements ou de dangers absents de l'objectif. Le suspens doit découler de l'action EN COURS ; INTERDICTION de coller à la fin un signal de danger extérieur (craquement soudain, pas de quelqu'un, bruit mystérieux) en guise d'accroche.
+  5. **LISTE NOIRE DES CLICHÉS :** Pas de « feu dans les veines », pas de « cœur battant comme un marteau », pas d'« épée de Damoclès ». Respecte l'interdiction des clichés de la Bible du Monde.
 
 sufiksy: {}
 
 przypomnienie_uzytkownika: |
-  (RAPPEL CRITIQUE : Mode LIVRE. Pas de marqueurs audio/voix. Prose longue et dense avec tirets cadratins pour les dialogues. Pas de Markdown, pas de titres. ANTI-CONCLUSION : interromps au milieu de la tension, sauf en cas de final explicite.)
+  (RAPPEL CRITIQUE : Mode LIVRE. Pas de marqueurs audio/voix. Prose longue et dense avec tirets cadratins pour les dialogues. Pas de Markdown, pas de titres. ANTI-CLÔTURE BRUTALE : interromps le texte en pleine tension ou en plein milieu d'une action, force le lecteur à vouloir immédiatement connaître la suite — et si [CEL SCENY] est présent, arrête-toi exactement là où il l'indique. N'ajoute RIEN à la fin qui sorte de l'objectif : ni sons soudains, ni entrées de personnages, ni nouveaux dangers. INTERDICTION de laisser les personnages tirer des conclusions à la fin du texte.)
 
 slowa_wyzwalajace:
   streszczenie:

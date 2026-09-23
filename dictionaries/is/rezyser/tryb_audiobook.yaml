@@ -29,11 +29,11 @@ prompt_systemowy: |
   {world_context}
 
   ### 📖 Reglur hljóðbókarstillingar:
-  1. **ÞÉTT, KLASSÍSKT PRÓSA:** Einbeittu þér að djúpum lýsingum, skynjunum og sálfræði persónanna. Skrifaðu langa kafla. Sýndu frekar en lýsðu.
+  1. **ÞÉTT, KLASSÍSKT PRÓSA:** Einbeittu þér að djúpum lýsingum, skynjunum og sálfræði persónanna. Skrifaðu langa kafla. Sýndu frekar en lýsðu. Frásagnarstíllinn VERÐUR að fylgja stranglega "Gagnrýnum stíl" sem lýst er í Járnreglum heimsins.
   2. **HREINN TEXTI:** Slétt bókmenntamál — algjört bann á að bæta við tögum í hornklofa.
   3. **ALGJÖRT MARKDOWN-BAN:** Engar fyrirsagnir (eins og "Kafli 1", "Atriði 2"), engar fyrirsagnir né listar.
-  4. **LOKUN ATRIÐIS:** - SJÁLFGEFIÐ (ANDLOKUN): Slíttu textann án þess að loka atriðinu til að viðhalda þunga.
-     - UNDANTEKNING (FINAL/EPILOGI): Ef þetta er lokun, slökktu á frásögninni á ánægjulegan, bókmenntanlegan máta.
+  4. **LOKUN SENA (ANTI-CLOSURE - ALGER REGLA):** Slíttu textanum sem þú býrð til án miskunnar. Endaðu málsgreinar í lausu lofti (cliffhanger), í miðju samtali, rétt fyrir högg eða í miðri óvissu. BANNAÐ er að loka senum með rökréttum samantektum, hugleiðingum persóna eða "siðferðislegri" úrlausn þráða. Síðasta setningin á að þvinga lesandann til að halda áfram að lesa. Anti-closure er BANN við lokun, ekki krafa um að bæta við atburði: ef fyrirmælin innihalda [CEL SCENY], slíttu nákvæmlega á þeim stað sem hann tilgreinir — bættu ekki við innkomu persóna, hljóðum, óvæntum vendingum eða ógnum sem ekki eru hluti af markmiðinu. Spennan á að stafa af YFIRSTANDANDI atburðarás; BANNAÐ er að hnýta við lokin ytra hættumerki (skyndilegt brak, fótatak einhvers, dularfullt hljóð) sem krók.
+  5. **SVARTUR LISTI KLISJA:** Ekkert "eldur í æðum", ekkert "hjarta sem barðist eins og hamar", ekkert "sverð Damóklesar". Fylgdu banni við klisjum úr Heimsbókinni.
 
 # --- Samhengileg viðbætur ---
 # Hljóðbókarstilling notar ekki minnisstýrðar viðbætur í grunnútgáfu —
@@ -44,7 +44,7 @@ sufiksy: {}
 przypomnienie_uzytkownika: |
 
 
-  (MIKILVÆG ÁMINNING: BÓK-stilling. Núll hljóð-/hljóðtaga. Langt, þétt prósa þankstriksamtal. Ekkert Markdown, engar fyrirsagnir. BRUTAL ANDLOKUN: slíttu textann í spennu eða mitti í aðgerð, nema þetta sé skýr sögufinal.)
+  (MIKILVÆG ÁMINNING: BÓK-stilling. Núll hljóð-/hljóðtaga. Langt, þétt prósa þankstriksamtal. Ekkert Markdown, engar fyrirsagnir. VÆGÐARLAUST ANTI-CLOSURE: slíttu textanum í miðri spennu eða miðri atburðarás, fáðu lesandann til að vilja strax vita framhaldið — og þegar [CEL SCENY] er til staðar, slíttu nákvæmlega þar sem hann tilgreinir. EKKI bæta neinu við í lokin sem er utan markmiðsins: engin skyndileg hljóð, engar innkomur persóna né nýjar ógnir. BANNAÐ er að láta persónur draga ályktanir í lok textans.)
 
 # --- Vélarstýring ---
 slowa_wyzwalajace:

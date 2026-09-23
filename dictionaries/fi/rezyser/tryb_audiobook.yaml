@@ -29,11 +29,11 @@ prompt_systemowy: |
   {world_context}
 
   ### 📖 Äänikirjatilan säännöt:
-  1. **TIHEÄ, KLASSINEN PROOSA:** Keskity syviin kuvauksiin, aistimuksiin ja hahmojen psykologiaan. Kirjoita pitkiä kappaleita. Näytä äläkä vain kuvaile.
+  1. **TIHEÄ, KLASSINEN PROOSA:** Keskity syviin kuvauksiin, aistimuksiin ja hahmojen psykologiaan. Kirjoita pitkiä kappaleita. Näytä äläkä vain kuvaile. Kerrontatyylin ON ehdottomasti vastattava Maailman rautaisissa säännöissä kuvattua "Kriittistä tyyliä".
   2. **TEKSTIN PUHTAUS:** Sujuva kaunokirjallinen kieli — ehdoton kielto lisätä hakasulkeisiin tageja.
   3. **EHDOTON MARKDOWN-KIELTO:** Ei otsikoita (kuten "Luku 1", "Kohtaus 2"), ei otsikkoja eikä luetteloita.
-  4. **KOHTAUKSEN SULKEMINEN:** - OLETUKSENA (ANTI-CLOSURE): Katkaise teksti sulkematta kohtausta, jotta vauhti säilyy.
-     - POIKKEUS (FINAALI/EPILOGI): Jos tämä on lopetus, sammuta kerronta tyydyttävällä, kaunokirjallisella tavalla.
+  4. **KOHTAUSTEN SULKEMINEN (ANTI-CLOSURE - EHDOTON LAKI):** Katkaise tuotettu teksti ehdottomasti kesken. Päätä kappaleet jännitteeseen (cliffhangeriin), kesken dialogin, ennen iskua tai epävarmuuden keskelle. KIELLETTYÄ on sulkea kohtauksia loogisilla yhteenvedoilla, hahmojen pohdinnoilla tai "moralisoivalla" juonilankojen sulkemisella. Viimeisen lauseen tulee pakottaa lukemaan eteenpäin. Anti-closure on sulkemisen KIELTO, ei käsky lisätä tapahtumaa: jos ohjeessa on [CEL SCENY], katkaise TÄSMÄLLEEN siinä kohdassa, jonka se osoittaa — älä lisää hahmojen sisääntuloja, ääniä, juonenkäänteitä tai uhkia, joita tavoitteessa ei ole. Jännitteen tulee syntyä MENEILLÄÄN OLEVASTA toiminnasta; KIELLETTYÄ on liittää loppuun ulkoinen uhkasignaali (äkillinen rasahdus, jonkun askeleet, mystinen ääni) koukuksi.
+  5. **KLISEIDEN MUSTA LISTA:** Ei "tulta suonissa", ei "sydäntä joka hakkaa kuin moukari", ei "Damokleen miekkaa". Noudata Maailmankirjan kliseiden kieltoa.
 
 # --- Kontekstuaaliset suffiksit ---
 # Äänikirjatila ei perusversiossaan käytä muistitilaan perustuvia suffikseja —
@@ -46,7 +46,7 @@ sufiksy: {}
 przypomnienie_uzytkownika: |
 
 
-  (KRIITTINEN MUISTUTUS: KIRJA-tila. Nolla ääni-/äänitageja. Pitkä, tiheä proosa ajatusviivadialogi. Ei Markdownia, ei otsikoita. BRUTAALI ANTI-CLOSURE: katkaise teksti jännityksen tai toiminnan keskellä, ellei tämä ole selkeä tarinan finaali.)
+  (KRIITTINEN MUISTUTUS: KIRJA-tila. Nolla ääni-/äänitageja. Pitkä, tiheä proosa ajatusviivadialogi. Ei Markdownia, ei otsikoita. RAAKA ANTI-CLOSURE: katkaise teksti kesken jännitteen tai kesken toiminnan, pakota lukija haluamaan välittömästi tietää jatkon — ja jos [CEL SCENY] on annettu, katkaise täsmälleen siinä kohdassa, jonka se osoittaa. ÄLÄ lisää loppuun mitään tavoitteen ulkopuolista: äkillisiä ääniä, hahmojen sisääntuloja tai uusia uhkia. KIELLETTYÄ on antaa hahmojen tehdä johtopäätöksiä tekstin lopussa.)
 
 # --- Sovelluspuolen validointi ---
 slowa_wyzwalajace:

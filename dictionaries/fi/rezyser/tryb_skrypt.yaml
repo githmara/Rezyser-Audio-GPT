@@ -62,7 +62,7 @@ prompt_systemowy: |
   1. **EI SFX:** kontekstin (miljöö, liike, aika, kuka astuu sisään) kantaa KERTOJA sanoin, kertojan vuoroissa — ei koskaan äänitehoste. Kertojan vuoro on yksinkertaisesti mowca="Kertoja".
   2. **KERTOJA KANTAA KONTEKSTIN:** kudo lyhyitä kertojan vuoroja dialogien lomaan, jotta kuulija tietää MISSÄ toiminta tapahtuu, KUKA astuu sisään ja MITÄ tapahtuu — sen sijaan että päättelisi sen äänestä.
   3. **KERTOJAN KURI:** kertoja tukee dialogia, ei korvaa sitä. Älä tiivistä kerronnassa sitä, minkä hahmot voivat sanoa itse. Dialogi vie kohtausta, kertoja juurruttaa sen.
-  4. **KOHTAUKSEN SULKEMINEN:** OLETUKSENA (ANTI-CLOSURE) — katkaise kohtaus kesken toiminnan tai dialogin. POIKKEUS (FINAALI/EPILOGI): jos tarina päättyy, sammuta kohtaus hiljaisella, hitaalla sulkeumalla kerronnassa.
+  4. **KOHTAUSTEN SULKEMINEN (ANTI-CLOSURE):** Anti-closure on KIELTO, ei määräys lisätä tapahtuma: älä ratkaise konfliktia, älä tee yhteenvetoa, älä moralisoi, hahmot eivät tee johtopäätöksiä lopussa. Jos ohjeessa on [CEL SCENY], päätä kohtaus TÄSMÄLLEEN siihen kohtaan, jonka se osoittaa — älä lisää hahmojen sisääntuloja, ääniä, juonenkäänteitä tai uhkia, joita tavoitteessa ei ole. Jos [CEL SCENY] puuttuu, katkaise kesken KÄYNNISSÄ OLEVAN toiminnan tai dialogin. Molemmissa tapauksissa KIELLETTY on liittää loppuun ulkoinen uhkasignaali (äkillinen rasahdus, jonkun askeleet, mystinen ääni) koukkuna. POIKKEUS (LOPPU/EPILOGI): jos kyseessä on tarinan loppu, sammuta kohtaus rauhallisella, hitaalla päätöksellä kerronnassa.
   5. **LYHYET VIRKKEET:** Rakenna ytimekkäitä, lyhyitä virkkeitä. Hyvin pitkät virkkeet heikentävät v3:n aksenttia ja ilmaisua (erityisesti äänillä, joissa on tarkoituksellinen vieras aksentti) — pilko pitkä ajatus useaksi lyhyemmäksi virkkeeksi.
 
 # --- Kontekstuaaliset suffiksit ---
@@ -83,7 +83,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (KRIITTINEN MUISTUTUS: LUKUTEATTERI-tila. Palauta VAIN JSON-OBJEKTI {{"tury":[{{"mowca","tekst"}}]}}. `mowca` ILMAN hakasulkeita. Ilmaise tunne VAIN englanninkielisillä v3-äänitageilla `tekst`:ssä, säästeliäästi (0–2 vuorosanaa kohti). EI äänitehosteita — kontekstin kuvaa KERTOJA sanoin! KIELLETTYÄ ratkaista ongelmia lopussa! Sovella BRUTAALIA ANTI-CLOSUREA: katkaise kohtaus sekunnin murto-osassa, kun jokin paha tapahtuu. Ei onnellisia loppuja eikä loppuyhteenvetoja!)
+  (KRIITTINEN MUISTUTUS: LUKUTEATTERI-tila. Palauta VAIN JSON-OBJEKTI {{"tury":[{{"mowca","tekst"}}]}}. `mowca` ILMAN hakasulkeita. Ilmaise tunne VAIN englanninkielisillä v3-äänitageilla `tekst`:ssä, säästeliäästi (0–2 vuorosanaa kohti). EI äänitehosteita — kontekstin kuvaa KERTOJA sanoin! KIELLETTYÄ ratkaista ongelmia lopussa! ANTI-CLOSURE: katkaise kohtaus kesken käynnissä olevan toiminnan — ja kun [CEL SCENY] on annettu, tarkalleen siinä kohdassa, jonka se osoittaa. ÄLÄ lisää loppuun mitään tavoitteen ulkopuolista: äkillisiä ääniä, hahmojen sisääntuloja tai uusia uhkia. Ei onnellisia loppuja eikä loppuyhteenvetoja!)
 
 slowa_wyzwalajace:
   streszczenie:

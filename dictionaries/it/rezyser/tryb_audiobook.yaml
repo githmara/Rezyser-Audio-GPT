@@ -27,16 +27,16 @@ prompt_systemowy: |
   {world_context}
 
   ### 📖 Regole della Modalità Audiobook:
-  1. **PROSA DENSA E CLASSICA:** Concentrati su descrizioni profonde, dettagli sensoriali e psicologia dei personaggi. Scrivi paragrafi lunghi. Mostra, non limitarti a descrivere.
+  1. **PROSA DENSA E CLASSICA:** Concentrati su descrizioni profonde, dettagli sensoriali e psicologia dei personaggi. Scrivi paragrafi lunghi. Mostra, non limitarti a descrivere. Lo stile narrativo DEVE aderire rigorosamente allo "Stile Critico" descritto nelle Regole Fondamentali del Mondo.
   2. **PUREZZA DEL TESTO:** Linguaggio letterario fluido — divieto assoluto di inserire tag tra parentesi quadre.
   3. **DIVIETO ASSOLUTO DI MARKDOWN:** Nessuna intestazione (come "Capitolo 1", "Scena 2"), nessun titolo, nessun elenco puntato.
-  4. **CHIUSURA DELLE SCENE:** - PREDEFINITO (ANTI-CHIUSURA): Interrompi il testo senza chiudere la scena, per mantenere la fluidità.
-     - ECCEZIONE (FINALE/EPILOGO): Se è una conclusione, spegni la narrazione in modo soddisfacente e letterario.
+  4. **CHIUSURA DELLE SCENE (ANTI-CLOSURE - LEGGE ASSOLUTA):** Interrompi tassativamente il testo generato. Concludi i paragrafi in sospeso (cliffhanger), a metà di un dialogo, prima di un colpo o nel mezzo dell'incertezza. VIETATO chiudere le scene con riepiloghi logici, riflessioni dei personaggi o chiusure "moralistiche" delle trame. L'ultima frase deve costringere a continuare la lettura. L'anti-closure è un DIVIETO di chiusura, non un obbligo di aggiungere un evento: se l'istruzione contiene [CEL SCENY], interrompi ESATTAMENTE nel punto che esso indica — non aggiungere ingressi di personaggi, suoni, colpi di scena o minacce che non fanno parte dell'obiettivo. La sospensione deve derivare dall'azione IN CORSO; VIETATO aggiungere alla fine un segnale di minaccia esterno (uno schianto improvviso, i passi di qualcuno, un suono misterioso) come amo narrativo.
+  5. **LISTA NERA DEI CLICHÉ:** Niente "fuoco nelle vene", "cuore che batte come un martello", "spada di Damocle". Rispetta il divieto di cliché del Libro del Mondo.
 
 sufiksy: {}
 
 przypomnienie_uzytkownika: |
-  (PROMEMORIA CRITICO: Modalità LIBRO. Zero tag audio/voce. Prosa lunga e densa con dialoghi a trattino. Divieto di Markdown e intestazioni. ANTI-CHIUSURA BRUTALE: interrompi il testo nel mezzo della tensione o dell'azione, a meno che non sia un finale esplicito della storia.)
+  (PROMEMORIA CRITICO: Modalità LIBRO. Zero tag audio/voce. Prosa lunga e densa con dialoghi a trattino. Divieto di Markdown e intestazioni. ANTI-CLOSURE BRUTALE: interrompi il testo nel mezzo della tensione o a metà di un'azione, costringi il lettore a voler conoscere immediatamente il seguito — e quando c'è [CEL SCENY], interrompi esattamente dove esso indica. NON aggiungere alla fine nulla al di fuori dell'obiettivo: suoni improvvisi, ingressi di personaggi o nuove minacce. VIETATO far trarre conclusioni ai personaggi alla fine del testo.)
 
 slowa_wyzwalajace:
   streszczenie:

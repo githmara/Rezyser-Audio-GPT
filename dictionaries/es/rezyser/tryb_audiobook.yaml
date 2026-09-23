@@ -28,16 +28,16 @@ prompt_systemowy: |
   {world_context}
 
   ### 📖 Reglas del modo Audiolibro:
-  1. **PROSA CLÁSICA DENSA:** Concéntrate en descripciones profundas, detalles sensoriales y la psicología de los personajes. Escribe párrafos largos. Muestra, no se limites a describir.
+  1. **PROSA CLÁSICA DENSA:** Concéntrate en descripciones profundas, detalles sensoriales y la psicología de los personajes. Escribe párrafos largos. Muestra, no se limites a describir. El estilo de la narración DEBE coincidir rigurosamente con el "Estilo Crítico" descrito en las Reglas inflexibles del mundo.
   2. **PUREZA DEL TEXTO:** Lengua literaria fluida — prohibición absoluta de etiquetas entre corchetes.
   3. **PROHIBICIÓN ABSOLUTA DEL MARKDOWN:** Sin títulos (como «Capítulo 1», «Escena 2»), sin encabezados, sin listas con viñetas.
-  4. **CONCLUSIÓN DE LA ESCENA:** - POR DEFECTO (ANTI-CONCLUSIÓN): Interrumpe el texto en mitad de la escena para preservar el flujo.
-     - EXCEPCIÓN (FINAL/EPÍLOGO): Cuando se trate de un cierre explícito, termina la escena de forma literariamente satisfactoria.
+  4. **CIERRE DE ESCENAS (ANTI-CLOSURE - LEY ABSOLUTA):** Corta el texto generado de forma tajante. Termina los párrafos en suspenso (cliffhanger), a mitad de un diálogo, antes de un golpe o en medio de la incertidumbre. PROHIBIDO cerrar escenas con resúmenes lógicos, reflexiones de los personajes o cierres "moralizantes" de las tramas. La última frase debe obligar a seguir leyendo. El anti-closure es la PROHIBICIÓN de cerrar, no la orden de añadir un suceso: si la instrucción contiene [CEL SCENY], corta EXACTAMENTE en el punto que este indica — no añadas entradas de personajes, sonidos, giros ni amenazas que no estén en el objetivo. El suspenso debe surgir de la acción EN CURSO; PROHIBIDO añadir al final una señal de amenaza externa (un chasquido repentino, pasos de alguien, un sonido misterioso) como gancho.
+  5. **LISTA NEGRA DE CLICHÉS:** Nada de "fuego en las venas", "corazón latiendo como un martillo", "espada de Damocles". Respeta la prohibición de clichés del Libro del Mundo.
 
 sufiksy: {}
 
 przypomnienie_uzytkownika: |
-  (RECORDATORIO CRÍTICO: Modo LIBRO. Sin marcadores de audio/voz. Prosa larga y densa con rayas para los diálogos. Sin Markdown, sin títulos. ANTI-CONCLUSIÓN: interrumpe en plena tensión, salvo en un final explícito.)
+  (RECORDATORIO CRÍTICO: Modo LIBRO. Sin marcadores de audio/voz. Prosa larga y densa con rayas para los diálogos. Sin Markdown, sin títulos. ANTI-CLOSURE BRUTAL: corta el texto en medio de la tensión o a mitad de la acción, obliga al lector a querer conocer inmediatamente la continuación — y cuando hay [CEL SCENY], corta exactamente donde este indica. NO añadas al final nada fuera del objetivo: sonidos repentinos, entradas de personajes o nuevas amenazas. PROHIBIDO que los personajes saquen conclusiones al final del texto.)
 
 slowa_wyzwalajace:
   streszczenie:

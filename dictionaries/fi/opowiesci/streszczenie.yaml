@@ -4,7 +4,7 @@
 #  Tulos korvaa koko vuorohistorian yhdellä merkinnällä muodossa
 #  `{"akcja_gracza": "(aiempien vuorojen tiivistelmä)", "narracja_skrot": <tulos>}`.
 #  GUI käynnistää sen taustasäikeessä onnistuneen vuoron JÄLKEEN, lukiten
-#  `_btn_wyslij`-painikkeen kunnes valmistuu (kilpa­tilan suoja
+#  `_btn_wyslij`-painikkeen kunnes valmistuu (kilpatilan suoja
 #  `_meta_w_toku=True`).
 # -----------------------------------------------------------------------------
 id: streszczenie

@@ -62,7 +62,7 @@ prompt_systemowy: |
   1. **SIN SFX:** el contexto (escenario, movimiento, tiempo, quién entra) lo lleva el NARRADOR con palabras, en turnos de narrador — nunca un efecto de sonido. Un turno de narrador es simplemente mowca="Narrador".
   2. **EL NARRADOR LLEVA EL CONTEXTO:** intercala breves turnos de narrador entre los diálogos para que el oyente sepa DÓNDE ocurre la acción, QUIÉN entra y QUÉ sucede — en lugar de deducirlo del sonido.
   3. **DISCIPLINA DEL NARRADOR:** el narrador apoya el diálogo, no lo sustituye. No resumas en la narración lo que los personajes pueden decir por sí mismos. El diálogo conduce la escena, el narrador la asienta.
-  4. **CONCLUSIÓN DE LA ESCENA:** POR DEFECTO (ANTI-CONCLUSIÓN) — interrumpe la escena en plena acción o diálogo. EXCEPCIÓN (FINAL/EPÍLOGO): al final de la historia, cierra la escena con un cierre tranquilo y lento en la narración.
+  4. **CIERRE DE ESCENAS (ANTI-CLOSURE):** Anti-closure es una PROHIBICIÓN, no una orden de añadir un evento: no resuelvas el conflicto, no resumas, no moralices, los personajes no sacan conclusiones al final. Si la instrucción contiene [CEL SCENY], termina la escena EXACTAMENTE en el punto que indica — no añadas entradas de personajes, sonidos, giros o amenazas que no estén en el objetivo. Sin [CEL SCENY], corta en medio de una acción o diálogo en curso. En ambos casos, PROHIBIDO añadir al final una señal externa de amenaza (un chasquido repentino, pasos de alguien, un sonido misterioso) como gancho. EXCEPCIÓN (FINAL/EPÍLOGO): si es el final de la historia, apaga la escena con un cierre tranquilo y pausado en la narración.
   5. **FRASES CORTAS:** Construye frases concisas y cortas. Las frases muy largas debilitan el acento y la expresión de v3 (sobre todo en voces con un acento extranjero deliberado) — divide una idea larga en varias frases más cortas.
 
 # --- Sufijos contextuales ---
@@ -83,7 +83,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (RECORDATORIO CRÍTICO: Modo TEATRO LEÍDO. Devuelve SOLO un OBJETO JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` SIN corchetes. Expresa la emoción SOLO con audio-tags v3 en inglés dentro de `tekst`, con moderación (0–2 por réplica). ¡SIN efectos de sonido — el contexto lo describe el NARRADOR con palabras! ¡NO resuelvas problemas al final! Aplica la ANTI-CONCLUSIÓN BRUTAL: interrumpe la escena en un instante cuando pasa algo malo. ¡Sin happy end ni resúmenes al final!)
+  (RECORDATORIO CRÍTICO: Modo TEATRO LEÍDO. Devuelve SOLO un OBJETO JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` SIN corchetes. Expresa la emoción SOLO con audio-tags v3 en inglés dentro de `tekst`, con moderación (0–2 por réplica). ¡SIN efectos de sonido — el contexto lo describe el NARRADOR con palabras! ¡NO resuelvas problemas al final! ANTI-CLOSURE: corta la escena en medio de una acción en curso — y cuando exista [CEL SCENY], exactamente donde este indique. NO añadas al final nada fuera del objetivo: sonidos repentinos, entradas de personajes ni nuevas amenazas. ¡Sin happy end ni resúmenes al final!)
 
 slowa_wyzwalajace:
   streszczenie:

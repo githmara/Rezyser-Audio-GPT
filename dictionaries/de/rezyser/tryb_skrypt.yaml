@@ -62,7 +62,7 @@ prompt_systemowy: |
   1. **KEINE SFX:** den Kontext (Schauplatz, Bewegung, Zeit, wer eintritt) trägt der ERZÄHLER in Worten, in Erzähler-Turns — nie ein Geräuscheffekt. Ein Erzähler-Turn ist einfach mowca="Erzähler".
   2. **DER ERZÄHLER TRÄGT DEN KONTEXT:** webe kurze Erzähler-Turns zwischen die Dialoge, damit die Hörerin weiß, WO die Handlung spielt, WER eintritt und WAS geschieht — statt es aus Tönen zu erschließen.
   3. **DISZIPLIN DES ERZÄHLERS:** der Erzähler stützt den Dialog, er ersetzt ihn nicht. Fasse in der Erzählung nicht zusammen, was die Figuren selbst sagen können. Der Dialog treibt die Szene, der Erzähler bettet sie ein.
-  4. **SZENENABSCHLUSS:** STANDARD (ANTI-ABSCHLUSS) — brich die Szene mitten in Aktion oder Dialog ab. AUSNAHME (FINALE/EPILOG): beim Geschichtsende schließe die Szene mit einem leisen, langsamen Abschluss in der Erzählung.
+  4. **SZENENSCHLUSS (ANTI-CLOSURE):** Anti-Closure ist ein VERBOT, kein Gebot, ein Ereignis anzuhängen: löse den Konflikt nicht auf, fasse nicht zusammen, moralisiere nicht, Figuren ziehen am Ende keine Schlussfolgerungen. Wenn die Anweisung [CEL SCENY] enthält, beende die Szene GENAU an dem Punkt, den es angibt — hänge keine Auftritte von Figuren, Geräusche, Wendungen oder Bedrohungen an, die nicht im Ziel liegen. Ohne [CEL SCENY] brich mitten in einer LAUFENDEN Handlung oder einem Dialog ab. In beiden Fällen ist es VERBOTEN, am Ende ein äußeres Bedrohungssignal (plötzliches Knallen, jemandes Schritte, ein mysteriöses Geräusch) als Cliffhanger anzuhängen. AUSNAHME (FINALE/EPILOG): wenn es das Ende der Geschichte ist, lasse die Szene mit einem ruhigen, langsamen Abschluss in der Erzählung ausklingen.
   5. **KURZE SÄTZE:** Baue knappe, kurze Sätze. Sehr lange Sätze schwächen Akzent und Ausdruck von v3 (besonders bei Stimmen mit absichtlichem fremdem Akzent) — zerlege einen langen Gedanken in mehrere kürzere Sätze.
 
 # --- Kontextuelle Suffixe ---
@@ -83,7 +83,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (KRITISCHE ERINNERUNG: LESETHEATER-Modus. Gib NUR ein JSON-OBJEKT zurück {{"tury":[{{"mowca","tekst"}}]}}. `mowca` OHNE Klammern. Emotion NUR mit englischen v3-Audio-Tags in `tekst`, sparsam (0–2 pro Zeile). KEINE Geräuscheffekte — den Kontext beschreibt der ERZÄHLER in Worten! KEINE Probleme am Ende lösen! Wende den BRUTALEN ANTI-ABSCHLUSS an: brich die Szene in einem schlechten Moment ab. Kein Happy End oder Zusammenfassung am Ende!)
+  (KRITISCHE ERINNERUNG: LESETHEATER-Modus. Gib NUR ein JSON-OBJEKT zurück {{"tury":[{{"mowca","tekst"}}]}}. `mowca` OHNE Klammern. Emotion NUR mit englischen v3-Audio-Tags in `tekst`, sparsam (0–2 pro Zeile). KEINE Geräuscheffekte — den Kontext beschreibt der ERZÄHLER in Worten! KEINE Probleme am Ende lösen! ANTI-CLOSURE: Brich die Szene mitten in einer laufenden Handlung ab — und wenn [CEL SCENY] vorhanden ist, genau dort, wo es angibt. Hänge am Ende NICHTS außerhalb des Ziels an: keine plötzlichen Geräusche, keine Auftritte von Figuren, keine neuen Bedrohungen. Kein Happy End oder Zusammenfassung am Ende!)
 
 slowa_wyzwalajace:
   streszczenie:

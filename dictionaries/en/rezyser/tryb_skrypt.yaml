@@ -61,7 +61,7 @@ prompt_systemowy: |
   1. **NO SFX:** context (setting, movement, time, who enters) is carried by the NARRATOR in words, in narrator turns — never by a sound effect. A narrator turn is simply mowca="Narrator".
   2. **THE NARRATOR CARRIES CONTEXT:** weave short narrator turns between the dialogue so the listener knows WHERE the action is, WHO is entering and WHAT is happening — instead of inferring it from sound.
   3. **NARRATOR DISCIPLINE:** the narrator supports the dialogue, it does not replace it. Do not summarize in narration what the characters can say themselves. The dialogue drives the scene, the narrator frames it.
-  4. **SCENE CLOSURE:** DEFAULT (ANTI-CLOSURE) — cut the scene mid-action or mid-dialogue. EXCEPTION (FINALE/EPILOGUE): if this is the end of the story, fade the scene with a quiet, slow close in the narration.
+  4. **CLOSING SCENES (ANTI-CLOSURE):** Anti-closure is a BAN, not an instruction to add an event: don't resolve the conflict, don't summarize, don't moralize, characters don't draw conclusions at the end. If the instruction includes [CEL SCENY], end the scene EXACTLY at the point it indicates — don't add character entrances, sounds, plot twists, or threats that aren't part of the goal. Without [CEL SCENY], cut off mid-way through an ONGOING action or dialogue. In both cases it is FORBIDDEN to tack on an external threat signal at the end (a sudden crack, someone's footsteps, a mysterious sound) as a hook. EXCEPTION (FINALE/EPILOGUE): if this is the end of the story, fade the scene out with a calm, slow closure in the narration.
   5. **SHORT SENTENCES:** Build concise, short sentences. Very long sentences weaken v3's accent and expression (especially for voices with a deliberate foreign accent) — break a long thought into several shorter sentences.
 
 # --- Contextual suffixes appended to prompt_systemowy ---
@@ -88,7 +88,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (CRITICAL REMINDER: READER'S THEATRE mode. Return a JSON OBJECT ONLY {{"tury":[{{"mowca","tekst"}}]}}. `mowca` WITHOUT brackets. Express emotion ONLY with English v3 audio tags woven into `tekst`, sparingly (0–2 per line). NO sound effects — the NARRATOR describes context in words! FORBIDDEN to resolve problems at the end. Apply BRUTAL ANTI-CLOSURE: cut the scene in a split second when something bad is happening. No happy endings or end-of-text recaps!)
+  (CRITICAL REMINDER: READER'S THEATRE mode. Return a JSON OBJECT ONLY {{"tury":[{{"mowca","tekst"}}]}}. `mowca` WITHOUT brackets. Express emotion ONLY with English v3 audio tags woven into `tekst`, sparingly (0–2 per line). NO sound effects — the NARRATOR describes context in words! FORBIDDEN to resolve problems at the end. ANTI-CLOSURE: cut off the scene mid-way through an ongoing action — and when [CEL SCENY] is present, exactly where it indicates. Do NOT add anything at the end beyond the goal: sudden sounds, character entrances, or new threats. No happy endings or end-of-text recaps!)
 
 # --- Application-side validation ---
 slowa_wyzwalajace:

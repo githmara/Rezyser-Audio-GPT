@@ -61,7 +61,7 @@ prompt_systemowy: |
   1. **ENGIN SFX:** samhengið (sviðsmynd, hreyfing, tími, hver kemur inn) ber SÖGUMAÐURINN með orðum, í töggum sögumanns — aldrei hljóðbrella. Taggi sögumanns er einfaldlega mowca="Sögumaður".
   2. **SÖGUMAÐURINN BER SAMHENGIÐ:** vefðu stutt innskot sögumanns milli samtalanna svo hlustandinn viti HVAR aðgerðin fer fram, HVER kemur inn og HVAÐ gerist — í stað þess að álykta það af hljóði.
   3. **AGI SÖGUMANNS:** sögumaðurinn styður samtalið, hann kemur ekki í stað þess. Ekki draga saman í frásögn það sem persónurnar geta sagt sjálfar. Samtalið leiðir atriðið, sögumaðurinn festir það.
-  4. **LOKUN ATRIÐIS:** SJÁLFGEFIÐ (ANDLOKUN) — slíttu atriðið mitt í aðgerð eða samtali. UNDANTEKNING (FINAL/EPILOGI): ef sagan endar, sammtu atriðið með hægri, rólegri lokun í frásögn.
+  4. **LOKUN SENA (ANTI-CLOSURE):** Anti-closure er BANN, ekki fyrirmæli um að bæta við atburði: ekki leysa átökin, ekki draga saman, ekki predika siðferði, persónur draga ekki ályktanir í lokin. Ef fyrirmælin innihalda [CEL SCENY], endaðu senuna NÁKVÆMLEGA á þeim punkti sem þar er tilgreindur — ekki bæta við innkomu persóna, hljóðum, óvæntum vendingum eða ógnum sem eru ekki hluti af markmiðinu. Án [CEL SCENY], stöðvaðu í miðri YFIRSTANDANDI atburðarás eða samtali. Í báðum tilvikum er BANNAÐ að bæta ytra ógnarmerki (skyndilegt bank, fótatak einhvers, dularfullt hljóð) við í lokin sem krók. UNDANTEKNING (LOKAKAFLI/EFTIRMÁLI): ef þetta er endir sögunnar, láttu senuna deyja út með rólegri, hægri lokun í frásögninni.
   5. **STUTTAR SETNINGAR:** Byggðu hnitmiðaðar, stuttar setningar. Mjög langar setningar veikja hreim og tjáningu v3 (sérstaklega raddir með viljandi erlendan hreim) — skiptu langri hugsun í nokkrar styttri setningar.
 
 # --- Kerfispromptviðbætur samhengis ---
@@ -82,7 +82,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (MIKILVÆG ÁMINNING: LEIKLESTRAR-stilling. Skilaðu AÐEINS JSON-HLUT {{"tury":[{{"mowca","tekst"}}]}}. `mowca` ÁN hornklofa. Tjáðu tilfinningu AÐEINS með enskum v3 hljóðtöggum í `tekst`, sparlega (0–2 á línu). ENGAR hljóðbrellur — samhengið lýsir SÖGUMAÐURINN með orðum! BANNAÐ að leysa vandamál í lokin! Notaðu BRUTALA ANDLOKUN: slíttu atriðið á brot úr sekúndu þegar eitthvað slæmt gerist. Engir hamingju-endar né lokasamantektir!)
+  (MIKILVÆG ÁMINNING: LEIKLESTRAR-stilling. Skilaðu AÐEINS JSON-HLUT {{"tury":[{{"mowca","tekst"}}]}}. `mowca` ÁN hornklofa. Tjáðu tilfinningu AÐEINS með enskum v3 hljóðtöggum í `tekst`, sparlega (0–2 á línu). ENGAR hljóðbrellur — samhengið lýsir SÖGUMAÐURINN með orðum! BANNAÐ að leysa vandamál í lokin! ANTI-CLOSURE: stöðvaðu senuna í miðri yfirstandandi atburðarás — og ef [CEL SCENY] er til staðar, nákvæmlega þar sem hann tilgreinir. EKKI bæta neinu við í lokin sem er utan markmiðsins: skyndilegum hljóðum, innkomu persóna eða nýjum ógnum. Engir hamingju-endar né lokasamantektir!)
 
 slowa_wyzwalajace:
   streszczenie:

@@ -63,7 +63,7 @@ prompt_systemowy: |
   1. **PAS DE SFX :** le contexte (décor, mouvement, temps, qui entre) est porté par le NARRATEUR en mots, dans des tours de narrateur — jamais par un effet sonore. Un tour de narrateur est simplement mowca="Narrateur".
   2. **LE NARRATEUR PORTE LE CONTEXTE :** intercale de brefs tours de narrateur entre les dialogues pour que l'auditeur sache OÙ se déroule l'action, QUI entre et CE QUI se passe — au lieu de le déduire du son.
   3. **DISCIPLINE DU NARRATEUR :** le narrateur soutient le dialogue, il ne le remplace pas. Ne résume pas dans la narration ce que les personnages peuvent dire eux-mêmes. Le dialogue mène la scène, le narrateur l'ancre.
-  4. **CONCLUSION DE SCÈNE :** PAR DÉFAUT (ANTI-CONCLUSION) — interromps la scène au milieu de l'action ou du dialogue. EXCEPTION (FINAL/ÉPILOGUE) : à la fin de l'histoire, conclus la scène par une clôture calme et lente dans la narration.
+  4. **CLÔTURE DES SCÈNES (ANTI-CLOSURE) :** l'anti-closure est une INTERDICTION, pas l'ordre d'ajouter un événement : ne résous pas le conflit, ne résume pas, ne moralise pas, les personnages ne tirent pas de conclusions à la fin. Si l'instruction contient [CEL SCENY], termine la scène EXACTEMENT au point qu'il indique — n'ajoute pas d'entrées de personnages, de sons, de rebondissements ou de menaces absentes de l'objectif. Sans [CEL SCENY], interromps en pleine action ou dialogue EN COURS. Dans les deux cas, il est INTERDIT d'ajouter à la fin un signal de menace externe (craquement soudain, pas de quelqu'un, son mystérieux) comme accroche. EXCEPTION (FINALE/ÉPILOGUE) : si c'est la fin de l'histoire, éteins la scène par une clôture calme et lente dans la narration.
   5. **PHRASES COURTES :** Construis des phrases concises et courtes. Les phrases très longues affaiblissent l'accent et l'expression de v3 (surtout pour les voix à accent étranger volontaire) — découpe une longue pensée en plusieurs phrases plus courtes.
 
 # --- Suffixes contextuels ---
@@ -84,7 +84,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (RAPPEL CRITIQUE : Mode THÉÂTRE LU. Ne renvoie QU'UN OBJET JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` SANS crochets. Exprime l'émotion UNIQUEMENT par des audio-tags v3 en anglais dans `tekst`, avec parcimonie (0–2 par réplique). PAS d'effets sonores — le contexte, c'est le NARRATEUR qui le décrit avec des mots ! NE résous PAS de problèmes à la fin ! Applique l'ANTI-CONCLUSION BRUTALE : interromps la scène en un instant quand quelque chose de mauvais arrive. Pas de happy end ni de résumé à la fin !)
+  (RAPPEL CRITIQUE : Mode THÉÂTRE LU. Ne renvoie QU'UN OBJET JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` SANS crochets. Exprime l'émotion UNIQUEMENT par des audio-tags v3 en anglais dans `tekst`, avec parcimonie (0–2 par réplique). PAS d'effets sonores — le contexte, c'est le NARRATEUR qui le décrit avec des mots ! NE résous PAS de problèmes à la fin ! ANTI-CLOSURE : interromps la scène en pleine action en cours — et lorsqu'il y a [CEL SCENY], exactement là où il l'indique. N'ajoute RIEN à la fin qui ne fasse pas partie de l'objectif : sons soudains, entrées de personnages ou nouvelles menaces. Pas de happy end ni de résumé à la fin !)
 
 slowa_wyzwalajace:
   streszczenie:

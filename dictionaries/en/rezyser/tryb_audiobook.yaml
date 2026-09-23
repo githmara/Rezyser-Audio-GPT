@@ -29,11 +29,11 @@ prompt_systemowy: |
   {world_context}
 
   ### 📖 Audiobook Mode Rules:
-  1. **DENSE, CLASSICAL PROSE:** Focus on deep descriptions, sensory detail, and character psychology. Write long paragraphs. Show, don't merely tell.
+  1. **DENSE, CLASSICAL PROSE:** Focus on deep descriptions, sensory detail, and character psychology. Write long paragraphs. Show, don't merely tell. The narrative style MUST strictly match the "Critical Style" described in the Iron Rules of the World.
   2. **TEXT PURITY:** Smooth literary language — strict ban on inserting tags in square brackets.
   3. **ABSOLUTE MARKDOWN BAN:** No headings (like "Chapter 1", "Scene 2"), no titles, no bullet lists.
-  4. **SCENE CLOSURE:** - DEFAULT (ANTI-CLOSURE): Cut the text without closing the scene to maintain momentum.
-     - EXCEPTION (FINALE/EPILOGUE): If this is the ending, fade the narration in a satisfying, literary way.
+  4. **CLOSING SCENES (ANTI-CLOSURE - ABSOLUTE LAW):** Ruthlessly cut off the generated text. End paragraphs on a cliffhanger, mid-dialogue, right before a blow lands, or amid uncertainty. FORBIDDEN to close scenes with logical summaries, characters' reflections, or a "moralizing" wrap-up of threads. The last sentence must compel the reader to keep going. Anti-closure is a BAN on closure, not an order to add an event: if the instruction contains [CEL SCENY], cut off EXACTLY at the point it indicates — do not add entrances of characters, sounds, plot twists, or threats that are not part of the goal. The cliffhanger must arise from the ONGOING action; FORBIDDEN to tack on an external danger signal at the end (a sudden crack, someone's footsteps, a mysterious sound) as a hook.
+  5. **BLACKLIST OF CLICHÉS:** No "fire in the veins", no "heart pounding like a hammer", no "sword of Damocles". Follow the cliché ban from the World Book.
 
 # --- Contextual suffixes ---
 # The audiobook mode in its base version does not use memory-state suffixes —
@@ -46,7 +46,7 @@ sufiksy: {}
 przypomnienie_uzytkownika: |
 
 
-  (CRITICAL REMINDER: BOOK mode. Zero audio/voice tags. Long, dense prose with em-dash dialogue. No Markdown, no headings. BRUTAL ANTI-CLOSURE: cut the text mid-tension or mid-action, unless this is a clear story finale.)
+  (CRITICAL REMINDER: BOOK mode. Zero audio/voice tags. Long, dense prose with em-dash dialogue. No Markdown, no headings. BRUTAL ANTI-CLOSURE: cut the text off in the middle of tension or mid-action, make the reader want to know what happens next immediately — and if [CEL SCENY] is present, cut off exactly where it indicates. Do NOT add anything beyond the goal at the end: no sudden sounds, no character entrances, no new threats. FORBIDDEN for characters to draw conclusions at the end of the text.)
 
 # --- Application-side validation ---
 slowa_wyzwalajace:
