@@ -473,6 +473,18 @@ def liczba_rozdzialow(tekst: str) -> int:
     )
 
 
+def nazwy_rozdzialow(tekst: str) -> list:
+    """Nazwy rozdziałów projektu Studio w kolejności — dokładnie te, które zbuduje most.
+
+    Karta publikacyjna (v19.8.1) typuje rozdziały na darmową próbkę, a formularz
+    platformy zna WYŁĄCZNIE rozdziały mostu: nagłówek sceny to tylko h1 wewnątrz
+    rozdziału, więc „Scena 1" powtórzona w siedmiu aktach nie jest żadnym z nich.
+    Lista pochodzi z :func:`buduj_chapters` (pusta obsada — głosy nie wpływają na
+    podział), żeby nie utrzymywać drugiej kopii reguł dzielenia.
+    """
+    return [ch["name"] for ch in buduj_chapters(tekst, {})]
+
+
 def wykryj_sieroty(tekst: str) -> list:
     """Wykrywa linie-sieroty, które ``buduj_chapters`` po cichu pomija (v17.2).
 

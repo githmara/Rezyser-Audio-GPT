@@ -73,6 +73,7 @@ from typing import Any, Callable
 
 import jsonschema
 
+import core_elevenlabs as ce
 import core_llm as cl
 import core_poliglota as cp
 import core_rezyser as cr
@@ -1519,12 +1520,25 @@ TIMEOUT_POSTPROD_CALOSC = 300.0
 # w `rezyser/baza.yaml`: strukturalny znacznik, po którym orientuje się kod, nie
 # podlega lokalizacji. Zmiana którejkolwiek z tych wartości wymaga zmiany
 # w 9 promptach ORAZ tutaj.
+KOTWICA_TYTUL = "Title:"   # wielka litera: "Subtitle:" jej NIE zawiera
 KOTWICA_OPIS = "Description"
 KOTWICA_GATUNKI = "Genres:"
 KOTWICA_ODBIORCA = "Target audience:"
 KOTWICA_DOJRZALOSC = "Mature content:"
 KOTWICA_PROBKI = "Sample chapters:"
+KOTWICA_OKLADKA = "Cover image prompt"
+KOTWICA_WYDAWCA = "Publisher:"
 KOTWICA_ISBN = "ISBN:"
+KOTWICA_AUTOR = "Author profile:"
+
+# Licznik w nagłówku opisu („Description (612/1000 characters):"). Model nie
+# umie liczyć znaków — w pierwszym bojowym teście podał 612 przy faktycznych
+# 701 — więc liczbę nadpisuje Python (`_popraw_licznik_opisu`).
+_RE_LICZNIK_OPISU = re.compile(r"\(\s*\d+\s*/")
+
+# Cudzysłowy, w które model lubi ubrać tytuł lub nazwisko — przy porównaniu
+# z promptem okładki nie są częścią wartości.
+_ZNAKI_CUDZYSLOWU = "\"'„”“«»"
 
 # Wartości pola „Mature content" — radio TAK/NIE w formularzu.
 _WARTOSCI_DOJRZALOSCI = ("yes", "no")
@@ -1560,17 +1574,30 @@ def _blok_opisu(tekst: str) -> str:
     najbliższej kolejnej kotwicy. Nagłówek linii (``Description (947/1000
     characters):``) odcinamy — nawias z licznikiem to instrukcja formatu, nie
     treść opisu, a jego doliczenie fałszowałoby wynik przy granicznych opisach.
+    Znaki nowej linii między akapitami ZOSTAJĄ w wyniku: pole formularza jest
+    wielowierszowe i liczy je do limitu jak każdy inny znak.
     """
+    return _blok_pola(tekst, KOTWICA_OPIS, (
+        KOTWICA_GATUNKI, KOTWICA_ODBIORCA, KOTWICA_DOJRZALOSC,
+        KOTWICA_PROBKI, KOTWICA_ISBN,
+    ))
+
+
+def _blok_okladki(tekst: str) -> str:
+    """Treść pola „Cover image prompt" — do następnego pola karty."""
+    return _blok_pola(tekst, KOTWICA_OKLADKA, (
+        KOTWICA_WYDAWCA, KOTWICA_ISBN, KOTWICA_AUTOR,
+    ))
+
+
+def _blok_pola(tekst: str, kotwica: str, kolejne: tuple[str, ...]) -> str:
+    """Pole wielolinijkowe: od linii z ``kotwica`` do linii z którąś z ``kolejne``."""
     linie = tekst.splitlines()
     start = next(
-        (i for i, l in enumerate(linie) if KOTWICA_OPIS in l), None,
+        (i for i, l in enumerate(linie) if kotwica in l), None,
     )
     if start is None:
         return ""
-    kolejne = (
-        KOTWICA_GATUNKI, KOTWICA_ODBIORCA, KOTWICA_DOJRZALOSC,
-        KOTWICA_PROBKI, KOTWICA_ISBN,
-    )
     zebrane: list[str] = []
     reszta_naglowka = linie[start].split(":", 1)
     if len(reszta_naglowka) == 2 and reszta_naglowka[1].strip():
@@ -1582,8 +1609,55 @@ def _blok_opisu(tekst: str) -> str:
     return "\n".join(zebrane).strip()
 
 
+def _popraw_licznik_opisu(tekst: str) -> str:
+    """Nadpisuje licznik w nagłówku „Description (N/limit …)" faktyczną długością.
+
+    Model deklaruje liczbę znaków, ale jej nie liczy — reżyser widziałby
+    fałszywą wartość tuż nad polem z limitem. Zmieniamy tylko samą liczbę
+    w PIERWSZEJ linii z kotwicą opisu; brak nawiasu z licznikiem = bez zmian.
+    """
+    linie = tekst.split("\n")
+    for i, linia in enumerate(linie):
+        if KOTWICA_OPIS in linia:
+            znaki = len(_blok_opisu(tekst))
+            linie[i] = _RE_LICZNIK_OPISU.sub(f"({znaki}/", linia, count=1)
+            return "\n".join(linie)
+    return tekst
+
+
+def formatuj_liste_rozdzialow(nazwy: list[str]) -> str:
+    """Lista rozdziałów mostu dla placeholdera ``{rozdzialy}`` — jeden na linię."""
+    return "\n".join(f"- {n}" for n in nazwy)
+
+
+def _wartosc_bez_cudzyslowu(wartosc: str) -> str:
+    return wartosc.strip().strip(_ZNAKI_CUDZYSLOWU).strip()
+
+
+def _nieznane_probki(linia: str, rozdzialy: list[str]) -> list[str]:
+    """Wartości pola „Sample chapters", których nie ma wśród rozdziałów mostu.
+
+    Kontrakt promptu to średnik. Przecinek sprawdzamy dopiero wtedy, gdy wpis
+    ze średnika nie pasuje — nazwa rozdziału nadana przez narzędzie tytułów
+    może sama zawierać przecinek („Rozdział 3: Ogień, woda").
+    """
+    znane = {n.casefold() for n in rozdzialy}
+    nieznane: list[str] = []
+    for wpis in linia.split(";"):
+        wpis = _wartosc_bez_cudzyslowu(wpis)
+        if not wpis or wpis.casefold() in znane:
+            continue
+        czesci = [_wartosc_bez_cudzyslowu(c) for c in wpis.split(",")]
+        czesci = [c for c in czesci if c]
+        if len(czesci) > 1 and all(c.casefold() in znane for c in czesci):
+            continue
+        nieznane.append(wpis)
+    return nieznane
+
+
 def waliduj_karte_publikacji(
     przepis: pr.PrzepisRezysera, tekst: str,
+    rozdzialy: list[str] | None = None,
 ) -> list[str]:
     """Miękka walidacja karty publikacyjnej — lista zlokalizowanych ostrzeżeń.
 
@@ -1597,6 +1671,10 @@ def waliduj_karte_publikacji(
     MIĘKKA celowo: wynik jest opłaconym callem i pozostaje użyteczny w całości
     (reżyser sam skróci opis albo wybierze inny gatunek). Nic nie blokujemy —
     tylko mówimy wprost, co wymaga ręcznej korekty. Pusta lista = karta zgodna.
+
+    ``rozdzialy`` (v19.8.1) = nazwy rozdziałów mostu (:func:`ce.nazwy_rozdzialow`)
+    — jedyne wartości, które formularz pokaże do wyboru jako próbkę. ``None``
+    = nie sprawdzamy (wołający nie zna treści projektu).
     """
     ostrzezenia: list[str] = []
 
@@ -1639,7 +1717,7 @@ def waliduj_karte_publikacji(
     # Tylko dla karty, która i tak zna kanon gatunków (inne narzędzia
     # `zakres: calosc` — np. raport z audytu — nie mają tych pól).
     if przepis.gatunki_dozwolone:
-        for kotwica in (KOTWICA_DOJRZALOSC, KOTWICA_PROBKI):
+        for kotwica in (KOTWICA_TYTUL, KOTWICA_DOJRZALOSC, KOTWICA_PROBKI):
             linia = _fragment_po_kotwicy(tekst, kotwica)
             if not linia:
                 ostrzezenia.append(i18n.t(
@@ -1649,6 +1727,34 @@ def waliduj_karte_publikacji(
                                 for w in _WARTOSCI_DOJRZALOSCI)):
                 ostrzezenia.append(i18n.t(
                     "rezyser.publikacja_ostrz_brak_pola", pole=kotwica))
+            elif kotwica == KOTWICA_PROBKI and rozdzialy is not None:
+                nieznane = _nieznane_probki(linia, rozdzialy)
+                if nieznane:
+                    ostrzezenia.append(i18n.t(
+                        "rezyser.publikacja_ostrz_probki",
+                        wartosci="; ".join(nieznane),
+                        rozdzialy="; ".join(rozdzialy)))
+
+        # Napis na okładce musi być TYM tytułem, który trafia do formularza —
+        # w pierwszym bojowym teście model skrócił „Kontynent Marzeń: Śledztwo
+        # Gospodarcze" do „KONTYNENT MARZEŃ". Porównanie po casefold, bo
+        # wersaliki na okładce są decyzją typograficzną, nie inną treścią.
+        okladka = _blok_okladki(tekst)
+        if okladka:
+            okladka_cf = " ".join(okladka.casefold().split())
+            tytul = _wartosc_bez_cudzyslowu(
+                _fragment_po_kotwicy(tekst, KOTWICA_TYTUL) or "")
+            if tytul and " ".join(tytul.casefold().split()) not in okladka_cf:
+                ostrzezenia.append(i18n.t(
+                    "rezyser.publikacja_ostrz_okladka_tytul", tytul=tytul))
+            autor = _wartosc_bez_cudzyslowu(
+                _fragment_po_kotwicy(tekst, KOTWICA_AUTOR) or "")
+            # `[do uzupełnienia ręcznie]` (w każdym języku paczki) zaczyna się
+            # nawiasem — wtedy nazwiska na okładce być nie może, nie sprawdzamy.
+            if (autor and not autor.startswith("[")
+                    and " ".join(autor.casefold().split()) not in okladka_cf):
+                ostrzezenia.append(i18n.t(
+                    "rezyser.publikacja_ostrz_okladka_autor", autor=autor))
 
         isbn = _fragment_po_kotwicy(tekst, KOTWICA_ISBN)
         if isbn and _RE_ISBN_ZMYSLONY.search(isbn):
@@ -1696,7 +1802,14 @@ def wykonaj_postprodukcje_calosc(
     blok_ksiegi = pr.buduj_prompt_ksiegi(przepis, ksiega or "")
     if blok_ksiegi:
         czesci.append(blok_ksiegi)
-    tresc = pr.buduj_prompt_uzytkownika(przepis, tresc=pelny_tekst)
+    # v19.8.1: rozdziały TAK, jak podzieli je most ElevenLabs — karta
+    # publikacyjna wybiera z nich próbkę (`{rozdzialy}`), a walidator sprawdza
+    # wybór. Przepis bez tego placeholdera po prostu go nie używa.
+    rozdzialy = ce.nazwy_rozdzialow(pelny_tekst)
+    tresc = pr.buduj_prompt_uzytkownika(
+        przepis, tresc=pelny_tekst,
+        rozdzialy=formatuj_liste_rozdzialow(rozdzialy),
+    )
     if not tresc:
         tresc = pelny_tekst
     elif pelny_tekst and pelny_tekst not in tresc:
@@ -1759,7 +1872,9 @@ def wykonaj_postprodukcje_calosc(
     # v18.14: miękka walidacja karty publikacyjnej. No-op dla narzędzi bez
     # zamkniętych zbiorów wartości (raport, audyt) — patrz
     # `waliduj_karte_publikacji`.
-    uwagi = waliduj_karte_publikacji(przepis, tekst)
+    if przepis.limit_znakow_opisu:
+        tekst = _popraw_licznik_opisu(tekst)
+    uwagi = waliduj_karte_publikacji(przepis, tekst, rozdzialy)
     if uwagi:
         blok = (
             i18n.t("rezyser.publikacja_ostrz_naglowek") + "\n\n"

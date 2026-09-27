@@ -820,6 +820,14 @@ rezyser:
   publikacja_ostrz_brak_pola: |-
     Karta nie zawiera wypełnionego pola „{pole}" – formularz go wymaga.
   publikacja_ostrz_isbn: "W polu ISBN pojawiły się cyfry. ISBN to numer rejestrowany – wpisz własny albo pozostaw pole do uzupełnienia."
+  # v19.8.1: próbka spoza rozdziałów mostu ElevenLabs i okładka z innym
+  # tytułem/autorem niż pola karty. {rozdzialy} = lista rozdziałów projektu.
+  publikacja_ostrz_probki: |-
+    Pole „Sample chapters" wskazuje fragmenty, których formularz nie pokaże jako rozdziałów: {wartosci}. Rozdziały tego projektu to: {rozdzialy}. Sceny nie są osobnymi rozdziałami.
+  publikacja_ostrz_okladka_tytul: |-
+    Prompt okładki nie zawiera tytułu z pola „Title": „{tytul}". Popraw napis w prompcie, zanim wygenerujesz grafikę.
+  publikacja_ostrz_okladka_autor: |-
+    Prompt okładki nie zawiera autora z pola „Author profile": „{autor}". Popraw napis w prompcie, zanim wygenerujesz grafikę.
   # Pre-check okna kontekstowego przed wywołaniem narzędzia (v18.13)
   postprod_kontekst_tytul: "Duży projekt — sprawdź okno modelu"
   postprod_kontekst_tresc: |-

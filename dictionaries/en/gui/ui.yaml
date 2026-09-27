@@ -693,6 +693,14 @@ rezyser:
   publikacja_ostrz_brak_pola: |-
     The card has no filled-in "{pole}" field – the form requires it.
   publikacja_ostrz_isbn: "Digits appeared in the ISBN field. An ISBN is a registered number – enter your own or leave the field to be filled in."
+  # v19.8.1: a sample outside the ElevenLabs bridge's chapters, and a cover
+  # whose title/author differs from the card fields. {rozdzialy} = chapter list.
+  publikacja_ostrz_probki: |-
+    The "Sample chapters" field names parts the form will not offer as chapters: {wartosci}. This project's chapters are: {rozdzialy}. Scenes are not separate chapters.
+  publikacja_ostrz_okladka_tytul: |-
+    The cover prompt does not contain the title from the "Title" field: "{tytul}". Fix the text in the prompt before you generate the image.
+  publikacja_ostrz_okladka_autor: |-
+    The cover prompt does not contain the author from the "Author profile" field: "{autor}". Fix the text in the prompt before you generate the image.
 
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
