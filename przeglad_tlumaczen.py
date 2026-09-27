@@ -530,6 +530,14 @@ more than style here.
   with a leading underscore, no spaces, Latin diacritics folded
   (`_veroffentlichung`, `_utgafa`), non-Latin scripts kept (`_пересказ`). It must
   not collide with another recipe's suffix inside the same pack.
+  It must also NOT CHANGE when an existing recipe is re-translated — a new
+  suffix orphans every result file users already have.
+- RE-TRANSLATING AN EXISTING RECIPE rewrites the WHOLE file, not just the rules
+  the Polish source changed (measured in 19.8 and 19.8.1: term drift, `tu` →
+  `vous` in fr, a new `[…]` placeholder value, a new `sufiks_pliku_wyniku`).
+  For a small source change keep the pack from git HEAD and splice in only the
+  changed rules from the draft; then check that the spliced rules use the same
+  form of address and the same `[…]` placeholder value as the rest of the file.
 - `regex_podzial_rozdzialow` is DERIVED, not translated: the header words must be
   byte-identical to `dictionaries/<code>/gui/ui.yaml::rezyser.naglowek_*`, because
   the engine wrote those headers into the project file. A "nicer" native synonym

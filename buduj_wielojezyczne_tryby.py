@@ -89,9 +89,21 @@ identyczne we wszystkich paczkach (patrz jego własny nagłówek). Przepisy
 `opowiesci/` mają inny schemat (`core_opowiesci`) i świadomie zostają poza
 zakresem tego narzędzia.
 
+⚠ ISTNIEJĄCY PRZEPIS = PEŁNA RETRANSLACJA, NIE ZMIANA CHIRURGICZNA. Narzędzie nie
+ma trybu „tylko zmienione zasady": `--przepisy X` przepisuje CAŁY plik od nowa,
+także tekst już zrecenzowany. Zmierzone dwa razy (19.8 i 19.8.1): dryf terminów,
+zmiana formy zwracania się (fr `tu` → `vous`), nowa wartość `[do uzupełnienia
+ręcznie]`, a nawet przetłumaczony na nowo `sufiks_pliku_wyniku` (de
+`_veroffentlichung` → `_publikation`, czyli inna nazwa pliku wyniku na dysku).
+Przy małej zmianie źródła PL traktuj wynik jako DRAFT do wycięcia fragmentów:
+złóż paczkę jako `git show HEAD:<plik>` + przetłumaczone zasady (po prefiksach
+linii, np. `  7. **`), przejrzyj tylko je i porównaj ich formę zwracania się
+i wartości `[…]` z resztą pliku z HEAD. Pełny przebieg zostaw dla nowego
+przepisu albo świadomej resynchronizacji paczki.
+
 Użycie:
   python buduj_wielojezyczne_tryby.py --wszystkie
-  python buduj_wielojezyczne_tryby.py --jezyki de,fi --przepisy postprod_publikacja
+  python buduj_wielojezyczne_tryby.py --jezyki de,fi --przepisy tryb_nowy   # NOWY przepis
   python buduj_wielojezyczne_tryby.py --jezyki de --dry-run     # zero API
   python buduj_wielojezyczne_tryby.py --wszystkie --tylko-walidacja   # zero API
   python buduj_wielojezyczne_tryby.py --wszystkie --finalizuj         # zero API

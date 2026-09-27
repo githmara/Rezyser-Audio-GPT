@@ -687,6 +687,9 @@ rezyser:
   ostrzezenie_skrypt_domknieto: Die Antwort des Modells hat das Längenlimit erreicht und wurde mitten in der letzten Replik abgebrochen. Alle vollständigen Repliken wurden gespeichert, und die abgebrochene wurde automatisch mit einem Satz abgeschlossen. Die Szene hat ihr Ziel aber möglicherweise nicht vollständig erreicht — prüfe das Ende und sende bei Bedarf eine kurze Anweisung zur Fortsetzung.
   ostrzezenie_skrypt_wycieto: Die Antwort des Modells hat das Längenlimit erreicht und wurde mitten in der letzten Replik abgebrochen, die sich nicht mehr retten ließ und daher ausgelassen wurde. Alle vollständigen Repliken wurden gespeichert. Die Szene hat ihr Ziel aber möglicherweise nicht vollständig erreicht — prüfe das Ende und sende bei Bedarf eine kurze Anweisung zur Fortsetzung.
   ostrzezenie_skrypt_limit: Die Antwort des Modells hat die Längenbegrenzung erreicht. Alle vollständigen Repliken wurden gespeichert, doch die Szene hat ihr Ziel möglicherweise nicht vollständig erreicht — prüfe das Ende und sende bei Bedarf eine kurze Anweisung zur Fortsetzung.
+  publikacja_ostrz_probki: 'Das Feld „Sample chapters“ nennt Abschnitte, die das Formular nicht als Kapitel anzeigt: {wartosci}. Die Kapitel dieses Projekts sind: {rozdzialy}. Szenen sind keine eigenständigen Kapitel.'
+  publikacja_ostrz_okladka_tytul: 'Der Cover-Prompt enthält nicht den Titel aus dem Feld „Title“: „{tytul}“. Korrigieren Sie den Text im Prompt, bevor Sie die Grafik generieren.'
+  publikacja_ostrz_okladka_autor: 'Der Cover-Prompt enthält nicht den Autor aus dem Feld „Author profile“: „{autor}“. Korrigieren Sie den Text im Prompt, bevor Sie die Grafik generieren.'
 poliglota:
   panel_name: "AI-Polyglott-Panel"
   heading: "🌍  AI-Polyglott – Hybrides Übersetzungsstudio"

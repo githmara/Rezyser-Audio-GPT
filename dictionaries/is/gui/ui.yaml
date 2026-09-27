@@ -687,6 +687,9 @@ rezyser:
   ostrzezenie_skrypt_domknieto: Svar líkansins náði hámarkslengd og rofnaði í miðri síðustu línu. Allar heilar línur hafa verið vistaðar og rofna línan var sjálfkrafa kláruð með einni setningu. Senan hefur þó mögulega ekki náð markmiði sínu til enda — athugaðu endinn og sendu stutta framhaldsleiðbeiningu ef þörf krefur.
   ostrzezenie_skrypt_wycieto: Svar líkansins náði hámarkslengd og rofnaði í miðri síðustu línu, sem ekki var hægt að bjarga og var því sleppt. Allar heilar línur hafa verið vistaðar. Senan hefur þó mögulega ekki náð markmiði sínu til enda — athugaðu endinn og sendu stutta framhaldsleiðbeiningu ef þörf krefur.
   ostrzezenie_skrypt_limit: Svar líkansins náði hámarkslengd. Allar heilar línur hafa verið vistaðar, en senan hefur þó mögulega ekki náð markmiði sínu til enda — athugaðu endinn og sendu stutta framhaldsleiðbeiningu ef þörf krefur.
+  publikacja_ostrz_probki: 'Reiturinn „Sample chapters“ tilgreinir hluta sem formið mun ekki sýna sem kafla: {wartosci}. Kaflar þessa verkefnis eru: {rozdzialy}. Atriði teljast ekki sem sérstakir kaflar.'
+  publikacja_ostrz_okladka_tytul: 'Kápuskipunin (prompt) inniheldur ekki titilinn úr reitnum „Title“: „{tytul}“. Leiðréttu textann í skipuninni áður en þú býrð til myndina.'
+  publikacja_ostrz_okladka_autor: 'Kápuskipunin (prompt) inniheldur ekki höfundinn úr reitnum „Author profile“: „{autor}“. Leiðréttu textann í skipuninni áður en þú býrð til myndina.'
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"

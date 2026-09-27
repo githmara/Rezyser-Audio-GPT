@@ -687,6 +687,9 @@ rezyser:
   ostrzezenie_skrypt_domknieto: 'La respuesta del modelo alcanzó el límite de longitud y se cortó durante la última línea de diálogo. Todas las líneas completas se han guardado, y la que quedó cortada se cerró automáticamente con una frase. Sin embargo, es posible que la escena no haya llegado al final previsto: revisa el tramo final y, si es necesario, envía una breve instrucción de continuación.'
   ostrzezenie_skrypt_wycieto: 'La respuesta del modelo alcanzó el límite de longitud y se cortó durante la última línea de diálogo, la cual no se pudo recuperar, por lo que fue omitida. Todas las líneas completas se han guardado. Sin embargo, es posible que la escena no haya llegado al final previsto: revisa el tramo final y, si es necesario, envía una breve instrucción de continuación.'
   ostrzezenie_skrypt_limit: La respuesta del modelo alcanzó el límite de longitud. Se han guardado todas las líneas completas, pero es posible que la escena no haya llegado al final previsto; revisa el desenlace y, si es necesario, envía una breve instrucción de continuación.
+  publikacja_ostrz_probki: 'El campo «Sample chapters» indica los fragmentos que el formulario no mostrará como capítulos: {wartosci}. Los capítulos de este proyecto son: {rozdzialy}. Las escenas no son capítulos independientes.'
+  publikacja_ostrz_okladka_tytul: 'El prompt de la portada no contiene el título del campo «Title»: «{tytul}». Corrige el texto del prompt antes de generar la imagen.'
+  publikacja_ostrz_okladka_autor: 'El prompt de la portada no contiene el autor del campo «Author profile»: «{autor}». Corrige el texto del prompt antes de generar la imagen.'
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"

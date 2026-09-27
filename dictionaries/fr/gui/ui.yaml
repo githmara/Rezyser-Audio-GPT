@@ -685,6 +685,9 @@ rezyser:
   ostrzezenie_skrypt_domknieto: La réponse du modèle a atteint la limite de longueur et s'est interrompue en plein milieu de la dernière réplique. Toutes les répliques complètes ont été enregistrées, et celle qui a été interrompue a été automatiquement complétée par une phrase. La scène n'a peut-être toutefois pas atteint son objectif final — vérifiez la fin et, si nécessaire, envoyez une brève instruction de continuation.
   ostrzezenie_skrypt_wycieto: La réponse du modèle a atteint la limite de longueur et s'est interrompue en plein milieu de la dernière réplique, qui n'a pas pu être récupérée et a donc été omise. Toutes les répliques complètes ont été enregistrées. La scène n'a peut-être toutefois pas atteint son objectif final — vérifiez la fin et, si nécessaire, envoyez une brève instruction de continuation.
   ostrzezenie_skrypt_limit: La réponse du modèle a atteint la limite de longueur. Toutes les répliques complètes ont été enregistrées, mais la scène n'est peut-être pas allée jusqu'au bout de son objectif — vérifiez la fin et, si nécessaire, envoyez une courte instruction de continuation.
+  publikacja_ostrz_probki: "Le champ « Sample chapters » indique les fragments que le formulaire n'affichera pas comme des chapitres : {wartosci}. Les chapitres de ce projet sont : {rozdzialy}. Les scènes ne sont pas des chapitres distincts."
+  publikacja_ostrz_okladka_tytul: 'Le prompt de la couverture ne contient pas le titre du champ « Title » : « {tytul} ». Corrigez le texte dans le prompt avant de générer le visuel.'
+  publikacja_ostrz_okladka_autor: "Le prompt de la couverture ne contient pas l'auteur du champ « Author profile » : « {autor} ». Corrigez le texte dans le prompt avant de générer le visuel."
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
