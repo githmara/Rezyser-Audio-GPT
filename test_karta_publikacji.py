@@ -180,6 +180,53 @@ def test_postprodukcja_podaje_rozdzialy_i_poprawia_licznik(przepis, monkeypatch)
     assert "Scena 1; Scena 2" in wynik.ostrzezenie
 
 
+# --- Przypadki z audytu 19.8.1 (każdy odtworzony wykonaniem przed poprawką) ---
+
+@pytest.mark.parametrize("naglowek", [
+    "**Description (612/1000 characters):**",
+    "**Description** (612/1000 characters):",
+    "3. Description (612/1000 characters):",
+])
+def test_ozdobiony_naglowek_opisu_nie_zawyza_licznika(naglowek):
+    karta = _karta(licznik="612").replace(
+        "Description (612/1000 characters):", naglowek)
+    assert rai._blok_opisu(karta) == OPIS
+    assert f"({len(OPIS)}/1000" in rai._popraw_licznik_opisu(karta)
+
+
+def test_slowo_description_w_tytule_nie_porywa_opisu(przepis):
+    karta = _karta(tytul="Description of Night",
+                   napis='"DESCRIPTION OF NIGHT"', licznik="612")
+    assert rai._blok_opisu(karta) == OPIS
+    assert f"Description ({len(OPIS)}/1000" in rai._popraw_licznik_opisu(karta)
+    assert rai.waliduj_karte_publikacji(przepis, karta, ROZDZIALY) == []
+
+
+def test_licznik_nie_rusza_nawiasu_w_tresci_opisu():
+    karta = "Description: Zaledwie (3/4 miasta) splonelo.\nGenres: Fantasy\n"
+    assert rai._popraw_licznik_opisu(karta) == karta
+
+
+@pytest.mark.parametrize("probki", [
+    "Prolog; Akt 1.", "**Prolog**; Akt 1", "Prolog;Akt 1", "- Prolog; - Akt 1",
+])
+def test_ozdobniki_wpisow_probki_nie_daja_ostrzezenia(probki):
+    assert rai._nieznane_probki(probki, ROZDZIALY) == []
+
+
+def test_srednik_w_nazwie_rozdzialu():
+    rozdzialy = ["Rozdzial 1: Ogien; woda", "Akt 2"]
+    assert rai._nieznane_probki("Rozdzial 1: Ogien; woda; Akt 2", rozdzialy) == []
+    assert rai._nieznane_probki("Rozdzial 1: Ogien; Akt 2", rozdzialy) \
+        == ["Rozdzial 1: Ogien"]
+
+
+def test_typografia_i_dopisek_autora_nie_daja_ostrzezenia(przepis):
+    karta = _karta(tytul="Ender’s Game – Saga", napis='"ENDER\'S GAME - SAGA"',
+                   autor="Mara (pseudonim z Ksiegi Swiata)")
+    assert rai.waliduj_karte_publikacji(przepis, karta, ROZDZIALY) == []
+
+
 JEZYKI = sorted(p.parent.parent.name for p in
                 Path(__file__).parent.glob("dictionaries/*/rezyser/postprod_publikacja.yaml"))
 

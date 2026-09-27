@@ -1536,6 +1536,35 @@ KOTWICA_AUTOR = "Author profile:"
 # 701 — więc liczbę nadpisuje Python (`_popraw_licznik_opisu`).
 _RE_LICZNIK_OPISU = re.compile(r"\(\s*\d+\s*/")
 
+
+def _re_naglowka_pola(nazwa: str) -> re.Pattern:
+    """Linia NAGŁÓWKA pola wielolinijkowego — po KSZTAŁCIE, nie po podciągu.
+
+    Audyt 19.8.1: tytuł „Description of Night" porywał blok opisu, bo szukaliśmy
+    pierwszej linii ZAWIERAJĄCEJ słowo. Dopuszczamy ozdobniki modelu przed
+    nazwą pola (`**`, `#`, numerację) i nawias z licznikiem przed dwukropkiem.
+    """
+    return re.compile(
+        r"^[\s*_#>\d.)-]*" + re.escape(nazwa)
+        + r"\b[*_]*\s*(?:\([^)]*\))?\s*[*_]*\s*:"
+    )
+
+
+_RE_NAGLOWEK_OPISU = _re_naglowka_pola(KOTWICA_OPIS)
+_RE_NAGLOWEK_OKLADKI = _re_naglowka_pola(KOTWICA_OKLADKA)
+
+# Ozdobniki wokół pojedynczej wartości listy („**Prolog**", „Akt 1."). Nagłówek
+# struktury z definicji nie ma interpunkcji zdaniowej (`ce.czy_moze_byc_naglowkiem`),
+# więc kropka na końcu wpisu to zawsze ozdobnik modelu. `-`/`=` na brzegach
+# obcina już `ce.czysty_naglowek`, więc to też tylko ozdobnik (myślnik listy
+# `{rozdzialy}` przepisany razem z nazwą).
+_ZNAKI_OZDOBNIKOW_WPISU = " *_.\t-="
+
+# Typografia, która nie zmienia treści napisu: apostrof drukarski vs prosty,
+# półpauza/pauza vs dywiz. Model przepisuje tytuł do promptu okładki raz tak,
+# raz tak — to nie jest inny tytuł.
+_TYPOGRAFIA = str.maketrans({"’": "'", "‘": "'", "ʼ": "'", "–": "-", "—": "-"})
+
 # Cudzysłowy, w które model lubi ubrać tytuł lub nazwisko — przy porównaniu
 # z promptem okładki nie są częścią wartości.
 _ZNAKI_CUDZYSLOWU = "\"'„”“«»"
@@ -1577,7 +1606,7 @@ def _blok_opisu(tekst: str) -> str:
     Znaki nowej linii między akapitami ZOSTAJĄ w wyniku: pole formularza jest
     wielowierszowe i liczy je do limitu jak każdy inny znak.
     """
-    return _blok_pola(tekst, KOTWICA_OPIS, (
+    return _blok_pola(tekst, _RE_NAGLOWEK_OPISU, (
         KOTWICA_GATUNKI, KOTWICA_ODBIORCA, KOTWICA_DOJRZALOSC,
         KOTWICA_PROBKI, KOTWICA_ISBN,
     ))
@@ -1585,23 +1614,29 @@ def _blok_opisu(tekst: str) -> str:
 
 def _blok_okladki(tekst: str) -> str:
     """Treść pola „Cover image prompt" — do następnego pola karty."""
-    return _blok_pola(tekst, KOTWICA_OKLADKA, (
+    return _blok_pola(tekst, _RE_NAGLOWEK_OKLADKI, (
         KOTWICA_WYDAWCA, KOTWICA_ISBN, KOTWICA_AUTOR,
     ))
 
 
-def _blok_pola(tekst: str, kotwica: str, kolejne: tuple[str, ...]) -> str:
-    """Pole wielolinijkowe: od linii z ``kotwica`` do linii z którąś z ``kolejne``."""
+def _blok_pola(tekst: str, naglowek: re.Pattern, kolejne: tuple[str, ...]) -> str:
+    """Pole wielolinijkowe: od linii-nagłówka do linii z którąś z ``kolejne``.
+
+    Treść po dwukropku nagłówka liczy się do pola, ale bez ozdobników
+    Markdown — ``**Description (…):**`` zostawiało `**` jako „treść"
+    (audyt 19.8.1: licznik zawyżony o 3).
+    """
     linie = tekst.splitlines()
-    start = next(
-        (i for i, l in enumerate(linie) if kotwica in l), None,
-    )
-    if start is None:
+    for start, linia in enumerate(linie):
+        m = naglowek.match(linia)
+        if m:
+            break
+    else:
         return ""
     zebrane: list[str] = []
-    reszta_naglowka = linie[start].split(":", 1)
-    if len(reszta_naglowka) == 2 and reszta_naglowka[1].strip():
-        zebrane.append(reszta_naglowka[1].strip())
+    reszta_naglowka = linie[start][m.end():].strip(" *_\t")
+    if reszta_naglowka:
+        zebrane.append(reszta_naglowka)
     for linia in linie[start + 1:]:
         if any(k in linia for k in kolejne):
             break
@@ -1614,13 +1649,16 @@ def _popraw_licznik_opisu(tekst: str) -> str:
 
     Model deklaruje liczbę znaków, ale jej nie liczy — reżyser widziałby
     fałszywą wartość tuż nad polem z limitem. Zmieniamy tylko samą liczbę
-    w PIERWSZEJ linii z kotwicą opisu; brak nawiasu z licznikiem = bez zmian.
+    i tylko W NAGŁÓWKU (do jego dwukropka) — opis zaczęty w tej samej linii
+    może mieć własny nawias z liczbą. Brak licznika = bez zmian.
     """
     linie = tekst.split("\n")
     for i, linia in enumerate(linie):
-        if KOTWICA_OPIS in linia:
+        m = _RE_NAGLOWEK_OPISU.match(linia)
+        if m:
             znaki = len(_blok_opisu(tekst))
-            linie[i] = _RE_LICZNIK_OPISU.sub(f"({znaki}/", linia, count=1)
+            glowa = _RE_LICZNIK_OPISU.sub(f"({znaki}/", linia[:m.end()], count=1)
+            linie[i] = glowa + linia[m.end():]
             return "\n".join(linie)
     return tekst
 
@@ -1634,24 +1672,45 @@ def _wartosc_bez_cudzyslowu(wartosc: str) -> str:
     return wartosc.strip().strip(_ZNAKI_CUDZYSLOWU).strip()
 
 
+def _wpis_listy(wartosc: str) -> str:
+    """Pojedyncza wartość listy bez cudzysłowów i ozdobników Markdown."""
+    return _wartosc_bez_cudzyslowu(
+        wartosc.strip(_ZNAKI_OZDOBNIKOW_WPISU)).strip(_ZNAKI_OZDOBNIKOW_WPISU)
+
+
+def _do_porownania(tekst: str) -> str:
+    """Casefold + jednolita typografia + zwinięte białe znaki."""
+    return " ".join(tekst.translate(_TYPOGRAFIA).casefold().split())
+
+
 def _nieznane_probki(linia: str, rozdzialy: list[str]) -> list[str]:
     """Wartości pola „Sample chapters", których nie ma wśród rozdziałów mostu.
 
-    Kontrakt promptu to średnik. Przecinek sprawdzamy dopiero wtedy, gdy wpis
-    ze średnika nie pasuje — nazwa rozdziału nadana przez narzędzie tytułów
-    może sama zawierać przecinek („Rozdział 3: Ogień, woda").
+    Kontrakt promptu to średnik. Nazwa rozdziału nadana przez narzędzie tytułów
+    może jednak sama zawierać średnik albo przecinek („Rozdział 3: Ogień, woda"),
+    więc od każdej pozycji próbujemy NAJDŁUŻSZEGO sklejenia kolejnych kawałków,
+    które jest znanym rozdziałem. Przecinek sprawdzamy dopiero wtedy, gdy wpis
+    ze średnika nie pasuje w żaden sposób.
     """
-    znane = {n.casefold() for n in rozdzialy}
+    znane = {_do_porownania(n) for n in rozdzialy}
+    kawalki = linia.split(";")
     nieznane: list[str] = []
-    for wpis in linia.split(";"):
-        wpis = _wartosc_bez_cudzyslowu(wpis)
-        if not wpis or wpis.casefold() in znane:
-            continue
-        czesci = [_wartosc_bez_cudzyslowu(c) for c in wpis.split(",")]
-        czesci = [c for c in czesci if c]
-        if len(czesci) > 1 and all(c.casefold() in znane for c in czesci):
-            continue
-        nieznane.append(wpis)
+    i = 0
+    while i < len(kawalki):
+        for j in range(len(kawalki), i, -1):
+            if _do_porownania(_wpis_listy(";".join(kawalki[i:j]))) in znane:
+                i = j
+                break
+        else:
+            wpis = _wpis_listy(kawalki[i])
+            i += 1
+            if not wpis:
+                continue
+            czesci = [_do_porownania(_wpis_listy(c)) for c in wpis.split(",")]
+            czesci = [c for c in czesci if c]
+            if len(czesci) > 1 and all(c in znane for c in czesci):
+                continue
+            nieznane.append(wpis)
     return nieznane
 
 
@@ -1741,18 +1800,21 @@ def waliduj_karte_publikacji(
         # wersaliki na okładce są decyzją typograficzną, nie inną treścią.
         okladka = _blok_okladki(tekst)
         if okladka:
-            okladka_cf = " ".join(okladka.casefold().split())
+            okladka_cf = _do_porownania(okladka)
             tytul = _wartosc_bez_cudzyslowu(
                 _fragment_po_kotwicy(tekst, KOTWICA_TYTUL) or "")
-            if tytul and " ".join(tytul.casefold().split()) not in okladka_cf:
+            if tytul and _do_porownania(tytul) not in okladka_cf:
                 ostrzezenia.append(i18n.t(
                     "rezyser.publikacja_ostrz_okladka_tytul", tytul=tytul))
             autor = _wartosc_bez_cudzyslowu(
                 _fragment_po_kotwicy(tekst, KOTWICA_AUTOR) or "")
+            # Dopisek modelu po nazwisku („Mara (pseudonim z Księgi Świata)",
+            # „Mara — autorka") nie trafia na okładkę; porównujemy samo nazwisko.
+            autor = re.split(r"\s+[(—–-]", autor, maxsplit=1)[0].strip()
             # `[do uzupełnienia ręcznie]` (w każdym języku paczki) zaczyna się
             # nawiasem — wtedy nazwiska na okładce być nie może, nie sprawdzamy.
             if (autor and not autor.startswith("[")
-                    and " ".join(autor.casefold().split()) not in okladka_cf):
+                    and _do_porownania(autor) not in okladka_cf):
                 ostrzezenia.append(i18n.t(
                     "rezyser.publikacja_ostrz_okladka_autor", autor=autor))
 
