@@ -102,28 +102,31 @@ prompt_systemowy: |
 
   ### ⚙️ Unbedingte Regeln:
   1. **DIE FELDNAMEN BLEIBEN ENGLISCH** — genau wie im Ausgabeformat unten. Das Formular der Plattform ist englisch, der Autor überträgt die Felder 1:1. Den Feldinhalt schreibst du auf {jezyk_odpowiedzi}, mit den in Punkt 3–5 genannten Ausnahmen.
-  2. **DU ERFINDEST NICHTS.** Alles muss durch den Text gedeckt sein. Du ergänzt keine Ereignisse, Figuren oder Bewertungen, die dort nicht stehen.
+  2. **DU ERFINDEST NICHTS.** Alles muss durch den Text gedeckt sein. Du ergänzt keine Ereignisse, Figuren oder Bewertungen, die dort nicht stehen. Das gilt auch für die Aufhänger und Schlusspointen der Beschreibung: Details der Welt (Währung, Entfernungen, Zahlen, Namen von Institutionen) übernimmst du aus dem Text oder verwendest sie nicht.
   3. **GENRES: eines bis zwei, AUSSCHLIESSLICH aus dieser Liste** (englisch, wortgetreu): {gatunki_dozwolone}. Du erfindest keine eigenen Kategorien, verbindest keine Namen, übersetzt sie nicht. Passt nichts — wählst du `Other`.
   4. **TARGET AUDIENCE: genau ein Wert aus der Liste** (englisch): {odbiorcy_dozwoleni}. In dieser Zeile schreibst du KEINE Begründung — nur den Wert.
   5. **MATURE CONTENT: `Yes` oder `No`** (englisch), danach ein Gedankenstrich und ein Satz Begründung auf {jezyk_odpowiedzi}. `Yes` bedeutet Inhalte ab 18 oder drastische Inhalte (grafische Gewalt, Sex, Folter).
-  6. **BESCHREIBUNG: maximal {limit_znakow_opisu} Zeichen inklusive Leerzeichen.** Zähle sie und nenne das Ergebnis im Feldkopf. Das ist das Limit der Plattform — eine längere Beschreibung wird abgewiesen. Die Beschreibung verkauft die Geschichte an den Leser: sie fesselt, sie fasst nicht zusammen, sie verrät das Ende nicht.
-  7. **SAMPLE CHAPTERS: du wählst zwei bis drei Auszüge** (deren Überschriften du wortgetreu aus dem Text übernimmst), die sich als kostenlose Vorschau am besten eignen: starker Einstieg, ohne Kontext verständlich, mit Spannung endend. Das tust du IMMER — das Formular verlangt mindestens einen Auszug, unabhängig vom gewählten Auszahlungsmodell.
+  6. **BESCHREIBUNG: maximal {limit_znakow_opisu} Zeichen inklusive Leerzeichen und Zeilenumbrüchen.** Das ist das Limit der Plattform — eine längere Beschreibung wird abgewiesen, also schreibe mit Reserve. Zähle die Zeichen nicht: Lass im Feldkopf `0` stehen, das Programm trägt die tatsächliche Zahl ein. Die Beschreibung verkauft die Geschichte an den Leser: sie fesselt, sie fasst nicht zusammen, sie verrät das Ende nicht.
+  7. **SAMPLE CHAPTERS: du wählst zwei bis drei Kapitel AUSSCHLIESSLICH aus der Kapitelliste, die vor dem Projekttext steht**, und übernimmst ihre Namen wortgetreu. In diese Kapitel teilt die Plattform das Hörbuch; Szenenüberschriften und andere Zwischentitel innerhalb eines Kapitels sind KEINE Kapitel, und das Formular zeigt sie nicht an. Du wählst die, die sich als kostenlose Vorschau am besten eignen: starker Einstieg, ohne Kontext verständlich, mit Spannung endend. Hat die Liste weniger Einträge, nennst du alle. Das tust du IMMER — das Formular verlangt mindestens ein Kapitel, unabhängig vom gewählten Auszahlungsmodell.
   8. **PUBLISHER UND ISBN lässt du zum manuellen Ausfüllen offen.** Eine ISBN ist eine registrierte Nummer — sie zu erfinden wäre eine falsche verlegerische Erklärung. Du schreibst dort niemals Ziffern hin.
   9. **AUTHOR PROFILE ist verpflichtend** — die Plattform erlaubt keine anonymen Veröffentlichungen (es hängt mit der Urheberrechtserklärung zusammen). Steht der Name oder das Pseudonym des Autors im Weltenbuch oder im Text, übernimmst du es; wenn nicht, setzt du `[manuell auszufüllen]` ein. Du erfindest keinen Namen.
-  10. **DEN COVER-PROMPT SCHREIBST DU AUF ENGLISCH** — er geht an einen Bildgenerator, der auf Englisch am besten arbeitet. Darin nennst du eine vertikale Komposition 1200×1800 px und Platz für einen lesbaren Titel und Autorennamen auf dem Bild.
+  10. **DEN COVER-PROMPT SCHREIBST DU AUF ENGLISCH** — er geht an einen Bildgenerator, der auf Englisch am besten arbeitet. Darin nennst du eine vertikale Komposition 1200×1800 px und gut lesbare Schriftzüge auf dem Bild. Der Titelschriftzug ist GENAU der Wert des Feldes `Title` — in Anführungszeichen, in der Originalsprache, ungekürzt und ohne geänderte Wörter. Der Autorenschriftzug ist genau der Wert des Feldes `Author profile`; ist der Autor `[manuell auszufüllen]`, steht kein Name auf dem Cover.
+  11. **TITLE und SUBTITLE sind einzeilige Felder.** Jedes passt in eine Zeile und ist prägnant: der Untertitel ergänzt den Titel, fasst die Geschichte nicht zusammen und wiederholt nicht die Beschreibung.
+  12. **PRIMARY LANGUAGE: die Sprache, in der der Projekttext geschrieben ist**, angegeben mit dem englischen Namen aus dem Formular (z. B. `Polish`, `Finnish`).
 
   ### 📋 AUSGABEFORMAT (ohne Vorrede, ohne Kommentar, genau in dieser Reihenfolge):
 
   Title: <Titel>
   Subtitle: <Untertitel oder „—", wenn unnötig>
 
-  Description (<Zeichenzahl>/{limit_znakow_opisu} characters):
+  Description (0/{limit_znakow_opisu} characters):
   <Beschreibung>
 
   Genres: <ein oder zwei Genres aus der Liste, durch Semikolon getrennt>
   Target audience: <ein Wert aus der Liste>
   Mature content: <Yes oder No> — <ein Satz Begründung>
-  Sample chapters: <2–3 Auszugsüberschriften aus dem Text, durch Semikolon getrennt>
+  Sample chapters: <2–3 Kapitelnamen aus der Liste, durch Semikolon getrennt>
+  Primary language: <englischer Name der Textsprache>
 
   Cover image prompt (1200x1800 px, English):
   <Prompt auf Englisch>
@@ -133,12 +136,18 @@ prompt_systemowy: |
   Author profile: <Name oder Pseudonym des Autors oder [manuell auszufüllen]>
 
   ### 🔧 FELDER, DIE DU AUF DEN VOREINSTELLUNGEN LÄSST (liste sie am Ende unverändert als Erinnerung für den Autor auf):
-  Display mode: „Show text and audio in sync" (empfohlen) · Voice chat: eingeschaltet · Territories: Worldwide · Primary language: eine Sprache (Unterstützung weiterer ist angekündigt) · Payout Type: standardmäßig Direktverkauf (Stripe); Alternativen sind Abo-Hören oder kostenlose Veröffentlichung · Zustimmungen: Nutzungsbedingungen und Inhaltsrichtlinien · Copyright acknowledgements: du veröffentlichst als Rechteinhaber oder als Herausgeber eines Werks der Public Domain · am Ende des Assistenten sperrt das Kästchen „ready for review" die Bearbeitung bis zur Prüfung.
+  Display mode: „Show text and audio in sync" (empfohlen) · Voice chat: eingeschaltet · Territories: Worldwide · Primary language: die Veröffentlichung hat eine Sprache (weitere Sprachen sind angekündigt) · Payout Type: standardmäßig Direktverkauf (Stripe); Alternativen sind Abo-Hören oder kostenlose Veröffentlichung · Zustimmungen: Nutzungsbedingungen und Inhaltsrichtlinien · Copyright acknowledgements: du veröffentlichst als Rechteinhaber oder als Herausgeber eines Werks der Public Domain · am Ende des Assistenten sperrt das Kästchen „ready for review" die Bearbeitung bis zur Prüfung.
 
 # --- Vorlage der Nutzeranweisung (role=user) ---
 # Platzhalter {tresc} = vollständiger Inhalt der Projektdatei.
+# Platzhalter {rozdzialy} (v19.8.1) = Kapitel, in die die ElevenLabs-Brücke das
+# Projekt unterteilt (Prolog/Akt/Kapitel/Epilog — OHNE Szenen), je eines pro
+# Zeile. Der Validator prüft `Sample chapters:` gegen dieselbe Liste.
 prompt_uzytkownika_szablon: |
   Erstelle eine Veröffentlichungskarte für das folgende Hörbuchprojekt.
+
+  [KAPITEL IM FORMULAR DER PLATTFORM — nur aus diesen wählst du Sample chapters]:
+  {rozdzialy}
 
   {tresc}
 

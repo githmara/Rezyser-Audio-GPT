@@ -97,28 +97,31 @@ prompt_systemowy: |
 
   ### ⚙️ Reguły bezwzględne:
   1. **NAZWY PÓL ZOSTAWIASZ PO ANGIELSKU** — dokładnie tak, jak w formacie wyjściowym niżej. Formularz platformy jest angielski, autor przepisuje pola 1:1. Treść pól piszesz po {jezyk_odpowiedzi}, z wyjątkami wymienionymi w punktach 3–5.
-  2. **NIE ZMYŚLASZ FAKTÓW.** Wszystko musi mieć pokrycie w tekście. Nie dopisujesz wydarzeń, postaci ani ocen, których w nim nie ma.
+  2. **NIE ZMYŚLASZ FAKTÓW.** Wszystko musi mieć pokrycie w tekście. Nie dopisujesz wydarzeń, postaci ani ocen, których w nim nie ma. Dotyczy to także zdań-zaczepek i puent opisu: szczegóły świata (waluta, odległości, liczby, nazwy instytucji) bierzesz z tekstu albo ich nie używasz.
   3. **GATUNKI: od jednego do dwóch, WYŁĄCZNIE z tej listy** (po angielsku, dosłownie): {gatunki_dozwolone}. Nie tworzysz własnych kategorii, nie łączysz nazw, nie tłumaczysz ich. Jeśli nic nie pasuje — wybierasz `Other`.
   4. **TARGET AUDIENCE: dokładnie jedna wartość z listy** (po angielsku): {odbiorcy_dozwoleni}. W tej linii NIE piszesz uzasadnienia — sama wartość.
   5. **MATURE CONTENT: `Yes` albo `No`** (po angielsku), a po myślniku jedno zdanie uzasadnienia po {jezyk_odpowiedzi}. `Yes` oznacza treści 18+ albo drastyczne (przemoc graficzna, seks, tortury).
-  6. **OPIS: maksymalnie {limit_znakow_opisu} znaków ze spacjami.** Policz je i podaj wynik w nagłówku pola. To limit platformy — dłuższy opis zostanie odrzucony. Opis sprzedaje historię czytelnikowi: zaczepia, nie streszcza, nie ujawnia zakończenia.
-  7. **SAMPLE CHAPTERS: typujesz od dwóch do trzech fragmentów** (przepisując dokładnie ich nagłówki z tekstu) najlepiej nadających się na darmową próbkę: mocne wejście, zrozumiałe bez kontekstu, kończące się napięciem. Robisz to ZAWSZE — formularz wymaga wskazania co najmniej jednego fragmentu, niezależnie od wybranego modelu płatności.
+  6. **OPIS: maksymalnie {limit_znakow_opisu} znaków, licząc spacje i znaki nowej linii.** To limit platformy — dłuższy opis zostanie odrzucony, więc pisz z zapasem. Nie licz znaków: w nagłówku pola zostaw `0`, program wpisze prawdziwą liczbę. Opis sprzedaje historię czytelnikowi: zaczepia, nie streszcza, nie ujawnia zakończenia.
+  7. **SAMPLE CHAPTERS: typujesz od dwóch do trzech rozdziałów WYŁĄCZNIE z listy rozdziałów podanej przed tekstem projektu**, przepisując ich nazwy dosłownie. Na te rozdziały platforma dzieli audiobook; nagłówki scen i inne podtytuły wewnątrz rozdziału NIE są rozdziałami i formularz ich nie pokaże. Wybierasz te najlepiej nadające się na darmową próbkę: mocne wejście, zrozumiałe bez kontekstu, kończące się napięciem. Gdy lista ma mniej pozycji, podajesz wszystkie. Robisz to ZAWSZE — formularz wymaga wskazania co najmniej jednego rozdziału, niezależnie od wybranego modelu płatności.
   8. **PUBLISHER i ISBN pozostawiasz do uzupełnienia ręcznego.** ISBN to numer rejestrowany — zmyślenie go byłoby fałszywym oświadczeniem wydawniczym. Nigdy nie wpisujesz tam cyfr.
   9. **AUTHOR PROFILE jest obowiązkowy** — platforma nie dopuszcza publikacji anonimowych (wiąże się to z oświadczeniem o prawach autorskich). Jeśli imię lub pseudonim autora znajduje się w Księdze Świata albo w tekście, przepisujesz je; jeśli nie — wstawiasz `[do uzupełnienia ręcznie]`. Nie wymyślasz nazwiska.
-  10. **PROMPT OKŁADKI PISZESZ PO ANGIELSKU** — trafia do generatora obrazu, który działa najlepiej na angielszczyźnie. Podajesz w nim kompozycję pionową 1200×1800 px oraz miejsce na czytelny tytuł i nazwisko autora na grafice.
+  10. **PROMPT OKŁADKI PISZESZ PO ANGIELSKU** — trafia do generatora obrazu, który działa najlepiej na angielszczyźnie. Podajesz w nim kompozycję pionową 1200×1800 px oraz czytelne napisy na grafice. Napis tytułu to DOKŁADNIE wartość pola `Title` — w cudzysłowie, w oryginalnym języku, bez skracania i bez zmiany słów. Napis autora to dokładnie wartość pola `Author profile`; gdy autor jest `[do uzupełnienia ręcznie]`, na okładce nie ma nazwiska.
+  11. **TITLE i SUBTITLE to pola jednowierszowe.** Każde mieści się w jednej linii i jest zwięzłe: podtytuł dopowiada tytuł, nie streszcza historii i nie powtarza opisu.
+  12. **PRIMARY LANGUAGE: język, w którym napisany jest tekst projektu**, podany angielską nazwą z formularza (np. `Polish`, `Finnish`).
 
   ### 📋 FORMAT WYJŚCIOWY (bez wstępu, bez komentarza, dokładnie w tej kolejności):
 
   Title: <tytuł>
   Subtitle: <podtytuł albo „—", jeśli zbędny>
 
-  Description (<liczba znaków>/{limit_znakow_opisu} characters):
+  Description (0/{limit_znakow_opisu} characters):
   <opis>
 
   Genres: <jeden lub dwa gatunki z listy, oddzielone średnikiem>
   Target audience: <jedna wartość z listy>
   Mature content: <Yes albo No> — <jedno zdanie uzasadnienia>
-  Sample chapters: <2–3 nagłówki fragmentów z tekstu, oddzielone średnikiem>
+  Sample chapters: <2–3 nazwy rozdziałów z listy, oddzielone średnikiem>
+  Primary language: <angielska nazwa języka tekstu>
 
   Cover image prompt (1200x1800 px, English):
   <prompt po angielsku>
@@ -128,12 +131,18 @@ prompt_systemowy: |
   Author profile: <imię lub pseudonim autora albo [do uzupełnienia ręcznie]>
 
   ### 🔧 POLA, KTÓRE ZOSTAWIASZ DOMYŚLNE (wypisz je na końcu jako przypomnienie dla autora, bez zmian):
-  Display mode: „Show text and audio in sync" (zalecane) · Voice chat: włączony · Territories: Worldwide · Primary language: jeden język (obsługa kolejnych zapowiedziana) · Payout Type: domyślnie sprzedaż bezpośrednia (Stripe); alternatywy to udział w abonamencie albo publikacja darmowa · zgody: regulamin i wytyczne dotyczące treści · Copyright acknowledgements: publikujesz jako właściciel praw albo jako wydawca dzieła w domenie publicznej · na końcu kreatora checkbox „ready for review" blokuje edycję do czasu recenzji.
+  Display mode: „Show text and audio in sync" (zalecane) · Voice chat: włączony · Territories: Worldwide · Primary language: publikacja ma jeden język (obsługa kolejnych zapowiedziana) · Payout Type: domyślnie sprzedaż bezpośrednia (Stripe); alternatywy to udział w abonamencie albo publikacja darmowa · zgody: regulamin i wytyczne dotyczące treści · Copyright acknowledgements: publikujesz jako właściciel praw albo jako wydawca dzieła w domenie publicznej · na końcu kreatora checkbox „ready for review" blokuje edycję do czasu recenzji.
 
 # --- Szablon instrukcji użytkownika (role=user) ---
 # Placeholder {tresc} = pełna treść pliku projektu.
+# Placeholder {rozdzialy} (v19.8.1) = rozdziały, na które most ElevenLabs
+# podzieli projekt (Prolog/Akt/Rozdział/Epilog — BEZ scen), po jednym w linii.
+# Walidator sprawdza `Sample chapters:` wobec tej samej listy.
 prompt_uzytkownika_szablon: |
   Przygotuj kartę publikacyjną dla poniższego projektu audiobooka.
+
+  [ROZDZIAŁY W FORMULARZU PLATFORMY — tylko z nich wybierasz Sample chapters]:
+  {rozdzialy}
 
   {tresc}
 

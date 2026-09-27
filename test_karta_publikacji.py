@@ -18,6 +18,7 @@ Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_karta_publikac
 """
 
 import dataclasses
+import re
 import sys
 from pathlib import Path
 
@@ -177,6 +178,43 @@ def test_postprodukcja_podaje_rozdzialy_i_poprawia_licznik(przepis, monkeypatch)
     assert wyslane["user"].startswith("- Prolog\n- Akt 1\n- Akt 2\n- Epilog")
     assert f"Description ({len(OPIS)}/1000" in wynik.tekst
     assert "Scena 1; Scena 2" in wynik.ostrzezenie
+
+
+JEZYKI = sorted(p.parent.parent.name for p in
+                Path(__file__).parent.glob("dictionaries/*/rezyser/postprod_publikacja.yaml"))
+
+
+def test_zakres_paczek():
+    assert len(JEZYKI) >= 9
+
+
+@pytest.mark.parametrize("kod", JEZYKI)
+def test_paczka_niesie_kontrakt_karty(kod):
+    """Placeholder listy rozdziałów, licznik `0` do nadpisania, nowe pole."""
+    p = pr.zaladuj_przepis("publikacja", kod, kategoria="postprodukcja")
+    assert p is not None
+    user = pr.buduj_prompt_uzytkownika(p, tresc="X", rozdzialy="- Akt 1")
+    assert "- Akt 1" in user and "{" not in user
+    system = pr.buduj_prompt_systemowy(p)
+    assert "Description (0/" in system
+    assert "Primary language:" in system and "`Title`" in system
+
+
+@pytest.mark.parametrize("kod", JEZYKI)
+def test_jedna_wartosc_do_uzupelnienia_w_paczce(kod):
+    """Reguła 9, reguła 10 i pole Publisher mówią o TEJ SAMEJ wartości.
+
+    Pełna retranslacja `_tryby` (19.8.1) tłumaczy tę wartość od nowa
+    (`[manuell zu ergänzen]` zamiast `[manuell auszufüllen]`), więc przy
+    SKŁADANIU paczki jako `HEAD` + nowe reguły z draftu reguła okładki niesie
+    inną wartość niż pole Publisher — model widziałby dwie różne „puste"
+    wartości. Sam draft jest wewnętrznie spójny; ten test pilnuje składania.
+    """
+    tekst = (Path(__file__).parent / "dictionaries" / kod / "rezyser"
+             / "postprod_publikacja.yaml").read_text(encoding="utf-8")
+    publisher = rai._fragment_po_kotwicy(tekst, rai.KOTWICA_WYDAWCA)
+    w_regulach = set(re.findall(r"`(\[[^\]`]+\])`", tekst)) - {"[OBECNA FABUŁA]"}
+    assert w_regulach == {publisher}
 
 
 if __name__ == "__main__":

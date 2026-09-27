@@ -101,28 +101,31 @@ prompt_systemowy: |
 
   ### ⚙️ Absolute rules:
   1. **KEEP THE FIELD NAMES IN ENGLISH** — exactly as in the output format below. The platform's form is English and the author copies the fields 1:1. The field content you write in {jezyk_odpowiedzi}, with the exceptions listed in points 3–5.
-  2. **INVENT NOTHING.** Everything must be backed by the text. You do not add events, characters or judgements that are not in it.
+  2. **INVENT NOTHING.** Everything must be backed by the text. You do not add events, characters or judgements that are not in it. This also applies to the description's hook sentences and closing lines: details of the world (currency, distances, numbers, names of institutions) you take from the text or you do not use them.
   3. **GENRES: one or two, ONLY from this list** (in English, verbatim): {gatunki_dozwolone}. You do not create your own categories, do not merge names, do not translate them. If nothing fits — you pick `Other`.
   4. **TARGET AUDIENCE: exactly one value from the list** (in English): {odbiorcy_dozwoleni}. You write NO justification on that line — the value alone.
   5. **MATURE CONTENT: `Yes` or `No`** (in English), followed by a dash and one sentence of justification in {jezyk_odpowiedzi}. `Yes` means 18+ or graphic content (graphic violence, sex, torture).
-  6. **DESCRIPTION: at most {limit_znakow_opisu} characters including spaces.** Count them and state the result in the field header. This is the platform's limit — a longer description will be rejected. The description sells the story to a reader: it hooks, it does not summarize, it does not reveal the ending.
-  7. **SAMPLE CHAPTERS: pick two to three excerpts** (copying their headings from the text verbatim) that work best as a free preview: a strong opening, understandable without context, ending on tension. You do this ALWAYS — the form requires at least one excerpt regardless of the chosen payout model.
+  6. **DESCRIPTION: at most {limit_znakow_opisu} characters, counting spaces and line breaks.** This is the platform's limit — a longer description will be rejected, so leave some margin. Do not count the characters: leave `0` in the field header, the program will fill in the real count. The description sells the story to a reader: it hooks, it does not summarize, it does not reveal the ending.
+  7. **SAMPLE CHAPTERS: pick two to three chapters ONLY from the chapter list given before the project text**, copying their names verbatim. These are the chapters the platform splits the audiobook into; scene headings and other subheadings inside a chapter are NOT chapters and the form will not show them. You pick the ones that work best as a free preview: a strong opening, understandable without context, ending on tension. When the list has fewer entries, you give all of them. You do this ALWAYS — the form requires at least one chapter regardless of the chosen payout model.
   8. **LEAVE PUBLISHER AND ISBN to be filled in manually.** An ISBN is a registered number — inventing one would be a false publishing declaration. You never put digits there.
   9. **AUTHOR PROFILE is mandatory** — the platform does not allow anonymous publications (it goes together with the copyright declaration). If the author's name or pen name appears in the World Lore or in the text, you copy it; if not, you insert `[to be filled in manually]`. You do not invent a name.
-  10. **WRITE THE COVER PROMPT IN ENGLISH** — it goes to an image generator, which works best in English. In it you state a vertical 1200×1800 px composition and room for a legible title and author name on the artwork.
+  10. **WRITE THE COVER PROMPT IN ENGLISH** — it goes to an image generator, which works best in English. In it you state a vertical 1200×1800 px composition and legible lettering on the artwork. The title lettering is EXACTLY the value of the `Title` field — in quotation marks, in the original language, not shortened and with no words changed. The author lettering is exactly the value of the `Author profile` field; when the author is `[to be filled in manually]`, there is no name on the cover.
+  11. **TITLE and SUBTITLE are single-line fields.** Each fits on one line and is concise: the subtitle adds to the title, it does not summarize the story or repeat the description.
+  12. **PRIMARY LANGUAGE: the language the project text is written in**, given by its English name as in the form (e.g. `Polish`, `Finnish`).
 
   ### 📋 OUTPUT FORMAT (no preamble, no commentary, exactly in this order):
 
   Title: <title>
   Subtitle: <subtitle, or "—" if not needed>
 
-  Description (<character count>/{limit_znakow_opisu} characters):
+  Description (0/{limit_znakow_opisu} characters):
   <description>
 
   Genres: <one or two genres from the list, separated by a semicolon>
   Target audience: <one value from the list>
   Mature content: <Yes or No> — <one sentence of justification>
-  Sample chapters: <2–3 excerpt headings from the text, separated by semicolons>
+  Sample chapters: <2–3 chapter names from the list, separated by semicolons>
+  Primary language: <English name of the text's language>
 
   Cover image prompt (1200x1800 px, English):
   <prompt in English>
@@ -132,12 +135,18 @@ prompt_systemowy: |
   Author profile: <author's name or pen name, or [to be filled in manually]>
 
   ### 🔧 FIELDS YOU LEAVE AT THEIR DEFAULTS (list them at the end as a reminder for the author, unchanged):
-  Display mode: "Show text and audio in sync" (recommended) · Voice chat: on · Territories: Worldwide · Primary language: one language (support for more is announced) · Payout Type: direct sales by default (Stripe); the alternatives are subscriber listening or free publication · consents: terms of service and content guidelines · Copyright acknowledgements: you publish as the rights holder or as the publisher of a public-domain work · at the end of the wizard the "ready for review" checkbox locks editing until the review is done.
+  Display mode: "Show text and audio in sync" (recommended) · Voice chat: on · Territories: Worldwide · Primary language: a publication has one language (support for more is announced) · Payout Type: direct sales by default (Stripe); the alternatives are subscriber listening or free publication · consents: terms of service and content guidelines · Copyright acknowledgements: you publish as the rights holder or as the publisher of a public-domain work · at the end of the wizard the "ready for review" checkbox locks editing until the review is done.
 
 # --- User instruction template (role=user) ---
 # Placeholder {tresc} = the full content of the project file.
+# Placeholder {rozdzialy} (v19.8.1) = the chapters the ElevenLabs bridge will
+# split the project into (Prologue/Act/Chapter/Epilogue — NO scenes), one per
+# line. The validator checks `Sample chapters:` against the same list.
 prompt_uzytkownika_szablon: |
   Prepare a publication card for the audiobook project below.
+
+  [CHAPTERS IN THE PLATFORM'S FORM — you pick Sample chapters only from these]:
+  {rozdzialy}
 
   {tresc}
 

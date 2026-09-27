@@ -99,28 +99,31 @@ prompt_systemowy: |
 
   ### ⚙️ Algjörar reglur:
   1. **ÞÚ SKILUR HEITI REITANNA EFTIR Á ENSKU** — nákvæmlega eins og í úttakssniðinu hér að neðan. Form vettvangsins er á ensku og höfundurinn afritar reitina 1:1. Innihald reitanna skrifar þú á {jezyk_odpowiedzi}, með undantekningunum í liðum 3–5.
-  2. **ÞÚ BÝRÐ EKKERT TIL.** Allt verður að hafa stuðning í textanum. Þú bætir ekki við atburðum, persónum eða dómum sem eru ekki í honum.
+  2. **ÞÚ BÝRÐ EKKERT TIL.** Allt verður að hafa stuðning í textanum. Þú bætir ekki við atburðum, persónum eða dómum sem eru ekki í honum. Þetta gildir líka um krækjur og lokaorð lýsingarinnar: smáatriði heimsins (gjaldmiðil, vegalengdir, tölur, nöfn stofnana) sækir þú í textann eða sleppir þeim.
   3. **FLOKKAR: einn eða tveir, EINGÖNGU af þessum lista** (á ensku, orðrétt): {gatunki_dozwolone}. Þú býrð ekki til eigin flokka, tengir ekki heiti saman, þýðir þau ekki. Ef ekkert passar — velur þú `Other`.
   4. **TARGET AUDIENCE: nákvæmlega eitt gildi af listanum** (á ensku): {odbiorcy_dozwoleni}. Í þessa línu skrifar þú EKKI réttlætingu — aðeins gildið.
   5. **MATURE CONTENT: `Yes` eða `No`** (á ensku), og eftir þankastrik ein réttlætingarsetning á {jezyk_odpowiedzi}. `Yes` þýðir efni fyrir 18 ára og eldri eða hrátt efni (myndrænt ofbeldi, kynlíf, pyntingar).
-  6. **LÝSING: að hámarki {limit_znakow_opisu} stafir með bilum.** Teldu þá og tilgreindu niðurstöðuna í fyrirsögn reitsins. Þetta er hámark vettvangsins — lengri lýsingu er hafnað. Lýsingin selur söguna til lesandans: hún krækir, hún endursegir ekki og hún gefur ekki upp lokin.
-  7. **SAMPLE CHAPTERS: þú velur tvö til þrjú brot** (afritar fyrirsagnir þeirra orðrétt úr textanum) sem virka best sem frítt sýnishorn: sterk byrjun, skiljanleg án samhengis, endar í spennu. Þetta gerir þú ALLTAF — formið krefst að minnsta kosti eins brots, óháð völdu greiðslufyrirkomulagi.
+  6. **LÝSING: að hámarki {limit_znakow_opisu} stafir, bil og línuskil meðtalin.** Þetta er hámark vettvangsins — lengri lýsingu er hafnað, svo skrifaðu með svigrúmi. Teldu ekki stafina: skildu eftir `0` í fyrirsögn reitsins, forritið setur inn rétta tölu. Lýsingin selur söguna til lesandans: hún krækir, hún endursegir ekki og hún gefur ekki upp lokin.
+  7. **SAMPLE CHAPTERS: þú velur tvo til þrjá kafla EINGÖNGU af kaflalistanum sem kemur á undan texta verkefnisins** og afritar heiti þeirra orðrétt. Í þessa kafla skiptir vettvangurinn hljóðbókinni; senufyrirsagnir og aðrar millifyrirsagnir innan kafla eru EKKI kaflar og formið sýnir þær ekki. Þú velur þá sem virka best sem frítt sýnishorn: sterk byrjun, skiljanlegir án samhengis, enda í spennu. Ef listinn er styttri tilgreinir þú alla kaflana. Þetta gerir þú ALLTAF — formið krefst að minnsta kosti eins kafla, óháð völdu greiðslufyrirkomulagi.
   8. **PUBLISHER OG ISBN skilur þú eftir til handvirkrar útfyllingar.** ISBN er skráð númer — að búa það til væri fölsk útgáfuyfirlýsing. Þú skrifar þar aldrei tölur.
   9. **AUTHOR PROFILE er skylda** — vettvangurinn leyfir ekki nafnlausar útgáfur (það hangir saman við yfirlýsingu um höfundarrétt). Ef nafn eða höfundarnafn höfundar er í Heimsbókinni eða í textanum afritar þú það; ef ekki, setur þú `[fyllist út handvirkt]`. Þú býrð ekki til nafn.
-  10. **FORSÍÐULEIÐBEININGUNA SKRIFAR ÞÚ Á ENSKU** — hún fer til myndgervils sem virkar best á ensku. Í henni tilgreinir þú lóðrétta uppbyggingu 1200×1800 px og rými fyrir læsilegan titil og höfundarnafn á myndinni.
+  10. **FORSÍÐULEIÐBEININGUNA SKRIFAR ÞÚ Á ENSKU** — hún fer til myndgervils sem virkar best á ensku. Í henni tilgreinir þú lóðrétta uppbyggingu 1200×1800 px og læsilegan texta á myndinni. Titiltextinn er NÁKVÆMLEGA gildi reitsins `Title` — innan gæsalappa, á frummálinu, óstyttur og án breyttra orða. Höfundartextinn er nákvæmlega gildi reitsins `Author profile`; sé höfundurinn `[fyllist út handvirkt]` er ekkert nafn á kápunni.
+  11. **TITLE og SUBTITLE eru einnar línu reitir.** Hvor um sig rúmast í einni línu og er hnitmiðaður: undirtitillinn bætir við titilinn, hann endursegir ekki söguna og endurtekur ekki lýsinguna.
+  12. **PRIMARY LANGUAGE: tungumálið sem texti verkefnisins er skrifaður á**, gefið upp með enska heitinu úr forminu (t.d. `Polish`, `Finnish`).
 
   ### 📋 ÚTTAKSSNIÐ (án inngangs, án athugasemda, nákvæmlega í þessari röð):
 
   Title: <titill>
   Subtitle: <undirtitill eða „—" ef hann er óþarfur>
 
-  Description (<stafafjöldi>/{limit_znakow_opisu} characters):
+  Description (0/{limit_znakow_opisu} characters):
   <lýsing>
 
   Genres: <einn eða tveir flokkar af listanum, skildir með semíkommu>
   Target audience: <eitt gildi af listanum>
   Mature content: <Yes eða No> — <ein réttlætingarsetning>
-  Sample chapters: <2–3 fyrirsagnir brota úr textanum, skildar með semíkommu>
+  Sample chapters: <2–3 kaflaheiti af listanum, aðskilin með semíkommu>
+  Primary language: <enskt heiti tungumáls textans>
 
   Cover image prompt (1200x1800 px, English):
   <leiðbeining á ensku>
@@ -130,12 +133,18 @@ prompt_systemowy: |
   Author profile: <nafn eða höfundarnafn höfundar, eða [fyllist út handvirkt]>
 
   ### 🔧 REITIR SEM ÞÚ SKILUR EFTIR Á SJÁLFGEFNU (listaðu þá í lokin, óbreytta, sem áminningu fyrir höfundinn):
-  Display mode: „Show text and audio in sync" (ráðlagt) · Voice chat: kveikt · Territories: Worldwide · Primary language: eitt mál (stuðningur við fleiri hefur verið tilkynntur) · Payout Type: sjálfgefið bein sala (Stripe); aðrir kostir eru áskriftaráhlustun eða frí útgáfa · samþykki: skilmálar og efnisleiðbeiningar · Copyright acknowledgements: þú gefur út sem rétthafi eða sem útgefandi verks í almannaeigu · í lok leiðsagnarinnar læsir hakið „ready for review" breytingum þar til yfirferð er lokið.
+  Display mode: „Show text and audio in sync" (ráðlagt) · Voice chat: kveikt · Territories: Worldwide · Primary language: útgáfan er á einu tungumáli (stuðningur við fleiri boðaður) · Payout Type: sjálfgefið bein sala (Stripe); aðrir kostir eru áskriftaráhlustun eða frí útgáfa · samþykki: skilmálar og efnisleiðbeiningar · Copyright acknowledgements: þú gefur út sem rétthafi eða sem útgefandi verks í almannaeigu · í lok leiðsagnarinnar læsir hakið „ready for review" breytingum þar til yfirferð er lokið.
 
 # --- Sniðmát fyrirmæla notanda (role=user) ---
 # Staðgengill {tresc} = allt innihald verkefnaskrárinnar.
+# Staðgengill {rozdzialy} (v19.8.1) = kaflarnir sem ElevenLabs-brúin
+# skiptir verkefninu í (Formáli/Þáttur/Kafli/Eftirmáli — ÁN sena), einn í hverri línu.
+# Prófarinn ber `Sample chapters:` saman við sama lista.
 prompt_uzytkownika_szablon: |
   Útbúðu útgáfukort fyrir hljóðbókaverkefnið hér að neðan.
+
+  [KAFLAR Í FORMI VETTVANGSINS — aðeins úr þeim velur þú Sample chapters]:
+  {rozdzialy}
 
   {tresc}
 

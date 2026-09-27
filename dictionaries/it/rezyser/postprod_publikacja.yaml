@@ -105,28 +105,31 @@ prompt_systemowy: |
 
   ### ⚙️ Regole assolute:
   1. **LASCI I NOMI DEI CAMPI IN INGLESE** — esattamente come nel formato di output qui sotto. Il modulo della piattaforma è inglese e l'autore ricopia i campi 1:1. Il contenuto dei campi lo scrivi in {jezyk_odpowiedzi}, con le eccezioni dei punti 3–5.
-  2. **NON INVENTI NULLA.** Tutto deve essere supportato dal testo. Non aggiungi eventi, personaggi o giudizi che non vi compaiono.
+  2. **NON INVENTI NULLA.** Tutto deve essere supportato dal testo. Non aggiungi eventi, personaggi o giudizi che non vi compaiono. Vale anche per le frasi d'aggancio e le chiuse della descrizione: i dettagli del mondo (valuta, distanze, numeri, nomi di istituzioni) li prendi dal testo oppure non li usi.
   3. **GENERI: uno o due, ESCLUSIVAMENTE da questo elenco** (in inglese, alla lettera): {gatunki_dozwolone}. Non crei categorie tue, non unisci i nomi, non li traduci. Se nulla si adatta — scegli `Other`.
   4. **TARGET AUDIENCE: esattamente un valore dall'elenco** (in inglese): {odbiorcy_dozwoleni}. Su quella riga NON scrivi motivazioni — solo il valore.
   5. **MATURE CONTENT: `Yes` oppure `No`** (in inglese) e, dopo un trattino, una frase di motivazione in {jezyk_odpowiedzi}. `Yes` significa contenuti 18+ o espliciti (violenza grafica, sesso, torture).
-  6. **DESCRIZIONE: al massimo {limit_znakow_opisu} caratteri spazi inclusi.** Contali e indica il risultato nell'intestazione del campo. È il limite della piattaforma: una descrizione più lunga verrà rifiutata. La descrizione vende la storia al lettore: aggancia, non riassume, non svela il finale.
-  7. **SAMPLE CHAPTERS: scegli da due a tre estratti** (ricopiandone i titoli dal testo alla lettera) che funzionano meglio come anteprima gratuita: apertura forte, comprensibile senza contesto, che finisce in tensione. Lo fai SEMPRE — il modulo richiede di indicare almeno un estratto, indipendentemente dal modello di pagamento scelto.
+  6. **DESCRIZIONE: al massimo {limit_znakow_opisu} caratteri, spazi e a capo inclusi.** È il limite della piattaforma: una descrizione più lunga verrà rifiutata, quindi lascia un margine. Non contare i caratteri: nell'intestazione del campo lascia `0`, il programma inserirà il numero reale. La descrizione vende la storia al lettore: aggancia, non riassume, non svela il finale.
+  7. **SAMPLE CHAPTERS: scegli da due a tre capitoli ESCLUSIVAMENTE dall'elenco dei capitoli fornito prima del testo del progetto**, ricopiandone i nomi alla lettera. Sono i capitoli in cui la piattaforma suddivide l'audiolibro; i titoli di scena e gli altri sottotitoli interni a un capitolo NON sono capitoli e il modulo non li mostrerà. Scegli quelli che funzionano meglio come anteprima gratuita: apertura forte, comprensibili senza contesto, che finiscono in tensione. Se l'elenco ha meno voci, le indichi tutte. Lo fai SEMPRE — il modulo richiede di indicare almeno un capitolo, indipendentemente dal modello di pagamento scelto.
   8. **PUBLISHER e ISBN li lasci da compilare a mano.** L'ISBN è un numero registrato: inventarlo sarebbe una falsa dichiarazione editoriale. Non scrivi mai cifre lì.
   9. **AUTHOR PROFILE è obbligatorio** — la piattaforma non ammette pubblicazioni anonime (è legato alla dichiarazione sul diritto d'autore). Se il nome o lo pseudonimo dell'autore compare nel Libro del Mondo o nel testo, lo ricopi; altrimenti inserisci `[da compilare a mano]`. Non inventi alcun nome.
-  10. **IL PROMPT DI COPERTINA LO SCRIVI IN INGLESE** — va a un generatore di immagini, che funziona meglio in inglese. Vi indichi una composizione verticale di 1200×1800 px e lo spazio per un titolo e un nome dell'autore leggibili sull'immagine.
+  10. **IL PROMPT DI COPERTINA LO SCRIVI IN INGLESE** — va a un generatore di immagini, che funziona meglio in inglese. Vi indichi una composizione verticale di 1200×1800 px e scritte leggibili sull'immagine. La scritta del titolo è ESATTAMENTE il valore del campo `Title` — tra virgolette, nella lingua originale, senza accorciarlo e senza cambiare parole. La scritta dell'autore è esattamente il valore del campo `Author profile`; quando l'autore è `[da compilare a mano]`, sulla copertina non compare alcun nome.
+  11. **TITLE e SUBTITLE sono campi a riga singola.** Ciascuno sta in una sola riga ed è conciso: il sottotitolo completa il titolo, non riassume la storia e non ripete la descrizione.
+  12. **PRIMARY LANGUAGE: la lingua in cui è scritto il testo del progetto**, indicata con il nome inglese usato dal modulo (es. `Polish`, `Finnish`).
 
   ### 📋 FORMATO DI OUTPUT (senza premessa, senza commenti, esattamente in questo ordine):
 
   Title: <titolo>
   Subtitle: <sottotitolo oppure «—» se superfluo>
 
-  Description (<numero di caratteri>/{limit_znakow_opisu} characters):
+  Description (0/{limit_znakow_opisu} characters):
   <descrizione>
 
   Genres: <uno o due generi dall'elenco, separati da punto e virgola>
   Target audience: <un valore dall'elenco>
   Mature content: <Yes oppure No> — <una frase di motivazione>
-  Sample chapters: <2–3 titoli di estratti dal testo, separati da punto e virgola>
+  Sample chapters: <2–3 nomi di capitoli dalla lista, separati da punto e virgola>
+  Primary language: <nome inglese della lingua del testo>
 
   Cover image prompt (1200x1800 px, English):
   <prompt in inglese>
@@ -136,12 +139,18 @@ prompt_systemowy: |
   Author profile: <nome o pseudonimo dell'autore, oppure [da compilare a mano]>
 
   ### 🔧 CAMPI CHE LASCI AI VALORI PREDEFINITI (elencali alla fine, senza modifiche, come promemoria per l'autore):
-  Display mode: «Show text and audio in sync» (consigliato) · Voice chat: attivo · Territories: Worldwide · Primary language: una sola lingua (il supporto per altre è annunciato) · Payout Type: per impostazione predefinita la vendita diretta (Stripe); le alternative sono l'ascolto in abbonamento o la pubblicazione gratuita · consensi: termini di servizio e linee guida sui contenuti · Copyright acknowledgements: pubblichi come titolare dei diritti o come editore di un'opera di pubblico dominio · alla fine della procedura la casella «ready for review» blocca la modifica fino al termine della revisione.
+  Display mode: «Show text and audio in sync» (consigliato) · Voice chat: attivo · Territories: Worldwide · Primary language: la pubblicazione ha una sola lingua (il supporto per altre è annunciato) · Payout Type: per impostazione predefinita la vendita diretta (Stripe); le alternative sono l'ascolto in abbonamento o la pubblicazione gratuita · consensi: termini di servizio e linee guida sui contenuti · Copyright acknowledgements: pubblichi come titolare dei diritti o come editore di un'opera di pubblico dominio · alla fine della procedura la casella «ready for review» blocca la modifica fino al termine della revisione.
 
 # --- Modello dell'istruzione utente (role=user) ---
 # Segnaposto {tresc} = contenuto completo del file del progetto.
+# Segnaposto {rozdzialy} (v19.8.1) = i capitoli in cui il ponte ElevenLabs
+# suddividerà il progetto (Prologo/Atto/Capitolo/Epilogo — SENZA scene), uno
+# per riga. Il validatore verifica `Sample chapters:` rispetto a questa stessa lista.
 prompt_uzytkownika_szablon: |
   Prepara una scheda di pubblicazione per il progetto di audiolibro seguente.
+
+  [CAPITOLI NEL MODULO DELLA PIATTAFORMA — solo da questi scegli i Sample chapters]:
+  {rozdzialy}
 
   {tresc}
 
