@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.8.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.8.2 „Wersja Wydawnicza"
+
+*Patch v19.8.2 (hotfix): ElevenReader zmienił kanon gatunków. **(1)** Z 22 pozycji znikają `Adult Romance` i `Detective and Crime`, dochodzą `Christian & Inspirational` i `Young Adult` — lista w 9 paczkach przepisana 1:1 z formularza. **(2)** Opis ma dolny próg 200 znaków (post-walidator formularza): pole `min_znakow_opisu`, reguła 6 prompta i ostrzeżenie walidatora karty. **(3)** Builder docs w trybie `--klucz` wstawia nową sekcję w miejscu z polskiego szablonu, a nie na końcu pliku. Zmiany przepisu naniesione ręcznie, bez brata `_tryby` — tryb szybkiej ścieżki.*
 
 *Patch v19.8.1: karta publikacyjna po pierwszym bojowym teście na prawdziwej sztuce. **(1)** `Sample chapters` wybiera się WYŁĄCZNIE z rozdziałów, na które podzieli projekt most ElevenLabs (lista liczona tym samym parserem i podawana modelowi jako `{rozdzialy}`), bo „Scena 1" z siedmiu aktów nie jest żadnym rozdziałem formularza. **(2)** Napis na okładce to dokładnie wartość `Title` i `Author profile` — walidator ostrzega, gdy model skróci tytuł. **(3)** Licznik znaków opisu wpisuje program (model podał 612 przy 701), a zdania-zaczepki opisu też muszą mieć pokrycie w tekście. **(4)** Nowe pole `Primary language`, jednowierszowe `Title`/`Subtitle`. **(5)** `_tryby` ostrzega, że retranslacja ISTNIEJĄCEGO przepisu przepisuje cały plik; wstrzymane dwa minorowe upgrade'y (`elevenlabs`, `markdown`).*
 
@@ -89,6 +91,51 @@
 *Release v18.8.0: owoce testu maintainera „polskie UI na fińskiej treści" (Poliglota offline) — jeden bug krytyczny plus dwa niedociągnięcia międzynarodowości. **(1) BUG KRYTYCZNY: tagi `lang` per akapit liczone na tekście JUŻ zniekształconym transformacją.** Silnik od 13.5 MA mechanizm detekcji języka per akapit wykonywanej PRZED transformacją (side-channel `opcje["_segmenty_wynikowe"]`), ale kanał był martwy od urodzenia: GUI wołało `przetworz(..., **opcje)`, Python REPAKOWAŁ kwargi do nowego słownika i mutacje silnika nigdy nie wracały do GUI — `zapisz_wynik` zawsze spadał na detekcję „na żywo" po wyniku. Dla typoglikemii na fińskim tekście lingua strzelała `lang="de"` na akapitach nagłówkowych (dowód: pochodne `explore_raport`); dla cezara fałszerstwo byłoby totalne. Ten sam martwy kanał ukrywał DWA bugi-rodzeństwo cezara z losowym przesunięciem: komunikat „wylosowano N" nigdy się nie pokazywał, a nazwa pliku traciła sufiks `±N` — czyli zaszyfrowany plik był praktycznie nieodwracalny dla usera. Fix: `przetworz` przyjmuje jawny, MUTOWALNY słownik `opcje=` (przez referencję); jeden korzeń naprawia trzy objawy. **(2) Lokalizacja sklejek nazw plików wynikowych.** Prefiksy `naprawiony_/oczyszczony_/_akcent_/_szyfr_/_tlumaczenie_/architektura_` były polskim hard-kodem — koszmar dla niepolskich syntezatorów (fińska Satu czytająca „tlumaczenie" jako [tumaksenije]). Teraz człony pochodzą z `ui.yaml` (klucze `filename_*` ×9 języków, w języku UI: fi `salaus/käännös/arkkitehtuuri`, is `dulkóðun/þýðing`, ru `шифр/перевод`…), z Unicode-safe sanityzacją i twardym fallbackiem na polskie defaulty; `id` wariantu pozostaje techniczne. Manuale zlokalizowane w ślad (przykłady `architektura_` → natywne). **(3) A11y: spin przesunięcia Cezara ukryty dla nie-cezarowych szyfrów** (NVDA nie ogłasza już martwego pola; wzorzec show/hide jak przy polu ISO naprawiacza). **(4) Dokumentacja user-facing przechodzi z .txt na HTML renderowany z Markdownu.** Szablony `dokumentacja/*.yaml` są od teraz pisane w MD (mechaniczna migracja: nagłówki `#`/`##` per sekcja + backticki wokół `<placeholderów>` ×9 języków, z autotestem integralności treści), a `generuj_dokumentacje.py` renderuje `docs/<id>.<iso>.html` (biblioteka `markdown`, nl2br + sane_lists) z pełnym dokumentem HTML5: `<html lang="<iso>">` przełącza syntezator czytnika ekranu na język treści, nagłówki dają nawigację klawiszami 1-6/h w NVDA, a minimalny CSS (z trybem ciemnym) czyta się dobrze też wzrokiem — koniec „obleśnego" gołego .txt w Notatniku. README bez zmian (surowy MD dla GitHuba). Menu Pomoc, `installer.iss` (checkbox „otwórz manual" + sprzątanie osieroconych `docs\*.txt` przy upgrade) i `build_release` przepięte; nowa bramka RAW-HTML w `--waliduj` pilnuje, żeby żaden surowy `<fragment>` z szablonu nie został połknięty przez przeglądarkę. Przy okazji naprawione martwe odwołanie w 9 manualach: przewodnik Opowieści to `tales.<iso>.html`, nie `opowiesci.pl.txt`/`tarinat.fi.txt`/`recits.fr.txt` (plik o tych nazwach nigdy nie istniał).*
 
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
+
+---
+
+## 19.8.2 — patch release
+
+### What's new
+
+**The publication card follows ElevenReader's new genre list.** The platform
+changed its genre canon: `Adult Romance` and `Detective and Crime` are gone,
+`Christian & Inspirational` and `Young Adult` are new, and the list still has
+22 entries. The card's allowed genres were copied from the live form in all nine
+packs, so the model is no longer offered two genres the form would reject, and
+the validator warns about them if they come back.
+
+**The description has a minimum length too.** The form shows a red message
+under a description shorter than 200 characters. The recipe now carries
+`min_znakow_opisu: 200` next to the existing 1000-character limit, the prompt
+asks for a description between the two, and the card's soft validator warns
+when a description falls short.
+
+**For contributors:** `buduj_wielojezyczne_docs.py -k <key>` used to append a
+newly added section at the END of every foreign manual, because the merge was a
+plain dictionary update. It now follows the section order of the Polish
+template; a key that exists only in the target file is kept, at the end. The old
+behaviour left `manual.yaml` and `readme.yaml` out of order in all eight foreign
+packs, so the next `-k` run on either file reorders it in full — a large but
+intended diff.
+
+This is a hotfix, so the recipe change was made by hand in the nine packs (one
+sentence of the prompt plus one field) instead of through
+`buduj_wielojezyczne_tryby.py`, which rewrites the whole file on an existing
+recipe.
+
+### Planned or deferred
+
+- Lighter modes for the auto-translator family. `buduj_wielojezyczne_opowiesci.py`
+  already has `--fiolka`; the others need their own light paths:
+  `buduj_wielojezyczne_tryby.py` should be able to swap technical values (genres,
+  audiences, limits) or re-translate a single sentence without rewriting the
+  recipe; `buduj_wielojezyczne_poliglota.py` has candidates for lighter modes as
+  well. `buduj_wielojezyczne_akcenty.py` stays one piece, because accent pairs are
+  not derived from one source; a light mode there is only possible after someone
+  tunes the pre-pass.
+- `elevenlabs` 2.69.0 and `markdown` 3.11 are still held one step below
+  (`elevenlabs<2.69`, `markdown<3.11`); see 19.8.1.
 
 ---
 

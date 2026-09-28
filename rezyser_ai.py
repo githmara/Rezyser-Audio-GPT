@@ -1740,7 +1740,12 @@ def waliduj_karte_publikacji(
 
     if przepis.limit_znakow_opisu or przepis.min_znakow_opisu:
         opis = _blok_opisu(tekst)
-        if przepis.limit_znakow_opisu and len(opis) > przepis.limit_znakow_opisu:
+        # Brak nagłówka pola to BRAK POLA, nie opis na 0 znaków — dolny próg
+        # (v19.8.2) mówiłby wtedy „rozwiń opis", którego karta w ogóle nie ma.
+        if not any(_RE_NAGLOWEK_OPISU.match(l) for l in tekst.splitlines()):
+            ostrzezenia.append(i18n.t(
+                "rezyser.publikacja_ostrz_brak_pola", pole=KOTWICA_OPIS))
+        elif przepis.limit_znakow_opisu and len(opis) > przepis.limit_znakow_opisu:
             ostrzezenia.append(i18n.t(
                 "rezyser.publikacja_ostrz_opis",
                 znaki=len(opis), limit=przepis.limit_znakow_opisu,
@@ -1940,7 +1945,7 @@ def wykonaj_postprodukcje_calosc(
     # v18.14: miękka walidacja karty publikacyjnej. No-op dla narzędzi bez
     # zamkniętych zbiorów wartości (raport, audyt) — patrz
     # `waliduj_karte_publikacji`.
-    if przepis.limit_znakow_opisu:
+    if przepis.limit_znakow_opisu or przepis.min_znakow_opisu:
         tekst = _popraw_licznik_opisu(tekst)
     uwagi = waliduj_karte_publikacji(przepis, tekst, rozdzialy)
     if uwagi:

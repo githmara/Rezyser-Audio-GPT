@@ -124,6 +124,13 @@ def test_opis_ponizej_minimum_daje_ostrzezenie(przepis):
     assert len(uwagi) == 1 and "15" in uwagi[0] and "200" in uwagi[0]
 
 
+def test_brak_pola_opisu_to_brak_pola_nie_zero_znakow(przepis):
+    karta = _karta().replace("Description (12/1000 characters):\n" + OPIS, "")
+    uwagi = rai.waliduj_karte_publikacji(przepis, karta, ROZDZIALY)
+    assert len(uwagi) == 1 and rai.KOTWICA_OPIS in uwagi[0]
+    assert "200" not in uwagi[0]
+
+
 def test_opis_na_granicach_nie_daje_ostrzezenia(przepis):
     for dlugosc in (przepis.min_znakow_opisu, przepis.limit_znakow_opisu):
         karta = _karta().replace(OPIS, "x" * dlugosc)
