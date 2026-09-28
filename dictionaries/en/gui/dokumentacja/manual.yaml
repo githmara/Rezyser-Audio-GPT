@@ -299,6 +299,14 @@ tresc:
     Once generated, the application checks the card on its own side: whether the description fits the limit, whether the genres and target audience come from the platform's list, whether the required fields are filled in, and whether digits have appeared in the ISBN field. Discrepancies are shown as soft notes — you get the whole result and decide yourself what to fix. This guards against the case where the model invents a non-existent category and the form rejects it only at the very end of the wizard.
 
     **Note:** Post-production tools require that the project file already be saved to disk (either generated or loaded). If the file doesn't exist, the application will display an appropriate message.
+  krok_4b_karta_publikacji_proba: |
+    ### Publication card: sample, cover and character count (since v19.8.1)
+
+    For the free sample the card names only the CHAPTERS the ElevenLabs bridge will split your project into: Prologue, Act, Chapter, Epilogue. The application computes that list with the same parser the bridge uses and hands it to the model. Scene headings are only subheadings inside a chapter and the platform's form will not show them — in a play with seven acts, "Scene 1" appears seven times.
+
+    The lettering on the cover must be exactly the title from the `Title` field and the name from the `Author profile` field, not shortened. The character count in the description header is filled in by the application, not by the model, because the model cannot count it reliably. Spaces and line breaks count towards the limit: the form's description field is multi-line. The card also gives the `Primary language` field — the English name of the text's language, as on the form's list.
+
+    The application-side check also warns when the sample names something outside the chapter list, when the cover prompt lacks the title or the author's name, and when the card has no `Title` field.
   krok_5_poliglota_intro: |
     ## STEP 5: AI Polyglot
 

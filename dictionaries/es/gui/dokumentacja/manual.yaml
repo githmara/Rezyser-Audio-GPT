@@ -299,6 +299,14 @@ tresc:
     Tras generarla, la aplicación revisa la ficha por su parte: si la descripción cabe en el límite, si los géneros y el público provienen de la lista de la plataforma, si están rellenados los campos obligatorios y si han aparecido cifras en el campo ISBN. Las discrepancias las muestra como avisos suaves — recibes el resultado completo y decides tú qué corregir. Es una protección frente al caso en que el modelo invente una categoría inexistente y el formulario la rechace solo al final del asistente.
 
     **Atención:** Las herramientas de postproducción requieren que el archivo del proyecto ya esté guardado en el disco (generado o cargado). Si el archivo no existe, la aplicación mostrará el mensaje correspondiente.
+  krok_4b_karta_publikacji_proba: |
+    ### Ficha de publicación: muestra, portada y contador de caracteres (desde v19.8.1)
+
+    Para la muestra gratuita, la ficha indica exclusivamente los CAPÍTULOS en los que el puente de ElevenLabs dividirá tu proyecto: Prólogo, Acto, Capítulo, Epílogo. La aplicación calcula esta lista con el mismo analizador que el puente y se la proporciona al modelo. Los encabezados de escena son solo subtítulos dentro del capítulo y el formulario de la plataforma no los mostrará; en una obra de siete actos, "Escena 1" aparece siete veces.
+
+    El texto de la portada debe ser exactamente el título del campo `Title` y el nombre del campo `Author profile`, sin abreviar. El número de caracteres en el encabezado de la descripción lo introduce la aplicación, no el modelo, porque el modelo no puede contar ese número de forma fiable. En el límite se cuentan los espacios y los saltos de línea: el campo de descripción del formulario es de varias líneas. La ficha también indica el campo `Primary language`: el nombre en inglés del idioma del texto, tal como aparece en la lista del formulario.
+
+    El control por parte de la aplicación además advierte cuando la muestra indica algo que no está en la lista de capítulos, cuando en el prompt de la portada falta el título o el nombre del autor, y cuando la ficha no tiene el campo `Title`.
   krok_5_poliglota_intro: |
     ## PASO 5: Políglota AI
 

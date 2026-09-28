@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Guide complet (Version 19.8.0 – Version de Lancement)</title>
+<title>Reżyser Audio GPT — Guide complet (Version 19.8.1 – Version de Lancement)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Guide complet (Version 19.8.0 – Version de Lancement)</h1>
+<h1>Reżyser Audio GPT — Guide complet (Version 19.8.1 – Version de Lancement)</h1>
 <p>Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).</p>
 <p>L'ensemble se compose du studio principal (Réalisation), de l'outil de traduction et d'accents (Polyglotte), de l'outil de construction de structure de fichier (Architecte de Livres Audio), du Gestionnaire de Règles (à partir de la version 13.0 — sans Python, vous pouvez ajouter un nouvel accent, un chiffre ou un mode créatif, voir ÉTAPE 7b ci-dessous) et — à partir de la version 15.0 — du module Histoires (fiction interactive à la deuxième personne générée par IA, lue par TTS ou lecteur d'écran, décrite dans le manuel séparé tales.fr.html). Les cinq outils sont disponibles dans une seule fenêtre de programme, commutable par des boutons sur la barre ou par des raccourcis clavier Ctrl+1..Ctrl+5.</p>
 <h2>ÉTAPE 1 : Première exécution (Cross-Platform)</h2>
@@ -195,6 +195,10 @@ Dans les versions antérieures de l'application, personne ne veillait à la coh�
 <p>Ce que la fiche ne fera pas à votre place : elle n'invente ni l'éditeur ni le numéro ISBN — elle les laisse comme champs à remplir à la main (l'ISBN est un numéro enregistré, et une hallucination serait ici une fausse déclaration éditoriale). Un profil d'auteur est obligatoire sur ElevenReader, car les publications anonymes ne sont pas autorisées et cela va de pair avec la déclaration de droits d'auteur — l'outil recopiera donc le nom ou le pseudonyme depuis le Livre du Monde, et s'il n'en trouve aucun, insérera un champ à remplir. Il choisit TOUJOURS les extraits d'aperçu, car le formulaire en exige au moins un, quel que soit le modèle de rémunération que vous choisirez plus tard.</p>
 <p>Après la génération, l'application vérifie la fiche de son côté : si la description tient dans la limite, si les genres et le public proviennent de la liste de la plateforme, si les champs obligatoires sont remplis et si des chiffres sont apparus dans le champ ISBN. Elle affiche les écarts comme des remarques souples — vous recevez le résultat en entier et décidez vous-même quoi corriger. C'est une protection contre le cas où le modèle inventerait une catégorie inexistante que le formulaire ne rejetterait qu'à la fin de l'assistant.</p>
 <p><strong>Remarque :</strong> Les outils de postproduction exigent que le fichier de projet soit déjà enregistré sur le disque (généré ou chargé). Si le fichier n'existe pas, l'application affichera un message approprié.</p>
+<h3>Fiche de publication : échantillon, couverture et compteur de caractères (depuis la v19.8.1)</h3>
+<p>Pour l'échantillon gratuit, la fiche indique exclusivement les CHAPITRES que le pont ElevenLabs utilisera pour diviser votre projet : Prologue, Acte, Chapitre, Épilogue. L'application établit cette liste à l'aide du même analyseur que le pont, puis la transmet au modèle. Les en-têtes de scènes ne sont que des intertitres à l'intérieur d'un chapitre, et le formulaire de la plateforme ne les affichera pas — dans une pièce comportant sept actes, « Scène 1 » apparaîtra sept fois.</p>
+<p>Le texte de la couverture doit reprendre exactement le titre du champ <code>Title</code> et le nom figurant dans le champ <code>Author profile</code>, sans les abréger. Le nombre de caractères dans l'en-tête de la description est calculé par l'application, non par le modèle, car ce dernier ne saurait le compter de façon fiable. Les espaces et les retours à la ligne entrent dans le calcul de la limite : le champ description du formulaire est multiligne. La fiche indique également le champ <code>Primary language</code> — le nom de la langue du texte en anglais, tel qu'il apparaît dans la liste du formulaire.</p>
+<p>Le contrôle effectué côté application émet en outre un avertissement lorsque l'échantillon désigne un élément absent de la liste des chapitres, lorsque le titre ou le nom de l'auteur manque dans le prompt de couverture, ou lorsque la fiche ne comporte pas de champ <code>Title</code>.</p>
 <h2>ÉTAPE 5 : Polyglotte AI</h2>
 <p>Application dédiée à la traduction et à l'imposition d'accents forcés sur les synthétiseurs des lecteurs d'écran. Accédez-y en cliquant sur le bouton "🌍  Polyglotte" dans la barre de boutons ou en sélectionnant Outils → Polyglotte dans le menu (raccourci : Ctrl+2).</p>
 <h3>Mode 1 : Traducteur classique (Utilise l'IA - Payant)</h3>

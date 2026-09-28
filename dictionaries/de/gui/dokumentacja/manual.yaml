@@ -299,6 +299,14 @@ tresc:
     Nach dem Erzeugen prüft die Anwendung die Karte auf ihrer Seite: ob die Beschreibung im Limit liegt, ob Genres und Zielgruppe aus der Liste der Plattform stammen, ob die erforderlichen Felder ausgefüllt sind und ob im ISBN-Feld Ziffern aufgetaucht sind. Abweichungen zeigt sie als sanfte Hinweise — du bekommst das Ergebnis vollständig und entscheidest selbst, was du korrigierst. Das schützt vor dem Fall, dass das Modell eine nicht existierende Kategorie erfindet und das Formular sie erst am Ende des Assistenten zurückweist.
 
     **Hinweis:** Postproduktions-Werkzeuge setzen voraus, dass die Projektdatei bereits auf der Festplatte gespeichert ist (generiert oder geladen). Existiert die Datei nicht, zeigt die Anwendung eine entsprechende Meldung an.
+  krok_4b_karta_publikacji_proba: |
+    ### Veröffentlichungskarte: Leseprobe, Cover und Zeichenzähler (ab v19.8.1)
+
+    Für die kostenlose Leseprobe zeigt die Karte ausschließlich die KAPITEL an, in die die ElevenLabs-Brücke Ihr Projekt aufteilen wird: Prolog, Akt, Kapitel, Epilog. Die Anwendung ermittelt diese Liste mit demselben Parser wie die Brücke und übergibt sie dem Modell. Szenenüberschriften sind lediglich Zwischentitel innerhalb eines Kapitels, und das Formular der Plattform zeigt sie nicht an — in einem Theaterstück mit sieben Akten kommt „Szene 1" siebenmal vor.
+
+    Der Cover-Text soll exakt dem Titel aus dem Feld `Title` und dem Namen aus dem Feld `Author profile` entsprechen, ohne Kürzungen. Die Zeichenzahl in der Überschrift der Beschreibung trägt die Anwendung ein, nicht das Modell, da das Modell diese Zahl nicht zuverlässig berechnen kann. In das Limit zählen auch Leerzeichen und Zeilenumbrüche: Das Beschreibungsfeld im Formular ist mehrzeilig. Die Karte enthält außerdem das Feld `Primary language` — die englische Bezeichnung der Textsprache, so wie sie in der Liste des Formulars erscheint.
+
+    Die anwendungsseitige Kontrolle warnt zusätzlich, wenn die Leseprobe auf etwas außerhalb der Kapitelliste verweist, wenn im Cover-Prompt der Titel oder der Name des Autors fehlt und wenn der Karte das Feld `Title` fehlt.
   krok_5_poliglota_intro: |
     ## SCHRITT 5: Polyglott AI
 

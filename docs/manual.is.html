@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 19.8.0 – Fullbúin útgáfa)</title>
+<title>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 19.8.1 – Fullbúin útgáfa)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 19.8.0 – Fullbúin útgáfa)</h1>
+<h1>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 19.8.1 – Fullbúin útgáfa)</h1>
 <p>Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).</p>
 <p>Verkfærakistan samanstendur af aðalstúdíóinu (Leikstjórn), þýðinga- og hreimaverkfærinu (Tungumálamaður), skráarbyggingarverkfærinu (Hljóðbókararkitekt), Reglustjóra (frá útgáfu 13.0 — án Python geturðu bætt við nýjum hreim, dulmáli eða sköpunarham, sjá SKREF 7b hér að neðan) og — frá útgáfu 15.0 — Sögueiningunni (gervigreindarframleiddur gagnvirkur skáldskapur í annarri persónu, lesin af TTS eða skjálesara, lýst í sérstöku handriti tales.is.html). Öll fimm verkfærin eru aðgengileg í einum forritsglugga, skipt á milli með hnöppum á stikunni eða með lyklaborðssamsetningum Ctrl+1..Ctrl+5.</p>
 <h2>SKREF 1: Fyrsta gangsetning (Cross-Platform)</h2>
@@ -195,6 +195,10 @@ code { font-family: ui-monospace, Consolas, monospace; }
 <p>Hvað kortið gerir ekki fyrir þig: það býr hvorki til útgefanda né ISBN-númer — skilur þau eftir sem reiti til handvirkrar útfyllingar (ISBN er skráð númer og ranghugsun hér væri fölsk útgáfuyfirlýsing). Höfundarprófíll er skylda á ElevenReader, því nafnlausar útgáfur eru ekki leyfðar og það hangir saman við yfirlýsingu um höfundarrétt — verkfærið afritar því nafn eða höfundarnafn úr Heimsbókinni, og finni það ekkert þar, setur það reit til útfyllingar. Sýnishornsbrotin velur það ALLTAF, því formið krefst að minnsta kosti eins, óháð greiðslufyrirkomulaginu sem þú velur síðar.</p>
 <p>Eftir að kortið er búið til athugar forritið það sín vegna: hvort lýsingin er innan hámarks, hvort flokkar og markhópur koma af lista vettvangsins, hvort skyldureitir eru útfylltir og hvort tölur hafi birst í ISBN-reitnum. Frávik birtir það sem mildar athugasemdir — þú fær útkomuna í heild og ákveður sjálf/ur hverju þú breytir. Þetta er vörn gegn því að líkanið búi til flokk sem er ekki til og formið hafni honum aðeins í lok leiðsagnarinnar.</p>
 <p><strong>Athugið:</strong> Eftirvinnslutæki krefjast þess að verkefnisskráin sé þegar vistuð á diski (búin til eða hlaðin inn). Ef skráin er ekki til, birtir forritið viðeigandi skilaboð.</p>
+<h3>Útgáfukort: sýnishorn, kápa og staftalning (frá v19.8.1)</h3>
+<p>Fyrir ókeypis sýnishornið vísar kortið eingöngu á KAFLA sem ElevenLabs-brúin mun skipta verkefninu þínu í: Formáli, Þáttur, Kafli, Eftirmáli. Forritið reiknar þennan lista með sömu greiningaraðferð og brúin og gefur hann áfram til líkansins. Atriðatitlar eru einungis millifyrirsagnir innan kafla og eyðublað kerfisins sýnir þá ekki — í leikriti með sjö þáttum kemur „Atriði 1" fyrir sjö sinnum.</p>
+<p>Áletrunin á kápunni á að vera nákvæmlega titillinn úr reitnum <code>Title</code> og höfundarnafnið úr reitnum <code>Author profile</code>, án styttinga. Forritið sjálft, ekki líkanið, fyllir út staftöluna í fyrirsögn lýsingarinnar, því líkanið getur ekki reiknað þá tölu með áreiðanlegum hætti. Bil og línuskil teljast með í hámarkinu: lýsingarreiturinn í eyðublaðinu er fjöllínu. Kortið gefur einnig upp reitinn <code>Primary language</code> — enskt heiti tungumáls textans, nákvæmlega eins og það birtist á lista eyðublaðsins.</p>
+<p>Eftirlitið í forritinu varar að auki við þegar sýnishornið vísar á eitthvað utan kaflalistans, þegar titil eða höfundarnafn vantar í kápuskipunina (prompt), og þegar kortið hefur engan <code>Title</code>-reit.</p>
 <h2>SKREF 5: Tungumálamaður AI</h2>
 <p>Forrit til að þýða og þvinga fram harða hreima í talgervlum skjálesara. Farðu í það með því að smella á hnappinn „🌍  Tungumálamaður" á hnappastikunni eða velja Verkfæri → Tungumálamaður úr valmyndinni (flýtileið: Ctrl+2).</p>
 <h3>Hamur 1: Venjulegur þýðandi (Notar gervigreind - Greitt)</h3>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Komplettanleitung (Version 19.8.0 – Release-Version)</title>
+<title>Reżyser Audio GPT — Komplettanleitung (Version 19.8.1 – Release-Version)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Komplettanleitung (Version 19.8.0 – Release-Version)</h1>
+<h1>Reżyser Audio GPT — Komplettanleitung (Version 19.8.1 – Release-Version)</h1>
 <p>Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.</p>
 <p>Das Set besteht aus dem Hauptstudio (Regie), einem Übersetzungs- und Akzentwerkzeug (Polyglott), einem Werkzeug zum Erstellen der Dateistruktur (Hörbucharchitekt), einem Regelmanager (ab Version 13.0 — ohne Python kannst du einen neuen Akzent, ein Chiffre oder einen kreativen Modus hinzufügen, siehe SCHRITT 7b unten) und — ab Version 15.0 — einem Geschichtenmodul (interaktive, zweite Person AI-generierte Fiktion, gelesen von TTS oder Screenreader, beschrieben in einem separaten Handbuch tales.de.html). Alle fünf Werkzeuge sind in einem Programmfenster verfügbar, das über Schaltflächen in der Leiste oder Tastenkombinationen Ctrl+1..Ctrl+5 umgeschaltet werden kann.</p>
 <h2>SCHRITT 1: Erste Ausführung (Cross-Platform)</h2>
@@ -195,6 +195,10 @@ In früheren Versionen der Anwendung wurde die Konsistenz des kreativen Modus in
 <p>Was die Karte nicht für dich tut: Sie erfindet weder einen Verlag noch eine ISBN — sie lässt beides als manuell auszufüllende Felder offen (eine ISBN ist eine registrierte Nummer, eine Halluzination wäre hier eine falsche verlegerische Erklärung). Ein Autorenprofil ist auf ElevenReader verpflichtend, weil anonyme Veröffentlichungen nicht erlaubt sind und es mit der Urheberrechtserklärung zusammenhängt — das Werkzeug übernimmt daher den Namen oder das Pseudonym aus dem Weltenbuch, und findet es dort keines, setzt es ein auszufüllendes Feld ein. Die Vorschau-Auszüge wählt es IMMER, denn das Formular verlangt mindestens einen, unabhängig vom später gewählten Auszahlungsmodell.</p>
 <p>Nach dem Erzeugen prüft die Anwendung die Karte auf ihrer Seite: ob die Beschreibung im Limit liegt, ob Genres und Zielgruppe aus der Liste der Plattform stammen, ob die erforderlichen Felder ausgefüllt sind und ob im ISBN-Feld Ziffern aufgetaucht sind. Abweichungen zeigt sie als sanfte Hinweise — du bekommst das Ergebnis vollständig und entscheidest selbst, was du korrigierst. Das schützt vor dem Fall, dass das Modell eine nicht existierende Kategorie erfindet und das Formular sie erst am Ende des Assistenten zurückweist.</p>
 <p><strong>Hinweis:</strong> Postproduktions-Werkzeuge setzen voraus, dass die Projektdatei bereits auf der Festplatte gespeichert ist (generiert oder geladen). Existiert die Datei nicht, zeigt die Anwendung eine entsprechende Meldung an.</p>
+<h3>Veröffentlichungskarte: Leseprobe, Cover und Zeichenzähler (ab v19.8.1)</h3>
+<p>Für die kostenlose Leseprobe zeigt die Karte ausschließlich die KAPITEL an, in die die ElevenLabs-Brücke Ihr Projekt aufteilen wird: Prolog, Akt, Kapitel, Epilog. Die Anwendung ermittelt diese Liste mit demselben Parser wie die Brücke und übergibt sie dem Modell. Szenenüberschriften sind lediglich Zwischentitel innerhalb eines Kapitels, und das Formular der Plattform zeigt sie nicht an — in einem Theaterstück mit sieben Akten kommt „Szene 1" siebenmal vor.</p>
+<p>Der Cover-Text soll exakt dem Titel aus dem Feld <code>Title</code> und dem Namen aus dem Feld <code>Author profile</code> entsprechen, ohne Kürzungen. Die Zeichenzahl in der Überschrift der Beschreibung trägt die Anwendung ein, nicht das Modell, da das Modell diese Zahl nicht zuverlässig berechnen kann. In das Limit zählen auch Leerzeichen und Zeilenumbrüche: Das Beschreibungsfeld im Formular ist mehrzeilig. Die Karte enthält außerdem das Feld <code>Primary language</code> — die englische Bezeichnung der Textsprache, so wie sie in der Liste des Formulars erscheint.</p>
+<p>Die anwendungsseitige Kontrolle warnt zusätzlich, wenn die Leseprobe auf etwas außerhalb der Kapitelliste verweist, wenn im Cover-Prompt der Titel oder der Name des Autors fehlt und wenn der Karte das Feld <code>Title</code> fehlt.</p>
 <h2>SCHRITT 5: Polyglott AI</h2>
 <p>Eine Anwendung zum Übersetzen und zum Erzwingen harter Akzente in den Synthesizern von Bildschirmleseprogrammen. Rufen Sie sie auf, indem Sie auf die Schaltfläche "🌍  Polyglott" in der Symbolleiste klicken oder Werkzeuge → Polyglott aus dem Menü wählen (Tastenkombination: Strg+2).</p>
 <h3>Modus 1: Normaler Übersetzer (Nutzt KI - Kostenpflichtig)</h3>

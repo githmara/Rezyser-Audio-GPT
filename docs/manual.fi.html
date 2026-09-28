@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Täydellinen opas (Versio 19.8.0 – Julkaisuversio)</title>
+<title>Reżyser Audio GPT — Täydellinen opas (Versio 19.8.1 – Julkaisuversio)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Täydellinen opas (Versio 19.8.0 – Julkaisuversio)</h1>
+<h1>Reżyser Audio GPT — Täydellinen opas (Versio 19.8.1 – Julkaisuversio)</h1>
 <p>Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.</p>
 <p>Paketti koostuu päästudiosta (Ohjaus), käännös- ja aksenttityökalusta (Polyglootti), tiedostorakenteen rakennustyökalusta (Äänikirja-arkkitehti), Sääntöjen Hallinnasta (versiosta 13.0 alkaen — ilman Pythonia voit lisätä uuden aksentin, salauksen tai luovan tilan, katso KOHTA 7b alla) sekä — versiosta 15.0 alkaen — Tarinamoduulista (interaktiivinen toisen persoonan fiktio, jonka AI tuottaa ja TTS tai ruudunlukija lukee, kuvattu erillisessä oppaassa tales.fi.html). Kaikki viisi työkalua ovat saatavilla yhdessä ohjelmaikkunassa, ja niitä voi vaihtaa painikkeilla tai pikanäppäimillä Ctrl+1..Ctrl+5.</p>
 <h2>VAIHE 1: Ensimmäinen käynnistys (Cross-Platform)</h2>
@@ -195,6 +195,10 @@ Sovelluksen aiemmissa versioissa kukaan ei valvonut luovan tilan johdonmukaisuut
 <p>Mitä kortti ei tee puolestasi: se ei keksi kustantajaa eikä ISBN-numeroa — jättää ne käsin täytettäviksi kentiksi (ISBN on rekisteröity numero, ja hallusinaatio olisi tässä väärä kustannusilmoitus). Kirjoittajaprofiili on ElevenReaderissa pakollinen, koska nimettömät julkaisut eivät ole sallittuja ja se liittyy tekijänoikeusvakuutukseen — työkalu kopioi siis nimen tai taiteilijanimen Maailmankirjasta, ja jos ei löydä sitä sieltä, lisää täytettävän kentän. Esikatselukatkelmat se valitsee AINA, koska lomake vaatii vähintään yhden riippumatta myöhemmin valitsemastasi maksumallista.</p>
 <p>Luomisen jälkeen sovellus tarkistaa kortin omalta osaltaan: mahtuuko kuvaus rajaan, tulevatko lajityypit ja kohderyhmä alustan listalta, ovatko pakolliset kentät täytetty ja onko ISBN-kenttään ilmestynyt numeroita. Poikkeamat se näyttää pehmeinä huomioina — saat tuloksen kokonaisuudessaan ja päätät itse, mitä korjaat. Tämä suojaa tilanteelta, jossa malli keksii olemattoman kategorian ja lomake hylkää sen vasta ohjatun toiminnon lopussa.</p>
 <p><strong>Huomio:</strong> Jälkituotantotyökalut vaativat, että projektitiedosto on jo tallennettu levylle (luotu tai ladattu). Jos tiedostoa ei ole olemassa, sovellus näyttää asianmukaisen ilmoituksen.</p>
+<h3>Julkaisukortti: näyte, kansi ja merkkilaskuri (versiosta 19.8.1)</h3>
+<p>Ilmaisessa näytteessä kortti osoittaa yksinomaan LUVUT, joihin ElevenLabs-silta jakaa projektisi: Prologi, Näytös, Luku, Epilogi. Sovellus laskee tämän listan samalla jäsentäjällä kuin silta ja välittää sen mallille. Kohtausten otsikot ovat vain luvun sisäisiä väliotsikoita, eikä alustan lomake näytä niitä — seitsemännäytöksisessä näytelmässä "Kohtaus 1" esiintyy seitsemän kertaa.</p>
+<p>Kannen tekstin on oltava täsmälleen <code>Title</code>-kentän mukainen otsikko ja <code>Author profile</code>-kentän mukainen kirjailijan nimi, ilman lyhentämistä. Merkkien lukumäärän kuvauksen otsikossa kirjoittaa sovellus, ei malli, koska malli ei laske tätä lukumäärää luotettavasti. Rajaan lasketaan mukaan välilyönnit ja rivinvaihtomerkit: lomakkeen kuvauskenttä on monirivinen. Kortti sisältää myös <code>Primary language</code>-kentän — tekstin kielen englanninkielisen nimen, samoin kuin lomakkeen listalla.</p>
+<p>Sovelluksen puoleinen tarkistus varoittaa lisäksi, kun näyte osoittaa johonkin lukujen listan ulkopuoliseen kohteeseen, kun kannen promptista puuttuu otsikko tai kirjailijan nimi, sekä kun kortilta puuttuu <code>Title</code>-kenttä.</p>
 <h2>VAIHE 5: Polyglootti AI</h2>
 <p>Sovellus tekstin kääntämiseen ja pakotettujen aksenttien luomiseen ruudunlukuohjelmien syntetisaattoreissa. Siirry siihen napsauttamalla painiketta "🌍  Polyglootti" painikepalkissa tai valitsemalla Työkalut → Polyglootti valikosta (pikanäppäin: Ctrl+2).</p>
 <h3>Tila 1: Tavallinen Kääntäjä (Käyttää tekoälyä - Maksullinen)</h3>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.8.0 – Wersja Wydawnicza)</title>
+<title>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.8.1 – Wersja Wydawnicza)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.8.0 – Wersja Wydawnicza)</h1>
+<h1>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.8.1 – Wersja Wydawnicza)</h1>
 <p>Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).</p>
 <p>Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota), narzędzia do budowania struktury pliku (Architekt Audiobooków), Managera Reguł (od wersji 13.0 — bez Pythona dodasz nowy akcent, szyfr lub tryb twórczy, patrz KROK 7b poniżej) oraz — od wersji 15.0 — modułu Opowieści (interaktywna fikcja drugoosobowa generowana przez AI, czytana przez TTS lub czytnik ekranu, opisana osobnym manualem tales.pl.html). Wszystkie pięć narzędzi dostępnych jest w jednym oknie programu, przełączanym przyciskami na pasku lub skrótami klawiaturowymi Ctrl+1..Ctrl+5.</p>
 <h2>KROK 1: Pierwsze uruchomienie (Cross-Platform)</h2>
@@ -204,6 +204,10 @@ W wersjach wcześniejszych aplikacji nikt nie pilnował spójności trybu twórc
 <p>Czego karta nie zrobi za Ciebie: wydawcy ani numeru ISBN nie zmyśla — zostawia je jako pola do uzupełnienia ręcznego (ISBN to numer rejestrowany, halucynacja byłaby tu fałszywym oświadczeniem wydawniczym). Profil autora jest na ElevenReaderze obowiązkowy, bo publikacje anonimowe są niedozwolone i wiążą się z oświadczeniem o prawach autorskich — narzędzie przepisze więc imię lub pseudonim z Księgi Świata, a gdy go tam nie znajdzie, wstawi pole do uzupełnienia. Fragmenty na próbkę typuje ZAWSZE, bo formularz wymaga wskazania co najmniej jednego, niezależnie od modelu płatności wybranego później.</p>
 <p>Po wygenerowaniu aplikacja sprawdza kartę po swojej stronie: czy opis mieści się w limicie, czy gatunki i grupa odbiorców pochodzą z listy platformy, czy wypełnione są pola wymagane i czy w polu ISBN nie pojawiły się cyfry. Rozbieżności pokazuje jako miękkie uwagi — wynik dostajesz w całości i sam decydujesz, co poprawić. To zabezpieczenie przed sytuacją, w której model wymyśli nieistniejącą kategorię, a formularz odrzuci ją dopiero na końcu kreatora.</p>
 <p><strong>Uwaga:</strong> Narzędzia postprodukcyjne wymagają, by plik projektu był już zapisany na dysku (wygenerowany lub wczytany). Jeśli plik nie istnieje, aplikacja wyświetli stosowny komunikat.</p>
+<h3>Karta publikacyjna: próbka, okładka i licznik znaków (od v19.8.1)</h3>
+<p>Na darmową próbkę karta wskazuje wyłącznie ROZDZIAŁY, na które most ElevenLabs podzieli Twój projekt: Prolog, Akt, Rozdział, Epilog. Aplikacja wylicza tę listę tym samym parserem co most i podaje ją modelowi. Nagłówki scen są tylko śródtytułami wewnątrz rozdziału i formularz platformy ich nie pokaże — w sztuce z siedmioma aktami „Scena 1" występuje siedem razy.</p>
+<p>Napis na okładce ma być dokładnie tytułem z pola <code>Title</code> i nazwiskiem z pola <code>Author profile</code>, bez skracania. Liczbę znaków w nagłówku opisu wpisuje aplikacja, nie model, bo model tej liczby nie policzy wiarygodnie. Do limitu liczą się spacje i znaki nowej linii: pole opisu w formularzu jest wielowierszowe. Karta podaje też pole <code>Primary language</code> — angielską nazwę języka tekstu, tak jak na liście formularza.</p>
+<p>Kontrola po stronie aplikacji ostrzega dodatkowo, gdy próbka wskazuje coś spoza listy rozdziałów, gdy w prompcie okładki brakuje tytułu albo nazwiska autora oraz gdy karta nie ma pola <code>Title</code>.</p>
 <h2>KROK 5: Poliglota AI</h2>
 <p>Aplikacja do tłumaczeń i wymuszania twardych akcentów na syntezatorach czytników ekranu. Przejdź do niej, klikając przycisk "🌍  Poliglota" na pasku przycisków lub wybierając Narzędzia → Poliglota z menu (skrót: Ctrl+2).</p>
 <h3>Tryb 1: Zwykły Tłumacz (Używa AI - Płatny)</h3>

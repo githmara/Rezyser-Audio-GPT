@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 19.8.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 19.8.1 „Wersja Wydawnicza"
+
+*Patch v19.8.1: karta publikacyjna po pierwszym bojowym teście na prawdziwej sztuce. **(1)** `Sample chapters` wybiera się WYŁĄCZNIE z rozdziałów, na które podzieli projekt most ElevenLabs (lista liczona tym samym parserem i podawana modelowi jako `{rozdzialy}`), bo „Scena 1" z siedmiu aktów nie jest żadnym rozdziałem formularza. **(2)** Napis na okładce to dokładnie wartość `Title` i `Author profile` — walidator ostrzega, gdy model skróci tytuł. **(3)** Licznik znaków opisu wpisuje program (model podał 612 przy 701), a zdania-zaczepki opisu też muszą mieć pokrycie w tekście. **(4)** Nowe pole `Primary language`, jednowierszowe `Title`/`Subtitle`. **(5)** `_tryby` ostrzega, że retranslacja ISTNIEJĄCEGO przepisu przepisuje cały plik; wstrzymane dwa minorowe upgrade'y (`elevenlabs`, `markdown`).*
 
 *Release v19.8.0: scena kończy się tam, gdzie wskazuje jej cel, a nie na wymyślonym haku — plus pięć rzeczy, które przy tym wyszły, i dziewięć poprawek z dwóch audytów przed zamknięciem. **(1)** Anti-closure w trybach piszących jest ZAKAZEM domknięcia, nie nakazem dopisania zdarzenia: z `[CEL SCENY]` scena kończy się w punkcie celu, bez trzasków i kroków spoza niego (zweryfikowane żywo, potem 9 paczek; audiobook ×8 odzyskał brakującą piątą zasadę). **(2)** Skrypt ucięty na limicie długości zapisuje odzyskane kwestie zamiast wyrzucać opłaconą generację: ostatnią domyka mikro-call, a gdy się nie da — wycina, zawsze z ostrzeżeniem. **(3)** Tłumacz AI nie płaci za mikrocall ISO, gdy kod jest znany (BWD: z `-l`; Poliglota: deterministyczny resolver nazw). **(4)** Blokada streszczenia widzi słowa z wielkiej litery, a `{jezyk_odpowiedzi}` nie dubluje przyimka. **(5)** Sekcja ubita przez bramkę rozdmuchania zostaje w `skrypty/` do oceny i `--przyjmij-probe`, a język może dostać jawny próg w `jezyki_docelowe.yaml`.*
 
@@ -87,6 +89,61 @@
 *Release v18.8.0: owoce testu maintainera „polskie UI na fińskiej treści" (Poliglota offline) — jeden bug krytyczny plus dwa niedociągnięcia międzynarodowości. **(1) BUG KRYTYCZNY: tagi `lang` per akapit liczone na tekście JUŻ zniekształconym transformacją.** Silnik od 13.5 MA mechanizm detekcji języka per akapit wykonywanej PRZED transformacją (side-channel `opcje["_segmenty_wynikowe"]`), ale kanał był martwy od urodzenia: GUI wołało `przetworz(..., **opcje)`, Python REPAKOWAŁ kwargi do nowego słownika i mutacje silnika nigdy nie wracały do GUI — `zapisz_wynik` zawsze spadał na detekcję „na żywo" po wyniku. Dla typoglikemii na fińskim tekście lingua strzelała `lang="de"` na akapitach nagłówkowych (dowód: pochodne `explore_raport`); dla cezara fałszerstwo byłoby totalne. Ten sam martwy kanał ukrywał DWA bugi-rodzeństwo cezara z losowym przesunięciem: komunikat „wylosowano N" nigdy się nie pokazywał, a nazwa pliku traciła sufiks `±N` — czyli zaszyfrowany plik był praktycznie nieodwracalny dla usera. Fix: `przetworz` przyjmuje jawny, MUTOWALNY słownik `opcje=` (przez referencję); jeden korzeń naprawia trzy objawy. **(2) Lokalizacja sklejek nazw plików wynikowych.** Prefiksy `naprawiony_/oczyszczony_/_akcent_/_szyfr_/_tlumaczenie_/architektura_` były polskim hard-kodem — koszmar dla niepolskich syntezatorów (fińska Satu czytająca „tlumaczenie" jako [tumaksenije]). Teraz człony pochodzą z `ui.yaml` (klucze `filename_*` ×9 języków, w języku UI: fi `salaus/käännös/arkkitehtuuri`, is `dulkóðun/þýðing`, ru `шифр/перевод`…), z Unicode-safe sanityzacją i twardym fallbackiem na polskie defaulty; `id` wariantu pozostaje techniczne. Manuale zlokalizowane w ślad (przykłady `architektura_` → natywne). **(3) A11y: spin przesunięcia Cezara ukryty dla nie-cezarowych szyfrów** (NVDA nie ogłasza już martwego pola; wzorzec show/hide jak przy polu ISO naprawiacza). **(4) Dokumentacja user-facing przechodzi z .txt na HTML renderowany z Markdownu.** Szablony `dokumentacja/*.yaml` są od teraz pisane w MD (mechaniczna migracja: nagłówki `#`/`##` per sekcja + backticki wokół `<placeholderów>` ×9 języków, z autotestem integralności treści), a `generuj_dokumentacje.py` renderuje `docs/<id>.<iso>.html` (biblioteka `markdown`, nl2br + sane_lists) z pełnym dokumentem HTML5: `<html lang="<iso>">` przełącza syntezator czytnika ekranu na język treści, nagłówki dają nawigację klawiszami 1-6/h w NVDA, a minimalny CSS (z trybem ciemnym) czyta się dobrze też wzrokiem — koniec „obleśnego" gołego .txt w Notatniku. README bez zmian (surowy MD dla GitHuba). Menu Pomoc, `installer.iss` (checkbox „otwórz manual" + sprzątanie osieroconych `docs\*.txt` przy upgrade) i `build_release` przepięte; nowa bramka RAW-HTML w `--waliduj` pilnuje, żeby żaden surowy `<fragment>` z szablonu nie został połknięty przez przeglądarkę. Przy okazji naprawione martwe odwołanie w 9 manualach: przewodnik Opowieści to `tales.<iso>.html`, nie `opowiesci.pl.txt`/`tarinat.fi.txt`/`recits.fr.txt` (plik o tych nazwach nigdy nie istniał).*
 
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
+
+---
+
+## 19.8.1 — patch release
+
+### What's new
+
+**The publication card samples real chapters.** The card's first live test on
+a real play (Prologue, seven Acts of several scenes each, Epilogue) answered
+`Sample chapters: Scene 1; Scene 2; Scene 3`. The ElevenLabs bridge opens a new
+chapter only at a Prologue/Act/Chapter/Epilogue heading — a scene is a subheading
+inside its chapter — and "Scene 1" stood in all seven acts, so none of the three
+was a chapter the platform's form could offer. The application now computes the
+chapter list with the bridge's own parser, hands it to the model as
+`{rozdzialy}`, and the soft validator warns about any sample outside that list.
+
+**The cover says what the Title field says.** The same card chose the title
+"Kontynent Marzeń: Śledztwo Gospodarcze" and then lettered "KONTYNENT MARZEŃ" on
+the cover prompt. The recipe now requires the cover lettering to be exactly the
+`Title` and `Author profile` values, and the validator warns when either is
+missing from the cover prompt (case, typographic apostrophes and dashes, and a
+note after the author's name do not count as a difference).
+
+**The description count is measured, not declared.** The model reported
+612/1000 characters for a description of 701. The model now leaves `0` in the
+header and the application writes the real length, counting spaces and line
+breaks, because the form's description field is multi-line. The "invent
+nothing" rule now names the hook sentences explicitly — the same card had
+Finland paying in crowns — and the card gains a `Primary language` field;
+`Title` and `Subtitle` are single-line.
+
+The recipe change reached all nine packs, and the new warnings speak all nine
+languages. An audit before closing (every finding reproduced by execution)
+found no high-severity defect; its six edge cases — a bold `**Description**`
+header counted three characters too many, a title containing the word
+"Description" hijacking the description block, decorated sample entries, a
+semicolon inside a chapter name — are fixed and covered by tests. The manual
+gains a short section on the sample, the cover and the count.
+
+For contributors: re-running `buduj_wielojezyczne_tryby.py` on an EXISTING
+recipe rewrites the whole file, reviewed text included — measured again here, it
+even re-translated a result-file suffix, which renames the file on disk. The
+tool's docstring, the recipe checklist in `przeglad_tlumaczen.py` and
+`CONTRIBUTING.md` now say so and describe the splice-from-HEAD path.
+
+### Planned or deferred
+
+- `elevenlabs` 2.69.0 and `markdown` 3.11 are minor steps above what this
+  release was built with, so both are held by a bound one step below
+  (`elevenlabs<2.69`, `markdown<3.11`) under the conservative canon. Taking
+  them is its own cycle: `inspect.signature` on the three Studio calls for the
+  SDK, and a regeneration plus a diff review of every `docs/` page for the
+  renderer.
+- `buduj_wielojezyczne_tryby.py` still has no per-rule mode like the docs
+  builder's `--klucz`; until it does, small recipe changes are spliced by hand.
 
 ---
 

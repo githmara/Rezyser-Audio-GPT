@@ -299,6 +299,14 @@ tresc:
     Après la génération, l'application vérifie la fiche de son côté : si la description tient dans la limite, si les genres et le public proviennent de la liste de la plateforme, si les champs obligatoires sont remplis et si des chiffres sont apparus dans le champ ISBN. Elle affiche les écarts comme des remarques souples — vous recevez le résultat en entier et décidez vous-même quoi corriger. C'est une protection contre le cas où le modèle inventerait une catégorie inexistante que le formulaire ne rejetterait qu'à la fin de l'assistant.
 
     **Remarque :** Les outils de postproduction exigent que le fichier de projet soit déjà enregistré sur le disque (généré ou chargé). Si le fichier n'existe pas, l'application affichera un message approprié.
+  krok_4b_karta_publikacji_proba: |
+    ### Fiche de publication : échantillon, couverture et compteur de caractères (depuis la v19.8.1)
+
+    Pour l'échantillon gratuit, la fiche indique exclusivement les CHAPITRES que le pont ElevenLabs utilisera pour diviser votre projet : Prologue, Acte, Chapitre, Épilogue. L'application établit cette liste à l'aide du même analyseur que le pont, puis la transmet au modèle. Les en-têtes de scènes ne sont que des intertitres à l'intérieur d'un chapitre, et le formulaire de la plateforme ne les affichera pas — dans une pièce comportant sept actes, « Scène 1 » apparaîtra sept fois.
+
+    Le texte de la couverture doit reprendre exactement le titre du champ `Title` et le nom figurant dans le champ `Author profile`, sans les abréger. Le nombre de caractères dans l'en-tête de la description est calculé par l'application, non par le modèle, car ce dernier ne saurait le compter de façon fiable. Les espaces et les retours à la ligne entrent dans le calcul de la limite : le champ description du formulaire est multiligne. La fiche indique également le champ `Primary language` — le nom de la langue du texte en anglais, tel qu'il apparaît dans la liste du formulaire.
+
+    Le contrôle effectué côté application émet en outre un avertissement lorsque l'échantillon désigne un élément absent de la liste des chapitres, lorsque le titre ou le nom de l'auteur manque dans le prompt de couverture, ou lorsque la fiche ne comporte pas de champ `Title`.
   krok_5_poliglota_intro: |
     ## ÉTAPE 5 : Polyglotte AI
 

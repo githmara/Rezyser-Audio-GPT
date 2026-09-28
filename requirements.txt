@@ -65,7 +65,11 @@ anthropic<1.8
 # i `client.user.subscription.get` — dokładnie tę powierzchnię ten SDK
 # przemianowuje między wydaniami. 2.52 → 2.67 (15 minorów) przeszło bez zmian
 # w kodzie: cała trójka i wszystkie nasze kwargi `create` są na miejscu.
-elevenlabs<3
+# WSTRZYMANIE ZAPISANE GRANICĄ (v19.8.1, kanon zachowawczy): PyPI ma 2.69.0,
+# krok MINOROWY ponad zainstalowane 2.68.0. Wydanie idzie jak jest, upgrade
+# + `inspect.signature` na trójce wyżej to treść osobnego cyklu. Bilet
+# powrotny: `skrypty/zamrozone_19.8.1.txt`.
+elevenlabs<2.69
 python-dotenv
 python-docx
 # `jezyki_lingua.KANON` jest LUSTREM enuma `lingua.Language`, a `audyt_podstaw`
@@ -102,7 +106,11 @@ pytest<10
 packaging
 # markdown — render szablonów docs (Markdown → HTML) w generuj_dokumentacje.py
 # (dev/build-time; runtime .exe go nie importuje, więc nie trafia do bundla).
-markdown
+# WSTRZYMANIE ZAPISANE GRANICĄ (v19.8.1, kanon zachowawczy): PyPI ma 3.11,
+# krok MINOROWY ponad zainstalowane 3.10.3. Nowy minor renderera potrafi
+# zmienić HTML wszystkich `docs/`, więc upgrade = regeneracja + przegląd diffu
+# w osobnym cyklu, nie przy okazji patcha.
+markdown<3.11
 # openai — dwaj konsumenci, obaj żywi:
 #   1. RUNTIME aplikacji, od v18.4: wybór dostawcy AI. Przy
 #      `LLM_PROVIDER=openai_compat` (README, manual KROK 2B) `core_llm.zbuduj_klienta`

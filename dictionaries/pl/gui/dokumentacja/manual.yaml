@@ -368,6 +368,14 @@ tresc:
     Po wygenerowaniu aplikacja sprawdza kartę po swojej stronie: czy opis mieści się w limicie, czy gatunki i grupa odbiorców pochodzą z listy platformy, czy wypełnione są pola wymagane i czy w polu ISBN nie pojawiły się cyfry. Rozbieżności pokazuje jako miękkie uwagi — wynik dostajesz w całości i sam decydujesz, co poprawić. To zabezpieczenie przed sytuacją, w której model wymyśli nieistniejącą kategorię, a formularz odrzuci ją dopiero na końcu kreatora.
 
     **Uwaga:** Narzędzia postprodukcyjne wymagają, by plik projektu był już zapisany na dysku (wygenerowany lub wczytany). Jeśli plik nie istnieje, aplikacja wyświetli stosowny komunikat.
+  krok_4b_karta_publikacji_proba: |
+    ### Karta publikacyjna: próbka, okładka i licznik znaków (od v19.8.1)
+
+    Na darmową próbkę karta wskazuje wyłącznie ROZDZIAŁY, na które most ElevenLabs podzieli Twój projekt: Prolog, Akt, Rozdział, Epilog. Aplikacja wylicza tę listę tym samym parserem co most i podaje ją modelowi. Nagłówki scen są tylko śródtytułami wewnątrz rozdziału i formularz platformy ich nie pokaże — w sztuce z siedmioma aktami „Scena 1" występuje siedem razy.
+
+    Napis na okładce ma być dokładnie tytułem z pola `Title` i nazwiskiem z pola `Author profile`, bez skracania. Liczbę znaków w nagłówku opisu wpisuje aplikacja, nie model, bo model tej liczby nie policzy wiarygodnie. Do limitu liczą się spacje i znaki nowej linii: pole opisu w formularzu jest wielowierszowe. Karta podaje też pole `Primary language` — angielską nazwę języka tekstu, tak jak na liście formularza.
+
+    Kontrola po stronie aplikacji ostrzega dodatkowo, gdy próbka wskazuje coś spoza listy rozdziałów, gdy w prompcie okładki brakuje tytułu albo nazwiska autora oraz gdy karta nie ma pola `Title`.
   krok_5_poliglota_intro: |
     ## KROK 5: Poliglota AI
 

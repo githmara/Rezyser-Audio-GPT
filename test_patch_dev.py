@@ -285,13 +285,15 @@ def test_manifest_ma_granice_na_pieciu_pakietach():
     Wartosci zmieniaja sie WYLACZNIE decyzja: `anthropic<1.8` i `openai<3.17`
     zapisuja wstrzymanie dwoch minorowych upgrade'ow (v19.8.0, kanon
     zachowawczy; poprzednie takie wstrzymanie z v19.4.2 zdjeto w v19.5.0 po
-    `inspect.signature` na wolanej powierzchni). Test ma o tym KRZYCZEC przy kazdej
+    `inspect.signature` na wolanej powierzchni), a `elevenlabs<2.69`
+    i `markdown<3.11` dwa kolejne (v19.8.1). Test ma o tym KRZYCZEC przy kazdej
     takiej zmianie — to jego zadanie, a nie uciazliwosc: granica ponizej
     najnowszego wydania znaczy „ktos zdecydowal", a granica przestarzala
     znaczy „ktos zapomnial".
     """
     oczekiwane = {"wxpython": "<4.4", "anthropic": "<1.8", "openai": "<3.17",
-                  "elevenlabs": "<3", "lingua-language-detector": "<2.3"}
+                  "elevenlabs": "<2.69", "lingua-language-detector": "<2.3",
+                  "markdown": "<3.11"}
     manifest = {w.nazwa: w.specyfikator for w in az.wczytaj_manifest()}
     for nazwa, granica in oczekiwane.items():
         assert manifest.get(nazwa) == granica, (

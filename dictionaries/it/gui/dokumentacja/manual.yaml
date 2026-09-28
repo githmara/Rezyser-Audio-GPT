@@ -302,6 +302,14 @@ tresc:
     Dopo la generazione l'applicazione controlla la scheda dal proprio lato: se la descrizione rientra nel limite, se generi e pubblico provengono dall'elenco della piattaforma, se i campi obbligatori sono compilati e se nel campo ISBN sono comparse delle cifre. Le discrepanze le mostra come note morbide — il risultato lo ricevi per intero e decidi tu cosa correggere. È una protezione contro il caso in cui il modello inventi una categoria inesistente e il modulo la rifiuti solo alla fine della procedura guidata.
 
     **Attenzione:** Gli strumenti di post-produzione richiedono che il file di progetto sia già salvato su disco (generato o caricato). Se il file non esiste, l'applicazione visualizzerà un messaggio appropriato.
+  krok_4b_karta_publikacji_proba: |
+    ### Scheda di pubblicazione: campione, copertina e conteggio caratteri (dalla v19.8.1)
+
+    Per il campione gratuito, la scheda indica esclusivamente i CAPITOLI in cui il ponte ElevenLabs suddividerà il tuo progetto: Prologo, Atto, Capitolo, Epilogo. L'applicazione calcola questo elenco con lo stesso analizzatore usato dal ponte e lo fornisce al modello. Le intestazioni di scena sono solo sottotitoli interni al capitolo e il modulo della piattaforma non le mostrerà — in un'opera con sette atti, "Scena 1" compare sette volte.
+
+    La scritta in copertina deve corrispondere esattamente al titolo del campo `Title` e al nome del campo `Author profile`, senza abbreviazioni. Il numero di caratteri nell'intestazione della descrizione viene inserito dall'applicazione, non dal modello, perché il modello non è in grado di calcolare questo numero in modo affidabile. Nel limite rientrano anche gli spazi e i caratteri di ritorno a capo: il campo descrizione nel modulo è multilinea. La scheda riporta inoltre il campo `Primary language` — il nome della lingua del testo in inglese, così come appare nell'elenco del modulo.
+
+    Il controllo lato applicazione segnala inoltre un avviso quando il campione indica qualcosa al di fuori dell'elenco dei capitoli, quando nel prompt della copertina manca il titolo o il nome dell'autore, e quando la scheda è priva del campo `Title`.
   krok_5_poliglota_intro: |
     ## PASSO 5: Poliglotta AI
 

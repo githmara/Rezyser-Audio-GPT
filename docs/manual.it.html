@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Guida completa (Versione 19.8.0 – Versione di Rilascio)</title>
+<title>Reżyser Audio GPT — Guida completa (Versione 19.8.1 – Versione di Rilascio)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Guida completa (Versione 19.8.0 – Versione di Rilascio)</h1>
+<h1>Reżyser Audio GPT — Guida completa (Versione 19.8.1 – Versione di Rilascio)</h1>
 <p>Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).</p>
 <p>Il set è composto dallo studio principale (Regia), dallo strumento per traduzioni e accenti (Poliglotta), dallo strumento per la costruzione della struttura del file (Architetto Audiolibri), dal Gestore Regole (dalla versione 13.0 — senza Python puoi aggiungere un nuovo accento, cifra o modalità creativa, vedi PASSO 7b sotto) e — dalla versione 15.0 — dal modulo Racconti (finzione interattiva in seconda persona generata da AI, letta da TTS o lettore dello schermo, descritta nel manuale separato tales.it.html). Tutti e cinque gli strumenti sono disponibili in un'unica finestra del programma, commutabile tramite pulsanti sulla barra o scorciatoie da tastiera Ctrl+1..Ctrl+5.</p>
 <h2>PASSO 1: Primo avvio (Cross-Platform)</h2>
@@ -195,6 +195,10 @@ Nelle versioni precedenti dell'applicazione nessuno controllava la coerenza dell
 <p>Ciò che la scheda non farà al tuo posto: non inventa né l'editore né il numero ISBN — li lascia come campi da compilare a mano (l'ISBN è un numero registrato e un'allucinazione qui sarebbe una falsa dichiarazione editoriale). Il profilo autore è obbligatorio su ElevenReader, perché le pubblicazioni anonime non sono ammesse ed è legato alla dichiarazione sul diritto d'autore — lo strumento ricopierà quindi il nome o lo pseudonimo dal Libro del Mondo e, se non lo trova, inserirà un campo da compilare. Gli estratti per l'anteprima li sceglie SEMPRE, perché il modulo ne richiede almeno uno, indipendentemente dal modello di pagamento che scegli in seguito.</p>
 <p>Dopo la generazione l'applicazione controlla la scheda dal proprio lato: se la descrizione rientra nel limite, se generi e pubblico provengono dall'elenco della piattaforma, se i campi obbligatori sono compilati e se nel campo ISBN sono comparse delle cifre. Le discrepanze le mostra come note morbide — il risultato lo ricevi per intero e decidi tu cosa correggere. È una protezione contro il caso in cui il modello inventi una categoria inesistente e il modulo la rifiuti solo alla fine della procedura guidata.</p>
 <p><strong>Attenzione:</strong> Gli strumenti di post-produzione richiedono che il file di progetto sia già salvato su disco (generato o caricato). Se il file non esiste, l'applicazione visualizzerà un messaggio appropriato.</p>
+<h3>Scheda di pubblicazione: campione, copertina e conteggio caratteri (dalla v19.8.1)</h3>
+<p>Per il campione gratuito, la scheda indica esclusivamente i CAPITOLI in cui il ponte ElevenLabs suddividerà il tuo progetto: Prologo, Atto, Capitolo, Epilogo. L'applicazione calcola questo elenco con lo stesso analizzatore usato dal ponte e lo fornisce al modello. Le intestazioni di scena sono solo sottotitoli interni al capitolo e il modulo della piattaforma non le mostrerà — in un'opera con sette atti, "Scena 1" compare sette volte.</p>
+<p>La scritta in copertina deve corrispondere esattamente al titolo del campo <code>Title</code> e al nome del campo <code>Author profile</code>, senza abbreviazioni. Il numero di caratteri nell'intestazione della descrizione viene inserito dall'applicazione, non dal modello, perché il modello non è in grado di calcolare questo numero in modo affidabile. Nel limite rientrano anche gli spazi e i caratteri di ritorno a capo: il campo descrizione nel modulo è multilinea. La scheda riporta inoltre il campo <code>Primary language</code> — il nome della lingua del testo in inglese, così come appare nell'elenco del modulo.</p>
+<p>Il controllo lato applicazione segnala inoltre un avviso quando il campione indica qualcosa al di fuori dell'elenco dei capitoli, quando nel prompt della copertina manca il titolo o il nome dell'autore, e quando la scheda è priva del campo <code>Title</code>.</p>
 <h2>PASSO 5: Poliglotta AI</h2>
 <p>Applicazione per traduzioni e per forzare accenti marcati sui sintetizzatori dei lettori di schermo. Vi si accede cliccando il pulsante "🌍  Poliglotta" sulla barra dei pulsanti oppure selezionando Strumenti → Poliglotta dal menu (scorciatoia: Ctrl+2).</p>
 <h3>Modalità 1: Traduttore Normale (Usa l'IA - A Pagamento)</h3>

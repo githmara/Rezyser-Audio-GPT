@@ -299,6 +299,14 @@ tresc:
     Luomisen jälkeen sovellus tarkistaa kortin omalta osaltaan: mahtuuko kuvaus rajaan, tulevatko lajityypit ja kohderyhmä alustan listalta, ovatko pakolliset kentät täytetty ja onko ISBN-kenttään ilmestynyt numeroita. Poikkeamat se näyttää pehmeinä huomioina — saat tuloksen kokonaisuudessaan ja päätät itse, mitä korjaat. Tämä suojaa tilanteelta, jossa malli keksii olemattoman kategorian ja lomake hylkää sen vasta ohjatun toiminnon lopussa.
 
     **Huomio:** Jälkituotantotyökalut vaativat, että projektitiedosto on jo tallennettu levylle (luotu tai ladattu). Jos tiedostoa ei ole olemassa, sovellus näyttää asianmukaisen ilmoituksen.
+  krok_4b_karta_publikacji_proba: |
+    ### Julkaisukortti: näyte, kansi ja merkkilaskuri (versiosta 19.8.1)
+
+    Ilmaisessa näytteessä kortti osoittaa yksinomaan LUVUT, joihin ElevenLabs-silta jakaa projektisi: Prologi, Näytös, Luku, Epilogi. Sovellus laskee tämän listan samalla jäsentäjällä kuin silta ja välittää sen mallille. Kohtausten otsikot ovat vain luvun sisäisiä väliotsikoita, eikä alustan lomake näytä niitä — seitsemännäytöksisessä näytelmässä "Kohtaus 1" esiintyy seitsemän kertaa.
+
+    Kannen tekstin on oltava täsmälleen `Title`-kentän mukainen otsikko ja `Author profile`-kentän mukainen kirjailijan nimi, ilman lyhentämistä. Merkkien lukumäärän kuvauksen otsikossa kirjoittaa sovellus, ei malli, koska malli ei laske tätä lukumäärää luotettavasti. Rajaan lasketaan mukaan välilyönnit ja rivinvaihtomerkit: lomakkeen kuvauskenttä on monirivinen. Kortti sisältää myös `Primary language`-kentän — tekstin kielen englanninkielisen nimen, samoin kuin lomakkeen listalla.
+
+    Sovelluksen puoleinen tarkistus varoittaa lisäksi, kun näyte osoittaa johonkin lukujen listan ulkopuoliseen kohteeseen, kun kannen promptista puuttuu otsikko tai kirjailijan nimi, sekä kun kortilta puuttuu `Title`-kenttä.
   krok_5_poliglota_intro: |
     ## VAIHE 5: Polyglootti AI
 

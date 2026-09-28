@@ -299,6 +299,14 @@ tresc:
     Eftir að kortið er búið til athugar forritið það sín vegna: hvort lýsingin er innan hámarks, hvort flokkar og markhópur koma af lista vettvangsins, hvort skyldureitir eru útfylltir og hvort tölur hafi birst í ISBN-reitnum. Frávik birtir það sem mildar athugasemdir — þú fær útkomuna í heild og ákveður sjálf/ur hverju þú breytir. Þetta er vörn gegn því að líkanið búi til flokk sem er ekki til og formið hafni honum aðeins í lok leiðsagnarinnar.
 
     **Athugið:** Eftirvinnslutæki krefjast þess að verkefnisskráin sé þegar vistuð á diski (búin til eða hlaðin inn). Ef skráin er ekki til, birtir forritið viðeigandi skilaboð.
+  krok_4b_karta_publikacji_proba: |
+    ### Útgáfukort: sýnishorn, kápa og staftalning (frá v19.8.1)
+
+    Fyrir ókeypis sýnishornið vísar kortið eingöngu á KAFLA sem ElevenLabs-brúin mun skipta verkefninu þínu í: Formáli, Þáttur, Kafli, Eftirmáli. Forritið reiknar þennan lista með sömu greiningaraðferð og brúin og gefur hann áfram til líkansins. Atriðatitlar eru einungis millifyrirsagnir innan kafla og eyðublað kerfisins sýnir þá ekki — í leikriti með sjö þáttum kemur „Atriði 1" fyrir sjö sinnum.
+
+    Áletrunin á kápunni á að vera nákvæmlega titillinn úr reitnum `Title` og höfundarnafnið úr reitnum `Author profile`, án styttinga. Forritið sjálft, ekki líkanið, fyllir út staftöluna í fyrirsögn lýsingarinnar, því líkanið getur ekki reiknað þá tölu með áreiðanlegum hætti. Bil og línuskil teljast með í hámarkinu: lýsingarreiturinn í eyðublaðinu er fjöllínu. Kortið gefur einnig upp reitinn `Primary language` — enskt heiti tungumáls textans, nákvæmlega eins og það birtist á lista eyðublaðsins.
+
+    Eftirlitið í forritinu varar að auki við þegar sýnishornið vísar á eitthvað utan kaflalistans, þegar titil eða höfundarnafn vantar í kápuskipunina (prompt), og þegar kortið hefur engan `Title`-reit.
   krok_5_poliglota_intro: |
     ## SKREF 5: Tungumálamaður AI
 
