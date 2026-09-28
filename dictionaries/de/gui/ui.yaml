@@ -595,6 +595,7 @@ rezyser:
   # ({pole}) bleiben englisch: das Formular der Plattform ist englisch.
   publikacja_ostrz_naglowek: "Die Karte ist fertig, benötigt aber eine manuelle Korrektur, bevor Sie sie in das Formular einfügen:"
   publikacja_ostrz_opis: "Die Beschreibung hat {znaki} Zeichen, das Formular nimmt höchstens {limit} an. Kürzen Sie sie vor dem Einfügen."
+  publikacja_ostrz_opis_krotki: "Die Beschreibung hat {znaki} Zeichen, das Formular verlangt mindestens {minimum}. Erweitern Sie sie vor dem Einfügen."
   publikacja_ostrz_gatunki: "Genres außerhalb der kanonischen Liste der Plattform: {wartosci}. Wählen Sie Ersatz aus der Liste `gatunki_dozwolone` in rezyser/postprod_publikacja.yaml."
   publikacja_ostrz_odbiorca: |-
     Die Zielgruppe „{wartosc}" ist kein Formularwert. Erlaubt: {dozwolone}.

@@ -595,6 +595,7 @@ rezyser:
   # ({pole}) остаются английскими: форма платформы на английском.
   publikacja_ostrz_naglowek: "Карточка готова, но перед вставкой в форму требует ручной правки:"
   publikacja_ostrz_opis: "В описании {znaki} знаков, а форма принимает не более {limit}. Сократи его перед вставкой."
+  publikacja_ostrz_opis_krotki: "В описании {znaki} знаков, а форма требует не менее {minimum}. Дополни его перед вставкой."
   publikacja_ostrz_gatunki: "Жанры вне канонического списка платформы: {wartosci}. Выбери замену из списка `gatunki_dozwolone` в файле rezyser/postprod_publikacja.yaml."
   publikacja_ostrz_odbiorca: |-
     Аудитория «{wartosc}» не является значением формы. Допустимые: {dozwolone}.

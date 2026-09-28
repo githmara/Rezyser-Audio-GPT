@@ -1722,9 +1722,10 @@ def waliduj_karte_publikacji(
 
     Uruchamiana dla przepisów, które deklarują zamknięte zbiory wartości
     (``gatunki_dozwolone`` / ``odbiorcy_dozwoleni``) albo limit opisu
-    (``limit_znakow_opisu``). Prompt podaje modelowi te same dane, ale prompt to
-    prośba, nie kontrakt: bez sprawdzenia halucynowana kategoria („Epic Fantasy
-    Saga") albo opis na 1400 znaków wracają do reżysera jako gotowe do wklejenia,
+    (``limit_znakow_opisu``, od v19.8.2 także ``min_znakow_opisu``). Prompt
+    podaje modelowi te same dane, ale prompt to prośba, nie kontrakt: bez
+    sprawdzenia halucynowana kategoria („Epic Fantasy Saga") albo opis na
+    1400 znaków wracają do reżysera jako gotowe do wklejenia,
     a formularz platformy odrzuca je dopiero po wypełnieniu całego kreatora.
 
     MIĘKKA celowo: wynik jest opłaconym callem i pozostaje użyteczny w całości
@@ -1737,12 +1738,17 @@ def waliduj_karte_publikacji(
     """
     ostrzezenia: list[str] = []
 
-    if przepis.limit_znakow_opisu:
+    if przepis.limit_znakow_opisu or przepis.min_znakow_opisu:
         opis = _blok_opisu(tekst)
-        if len(opis) > przepis.limit_znakow_opisu:
+        if przepis.limit_znakow_opisu and len(opis) > przepis.limit_znakow_opisu:
             ostrzezenia.append(i18n.t(
                 "rezyser.publikacja_ostrz_opis",
                 znaki=len(opis), limit=przepis.limit_znakow_opisu,
+            ))
+        elif przepis.min_znakow_opisu and len(opis) < przepis.min_znakow_opisu:
+            ostrzezenia.append(i18n.t(
+                "rezyser.publikacja_ostrz_opis_krotki",
+                znaki=len(opis), minimum=przepis.min_znakow_opisu,
             ))
 
     if przepis.gatunki_dozwolone:

@@ -53,6 +53,8 @@ kod_jezyka: pl
 # --- Zamknięte zbiory wartości formularza (walidowane też w Pythonie) ---
 # Limit opisu z formularza ElevenReadera (stan: czerwiec 2026).
 limit_znakow_opisu: 1000
+# Dolny próg opisu z formularza ElevenReadera (stan: wrzesień 2026).
+min_znakow_opisu: 200
 
 # Pole „Target audience" (wymagane). Wartości po angielsku — jak w formularzu.
 odbiorcy_dozwoleni:
@@ -101,7 +103,7 @@ prompt_systemowy: |
   3. **GATUNKI: od jednego do dwóch, WYŁĄCZNIE z tej listy** (po angielsku, dosłownie): {gatunki_dozwolone}. Nie tworzysz własnych kategorii, nie łączysz nazw, nie tłumaczysz ich. Jeśli nic nie pasuje — wybierasz `Other`.
   4. **TARGET AUDIENCE: dokładnie jedna wartość z listy** (po angielsku): {odbiorcy_dozwoleni}. W tej linii NIE piszesz uzasadnienia — sama wartość.
   5. **MATURE CONTENT: `Yes` albo `No`** (po angielsku), a po myślniku jedno zdanie uzasadnienia po {jezyk_odpowiedzi}. `Yes` oznacza treści 18+ albo drastyczne (przemoc graficzna, seks, tortury).
-  6. **OPIS: maksymalnie {limit_znakow_opisu} znaków, licząc spacje i znaki nowej linii.** To limit platformy — dłuższy opis zostanie odrzucony, więc pisz z zapasem. Nie licz znaków: w nagłówku pola zostaw `0`, program wpisze prawdziwą liczbę. Opis sprzedaje historię czytelnikowi: zaczepia, nie streszcza, nie ujawnia zakończenia.
+  6. **OPIS: od {min_znakow_opisu} do {limit_znakow_opisu} znaków, licząc spacje i znaki nowej linii.** To limity platformy — krótszego ani dłuższego opisu formularz nie przyjmie, więc pisz z zapasem od obu granic. Nie licz znaków: w nagłówku pola zostaw `0`, program wpisze prawdziwą liczbę. Opis sprzedaje historię czytelnikowi: zaczepia, nie streszcza, nie ujawnia zakończenia.
   7. **SAMPLE CHAPTERS: typujesz od dwóch do trzech rozdziałów WYŁĄCZNIE z listy rozdziałów podanej przed tekstem projektu**, przepisując ich nazwy dosłownie. Na te rozdziały platforma dzieli audiobook; nagłówki scen i inne podtytuły wewnątrz rozdziału NIE są rozdziałami i formularz ich nie pokaże. Wybierasz te najlepiej nadające się na darmową próbkę: mocne wejście, zrozumiałe bez kontekstu, kończące się napięciem. Gdy lista ma mniej pozycji, podajesz wszystkie. Robisz to ZAWSZE — formularz wymaga wskazania co najmniej jednego rozdziału, niezależnie od wybranego modelu płatności.
   8. **PUBLISHER i ISBN pozostawiasz do uzupełnienia ręcznego.** ISBN to numer rejestrowany — zmyślenie go byłoby fałszywym oświadczeniem wydawniczym. Nigdy nie wpisujesz tam cyfr.
   9. **AUTHOR PROFILE jest obowiązkowy** — platforma nie dopuszcza publikacji anonimowych (wiąże się to z oświadczeniem o prawach autorskich). Jeśli imię lub pseudonim autora znajduje się w Księdze Świata albo w tekście, przepisujesz je; jeśli nie — wstawiasz `[do uzupełnienia ręcznie]`. Nie wymyślasz nazwiska.

@@ -421,6 +421,9 @@ class PrzepisRezysera:
     gatunki_dozwolone: list[str] = field(default_factory=list)
     odbiorcy_dozwoleni: list[str] = field(default_factory=list)
     limit_znakow_opisu: int = 0
+    # v19.8.2: formularz ma też DOLNY próg opisu (post-walidator z czerwonym
+    # komunikatem poniżej 200 znaków). 0 = brak progu.
+    min_znakow_opisu: int = 0
 
 
 # =============================================================================
@@ -900,6 +903,7 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
             gatunki_dozwolone=_lista_str(data.get("gatunki_dozwolone")),
             odbiorcy_dozwoleni=_lista_str(data.get("odbiorcy_dozwoleni")),
             limit_znakow_opisu=max(0, int(data.get("limit_znakow_opisu") or 0)),
+            min_znakow_opisu=max(0, int(data.get("min_znakow_opisu") or 0)),
         )
     except (TypeError, ValueError, AttributeError) as exc:
         zglos_pominiecie(sciezka, POWOD_POLE, str(exc))
@@ -1428,6 +1432,7 @@ def buduj_pelny_prompt_systemowy(
         gatunki_dozwolone="; ".join(przepis.gatunki_dozwolone),
         odbiorcy_dozwoleni="; ".join(przepis.odbiorcy_dozwoleni),
         limit_znakow_opisu=przepis.limit_znakow_opisu or "",
+        min_znakow_opisu=przepis.min_znakow_opisu or "",
     )
     sufiks = ""
     if sufiks_nazwa:

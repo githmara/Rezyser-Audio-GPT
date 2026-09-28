@@ -595,6 +595,7 @@ rezyser:
   # champs ({pole}) restent en anglais : le formulaire de la plateforme est anglais.
   publikacja_ostrz_naglowek: "La fiche est prête, mais elle demande une correction manuelle avant d'être collée dans le formulaire :"
   publikacja_ostrz_opis: "La description compte {znaki} caractères alors que le formulaire en accepte au maximum {limit}. Raccourcissez-la avant de la coller."
+  publikacja_ostrz_opis_krotki: "La description compte {znaki} caractères alors que le formulaire en exige au moins {minimum}. Étoffez-la avant de la coller."
   publikacja_ostrz_gatunki: "Genres hors de la liste canonique de la plateforme : {wartosci}. Choisissez des remplaçants dans la liste `gatunki_dozwolone` du fichier rezyser/postprod_publikacja.yaml."
   publikacja_ostrz_odbiorca: |-
     Le public « {wartosc} » n'est pas une valeur du formulaire. Autorisés : {dozwolone}.

@@ -59,6 +59,8 @@ kod_jezyka: fi
 # --- Lomakkeen suljetut arvojoukot (validoidaan myös Pythonissa) ---
 # Kuvauksen raja ElevenReaderin lomakkeesta (tilanne: kesäkuu 2026).
 limit_znakow_opisu: 1000
+# Kuvauksen vähimmäispituus ElevenReaderin lomakkeesta (tilanne: syyskuu 2026).
+min_znakow_opisu: 200
 
 # Kenttä ”Target audience” (pakollinen). Arvot englanniksi — kuten lomakkeessa.
 odbiorcy_dozwoleni:
@@ -107,7 +109,7 @@ prompt_systemowy: |
   3. **LAJITYYPIT: yksi tai kaksi, YKSINOMAAN tästä listasta** (englanniksi, kirjaimellisesti): {gatunki_dozwolone}. Et luo omia kategorioita, et yhdistele nimiä, et käännä niitä. Jos mikään ei sovi — valitset `Other`.
   4. **TARGET AUDIENCE: täsmälleen yksi arvo listalta** (englanniksi): {odbiorcy_dozwoleni}. Tälle riville ET kirjoita perustelua — pelkän arvon.
   5. **MATURE CONTENT: `Yes` tai `No`** (englanniksi) ja ajatusviivan jälkeen yksi perustelulause {jezyk_odpowiedzi}. `Yes` tarkoittaa K18- tai raakaa sisältöä (graafinen väkivalta, seksi, kidutus).
-  6. **KUVAUS: enintään {limit_znakow_opisu} merkkiä välilyönnit ja rivinvaihdot mukaan lukien.** Tämä on alustan raja — pidempi kuvaus hylätään, joten jätä pelivaraa. Älä laske merkkejä: jätä kentän otsikkoon `0`, ohjelma kirjoittaa siihen todellisen määrän. Kuvaus myy tarinan lukijalle: se koukuttaa, ei tiivistä eikä paljasta loppua.
+  6. **KUVAUS: {min_znakow_opisu}–{limit_znakow_opisu} merkkiä välilyönnit ja rivinvaihdot mukaan lukien.** Nämä ovat alustan rajat — lyhyempi tai pidempi kuvaus hylätään, joten jätä pelivaraa kumpaankin suuntaan. Älä laske merkkejä: jätä kentän otsikkoon `0`, ohjelma kirjoittaa siihen todellisen määrän. Kuvaus myy tarinan lukijalle: se koukuttaa, ei tiivistä eikä paljasta loppua.
   7. **SAMPLE CHAPTERS: valitset kaksi tai kolme lukua VAIN projektin tekstin edellä annetusta lukulistasta**, kopioiden niiden nimet sanatarkasti. Näiden lukujen mukaan alusta jakaa äänikirjan; kohtausotsikot ja muut väliotsikot luvun sisällä EIVÄT ole lukuja, eikä lomake näytä niitä. Valitset ne, jotka sopivat parhaiten ilmaiseksi näytteeksi: vahva alku, ymmärrettävä ilman kontekstia, päättyy jännitteeseen. Jos listassa on vähemmän kohtia, annat ne kaikki. Teet tämän AINA — lomake vaatii vähintään yhden luvun ilmoittamista valitusta maksumallista riippumatta.
   8. **PUBLISHER JA ISBN jätät käsin täytettäviksi.** ISBN on rekisteröity numero — sen keksiminen olisi väärä kustannusilmoitus. Et koskaan kirjoita sinne numeroita.
   9. **AUTHOR PROFILE on pakollinen** — alusta ei salli anonyymejä julkaisuja (se liittyy tekijänoikeusvakuutukseen). Jos kirjoittajan nimi tai taiteilijanimi on Maailmankirjassa tai tekstissä, kopioit sen; jos ei, kirjoitat `[täytetään käsin]`. Et keksi nimeä.

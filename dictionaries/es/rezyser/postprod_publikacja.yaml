@@ -60,6 +60,8 @@ kod_jezyka: es
 # --- Conjuntos cerrados de valores del formulario (validados también en Python) -
 # Límite de la descripción del formulario de ElevenReader (a junio de 2026).
 limit_znakow_opisu: 1000
+# Longitud mínima de la descripción del formulario de ElevenReader (a septiembre de 2026).
+min_znakow_opisu: 200
 
 # El campo "Target audience" (obligatorio). Valores en inglés — como en el formulario.
 odbiorcy_dozwoleni:
@@ -108,7 +110,7 @@ prompt_systemowy: |
   3. **GÉNEROS: uno o dos, EXCLUSIVAMENTE de esta lista** (en inglés, literalmente): {gatunki_dozwolone}. No creas categorías propias, no combinas nombres, no los traduces. Si nada encaja — eliges `Other`.
   4. **TARGET AUDIENCE: exactamente un valor de la lista** (en inglés): {odbiorcy_dozwoleni}. En esa línea NO escribes justificación — solo el valor.
   5. **MATURE CONTENT: `Yes` o `No`** (en inglés) y, tras un guion, una frase de justificación en {jezyk_odpowiedzi}. `Yes` significa contenido +18 o explícito (violencia gráfica, sexo, tortura).
-  6. **DESCRIPCIÓN: como máximo {limit_znakow_opisu} caracteres, contando espacios y saltos de línea.** Es el límite de la plataforma: una descripción más larga será rechazada, así que escribe con margen. No cuentes los caracteres: deja `0` en el encabezado del campo y el programa pondrá la cifra real. La descripción vende la historia al lector: engancha, no resume, no revela el final.
+  6. **DESCRIPCIÓN: entre {min_znakow_opisu} y {limit_znakow_opisu} caracteres, contando espacios y saltos de línea.** Son los límites de la plataforma: una descripción más corta o más larga será rechazada, así que deja margen respecto a ambos. No cuentes los caracteres: deja `0` en el encabezado del campo y el programa pondrá la cifra real. La descripción vende la historia al lector: engancha, no resume, no revela el final.
   7. **SAMPLE CHAPTERS: eliges de dos a tres capítulos EXCLUSIVAMENTE de la lista de capítulos que precede al texto del proyecto**, copiando sus nombres al pie de la letra. Son los capítulos en los que la plataforma divide el audiolibro; los encabezados de escena y otros subtítulos dentro de un capítulo NO son capítulos y el formulario no los mostrará. Eliges los que mejor funcionen como muestra gratuita: entrada potente, comprensibles sin contexto, que terminen en tensión. Si la lista tiene menos elementos, los indicas todos. Lo haces SIEMPRE — el formulario exige indicar al menos un capítulo, independientemente del modelo de pago elegido.
   8. **PUBLISHER e ISBN los dejas para rellenar a mano.** El ISBN es un número registrado: inventarlo sería una declaración editorial falsa. Nunca escribes cifras ahí.
   9. **AUTHOR PROFILE es obligatorio** — la plataforma no admite publicaciones anónimas (va unido a la declaración de derechos de autor). Si el nombre o el seudónimo del autor está en el Libro del Mundo o en el texto, lo copias; si no, pones `[por rellenar a mano]`. No inventas ningún nombre.

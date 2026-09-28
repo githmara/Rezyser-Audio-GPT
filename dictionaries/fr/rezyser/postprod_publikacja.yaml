@@ -62,6 +62,8 @@ kod_jezyka: fr
 # --- Ensembles fermés de valeurs du formulaire (validés aussi en Python) ---
 # Limite de la description dans le formulaire d'ElevenReader (état : juin 2026).
 limit_znakow_opisu: 1000
+# Longueur minimale de la description dans le formulaire d'ElevenReader (état : septembre 2026).
+min_znakow_opisu: 200
 
 # Le champ « Target audience » (obligatoire). Valeurs en anglais — comme dans le
 # formulaire.
@@ -112,7 +114,7 @@ prompt_systemowy: |
   3. **GENRES : un ou deux, EXCLUSIVEMENT dans cette liste** (en anglais, à la lettre) : {gatunki_dozwolone}. Tu ne crées pas tes propres catégories, tu ne combines pas les noms, tu ne les traduis pas. Si rien ne convient — tu choisis `Other`.
   4. **TARGET AUDIENCE : exactement une valeur de la liste** (en anglais) : {odbiorcy_dozwoleni}. Sur cette ligne, tu n'écris AUCUNE justification — la valeur seule.
   5. **MATURE CONTENT : `Yes` ou `No`** (en anglais), puis, après un tiret, une phrase de justification en {jezyk_odpowiedzi}. `Yes` signifie un contenu 18+ ou explicite (violence graphique, sexe, torture).
-  6. **DESCRIPTION : au maximum {limit_znakow_opisu} caractères, espaces et retours à la ligne compris.** C'est la limite de la plateforme : une description plus longue sera rejetée, alors garde une marge. Ne compte pas les caractères : laisse `0` dans l'en-tête du champ, le programme y inscrira le nombre réel. La description vend l'histoire au lecteur : elle accroche, elle ne résume pas, elle ne révèle pas la fin.
+  6. **DESCRIPTION : entre {min_znakow_opisu} et {limit_znakow_opisu} caractères, espaces et retours à la ligne compris.** Ce sont les limites de la plateforme : une description plus courte ou plus longue sera rejetée, alors garde une marge des deux côtés. Ne compte pas les caractères : laisse `0` dans l'en-tête du champ, le programme y inscrira le nombre réel. La description vend l'histoire au lecteur : elle accroche, elle ne résume pas, elle ne révèle pas la fin.
   7. **SAMPLE CHAPTERS : tu choisis de deux à trois chapitres UNIQUEMENT dans la liste des chapitres donnée avant le texte du projet**, en recopiant leurs noms à la lettre. Ce sont les chapitres selon lesquels la plateforme découpe le livre audio ; les titres de scènes et autres intertitres à l'intérieur d'un chapitre NE SONT PAS des chapitres et le formulaire ne les affichera pas. Tu choisis ceux qui fonctionnent le mieux comme aperçu gratuit : entrée forte, compréhensibles hors contexte, se terminant sur une tension. Si la liste compte moins d'entrées, tu les indiques toutes. Tu le fais TOUJOURS — le formulaire exige au moins un chapitre, quel que soit le modèle de rémunération choisi.
   8. **PUBLISHER et ISBN, tu les laisses à remplir à la main.** L'ISBN est un numéro enregistré : l'inventer serait une fausse déclaration éditoriale. Tu n'y écris jamais de chiffres.
   9. **AUTHOR PROFILE est obligatoire** — la plateforme n'autorise pas les publications anonymes (cela va de pair avec la déclaration de droits d'auteur). Si le nom ou le pseudonyme de l'auteur figure dans le Livre du Monde ou dans le texte, tu le recopies ; sinon, tu inscris `[à remplir à la main]`. Tu n'inventes aucun nom.

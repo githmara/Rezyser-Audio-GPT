@@ -56,7 +56,12 @@ Epilog
 [Johanna] Stacja koncowa.
 """
 
-OPIS = "Pierwszy akapit opisu.\n\nDrugi akapit opisu."
+# Ponad dolny prog formularza (200 znakow, v19.8.2) - krotszy opis to
+# ostrzezenie, a fixture ma reprezentowac karte ZGODNA.
+OPIS = ("Pierwszy akapit opisu, ktory zaczepia czytelnika i nie zdradza "
+        "zakonczenia historii.\n\nDrugi akapit opisu dopowiada stawke, "
+        "stawia pytanie i zostawia czytelnika z napieciem, ktore kaze mu "
+        "wlaczyc pierwszy rozdzial audiobooka.")
 
 
 def _karta(probki="Prolog; Akt 1", tytul="Kontynent Marzen: Sledztwo",
@@ -112,6 +117,27 @@ def test_karta_zgodna_nie_ma_ostrzezen(przepis):
     assert rai.waliduj_karte_publikacji(przepis, _karta(), ROZDZIALY) == []
 
 
+def test_opis_ponizej_minimum_daje_ostrzezenie(przepis):
+    assert przepis.min_znakow_opisu == 200
+    karta = _karta().replace(OPIS, "Za krotki opis.")
+    uwagi = rai.waliduj_karte_publikacji(przepis, karta, ROZDZIALY)
+    assert len(uwagi) == 1 and "15" in uwagi[0] and "200" in uwagi[0]
+
+
+def test_opis_na_granicach_nie_daje_ostrzezenia(przepis):
+    for dlugosc in (przepis.min_znakow_opisu, przepis.limit_znakow_opisu):
+        karta = _karta().replace(OPIS, "x" * dlugosc)
+        assert rai.waliduj_karte_publikacji(przepis, karta, ROZDZIALY) == []
+
+
+@pytest.mark.parametrize("kod", ["pl", "en", "de", "es", "fi", "fr", "is", "it", "ru"])
+def test_prompt_niesie_oba_progi_opisu(kod):
+    p = pr.zaladuj_przepis("publikacja", kod, kategoria="postprodukcja")
+    prompt = pr.buduj_prompt_systemowy(p)
+    assert "200" in prompt and "1000" in prompt
+    assert "{min_znakow_opisu}" not in prompt
+
+
 def test_sceny_jako_probki_daja_ostrzezenie(przepis):
     uwagi = rai.waliduj_karte_publikacji(
         przepis, _karta(probki="Scena 1; Scena 2; Akt 1"), ROZDZIALY)
@@ -160,7 +186,8 @@ def test_licznik_opisu_nadpisany_faktyczna_dlugoscia_z_nowymi_liniami():
     karta = rai._popraw_licznik_opisu(_karta(licznik="612"))
     assert f"Description ({len(OPIS)}/1000 characters):" in karta
     # dwa znaki nowej linii miedzy akapitami wliczone do limitu
-    assert len(OPIS) == len("Pierwszy akapit opisu.") + 2 + len("Drugi akapit opisu.")
+    akapit_1, akapit_2 = OPIS.split("\n\n")
+    assert len(OPIS) == len(akapit_1) + 2 + len(akapit_2)
 
 
 def test_postprodukcja_podaje_rozdzialy_i_poprawia_licznik(przepis, monkeypatch):

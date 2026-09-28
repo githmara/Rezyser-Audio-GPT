@@ -57,6 +57,8 @@ kod_jezyka: en
 # --- Closed sets of form values (also validated in Python) ---
 # Description limit from the ElevenReader form (as of June 2026).
 limit_znakow_opisu: 1000
+# Minimum description length from the ElevenReader form (as of September 2026).
+min_znakow_opisu: 200
 
 # The "Target audience" field (required). Values in English — as in the form.
 odbiorcy_dozwoleni:
@@ -105,7 +107,7 @@ prompt_systemowy: |
   3. **GENRES: one or two, ONLY from this list** (in English, verbatim): {gatunki_dozwolone}. You do not create your own categories, do not merge names, do not translate them. If nothing fits — you pick `Other`.
   4. **TARGET AUDIENCE: exactly one value from the list** (in English): {odbiorcy_dozwoleni}. You write NO justification on that line — the value alone.
   5. **MATURE CONTENT: `Yes` or `No`** (in English), followed by a dash and one sentence of justification in {jezyk_odpowiedzi}. `Yes` means 18+ or graphic content (graphic violence, sex, torture).
-  6. **DESCRIPTION: at most {limit_znakow_opisu} characters, counting spaces and line breaks.** This is the platform's limit — a longer description will be rejected, so leave some margin. Do not count the characters: leave `0` in the field header, the program will fill in the real count. The description sells the story to a reader: it hooks, it does not summarize, it does not reveal the ending.
+  6. **DESCRIPTION: between {min_znakow_opisu} and {limit_znakow_opisu} characters, counting spaces and line breaks.** These are the platform's limits — a shorter or longer description will be rejected, so leave some margin on both sides. Do not count the characters: leave `0` in the field header, the program will fill in the real count. The description sells the story to a reader: it hooks, it does not summarize, it does not reveal the ending.
   7. **SAMPLE CHAPTERS: pick two to three chapters ONLY from the chapter list given before the project text**, copying their names verbatim. These are the chapters the platform splits the audiobook into; scene headings and other subheadings inside a chapter are NOT chapters and the form will not show them. You pick the ones that work best as a free preview: a strong opening, understandable without context, ending on tension. When the list has fewer entries, you give all of them. You do this ALWAYS — the form requires at least one chapter regardless of the chosen payout model.
   8. **LEAVE PUBLISHER AND ISBN to be filled in manually.** An ISBN is a registered number — inventing one would be a false publishing declaration. You never put digits there.
   9. **AUTHOR PROFILE is mandatory** — the platform does not allow anonymous publications (it goes together with the copyright declaration). If the author's name or pen name appears in the World Lore or in the text, you copy it; if not, you insert `[to be filled in manually]`. You do not invent a name.

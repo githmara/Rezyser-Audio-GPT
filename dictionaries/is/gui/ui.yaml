@@ -595,6 +595,7 @@ rezyser:
   # ({pole}) eru áfram á ensku: form vettvangsins er á ensku.
   publikacja_ostrz_naglowek: "Kortið er tilbúið en þarf handvirka leiðréttingu áður en þú límir það í formið:"
   publikacja_ostrz_opis: "Lýsingin er {znaki} stafir en formið tekur að hámarki {limit}. Styttu hana áður en þú límir hana."
+  publikacja_ostrz_opis_krotki: "Lýsingin er {znaki} stafir en formið krefst að lágmarki {minimum}. Lengdu hana áður en þú límir hana."
   publikacja_ostrz_gatunki: "Flokkar utan kanónlista vettvangsins: {wartosci}. Veldu í staðinn úr listanum `gatunki_dozwolone` í rezyser/postprod_publikacja.yaml."
   publikacja_ostrz_odbiorca: |-
     Markhópurinn „{wartosc}" er ekki gildi í forminu. Leyfilegt: {dozwolone}.

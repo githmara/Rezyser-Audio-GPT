@@ -687,6 +687,7 @@ rezyser:
   # stay in English: the platform's form is English.
   publikacja_ostrz_naglowek: "The card is ready, but it needs a manual fix before you paste it into the form:"
   publikacja_ostrz_opis: "The description has {znaki} characters and the form accepts at most {limit}. Shorten it before pasting."
+  publikacja_ostrz_opis_krotki: "The description has {znaki} characters and the form requires at least {minimum}. Expand it before pasting."
   publikacja_ostrz_gatunki: "Genres outside the platform's canonical list: {wartosci}. Pick replacements from the `gatunki_dozwolone` list in rezyser/postprod_publikacja.yaml."
   publikacja_ostrz_odbiorca: |-
     The target audience "{wartosc}" is not a form value. Allowed: {dozwolone}.

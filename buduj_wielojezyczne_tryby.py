@@ -233,6 +233,7 @@ KLASY_POL: dict[str, str] = {
     "gatunki_dozwolone": KLASA_TECHNICZNA,
     "odbiorcy_dozwoleni": KLASA_TECHNICZNA,
     "limit_znakow_opisu": KLASA_TECHNICZNA,
+    "min_znakow_opisu": KLASA_TECHNICZNA,
     # --- Krótkie napisy
     "etykieta": KLASA_ETYKIETA,
     "etykieta_fragment_zbyt_krotki": KLASA_ETYKIETA,

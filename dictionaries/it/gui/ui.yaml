@@ -595,6 +595,7 @@ rezyser:
   # campi ({pole}) restano in inglese: il modulo della piattaforma è inglese.
   publikacja_ostrz_naglowek: "La scheda è pronta, ma richiede una correzione manuale prima di incollarla nel modulo:"
   publikacja_ostrz_opis: "La descrizione ha {znaki} caratteri e il modulo ne accetta al massimo {limit}. Accorciala prima di incollarla."
+  publikacja_ostrz_opis_krotki: "La descrizione ha {znaki} caratteri e il modulo ne richiede almeno {minimum}. Ampliala prima di incollarla."
   publikacja_ostrz_gatunki: "Generi fuori dall'elenco canonico della piattaforma: {wartosci}. Scegli i sostituti dall'elenco `gatunki_dozwolone` in rezyser/postprod_publikacja.yaml."
   publikacja_ostrz_odbiorca: |-
     Il pubblico «{wartosc}» non è un valore del modulo. Ammessi: {dozwolone}.

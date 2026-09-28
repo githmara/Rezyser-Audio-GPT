@@ -61,6 +61,8 @@ kod_jezyka: it
 # --- Insiemi chiusi di valori del modulo (validati anche in Python) ---
 # Limite della descrizione dal modulo di ElevenReader (stato: giugno 2026).
 limit_znakow_opisu: 1000
+# Lunghezza minima della descrizione dal modulo di ElevenReader (stato: settembre 2026).
+min_znakow_opisu: 200
 
 # Il campo «Target audience» (obbligatorio). Valori in inglese — come nel modulo.
 odbiorcy_dozwoleni:
@@ -109,7 +111,7 @@ prompt_systemowy: |
   3. **GENERI: uno o due, ESCLUSIVAMENTE da questo elenco** (in inglese, alla lettera): {gatunki_dozwolone}. Non crei categorie tue, non unisci i nomi, non li traduci. Se nulla si adatta — scegli `Other`.
   4. **TARGET AUDIENCE: esattamente un valore dall'elenco** (in inglese): {odbiorcy_dozwoleni}. Su quella riga NON scrivi motivazioni — solo il valore.
   5. **MATURE CONTENT: `Yes` oppure `No`** (in inglese) e, dopo un trattino, una frase di motivazione in {jezyk_odpowiedzi}. `Yes` significa contenuti 18+ o espliciti (violenza grafica, sesso, torture).
-  6. **DESCRIZIONE: al massimo {limit_znakow_opisu} caratteri, spazi e a capo inclusi.** È il limite della piattaforma: una descrizione più lunga verrà rifiutata, quindi lascia un margine. Non contare i caratteri: nell'intestazione del campo lascia `0`, il programma inserirà il numero reale. La descrizione vende la storia al lettore: aggancia, non riassume, non svela il finale.
+  6. **DESCRIZIONE: tra {min_znakow_opisu} e {limit_znakow_opisu} caratteri, spazi e a capo inclusi.** Sono i limiti della piattaforma: una descrizione più corta o più lunga verrà rifiutata, quindi lascia un margine da entrambi i lati. Non contare i caratteri: nell'intestazione del campo lascia `0`, il programma inserirà il numero reale. La descrizione vende la storia al lettore: aggancia, non riassume, non svela il finale.
   7. **SAMPLE CHAPTERS: scegli da due a tre capitoli ESCLUSIVAMENTE dall'elenco dei capitoli fornito prima del testo del progetto**, ricopiandone i nomi alla lettera. Sono i capitoli in cui la piattaforma suddivide l'audiolibro; i titoli di scena e gli altri sottotitoli interni a un capitolo NON sono capitoli e il modulo non li mostrerà. Scegli quelli che funzionano meglio come anteprima gratuita: apertura forte, comprensibili senza contesto, che finiscono in tensione. Se l'elenco ha meno voci, le indichi tutte. Lo fai SEMPRE — il modulo richiede di indicare almeno un capitolo, indipendentemente dal modello di pagamento scelto.
   8. **PUBLISHER e ISBN li lasci da compilare a mano.** L'ISBN è un numero registrato: inventarlo sarebbe una falsa dichiarazione editoriale. Non scrivi mai cifre lì.
   9. **AUTHOR PROFILE è obbligatorio** — la piattaforma non ammette pubblicazioni anonime (è legato alla dichiarazione sul diritto d'autore). Se il nome o lo pseudonimo dell'autore compare nel Libro del Mondo o nel testo, lo ricopi; altrimenti inserisci `[da compilare a mano]`. Non inventi alcun nome.

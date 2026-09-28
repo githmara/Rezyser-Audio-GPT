@@ -55,6 +55,8 @@ kod_jezyka: is
 # --- Lokuð gildasöfn formsins (einnig staðfest í Python) ---
 # Hámarkslengd lýsingar úr ElevenReader-forminu (staða: júní 2026).
 limit_znakow_opisu: 1000
+# Lágmarkslengd lýsingar úr ElevenReader-forminu (staða: september 2026).
+min_znakow_opisu: 200
 
 # Reiturinn „Target audience" (skylda). Gildi á ensku — eins og í forminu.
 odbiorcy_dozwoleni:
@@ -103,7 +105,7 @@ prompt_systemowy: |
   3. **FLOKKAR: einn eða tveir, EINGÖNGU af þessum lista** (á ensku, orðrétt): {gatunki_dozwolone}. Þú býrð ekki til eigin flokka, tengir ekki heiti saman, þýðir þau ekki. Ef ekkert passar — velur þú `Other`.
   4. **TARGET AUDIENCE: nákvæmlega eitt gildi af listanum** (á ensku): {odbiorcy_dozwoleni}. Í þessa línu skrifar þú EKKI réttlætingu — aðeins gildið.
   5. **MATURE CONTENT: `Yes` eða `No`** (á ensku), og eftir þankastrik ein réttlætingarsetning á {jezyk_odpowiedzi}. `Yes` þýðir efni fyrir 18 ára og eldri eða hrátt efni (myndrænt ofbeldi, kynlíf, pyntingar).
-  6. **LÝSING: að hámarki {limit_znakow_opisu} stafir, bil og línuskil meðtalin.** Þetta er hámark vettvangsins — lengri lýsingu er hafnað, svo skrifaðu með svigrúmi. Teldu ekki stafina: skildu eftir `0` í fyrirsögn reitsins, forritið setur inn rétta tölu. Lýsingin selur söguna til lesandans: hún krækir, hún endursegir ekki og hún gefur ekki upp lokin.
+  6. **LÝSING: {min_znakow_opisu} til {limit_znakow_opisu} stafir, bil og línuskil meðtalin.** Þetta eru mörk vettvangsins — styttri eða lengri lýsingu er hafnað, svo haltu svigrúmi frá báðum mörkum. Teldu ekki stafina: skildu eftir `0` í fyrirsögn reitsins, forritið setur inn rétta tölu. Lýsingin selur söguna til lesandans: hún krækir, hún endursegir ekki og hún gefur ekki upp lokin.
   7. **SAMPLE CHAPTERS: þú velur tvo til þrjá kafla EINGÖNGU af kaflalistanum sem kemur á undan texta verkefnisins** og afritar heiti þeirra orðrétt. Í þessa kafla skiptir vettvangurinn hljóðbókinni; senufyrirsagnir og aðrar millifyrirsagnir innan kafla eru EKKI kaflar og formið sýnir þær ekki. Þú velur þá sem virka best sem frítt sýnishorn: sterk byrjun, skiljanlegir án samhengis, enda í spennu. Ef listinn er styttri tilgreinir þú alla kaflana. Þetta gerir þú ALLTAF — formið krefst að minnsta kosti eins kafla, óháð völdu greiðslufyrirkomulagi.
   8. **PUBLISHER OG ISBN skilur þú eftir til handvirkrar útfyllingar.** ISBN er skráð númer — að búa það til væri fölsk útgáfuyfirlýsing. Þú skrifar þar aldrei tölur.
   9. **AUTHOR PROFILE er skylda** — vettvangurinn leyfir ekki nafnlausar útgáfur (það hangir saman við yfirlýsingu um höfundarrétt). Ef nafn eða höfundarnafn höfundar er í Heimsbókinni eða í textanum afritar þú það; ef ekki, setur þú `[fyllist út handvirkt]`. Þú býrð ekki til nafn.

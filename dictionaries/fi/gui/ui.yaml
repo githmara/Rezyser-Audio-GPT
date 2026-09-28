@@ -595,6 +595,7 @@ rezyser:
   # ({pole}) pysyvät englanniksi: alustan lomake on englanninkielinen.
   publikacja_ostrz_naglowek: "Kortti on valmis, mutta vaatii käsin tehtävän korjauksen ennen liittämistä lomakkeeseen:"
   publikacja_ostrz_opis: "Kuvauksessa on {znaki} merkkiä, ja lomake hyväksyy enintään {limit}. Lyhennä sitä ennen liittämistä."
+  publikacja_ostrz_opis_krotki: "Kuvauksessa on {znaki} merkkiä, ja lomake vaatii vähintään {minimum}. Laajenna sitä ennen liittämistä."
   publikacja_ostrz_gatunki: "Lajityyppejä alustan kanonisen listan ulkopuolelta: {wartosci}. Valitse korvaajat listalta `gatunki_dozwolone` tiedostossa rezyser/postprod_publikacja.yaml."
   publikacja_ostrz_odbiorca: |-
     Kohderyhmä ”{wartosc}” ei ole lomakkeen arvo. Sallitut: {dozwolone}.

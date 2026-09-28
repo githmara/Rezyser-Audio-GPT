@@ -58,6 +58,8 @@ kod_jezyka: de
 # --- Geschlossene Wertemengen des Formulars (auch in Python validiert) ---
 # Beschreibungslimit aus dem ElevenReader-Formular (Stand: Juni 2026).
 limit_znakow_opisu: 1000
+# Mindestlänge der Beschreibung aus dem ElevenReader-Formular (Stand: September 2026).
+min_znakow_opisu: 200
 
 # Das Feld „Target audience" (erforderlich). Werte englisch — wie im Formular.
 odbiorcy_dozwoleni:
@@ -106,7 +108,7 @@ prompt_systemowy: |
   3. **GENRES: eines bis zwei, AUSSCHLIESSLICH aus dieser Liste** (englisch, wortgetreu): {gatunki_dozwolone}. Du erfindest keine eigenen Kategorien, verbindest keine Namen, übersetzt sie nicht. Passt nichts — wählst du `Other`.
   4. **TARGET AUDIENCE: genau ein Wert aus der Liste** (englisch): {odbiorcy_dozwoleni}. In dieser Zeile schreibst du KEINE Begründung — nur den Wert.
   5. **MATURE CONTENT: `Yes` oder `No`** (englisch), danach ein Gedankenstrich und ein Satz Begründung auf {jezyk_odpowiedzi}. `Yes` bedeutet Inhalte ab 18 oder drastische Inhalte (grafische Gewalt, Sex, Folter).
-  6. **BESCHREIBUNG: maximal {limit_znakow_opisu} Zeichen inklusive Leerzeichen und Zeilenumbrüchen.** Das ist das Limit der Plattform — eine längere Beschreibung wird abgewiesen, also schreibe mit Reserve. Zähle die Zeichen nicht: Lass im Feldkopf `0` stehen, das Programm trägt die tatsächliche Zahl ein. Die Beschreibung verkauft die Geschichte an den Leser: sie fesselt, sie fasst nicht zusammen, sie verrät das Ende nicht.
+  6. **BESCHREIBUNG: {min_znakow_opisu} bis {limit_znakow_opisu} Zeichen inklusive Leerzeichen und Zeilenumbrüchen.** Das sind die Limits der Plattform — eine kürzere oder längere Beschreibung wird abgewiesen, also halte zu beiden Grenzen Abstand. Zähle die Zeichen nicht: Lass im Feldkopf `0` stehen, das Programm trägt die tatsächliche Zahl ein. Die Beschreibung verkauft die Geschichte an den Leser: sie fesselt, sie fasst nicht zusammen, sie verrät das Ende nicht.
   7. **SAMPLE CHAPTERS: du wählst zwei bis drei Kapitel AUSSCHLIESSLICH aus der Kapitelliste, die vor dem Projekttext steht**, und übernimmst ihre Namen wortgetreu. In diese Kapitel teilt die Plattform das Hörbuch; Szenenüberschriften und andere Zwischentitel innerhalb eines Kapitels sind KEINE Kapitel, und das Formular zeigt sie nicht an. Du wählst die, die sich als kostenlose Vorschau am besten eignen: starker Einstieg, ohne Kontext verständlich, mit Spannung endend. Hat die Liste weniger Einträge, nennst du alle. Das tust du IMMER — das Formular verlangt mindestens ein Kapitel, unabhängig vom gewählten Auszahlungsmodell.
   8. **PUBLISHER UND ISBN lässt du zum manuellen Ausfüllen offen.** Eine ISBN ist eine registrierte Nummer — sie zu erfinden wäre eine falsche verlegerische Erklärung. Du schreibst dort niemals Ziffern hin.
   9. **AUTHOR PROFILE ist verpflichtend** — die Plattform erlaubt keine anonymen Veröffentlichungen (es hängt mit der Urheberrechtserklärung zusammen). Steht der Name oder das Pseudonym des Autors im Weltenbuch oder im Text, übernimmst du es; wenn nicht, setzt du `[manuell auszufüllen]` ein. Du erfindest keinen Namen.
