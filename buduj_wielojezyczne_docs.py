@@ -1190,6 +1190,33 @@ def wczytaj_istniejacy_docelowy(plik_docelowy: Path) -> dict[str, str] | None:
     return None
 
 
+def scal_sekcje_w_kolejnosci_pl(
+    sekcje_pl: dict[str, str],
+    sekcje_istniejace: dict[str, str],
+    sekcje_przetlumaczone: dict[str, str],
+) -> dict[str, str]:
+    """Scala tryb ``--klucz`` w KOLEJNOŚCI sekcji polskiego szablonu (v19.8.2).
+
+    Do v19.8.1 wynik powstawał jako ``dict(istniejace).update(przetlumaczone)``,
+    a ``update`` dokleja nieznany klucz na KONIEC słownika: nowa sekcja
+    wstawiona w środek polskiego szablonu lądowała w paczkach obcych za
+    ostatnią sekcją, a generator renderuje sekcje w kolejności pliku — obcy
+    podręcznik miał rozdział w innym miejscu niż polski. Kolejność bierzemy
+    więc z PL; klucze obecne tylko w pliku docelowym (sieroty po usuniętej
+    sekcji PL) idą na koniec w swojej dotychczasowej kolejności — scalanie
+    nie może niczego zgubić, sprzątanie sierot to osobna decyzja.
+    """
+    wynik: dict[str, str] = {}
+    for klucz in sekcje_pl:
+        if klucz in sekcje_przetlumaczone:
+            wynik[klucz] = sekcje_przetlumaczone[klucz]
+        elif klucz in sekcje_istniejace:
+            wynik[klucz] = sekcje_istniejace[klucz]
+    for klucz, tresc in sekcje_istniejace.items():
+        wynik.setdefault(klucz, tresc)
+    return wynik
+
+
 # ---------------------------------------------------------------------------
 # Pipeline dla jednego języka docelowego
 # ---------------------------------------------------------------------------
@@ -1542,8 +1569,8 @@ def tlumacz_szablon(
 
     # Złóż wynikowy dict: SURGICAL = scal z istniejącymi, FULL = same przetłumaczone
     if sekcje_istniejace is not None:
-        wynikowy_dict = dict(sekcje_istniejace)
-        wynikowy_dict.update(sekcje_przetlumaczone)
+        wynikowy_dict = scal_sekcje_w_kolejnosci_pl(
+            sekcje_pl, sekcje_istniejace, sekcje_przetlumaczone)
     else:
         wynikowy_dict = sekcje_przetlumaczone
 
