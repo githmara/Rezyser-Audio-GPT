@@ -1,6 +1,6 @@
 # Release Notes — Reżyser Audio GPT 19.8.2 „Wersja Wydawnicza"
 
-*Patch v19.8.2 (hotfix): ElevenReader zmienił kanon gatunków. **(1)** Z 22 pozycji znikają `Adult Romance` i `Detective and Crime`, dochodzą `Christian & Inspirational` i `Young Adult` — lista w 9 paczkach przepisana 1:1 z formularza. **(2)** Opis ma dolny próg 200 znaków (post-walidator formularza): pole `min_znakow_opisu`, reguła 6 prompta i ostrzeżenie walidatora karty. **(3)** Builder docs w trybie `--klucz` wstawia nową sekcję w miejscu z polskiego szablonu, a nie na końcu pliku. Zmiany przepisu naniesione ręcznie, bez brata `_tryby` — tryb szybkiej ścieżki.*
+*Patch v19.8.2 (hotfix): ElevenReader zmienił kanon gatunków. **(1)** Z 22 pozycji znikają `Adult Romance` i `Detective and Crime`, dochodzą `Christian & Inspirational` i `Young Adult` — lista w 9 paczkach przepisana 1:1 z formularza. **(2)** Opis ma dolny próg 200 znaków (post-walidator formularza): pole `min_znakow_opisu`, reguła 6 prompta i ostrzeżenie walidatora karty. **(3)** Builder docs w trybie `--klucz` wstawia nową sekcję w miejscu z polskiego szablonu, a nie na końcu pliku; `manual`/`readme` w 8 paczkach obcych wróciły do kolejności PL. Zmiany przepisu naniesione ręcznie, bez brata `_tryby` — tryb szybkiej ścieżki.*
 
 *Patch v19.8.1: karta publikacyjna po pierwszym bojowym teście na prawdziwej sztuce. **(1)** `Sample chapters` wybiera się WYŁĄCZNIE z rozdziałów, na które podzieli projekt most ElevenLabs (lista liczona tym samym parserem i podawana modelowi jako `{rozdzialy}`), bo „Scena 1" z siedmiu aktów nie jest żadnym rozdziałem formularza. **(2)** Napis na okładce to dokładnie wartość `Title` i `Author profile` — walidator ostrzega, gdy model skróci tytuł. **(3)** Licznik znaków opisu wpisuje program (model podał 612 przy 701), a zdania-zaczepki opisu też muszą mieć pokrycie w tekście. **(4)** Nowe pole `Primary language`, jednowierszowe `Title`/`Subtitle`. **(5)** `_tryby` ostrzega, że retranslacja ISTNIEJĄCEGO przepisu przepisuje cały plik; wstrzymane dwa minorowe upgrade'y (`elevenlabs`, `markdown`).*
 
@@ -115,14 +115,16 @@ when a description falls short.
 newly added section at the END of every foreign manual, because the merge was a
 plain dictionary update. It now follows the section order of the Polish
 template; a key that exists only in the target file is kept, at the end. The old
-behaviour left `manual.yaml` and `readme.yaml` out of order in all eight foreign
-packs, so the next `-k` run on either file reorders it in full — a large but
-intended diff.
+behaviour had left `manual.yaml` and `readme.yaml` out of order in all eight
+foreign packs — in the English manual, "STEP 2B" stood after the 9.0–13.0
+changelogs. This release moves those sections back into the Polish order
+(content unchanged, verified section by section), and the regenerated manuals
+follow it.
 
-This is a hotfix, so the recipe change was made by hand in the nine packs (one
-sentence of the prompt plus one field) instead of through
-`buduj_wielojezyczne_tryby.py`, which rewrites the whole file on an existing
-recipe.
+Recipes now follow the same rule as the manuals: a small edit of an existing
+recipe (here one sentence of the prompt plus one field) is applied by hand in
+the nine packs instead of through `buduj_wielojezyczne_tryby.py`, which rewrites
+the whole file on an existing recipe (`CLAUDE.md`, Rule Manager section).
 
 ### Planned or deferred
 

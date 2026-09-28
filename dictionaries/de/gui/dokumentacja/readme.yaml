@@ -102,16 +102,6 @@ tresc:
     Die `.sh`-Skripte für macOS/Linux wurden in v13.1 entfernt — die Entwicklungsumgebung konzentriert sich auf Windows aufgrund der Spezifik der NVDA-Zugänglichkeitstests. Die Arbeit mit dem Code auf anderen Systemen ist möglich, erfordert jedoch eine manuelle Einrichtung: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
     **Skripte zum Erstellen von Release-Paketen** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) dienen ausschließlich zum Erstellen von Paketen für Windows. Ab Version 17.0 friert `build_release.py` die Anwendung mit PyInstaller ein (onedir + windowed) gemäß `rezyser_audio.spec` — es erzeugt `dist/` mit einer nativen `.exe` und einem Bundle-Ordner `runtime/` (Interpreter + Bibliotheken). Es ist kein tragbares Python mehr erforderlich, das manuell in das Repository geladen wird; die Verzeichnisse `dist/` und `build/` sind in `.gitignore`.
-  dokumentacja: |
-    ## Vollständige Dokumentation
-
-    Dieses README ist nur ein architektonischer Überblick über das Projekt. Um fortgeschrittene Techniken zur Vermeidung von KI-Halluzinationen, Installationsanweisungen für kompatible Sprachsynthesizer (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), eine vollständige Beschreibung der Modi "Geschichten mit Phiole" sowie ein vollständiges Benutzerhandbuch kennenzulernen, konsultieren Sie die Dateien im Ordner `docs/`:
-
-    * `docs/manual.<iso>.html` — Hauptbenutzerhandbuch (für Endbenutzer geschrieben).
-    * `docs/tales.<iso>.html` — Handbuch für den Modus "Geschichten" (interaktive Textspiele).
-    * `docs/dictionaries.<iso>.html` — Anleitung für Linguisten ohne Python, wie man eigene Akzente/Verschlüsselungen/AI-Modi hinzufügt.
-
-    Jede dieser Dateien ist in {liczba_kompletnych_jezykow} Sprachen verfügbar — Suffix `.<iso>.html` (z.B. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   polskie_nazewnictwo: |
     ### Polnische Benennungen — Leitfaden für Personen außerhalb des polnischen Sprachraums
 
@@ -131,6 +121,16 @@ tresc:
     * `rezyser/` — *Regisseur*: kreative Modi des Regisseur-Moduls.
     * `opowiesci/` — *Geschichten*: Modi interaktiver Geschichten.
     * `gui/` — Benutzeroberflächentexte (`ui.yaml`) und Dokumentationsvorlagen.
+  dokumentacja: |
+    ## Vollständige Dokumentation
+
+    Dieses README ist nur ein architektonischer Überblick über das Projekt. Um fortgeschrittene Techniken zur Vermeidung von KI-Halluzinationen, Installationsanweisungen für kompatible Sprachsynthesizer (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), eine vollständige Beschreibung der Modi "Geschichten mit Phiole" sowie ein vollständiges Benutzerhandbuch kennenzulernen, konsultieren Sie die Dateien im Ordner `docs/`:
+
+    * `docs/manual.<iso>.html` — Hauptbenutzerhandbuch (für Endbenutzer geschrieben).
+    * `docs/tales.<iso>.html` — Handbuch für den Modus "Geschichten" (interaktive Textspiele).
+    * `docs/dictionaries.<iso>.html` — Anleitung für Linguisten ohne Python, wie man eigene Akzente/Verschlüsselungen/AI-Modi hinzufügt.
+
+    Jede dieser Dateien ist in {liczba_kompletnych_jezykow} Sprachen verfügbar — Suffix `.<iso>.html` (z.B. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   licencja: |
     ## Lizenz
 

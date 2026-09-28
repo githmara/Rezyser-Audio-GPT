@@ -102,16 +102,6 @@ tresc:
     `.sh` scripts for macOS/Linux were removed in v13.1 — the development environment is focused on Windows due to the specifics of NVDA accessibility testing. Working with the code on other systems is possible but requires manual setup: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
     **Scripts for building release packages** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) are used exclusively for creating packages for Windows. From version 17.0, `build_release.py` freezes the application with PyInstaller (onedir + windowed) according to `rezyser_audio.spec` — it produces `dist/` with a native `.exe` and a `runtime/` bundle folder (interpreter + libraries). No portable Python manually uploaded to the repository is needed anymore; the `dist/` and `build/` directories are in `.gitignore`.
-  dokumentacja: |
-    ## Full Documentation
-
-    This README is only an architectural outline of the project. To learn advanced techniques for preventing AI hallucinations, installation instructions for compatible speech synthesizers (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), a full description of the Vial Story modes, and a complete user guide, refer to the files in the `docs/` folder:
-
-    * `docs/manual.<iso>.html` — main user manual (written for the end user).
-    * `docs/tales.<iso>.html` — Story mode manual (interactive text games).
-    * `docs/dictionaries.<iso>.html` — guide for linguists without Python on how to add custom accents/ciphers/AI modes.
-
-    Each of these files is available in {liczba_kompletnych_jezykow} languages — suffix `.<iso>.html` (e.g., `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   polskie_nazewnictwo: |
     ### Polish Naming — Guide for Non-Polish Speakers
 
@@ -131,6 +121,16 @@ tresc:
     * `rezyser/` — *director*: creative modes of the Director module.
     * `opowiesci/` — *stories*: interactive Story modes.
     * `gui/` — interface texts (`ui.yaml`) and documentation templates.
+  dokumentacja: |
+    ## Full Documentation
+
+    This README is only an architectural outline of the project. To learn advanced techniques for preventing AI hallucinations, installation instructions for compatible speech synthesizers (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), a full description of the Vial Story modes, and a complete user guide, refer to the files in the `docs/` folder:
+
+    * `docs/manual.<iso>.html` — main user manual (written for the end user).
+    * `docs/tales.<iso>.html` — Story mode manual (interactive text games).
+    * `docs/dictionaries.<iso>.html` — guide for linguists without Python on how to add custom accents/ciphers/AI modes.
+
+    Each of these files is available in {liczba_kompletnych_jezykow} languages — suffix `.<iso>.html` (e.g., `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   licencja: |
     ## License
 

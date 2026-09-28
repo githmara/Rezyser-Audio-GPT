@@ -102,16 +102,6 @@ tresc:
     `.sh`-skriptit macOS/Linuxille poistettiin versiossa 13.1 — kehitysympäristö keskittyy Windowsiin NVDA:n saavutettavuustestien erityispiirteiden vuoksi. Koodin kanssa työskentely muilla järjestelmillä on mahdollista, mutta vaatii manuaalista asennusta: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
     **Julkaisupakettien rakennusskriptit** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) on tarkoitettu ainoastaan Windows-pakettien luomiseen. Versiosta 17.0 alkaen `build_release.py` jäädyttää sovelluksen PyInstallerilla (onedir + windowed) `rezyser_audio.spec`-tiedoston mukaisesti — tuottaa `dist/`-hakemiston, jossa on alkuperäinen `.exe` ja bundlen `runtime/`-kansio (tulkki + kirjastot). Manuaalisesti ladattua siirrettävää Pythonia ei enää tarvita arkistoon; `dist/` ja `build/`-hakemistot ovat `.gitignore`-tiedostossa.
-  dokumentacja: |
-    ## Täydellinen dokumentaatio
-
-    Tämä README on vain projektin arkkitehtoninen luonnos. Jos haluat oppia kehittyneitä tekniikoita AI-harhojen estämiseksi, yhteensopivien puhesyntetisaattoreiden (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices) asennusohjeita, täydellisen kuvauksen Tarinat-tiloista sekä täydellisen käyttöoppaan, tutustu `docs/`-kansiossa oleviin tiedostoihin:
-
-    * `docs/manual.<iso>.html` — pääasiallinen käyttöohje (kirjoitettu loppukäyttäjälle).
-    * `docs/tales.<iso>.html` — Tarinat-tilan ohjekirja (interaktiiviset tekstipelit).
-    * `docs/dictionaries.<iso>.html` — ohjeet lingvisteille ilman Pythonia, kuinka lisätä omia aksentteja/salauksia/AI-tiloja.
-
-    Jokainen näistä tiedostoista on saatavilla {liczba_kompletnych_jezykow} kielellä — suffiksi `.<iso>.html` (esim. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   polskie_nazewnictwo: |
     ### Puolan kielinen nimistö — opas ei-puolankielisille käyttäjille
 
@@ -131,6 +121,16 @@ tresc:
     * `rezyser/` — *director*: Ohjaaja-moduulin luovat tilat.
     * `opowiesci/` — *stories*: interaktiivisten Tarinoiden tilat.
     * `gui/` — käyttöliittymän tekstit (`ui.yaml`) ja dokumentaatiomallit.
+  dokumentacja: |
+    ## Täydellinen dokumentaatio
+
+    Tämä README on vain projektin arkkitehtoninen luonnos. Jos haluat oppia kehittyneitä tekniikoita AI-harhojen estämiseksi, yhteensopivien puhesyntetisaattoreiden (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices) asennusohjeita, täydellisen kuvauksen Tarinat-tiloista sekä täydellisen käyttöoppaan, tutustu `docs/`-kansiossa oleviin tiedostoihin:
+
+    * `docs/manual.<iso>.html` — pääasiallinen käyttöohje (kirjoitettu loppukäyttäjälle).
+    * `docs/tales.<iso>.html` — Tarinat-tilan ohjekirja (interaktiiviset tekstipelit).
+    * `docs/dictionaries.<iso>.html` — ohjeet lingvisteille ilman Pythonia, kuinka lisätä omia aksentteja/salauksia/AI-tiloja.
+
+    Jokainen näistä tiedostoista on saatavilla {liczba_kompletnych_jezykow} kielellä — suffiksi `.<iso>.html` (esim. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   licencja: |
     ## Lisenssi
 

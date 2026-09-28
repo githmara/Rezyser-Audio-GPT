@@ -7,7 +7,7 @@
 
 A set of self-contained AI-powered tools for automatic writing, planning, formatting, and translating extensive scripts, as well as conducting interactive text games. The project is a native desktop application (wxPython) designed from the ground up with full accessibility for screen readers (NVDA, VoiceOver) and compatibility with professional text-to-speech synthesizers (TTS). It operates without a browser and without a local server — it launches as a regular program window.
 
-Version: **19.8.1** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **19.8.2** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Main Modules
@@ -100,17 +100,6 @@ This is a fundamental limitation of the current generation of artificial intelli
 **Scripts for building release packages** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) are used exclusively for creating packages for Windows. From version 17.0, `build_release.py` freezes the application with PyInstaller (onedir + windowed) according to `rezyser_audio.spec` — it produces `dist/` with a native `.exe` and a `runtime/` bundle folder (interpreter + libraries). No portable Python manually uploaded to the repository is needed anymore; the `dist/` and `build/` directories are in `.gitignore`.
 
 
-## Full Documentation
-
-This README is only an architectural outline of the project. To learn advanced techniques for preventing AI hallucinations, installation instructions for compatible speech synthesizers (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), a full description of the Vial Story modes, and a complete user guide, refer to the files in the `docs/` folder:
-
-* `docs/manual.<iso>.html` — main user manual (written for the end user).
-* `docs/tales.<iso>.html` — Story mode manual (interactive text games).
-* `docs/dictionaries.<iso>.html` — guide for linguists without Python on how to add custom accents/ciphers/AI modes.
-
-Each of these files is available in 9 languages — suffix `.<iso>.html` (e.g., `manual.pl.html`, `manual.en.html`, `manual.de.html`).
-
-
 ### Polish Naming — Guide for Non-Polish Speakers
 
 The primary language of this project is Polish. Module names, class names, code comments, as well as directory and data file names are in Polish and — for backward compatibility and multilingual engine contract reasons — are intentionally NOT translated or changed. The following glossary will help developers and macOS/Linux system users navigate the structure.
@@ -129,6 +118,17 @@ The primary language of this project is Polish. Module names, class names, code 
 * `rezyser/` — *director*: creative modes of the Director module.
 * `opowiesci/` — *stories*: interactive Story modes.
 * `gui/` — interface texts (`ui.yaml`) and documentation templates.
+
+
+## Full Documentation
+
+This README is only an architectural outline of the project. To learn advanced techniques for preventing AI hallucinations, installation instructions for compatible speech synthesizers (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), a full description of the Vial Story modes, and a complete user guide, refer to the files in the `docs/` folder:
+
+* `docs/manual.<iso>.html` — main user manual (written for the end user).
+* `docs/tales.<iso>.html` — Story mode manual (interactive text games).
+* `docs/dictionaries.<iso>.html` — guide for linguists without Python on how to add custom accents/ciphers/AI modes.
+
+Each of these files is available in 9 languages — suffix `.<iso>.html` (e.g., `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ## License

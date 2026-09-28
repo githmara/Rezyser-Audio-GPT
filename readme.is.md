@@ -7,7 +7,7 @@
 
 Safn sjálfstæðra verkfæra knúin af gervigreind til sjálfvirkrar ritunar, skipulagningar, sniðmáts og þýðingar á umfangsmiklum handritum og til að stýra gagnvirkum textaleikjum. Verkefnið er innfæddur skjáborðsforrit (wxPython) hannað frá grunni með fullu aðgengi fyrir skjálesara (NVDA, VoiceOver) og samhæfni við faglega talgervla (TTS). Það virkar án vafra og án staðbundins netþjóns — keyrir sem venjulegur gluggi forrits.
 
-Útgáfa: **19.8.1** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Útgáfa: **19.8.2** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Helstu einingar
@@ -100,17 +100,6 @@ Ráðlagður og sjálfgefinn AI-þjónustuveitandi er Anthropic (Claude) — all
 **Byggingarskriftur fyrir útgáfupakka** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) eru eingöngu til að búa til pakka fyrir Windows. Frá útgáfu 17.0 frystir `build_release.py` forritið með PyInstaller (onedir + windowed) samkvæmt `rezyser_audio.spec` — framleiðir `dist/` með innfæddri `.exe` og möppu `runtime/` (túlkur + bókasöfn). Engin þörf er lengur á flutningshæfu Python sem er hlaðið handvirkt inn í geymsluna; möppur `dist/` og `build/` eru í `.gitignore`.
 
 
-## Full skjal
-
-Þetta README er aðeins uppbyggingarútdráttur verkefnisins. Til að læra um háþróaðar aðferðir til að koma í veg fyrir ofskynjanir AI, uppsetningarleiðbeiningar fyrir samhæfða talgervla (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), fulla lýsingu á sögumódum með flösku, og fullkomna notendahandbók, skoðaðu skrárnar í `docs/` möppunni:
-
-* `docs/manual.<iso>.html` — aðalnotendahandbókin (skrifuð fyrir endanotanda).
-* `docs/tales.<iso>.html` — handbók fyrir sögumóða (gagnvirkir textaleikir).
-* `docs/dictionaries.<iso>.html` — leiðbeiningar fyrir málfræðinga án Python, um hvernig á að bæta við eigin hreim/sifrum/AI-móda.
-
-Hver af þessum skrám er fáanleg á 9 tungumálum — viðskeyti `.<iso>.html` (t.d. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
-
-
 ### Pólskt heiti — leiðarvísir fyrir þá sem eru utan pólska tungumálasvæðisins
 
 Aðaltungumál þessa verkefnis er pólska. Nöfn eininga, flokka, athugasemdir í kóða, sem og nöfn skráa og gagnamöppur eru á pólsku og — vegna afturvirkrar samhæfni og margmálavélar — eru vísvitandi EKKI þýdd eða breytt. Eftirfarandi orðalisti mun hjálpa forriturum og notendum macOS/Linux kerfa að átta sig á uppbyggingunni.
@@ -129,6 +118,17 @@ Aðaltungumál þessa verkefnis er pólska. Nöfn eininga, flokka, athugasemdir 
 * `rezyser/` — *director*: skapandi hamir Leikstjóraeiningarinnar.
 * `opowiesci/` — *stories*: hamir fyrir gagnvirkar sögur.
 * `gui/` — viðmótstextar (`ui.yaml`) og skjalasniðmát.
+
+
+## Full skjal
+
+Þetta README er aðeins uppbyggingarútdráttur verkefnisins. Til að læra um háþróaðar aðferðir til að koma í veg fyrir ofskynjanir AI, uppsetningarleiðbeiningar fyrir samhæfða talgervla (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), fulla lýsingu á sögumódum með flösku, og fullkomna notendahandbók, skoðaðu skrárnar í `docs/` möppunni:
+
+* `docs/manual.<iso>.html` — aðalnotendahandbókin (skrifuð fyrir endanotanda).
+* `docs/tales.<iso>.html` — handbók fyrir sögumóða (gagnvirkir textaleikir).
+* `docs/dictionaries.<iso>.html` — leiðbeiningar fyrir málfræðinga án Python, um hvernig á að bæta við eigin hreim/sifrum/AI-móda.
+
+Hver af þessum skrám er fáanleg á 9 tungumálum — viðskeyti `.<iso>.html` (t.d. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ## Leyfi

@@ -7,7 +7,7 @@
 
 Itsenäinen tekoälyllä toimivien työkalujen kokoelma laajojen käsikirjoitusten automaattiseen kirjoittamiseen, suunnitteluun, muotoiluun ja kääntämiseen sekä interaktiivisten tekstipelien johtamiseen. Projekti on natiivi työpöytäsovellus (wxPython), joka on suunniteltu alusta alkaen täysin saavutettavaksi ruudunlukijoille (NVDA, VoiceOver) ja yhteensopivaksi ammattimaisten puhesynteesien (TTS) kanssa. Toimii ilman selainta ja ilman paikallista palvelinta — käynnistyy tavallisena ohjelmaikkunana.
 
-Versio: **19.8.1** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versio: **19.8.2** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Päämoduulit
@@ -100,17 +100,6 @@ Tämä on nykyisen sukupolven tekoälyn perustavanlaatuinen rajoitus. Tästä sy
 **Julkaisupakettien rakennusskriptit** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) on tarkoitettu ainoastaan Windows-pakettien luomiseen. Versiosta 17.0 alkaen `build_release.py` jäädyttää sovelluksen PyInstallerilla (onedir + windowed) `rezyser_audio.spec`-tiedoston mukaisesti — tuottaa `dist/`-hakemiston, jossa on alkuperäinen `.exe` ja bundlen `runtime/`-kansio (tulkki + kirjastot). Manuaalisesti ladattua siirrettävää Pythonia ei enää tarvita arkistoon; `dist/` ja `build/`-hakemistot ovat `.gitignore`-tiedostossa.
 
 
-## Täydellinen dokumentaatio
-
-Tämä README on vain projektin arkkitehtoninen luonnos. Jos haluat oppia kehittyneitä tekniikoita AI-harhojen estämiseksi, yhteensopivien puhesyntetisaattoreiden (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices) asennusohjeita, täydellisen kuvauksen Tarinat-tiloista sekä täydellisen käyttöoppaan, tutustu `docs/`-kansiossa oleviin tiedostoihin:
-
-* `docs/manual.<iso>.html` — pääasiallinen käyttöohje (kirjoitettu loppukäyttäjälle).
-* `docs/tales.<iso>.html` — Tarinat-tilan ohjekirja (interaktiiviset tekstipelit).
-* `docs/dictionaries.<iso>.html` — ohjeet lingvisteille ilman Pythonia, kuinka lisätä omia aksentteja/salauksia/AI-tiloja.
-
-Jokainen näistä tiedostoista on saatavilla 9 kielellä — suffiksi `.<iso>.html` (esim. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
-
-
 ### Puolan kielinen nimistö — opas ei-puolankielisille käyttäjille
 
 Tämän projektin pääkieli on puola. Moduulien nimet, luokat, koodikommentit sekä hakemistojen ja datatiedostojen nimet ovat puolankielisiä, ja — taaksepäin yhteensopivuuden ja monikielimoottorin sopimuksen vuoksi — niitä EI tarkoituksella käännetä tai muuteta. Seuraava sanasto auttaa kehittäjiä ja macOS/Linux-käyttäjiä hahmottamaan rakennetta.
@@ -129,6 +118,17 @@ Tämän projektin pääkieli on puola. Moduulien nimet, luokat, koodikommentit s
 * `rezyser/` — *director*: Ohjaaja-moduulin luovat tilat.
 * `opowiesci/` — *stories*: interaktiivisten Tarinoiden tilat.
 * `gui/` — käyttöliittymän tekstit (`ui.yaml`) ja dokumentaatiomallit.
+
+
+## Täydellinen dokumentaatio
+
+Tämä README on vain projektin arkkitehtoninen luonnos. Jos haluat oppia kehittyneitä tekniikoita AI-harhojen estämiseksi, yhteensopivien puhesyntetisaattoreiden (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices) asennusohjeita, täydellisen kuvauksen Tarinat-tiloista sekä täydellisen käyttöoppaan, tutustu `docs/`-kansiossa oleviin tiedostoihin:
+
+* `docs/manual.<iso>.html` — pääasiallinen käyttöohje (kirjoitettu loppukäyttäjälle).
+* `docs/tales.<iso>.html` — Tarinat-tilan ohjekirja (interaktiiviset tekstipelit).
+* `docs/dictionaries.<iso>.html` — ohjeet lingvisteille ilman Pythonia, kuinka lisätä omia aksentteja/salauksia/AI-tiloja.
+
+Jokainen näistä tiedostoista on saatavilla 9 kielellä — suffiksi `.<iso>.html` (esim. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ## Lisenssi

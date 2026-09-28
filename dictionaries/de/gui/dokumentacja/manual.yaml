@@ -91,6 +91,23 @@ tresc:
     4. In der geöffneten Datei sehen Sie die Zeile: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Löschen Sie den Platzhaltertext und fügen Sie Ihren Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen und ohne Anführungszeichen). Speichern Sie die Datei und starten Sie die Anwendung neu.
 
     **Hinweis:** Nach dem Neustart prüft die Anwendung die Datei und zeigt im Bereich „{home.heading_system_check}" den Status des Schlüssels an. Er muss grün sein, damit alle KI-Module einsatzbereit sind. Fehlt der Schlüssel oder ist er fehlerhaft, weist das Programm klar darauf hin und ermöglicht es, den Texteditor zu öffnen, um den Fehler schnell zu beheben.
+  krok_2b_dostawca_zaawansowany: |
+    ## SCHRITT 2B (erweitert, optional): Eigener KI-Anbieter kompatibel mit OpenAI
+
+    Die meisten Benutzer sollten beim empfohlenen Anthropic (SCHRITT 2) bleiben — er liefert die höchste Qualität. Wenn du jedoch einen eigenen Grund hast (Kosten, Zugang, Datenschutz, eigenes lokales Modell), kannst du ab Version 18.4 JEDEN Endpunkt angeben, der mit der OpenAI-API kompatibel ist — zum Beispiel OpenRouter, Groq, Fireworks, DeepSeek, lokales Ollama oder einen OpenAI-kompatiblen Gemini-Endpunkt. Die gesamte KI-Engine läuft dann über einen einzigen Pfad zu diesem Endpunkt, ohne separate Integration pro Anbieter.
+
+    Dies ist eine Option für Fortgeschrittene: Du konfigurierst sie manuell in der Datei golden_key.env, indem du neben (oder anstelle von) dem Anthropic-Schlüssel drei Zeilen sowie den Schlüssel des gewählten Anbieters hinzufügst:
+
+    LLM_PROVIDER=openai_compat
+    LLM_BASE_URL=adresse_des_endpunkts (z. B. https://openrouter.ai/api/v1)
+    LLM_MODEL=modellname_beim_anbieter (z. B. openai/gpt-4o-mini)
+    OPENAI_API_KEY=dein_schlüssel_bei_diesem_anbieter
+
+    So funktioniert es:
+    •  Wenn LLM_PROVIDER=openai_compat gesetzt ist, nutzt die GESAMTE KI-Engine (Regisseur, Geschichten, Polyglott, Titel, Spracherkennung) den angegebenen Endpunkt, und der Modellname aus den Konfigurationsdateien wird durch LLM_MODEL überschrieben.
+    •  Wenn die Zeile LLM_PROVIDER fehlt (oder den Wert anthropic hat), verhält sich die Anwendung wie in SCHRITT 2 — ausschließlich mit dem Anthropic-Schlüssel. Du musst nichts ändern.
+
+    **Wichtig (Qualität):** Die System-Prompts der Anwendung sind für Claude geschrieben und optimiert. Ein anderes Modell kann eine geringere Qualität liefern — es hält sich möglicherweise schlechter an die Weltregeln, verliert die JSON-Struktur in Modi mit Auswahlmöglichkeiten oder gibt Text in der falschen Sprache zurück. Dies ist ein bewusster Kosten↔Qualität-Kompromiss auf deiner Seite. Wenn dir das beste Ergebnis wichtig ist, bleib bei Anthropic.
   krok_3_glowne_studio: |
     ## SCHRITT 3: Das Haupt-Regie-Studio
 
@@ -362,6 +379,23 @@ tresc:
 
     - Schutzschild: Das Skript schützt alle HTML-Tags. Es verdirbt nur Dialoge und Erzählung.
     - Funktioniert lokal und kostet nichts!
+  krok_5_naprawiacz_per_akapit: |
+    ## Tag-Reparateur: Sprachcode separat für jeden Absatz (NEU in Version 19.2)
+
+    Unter dem Feld für den ISO-Code findest du das Auswahlfeld „{poliglota.chk_per_akapit}". Nicht angehakt — es bleibt alles beim Alten: ein Code gilt für die ganze Datei, und es öffnet sich kein zusätzliches Fenster. Angehakt — nach Betätigung von „{poliglota.btn_process}" öffnet sich eine Liste der Absätze deiner Datei.
+
+    Jeder Listeneintrag zeigt sofort drei Dinge: die Nummer des Absatzes, den Anfang seines Inhalts und den Code, den dieser Absatz erhalten wird. Du musst also in kein Feld hineingehen, um zu erfahren, was wohin gelangt. Unter der Liste stehen drei Angaben zum ausgewählten Absatz: sein vollständiger Inhalt, das Ergebnis der Spracherkennung und das Feld, in dem du den Code änderst. Alle Absätze starten mit dem Code, den du in das Feld „ISO-Code" eingetragen hast — in die Datei gelangt kein Code, den du nicht bestätigt hast.
+
+    Zwei Schaltflächen verkürzen die Arbeit bei einer längeren Datei. „{poliglota.per_akapit_btn_wszystkie}" verteilt den aktuellen Code auf die gesamte Liste — nützlich, wenn du den globalen Code ändern und danach nur ein paar Ausnahmen korrigieren möchtest. „{poliglota.per_akapit_btn_detektor}" fragt der Reihe nach die Sprache jedes Absatzes ab und trägt die Antworten als Codes ein; ein Absatz, bei dem die Erkennung keine eindeutige Aussage treffen kann (zu kurz oder unsicheres Ergebnis), behält den Code, den er bereits hatte — ein „weiß nicht" überschreibt niemals das, was du eingegeben hast.
+
+    Die Spracherkennung in diesem Fenster kennt ALLE Sprachen, die die Erkennungsbibliothek unterscheidet — auch jene, für die das Programm kein eigenes Regelpaket besitzt. Das ist beabsichtigt: Der Tag-Reparator existiert gerade für Dateien in Sprachen, für die wir keinen Akzent haben, daher wäre eine auf die implementierten Pakete verengte Antwort für ihn sicher und zugleich falsch (ein tschechischer Absatz würde beispielsweise als Deutsch bezeichnet). Der Hinweis bleibt ein Hinweis — die Entscheidung liegt trotzdem bei dir.
+
+    Was ein „Absatz" ist, hängt vom Dateiformat ab, denn das Programm vergibt den Code genau an jene Stellen, die der Bildschirmleser als eigenständige Einheiten erkennt: in .docx ist das ein Absatz des Word-Dokuments, in einer HTML-Datei ein Absatz, eine Überschrift, ein Listenpunkt oder eine Tabellenzelle, und in .txt ein durch eine Leerzeile getrennter Abschnitt. Die Liste zeigt sie in Lesereihenfolge, sodass Position Nummer 7 die siebte Stelle ist, zu der der Synthesizer gelangen wird.
+
+    Zwei Korrekturen, die bei dieser Gelegenheit hinzugefügt wurden:
+
+    - Tabellen in .docx erhalten endlich einen Sprachcode. Das Programm hat sie bislang überhaupt nicht wahrgenommen: Absätze aus Zellen wurden nicht getaggt, und beim Einlesen der Datei erschien ihr Inhalt nicht einmal in der Vorschau oder im Zeichenzähler. Jetzt durchlaufen sowohl die Vorschau als auch das Tagging den gesamten Inhalt des Dokuments, einschließlich verschachtelter Tabellen.
+    - Eine Dateierweiterung, die das Programm nicht direkt unterstützt, liefert jetzt eine klare Warnung. In einer solchen Datei gibt es keinen Platz, um den Sprachcode unterzubringen, sodass der Tag-Reparator eine mit dem Original identische Kopie gespeichert hätte — und bislang meldete er „{common.sukces_tytul}" und gab den Pfad einer Datei an, in der sich außer dem Namen nichts geändert hatte.
   krok_5_tryb_szyfrant: |
     ## Modus 3: Kryptograph (NEU in 13.0 — Textspielereien, kostenlos, lokal)
 
@@ -526,6 +560,39 @@ tresc:
     Wo Sie weitere Dokumentation zum Ordner dictionaries/ finden:
     - Die Datei `docs/dictionaries.pl.html` (verfügbar im Paket für Endbenutzer im Reiter Releases) — eine kurze, in einfacher Sprache verfasste Beschreibung jedes Unterordners, 6 fertiger Chiffren, 8 fertiger Akzente sowie Ideen, was man selbst umsetzen kann, ohne Python-Kenntnisse.
     - Die Datei `dictionaries/README.md` (nur verfügbar beim Klonen des Repositories von GitHub — die Release-Pakete filtern .md-Dateien heraus) — detaillierte technische Dokumentation des YAML-Formats mit Beispielen, Feldlisten, Pipeline-Regeln, Regex-Ausdrücken. Dieses Dokument richtet sich an Linguisten mit Grundkenntnissen im Programmieren sowie an Entwickler.
+  krok_7b_manager_regul_kolejnosc_zamian: |
+    ## SCHRITT 7b (Ergänzung): Die Reihenfolge der `zamiany:`-Regeln ist wichtig
+
+    Die Dateien in `dictionaries/<kod>/akcenty/*.yaml` enthalten eine Liste von `zamiany:`-Regeln — Paare von `wzor → zamiana`, die die Engine SEQUENZIELL anwendet. Jede nachfolgende Regel arbeitet auf der Ausgabe der vorherigen. Dies ermöglicht den Aufbau von Pipelines wie „zerlege den Digraphen `szcz` in `shch` und ersetze dann `ch` durch `h`", birgt jedoch auch die klassische Falle für den Autor eines Sprachpakets.
+
+    Die „sequenzielle Schleifen"-Falle. Angenommen, für einen spanischen Akzent, der das polnische „ñ" an die Aussprache von Diego (Loquendo) anpassen soll, fügt der Autor zwei Regeln hinzu:
+    1. `ñ → nj` (damit das polnische „ñ" wie ein weiches „nj" klingt)
+    2. `j → x` (damit das polnische „j" wie das spanische „j" klingt — phonetisch /x/)
+
+    Nach dem Start stellt sich heraus, dass Wörter mit „ñ" als „nx" und nicht als „nj" ausgesprochen werden. Warum? Weil die erste Regel „ñ" in „nj" umwandelt, wird das neue „j" sofort von der zweiten Regel erfasst und in „x" umgewandelt. Ergebnis: Anstatt des beabsichtigten „ñ → nj" erhalten wir „ñ → nx".
+
+    Die Regel der Reihenfolge (universell). Wenn eine Regel ein Zeichen einführt, das in einer anderen Regel als Muster verwendet wird, IST DIE REIHENFOLGE WICHTIG. Eine sichere Heuristik: ZUERST das TARGET (das Zeichen, das später als `wzor` in einer anderen Regel verwendet wird) in etwas Sicheres umwandeln, DANN das SOURCE (das Zeichen, das sich in das TARGET auflösen soll) einführen. Für das spanische Beispiel korrekt: zuerst `j → x`, dann `ñ → nj`. Ergebnis: „ñ" ergibt „nj" (das zweite „j" wird nicht mehr erfasst, da die Regel `j → x` bereits angewendet wurde, als „nj" noch nicht existierte).
+
+    Wie man testet. Nach dem Ändern der Reihenfolge der Regeln in der Akzentdatei, lassen Sie einen Satz, der BEIDE Buchstaben enthält, durch den Regisseur-Modus laufen. Für das Beispiel ES: „Niño de paja juega" → das Ergebnis muss sowohl den ñ-Akzent („ñ → nj") als auch den j-Akzent („j → x") haben, also etwas wie „Ninjo de paxa xuega". Wenn Sie „ninxo" statt „ninjo" sehen — die Reihenfolge ist umgekehrt.
+
+    Validierung in der Engine (opt-in für Paketautoren). Die Anwendung verfügt über eine eingebaute Heuristik zur Erkennung potenzieller Schleifen, ist jedoch standardmäßig deaktiviert — da viele Pipelines wie eine Schleife aussehen, obwohl sie beabsichtigt sind (klassisches „szcz → shch" + „ch → h"). Um sie zu aktivieren: Setzen Sie die Umgebungsvariable `REZYSER_VALIDATE_ZAMIANY=1` und starten Sie die Anwendung von der Konsole aus — aus der Quelle über `python main.py`, da das eingefrorene `.exe` im Fenstermodus (ab Version 17.0) kein Konsolenfenster hat. Die Engine gibt für jede Akzentdatei eine aggregierte WARN-Zeile mit den ersten drei potenziellen Schleifen und der Anzahl der verbleibenden aus. Überprüfen Sie die resultierende Phonetik am Testsatz — wenn der Effekt beabsichtigt ist, ignorieren Sie die WARN.
+
+    Die Schaltflächen zum Verschieben von Regeln im GUI-Regel-Manager (Drag-and-Drop, „Nach oben / Nach unten") sind eine separate Funktion, die für einen späteren Versionszyklus geplant ist — sie erfordert eine Neugestaltung des Managers (derzeit delegiert er die Bearbeitung der Datei an den externen System-Notizblock und hat keine eigene Regelansicht). Bis zur Implementierung: Bearbeiten Sie die YAML-Datei manuell, verschieben Sie Zeilen im Abschnitt `zamiany:`, verwenden Sie den Validator mit ENV-Variable und testen Sie an Kontrollsätzen.
+  krok_7b_polskie_nazewnictwo: |
+    ## SCHRITT 7b — Polnische Namen von Ordnern und Dateien (für Benutzer außerhalb Polens)
+
+    Das Programm wird von der polnischen Sprache gesteuert — sie ist die Hauptsprache des Projekts. Beim Durchsuchen des dictionaries/-Ordners im Regelmanager (Ctrl+4) oder beim Blick in die Speicherordner stoßen Sie auf polnische Namen. Diese sind KEIN Fehler oder Übersetzungsmangel: Sie bleiben absichtlich polnisch, da sie interne Identifikatoren der Engine sind. Das folgende Glossar erklärt, was sie bedeuten.
+
+    Unterordner in `dictionaries/<kod>/` (das sehen Sie im Regelmanager):
+    - podstawy (basics) — Konfiguration des Sprachpakets
+    - akcenty (accents) — phonetische Regeln für Sprachsynthesizer
+    - szyfry (ciphers) — Textverschlüsselungsmodi
+    - rezyser (director) — kreative Modi des Regisseursmoduls
+    - opowiesci (stories) — Modi für interaktive Geschichten
+
+    Ordner mit Ihren Aufzeichnungen (neben dem Programm):
+    - skrypty (scripts) — Regisseurprojekte: Erzählung .txt, Weltbuch .md
+    - opowiesci (stories) — Aufzeichnungen interaktiver Geschichten
   nvda_a11y: |
     ## Wichtige Hinweise für Benutzer von Bildschirmlesegeräten (NVDA)
 
@@ -681,70 +748,3 @@ tresc:
     - Automatisches Laden des kreativen Modus aus der Projekt-Metadatendatei.
     - Alle Akzente aus früheren Versionen (Englisch, Französisch, Deutsch, Spanisch, Italienisch, Finnisch, Isländisch) sowie Tag-Reparatur.
     - Volle AI-Funktionen: Brainstorming, Skript, Hörbuch, Plot-Akkumulator, Unendliches Gedächtnis, Titelvergabe.
-  krok_7b_manager_regul_kolejnosc_zamian: |
-    ## SCHRITT 7b (Ergänzung): Die Reihenfolge der `zamiany:`-Regeln ist wichtig
-
-    Die Dateien in `dictionaries/<kod>/akcenty/*.yaml` enthalten eine Liste von `zamiany:`-Regeln — Paare von `wzor → zamiana`, die die Engine SEQUENZIELL anwendet. Jede nachfolgende Regel arbeitet auf der Ausgabe der vorherigen. Dies ermöglicht den Aufbau von Pipelines wie „zerlege den Digraphen `szcz` in `shch` und ersetze dann `ch` durch `h`", birgt jedoch auch die klassische Falle für den Autor eines Sprachpakets.
-
-    Die „sequenzielle Schleifen"-Falle. Angenommen, für einen spanischen Akzent, der das polnische „ñ" an die Aussprache von Diego (Loquendo) anpassen soll, fügt der Autor zwei Regeln hinzu:
-    1. `ñ → nj` (damit das polnische „ñ" wie ein weiches „nj" klingt)
-    2. `j → x` (damit das polnische „j" wie das spanische „j" klingt — phonetisch /x/)
-
-    Nach dem Start stellt sich heraus, dass Wörter mit „ñ" als „nx" und nicht als „nj" ausgesprochen werden. Warum? Weil die erste Regel „ñ" in „nj" umwandelt, wird das neue „j" sofort von der zweiten Regel erfasst und in „x" umgewandelt. Ergebnis: Anstatt des beabsichtigten „ñ → nj" erhalten wir „ñ → nx".
-
-    Die Regel der Reihenfolge (universell). Wenn eine Regel ein Zeichen einführt, das in einer anderen Regel als Muster verwendet wird, IST DIE REIHENFOLGE WICHTIG. Eine sichere Heuristik: ZUERST das TARGET (das Zeichen, das später als `wzor` in einer anderen Regel verwendet wird) in etwas Sicheres umwandeln, DANN das SOURCE (das Zeichen, das sich in das TARGET auflösen soll) einführen. Für das spanische Beispiel korrekt: zuerst `j → x`, dann `ñ → nj`. Ergebnis: „ñ" ergibt „nj" (das zweite „j" wird nicht mehr erfasst, da die Regel `j → x` bereits angewendet wurde, als „nj" noch nicht existierte).
-
-    Wie man testet. Nach dem Ändern der Reihenfolge der Regeln in der Akzentdatei, lassen Sie einen Satz, der BEIDE Buchstaben enthält, durch den Regisseur-Modus laufen. Für das Beispiel ES: „Niño de paja juega" → das Ergebnis muss sowohl den ñ-Akzent („ñ → nj") als auch den j-Akzent („j → x") haben, also etwas wie „Ninjo de paxa xuega". Wenn Sie „ninxo" statt „ninjo" sehen — die Reihenfolge ist umgekehrt.
-
-    Validierung in der Engine (opt-in für Paketautoren). Die Anwendung verfügt über eine eingebaute Heuristik zur Erkennung potenzieller Schleifen, ist jedoch standardmäßig deaktiviert — da viele Pipelines wie eine Schleife aussehen, obwohl sie beabsichtigt sind (klassisches „szcz → shch" + „ch → h"). Um sie zu aktivieren: Setzen Sie die Umgebungsvariable `REZYSER_VALIDATE_ZAMIANY=1` und starten Sie die Anwendung von der Konsole aus — aus der Quelle über `python main.py`, da das eingefrorene `.exe` im Fenstermodus (ab Version 17.0) kein Konsolenfenster hat. Die Engine gibt für jede Akzentdatei eine aggregierte WARN-Zeile mit den ersten drei potenziellen Schleifen und der Anzahl der verbleibenden aus. Überprüfen Sie die resultierende Phonetik am Testsatz — wenn der Effekt beabsichtigt ist, ignorieren Sie die WARN.
-
-    Die Schaltflächen zum Verschieben von Regeln im GUI-Regel-Manager (Drag-and-Drop, „Nach oben / Nach unten") sind eine separate Funktion, die für einen späteren Versionszyklus geplant ist — sie erfordert eine Neugestaltung des Managers (derzeit delegiert er die Bearbeitung der Datei an den externen System-Notizblock und hat keine eigene Regelansicht). Bis zur Implementierung: Bearbeiten Sie die YAML-Datei manuell, verschieben Sie Zeilen im Abschnitt `zamiany:`, verwenden Sie den Validator mit ENV-Variable und testen Sie an Kontrollsätzen.
-  krok_7b_polskie_nazewnictwo: |
-    ## SCHRITT 7b — Polnische Namen von Ordnern und Dateien (für Benutzer außerhalb Polens)
-
-    Das Programm wird von der polnischen Sprache gesteuert — sie ist die Hauptsprache des Projekts. Beim Durchsuchen des dictionaries/-Ordners im Regelmanager (Ctrl+4) oder beim Blick in die Speicherordner stoßen Sie auf polnische Namen. Diese sind KEIN Fehler oder Übersetzungsmangel: Sie bleiben absichtlich polnisch, da sie interne Identifikatoren der Engine sind. Das folgende Glossar erklärt, was sie bedeuten.
-
-    Unterordner in `dictionaries/<kod>/` (das sehen Sie im Regelmanager):
-    - podstawy (basics) — Konfiguration des Sprachpakets
-    - akcenty (accents) — phonetische Regeln für Sprachsynthesizer
-    - szyfry (ciphers) — Textverschlüsselungsmodi
-    - rezyser (director) — kreative Modi des Regisseursmoduls
-    - opowiesci (stories) — Modi für interaktive Geschichten
-
-    Ordner mit Ihren Aufzeichnungen (neben dem Programm):
-    - skrypty (scripts) — Regisseurprojekte: Erzählung .txt, Weltbuch .md
-    - opowiesci (stories) — Aufzeichnungen interaktiver Geschichten
-  krok_2b_dostawca_zaawansowany: |
-    ## SCHRITT 2B (erweitert, optional): Eigener KI-Anbieter kompatibel mit OpenAI
-
-    Die meisten Benutzer sollten beim empfohlenen Anthropic (SCHRITT 2) bleiben — er liefert die höchste Qualität. Wenn du jedoch einen eigenen Grund hast (Kosten, Zugang, Datenschutz, eigenes lokales Modell), kannst du ab Version 18.4 JEDEN Endpunkt angeben, der mit der OpenAI-API kompatibel ist — zum Beispiel OpenRouter, Groq, Fireworks, DeepSeek, lokales Ollama oder einen OpenAI-kompatiblen Gemini-Endpunkt. Die gesamte KI-Engine läuft dann über einen einzigen Pfad zu diesem Endpunkt, ohne separate Integration pro Anbieter.
-
-    Dies ist eine Option für Fortgeschrittene: Du konfigurierst sie manuell in der Datei golden_key.env, indem du neben (oder anstelle von) dem Anthropic-Schlüssel drei Zeilen sowie den Schlüssel des gewählten Anbieters hinzufügst:
-
-    LLM_PROVIDER=openai_compat
-    LLM_BASE_URL=adresse_des_endpunkts (z. B. https://openrouter.ai/api/v1)
-    LLM_MODEL=modellname_beim_anbieter (z. B. openai/gpt-4o-mini)
-    OPENAI_API_KEY=dein_schlüssel_bei_diesem_anbieter
-
-    So funktioniert es:
-    •  Wenn LLM_PROVIDER=openai_compat gesetzt ist, nutzt die GESAMTE KI-Engine (Regisseur, Geschichten, Polyglott, Titel, Spracherkennung) den angegebenen Endpunkt, und der Modellname aus den Konfigurationsdateien wird durch LLM_MODEL überschrieben.
-    •  Wenn die Zeile LLM_PROVIDER fehlt (oder den Wert anthropic hat), verhält sich die Anwendung wie in SCHRITT 2 — ausschließlich mit dem Anthropic-Schlüssel. Du musst nichts ändern.
-
-    **Wichtig (Qualität):** Die System-Prompts der Anwendung sind für Claude geschrieben und optimiert. Ein anderes Modell kann eine geringere Qualität liefern — es hält sich möglicherweise schlechter an die Weltregeln, verliert die JSON-Struktur in Modi mit Auswahlmöglichkeiten oder gibt Text in der falschen Sprache zurück. Dies ist ein bewusster Kosten↔Qualität-Kompromiss auf deiner Seite. Wenn dir das beste Ergebnis wichtig ist, bleib bei Anthropic.
-  krok_5_naprawiacz_per_akapit: |
-    ## Tag-Reparateur: Sprachcode separat für jeden Absatz (NEU in Version 19.2)
-
-    Unter dem Feld für den ISO-Code findest du das Auswahlfeld „{poliglota.chk_per_akapit}". Nicht angehakt — es bleibt alles beim Alten: ein Code gilt für die ganze Datei, und es öffnet sich kein zusätzliches Fenster. Angehakt — nach Betätigung von „{poliglota.btn_process}" öffnet sich eine Liste der Absätze deiner Datei.
-
-    Jeder Listeneintrag zeigt sofort drei Dinge: die Nummer des Absatzes, den Anfang seines Inhalts und den Code, den dieser Absatz erhalten wird. Du musst also in kein Feld hineingehen, um zu erfahren, was wohin gelangt. Unter der Liste stehen drei Angaben zum ausgewählten Absatz: sein vollständiger Inhalt, das Ergebnis der Spracherkennung und das Feld, in dem du den Code änderst. Alle Absätze starten mit dem Code, den du in das Feld „ISO-Code" eingetragen hast — in die Datei gelangt kein Code, den du nicht bestätigt hast.
-
-    Zwei Schaltflächen verkürzen die Arbeit bei einer längeren Datei. „{poliglota.per_akapit_btn_wszystkie}" verteilt den aktuellen Code auf die gesamte Liste — nützlich, wenn du den globalen Code ändern und danach nur ein paar Ausnahmen korrigieren möchtest. „{poliglota.per_akapit_btn_detektor}" fragt der Reihe nach die Sprache jedes Absatzes ab und trägt die Antworten als Codes ein; ein Absatz, bei dem die Erkennung keine eindeutige Aussage treffen kann (zu kurz oder unsicheres Ergebnis), behält den Code, den er bereits hatte — ein „weiß nicht" überschreibt niemals das, was du eingegeben hast.
-
-    Die Spracherkennung in diesem Fenster kennt ALLE Sprachen, die die Erkennungsbibliothek unterscheidet — auch jene, für die das Programm kein eigenes Regelpaket besitzt. Das ist beabsichtigt: Der Tag-Reparator existiert gerade für Dateien in Sprachen, für die wir keinen Akzent haben, daher wäre eine auf die implementierten Pakete verengte Antwort für ihn sicher und zugleich falsch (ein tschechischer Absatz würde beispielsweise als Deutsch bezeichnet). Der Hinweis bleibt ein Hinweis — die Entscheidung liegt trotzdem bei dir.
-
-    Was ein „Absatz" ist, hängt vom Dateiformat ab, denn das Programm vergibt den Code genau an jene Stellen, die der Bildschirmleser als eigenständige Einheiten erkennt: in .docx ist das ein Absatz des Word-Dokuments, in einer HTML-Datei ein Absatz, eine Überschrift, ein Listenpunkt oder eine Tabellenzelle, und in .txt ein durch eine Leerzeile getrennter Abschnitt. Die Liste zeigt sie in Lesereihenfolge, sodass Position Nummer 7 die siebte Stelle ist, zu der der Synthesizer gelangen wird.
-
-    Zwei Korrekturen, die bei dieser Gelegenheit hinzugefügt wurden:
-
-    - Tabellen in .docx erhalten endlich einen Sprachcode. Das Programm hat sie bislang überhaupt nicht wahrgenommen: Absätze aus Zellen wurden nicht getaggt, und beim Einlesen der Datei erschien ihr Inhalt nicht einmal in der Vorschau oder im Zeichenzähler. Jetzt durchlaufen sowohl die Vorschau als auch das Tagging den gesamten Inhalt des Dokuments, einschließlich verschachtelter Tabellen.
-    - Eine Dateierweiterung, die das Programm nicht direkt unterstützt, liefert jetzt eine klare Warnung. In einer solchen Datei gibt es keinen Platz, um den Sprachcode unterzubringen, sodass der Tag-Reparator eine mit dem Original identische Kopie gespeichert hätte — und bislang meldete er „{common.sukces_tytul}" und gab den Pfad einer Datei an, in der sich außer dem Namen nichts geändert hatte.

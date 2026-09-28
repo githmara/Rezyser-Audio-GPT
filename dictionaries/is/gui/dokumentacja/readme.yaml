@@ -102,16 +102,6 @@ tresc:
     `.sh` skriftur fyrir macOS/Linux voru fjarlægðar í v13.1 — þróunarumhverfið er einbeitt á Windows vegna sérstöðu NVDA aðgengisprófa. Vinna með kóðann á öðrum kerfum er möguleg, en krefst handvirkrar uppsetningar: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
     **Byggingarskriftur fyrir útgáfupakka** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) eru eingöngu til að búa til pakka fyrir Windows. Frá útgáfu 17.0 frystir `build_release.py` forritið með PyInstaller (onedir + windowed) samkvæmt `rezyser_audio.spec` — framleiðir `dist/` með innfæddri `.exe` og möppu `runtime/` (túlkur + bókasöfn). Engin þörf er lengur á flutningshæfu Python sem er hlaðið handvirkt inn í geymsluna; möppur `dist/` og `build/` eru í `.gitignore`.
-  dokumentacja: |
-    ## Full skjal
-
-    Þetta README er aðeins uppbyggingarútdráttur verkefnisins. Til að læra um háþróaðar aðferðir til að koma í veg fyrir ofskynjanir AI, uppsetningarleiðbeiningar fyrir samhæfða talgervla (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), fulla lýsingu á sögumódum með flösku, og fullkomna notendahandbók, skoðaðu skrárnar í `docs/` möppunni:
-
-    * `docs/manual.<iso>.html` — aðalnotendahandbókin (skrifuð fyrir endanotanda).
-    * `docs/tales.<iso>.html` — handbók fyrir sögumóða (gagnvirkir textaleikir).
-    * `docs/dictionaries.<iso>.html` — leiðbeiningar fyrir málfræðinga án Python, um hvernig á að bæta við eigin hreim/sifrum/AI-móda.
-
-    Hver af þessum skrám er fáanleg á {liczba_kompletnych_jezykow} tungumálum — viðskeyti `.<iso>.html` (t.d. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   polskie_nazewnictwo: |
     ### Pólskt heiti — leiðarvísir fyrir þá sem eru utan pólska tungumálasvæðisins
 
@@ -131,6 +121,16 @@ tresc:
     * `rezyser/` — *director*: skapandi hamir Leikstjóraeiningarinnar.
     * `opowiesci/` — *stories*: hamir fyrir gagnvirkar sögur.
     * `gui/` — viðmótstextar (`ui.yaml`) og skjalasniðmát.
+  dokumentacja: |
+    ## Full skjal
+
+    Þetta README er aðeins uppbyggingarútdráttur verkefnisins. Til að læra um háþróaðar aðferðir til að koma í veg fyrir ofskynjanir AI, uppsetningarleiðbeiningar fyrir samhæfða talgervla (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), fulla lýsingu á sögumódum með flösku, og fullkomna notendahandbók, skoðaðu skrárnar í `docs/` möppunni:
+
+    * `docs/manual.<iso>.html` — aðalnotendahandbókin (skrifuð fyrir endanotanda).
+    * `docs/tales.<iso>.html` — handbók fyrir sögumóða (gagnvirkir textaleikir).
+    * `docs/dictionaries.<iso>.html` — leiðbeiningar fyrir málfræðinga án Python, um hvernig á að bæta við eigin hreim/sifrum/AI-móda.
+
+    Hver af þessum skrám er fáanleg á {liczba_kompletnych_jezykow} tungumálum — viðskeyti `.<iso>.html` (t.d. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   licencja: |
     ## Leyfi
 

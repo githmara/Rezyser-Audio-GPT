@@ -7,7 +7,7 @@
 
 Strumenti autonomi alimentati da AI per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, oltre alla conduzione di giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata da zero per garantire piena accessibilità ai lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra di programma.
 
-Versione: **19.8.1** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versione: **19.8.2** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Moduli principali
@@ -100,17 +100,6 @@ Gli script `.sh` per macOS/Linux sono stati rimossi nella v13.1 — l'ambiente d
 **Gli script per costruire i pacchetti di rilascio** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) sono utilizzati esclusivamente per creare pacchetti per Windows. Dalla versione 17.0 `build_release.py` congela l'applicazione con PyInstaller (onedir + windowed) secondo `rezyser_audio.spec` — produce `dist/` con un `.exe` nativo e una cartella bundle `runtime/` (interprete + librerie). Non è più necessario alcun Python portatile caricato manualmente nel repository; le directory `dist/` e `build/` sono in `.gitignore`.
 
 
-## Documentazione completa
-
-Questo README è solo un contorno architettonico del progetto. Per conoscere le tecniche avanzate per prevenire le allucinazioni dell'IA, le istruzioni per l'installazione di sintetizzatori vocali compatibili (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descrizione completa delle modalità Racconti con la fiala e il manuale completo dell'utente, consulta i file nella cartella `docs/`:
-
-* `docs/manual.<iso>.html` — manuale principale dell'utente (scritto per l'utente finale).
-* `docs/tales.<iso>.html` — manuale della modalità Racconti (giochi di testo interattivi).
-* `docs/dictionaries.<iso>.html` — istruzioni per linguisti senza Python su come aggiungere accenti/cifrari/modalità AI personalizzati.
-
-Ognuno di questi file è disponibile in 9 lingue — suffisso `.<iso>.html` (ad es. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
-
-
 ### Guida alla nomenclatura polacca — per chi non parla polacco
 
 La lingua principale di questo progetto è il polacco. I nomi dei moduli, delle classi, i commenti nel codice, così come i nomi delle cartelle e dei file di dati sono in polacco e — per garantire la retrocompatibilità e il contratto del motore multilingue — NON vengono tradotti né modificati intenzionalmente. Il seguente glossario aiuterà gli sviluppatori e gli utenti dei sistemi macOS/Linux a orientarsi nella struttura.
@@ -129,6 +118,17 @@ La lingua principale di questo progetto è il polacco. I nomi dei moduli, delle 
 * `rezyser/` — *director*: modalità creative del modulo Regista.
 * `opowiesci/` — *stories*: modalità di Racconti interattivi.
 * `gui/` — testi dell'interfaccia (`ui.yaml`) e modelli di documentazione.
+
+
+## Documentazione completa
+
+Questo README è solo un contorno architettonico del progetto. Per conoscere le tecniche avanzate per prevenire le allucinazioni dell'IA, le istruzioni per l'installazione di sintetizzatori vocali compatibili (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descrizione completa delle modalità Racconti con la fiala e il manuale completo dell'utente, consulta i file nella cartella `docs/`:
+
+* `docs/manual.<iso>.html` — manuale principale dell'utente (scritto per l'utente finale).
+* `docs/tales.<iso>.html` — manuale della modalità Racconti (giochi di testo interattivi).
+* `docs/dictionaries.<iso>.html` — istruzioni per linguisti senza Python su come aggiungere accenti/cifrari/modalità AI personalizzati.
+
+Ognuno di questi file è disponibile in 9 lingue — suffisso `.<iso>.html` (ad es. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ## Licenza

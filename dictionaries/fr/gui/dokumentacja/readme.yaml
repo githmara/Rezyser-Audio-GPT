@@ -102,16 +102,6 @@ tresc:
     Les scripts `.sh` pour macOS/Linux ont été supprimés dans la version 13.1 — l'environnement de développement est concentré sur Windows en raison des spécificités des tests d'accessibilité NVDA. Travailler avec le code sur d'autres systèmes est possible, mais nécessite une configuration manuelle : `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
     **Les scripts de construction des paquets de release** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) servent uniquement à créer des paquets pour Windows. À partir de la version 17.0, `build_release.py` fige l'application avec PyInstaller (onedir + windowed) selon `rezyser_audio.spec` — il produit `dist/` avec un `.exe` natif et un dossier bundle `runtime/` (interpréteur + bibliothèques). Il n'est plus nécessaire d'avoir un Python portable installé manuellement dans le dépôt ; les répertoires `dist/` et `build/` sont dans `.gitignore`.
-  dokumentacja: |
-    ## Documentation complète
-
-    Ce README est uniquement un aperçu architectural du projet. Pour découvrir les techniques avancées de prévention des hallucinations de l'IA, les instructions d'installation des synthétiseurs vocaux compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), une description complète des modes Histoires avec fiole, ainsi qu'un guide utilisateur complet, consultez les fichiers dans le dossier `docs/` :
-
-    * `docs/manual.<iso>.html` — le manuel principal (écrit pour l'utilisateur final).
-    * `docs/tales.<iso>.html` — le manuel du mode Histoires (jeux textuels interactifs).
-    * `docs/dictionaries.<iso>.html` — guide pour les linguistes sans Python, sur comment ajouter des accents/chiffres/modes IA personnalisés.
-
-    Chacun de ces fichiers est disponible en {liczba_kompletnych_jezykow} langues — suffixe `.<iso>.html` (par exemple, `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   polskie_nazewnictwo: |
     ### Nomenclature polonaise — guide pour les non-locuteurs du polonais
 
@@ -131,6 +121,16 @@ tresc:
     * `rezyser/` — *réalisateur*: modes créatifs du module Réalisateur.
     * `opowiesci/` — *histoires*: modes d'histoires interactives.
     * `gui/` — textes de l'interface (`ui.yaml`) et modèles de documentation.
+  dokumentacja: |
+    ## Documentation complète
+
+    Ce README est uniquement un aperçu architectural du projet. Pour découvrir les techniques avancées de prévention des hallucinations de l'IA, les instructions d'installation des synthétiseurs vocaux compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), une description complète des modes Histoires avec fiole, ainsi qu'un guide utilisateur complet, consultez les fichiers dans le dossier `docs/` :
+
+    * `docs/manual.<iso>.html` — le manuel principal (écrit pour l'utilisateur final).
+    * `docs/tales.<iso>.html` — le manuel du mode Histoires (jeux textuels interactifs).
+    * `docs/dictionaries.<iso>.html` — guide pour les linguistes sans Python, sur comment ajouter des accents/chiffres/modes IA personnalisés.
+
+    Chacun de ces fichiers est disponible en {liczba_kompletnych_jezykow} langues — suffixe `.<iso>.html` (par exemple, `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   licencja: |
     ## Licence
 

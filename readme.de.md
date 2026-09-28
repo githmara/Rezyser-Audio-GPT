@@ -7,7 +7,7 @@
 
 Ein eigenständiges Toolkit, das von KI angetrieben wird, um umfangreiche Skripte automatisch zu schreiben, zu planen, zu formatieren und zu übersetzen sowie interaktive Textspiele zu führen. Das Projekt ist eine native Desktop-Anwendung (wxPython), die von Grund auf für vollständige Zugänglichkeit mit Bildschirmlesern (NVDA, VoiceOver) und die Zusammenarbeit mit professionellen Sprachsynthesizern (TTS) entwickelt wurde. Es funktioniert ohne Browser und ohne lokalen Server — es startet als normales Programmfenster.
 
-Version: **19.8.1** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **19.8.2** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Hauptmodule
@@ -100,17 +100,6 @@ Die `.sh`-Skripte für macOS/Linux wurden in v13.1 entfernt — die Entwicklungs
 **Skripte zum Erstellen von Release-Paketen** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) dienen ausschließlich zum Erstellen von Paketen für Windows. Ab Version 17.0 friert `build_release.py` die Anwendung mit PyInstaller ein (onedir + windowed) gemäß `rezyser_audio.spec` — es erzeugt `dist/` mit einer nativen `.exe` und einem Bundle-Ordner `runtime/` (Interpreter + Bibliotheken). Es ist kein tragbares Python mehr erforderlich, das manuell in das Repository geladen wird; die Verzeichnisse `dist/` und `build/` sind in `.gitignore`.
 
 
-## Vollständige Dokumentation
-
-Dieses README ist nur ein architektonischer Überblick über das Projekt. Um fortgeschrittene Techniken zur Vermeidung von KI-Halluzinationen, Installationsanweisungen für kompatible Sprachsynthesizer (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), eine vollständige Beschreibung der Modi "Geschichten mit Phiole" sowie ein vollständiges Benutzerhandbuch kennenzulernen, konsultieren Sie die Dateien im Ordner `docs/`:
-
-* `docs/manual.<iso>.html` — Hauptbenutzerhandbuch (für Endbenutzer geschrieben).
-* `docs/tales.<iso>.html` — Handbuch für den Modus "Geschichten" (interaktive Textspiele).
-* `docs/dictionaries.<iso>.html` — Anleitung für Linguisten ohne Python, wie man eigene Akzente/Verschlüsselungen/AI-Modi hinzufügt.
-
-Jede dieser Dateien ist in 9 Sprachen verfügbar — Suffix `.<iso>.html` (z.B. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
-
-
 ### Polnische Benennungen — Leitfaden für Personen außerhalb des polnischen Sprachraums
 
 Die Hauptsprache dieses Projekts ist Polnisch. Die Namen der Module, Klassen, Kommentare im Code sowie die Namen der Verzeichnisse und Datendateien sind polnisch und werden — aus Gründen der Rückwärtskompatibilität und des Mehrsprachigkeits-Engines — bewusst NICHT übersetzt oder geändert. Das folgende Glossar hilft Entwicklern und Nutzern von macOS/Linux-Systemen, sich in der Struktur zurechtzufinden.
@@ -129,6 +118,17 @@ Die Hauptsprache dieses Projekts ist Polnisch. Die Namen der Module, Klassen, Ko
 * `rezyser/` — *Regisseur*: kreative Modi des Regisseur-Moduls.
 * `opowiesci/` — *Geschichten*: Modi interaktiver Geschichten.
 * `gui/` — Benutzeroberflächentexte (`ui.yaml`) und Dokumentationsvorlagen.
+
+
+## Vollständige Dokumentation
+
+Dieses README ist nur ein architektonischer Überblick über das Projekt. Um fortgeschrittene Techniken zur Vermeidung von KI-Halluzinationen, Installationsanweisungen für kompatible Sprachsynthesizer (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), eine vollständige Beschreibung der Modi "Geschichten mit Phiole" sowie ein vollständiges Benutzerhandbuch kennenzulernen, konsultieren Sie die Dateien im Ordner `docs/`:
+
+* `docs/manual.<iso>.html` — Hauptbenutzerhandbuch (für Endbenutzer geschrieben).
+* `docs/tales.<iso>.html` — Handbuch für den Modus "Geschichten" (interaktive Textspiele).
+* `docs/dictionaries.<iso>.html` — Anleitung für Linguisten ohne Python, wie man eigene Akzente/Verschlüsselungen/AI-Modi hinzufügt.
+
+Jede dieser Dateien ist in 9 Sprachen verfügbar — Suffix `.<iso>.html` (z.B. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ## Lizenz

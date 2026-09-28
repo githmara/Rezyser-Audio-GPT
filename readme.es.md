@@ -7,7 +7,7 @@
 
 Conjunto de herramientas autocontenidas impulsadas por IA para la escritura automática, planificación, formato y traducción de guiones extensos, así como para la ejecución de juegos de texto interactivos. El proyecto es una aplicación de escritorio nativa (wxPython) diseñada desde cero con plena accesibilidad para lectores de pantalla (NVDA, VoiceOver) y compatibilidad con sintetizadores de voz profesionales (TTS). Funciona sin navegador y sin servidor local: se ejecuta como una ventana de programa normal.
 
-Versión: **19.8.1** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versión: **19.8.2** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Módulos principales
@@ -100,17 +100,6 @@ Los scripts `.sh` para macOS/Linux fueron eliminados en la versión v13.1 — el
 **Scripts para construir paquetes de lanzamiento** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) se utilizan exclusivamente para crear paquetes para Windows. Desde la versión 17.0, `build_release.py` congela la aplicación con PyInstaller (onedir + windowed) según `rezyser_audio.spec` — produce `dist/` con un `.exe` nativo y una carpeta de bundle `runtime/` (intérprete + bibliotecas). Ya no es necesario ningún Python portátil cargado manualmente en el repositorio; los directorios `dist/` y `build/` están en `.gitignore`.
 
 
-## Documentación completa
-
-Este README es solo un esquema arquitectónico del proyecto. Para conocer las técnicas avanzadas de prevención de alucinaciones de IA, las instrucciones de instalación de sintetizadores de voz compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descripción completa de los modos de Historias con ampolla, y la guía completa del usuario, consulta los archivos en la carpeta `docs/`:
-
-* `docs/manual.<iso>.html` — manual principal de usuario (escrito para el usuario final).
-* `docs/tales.<iso>.html` — manual del modo Historias (juegos de texto interactivos).
-* `docs/dictionaries.<iso>.html` — instrucciones para lingüistas sin Python sobre cómo añadir sus propios acentos/códigos/modos de IA.
-
-Cada uno de estos archivos está disponible en 9 idiomas — sufijo `.<iso>.html` (por ejemplo, `manual.pl.html`, `manual.en.html`, `manual.de.html`).
-
-
 ### Guía de nombres polacos — para personas fuera del ámbito lingüístico polaco
 
 El idioma principal de este proyecto es el polaco. Los nombres de los módulos, clases, comentarios en el código, así como los nombres de directorios y archivos de datos están en polaco y — debido a la compatibilidad retroactiva y al contrato del motor multilingüe — deliberadamente NO se traducen ni cambian. El siguiente glosario ayudará a los desarrolladores y usuarios de sistemas macOS/Linux a orientarse en la estructura.
@@ -129,6 +118,17 @@ El idioma principal de este proyecto es el polaco. Los nombres de los módulos, 
 * `rezyser/` — *director*: modos creativos del módulo Director.
 * `opowiesci/` — *stories*: modos de Historias interactivas.
 * `gui/` — textos de la interfaz (`ui.yaml`) y plantillas de documentación.
+
+
+## Documentación completa
+
+Este README es solo un esquema arquitectónico del proyecto. Para conocer las técnicas avanzadas de prevención de alucinaciones de IA, las instrucciones de instalación de sintetizadores de voz compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descripción completa de los modos de Historias con ampolla, y la guía completa del usuario, consulta los archivos en la carpeta `docs/`:
+
+* `docs/manual.<iso>.html` — manual principal de usuario (escrito para el usuario final).
+* `docs/tales.<iso>.html` — manual del modo Historias (juegos de texto interactivos).
+* `docs/dictionaries.<iso>.html` — instrucciones para lingüistas sin Python sobre cómo añadir sus propios acentos/códigos/modos de IA.
+
+Cada uno de estos archivos está disponible en 9 idiomas — sufijo `.<iso>.html` (por ejemplo, `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ## Licencia

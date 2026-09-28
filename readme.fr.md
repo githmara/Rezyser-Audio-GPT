@@ -7,7 +7,7 @@
 
 Ensemble d'outils autonomes alimentés par l'IA pour l'écriture automatique, la planification, le formatage et la traduction de scripts volumineux, ainsi que pour la conduite de jeux textuels interactifs. Le projet est une application de bureau native (wxPython) conçue dès le départ pour une accessibilité totale aux lecteurs d'écran (NVDA, VoiceOver) et pour fonctionner avec des synthétiseurs vocaux professionnels (TTS). Il fonctionne sans navigateur et sans serveur local — il se lance comme une fenêtre de programme ordinaire.
 
-Version : **19.8.1** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version : **19.8.2** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Modules principaux
@@ -100,17 +100,6 @@ Les scripts `.sh` pour macOS/Linux ont été supprimés dans la version 13.1 —
 **Les scripts de construction des paquets de release** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) servent uniquement à créer des paquets pour Windows. À partir de la version 17.0, `build_release.py` fige l'application avec PyInstaller (onedir + windowed) selon `rezyser_audio.spec` — il produit `dist/` avec un `.exe` natif et un dossier bundle `runtime/` (interpréteur + bibliothèques). Il n'est plus nécessaire d'avoir un Python portable installé manuellement dans le dépôt ; les répertoires `dist/` et `build/` sont dans `.gitignore`.
 
 
-## Documentation complète
-
-Ce README est uniquement un aperçu architectural du projet. Pour découvrir les techniques avancées de prévention des hallucinations de l'IA, les instructions d'installation des synthétiseurs vocaux compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), une description complète des modes Histoires avec fiole, ainsi qu'un guide utilisateur complet, consultez les fichiers dans le dossier `docs/` :
-
-* `docs/manual.<iso>.html` — le manuel principal (écrit pour l'utilisateur final).
-* `docs/tales.<iso>.html` — le manuel du mode Histoires (jeux textuels interactifs).
-* `docs/dictionaries.<iso>.html` — guide pour les linguistes sans Python, sur comment ajouter des accents/chiffres/modes IA personnalisés.
-
-Chacun de ces fichiers est disponible en 9 langues — suffixe `.<iso>.html` (par exemple, `manual.pl.html`, `manual.en.html`, `manual.de.html`).
-
-
 ### Nomenclature polonaise — guide pour les non-locuteurs du polonais
 
 La langue principale de ce projet est le polonais. Les noms des modules, des classes, les commentaires dans le code ainsi que les noms des répertoires et des fichiers de données sont en polonais et — pour assurer la rétrocompatibilité et le contrat du moteur multilingue — ne sont pas traduits ni modifiés intentionnellement. Le glossaire ci-dessous aidera les développeurs et les utilisateurs des systèmes macOS/Linux à se repérer dans la structure.
@@ -129,6 +118,17 @@ La langue principale de ce projet est le polonais. Les noms des modules, des cla
 * `rezyser/` — *réalisateur*: modes créatifs du module Réalisateur.
 * `opowiesci/` — *histoires*: modes d'histoires interactives.
 * `gui/` — textes de l'interface (`ui.yaml`) et modèles de documentation.
+
+
+## Documentation complète
+
+Ce README est uniquement un aperçu architectural du projet. Pour découvrir les techniques avancées de prévention des hallucinations de l'IA, les instructions d'installation des synthétiseurs vocaux compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), une description complète des modes Histoires avec fiole, ainsi qu'un guide utilisateur complet, consultez les fichiers dans le dossier `docs/` :
+
+* `docs/manual.<iso>.html` — le manuel principal (écrit pour l'utilisateur final).
+* `docs/tales.<iso>.html` — le manuel du mode Histoires (jeux textuels interactifs).
+* `docs/dictionaries.<iso>.html` — guide pour les linguistes sans Python, sur comment ajouter des accents/chiffres/modes IA personnalisés.
+
+Chacun de ces fichiers est disponible en 9 langues — suffixe `.<iso>.html` (par exemple, `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ## Licence

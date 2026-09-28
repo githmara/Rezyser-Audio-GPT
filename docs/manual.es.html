@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Guía Completa (Versión 19.8.1 – Versión de Lanzamiento)</title>
+<title>Reżyser Audio GPT — Guía Completa (Versión 19.8.2 – Versión de Lanzamiento)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Guía Completa (Versión 19.8.1 – Versión de Lanzamiento)</h1>
+<h1>Reżyser Audio GPT — Guía Completa (Versión 19.8.2 – Versión de Lanzamiento)</h1>
 <p>¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radionovelas y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).</p>
 <p>El conjunto consta del estudio principal (Dirección), la herramienta de traducción y acentos (Políglota), la herramienta para construir la estructura de archivos (Arquitecto de Audiolibros), el Gestor de Reglas (desde la versión 13.0 — sin Python puedes añadir un nuevo acento, cifrado o modo creativo, ver PASO 7b a continuación) y — desde la versión 15.0 — el módulo de Historias (ficción interactiva en segunda persona generada por IA, leída por TTS o lector de pantalla, descrita en un manual separado tales.es.html). Todas las cinco herramientas están disponibles en una sola ventana del programa, conmutables mediante botones en la barra o atajos de teclado Ctrl+1..Ctrl+5.</p>
 <h2>PASO 1: Primera ejecución (Cross-Platform)</h2>
@@ -69,6 +69,17 @@ code { font-family: ui-monospace, Consolas, monospace; }
 3. En la pantalla de inicio del programa, haz clic en el botón "Generar archivo golden_key.env y abrir editor de texto". El sistema creará automáticamente un archivo de configuración limpio en el lugar correcto y abrirá el Bloc de notas con una plantilla lista para editar.<br>
 4. En el archivo abierto verás la línea: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Elimina el texto de marcador de posición y pega tu clave directamente después del signo igual (sin espacios ni comillas). Guarda el archivo y reinicia la aplicación.</p>
 <p><strong>Consejo:</strong> Tras reiniciar, la aplicación comprobará el archivo y en la sección "System Check" mostrará el estado de la clave. Debe aparecer en verde para que todos los módulos de IA estén listos para funcionar. Si la clave falta o es incorrecta, el programa lo indicará claramente y permitirá abrir el editor de texto para corregir el error rápidamente.</p>
+<h2>PASO 2B (avanzado, opcional): Proveedor de IA propio compatible con OpenAI</h2>
+<p>La mayoría de los usuarios debería quedarse con el Anthropic recomendado (PASO 2) — es el que ofrece la mayor calidad. Sin embargo, si tienes una razón propia (coste, acceso, privacidad, modelo local propio), a partir de la versión 18.4 puedes indicar CUALQUIER endpoint compatible con la API de OpenAI — por ejemplo OpenRouter, Groq, Fireworks, DeepSeek, Ollama local o un endpoint de Gemini compatible con OpenAI. Todo el motor de IA sigue entonces un único camino hacia ese endpoint, sin integración separada por proveedor.</p>
+<p>Esta es una opción para usuarios avanzados: la configuras manualmente en el archivo golden_key.env, añadiendo junto a (o en lugar de) la clave de Anthropic tres líneas y la clave del proveedor elegido:</p>
+<p>LLM_PROVIDER=openai_compat<br>
+LLM_BASE_URL=dirección_del_endpoint (p. ej. https://openrouter.ai/api/v1)<br>
+LLM_MODEL=nombre_del_modelo_en_el_proveedor (p. ej. openai/gpt-4o-mini)<br>
+OPENAI_API_KEY=tu_clave_en_ese_proveedor</p>
+<p>Cómo funciona:<br>
+•  Cuando LLM_PROVIDER=openai_compat, TODO el motor de IA (Director, Historias, Políglota, títulos, detección de idioma) utiliza el endpoint indicado, y LLM_MODEL sobrescribe el nombre del modelo de los archivos de configuración.<br>
+•  Cuando la línea LLM_PROVIDER no existe (o tiene el valor anthropic), la aplicación funciona como en el PASO 2 — exclusivamente con la clave de Anthropic. No necesitas cambiar nada.</p>
+<p><strong>Importante (calidad):</strong> los prompts del sistema de la aplicación están escritos y ajustados para Claude. Otro modelo puede ofrecer menor calidad — respetar peor las reglas del mundo, perder la estructura JSON en los modos con elecciones o devolver el texto en un idioma incorrecto. Es un compromiso consciente coste↔calidad de tu parte. Si lo que te importa es el mejor resultado, quédate con Anthropic.</p>
 <h2>PASO 3: El Estudio de Dirección Principal</h2>
 <p>Este es tu centro de mando para idear historias y escribir guiones. Accede a él haciendo clic en el botón "🎬  Director" de la barra de botones o seleccionando Herramientas → Director en el menú (atajo: Ctrl+1).</p>
 <h3>Importante: Formato de archivos de proyecto — regreso a .txt</h3>
@@ -239,6 +250,17 @@ Seguramente os preguntaréis si el sintetizador podrá declinar esos números no
 <li>Escudo protector: El script protege todas las etiquetas HTML. Solo estropea los diálogos y la narración.</li>
 <li>¡Funciona localmente y no cuesta nada!</li>
 </ul>
+<h2>Reparador de etiquetas: código de idioma independiente para cada párrafo (NOVEDAD en la versión 19.2)</h2>
+<p>Debajo del campo de código ISO encontrarás una casilla de selección «Establecer código ISO por separado para cada párrafo». Desmarcada, todo sigue como antes: un solo código se aplica a todo el archivo y no aparece ninguna ventana adicional. Marcada, al pulsar «Iniciar Procesamiento» se abre una lista con los párrafos de tu archivo.</p>
+<p>Cada elemento de la lista indica de inmediato tres cosas: el número del párrafo, el inicio de su contenido y el código que recibirá ese párrafo. Así que no hace falta entrar en ningún campo para saber qué irá a parar dónde. Debajo de la lista hay tres elementos correspondientes al párrafo seleccionado: su contenido completo, el resultado de la detección de idioma y el campo donde se cambia el código. Todos los párrafos parten del código que introdujiste en el campo «Código ISO»: al archivo no llega ningún código que no hayas aprobado tú.</p>
+<p>Dos botones agilizan el trabajo con archivos más largos. «Aplicar este código a todos los párrafos» distribuye el código actual por toda la lista; resulta útil cuando quieres cambiar el código global y luego corregir solo unas cuantas excepciones. «Rellenar todos los códigos con el resultado de la detección» pregunta el idioma de cada párrafo uno a uno e inserta las respuestas como códigos; el párrafo para el que la detección no tiene un criterio claro (demasiado corto o resultado incierto) conserva el código que ya tenía: un «no lo sé» nunca sobrescribe lo que tú introdujiste.</p>
+<p>La detección de idioma de esta ventana reconoce TODOS los idiomas que identifica la biblioteca de detección, incluidos aquellos para los que el programa no dispone de su propio paquete de reglas. Esto es intencionado: el Reparador de Etiquetas existe precisamente para archivos en idiomas para los que no tenemos ningún acento propio, así que una respuesta limitada a los paquetes ya implementados sería, para este caso, segura pero errónea (un párrafo en checo, por ejemplo, se etiquetaría como alemán). La sugerencia sigue siendo una sugerencia: la decisión sigue siendo tuya.</p>
+<p>Qué se considera un «párrafo» depende del formato del archivo, porque el programa asigna el código exactamente a las unidades que el lector de pantalla percibe como entidades separadas: en .docx es un párrafo del documento Word; en un archivo HTML, un párrafo, un encabezado, un elemento de lista o una celda de tabla; y en .txt, un fragmento separado por una línea en blanco. La lista los muestra en el orden de lectura, de modo que la posición número 7 es el séptimo lugar al que llegará el sintetizador.</p>
+<p>Dos correcciones añadidas de paso:</p>
+<ul>
+<li>Las tablas en .docx obtienen por fin un código de idioma. Hasta ahora el programa no las veía en absoluto: los párrafos de las celdas no se etiquetaban, y al cargar el archivo su contenido ni siquiera aparecía en la vista previa ni en el contador de caracteres. Ahora tanto la vista previa como el etiquetado recorren todo el contenido del documento, incluidas las tablas anidadas.</li>
+<li>Una extensión que el programa no admite de forma directa ahora muestra una advertencia clara. En ese tipo de archivo no hay dónde colocar el código de idioma, así que el Reparador guardaría una copia idéntica al original; hasta ahora, en cambio, informaba «Éxito» e indicaba la ruta de un archivo en el que no había cambiado nada salvo el nombre.</li>
+</ul>
 <h2>Modo 3: Cifrador (NUEVO en 13.0 — juegos de texto, gratuito, local)</h2>
 <p>El tercer RadioButton en Políglota, junto al Traductor IA y el Modo Director: "Modo Cifrador (juegos de texto, interrupciones aleatorias)". Activa seis algoritmos locales que distorsionan el texto — para juegos, acertijos, rompecabezas lingüísticos. Al seleccionar el modo, aparece una lista desplegable de algoritmos, y para uno de ellos (Cifrado César) un campo numérico adicional para el desplazamiento.</p>
 <p>Algoritmos disponibles (selecciona en el menú "Elige algoritmo de distorsión"):</p>
@@ -350,6 +372,27 @@ Seguramente os preguntaréis si el sintetizador podrá declinar esos números no
 <p>Dónde buscar más documentación sobre la carpeta dictionaries/:<br>
 - El archivo <code>docs/dictionaries.pl.html</code> (disponible en el paquete para usuarios finales en la pestaña Releases) — una descripción breve y en lenguaje sencillo de cada subcarpeta, 6 cifrados listos, 8 acentos listos e ideas de qué se puede hacer por cuenta propia, sin conocimientos de Python.<br>
 - El archivo <code>dictionaries/README.md</code> (disponible solo al clonar el repositorio desde GitHub — los paquetes de lanzamiento filtran los archivos .md) — documentación técnica detallada del formato YAML con ejemplos, listas de campos, reglas del pipeline y expresiones regulares. Este documento está dirigido a lingüistas con conocimientos básicos de programación y a desarrolladores.</p>
+<h2>PASO 7b (complemento): El orden de las reglas <code>zamiany:</code> importa</h2>
+<p>Los archivos en <code>dictionaries/&lt;kod&gt;/akcenty/*.yaml</code> contienen una lista de reglas <code>zamiany:</code> — pares <code>wzor → zamiana</code>, que el motor aplica SECUENCIALMENTE. Cada regla subsiguiente opera sobre la salida de la anterior. Esto permite construir pipelines del tipo "descomponer el dígrafo <code>szcz</code> en <code>shch</code>, y luego cambiar solo <code>ch</code> por <code>h</code>", pero también abre la clásica trampa para el autor del paquete de idioma.</p>
+<p>La trampa del "bucle secuencial". Supongamos que para un acento español que quiere hacer que la "ñ" polaca suene como la pronunciación de Diego (Loquendo), el autor añade dos reglas:<br>
+1. <code>ñ → nj</code> (para que la "ñ" polaca suene como una "nj" suave)<br>
+2. <code>j → x</code> (para que la "j" polaca suene como la "j" española — fonéticamente /x/)</p>
+<p>Al ejecutarlo, resulta que las palabras con "ñ" se pronuncian como "nx", no "nj". ¿Por qué? Porque cuando la primera regla cambia "ñ" por "nj", la nueva "j" es inmediatamente atrapada por la segunda regla y cambiada a "x". Resultado: en lugar de "ñ → nj" como se pretendía, obtenemos "ñ → nx".</p>
+<p>Regla del orden (universal). Cuando una regla introduce un carácter que otra regla tiene como patrón, EL ORDEN IMPORTA. Una heurística segura: PRIMERO cambia el TARGET (carácter usado después como <code>wzor</code> en otra regla) a algo seguro, y SOLO DESPUÉS introduce el SOURCE (carácter que debe descomponerse en el TARGET). Para el ejemplo español correctamente: primero <code>j → x</code>, luego <code>ñ → nj</code>. Resultado: "ñ" da "nj" (la segunda "j" ya no será consumida, porque la regla <code>j → x</code> se aplicó antes, cuando "nj" aún no existía).</p>
+<p>Cómo probar. Después de cambiar el orden de las reglas en el archivo de acento, pasa una oración que contenga AMBAS letras por el Modo Director. Por ejemplo, ES: "Niño de paja juega" → el resultado debe tener tanto el acento ñ ("ñ → nj") como el acento j ("j → x"), es decir, algo como "Ninjo de paxa xuega". Si ves "ninxo" en lugar de "ninjo" — el orden es incorrecto.</p>
+<p>Validación en el motor (opt-in para autores de paquetes). La aplicación tiene una heurística incorporada para detectar bucles potenciales, pero está desactivada por defecto — porque muchas pipelines parecen un bucle, aunque son intencionales (el clásico "szcz → shch" + "ch → h"). Para activarla: establece la variable de entorno <code>REZYSER_VALIDATE_ZAMIANY=1</code> y ejecuta la aplicación desde la consola — desde la fuente a través de <code>python main.py</code>, porque el <code>.exe</code> congelado en modo ventana (a partir de la versión 17.0) no tiene ventana de consola. El motor imprimirá para cada archivo de acentos una línea agregada WARN con los primeros tres bucles potenciales y el número de los restantes. Verifica la fonética resultante en la oración de prueba — si el efecto es el deseado, ignora el WARN.</p>
+<p>Los botones para mover reglas en el GUI del Gestor de Reglas (arrastrar y soltar, "Arriba / Abajo") son una función separada planeada para un ciclo de versión posterior — requiere rediseñar el Gestor (actualmente delega la edición del archivo a un Bloc de Notas externo del sistema y no tiene su propia vista de reglas). Hasta su implementación: edita el archivo YAML manualmente, mueve las líneas en la sección <code>zamiany:</code>, utiliza el validador con la variable ENV y prueba con oraciones de control.</p>
+<h2>PASO 7b — Nombres de carpetas y archivos en polaco (para usuarios fuera de Polonia)</h2>
+<p>El programa está regido por el idioma polaco, que es el idioma principal del proyecto. Al navegar por la carpeta dictionaries/ en el Gestor de Reglas (Ctrl+4) o al revisar las carpetas de guardado, te encontrarás con nombres en polaco. NO son un error ni un fallo de traducción: permanecen en polaco intencionadamente, ya que son identificadores internos del motor. El siguiente glosario explica lo que significan.</p>
+<p>Subcarpetas en <code>dictionaries/&lt;código-idioma&gt;/</code> (esto es lo que ves en el Gestor de Reglas):<br>
+- podstawy (básicos) — configuración del paquete de idioma<br>
+- akcenty (acentos) — reglas fonéticas para los sintetizadores de voz<br>
+- szyfry (cifras) — modos de cifrado de texto<br>
+- rezyser (director) — modos creativos del módulo Director<br>
+- opowiesci (historias) — modos de Historias interactivas</p>
+<p>Carpetas con tus guardados (junto al programa):<br>
+- skrypty (guiones) — proyectos del Director: narración .txt, Libro del Mundo .md<br>
+- opowiesci (historias) — guardados de Historias interactivas</p>
 <h2>Importante información para usuarios de lectores de pantalla (NVDA)</h2>
 <h3>1. Mensajes de éxito y error</h3>
 <p>Cuando la aplicación finaliza una acción (por ejemplo, guarda un archivo o encuentra un error), aparecerá un cuadro de diálogo con un título como "Éxito", "Advertencia" o "Error". NVDA anunciará inmediatamente este cuadro de diálogo y leerá su contenido. No necesitas hacer nada: los diálogos son completamente accesibles desde el teclado y el foco automáticamente se posiciona en el botón "OK". Ya no hay trucos con el prefijo "Alerta": los cuadros de diálogo nativos de wxPython son manejados directamente por el lector.</p>
@@ -495,49 +538,6 @@ Adaptación de Guion a Audiolibro (Modo Guion) — eliminada por razones financi
 <li>Carga automática del modo creativo desde el archivo de metadatos del proyecto.</li>
 <li>Todos los acentos de versiones anteriores (Inglés, Francés, Alemán, Polaco, Italiano, Finés, Islandés) y el Reparador de Etiquetas.</li>
 <li>Funciones completas de IA: Tormenta de Ideas, Guion, Audiolibro, Acumulador de Trama, Memoria Infinita, Asignación de Títulos.</li>
-</ul>
-<h2>PASO 7b (complemento): El orden de las reglas <code>zamiany:</code> importa</h2>
-<p>Los archivos en <code>dictionaries/&lt;kod&gt;/akcenty/*.yaml</code> contienen una lista de reglas <code>zamiany:</code> — pares <code>wzor → zamiana</code>, que el motor aplica SECUENCIALMENTE. Cada regla subsiguiente opera sobre la salida de la anterior. Esto permite construir pipelines del tipo "descomponer el dígrafo <code>szcz</code> en <code>shch</code>, y luego cambiar solo <code>ch</code> por <code>h</code>", pero también abre la clásica trampa para el autor del paquete de idioma.</p>
-<p>La trampa del "bucle secuencial". Supongamos que para un acento español que quiere hacer que la "ñ" polaca suene como la pronunciación de Diego (Loquendo), el autor añade dos reglas:<br>
-1. <code>ñ → nj</code> (para que la "ñ" polaca suene como una "nj" suave)<br>
-2. <code>j → x</code> (para que la "j" polaca suene como la "j" española — fonéticamente /x/)</p>
-<p>Al ejecutarlo, resulta que las palabras con "ñ" se pronuncian como "nx", no "nj". ¿Por qué? Porque cuando la primera regla cambia "ñ" por "nj", la nueva "j" es inmediatamente atrapada por la segunda regla y cambiada a "x". Resultado: en lugar de "ñ → nj" como se pretendía, obtenemos "ñ → nx".</p>
-<p>Regla del orden (universal). Cuando una regla introduce un carácter que otra regla tiene como patrón, EL ORDEN IMPORTA. Una heurística segura: PRIMERO cambia el TARGET (carácter usado después como <code>wzor</code> en otra regla) a algo seguro, y SOLO DESPUÉS introduce el SOURCE (carácter que debe descomponerse en el TARGET). Para el ejemplo español correctamente: primero <code>j → x</code>, luego <code>ñ → nj</code>. Resultado: "ñ" da "nj" (la segunda "j" ya no será consumida, porque la regla <code>j → x</code> se aplicó antes, cuando "nj" aún no existía).</p>
-<p>Cómo probar. Después de cambiar el orden de las reglas en el archivo de acento, pasa una oración que contenga AMBAS letras por el Modo Director. Por ejemplo, ES: "Niño de paja juega" → el resultado debe tener tanto el acento ñ ("ñ → nj") como el acento j ("j → x"), es decir, algo como "Ninjo de paxa xuega". Si ves "ninxo" en lugar de "ninjo" — el orden es incorrecto.</p>
-<p>Validación en el motor (opt-in para autores de paquetes). La aplicación tiene una heurística incorporada para detectar bucles potenciales, pero está desactivada por defecto — porque muchas pipelines parecen un bucle, aunque son intencionales (el clásico "szcz → shch" + "ch → h"). Para activarla: establece la variable de entorno <code>REZYSER_VALIDATE_ZAMIANY=1</code> y ejecuta la aplicación desde la consola — desde la fuente a través de <code>python main.py</code>, porque el <code>.exe</code> congelado en modo ventana (a partir de la versión 17.0) no tiene ventana de consola. El motor imprimirá para cada archivo de acentos una línea agregada WARN con los primeros tres bucles potenciales y el número de los restantes. Verifica la fonética resultante en la oración de prueba — si el efecto es el deseado, ignora el WARN.</p>
-<p>Los botones para mover reglas en el GUI del Gestor de Reglas (arrastrar y soltar, "Arriba / Abajo") son una función separada planeada para un ciclo de versión posterior — requiere rediseñar el Gestor (actualmente delega la edición del archivo a un Bloc de Notas externo del sistema y no tiene su propia vista de reglas). Hasta su implementación: edita el archivo YAML manualmente, mueve las líneas en la sección <code>zamiany:</code>, utiliza el validador con la variable ENV y prueba con oraciones de control.</p>
-<h2>PASO 7b — Nombres de carpetas y archivos en polaco (para usuarios fuera de Polonia)</h2>
-<p>El programa está regido por el idioma polaco, que es el idioma principal del proyecto. Al navegar por la carpeta dictionaries/ en el Gestor de Reglas (Ctrl+4) o al revisar las carpetas de guardado, te encontrarás con nombres en polaco. NO son un error ni un fallo de traducción: permanecen en polaco intencionadamente, ya que son identificadores internos del motor. El siguiente glosario explica lo que significan.</p>
-<p>Subcarpetas en <code>dictionaries/&lt;código-idioma&gt;/</code> (esto es lo que ves en el Gestor de Reglas):<br>
-- podstawy (básicos) — configuración del paquete de idioma<br>
-- akcenty (acentos) — reglas fonéticas para los sintetizadores de voz<br>
-- szyfry (cifras) — modos de cifrado de texto<br>
-- rezyser (director) — modos creativos del módulo Director<br>
-- opowiesci (historias) — modos de Historias interactivas</p>
-<p>Carpetas con tus guardados (junto al programa):<br>
-- skrypty (guiones) — proyectos del Director: narración .txt, Libro del Mundo .md<br>
-- opowiesci (historias) — guardados de Historias interactivas</p>
-<h2>PASO 2B (avanzado, opcional): Proveedor de IA propio compatible con OpenAI</h2>
-<p>La mayoría de los usuarios debería quedarse con el Anthropic recomendado (PASO 2) — es el que ofrece la mayor calidad. Sin embargo, si tienes una razón propia (coste, acceso, privacidad, modelo local propio), a partir de la versión 18.4 puedes indicar CUALQUIER endpoint compatible con la API de OpenAI — por ejemplo OpenRouter, Groq, Fireworks, DeepSeek, Ollama local o un endpoint de Gemini compatible con OpenAI. Todo el motor de IA sigue entonces un único camino hacia ese endpoint, sin integración separada por proveedor.</p>
-<p>Esta es una opción para usuarios avanzados: la configuras manualmente en el archivo golden_key.env, añadiendo junto a (o en lugar de) la clave de Anthropic tres líneas y la clave del proveedor elegido:</p>
-<p>LLM_PROVIDER=openai_compat<br>
-LLM_BASE_URL=dirección_del_endpoint (p. ej. https://openrouter.ai/api/v1)<br>
-LLM_MODEL=nombre_del_modelo_en_el_proveedor (p. ej. openai/gpt-4o-mini)<br>
-OPENAI_API_KEY=tu_clave_en_ese_proveedor</p>
-<p>Cómo funciona:<br>
-•  Cuando LLM_PROVIDER=openai_compat, TODO el motor de IA (Director, Historias, Políglota, títulos, detección de idioma) utiliza el endpoint indicado, y LLM_MODEL sobrescribe el nombre del modelo de los archivos de configuración.<br>
-•  Cuando la línea LLM_PROVIDER no existe (o tiene el valor anthropic), la aplicación funciona como en el PASO 2 — exclusivamente con la clave de Anthropic. No necesitas cambiar nada.</p>
-<p><strong>Importante (calidad):</strong> los prompts del sistema de la aplicación están escritos y ajustados para Claude. Otro modelo puede ofrecer menor calidad — respetar peor las reglas del mundo, perder la estructura JSON en los modos con elecciones o devolver el texto en un idioma incorrecto. Es un compromiso consciente coste↔calidad de tu parte. Si lo que te importa es el mejor resultado, quédate con Anthropic.</p>
-<h2>Reparador de etiquetas: código de idioma independiente para cada párrafo (NOVEDAD en la versión 19.2)</h2>
-<p>Debajo del campo de código ISO encontrarás una casilla de selección «Establecer código ISO por separado para cada párrafo». Desmarcada, todo sigue como antes: un solo código se aplica a todo el archivo y no aparece ninguna ventana adicional. Marcada, al pulsar «Iniciar Procesamiento» se abre una lista con los párrafos de tu archivo.</p>
-<p>Cada elemento de la lista indica de inmediato tres cosas: el número del párrafo, el inicio de su contenido y el código que recibirá ese párrafo. Así que no hace falta entrar en ningún campo para saber qué irá a parar dónde. Debajo de la lista hay tres elementos correspondientes al párrafo seleccionado: su contenido completo, el resultado de la detección de idioma y el campo donde se cambia el código. Todos los párrafos parten del código que introdujiste en el campo «Código ISO»: al archivo no llega ningún código que no hayas aprobado tú.</p>
-<p>Dos botones agilizan el trabajo con archivos más largos. «Aplicar este código a todos los párrafos» distribuye el código actual por toda la lista; resulta útil cuando quieres cambiar el código global y luego corregir solo unas cuantas excepciones. «Rellenar todos los códigos con el resultado de la detección» pregunta el idioma de cada párrafo uno a uno e inserta las respuestas como códigos; el párrafo para el que la detección no tiene un criterio claro (demasiado corto o resultado incierto) conserva el código que ya tenía: un «no lo sé» nunca sobrescribe lo que tú introdujiste.</p>
-<p>La detección de idioma de esta ventana reconoce TODOS los idiomas que identifica la biblioteca de detección, incluidos aquellos para los que el programa no dispone de su propio paquete de reglas. Esto es intencionado: el Reparador de Etiquetas existe precisamente para archivos en idiomas para los que no tenemos ningún acento propio, así que una respuesta limitada a los paquetes ya implementados sería, para este caso, segura pero errónea (un párrafo en checo, por ejemplo, se etiquetaría como alemán). La sugerencia sigue siendo una sugerencia: la decisión sigue siendo tuya.</p>
-<p>Qué se considera un «párrafo» depende del formato del archivo, porque el programa asigna el código exactamente a las unidades que el lector de pantalla percibe como entidades separadas: en .docx es un párrafo del documento Word; en un archivo HTML, un párrafo, un encabezado, un elemento de lista o una celda de tabla; y en .txt, un fragmento separado por una línea en blanco. La lista los muestra en el orden de lectura, de modo que la posición número 7 es el séptimo lugar al que llegará el sintetizador.</p>
-<p>Dos correcciones añadidas de paso:</p>
-<ul>
-<li>Las tablas en .docx obtienen por fin un código de idioma. Hasta ahora el programa no las veía en absoluto: los párrafos de las celdas no se etiquetaban, y al cargar el archivo su contenido ni siquiera aparecía en la vista previa ni en el contador de caracteres. Ahora tanto la vista previa como el etiquetado recorren todo el contenido del documento, incluidas las tablas anidadas.</li>
-<li>Una extensión que el programa no admite de forma directa ahora muestra una advertencia clara. En ese tipo de archivo no hay dónde colocar el código de idioma, así que el Reparador guardaría una copia idéntica al original; hasta ahora, en cambio, informaba «Éxito» e indicaba la ruta de un archivo en el que no había cambiado nada salvo el nombre.</li>
 </ul>
 </body>
 </html>

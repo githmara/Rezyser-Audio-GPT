@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Täydellinen opas (Versio 19.8.1 – Julkaisuversio)</title>
+<title>Reżyser Audio GPT — Täydellinen opas (Versio 19.8.2 – Julkaisuversio)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Täydellinen opas (Versio 19.8.1 – Julkaisuversio)</h1>
+<h1>Reżyser Audio GPT — Täydellinen opas (Versio 19.8.2 – Julkaisuversio)</h1>
 <p>Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.</p>
 <p>Paketti koostuu päästudiosta (Ohjaus), käännös- ja aksenttityökalusta (Polyglootti), tiedostorakenteen rakennustyökalusta (Äänikirja-arkkitehti), Sääntöjen Hallinnasta (versiosta 13.0 alkaen — ilman Pythonia voit lisätä uuden aksentin, salauksen tai luovan tilan, katso KOHTA 7b alla) sekä — versiosta 15.0 alkaen — Tarinamoduulista (interaktiivinen toisen persoonan fiktio, jonka AI tuottaa ja TTS tai ruudunlukija lukee, kuvattu erillisessä oppaassa tales.fi.html). Kaikki viisi työkalua ovat saatavilla yhdessä ohjelmaikkunassa, ja niitä voi vaihtaa painikkeilla tai pikanäppäimillä Ctrl+1..Ctrl+5.</p>
 <h2>VAIHE 1: Ensimmäinen käynnistys (Cross-Platform)</h2>
@@ -69,6 +69,17 @@ code { font-family: ui-monospace, Consolas, monospace; }
 3. Napsauta ohjelman aloitusnäytöllä painiketta "Luo golden_key.env-tiedosto ja avaa tekstieditori". Järjestelmä luo automaattisesti puhtaan konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistiossa valmiin mallin, jota voit muokata.<br>
 4. Avautuneessa tiedostossa näet rivin: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Poista paikkamerkkiteksti ja liitä avaimesi suoraan yhtäläisyysmerkin jälkeen (ilman välilyöntejä ja ilman lainausmerkkejä). Tallenna tiedosto ja käynnistä sovellus uudelleen.</p>
 <p><strong>Vinkki:</strong> Uudelleenkäynnistyksen jälkeen sovellus tarkistaa tiedoston ja näyttää osiossa "Järjestelmän tarkistus" avaimen tilan. Sen on oltava vihreä, jotta kaikki tekoälymoduulit ovat valmiita käyttöön. Jos avain puuttuu tai on virheellinen, ohjelma ilmoittaa siitä selkeästi ja antaa avata tekstieditorin virheen nopeaa korjaamista varten.</p>
+<h2>VAIHE 2B (edistynyt, valinnainen): Oma OpenAI-yhteensopiva AI-palveluntarjoaja</h2>
+<p>Useimpien käyttäjien kannattaa pysyä suositellussa Anthropicissa (VAIHE 2) — se tarjoaa parhaan laadun. Jos sinulla on kuitenkin oma syy (kustannukset, saatavuus, yksityisyys, oma paikallinen malli), voit versiosta 18.4 alkaen osoittaa MINKÄ TAHANSA OpenAI API -yhteensopivan endpointin — esimerkiksi OpenRouter, Groq, Fireworks, DeepSeek, paikallinen Ollama tai OpenAI-yhteensopiva Gemini-endpoint. Koko AI-moottori kulkee silloin yhtä polkua kyseiseen endpointiin, ilman erillistä integraatiota palveluntarjoajakohtaisesti.</p>
+<p>Tämä on edistyneiden käyttäjien vaihtoehto: se konfiguroidaan manuaalisesti tiedostossa golden_key.env lisäämällä Anthropic-avaimen rinnalle (tai tilalle) kolme riviä sekä valitun palveluntarjoajan avain:</p>
+<p>LLM_PROVIDER=openai_compat<br>
+LLM_BASE_URL=endpointin_osoite (esim. https://openrouter.ai/api/v1)<br>
+LLM_MODEL=mallin_nimi_palveluntarjoajalla (esim. openai/gpt-4o-mini)<br>
+OPENAI_API_KEY=sinun_avaimesi_kyseiseltä_palveluntarjoajalta</p>
+<p>Miten se toimii:<br>
+•  Kun LLM_PROVIDER=openai_compat, KOKO AI-moottori (Ohjaaja, Tarinat, Polyglootti, otsikot, kielen tunnistus) käyttää määritettyä endpointia, ja konfiguraatiotiedostojen mallinimi korvataan LLM_MODEL-arvolla.<br>
+•  Kun LLM_PROVIDER-riviä ei ole (tai sen arvo on anthropic), sovellus toimii kuten VAIHEESSA 2 — yksinomaan Anthropic-avaimella. Sinun ei tarvitse muuttaa mitään.</p>
+<p><strong>Tärkeää (laatu):</strong> sovelluksen järjestelmäpromptit on kirjoitettu ja viritetty Claudea varten. Muu malli saattaa tuottaa heikompaa laatua — se saattaa noudattaa maailman sääntöjä heikommin, menettää JSON-rakenteen valintoja sisältävissä tiloissa tai palauttaa tekstiä väärällä kielellä. Tämä on tietoinen kustannus↔laatu-kompromissi sinun puoleltasi. Jos haluat parhaan tuloksen, pysy Anthropicissa.</p>
 <h2>VAIHE 3: Pääohjaamo</h2>
 <p>Tämä on komentokeskuksesi tarinoiden keksimistä ja käsikirjoitusten kirjoittamista varten. Siirry sinne napsauttamalla "🎬  Ohjaaja"-painiketta painikepalkissa tai valitsemalla Työkalut → Ohjaaja valikosta (pikakuvake: Ctrl+1).</p>
 <h3>Tärkeää: Projektitiedostojen muoto — paluu .txt-tiedostoihin</h3>
@@ -239,6 +250,17 @@ Kysyttekö varmasti, osaako syntetisaattori taivuttaa näin normalisoituja lukuj
 <li>Suojakilpi: Skripti suojaa kaikkia HTML-tageja. Se turmelee vain dialogia ja kerrontaa.</li>
 <li>Toimii paikallisesti eikä maksa mitään!</li>
 </ul>
+<h2>Tunnistekorjain: kielikoodi erikseen jokaiselle kappaleelle (UUTTA versiossa 19.2)</h2>
+<p>ISO-koodikentän alapuolella löydät valintaruudun „Aseta ISO-koodi erikseen jokaiselle kappaleelle". Kun se on tyhjä — kaikki toimii kuten ennen: yksi koodi menee koko tiedostolle, eikä mitään ylimääräistä ikkunaa avaudu. Kun se on valittuna — painikkeen „Käynnistä käsittely" painamisen jälkeen avautuu tiedostosi kappaleiden luettelo.</p>
+<p>Jokainen luettelon kohta kertoo heti kolme asiaa: kappaleen numeron, sen sisällön alun ja koodin, jonka tämä kappale saa. Sinun ei siis tarvitse avata mitään kenttää kuullaksesi, mikä menee minnekin. Luettelon alla on kolme asiaa valittua kappaletta varten: sen koko sisältö, kielentunnistuksen tulos ja kenttä, jossa vaihdat koodin. Kaikki kappaleet lähtevät liikkeelle koodilla, jonka kirjoitit kenttään „Kod ISO" — tiedostoon ei päädy yhtään koodia, jota et ole hyväksynyt.</p>
+<p>Kaksi painiketta lyhentävät työtä pidemmän tiedoston kanssa. „Käytä tätä koodia kaikissa kappaleissa" levittää nykyisen koodin koko luetteloon — hyödyllinen, kun haluat vaihtaa yleisen koodin ja korjata sitten vain muutaman poikkeuksen. „Täytä kaikki koodit tunnistuksen tuloksella" kysyy jokaisen kappaleen kielen vuorotellen ja lisää vastaukset koodeina; kappale, jonka kohdalla tunnistus ei osaa sanoa mielipidettä (liian lyhyt tai tulos epävarma), säilyttää koodin, joka sillä jo oli — „en tiedä" ei koskaan kirjoita yli sitä, minkä olet itse syöttänyt.</p>
+<p>Tämän ikkunan kielentunnistus tuntee KAIKKI kielet, jotka tunnistuskirjasto osaa tunnistaa — myös ne, joille ohjelmalla ei ole omaa sääntöpakettia. Tämä on tarkoituksellista: Tagien korjaaja on olemassa juuri niitä tiedostoja varten, joiden kielelle meillä ei ole yhtään aksenttia, joten vastaus, joka rajoittuisi vain käyttöönotettuihin paketteihin, olisi tälle tiedostolle varma mutta väärä (esimerkiksi tšekinkielinen kappale nimettäisiin vaikkapa saksaksi). Vihje pysyy vihjeenä — päätös on silti aina sinun.</p>
+<p>Mikä on „kappale" — riippuu tiedostomuodosta, sillä ohjelma antaa koodin täsmälleen niille kohdille, jotka ruudunlukija näkee erillisinä yksikköinä: .docx-tiedostossa se on Word-asiakirjan kappale, HTML-tiedostossa kappale, otsikko, luettelokohta tai taulukon solu, ja .txt-tiedostossa tyhjällä rivillä erotettu osuus. Luettelo näyttää ne lukujärjestyksessä, joten kohta numero 7 on seitsemäs paikka, johon synteesijärjestelmä tulee pääsemään.</p>
+<p>Kaksi korjausta lisätty samalla:</p>
+<ul>
+<li>Taulukot .docx-tiedostoissa saavat vihdoin kielikoodin. Ohjelma ei tähän asti nähnyt niitä lainkaan: solujen kappaleita ei tagattu, ja tiedostoa ladattaessa niiden sisältö ei näkynyt edes esikatselussa eikä merkkilaskurissa. Nyt sekä esikatselu että tagaus käyvät läpi koko asiakirjan sisällön, mukaan lukien sisäkkäiset taulukot.</li>
+<li>Laajennus, jota ohjelma ei tue suoraan, antaa nyt selkeän varoituksen. Tällaisessa tiedostossa ei ole paikkaa, johon kielikoodin voisi sijoittaa, joten Tagien korjaaja tallentaisi kopion, joka on identtinen alkuperäisen kanssa — mutta tähän asti se ilmoitti „Onnistui" ja antoi polun tiedostoon, jossa mikään ei ollut muuttunut nimeä lukuun ottamatta.</li>
+</ul>
 <h2>Tila 3: Koodinmurtaja (UUTTA versiossa 13.0 — tekstillä leikkimistä, ilmainen, paikallinen)</h2>
 <p>Kolmas RadioButton Polyglootissa, Tekoälykääntäjän ja Ohjaajan tilan vieressä: "Koodinmurtajan tila (tekstileikit, satunnainen katkaisu)". Käynnistää kuusi paikallista algoritmia, jotka vääristävät tekstiä — hauskanpitoon, arvoituksiin, kielellisiin pulmiin. Tilan valinnan jälkeen avautuu algoritmien pudotusvalikko, ja yhdelle niistä (Caesarin salaus) lisäkenttä siirtymälle.</p>
 <p>Saatavilla olevat algoritmit (valitse valikosta "Valitse vääristysalgoritmi"):</p>
@@ -352,6 +374,27 @@ Kysyttekö varmasti, osaako syntetisaattori taivuttaa näin normalisoituja lukuj
 <li>Tiedosto <code>docs/dictionaries.pl.html</code> (saatavilla loppukäyttäjäpaketissa Releases-välilehdeltä) — lyhyt, yksinkertaisella kielellä kirjoitettu kuvaus kustakin alikansiosta, 6 valmista sifferiä, 8 valmista aksenttia sekä ideoita siitä, mitä voi tehdä itse ilman Python-osaamista.</li>
 <li>Tiedosto <code>dictionaries/README.md</code> (saatavilla vain kloonattaessa repositorio GitHubista — julkaisupaketit suodattavat .md-tiedostot pois) — yksityiskohtainen tekninen dokumentaatio YAML-muodosta esimerkkeineen, kenttäluetteloineen, pipeline-säännöineen ja regex-lausekkeineen. Tämä asiakirja on suunnattu ohjelmoinnin perusteet tunteville kielitieteilijöille sekä kehittäjille.</li>
 </ul>
+<h2>VAIHE 7b (täydennys): <code>zamiany:</code>-sääntöjen järjestyksellä on merkitystä</h2>
+<p>Tiedostot <code>dictionaries/&lt;kod&gt;/akcenty/*.yaml</code> sisältävät <code>zamiany:</code>-sääntöjen listan — parit <code>wzor → zamiana</code>, joita moottori soveltaa SEKVENSIAALISESTI. Jokainen seuraava sääntö toimii edellisen tuloksen perusteella. Tämä mahdollistaa putkilinjojen rakentamisen, kuten "muunna kaksikirjaiminen <code>szcz</code> <code>shch</code>:ksi ja sitten <code>ch</code> <code>h</code>:ksi", mutta avaa myös klassisen ansan kielipaketin tekijälle.</p>
+<p>"Järjestyssilmukan" ansa. Oletetaan, että espanjalaiselle aksentille, joka pyrkii saamaan puolalaisen "ñ":n kuulostamaan Diegon (Loquendo) ääntämykseltä, tekijä lisää kaksi sääntöä:<br>
+1. <code>ñ → nj</code> (jotta puolalainen "ñ" kuulostaisi pehmeältä "nj":ltä)<br>
+2. <code>j → x</code> (jotta puolalainen "j" kuulostaisi espanjalaiselta "j":ltä — foneettisesti /x/)</p>
+<p>Kun ohjelma käynnistetään, huomataan, että sanat, joissa on "ñ", lausutaan "nx", ei "nj". Miksi? Koska kun ensimmäinen sääntö muuntaa "ñ":n "nj":ksi, uusi "j" tarttuu heti toiseen sääntöön ja muunnetaan "x":ksi. Tuloksena: suunnitellun "ñ → nj" sijaan saadaan "ñ → nx".</p>
+<p>Järjestyssääntö (universaali). Kun yksi sääntö tuo merkin, joka on toisessa säännössä mallina, JÄRJESTYKSELLÄ ON MERKITYSTÄ. Turvallinen heuristiikka: ENSIN muuta TARGET (merkki, jota käytetään myöhemmin <code>wzor</code>-säännössä) johonkin turvalliseen, VASTA SITTEN tuo SOURCE (merkki, joka pitäisi hajottaa TARGETiksi). Esimerkiksi espanjalaisessa tapauksessa oikein: ensin <code>j → x</code>, sitten <code>ñ → nj</code>. Tuloksena: "ñ" antaa "nj" (toinen "j" ei enää muutu, koska <code>j → x</code>-sääntöä sovellettiin aiemmin, kun "nj" ei vielä ollut olemassa).</p>
+<p>Miten testata. Kun muutat sääntöjen järjestystä aksenttitiedostossa, syötä lause, joka sisältää MOLEMMAT kirjaimet Ohjaaja-tilassa. Esimerkiksi ES: "Niño de paja juega" → tuloksessa täytyy olla sekä ñ-aksentti ("ñ → nj") että j-aksentti ("j → x"), eli jotain tyyliin "Ninjo de paxa xuega". Jos näet "ninxo" "ninjo":n sijaan — järjestys on väärä.</p>
+<p>Validointi moottorissa (opt-in pakettien tekijöille). Sovelluksessa on sisäänrakennettu heuristiikka, joka tunnistaa mahdolliset silmukat, mutta se on oletuksena pois päältä — koska monet putkilinjat näyttävät silmukoilta, vaikka ne ovat tarkoituksellisia (klassinen "szcz → shch" + "ch → h"). Sen aktivoimiseksi: aseta ympäristömuuttuja <code>REZYSER_VALIDATE_ZAMIANY=1</code> ja käynnistä sovellus konsolista — lähteestä <code>python main.py</code>, koska jäädytetyllä <code>.exe</code>:llä ei ole konsoli-ikkunaa ikkunatilassa (versiosta 17.0 alkaen). Moottori tulostaa jokaiselle aksenttitiedostolle yhden koontirivin WARN kolmella ensimmäisellä mahdollisella silmukalla ja jäljellä olevien lukumäärällä. Tarkista tuloksena oleva foneettisuus testilauseella — jos vaikutus on tarkoitettu, jätä WARN huomiotta.</p>
+<p>Sääntöjen siirtopainikkeet GUI-sääntöjen hallinnassa (drag-and-drop, "Ylös / Alas") ovat erillinen toiminto, joka on suunniteltu myöhempään versiosykliin — se vaatii Managerin uudelleensuunnittelua (tällä hetkellä se delegoi tiedoston muokkauksen ulkoiselle järjestelmän Muistioon eikä sillä ole omaa sääntönäkymää). Ennen sen toteuttamista: muokkaa YAML-tiedostoa manuaalisesti, siirrä rivejä <code>zamiany:</code>-osiossa, käytä validointia ENV-varilla ja testaa kontrollilauseilla.</p>
+<h2>VAIHE 7b — Puolalaiset kansioiden ja tiedostojen nimet (käyttäjille, jotka eivät ole Puolasta)</h2>
+<p>Ohjelma käyttää puolaa — se on projektin pääkieli. Selaamalla dictionaries/ -kansiota Sääntöjen Hallinnassa (Ctrl+4) tai tarkastelemalla tallennuskansioita, kohtaat puolalaisia nimiä. NE eivät ole virheitä tai käännöksen puutteita: ne pysyvät puolalaisina tarkoituksella, koska ne ovat moottorin sisäisiä tunnisteita. Alla oleva sanasto selittää, mitä ne tarkoittavat.</p>
+<p>Alikansiot <code>dictionaries/&lt;kod&gt;/</code> (näet nämä Sääntöjen Hallinnassa):<br>
+- podstawy (perusteet) — kielipaketin konfiguraatio<br>
+- akcenty (aksentit) — foneettiset säännöt puhesynteesille<br>
+- szyfry (salaukset) — tekstin salausmoodit<br>
+- rezyser (ohjaaja) — Ohjaaja-moduulin luovat tilat<br>
+- opowiesci (tarinat) — interaktiivisten Tarinoiden tilat</p>
+<p>Kansiot tallennuksillesi (ohjelman vieressä):<br>
+- skrypty (käsikirjoitukset) — Ohjaajan projektit: kerronta .txt, Maailman Kirja .md<br>
+- opowiesci (tarinat) — interaktiivisten Tarinoiden tallennukset</p>
 <h2>Tärkeitä ohjeita näytönlukijoiden käyttäjille (NVDA)</h2>
 <h3>1. Onnistumis- ja virheilmoitukset</h3>
 <p>Kun sovellus suorittaa toiminnon (esim. tallentaa tiedoston tai kohtaa virheen), ilmestyy valintaikkuna, jonka otsikko on esimerkiksi "Onnistuminen", "Varoitus" tai "Virhe". NVDA ilmoittaa tästä ikkunasta välittömästi ja lukee sen sisällön. Sinun ei tarvitse tehdä mitään — valintaikkunat ovat täysin käytettävissä näppäimistöllä, ja kohdistus siirtyy automaattisesti "OK"-painikkeeseen. Ei enää "Alert"-etuliitteitä — wxPythonin natiivivalintaikkunat ovat suoraan näytönlukijan tukemia.</p>
@@ -497,49 +540,6 @@ Käsikirjoituksen muuntaminen Äänikirjaksi (Käsikirjoitustila) — poistettu 
 <li>Luovatilan automaattinen lataus projektin metatiedostosta.</li>
 <li>Kaikki aiemmat aksentit (Englanti, Ranska, Saksa, Espanja, Italia, Puola, Islanti) sekä Tunnisteiden korjaaja.</li>
 <li>Täydet AI-toiminnot: Aivoriihi, Käsikirjoitus, Äänikirja, Juonen Akut, Loputon muisti, Otsikointi.</li>
-</ul>
-<h2>VAIHE 7b (täydennys): <code>zamiany:</code>-sääntöjen järjestyksellä on merkitystä</h2>
-<p>Tiedostot <code>dictionaries/&lt;kod&gt;/akcenty/*.yaml</code> sisältävät <code>zamiany:</code>-sääntöjen listan — parit <code>wzor → zamiana</code>, joita moottori soveltaa SEKVENSIAALISESTI. Jokainen seuraava sääntö toimii edellisen tuloksen perusteella. Tämä mahdollistaa putkilinjojen rakentamisen, kuten "muunna kaksikirjaiminen <code>szcz</code> <code>shch</code>:ksi ja sitten <code>ch</code> <code>h</code>:ksi", mutta avaa myös klassisen ansan kielipaketin tekijälle.</p>
-<p>"Järjestyssilmukan" ansa. Oletetaan, että espanjalaiselle aksentille, joka pyrkii saamaan puolalaisen "ñ":n kuulostamaan Diegon (Loquendo) ääntämykseltä, tekijä lisää kaksi sääntöä:<br>
-1. <code>ñ → nj</code> (jotta puolalainen "ñ" kuulostaisi pehmeältä "nj":ltä)<br>
-2. <code>j → x</code> (jotta puolalainen "j" kuulostaisi espanjalaiselta "j":ltä — foneettisesti /x/)</p>
-<p>Kun ohjelma käynnistetään, huomataan, että sanat, joissa on "ñ", lausutaan "nx", ei "nj". Miksi? Koska kun ensimmäinen sääntö muuntaa "ñ":n "nj":ksi, uusi "j" tarttuu heti toiseen sääntöön ja muunnetaan "x":ksi. Tuloksena: suunnitellun "ñ → nj" sijaan saadaan "ñ → nx".</p>
-<p>Järjestyssääntö (universaali). Kun yksi sääntö tuo merkin, joka on toisessa säännössä mallina, JÄRJESTYKSELLÄ ON MERKITYSTÄ. Turvallinen heuristiikka: ENSIN muuta TARGET (merkki, jota käytetään myöhemmin <code>wzor</code>-säännössä) johonkin turvalliseen, VASTA SITTEN tuo SOURCE (merkki, joka pitäisi hajottaa TARGETiksi). Esimerkiksi espanjalaisessa tapauksessa oikein: ensin <code>j → x</code>, sitten <code>ñ → nj</code>. Tuloksena: "ñ" antaa "nj" (toinen "j" ei enää muutu, koska <code>j → x</code>-sääntöä sovellettiin aiemmin, kun "nj" ei vielä ollut olemassa).</p>
-<p>Miten testata. Kun muutat sääntöjen järjestystä aksenttitiedostossa, syötä lause, joka sisältää MOLEMMAT kirjaimet Ohjaaja-tilassa. Esimerkiksi ES: "Niño de paja juega" → tuloksessa täytyy olla sekä ñ-aksentti ("ñ → nj") että j-aksentti ("j → x"), eli jotain tyyliin "Ninjo de paxa xuega". Jos näet "ninxo" "ninjo":n sijaan — järjestys on väärä.</p>
-<p>Validointi moottorissa (opt-in pakettien tekijöille). Sovelluksessa on sisäänrakennettu heuristiikka, joka tunnistaa mahdolliset silmukat, mutta se on oletuksena pois päältä — koska monet putkilinjat näyttävät silmukoilta, vaikka ne ovat tarkoituksellisia (klassinen "szcz → shch" + "ch → h"). Sen aktivoimiseksi: aseta ympäristömuuttuja <code>REZYSER_VALIDATE_ZAMIANY=1</code> ja käynnistä sovellus konsolista — lähteestä <code>python main.py</code>, koska jäädytetyllä <code>.exe</code>:llä ei ole konsoli-ikkunaa ikkunatilassa (versiosta 17.0 alkaen). Moottori tulostaa jokaiselle aksenttitiedostolle yhden koontirivin WARN kolmella ensimmäisellä mahdollisella silmukalla ja jäljellä olevien lukumäärällä. Tarkista tuloksena oleva foneettisuus testilauseella — jos vaikutus on tarkoitettu, jätä WARN huomiotta.</p>
-<p>Sääntöjen siirtopainikkeet GUI-sääntöjen hallinnassa (drag-and-drop, "Ylös / Alas") ovat erillinen toiminto, joka on suunniteltu myöhempään versiosykliin — se vaatii Managerin uudelleensuunnittelua (tällä hetkellä se delegoi tiedoston muokkauksen ulkoiselle järjestelmän Muistioon eikä sillä ole omaa sääntönäkymää). Ennen sen toteuttamista: muokkaa YAML-tiedostoa manuaalisesti, siirrä rivejä <code>zamiany:</code>-osiossa, käytä validointia ENV-varilla ja testaa kontrollilauseilla.</p>
-<h2>VAIHE 7b — Puolalaiset kansioiden ja tiedostojen nimet (käyttäjille, jotka eivät ole Puolasta)</h2>
-<p>Ohjelma käyttää puolaa — se on projektin pääkieli. Selaamalla dictionaries/ -kansiota Sääntöjen Hallinnassa (Ctrl+4) tai tarkastelemalla tallennuskansioita, kohtaat puolalaisia nimiä. NE eivät ole virheitä tai käännöksen puutteita: ne pysyvät puolalaisina tarkoituksella, koska ne ovat moottorin sisäisiä tunnisteita. Alla oleva sanasto selittää, mitä ne tarkoittavat.</p>
-<p>Alikansiot <code>dictionaries/&lt;kod&gt;/</code> (näet nämä Sääntöjen Hallinnassa):<br>
-- podstawy (perusteet) — kielipaketin konfiguraatio<br>
-- akcenty (aksentit) — foneettiset säännöt puhesynteesille<br>
-- szyfry (salaukset) — tekstin salausmoodit<br>
-- rezyser (ohjaaja) — Ohjaaja-moduulin luovat tilat<br>
-- opowiesci (tarinat) — interaktiivisten Tarinoiden tilat</p>
-<p>Kansiot tallennuksillesi (ohjelman vieressä):<br>
-- skrypty (käsikirjoitukset) — Ohjaajan projektit: kerronta .txt, Maailman Kirja .md<br>
-- opowiesci (tarinat) — interaktiivisten Tarinoiden tallennukset</p>
-<h2>VAIHE 2B (edistynyt, valinnainen): Oma OpenAI-yhteensopiva AI-palveluntarjoaja</h2>
-<p>Useimpien käyttäjien kannattaa pysyä suositellussa Anthropicissa (VAIHE 2) — se tarjoaa parhaan laadun. Jos sinulla on kuitenkin oma syy (kustannukset, saatavuus, yksityisyys, oma paikallinen malli), voit versiosta 18.4 alkaen osoittaa MINKÄ TAHANSA OpenAI API -yhteensopivan endpointin — esimerkiksi OpenRouter, Groq, Fireworks, DeepSeek, paikallinen Ollama tai OpenAI-yhteensopiva Gemini-endpoint. Koko AI-moottori kulkee silloin yhtä polkua kyseiseen endpointiin, ilman erillistä integraatiota palveluntarjoajakohtaisesti.</p>
-<p>Tämä on edistyneiden käyttäjien vaihtoehto: se konfiguroidaan manuaalisesti tiedostossa golden_key.env lisäämällä Anthropic-avaimen rinnalle (tai tilalle) kolme riviä sekä valitun palveluntarjoajan avain:</p>
-<p>LLM_PROVIDER=openai_compat<br>
-LLM_BASE_URL=endpointin_osoite (esim. https://openrouter.ai/api/v1)<br>
-LLM_MODEL=mallin_nimi_palveluntarjoajalla (esim. openai/gpt-4o-mini)<br>
-OPENAI_API_KEY=sinun_avaimesi_kyseiseltä_palveluntarjoajalta</p>
-<p>Miten se toimii:<br>
-•  Kun LLM_PROVIDER=openai_compat, KOKO AI-moottori (Ohjaaja, Tarinat, Polyglootti, otsikot, kielen tunnistus) käyttää määritettyä endpointia, ja konfiguraatiotiedostojen mallinimi korvataan LLM_MODEL-arvolla.<br>
-•  Kun LLM_PROVIDER-riviä ei ole (tai sen arvo on anthropic), sovellus toimii kuten VAIHEESSA 2 — yksinomaan Anthropic-avaimella. Sinun ei tarvitse muuttaa mitään.</p>
-<p><strong>Tärkeää (laatu):</strong> sovelluksen järjestelmäpromptit on kirjoitettu ja viritetty Claudea varten. Muu malli saattaa tuottaa heikompaa laatua — se saattaa noudattaa maailman sääntöjä heikommin, menettää JSON-rakenteen valintoja sisältävissä tiloissa tai palauttaa tekstiä väärällä kielellä. Tämä on tietoinen kustannus↔laatu-kompromissi sinun puoleltasi. Jos haluat parhaan tuloksen, pysy Anthropicissa.</p>
-<h2>Tunnistekorjain: kielikoodi erikseen jokaiselle kappaleelle (UUTTA versiossa 19.2)</h2>
-<p>ISO-koodikentän alapuolella löydät valintaruudun „Aseta ISO-koodi erikseen jokaiselle kappaleelle". Kun se on tyhjä — kaikki toimii kuten ennen: yksi koodi menee koko tiedostolle, eikä mitään ylimääräistä ikkunaa avaudu. Kun se on valittuna — painikkeen „Käynnistä käsittely" painamisen jälkeen avautuu tiedostosi kappaleiden luettelo.</p>
-<p>Jokainen luettelon kohta kertoo heti kolme asiaa: kappaleen numeron, sen sisällön alun ja koodin, jonka tämä kappale saa. Sinun ei siis tarvitse avata mitään kenttää kuullaksesi, mikä menee minnekin. Luettelon alla on kolme asiaa valittua kappaletta varten: sen koko sisältö, kielentunnistuksen tulos ja kenttä, jossa vaihdat koodin. Kaikki kappaleet lähtevät liikkeelle koodilla, jonka kirjoitit kenttään „Kod ISO" — tiedostoon ei päädy yhtään koodia, jota et ole hyväksynyt.</p>
-<p>Kaksi painiketta lyhentävät työtä pidemmän tiedoston kanssa. „Käytä tätä koodia kaikissa kappaleissa" levittää nykyisen koodin koko luetteloon — hyödyllinen, kun haluat vaihtaa yleisen koodin ja korjata sitten vain muutaman poikkeuksen. „Täytä kaikki koodit tunnistuksen tuloksella" kysyy jokaisen kappaleen kielen vuorotellen ja lisää vastaukset koodeina; kappale, jonka kohdalla tunnistus ei osaa sanoa mielipidettä (liian lyhyt tai tulos epävarma), säilyttää koodin, joka sillä jo oli — „en tiedä" ei koskaan kirjoita yli sitä, minkä olet itse syöttänyt.</p>
-<p>Tämän ikkunan kielentunnistus tuntee KAIKKI kielet, jotka tunnistuskirjasto osaa tunnistaa — myös ne, joille ohjelmalla ei ole omaa sääntöpakettia. Tämä on tarkoituksellista: Tagien korjaaja on olemassa juuri niitä tiedostoja varten, joiden kielelle meillä ei ole yhtään aksenttia, joten vastaus, joka rajoittuisi vain käyttöönotettuihin paketteihin, olisi tälle tiedostolle varma mutta väärä (esimerkiksi tšekinkielinen kappale nimettäisiin vaikkapa saksaksi). Vihje pysyy vihjeenä — päätös on silti aina sinun.</p>
-<p>Mikä on „kappale" — riippuu tiedostomuodosta, sillä ohjelma antaa koodin täsmälleen niille kohdille, jotka ruudunlukija näkee erillisinä yksikköinä: .docx-tiedostossa se on Word-asiakirjan kappale, HTML-tiedostossa kappale, otsikko, luettelokohta tai taulukon solu, ja .txt-tiedostossa tyhjällä rivillä erotettu osuus. Luettelo näyttää ne lukujärjestyksessä, joten kohta numero 7 on seitsemäs paikka, johon synteesijärjestelmä tulee pääsemään.</p>
-<p>Kaksi korjausta lisätty samalla:</p>
-<ul>
-<li>Taulukot .docx-tiedostoissa saavat vihdoin kielikoodin. Ohjelma ei tähän asti nähnyt niitä lainkaan: solujen kappaleita ei tagattu, ja tiedostoa ladattaessa niiden sisältö ei näkynyt edes esikatselussa eikä merkkilaskurissa. Nyt sekä esikatselu että tagaus käyvät läpi koko asiakirjan sisällön, mukaan lukien sisäkkäiset taulukot.</li>
-<li>Laajennus, jota ohjelma ei tue suoraan, antaa nyt selkeän varoituksen. Tällaisessa tiedostossa ei ole paikkaa, johon kielikoodin voisi sijoittaa, joten Tagien korjaaja tallentaisi kopion, joka on identtinen alkuperäisen kanssa — mutta tähän asti se ilmoitti „Onnistui" ja antoi polun tiedostoon, jossa mikään ei ollut muuttunut nimeä lukuun ottamatta.</li>
 </ul>
 </body>
 </html>

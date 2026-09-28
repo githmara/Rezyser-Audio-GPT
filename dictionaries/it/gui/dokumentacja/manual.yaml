@@ -94,6 +94,23 @@ tresc:
     4. Nel file aperto vedrai la riga: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Elimina il testo segnaposto e incolla la tua chiave direttamente dopo il segno di uguale (senza spazi e senza virgolette). Salva il file e riavvia l'applicazione.
 
     **Suggerimento:** Dopo il riavvio, l'applicazione verificherà il file e nella sezione "{home.heading_system_check}" mostrerà lo stato della chiave. Deve essere verde affinché tutti i moduli AI siano pronti all'uso. Se la chiave è assente o errata, il programma lo indicherà chiaramente e consentirà di aprire l'editor di testo per correggere rapidamente l'errore.
+  krok_2b_dostawca_zaawansowany: |
+    ## PASSO 2B (avanzato, opzionale): Provider AI personalizzato compatibile con OpenAI
+
+    La maggior parte degli utenti dovrebbe restare con il consigliato Anthropic (PASSO 2) — è quello che garantisce la qualità più elevata. Se però hai una ragione specifica (costo, accesso, privacy, modello locale personalizzato), dalla versione 18.4 puoi indicare QUALSIASI endpoint compatibile con le API OpenAI — ad esempio OpenRouter, Groq, Fireworks, DeepSeek, Ollama locale o un endpoint Gemini compatibile con OpenAI. L'intero motore AI segue allora un unico percorso verso quell'endpoint, senza integrazione separata per provider.
+
+    Questa è un'opzione per utenti avanzati: la configuri manualmente nel file golden_key.env, aggiungendo accanto (o al posto) della chiave Anthropic tre righe e la chiave del provider scelto:
+
+    LLM_PROVIDER=openai_compat
+    LLM_BASE_URL=indirizzo_endpoint (es. https://openrouter.ai/api/v1)
+    LLM_MODEL=nome_modello_presso_il_provider (es. openai/gpt-4o-mini)
+    OPENAI_API_KEY=tua_chiave_presso_questo_provider
+
+    Come funziona:
+    •  Quando LLM_PROVIDER=openai_compat, L'INTERO motore AI (Regista, Racconti, Poliglotta, titoli, rilevamento lingua) utilizza l'endpoint indicato, e il nome del modello nei file di configurazione viene sovrascritto da LLM_MODEL.
+    •  Quando la riga LLM_PROVIDER è assente (o ha il valore anthropic), l'applicazione funziona come nel PASSO 2 — esclusivamente con la chiave Anthropic. Non devi cambiare nulla.
+
+    **Importante (qualità):** i prompt di sistema dell'applicazione sono scritti e ottimizzati per Claude. Un modello diverso potrebbe offrire una qualità inferiore — rispettare meno le regole del mondo, perdere la struttura JSON nelle modalità con scelte oppure restituire il testo nella lingua sbagliata. Si tratta di un compromesso consapevole costo↔qualità da parte tua. Se tieni al miglior risultato possibile, resta con Anthropic.
   krok_3_glowne_studio: |
     ## PASSO 3: Studio di Regia Principale
 
@@ -364,6 +381,23 @@ tresc:
 
     - Scudo protettivo: Lo script protegge tutti i tag HTML. Rovina solo i dialoghi e la narrazione.
     - Funziona localmente e non costa nulla!
+  krok_5_naprawiacz_per_akapit: |
+    ## Riparatore di Tag: codice lingua separato per ogni paragrafo (NOVITÀ nella versione 19.2)
+
+    Sotto il campo del codice ISO trovi una casella di selezione „{poliglota.chk_per_akapit}". Deselezionata — tutto rimane come prima: un unico codice vale per l'intero file e non compare nessuna finestra aggiuntiva. Selezionata — dopo aver premuto „{poliglota.btn_process}" si apre l'elenco dei paragrafi del tuo file.
+
+    Ogni voce dell'elenco indica subito tre cose: il numero del paragrafo, l'inizio del suo contenuto e il codice che quel paragrafo riceverà. Non devi quindi entrare in nessun campo per sapere cosa finirà dove. Sotto l'elenco ci sono tre elementi relativi al paragrafo selezionato: il suo contenuto completo, il risultato del rilevamento della lingua e il campo in cui modifichi il codice. Tutti i paragrafi partono con il codice che hai inserito nel campo „Codice ISO" — nel file non finisce nessun codice che non hai approvato.
+
+    Due pulsanti abbreviano il lavoro su un file più lungo. „{poliglota.per_akapit_btn_wszystkie}" distribuisce il codice corrente su tutto l'elenco — utile quando vuoi cambiare il codice globale e poi correggere solo qualche eccezione. „{poliglota.per_akapit_btn_detektor}" interroga la lingua di ogni paragrafo uno dopo l'altro e inserisce le risposte come codici; il paragrafo per cui il rilevamento non ha un'opinione (troppo corto o risultato incerto) mantiene il codice che aveva già — un „non lo so" non sovrascrive mai ciò che hai inserito tu.
+
+    Il rilevamento della lingua in questa finestra conosce TUTTE le lingue riconosciute dalla libreria di rilevamento — anche quelle per cui il programma non dispone di un proprio pacchetto di regole. Questo è intenzionale: il Correttore di Tag esiste proprio per i file nelle lingue per cui non abbiamo nessun accento, quindi una risposta limitata ai soli pacchetti implementati sarebbe per esso sicura e sbagliata (un paragrafo in ceco verrebbe ad esempio classificato come tedesco). Il suggerimento resta un suggerimento — la decisione è comunque tua.
+
+    Cosa sia un „paragrafo" dipende dal formato del file, perché il programma assegna il codice esattamente ai punti che lo screen reader percepisce come unità distinte: in .docx è il paragrafo del documento Word, in un file HTML è un paragrafo, un'intestazione, un elemento di elenco o una cella di tabella, mentre in .txt è un frammento separato da una riga vuota. L'elenco li mostra nell'ordine di lettura, quindi la posizione numero 7 è il settimo punto a cui arriverà il sintetizzatore.
+
+    Due correzioni aggiunte per l'occasione:
+
+    - Le tabelle in .docx ottengono finalmente un codice lingua. Finora il programma non le vedeva affatto: i paragrafi delle celle non venivano taggati e, al momento del caricamento del file, il loro contenuto non compariva nemmeno nell'anteprima né nel contatore di caratteri. Ora sia l'anteprima sia la taggatura passano attraverso l'intero contenuto del documento, comprese le tabelle annidate.
+    - Un'estensione che il programma non supporta direttamente ora produce un avviso chiaro. In un file simile non c'è dove collocare il codice lingua, quindi il Correttore salverebbe una copia identica all'originale — mentre finora segnalava „{common.sukces_tytul}" indicando il percorso di un file in cui non era cambiato nulla tranne il nome.
   krok_5_tryb_szyfrant: |
     ## Modalità 3: Cifrario (NOVITÀ in 13.0 — giochi di testo, gratuiti, locali)
 
@@ -528,6 +562,39 @@ tresc:
     Dove cercare ulteriore documentazione sulla cartella dictionaries/:
     - Il file `docs/dictionaries.pl.html` (disponibile nel pacchetto per gli utenti finali dalla scheda Releases) — una descrizione breve, in linguaggio semplice, di ogni sottocartella, 6 cifrari pronti, 8 accenti pronti e idee su cosa si può fare autonomamente, senza conoscenze di Python.
     - Il file `dictionaries/README.md` (disponibile solo clonando il repository da GitHub — i pacchetti di rilascio filtrano i file .md) — documentazione tecnica dettagliata del formato YAML con esempi, elenchi di campi, regole della pipeline, espressioni regolari. Questo documento è indirizzato a linguisti con conoscenze di base di programmazione e a sviluppatori.
+  krok_7b_manager_regul_kolejnosc_zamian: |
+    ## PASSO 7b (completamento): L'ordine delle regole `zamiany:` è importante
+
+    I file in `dictionaries/<kod>/akcenty/*.yaml` contengono un elenco di regole `zamiany:` — coppie `wzor → zamiana`, che il motore applica SEQUENZIALMENTE. Ogni regola successiva opera sull'output della precedente. Questo permette di costruire pipeline del tipo "scomponi il digramma `szcz` in `shch`, e poi sostituisci `ch` con `h`", ma apre anche la classica trappola per l'autore del pacchetto linguistico.
+
+    La trappola del "ciclo sequenziale". Supponiamo che per l'accento spagnolo, che deve far somigliare la pronuncia polacca di "ñ" a quella di Diego (Loquendo), l'autore aggiunga due regole:
+    1. `ñ → nj` (per far suonare la "ñ" polacca come una morbida "nj")
+    2. `j → x` (per far suonare la "j" polacca come la "j" spagnola — foneticamente /x/)
+
+    Dopo l'esecuzione, si scopre che le parole con "ñ" vengono pronunciate come "nx", non "nj". Perché? Perché quando la prima regola sostituisce "ñ" con "nj", la nuova "j" viene immediatamente catturata dalla seconda regola e sostituita con "x". Risultato: invece del previsto "ñ → nj", otteniamo "ñ → nx".
+
+    Regola dell'ordine (universale). Quando una regola introduce un carattere che un'altra regola ha come modello, L'ORDINE CONTA. Un'euristica sicura: PRIMA sostituisci il TARGET (carattere usato successivamente come `wzor` in un'altra regola) con qualcosa di sicuro, POI introduci il SOURCE (carattere che deve scomporsi nel TARGET). Per l'esempio spagnolo correttamente: prima `j → x`, poi `ñ → nj`. Risultato: "ñ" diventa "nj" (la seconda "j" non verrà più catturata, perché la regola `j → x` è stata applicata prima, quando "nj" non esisteva ancora).
+
+    Come testare. Dopo aver cambiato l'ordine delle regole nel file dell'accento, passa una frase contenente ENTRAMBI i caratteri attraverso il Modalità Regista. Per esempio ES: "Niño de paja juega" → il risultato deve avere sia l'accento ñ ("ñ → nj"), sia l'accento j ("j → x"), quindi qualcosa come "Ninjo de paxa xuega". Se vedi "ninxo" invece di "ninjo" — l'ordine è invertito.
+
+    Validazione nel motore (opt-in per gli autori dei pacchetti). L'applicazione ha un'euristica incorporata che rileva potenziali cicli, ma è disattivata per impostazione predefinita — perché molte pipeline sembrano cicli, anche se sono intenzionali (il classico "szcz → shch" + "ch → h"). Per attivarla: imposta la variabile d'ambiente `REZYSER_VALIDATE_ZAMIANY=1` e avvia l'applicazione dalla console — dalla sorgente tramite `python main.py`, perché l'eseguibile congelato `.exe` in modalità finestra (dalla versione 17.0) non ha una finestra console. Il motore stamperà per ogni file di accenti una riga aggregata WARN con i primi tre potenziali cicli e il numero degli altri. Controlla la fonetica risultante sulla frase di test — se l'effetto è quello desiderato, ignora il WARN.
+
+    I pulsanti per spostare le regole nel GUI del Gestore Regole (drag-and-drop, "Su / Giù") sono una funzione separata pianificata per un ciclo di versione successivo — richiede una riprogettazione del Gestore (attualmente delega l'editing del file a un Blocco Note esterno di sistema, e non ha una propria vista delle regole). Fino alla sua implementazione: modifica manualmente il file YAML, sposta le righe nella sezione `zamiany:`, utilizza il validatore tramite ENV-var e testa su frasi di controllo.
+  krok_7b_polskie_nazewnictwo: |
+    ## PASSO 7b — Nomi polacchi di cartelle e file (per utenti non polacchi)
+
+    Il programma è governato dalla lingua polacca — è la lingua principale del progetto. Esplorando la cartella dictionaries/ nel Gestore Regole (Ctrl+4) o aprendo le cartelle dei salvataggi, incontrerai nomi polacchi. NON sono un errore né un difetto di traduzione: restano in polacco di proposito, perché sono gli identificatori interni del motore. Il glossario seguente spiega cosa significano.
+
+    Sottocartelle in `dictionaries/<codice-lingua>/` (questo è ciò che vedi nel Gestore Regole):
+    - podstawy (basics) — configurazione del pacchetto linguistico
+    - akcenty (accents) — regole fonetiche per i sintetizzatori vocali
+    - szyfry (ciphers) — modalità di cifratura del testo
+    - rezyser (director) — modalità creative del modulo Regista
+    - opowiesci (stories) — modalità dei Racconti interattivi
+
+    Cartelle con i tuoi salvataggi (accanto al programma):
+    - skrypty (scripts) — progetti del Regista: narrazione .txt, Libro del Mondo .md
+    - opowiesci (stories) — salvataggi dei Racconti interattivi
   nvda_a11y: |
     ## Indicazioni importanti per gli utenti dei lettori di schermo (NVDA)
 
@@ -684,70 +751,3 @@ tresc:
     - Caricamento automatico della modalità creativa dal file di metadati del progetto.
     - Tutti gli accenti delle versioni precedenti (Inglese, Francese, Tedesco, Spagnolo, Polacco, Finlandese, Islandese) e il Correttore di Tag.
     - Piene funzionalità AI: Brainstorming, Script, Audiolibro, Accumulatore di Trama, Memoria Infinita, Assegnazione di Titoli.
-  krok_7b_manager_regul_kolejnosc_zamian: |
-    ## PASSO 7b (completamento): L'ordine delle regole `zamiany:` è importante
-
-    I file in `dictionaries/<kod>/akcenty/*.yaml` contengono un elenco di regole `zamiany:` — coppie `wzor → zamiana`, che il motore applica SEQUENZIALMENTE. Ogni regola successiva opera sull'output della precedente. Questo permette di costruire pipeline del tipo "scomponi il digramma `szcz` in `shch`, e poi sostituisci `ch` con `h`", ma apre anche la classica trappola per l'autore del pacchetto linguistico.
-
-    La trappola del "ciclo sequenziale". Supponiamo che per l'accento spagnolo, che deve far somigliare la pronuncia polacca di "ñ" a quella di Diego (Loquendo), l'autore aggiunga due regole:
-    1. `ñ → nj` (per far suonare la "ñ" polacca come una morbida "nj")
-    2. `j → x` (per far suonare la "j" polacca come la "j" spagnola — foneticamente /x/)
-
-    Dopo l'esecuzione, si scopre che le parole con "ñ" vengono pronunciate come "nx", non "nj". Perché? Perché quando la prima regola sostituisce "ñ" con "nj", la nuova "j" viene immediatamente catturata dalla seconda regola e sostituita con "x". Risultato: invece del previsto "ñ → nj", otteniamo "ñ → nx".
-
-    Regola dell'ordine (universale). Quando una regola introduce un carattere che un'altra regola ha come modello, L'ORDINE CONTA. Un'euristica sicura: PRIMA sostituisci il TARGET (carattere usato successivamente come `wzor` in un'altra regola) con qualcosa di sicuro, POI introduci il SOURCE (carattere che deve scomporsi nel TARGET). Per l'esempio spagnolo correttamente: prima `j → x`, poi `ñ → nj`. Risultato: "ñ" diventa "nj" (la seconda "j" non verrà più catturata, perché la regola `j → x` è stata applicata prima, quando "nj" non esisteva ancora).
-
-    Come testare. Dopo aver cambiato l'ordine delle regole nel file dell'accento, passa una frase contenente ENTRAMBI i caratteri attraverso il Modalità Regista. Per esempio ES: "Niño de paja juega" → il risultato deve avere sia l'accento ñ ("ñ → nj"), sia l'accento j ("j → x"), quindi qualcosa come "Ninjo de paxa xuega". Se vedi "ninxo" invece di "ninjo" — l'ordine è invertito.
-
-    Validazione nel motore (opt-in per gli autori dei pacchetti). L'applicazione ha un'euristica incorporata che rileva potenziali cicli, ma è disattivata per impostazione predefinita — perché molte pipeline sembrano cicli, anche se sono intenzionali (il classico "szcz → shch" + "ch → h"). Per attivarla: imposta la variabile d'ambiente `REZYSER_VALIDATE_ZAMIANY=1` e avvia l'applicazione dalla console — dalla sorgente tramite `python main.py`, perché l'eseguibile congelato `.exe` in modalità finestra (dalla versione 17.0) non ha una finestra console. Il motore stamperà per ogni file di accenti una riga aggregata WARN con i primi tre potenziali cicli e il numero degli altri. Controlla la fonetica risultante sulla frase di test — se l'effetto è quello desiderato, ignora il WARN.
-
-    I pulsanti per spostare le regole nel GUI del Gestore Regole (drag-and-drop, "Su / Giù") sono una funzione separata pianificata per un ciclo di versione successivo — richiede una riprogettazione del Gestore (attualmente delega l'editing del file a un Blocco Note esterno di sistema, e non ha una propria vista delle regole). Fino alla sua implementazione: modifica manualmente il file YAML, sposta le righe nella sezione `zamiany:`, utilizza il validatore tramite ENV-var e testa su frasi di controllo.
-  krok_7b_polskie_nazewnictwo: |
-    ## PASSO 7b — Nomi polacchi di cartelle e file (per utenti non polacchi)
-
-    Il programma è governato dalla lingua polacca — è la lingua principale del progetto. Esplorando la cartella dictionaries/ nel Gestore Regole (Ctrl+4) o aprendo le cartelle dei salvataggi, incontrerai nomi polacchi. NON sono un errore né un difetto di traduzione: restano in polacco di proposito, perché sono gli identificatori interni del motore. Il glossario seguente spiega cosa significano.
-
-    Sottocartelle in `dictionaries/<codice-lingua>/` (questo è ciò che vedi nel Gestore Regole):
-    - podstawy (basics) — configurazione del pacchetto linguistico
-    - akcenty (accents) — regole fonetiche per i sintetizzatori vocali
-    - szyfry (ciphers) — modalità di cifratura del testo
-    - rezyser (director) — modalità creative del modulo Regista
-    - opowiesci (stories) — modalità dei Racconti interattivi
-
-    Cartelle con i tuoi salvataggi (accanto al programma):
-    - skrypty (scripts) — progetti del Regista: narrazione .txt, Libro del Mondo .md
-    - opowiesci (stories) — salvataggi dei Racconti interattivi
-  krok_2b_dostawca_zaawansowany: |
-    ## PASSO 2B (avanzato, opzionale): Provider AI personalizzato compatibile con OpenAI
-
-    La maggior parte degli utenti dovrebbe restare con il consigliato Anthropic (PASSO 2) — è quello che garantisce la qualità più elevata. Se però hai una ragione specifica (costo, accesso, privacy, modello locale personalizzato), dalla versione 18.4 puoi indicare QUALSIASI endpoint compatibile con le API OpenAI — ad esempio OpenRouter, Groq, Fireworks, DeepSeek, Ollama locale o un endpoint Gemini compatibile con OpenAI. L'intero motore AI segue allora un unico percorso verso quell'endpoint, senza integrazione separata per provider.
-
-    Questa è un'opzione per utenti avanzati: la configuri manualmente nel file golden_key.env, aggiungendo accanto (o al posto) della chiave Anthropic tre righe e la chiave del provider scelto:
-
-    LLM_PROVIDER=openai_compat
-    LLM_BASE_URL=indirizzo_endpoint (es. https://openrouter.ai/api/v1)
-    LLM_MODEL=nome_modello_presso_il_provider (es. openai/gpt-4o-mini)
-    OPENAI_API_KEY=tua_chiave_presso_questo_provider
-
-    Come funziona:
-    •  Quando LLM_PROVIDER=openai_compat, L'INTERO motore AI (Regista, Racconti, Poliglotta, titoli, rilevamento lingua) utilizza l'endpoint indicato, e il nome del modello nei file di configurazione viene sovrascritto da LLM_MODEL.
-    •  Quando la riga LLM_PROVIDER è assente (o ha il valore anthropic), l'applicazione funziona come nel PASSO 2 — esclusivamente con la chiave Anthropic. Non devi cambiare nulla.
-
-    **Importante (qualità):** i prompt di sistema dell'applicazione sono scritti e ottimizzati per Claude. Un modello diverso potrebbe offrire una qualità inferiore — rispettare meno le regole del mondo, perdere la struttura JSON nelle modalità con scelte oppure restituire il testo nella lingua sbagliata. Si tratta di un compromesso consapevole costo↔qualità da parte tua. Se tieni al miglior risultato possibile, resta con Anthropic.
-  krok_5_naprawiacz_per_akapit: |
-    ## Riparatore di Tag: codice lingua separato per ogni paragrafo (NOVITÀ nella versione 19.2)
-
-    Sotto il campo del codice ISO trovi una casella di selezione „{poliglota.chk_per_akapit}". Deselezionata — tutto rimane come prima: un unico codice vale per l'intero file e non compare nessuna finestra aggiuntiva. Selezionata — dopo aver premuto „{poliglota.btn_process}" si apre l'elenco dei paragrafi del tuo file.
-
-    Ogni voce dell'elenco indica subito tre cose: il numero del paragrafo, l'inizio del suo contenuto e il codice che quel paragrafo riceverà. Non devi quindi entrare in nessun campo per sapere cosa finirà dove. Sotto l'elenco ci sono tre elementi relativi al paragrafo selezionato: il suo contenuto completo, il risultato del rilevamento della lingua e il campo in cui modifichi il codice. Tutti i paragrafi partono con il codice che hai inserito nel campo „Codice ISO" — nel file non finisce nessun codice che non hai approvato.
-
-    Due pulsanti abbreviano il lavoro su un file più lungo. „{poliglota.per_akapit_btn_wszystkie}" distribuisce il codice corrente su tutto l'elenco — utile quando vuoi cambiare il codice globale e poi correggere solo qualche eccezione. „{poliglota.per_akapit_btn_detektor}" interroga la lingua di ogni paragrafo uno dopo l'altro e inserisce le risposte come codici; il paragrafo per cui il rilevamento non ha un'opinione (troppo corto o risultato incerto) mantiene il codice che aveva già — un „non lo so" non sovrascrive mai ciò che hai inserito tu.
-
-    Il rilevamento della lingua in questa finestra conosce TUTTE le lingue riconosciute dalla libreria di rilevamento — anche quelle per cui il programma non dispone di un proprio pacchetto di regole. Questo è intenzionale: il Correttore di Tag esiste proprio per i file nelle lingue per cui non abbiamo nessun accento, quindi una risposta limitata ai soli pacchetti implementati sarebbe per esso sicura e sbagliata (un paragrafo in ceco verrebbe ad esempio classificato come tedesco). Il suggerimento resta un suggerimento — la decisione è comunque tua.
-
-    Cosa sia un „paragrafo" dipende dal formato del file, perché il programma assegna il codice esattamente ai punti che lo screen reader percepisce come unità distinte: in .docx è il paragrafo del documento Word, in un file HTML è un paragrafo, un'intestazione, un elemento di elenco o una cella di tabella, mentre in .txt è un frammento separato da una riga vuota. L'elenco li mostra nell'ordine di lettura, quindi la posizione numero 7 è il settimo punto a cui arriverà il sintetizzatore.
-
-    Due correzioni aggiunte per l'occasione:
-
-    - Le tabelle in .docx ottengono finalmente un codice lingua. Finora il programma non le vedeva affatto: i paragrafi delle celle non venivano taggati e, al momento del caricamento del file, il loro contenuto non compariva nemmeno nell'anteprima né nel contatore di caratteri. Ora sia l'anteprima sia la taggatura passano attraverso l'intero contenuto del documento, comprese le tabelle annidate.
-    - Un'estensione che il programma non supporta direttamente ora produce un avviso chiaro. In un file simile non c'è dove collocare il codice lingua, quindi il Correttore salverebbe una copia identica all'originale — mentre finora segnalava „{common.sukces_tytul}" indicando il percorso di un file in cui non era cambiato nulla tranne il nome.
