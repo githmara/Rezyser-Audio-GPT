@@ -71,16 +71,15 @@ odbiorcy_dozwoleni:
   - Adult
   - All ages
 
-# CANON DES GENRES D'ELEVENREADER (22 entrées, état : juin 2026). Valeurs
+# CANON DES GENRES D'ELEVENREADER (22 entrées, état : septembre 2026). Valeurs
 # anglaises, recopiées dans le formulaire 1:1 — NE PAS TRADUIRE. Sans cette liste
 # servie sur un plateau, le modèle hallucine des catégories inexistantes
 # (« Epic Fantasy Saga »), et le formulaire ne les rejette qu'à la fin de
 # l'assistant.
 gatunki_dozwolone:
   - Action and Adventure
-  - Adult Romance
   - Children's Literature
-  - Detective and Crime
+  - Christian & Inspirational
   - Dystopia
   - Fairy Tales and Folklore
   - Fan Fiction
@@ -98,6 +97,7 @@ gatunki_dozwolone:
   - Science Fiction
   - Science and Nature
   - Technology
+  - Young Adult
   - Other
 
 # --- Prompt système ---

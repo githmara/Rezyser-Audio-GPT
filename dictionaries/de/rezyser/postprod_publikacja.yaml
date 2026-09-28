@@ -66,15 +66,14 @@ odbiorcy_dozwoleni:
   - Adult
   - All ages
 
-# GENRE-KANON VON ELEVENREADER (22 Einträge, Stand: Juni 2026). Englische Werte,
+# GENRE-KANON VON ELEVENREADER (22 Einträge, Stand: September 2026). Englische Werte,
 # 1:1 ins Formular übertragen — NICHT ÜBERSETZEN. Ohne diese Liste auf dem
 # Silbertablett halluziniert das Modell nicht existierende Kategorien („Epic
 # Fantasy Saga"), und das Formular weist sie erst am Ende des Assistenten zurück.
 gatunki_dozwolone:
   - Action and Adventure
-  - Adult Romance
   - Children's Literature
-  - Detective and Crime
+  - Christian & Inspirational
   - Dystopia
   - Fairy Tales and Folklore
   - Fan Fiction
@@ -92,6 +91,7 @@ gatunki_dozwolone:
   - Science Fiction
   - Science and Nature
   - Technology
+  - Young Adult
   - Other
 
 # --- Systemprompt ---

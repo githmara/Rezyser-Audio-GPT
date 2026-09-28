@@ -69,7 +69,7 @@ def _karta(probki="Prolog; Akt 1", tytul="Kontynent Marzen: Sledztwo",
         f"Description ({licznik}/1000 characters):\n"
         f"{OPIS}\n"
         "\n"
-        "Genres: Fantasy; Detective and Crime\n"
+        "Genres: Fantasy; Mystery and Thriller\n"
         "Target audience: Adult\n"
         "Mature content: No — bez drastycznych scen.\n"
         f"Sample chapters: {probki}\n"

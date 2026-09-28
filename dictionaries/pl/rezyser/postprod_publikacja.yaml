@@ -61,15 +61,14 @@ odbiorcy_dozwoleni:
   - Adult
   - All ages
 
-# KANON GATUNKÓW ElevenReadera (22 pozycje, stan: czerwiec 2026). Wartości
+# KANON GATUNKÓW ElevenReadera (22 pozycje, stan: wrzesień 2026). Wartości
 # angielskie, przepisywane do formularza 1:1 — NIE TŁUMACZYĆ. Bez podania tej
 # listy modelowi na tacy halucynuje nieistniejące kategorie („Epic Fantasy Saga"),
 # a formularz odrzuca je dopiero na końcu kreatora.
 gatunki_dozwolone:
   - Action and Adventure
-  - Adult Romance
   - Children's Literature
-  - Detective and Crime
+  - Christian & Inspirational
   - Dystopia
   - Fairy Tales and Folklore
   - Fan Fiction
@@ -87,6 +86,7 @@ gatunki_dozwolone:
   - Science Fiction
   - Science and Nature
   - Technology
+  - Young Adult
   - Other
 
 # --- Prompt systemowy ---

@@ -67,15 +67,14 @@ odbiorcy_dozwoleni:
   - Adult
   - All ages
 
-# КАНОН ЖАНРОВ ELEVENREADER (22 позиции, состояние: июнь 2026). Английские
+# КАНОН ЖАНРОВ ELEVENREADER (22 позиции, состояние: сентябрь 2026). Английские
 # значения, переписываемые в форму 1:1 — НЕ ПЕРЕВОДИТЬ. Без этого списка,
 # поданного модели на блюде, она выдумывает несуществующие категории («Epic
 # Fantasy Saga»), а форма отклоняет их лишь в самом конце мастера.
 gatunki_dozwolone:
   - Action and Adventure
-  - Adult Romance
   - Children's Literature
-  - Detective and Crime
+  - Christian & Inspirational
   - Dystopia
   - Fairy Tales and Folklore
   - Fan Fiction
@@ -93,6 +92,7 @@ gatunki_dozwolone:
   - Science Fiction
   - Science and Nature
   - Technology
+  - Young Adult
   - Other
 
 # --- Системный промпт ---

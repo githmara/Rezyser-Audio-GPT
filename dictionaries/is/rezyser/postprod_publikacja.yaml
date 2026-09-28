@@ -63,15 +63,14 @@ odbiorcy_dozwoleni:
   - Adult
   - All ages
 
-# FLOKKAKANÓN ELEVENREADER (22 atriði, staða: júní 2026). Ensk gildi, afrituð í
+# FLOKKAKANÓN ELEVENREADER (22 atriði, staða: september 2026). Ensk gildi, afrituð í
 # formið 1:1 — EKKI ÞÝÐA. Án þessa lista á silfurbakka ranghugsar módelið flokka
 # sem eru ekki til („Epic Fantasy Saga"), og formið hafnar þeim ekki fyrr en í
 # lok leiðsagnarinnar.
 gatunki_dozwolone:
   - Action and Adventure
-  - Adult Romance
   - Children's Literature
-  - Detective and Crime
+  - Christian & Inspirational
   - Dystopia
   - Fairy Tales and Folklore
   - Fan Fiction
@@ -89,6 +88,7 @@ gatunki_dozwolone:
   - Science Fiction
   - Science and Nature
   - Technology
+  - Young Adult
   - Other
 
 # --- Kerfisleiðbeining ---

@@ -67,15 +67,14 @@ odbiorcy_dozwoleni:
   - Adult
   - All ages
 
-# ELEVENREADERIN LAJITYYPPIKANONI (22 kohtaa, tilanne: kesäkuu 2026).
+# ELEVENREADERIN LAJITYYPPIKANONI (22 kohtaa, tilanne: syyskuu 2026).
 # Englanninkieliset arvot, jotka kopioidaan lomakkeeseen 1:1 — EI KÄÄNNETÄ. Ilman
 # tätä listaa tarjottimella malli hallusinoi olemattomia kategorioita (”Epic
 # Fantasy Saga”), ja lomake hylkää ne vasta ohjatun toiminnon lopussa.
 gatunki_dozwolone:
   - Action and Adventure
-  - Adult Romance
   - Children's Literature
-  - Detective and Crime
+  - Christian & Inspirational
   - Dystopia
   - Fairy Tales and Folklore
   - Fan Fiction
@@ -93,6 +92,7 @@ gatunki_dozwolone:
   - Science Fiction
   - Science and Nature
   - Technology
+  - Young Adult
   - Other
 
 # --- Järjestelmäkehote ---
