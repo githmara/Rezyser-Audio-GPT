@@ -232,5 +232,63 @@ def test_odcisk_schematu_nie_zalezy_od_effort():
     assert slad_a[0]["schemat"] == slad_b[0]["schemat"] != "no"
 
 
+
+# --- 4. galaz awaryjna (znaleziska audytu v19.9, odtworzone 1:1) ----------------
+
+class _SDKPoPayloadzie:
+    """Model, ktory przyjmuje tylko `between_tools` i nie zna `output_config`.
+
+    Odrzucenie schematu przychodzi NIEROZPOZNANYM komunikatem, wiec drabina
+    idzie galezia awaryjna - ta nie moze wskrzesic dialektu, ktory API juz
+    odrzucilo.
+    """
+
+    def __init__(self, wyslane):
+        self._wyslane = wyslane
+        self.messages = self
+
+    def with_options(self, **_kwargs):
+        return self
+
+    def create(self, **kwargs):
+        self._wyslane.append(json.loads(json.dumps(kwargs)))
+        if kwargs.get("thinking") != {"type": "between_tools"}:
+            raise _Blad400(BLAD_DISABLED_ZYWY)
+        if "output_config" in kwargs:
+            raise _Blad400("Invalid request body")
+        return _MockSDK(["ok"], []).create()
+
+
+def _po_payloadzie(**extra):
+    wyslane = []
+    klient = cl.KlientLLM(provider=cl.PROVIDER_ANTHROPIC,
+                          sdk=_SDKPoPayloadzie(wyslane))
+    tekst, _ = cl._wywolaj_anthropic(
+        klient, "egzotyk-7", "S.", [{"role": "user", "content": "x"}],
+        max_tokens=100, temperature=1.0, timeout=5.0, schema_json=SCHEMAT, **extra)
+    return tekst, wyslane
+
+
+def _slad(wyslane):
+    return [(w.get("thinking", {}).get("type") if w.get("thinking") else None,
+             "output_config" in w) for w in wyslane]
+
+
+def test_awaryjnie_nie_wskrzesza_odrzuconego_dialektu():
+    tekst, wyslane = _po_payloadzie()
+    assert tekst == "ok", _slad(wyslane)
+    assert wyslane[-1]["thinking"] == {"type": "between_tools"}
+
+
+def test_awaryjnie_z_quality_bez_zduplikowanej_proby():
+    tekst, wyslane = _po_payloadzie(thinking_budget=4096)
+    assert tekst == "ok", _slad(wyslane)
+    kolejne = [json.dumps(w, sort_keys=True) for w in wyslane]
+    assert len(kolejne) == len(set(kolejne)), f"identical request re-sent: {_slad(wyslane)}"
+
+
+def test_effort_bez_pelnej_sciezki_to_thinking():
+    assert cl._co_odrzucono(_Blad400("effort is not supported on this model")) == "thinking"
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))

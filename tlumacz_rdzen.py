@@ -190,7 +190,7 @@ SCHEMA_TLUMACZENIA: dict[str, Any] = {
 NAZWA_PLIKU_KLUCZA = "golden_key.env"
 
 # Tłumaczenie to odwzorowanie, nie wyprowadzanie — sampling zerujemy. Wartość
-# jest NIEDOMYŚLNA, więc modele pokroju `claude-sonnet-5` odrzucają ją kodem 400;
+# jest NIEDOMYŚLNA, więc modele pokroju `claude-sonnet-5`/`-5-5` odrzucają ją kodem 400;
 # kogo pominąć bez próby, rozstrzyga `core_llm.honoruje_temperature`.
 TEMPERATURA_TLUMACZENIA = 0.0
 
@@ -277,14 +277,14 @@ def wywolaj_llm(
             wyprowadzanie, więc determinizm jest tam wart więcej niż namysł).
             Włącza to brat od AKCENTÓW: para akcentowa nie jest przekładem, a
             wyprowadzeniem reguły fonetycznej dla pary (pismo źródła →
-            fonologia celu). UWAGA: na Claude Sonnet 5 niedomyślna
+            fonologia celu). UWAGA: od Claude Sonnet 5 niedomyślna
             `temperature` i tak kończy się 400 (degradacja niżej), a myślenie
             adaptacyjne jest domyślne — jawny `thinking` trzymamy, żeby
             intencja była widoczna w kodzie, nie w domyśle modelu.
             **DRUGA UWAGA, mina limitu (v18.30.0): myślenie WSPÓŁDZIELI budżet
             `max_tokens` z odpowiedzią.** Rdzeń — inaczej niż
-            `core_llm._anthropic`, które przy `thinking_budget` dokłada
-            `budget_tokens` PONAD limit wołającego — wysyła `max_tokens`
+            `core_llm._wywolaj_anthropic`, które przy `thinking_budget` dokłada
+            budżet namysłu PONAD limit wołającego — wysyła `max_tokens`
             nietknięte. Ciasny limit (mikrocall-bramka, jak
             `MAX_TOKENS_NAZWA_PL` u brata od akcentów) jest więc poprawny
             WYŁĄCZNIE przy `myslenie=False`; z myśleniem uderzyłby w limit na

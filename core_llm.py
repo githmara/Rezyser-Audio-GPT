@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import sys
 from dataclasses import dataclass
 from typing import Any
@@ -551,7 +552,8 @@ def _co_odrzucono(exc: Exception) -> str | None:
     tresc = str(exc).lower()
     if "temperature" in tresc:
         return "temperature"
-    if "thinking.type" in tresc or "output_config.effort" in tresc:
+    if ("thinking.type" in tresc or "output_config.effort" in tresc
+            or re.search(r"\beffort\b", tresc)):
         return "thinking"
     if "output_config" in tresc or "json_schema" in tresc:
         return "output_config"
@@ -1371,7 +1373,15 @@ def _wywolaj_anthropic(
                 )
                 zdejmij_temperature(kwargs)
                 kwargs.pop("output_config", None)
-                ustaw_thinking(kwargs, bez_myslenia)
+                # Wariant „bez myślenia", który JUŻ przeszedł walidację, zostaje
+                # (reset do `bez_myslenia` wskrzeszał dialekt odrzucony wcześniej
+                # — audyt v19.9). Z quality schodzimy na NASTĘPNY niewypróbowany.
+                if kwargs.get("thinking") == {"type": "adaptive"}:
+                    jest, wariant = kolejny_wariant_bez_myslenia(
+                        mdl, wyprobowane_thinking)
+                    if jest:
+                        wyprobowane_thinking.append(wariant)
+                        ustaw_thinking(kwargs, wariant)
                 kwargs["max_tokens"] = max_tokens
                 winowajca = "awaryjnie"
             zdjete.add(winowajca)
