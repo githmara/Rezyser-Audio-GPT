@@ -132,7 +132,7 @@ PLIKI_TYLKO_JAWNIE = frozenset({"zaczatki.yaml"})
 # źródeł chunku przekroczy próg — z zapasem pod cyrylicę i fińską aglutynację.
 BATCH_MAX_ZNAKOW = 12_000
 MAX_TOKENS_OUT = 16_000
-MODEL_DOMYSLNY = "claude-sonnet-5"
+MODEL_DOMYSLNY = "claude-sonnet-5-5"
 
 MAPA_JEZYKOW: dict[str, str] = tlumacz_rdzen.wczytaj_mape_jezykow(
     ROOT, KOD_ZRODLOWY)
@@ -488,7 +488,7 @@ def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str) -> str:
         "markers, do not renumber them, do not translate them. The sentence "
         "AROUND a marker is translated normally.\n"
         "2. **Do not translate** technical literals: AI model names "
-        "(`claude-sonnet-5`, `Anthropic`), file and folder names and extensions "
+        "(`claude-sonnet-5-5`, `Anthropic`), file and folder names and extensions "
         "(`opowiesci/`, `runtime/`, `baza.yaml`, `.txt`, `.jsonl`), Python "
         "identifiers and YAML keys (`opowiesci_ai.py`, `prompt_systemowy`, "
         "`prog_aktywacji_tur`), the product brand \"Reżyser Audio GPT\", version "

@@ -167,7 +167,7 @@ PLIKI_POMIJANE = frozenset({"baza.yaml"})
 # rozwlekłe języki i cyrylicę (ru puchnie ~1,5× wobec PL).
 BATCH_MAX_ZNAKOW = 12_000
 MAX_TOKENS_OUT = 16_000
-MODEL_DOMYSLNY = "claude-sonnet-5"
+MODEL_DOMYSLNY = "claude-sonnet-5-5"
 
 # Schemat structured-outputs — wspólny kontrakt id→target całej rodziny.
 SCHEMA_TLUMACZENIA = tlumacz_rdzen.SCHEMA_TLUMACZENIA
@@ -695,7 +695,7 @@ def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str) -> str:
         "source, do not renumber them, do not translate them. The sentence AROUND "
         "a marker is still translated normally.\n"
         "2. **Do not translate** technical literals: AI model names "
-        "(`claude-sonnet-5`, `Anthropic`), file and folder names and extensions "
+        "(`claude-sonnet-5-5`, `Anthropic`), file and folder names and extensions "
         "(`skrypty/`, `runtime/`, `baza.yaml`, `.txt`, `.md`), Python identifiers "
         "and YAML keys (`przepisy_rezysera.py`, `prompt_systemowy`, "
         "`sufiks_pliku_wyniku`), the product brand \"Reżyser Audio GPT\", version "

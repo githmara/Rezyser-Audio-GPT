@@ -397,7 +397,8 @@ def _wywolaj_claude(
 ) -> tuple[str, str | None]:
     """Wywołuje warstwę LLM (proza, BEZ reasoningu) → (tekst, stop_reason).
 
-    ``thinking=disabled`` — tryby narracyjne to czysta proza/JSON, reasoning tylko
+    Bez myślenia (dialekt modelu, patrz ``core_llm.thinking_bez_myslenia``) —
+    tryby narracyjne to czysta proza/JSON, reasoning tylko
     dodawałby latencję i koszt. ``temperature`` z przepisu (Sonnet 4.6 ją honoruje
     jako jedyny parametr próbkowania — bez ``top_p``). Timeout per-wywołanie przez
     ``with_options`` (SDK Anthropic nie przyjmuje ``timeout=`` na ``messages.create``).
@@ -1999,7 +2000,7 @@ def wywnioskuj_kod_jezyka(
     try:
         raw_txt, _stop = cl.wywolaj_llm(
             klient,
-            model="claude-sonnet-5",
+            model="claude-sonnet-5-5",
             system=system,
             messages=[{"role": "user", "content": jezyk_odpowiedzi}],
             temperature=0,

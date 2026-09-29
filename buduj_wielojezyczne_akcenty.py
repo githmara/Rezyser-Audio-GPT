@@ -126,7 +126,7 @@ NARZEDZIA_AKCENTOW = ("oczyszczenie.yaml", "oczyszczenie_bez_liczb.yaml",
 
 TRYB_SILNIKA = "Rezyser"      # `core_poliglota._FOLDER_DLA_TRYBU["Rezyser"] == "akcenty"`
 
-MODEL_DOMYSLNY = "claude-sonnet-5"
+MODEL_DOMYSLNY = "claude-sonnet-5-5"
 MAX_TOKENS_OUT = 16_000
 
 # Limit mikrocallu o polską nazwę języka — świadomie CIASNY, bo pełni rolę

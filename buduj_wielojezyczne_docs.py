@@ -2156,8 +2156,8 @@ def _parsuj_argumenty() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model",
-        default="claude-sonnet-5",
-        help="Anthropic Claude model for the main translation (default: claude-sonnet-5).",
+        default="claude-sonnet-5-5",
+        help="Anthropic Claude model for the main translation (default: claude-sonnet-5-5).",
     )
     parser.add_argument(
         "-k", "--klucz",

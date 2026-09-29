@@ -144,7 +144,7 @@ TRYB_DLA_FOLDERU = {"szyfry": "Szyfrant", "akcenty": "Rezyser"}
 # konwencji.
 BATCH_MAX_ZNAKOW = 12_000
 MAX_TOKENS_OUT = 16_000
-MODEL_DOMYSLNY = "claude-sonnet-5"
+MODEL_DOMYSLNY = "claude-sonnet-5-5"
 
 MAPA_JEZYKOW: dict[str, str] = tlumacz_rdzen.wczytaj_mape_jezykow(
     ROOT, KOD_ZRODLOWY)

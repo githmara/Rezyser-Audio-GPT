@@ -61,10 +61,10 @@ import core_tokeny as ct
 # Konfiguracja modelu i limitów (Anthropic Claude — migracja v18.x, Opcja A)
 # =============================================================================
 # Jeden model dla głównego tłumaczenia i mikro-callu ISO (konsolidacja: koniec
-# dual-providera). Domyślnie `thinking={"type":"disabled"}` — szybka proza bez
-# narzutu; od 18.11 tryb quality (checkbox w GUI Poligloty) włącza extended
-# thinking przez `thinking_budget` (patrz `THINKING_BUDGET_QUALITY` niżej).
-MODEL_TLUMACZ = "claude-sonnet-5"
+# dual-providera). Domyślnie bez myślenia (dialekt modelu, `core_llm`) — szybka
+# proza bez narzutu; od 18.11 tryb quality (checkbox w GUI Poligloty) włącza
+# myślenie (od v19.9 adaptive + effort) przez `thinking_budget` (patrz `THINKING_BUDGET_QUALITY` niżej).
+MODEL_TLUMACZ = "claude-sonnet-5-5"
 
 # Maks. tokenów WYJŚCIA pojedynczego bloku. Ceiling, nie target: blok wejściowy
 # ma ≤ `max_tokenow_na_blok` tokenów (2 500 GUI / 4 000 docs), tłumaczenie bywa

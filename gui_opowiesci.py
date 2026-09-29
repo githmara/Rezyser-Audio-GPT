@@ -822,7 +822,7 @@ class OpowiesciPanel(wx.Panel):
         GPT-4o-mini regularnie łamał zasady świata w trybach z wyborami (4/5)
         — proponował opcje neutralne mimo „wszystkie wybory niekorzystne".
         Analogicznie do migracji narracji Reżysera (v18.0) całość przechodzi
-        na jeden, mocniejszy model (`claude-sonnet-5`), który ten problem
+        na jeden, mocniejszy model (`claude-sonnet-5-5`), który ten problem
         usuwa. Argument ``tryb`` zachowany dla zgodności sygnatury wywołań.
         """
         _ = tryb  # zachowany dla zgodności sygnatury (jeden model dla wszystkich)

@@ -84,7 +84,7 @@ class KonfiguracjaLLM:
     """Migawka konfiguracji LLM z ``golden_key.env``.
 
     Pola ``base_url``/``model`` mają znaczenie wyłącznie dla ``openai_compat``.
-    W trybie ``anthropic`` model bierze się z YAML przepisu (``claude-sonnet-5``).
+    W trybie ``anthropic`` model bierze się z YAML przepisu (``claude-sonnet-5-5``).
     """
 
     provider: str = DOMYSLNY_PROVIDER
@@ -128,7 +128,7 @@ class KlientLLM:
     """Lekki wrapper nad klientem SDK + znacznik providera.
 
     ``model_override`` (z ``LLM_MODEL``) służy tylko trybowi ``openai_compat`` —
-    nadpisuje nazwę modelu z przepisu YAML (na cudzym endpoincie ``claude-sonnet-5``
+    nadpisuje nazwę modelu z przepisu YAML (na cudzym endpoincie ``claude-sonnet-5-5``
     nie istnieje). W trybie Anthropic pozostaje pusty i model bierze się z przepisu.
     """
 
@@ -316,11 +316,11 @@ _POWODY_ODRZUCENIA = ("safety", "brak_informacji", "niejednoznacznosc", "inne")
 # z nich RODZINA AUTOTŁUMACZY, która ma własnych klientów
 # Anthropic (`tlumacz_rdzen`, `buduj_wielojezyczne_ui`) i bez tego płaciła
 # jałowym round-tripem 400 przy KAŻDYM chunku: wszystkie sześć narzędzi jedzie
-# domyślnie na `claude-sonnet-5`, a tłumaczenie wysyła `temperature=0.0`
+# domyślnie na `claude-sonnet-5-5`, a tłumaczenie wysyła `temperature=0.0`
 # (determinizm), czyli wartość niedomyślną. Baseline + autocache poniżej są
 # więc wspólne dla runtime'u i dev-toolingu — jeden plik nauki, jedna prawda.
 # Do v18.22 degradacja `temperature` była REAKTYWNA: wysyłamy z przepisu →
-# 400 → ponawiamy bez. Na dziś domyślny model runtime'u (`claude-sonnet-5`)
+# 400 → ponawiamy bez. Na dziś domyślny model runtime'u (`claude-sonnet-5-5`)
 # NIE honoruje `temperature` w ogóle, więc ten scenariusz zachodził przy KAŻDYM
 # wywołaniu — czyli każda generacja płaciła dodatkowym round-tripem HTTP
 # (samo 400 to błąd walidacji przed inferencją, więc bez kosztu tokenów, ale
@@ -1242,7 +1242,7 @@ def _wywolaj_anthropic(
 
     **Degradacja jest CELOWANA, nie kolejnościowa.** Wcześniejszy wariant „zdejmij
     następny element listy" wyglądał bezpiecznie, ale przy modelu nieprzyjmującym
-    ``temperature`` (dziś: domyślny `claude-sonnet-5`) zdejmowałby najpierw
+    ``temperature`` (dziś: domyślny `claude-sonnet-5-5`) zdejmowałby najpierw
     ``output_config`` — czyli structured outputs nie zadziałałyby ANI RAZU
     w produkcji, a wyjście wracałoby do stanu, który wywołał zgłoszenie
     z 2026-08-29. Dodatkowo ``temperature`` nie jest już wysyłana do modeli
@@ -1273,7 +1273,7 @@ def _wywolaj_anthropic(
     ustaw_thinking(kwargs, bez_myslenia)
     wyprobowane_thinking: list[dict[str, str] | None] = [bez_myslenia]
     # `temperature` wysyłamy TYLKO tam, gdzie ma szansę zadziałać (baseline +
-    # autocache). Dla `claude-sonnet-5` i pokrewnych pomijamy ją od razu, więc
+    # autocache). Dla `claude-sonnet-5-5` i pokrewnych pomijamy ją od razu, więc
     # nie płacimy jałowym round-tripem przy każdej generacji.
     if honoruje_temperature(mdl, temperature):
         wstaw_temperature(kwargs, temperature)

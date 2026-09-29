@@ -1630,7 +1630,7 @@ wiring it into the Python engine + GUI.
    `buduj_wielojezyczne_ui.py` for the non-pl languages, or add by hand and
    proofread).
 5. **`_model_dla_trybu`** in `gui_opowiesci.py`: since v18.1 every mode runs
-   on one model — the method returns `oai.MODEL_NARRACJA` (`claude-sonnet-5`)
+   on one model — the method returns `oai.MODEL_NARRACJA` (`claude-sonnet-5-5`)
    unconditionally (the per-mode OpenAI tier `MODEL_QUALITY` is gone;
    `opowiesci_ai.MODEL_DOMYSLNY` still exists, but only as the token-cost
    default from `core_tokeny`, not as a dispatch choice). A new mode needs NO change here; leave it as is unless you

@@ -228,7 +228,7 @@ def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str, *, persona_hint: bool = False) 
         "— copy 1:1 and keep their position relative to the rest of the text.\n"
         "4. **Technical literals** — do NOT translate: file names (`golden_key.env`, "
         "`.docx`, `.exe`), paths (`dictionaries/`, `runtime/`), AI model names "
-        "(`claude-sonnet-5`, `Anthropic`, `gpt-4o`, `OpenAI`), product names "
+        "(`claude-sonnet-5-5`, `Anthropic`, `gpt-4o`, `OpenAI`), product names "
         "(`NVDA`, `Vocalizer`, `Microsoft Word`), "
         "key prefixes (`sk-`), and Ctrl/Alt/Shift inside keyboard shortcuts.\n"
         "5. **Whitespace** — preserve every `\\n`, double space and indentation. Line "
@@ -811,8 +811,8 @@ def _parsuj_argumenty() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model",
-        default="claude-sonnet-5",
-        help="Anthropic Claude model used for translation (default: claude-sonnet-5).",
+        default="claude-sonnet-5-5",
+        help="Anthropic Claude model used for translation (default: claude-sonnet-5-5).",
     )
     # NB (od refaktoru 18.x): KAŻDE tłumaczenie — pełne ORAZ chirurgiczne
     # (--klucz) — ZAWSZE ląduje jako draft do recenzji + emituje checklistę

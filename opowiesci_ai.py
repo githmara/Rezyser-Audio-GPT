@@ -85,7 +85,7 @@ ENV_FILENAME       = "golden_key.env"
 # (tury 3/4/5, /visualize, streszczenie, cinematic) idą na jeden model Claude —
 # koniec model-per-tryb (dawne MODEL_QUALITY/gpt-4o usunięte). Dispatch routuje
 # na klienta Anthropic niezależnie od języka UI.
-MODEL_NARRACJA     = "claude-sonnet-5"
+MODEL_NARRACJA     = "claude-sonnet-5-5"
 # gpt-4o-mini ZOSTAJE wyłącznie do liczenia tokenów (tiktoken o200k_base) na
 # pasku pamięci — NIE jest już modelem LLM. `OKNO_KONTEKSTU_MAX=128k` (core_tokeny)
 # pozostaje LOGICZNYM budżetem kosztu/spójności (+ auto-streszczenie po 70%), nie
@@ -355,7 +355,8 @@ def _wywolaj_claude(
 
     Klon ``rezyser_ai._wywolaj_claude`` dostrojony do Opowieści: model/temperatura/
     max_tokens podajemy jawnie, bo Opowieści nie mają dataclassy ``PrzepisRezysera``
-    — parametry żyją w dictach YAML. ``thinking=disabled`` (narracja/JSON, reasoning
+    — parametry żyją w dictach YAML. Bez myślenia (dialekt modelu, patrz
+    ``core_llm.thinking_bez_myslenia``; narracja/JSON, reasoning
     tylko dodawałby latencję i koszt). ``temperature`` honoruje Sonnet 4.6 (jedyny
     parametr próbkowania — bez ``top_p``). Timeout per-wywołanie przez
     ``with_options`` (Messages API nie przyjmuje ``timeout=`` na ``create``).

@@ -15,7 +15,7 @@ Dlaczego osobny plik?
 
       * zmienić język odpowiedzi (``jezyk_odpowiedzi: angielsku``),
       * osłabić lub wzmocnić Anti-Closure w trybie Audiobook,
-      * podmienić model punktowo (pole ``model:``; domyślnie ``claude-sonnet-5``),
+      * podmienić model punktowo (pole ``model:``; domyślnie ``claude-sonnet-5-5``),
       * dodać zupełnie nowy tryb (np. ``tryb_poezja.yaml``) bez dotykania
         kodu Pythona – wystarczy nowy YAML i restart aplikacji.
 
@@ -177,7 +177,7 @@ _ZNAKI_ZAKAZANE_SUFIKSU = '\\/:*?"<>|'
 # bez pola ``model:`` przekazałby do API model nieznany Anthropic i wywaliłby
 # całe wywołanie (404 model-not-found). Paczki shippowane mają ``model:``
 # wypełnione — ta stała chroni ręcznie tworzone / edytowane YAML-e.
-MODEL_DOMYSLNY = "claude-sonnet-5"
+MODEL_DOMYSLNY = "claude-sonnet-5-5"
 
 
 # -----------------------------------------------------------------------------
@@ -226,7 +226,7 @@ class PrzepisRezysera:
         etykieta:         Tekst wyświetlany w RadioBox / menu GUI.
         kategoria:        ``"tryb"`` lub ``"postprodukcja"``.
         kolejnosc:        Sortowanie wyświetlania (rosnąco).
-        model:            Nazwa modelu AI (np. ``"claude-sonnet-5"``);
+        model:            Nazwa modelu AI (np. ``"claude-sonnet-5-5"``);
                           pominięte w YAML → :data:`MODEL_DOMYSLNY` (Anthropic).
         temperatura:      Parametr ``temperature`` wywołania API. Dozwolone
                           :data:`TEMPERATURA_MIN`–:data:`TEMPERATURA_MAX`;
