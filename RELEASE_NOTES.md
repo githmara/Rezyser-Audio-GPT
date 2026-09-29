@@ -94,6 +94,58 @@
 
 ---
 
+## 19.9.0 — minor release
+
+### What's new
+
+**The whole AI engine now runs on Claude Sonnet 5.5.** Every Director mode,
+every Tales mode, the Polyglot translator, chapter titles, summaries, the
+publication card and the language-code detection use `claude-sonnet-5-5`. So do
+the six auto-translators for contributors. Anthropic describes it as faster than
+Sonnet 5 and cheaper per task, at the same price per token. The `model:` field
+changed in all 117 recipes of the nine packs, and the manuals name the new
+model.
+
+**"No thinking" now depends on the model.** The engine writes prose and JSON
+without extended thinking, and until now it said so with
+`thinking: {"type": "disabled"}`. Sonnet 5.5 rejects that value; its
+equivalent is `{"type": "between_tools"}`, which every other model rejects.
+Without a fix, no generation on the new model would have gone through: the
+fallback logic answered the error by sending `disabled` again and then gave up.
+The request now uses the setting that the chosen model accepts (`disabled`,
+`between_tools`, or no field at all for models whose thinking cannot be turned
+off). If the API still refuses it, the request tries the next setting and never
+repeats one it already sent. A recipe that names an older model, such as
+`claude-sonnet-5` or `claude-haiku-4-5`, keeps working unchanged.
+
+**Polyglot's quality mode thinks again.** The quality checkbox asked for a
+fixed thinking budget (`budget_tokens`). The API has rejected that since
+Sonnet 5, and the request quietly fell back to the normal mode, so "quality"
+had been ordinary translation plus one wasted round-trip. It now asks for
+adaptive thinking at `high` effort. The budget still adds room to the response
+limit, so a truncated answer is detected exactly as before.
+
+**For contributors:** `tlumacz_rdzen.wywolaj_llm`, the shared core of the
+auto-translators, applies the same per-model setting and the same no-repeat
+retry. The error text Sonnet 5.5 returns for `disabled` was measured live and
+differs from the one in Anthropic's migration guide. Both versions are covered
+in `test_thinking_dialekty.py`.
+
+### Planned or deferred
+
+- Server-side refusal fallback (`fallbacks: "default"`) is not enabled. On
+  Sonnet 5.5 it retries only `cyber` and `frontier_llm` refusals on Sonnet 5.
+  The refusals a dark story can actually trigger (`general_harms`) are not
+  retried, and the existing refusal handling already covers the user side.
+- An effort sweep for the narrative modes (adaptive thinking at `low` compared
+  with the current thinking-free setting) is left for a separate, measured
+  release. The prompts are tuned for no thinking, and changing that is a quality
+  decision, not part of a migration.
+- `elevenlabs` 2.69.0 and `markdown` 3.11 are still held one step below
+  (`elevenlabs<2.69`, `markdown<3.11`); see 19.8.1.
+
+---
+
 ## 19.8.2 — patch release
 
 ### What's new
