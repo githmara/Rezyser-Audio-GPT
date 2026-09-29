@@ -7,7 +7,7 @@
 
 Safn sjálfstæðra verkfæra knúin af gervigreind til sjálfvirkrar ritunar, skipulagningar, sniðmáts og þýðingar á umfangsmiklum handritum og til að stýra gagnvirkum textaleikjum. Verkefnið er innfæddur skjáborðsforrit (wxPython) hannað frá grunni með fullu aðgengi fyrir skjálesara (NVDA, VoiceOver) og samhæfni við faglega talgervla (TTS). Það virkar án vafra og án staðbundins netþjóns — keyrir sem venjulegur gluggi forrits.
 
-Útgáfa: **19.8.2** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Útgáfa: **19.9.0** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Helstu einingar
@@ -31,7 +31,7 @@ Gagnvirkir textaleikir sem gervigreind stýrir í hlutverki frásagnarvélar. Ó
 * **Valhamur:** hver umferð endar með 3-5 tölusettum valkostum A-E. Innsæisríkasti hamurinn fyrir blinda leikendur — NVDA les valkostina, þú ýtir á Tab og Enter.
 * **Hamur Minna Illskunnar:** eins og Val, en hver valkostur er óhagstæður siðferðilega, líkamlega eða stefnulega. Frá útgáfu 15.2 er til viðbótar „flaskan" — endurnýtanlegur NÚLL-tölusettur örvæntingarbjörgunarvalkostur, þar sem áhrifin eru gervi-tilviljunarkennd (60% skaðleg / 30% skynjunartruflandi / 10% sjaldan-hagstæð, dreifingin þvinguð fram af Python, LLM getur ekki fundið upp á hagstæðri niðurstöðu).
 * **Frjáls Hamur:** hvaða aðgerð sem er í lausum texta („ég reyni að opna dyrnar"), vélin stingur upp á 1-3 tillögum en þvingar ekki fram val.
-* **Eitt gervigreindarlíkan fyrir alla hami:** frá útgáfu 18.1 nota allir hamir Sagnanna sama, sameiginlega líkanið (sjálfgefið og mælt með Anthropic Claude Sonnet 5) — öflugra líkan heldur sig nákvæmlega við reglur heimsins (sérstaklega mikilvægt í ham Minna Illskunnar, þar sem hver valkostur verður að vera raunverulega óhagstæður).
+* **Eitt gervigreindarlíkan fyrir alla hami:** frá útgáfu 18.1 nota allir hamir Sagnanna sama, sameiginlega líkanið (sjálfgefið og mælt með Anthropic Claude Sonnet 5.5) — öflugra líkan heldur sig nákvæmlega við reglur heimsins (sérstaklega mikilvægt í ham Minna Illskunnar, þar sem hver valkostur verður að vera raunverulega óhagstæður).
 
 
 ### 3. Tungumálamaður (Ctrl+2, AI-þýðandi + TTS-hreimar)
@@ -68,7 +68,7 @@ Allt GUI viðmót, skjöl (`docs/manual.<iso>.html`) og flest kerfisskilaboð er
 
 Ráðlagður og sjálfgefinn AI-þjónustuveitandi er Anthropic (Claude) — allar kerfisskipanir (system prompts) eru fínstilltar fyrir hann, svo hann skilar hæstu gæðum í frásögn, tryggustu fylgni við reglur heimsins og eðlilegustu prósa. Samþjöppun yfir í Claude fór fram í áföngum (Leikstjóri í útgáfu 18.0, Sögur í útgáfu 18.1, Tungumálamaður og eftirvinnsla í útgáfu 18.2) — sem byggðist á reynslulega staðfestu forskoti í fylgni við reglur heimsins, eðlilegum prósa og forðun klisja.
 
-* **Anthropic Claude Sonnet 5 (sjálfgefin gæðastoð):** Vélin á bak við ALLA greind forritsins. Ber ábyrgð á skapandi frásögn (leikstjórn handrita, ritun hefðbundins hljóðbókarprósa, Hugflæði (Burza Mózgów) og ÖLLUM háttum Sagna — Valkostir, Minna illt og Frjáls háttur — ásamt gerð samantekta og millikafla í Cinematic-stíl), háþróuðum þýðingum með varðveislu samhengis milli margra blokka (Tungumálamaður), auk smærri verkefna: endurtekinnar úthlutunar á bókmenntalegum köflatitlum og greiningar á tungumálakóða efnis.
+* **Anthropic Claude Sonnet 5.5 (sjálfgefin gæðastoð):** Vélin á bak við ALLA greind forritsins. Ber ábyrgð á skapandi frásögn (leikstjórn handrita, ritun hefðbundins hljóðbókarprósa, Hugflæði (Burza Mózgów) og ÖLLUM háttum Sagna — Valkostir, Minna illt og Frjáls háttur — ásamt gerð samantekta og millikafla í Cinematic-stíl), háþróuðum þýðingum með varðveislu samhengis milli margra blokka (Tungumálamaður), auk smærri verkefna: endurtekinnar úthlutunar á bókmenntalegum köflatitlum og greiningar á tungumálakóða efnis.
 
 * **Eigin endapunktur samhæfður við OpenAI (valkostur fyrir lengra komna, frá útgáfu 18.4):** Í stað Anthropic er hægt að tilgreina hvaða endapunkt sem er samhæfðan við OpenAI-API (OpenRouter, Groq, Fireworks, DeepSeek, staðbundið Ollama, OpenAI-samhæft Gemini og fleiri) — með einni, sameiginlegri kóðaleið, án sérstakrar samþættingar fyrir hvern þjónustuveitanda. Stillingar eru í skránni `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); fullar leiðbeiningar er að finna í aðalhandbókinni (SKREF 2B). Önnur líkön geta gefið lakari gæði en Claude, sem skipanirnar eru fínstilltar fyrir — þetta er meðvitað val notandans milli kostnaðar og gæða.
 

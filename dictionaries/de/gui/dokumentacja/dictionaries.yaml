@@ -238,7 +238,7 @@ tresc:
     Sie können den Erzählstil anpassen (z. B. weniger blumig), die Länge
     einer Runde ändern, eigene Handlungsdirektiven hinzufügen. Ab v18.1 nutzen alle Geschichten-Modi
     ein einziges, gemeinsames Modell (standardmäßig und empfohlen Anthropic
-    Claude Sonnet 5) — ein leistungsstärkeres Modell hält sich rigoros an die Weltregeln
+    Claude Sonnet 5.5) — ein leistungsstärkeres Modell hält sich rigoros an die Weltregeln
     (entscheidend im Modus „Das kleinere Übel", wo jede Option realistisch nachteilig sein muss).
   jak_zaczac: |
     ## Wie man anfängt — drei Schwierigkeitsstufen

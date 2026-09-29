@@ -149,7 +149,7 @@ tresc:
     Þú getur stillt stíl sögumannsins (t.d. minna blómlegan), breytt lengd
     umferðar, bætt við eigin söguþráðartilskipunum. Frá v18.1 nota allir Sagnahamir
     eitt sameiginlegt líkan (sjálfgefið og mælt með Anthropic
-    Claude Sonnet 5) — sterkara líkan heldur ströngum reglum heimsins
+    Claude Sonnet 5.5) — sterkara líkan heldur ströngum reglum heimsins
     (lykilatriði í hamnum Minna böl, þar sem hver valkostur verður að vera raunverulega óhagstæður).
   jak_zaczac: |
     ## Hvernig á að byrja að leika sér — þrjú erfiðleikastig

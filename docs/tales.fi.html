@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (19.8.2 – Julkaisuversio)</title>
+<title>Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (19.9.0 – Julkaisuversio)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (19.8.2 – Julkaisuversio)</h1>
+<h1>Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (19.9.0 – Julkaisuversio)</h1>
 <p>Toinen sovelluksen päätila Ohjaajan rinnalla — tällä kertaa sinusta tulee dynaamisesti luodun tarinan pelaaja sen kirjoittajan sijaan. Tekoäly ohjaa kerrontaa yksikön toisessa persoonassa ("Kävelet sumuisen metsän läpi, tunnet märän lehden tuoksun..."), ja sinä päätät seuraavasta liikkeestä — kirjoittamalla vapaamuotoisen toiminnon tai valitsemalla yhden numeroiduista vaihtoehdoista.</p>
 <p>Moduuli on alusta alkaen suunniteltu näkövammaisille pelaajille — kerronta luetaan lineaarisesti näytönlukijalla (NVDA) tai TTS-moottorilla, dynaamiset valinnat äänikuvauksilla varustettujen painikkeiden muodossa, jokainen päättynyt vuoro merkitään kellon äänellä ja automaattisella fokuksen siirrolla uuteen luotuun tekstiin.</p>
 <p>Avaat paneelin painikkeella "📖  Tarinoita" työkalupalkissa tai pikanäppäimellä Ctrl+5.</p>
@@ -56,7 +56,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 <p>Toimintokenttään voit milloin tahansa kirjoittaa komennon, joka alkaa vinoviivalla <code>/</code>. Komennot ovat paikallisia (ne eivät kuluta yhtään API-kutsua) ja toimivat pelitilasta riippumatta. Hyväksyttyjä ovat sekä puolalaiset että englanninkieliset variantit:</p>
 <p>/zapisz, /save — pakottaa pelitilan manuaalisen tallennuksen. Automaattitallennus toimii jokaisen vuoron jälkeen, joten tämä komento on lähinnä varmuuden vuoksi ennen sovelluksen sulkemista.</p>
 <p>/wczytaj, /load — avaa pelin valintaikkunan, jossa on lista käytettävissä olevista nimistä (versiosta v15.2.3 lähtien järjestelmän tiedostovalintaikkunan sijaan — suora lista kaikista tallennetuista peleistäsi). NVDA lukee listan luontevasti, sokean pelaajan ei tarvitse navigoida järjestelmän tiedostovalintaikkunassa. Nimen valinnan jälkeen pelin tila, tila-asetus ja koko kertomus palautetaan — voit jatkaa siitä vuorosta, johon jäit. Sama toiminto löytyy painikkeesta "Lataa".</p>
-<p>Kaikkien Tarinat-tilojen kerrontamoottori käyttää yhtä, yhteistä mallia (oletuksena ja suositeltuna Anthropic Claude Sonnet 5; versiosta v18.4 lähtien edistynyt käyttäjä voi määrittää oman OpenAI-yhteensopivan päätepisteen — katso pääkäsikirja, VAIHE 2B). Vahvempi malli noudattaa tiukasti maailman sääntöjä — tämä on erityisen tärkeää Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on pysyttävä aidosti epäedullisena.</p>
+<p>Kaikkien Tarinat-tilojen kerrontamoottori käyttää yhtä, yhteistä mallia (oletuksena ja suositeltuna Anthropic Claude Sonnet 5.5; versiosta v18.4 lähtien edistynyt käyttäjä voi määrittää oman OpenAI-yhteensopivan päätepisteen — katso pääkäsikirja, VAIHE 2B). Vahvempi malli noudattaa tiukasti maailman sääntöjä — tämä on erityisen tärkeää Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on pysyttävä aidosti epäedullisena.</p>
 <p>/wizualizuj <code>&lt;opis&gt;</code>, /visualize <code>&lt;opis&gt;</code> — nykyisen kohtauksen moniaistinen kuvaus. Ei muuta pelin tilaa eikä ehdota valintoja — kerrontamoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, tunto, maku) näyttääkseen kohtauksen syvällisemmin. Tulos ilmestyy erilliseen valintaikkunaan, eikä sitä lisätä kertomukseen. Esimerkki: "/wizualizuj jak wygląda strażnik" (miltä vartija näyttää) tai "/wizualizuj zapach kawiarni" (kahvilan tuoksu).</p>
 <p>/pomoc, /help — näyttää valintaikkunan, jossa on lista kaikista käytettävissä olevista komennoista. Ikkuna on vain luku -tilassa ja NVDA-ystävällinen — tekstikenttä saa fokuksen automaattisesti, ja ruudunlukija lukee heti koko listan ilman että sitä tarvitsee navigoida erikseen.</p>
 <p>/koniec, /quit — sulkee sovelluksen (senhetkisen vuoron automaattitallennuksen jälkeen).</p>

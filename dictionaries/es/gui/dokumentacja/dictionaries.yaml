@@ -160,7 +160,7 @@ tresc:
     editable. Puedes ajustar el estilo del narrador (por ejemplo, hacerlo menos
     florido), cambiar la duración del turno, añadir tus propias directivas de
     trama. Desde la v18.1, todos los modos de Historias utilizan un único modelo
-    común (por defecto y recomendado, Anthropic Claude Sonnet 5); un modelo más
+    común (por defecto y recomendado, Anthropic Claude Sonnet 5.5); un modelo más
     potente se atiene rigurosamente a las reglas del mundo (algo clave en el modo
     Mal menor, donde cada opción debe ser realmente desfavorable).
   jak_zaczac: |

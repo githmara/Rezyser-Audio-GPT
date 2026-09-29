@@ -193,7 +193,7 @@ tresc:
     Vous pouvez ajuster le style du narrateur (par exemple le rendre moins fleuri), modifier la durée
     d'un tour, ajouter vos propres directives narratives. Depuis la v18.1, tous les modes Histoires
     utilisent un seul modèle commun (par défaut et recommandé Anthropic
-    Claude Sonnet 5) — un modèle plus puissant respecte rigoureusement les règles du monde
+    Claude Sonnet 5.5) — un modèle plus puissant respecte rigoureusement les règles du monde
     (essentiel dans le mode Le moindre mal, où chaque option doit être réellement défavorable).
   jak_zaczac: |
     ## Comment commencer à s'amuser — trois niveaux de difficulté

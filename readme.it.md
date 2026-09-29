@@ -7,7 +7,7 @@
 
 Strumenti autonomi alimentati da AI per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, oltre alla conduzione di giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata da zero per garantire piena accessibilità ai lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra di programma.
 
-Versione: **19.8.2** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versione: **19.9.0** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Moduli principali
@@ -31,7 +31,7 @@ Giochi testuali interattivi condotti dall'IA nel ruolo di motore narrativo. A di
 * **Modalità Scelte:** ogni turno si conclude con 3-5 opzioni numerate A-E. La modalità più intuitiva per i giocatori non vedenti — NVDA legge le opzioni, premi Tab ed Enter.
 * **Modalità Male Minore:** come Scelte, ma ogni opzione è sfavorevole moralmente, fisicamente o strategicamente. Dalla v15.2 è stata aggiunta la "fiala" — un'opzione riutilizzabile numerata ZERO di salvezza disperata, i cui effetti sono pseudocasuali (60% dannosi / 30% alteranti la percezione / 10% raramente favorevoli, distribuzione imposta da Python, l'LLM non ha modo di inventare un esito salvifico).
 * **Modalità Libera:** qualsiasi azione in testo libero ("provo ad aprire la porta"), il motore propone 1-3 suggerimenti ma non impone una scelta.
-* **Un unico modello IA per tutte le modalità:** dalla v18.1 tutte le modalità di Racconti utilizzano lo stesso modello condiviso (predefinito e consigliato Anthropic Claude Sonnet 5) — un modello più potente si attiene rigorosamente alle regole del mondo (particolarmente cruciale nella modalità Male Minore, dove ogni opzione deve essere realmente sfavorevole).
+* **Un unico modello IA per tutte le modalità:** dalla v18.1 tutte le modalità di Racconti utilizzano lo stesso modello condiviso (predefinito e consigliato Anthropic Claude Sonnet 5.5) — un modello più potente si attiene rigorosamente alle regole del mondo (particolarmente cruciale nella modalità Male Minore, dove ogni opzione deve essere realmente sfavorevole).
 
 
 ### 3. Poliglotta (Ctrl+2, Traduttore AI + Accenti TTS)
@@ -68,7 +68,7 @@ L'interfaccia GUI, la documentazione (`docs/manual.<iso>.html`) e la maggior par
 
 Il provider AI consigliato e predefinito è Anthropic (Claude) — tutti i prompt di sistema sono calibrati su di esso, quindi è lui a garantire la massima qualità narrativa, la migliore aderenza alle regole del mondo narrativo e la prosa più naturale. Il consolidamento su Claude è avvenuto per fasi (Regista nella v18.0, Racconti nella v18.1, Poliglotta e post-produzione nella v18.2) — frutto di un vantaggio empiricamente confermato nell'aderenza alle regole del mondo narrativo, nella naturalezza della prosa e nell'evitare i cliché.
 
-* **Anthropic Claude Sonnet 5 (pilastro predefinito della qualità):** Il motore di TUTTA l'intelligenza dell'applicazione. È responsabile della narrazione creativa (la regia degli script, la scrittura della prosa tradizionale dell'Audiolibro, il Brainstorming e TUTTE le modalità Racconti — Scelte, Male Minore, Libero — insieme alla generazione dei riepiloghi e degli intermezzi Cinematic), delle traduzioni avanzate con mantenimento del contesto multi-blocco (Poliglotta), oltre a micro-task quali: l'assegnazione iterativa di titoli letterari ai capitoli e il rilevamento del codice della lingua del contenuto.
+* **Anthropic Claude Sonnet 5.5 (pilastro predefinito della qualità):** Il motore di TUTTA l'intelligenza dell'applicazione. È responsabile della narrazione creativa (la regia degli script, la scrittura della prosa tradizionale dell'Audiolibro, il Brainstorming e TUTTE le modalità Racconti — Scelte, Male Minore, Libero — insieme alla generazione dei riepiloghi e degli intermezzi Cinematic), delle traduzioni avanzate con mantenimento del contesto multi-blocco (Poliglotta), oltre a micro-task quali: l'assegnazione iterativa di titoli letterari ai capitoli e il rilevamento del codice della lingua del contenuto.
 
 * **Endpoint personalizzato compatibile con OpenAI (opzione avanzata, dalla v18.4):** Al posto di Anthropic è possibile indicare un qualsiasi endpoint compatibile con l'API OpenAI (OpenRouter, Groq, Fireworks, DeepSeek, Ollama locale, Gemini compatibile con OpenAI e altri) — attraverso un unico percorso di codice condiviso, senza integrazione separata per ciascun provider. Configurazione nel file `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); le istruzioni complete si trovano nel manuale principale (PASSO 2B). Altri modelli possono offrire una qualità inferiore rispetto a Claude, su cui sono calibrati i prompt — si tratta di una scelta consapevole costo↔qualità da parte dell'utente.
 

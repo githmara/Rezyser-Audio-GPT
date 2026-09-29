@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Interaktive Geschichten Modul (19.8.2 – Release-Version)</title>
+<title>Reżyser Audio GPT — Interaktive Geschichten Modul (19.9.0 – Release-Version)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Interaktive Geschichten Modul (19.8.2 – Release-Version)</h1>
+<h1>Reżyser Audio GPT — Interaktive Geschichten Modul (19.9.0 – Release-Version)</h1>
 <p>Der zweite Hauptmodus der Anwendung neben dem Regisseur — diesmal wirst du zum Spieler einer dynamisch generierten Geschichte, anstatt ihr Autor zu sein. Die künstliche Intelligenz führt die Erzählung in der zweiten Person Singular („Du gehst durch den nebligen Wald, riechst die feuchten Blätter…"), und du entscheidest über die nächste Aktion — indem du eine beliebige Aktion im freien Text schreibst oder eine der nummerierten Optionen auswählst.</p>
 <p>Das Modul wurde von Anfang an mit Blick auf blinde Spieler entwickelt — die Erzählung wird linear von einem Bildschirmleser (NVDA) oder einer TTS-Engine vorgelesen, dynamische Entscheidungen in Form von Schaltflächen mit Sprachbeschreibungen, jede abgeschlossene Runde wird durch einen Glockenton signalisiert und der Fokus automatisch auf den neu generierten Text verschoben.</p>
 <p>Du öffnest das Panel mit der Schaltfläche "📖  Geschichten" in der Symbolleiste oder mit der Tastenkombination Ctrl+5.</p>
@@ -56,7 +56,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 <p>Im Aktionsfeld können Sie jederzeit einen Befehl eingeben, der mit einem Schrägstrich <code>/</code> beginnt. Die Befehle sind lokal (sie kosten keinerlei API-Aufrufe) und funktionieren unabhängig vom Spielmodus. Sowohl polnische als auch englische Varianten werden akzeptiert:</p>
 <p>/zapisz, /save — erzwingt ein manuelles Speichern des Spielstands. Die automatische Speicherung erfolgt nach jeder Runde, dieser Befehl dient also hauptsächlich der Sicherheit vor dem Schließen der Anwendung.</p>
 <p>/wczytaj, /load — öffnet den Dialog zur Spielauswahl mit einer Liste der verfügbaren Namen (seit v15.2.3 anstelle des systemeigenen Dateidialogs — eine direkte Liste aller gespeicherten Spiele). NVDA liest die Liste natürlich vor, ein blinder Spieler muss nicht durch den Systemdateidialog navigieren. Nach Auswahl des Spielnamens werden Modus und vollständige Erzählung wiederhergestellt — Sie können ab der Runde fortfahren, bei der Sie aufgehört haben. Die Schaltfläche „Laden" verhält sich identisch.</p>
-<p>Die Erzähl-Engine aller Geschichten-Modi nutzt ein einziges, gemeinsames Modell (standardmäßig und empfohlen: Anthropic Claude Sonnet 5; ab v18.4 kann ein fortgeschrittener Benutzer einen eigenen OpenAI-kompatiblen Endpoint angeben — siehe Hauptmanual, SCHRITT 2B). Das leistungsfähigere Modell hält sich strikt an die Regeln der Spielwelt — das ist besonders wichtig im Modus Das kleinere Übel, wo jede Option real nachteilig bleiben muss.</p>
+<p>Die Erzähl-Engine aller Geschichten-Modi nutzt ein einziges, gemeinsames Modell (standardmäßig und empfohlen: Anthropic Claude Sonnet 5.5; ab v18.4 kann ein fortgeschrittener Benutzer einen eigenen OpenAI-kompatiblen Endpoint angeben — siehe Hauptmanual, SCHRITT 2B). Das leistungsfähigere Modell hält sich strikt an die Regeln der Spielwelt — das ist besonders wichtig im Modus Das kleinere Übel, wo jede Option real nachteilig bleiben muss.</p>
 <p>/wizualizuj <code>&lt;opis&gt;</code>, /visualize <code>&lt;opis&gt;</code> — multisensorische Beschreibung der aktuellen Szene. Ändert nicht den Spielzustand, schlägt keine Entscheidungen vor — die Erzähl-Engine nutzt alle fünf Sinne (Sehen, Hören, Riechen, Tasten, Schmecken), um die Szene mit größerer Tiefe darzustellen. Das Ergebnis erscheint in einem separaten Dialog und wird NICHT der Erzählung hinzugefügt. Beispiel: „/wizualizuj wie der Wächter aussieht" oder „/wizualizuj Duft des Cafés".</p>
 <p>/pomoc, /help — zeigt ein Dialogfenster mit der Liste aller verfügbaren Befehle. Der Dialog ist schreibgeschützt und NVDA-freundlich — das Textfeld erhält automatisch den Fokus, der Screenreader liest die gesamte Liste sofort vor, ohne dass navigiert werden muss.</p>
 <p>/koniec, /quit — schließt die Anwendung (nach automatischem Speichern der laufenden Runde).</p>

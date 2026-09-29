@@ -88,7 +88,7 @@ tresc:
 
     /wczytaj, /load — opnar val-glugga fyrir leiki með lista yfir tiltæk nöfn (frá v15.2.3, í stað kerfisglugga fyrir skrár — beinn listi yfir öll þín vistuðu spil). NVDA les listann eðlilega, blindur leikmaður þarf ekki að rata um kerfisglugga fyrir skrár. Eftir að nafn leiksins hefur verið valið eru stillingin og öll frásögnin endurheimt — þú getur haldið áfram frá þeirri umferð sem þú hættir í. Hnappurinn "{opowiesci.btn_wczytaj_label}" hegðar sér nákvæmlega eins.
 
-    Frásagnarvélin í öllum stillingum Sagna notar eina, sameiginlega líkan (sjálfgefið og mælt er með Anthropic Claude Sonnet 5; frá v18.4 getur lengra kominn notandi tilgreint eigin endapunkt sem er samhæfur við OpenAI — sjá aðalhandbókina, SKREF 2B). Öflugra líkanið heldur sig strangt við reglur heimsins — þetta skiptir sérstöku máli í stillingunni Minna illt, þar sem hver valkostur verður að haldast raunverulega óhagstæður.
+    Frásagnarvélin í öllum stillingum Sagna notar eina, sameiginlega líkan (sjálfgefið og mælt er með Anthropic Claude Sonnet 5.5; frá v18.4 getur lengra kominn notandi tilgreint eigin endapunkt sem er samhæfur við OpenAI — sjá aðalhandbókina, SKREF 2B). Öflugra líkanið heldur sig strangt við reglur heimsins — þetta skiptir sérstöku máli í stillingunni Minna illt, þar sem hver valkostur verður að haldast raunverulega óhagstæður.
 
     /wizualizuj `<opis>`, /visualize `<opis>` — fjölskynjanleg lýsing á núverandi atriði. Breytir ekki leikstöðunni, býður ekki upp á val — frásagnarvélin notar öll fimm skynfærin (sjón, heyrn, lykt, snertingu, bragð) til að sýna atriðið með meiri dýpt. Niðurstaðan birtist í sérstökum glugga og bætist EKKI við frásögnina. Dæmi: „/wizualizuj hvernig lítur vörðurinn út" eða „/wizualizuj lykt kaffihússins".
 

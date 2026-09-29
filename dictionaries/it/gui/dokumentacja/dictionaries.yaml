@@ -194,7 +194,7 @@ tresc:
     Puoi calibrare lo stile del narratore (ad esempio renderlo meno fiorito), modificare
     la durata del turno, aggiungere direttive narrative personalizzate. Dalla v18.1 tutte le modalità Racconti
     utilizzano un unico modello condiviso (di default e consigliato Anthropic
-    Claude Sonnet 5) — un modello più potente si attiene rigorosamente alle regole del mondo
+    Claude Sonnet 5.5) — un modello più potente si attiene rigorosamente alle regole del mondo
     (fondamentale nella modalità Il male minore, dove ogni opzione deve essere realmente svantaggiosa).
   jak_zaczac: |
     ## Come iniziare a divertirsi — tre livelli di difficoltà

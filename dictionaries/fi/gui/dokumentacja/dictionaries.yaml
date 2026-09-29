@@ -233,7 +233,7 @@ tresc:
     Voit hienosäätää kertojan tyyliä (esim. vähemmän kukkeaa), muuttaa vuoron
     pituutta, lisätä omia juonidirektiivejä. Versiosta 18.1 lähtien kaikki
     Tarinatilan tilat käyttävät yhtä yhteistä mallia (oletuksena ja suositeltuna
-    Anthropic Claude Sonnet 5) — vahvempi malli noudattaa tiukasti maailman
+    Anthropic Claude Sonnet 5.5) — vahvempi malli noudattaa tiukasti maailman
     sääntöjä (ratkaisevan tärkeää Pienempi paha -tilassa, jossa jokaisen
     vaihtoehdon on oltava todella epäedullinen).
   jak_zaczac: |

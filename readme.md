@@ -7,7 +7,7 @@
 
 A set of self-contained AI-powered tools for automatic writing, planning, formatting, and translating extensive scripts, as well as conducting interactive text games. The project is a native desktop application (wxPython) designed from the ground up with full accessibility for screen readers (NVDA, VoiceOver) and compatibility with professional text-to-speech synthesizers (TTS). It operates without a browser and without a local server — it launches as a regular program window.
 
-Version: **19.8.2** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **19.9.0** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Main Modules
@@ -31,7 +31,7 @@ Interactive text-based games run by AI acting as a narrative engine. Unlike Dire
 * **Choices Mode:** each turn ends with 3-5 numbered options A-E. The most intuitive mode for blind players — NVDA reads the options aloud, you press Tab and Enter.
 * **Lesser Evil Mode:** like Choices, but every option is disadvantageous — morally, physically, or strategically. Since v15.2 there's an additional "vial" — a reusable ZERO-numbered option representing a desperate rescue attempt, whose effects are pseudo-random (60% harmful / 30% perception-disrupting / 10% rarely beneficial, with the distribution forced by Python so the LLM has no way to invent a favorable outcome).
 * **Free Mode:** any action typed as free text ("I try to open the door"), the engine proposes 1-3 suggestions but doesn't force a choice.
-* **One AI model for all modes:** since v18.1 all Stories modes use the same, shared model (Anthropic Claude Sonnet 5 by default and recommended) — a more powerful model that rigorously adheres to the rules of the world (especially crucial in Lesser Evil Mode, where every option must be genuinely disadvantageous).
+* **One AI model for all modes:** since v18.1 all Stories modes use the same, shared model (Anthropic Claude Sonnet 5.5 by default and recommended) — a more powerful model that rigorously adheres to the rules of the world (especially crucial in Lesser Evil Mode, where every option must be genuinely disadvantageous).
 
 
 ### 3. Polyglot (Ctrl+2, AI Translator + TTS Accents)
@@ -68,7 +68,7 @@ The entire GUI interface, documentation (`docs/manual.<iso>.html`), and most sys
 
 The recommended and default AI provider is Anthropic (Claude) — all system prompts are tuned for it, which is why it delivers the highest quality narration, the strongest adherence to world-building rules, and the most natural prose. Consolidation onto Claude proceeded in stages (Director in v18.0, Stories in v18.1, Polyglot and postproduction in v18.2) — resulting from an empirically confirmed advantage in adherence to world rules, naturalness of prose, and avoidance of clichés.
 
-* **Anthropic Claude Sonnet 5 (default pillar of quality):** The engine of ALL the application's intelligence. Responsible for creative narration (directing scripts, writing traditional Audiobook prose, Brainstorming, and ALL Story modes — Choices, Lesser Evil, Freeform — along with generating Cinematic summaries and interludes), advanced translations with multi-block context preservation (Polyglot), as well as microtasks: iterative literary title generation for chapters and content language code detection.
+* **Anthropic Claude Sonnet 5.5 (default pillar of quality):** The engine of ALL the application's intelligence. Responsible for creative narration (directing scripts, writing traditional Audiobook prose, Brainstorming, and ALL Story modes — Choices, Lesser Evil, Freeform — along with generating Cinematic summaries and interludes), advanced translations with multi-block context preservation (Polyglot), as well as microtasks: iterative literary title generation for chapters and content language code detection.
 
 * **Custom OpenAI-compatible endpoint (advanced option, since v18.4):** Instead of Anthropic, you can point to any OpenAI API-compatible endpoint (OpenRouter, Groq, Fireworks, DeepSeek, local Ollama, OpenAI-compatible Gemini, and others) — via a single, shared code path, without separate per-provider integration. Configuration is done in the `golden_key.env` file (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); full instructions are in the main manual (STEP 2B). Other models may deliver lower quality than Claude, for which the prompts are tuned — this is a conscious cost↔quality trade-off left to the user.
 

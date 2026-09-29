@@ -232,7 +232,7 @@ tresc:
     As in Director Mode, each file contains an editable "system prompt".
     You can fine-tune the narrator's style (e.g. less flowery), change the
     turn length, add your own plot directives. Since v18.1 all Stories Mode
-    modes use a single, shared model (Anthropic Claude Sonnet 5 by default and
+    modes use a single, shared model (Anthropic Claude Sonnet 5.5 by default and
     recommended) — a stronger model rigorously sticks to the world's rules
     (crucial in Lesser Evil mode, where every option must be genuinely unfavorable).
   jak_zaczac: |
