@@ -1,7 +1,7 @@
 # NACHBEARBEITUNG: KI-KAPITELÜBERSCHRIFTEN
 # Werkzeug für den Hörbuch-Modus: Iteriert über die Kapitel in der gespeicherten
 # Projektdatei und generiert für jedes einen kurzen literarischen Titel.
-# Verwendet standardmäßig ein kostengünstiges Modell (claude-sonnet-5).
+# Verwendet standardmäßig ein kostengünstiges Modell (claude-sonnet-5-5).
 
 id: tytuly
 etykieta: "Kapitelüberschriften zuweisen (KI)"
@@ -17,7 +17,7 @@ zakres: per_rozdzial
 max_tokens_wyjscia: 256
 
 # --- Anthropic-Parameter ---
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.7
 jezyk_odpowiedzi: Deutsch
 kod_jezyka: de

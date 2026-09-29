@@ -45,7 +45,7 @@ max_tokens_wyjscia: 3000
 # --- Parametry Anthropic ---
 # Niska temperatura: karta to metadane, nie proza. Chcemy wierność treści
 # projektu i zero ozdobników, które reżyser musiałby wycinać przed wklejeniem.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.4
 jezyk_odpowiedzi: polsku
 kod_jezyka: pl

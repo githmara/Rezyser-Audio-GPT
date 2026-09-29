@@ -52,7 +52,7 @@ max_tokens_wyjscia: 3000
 # --- Parámetros de Anthropic ---
 # Temperatura baja: una ficha son metadatos, no prosa. Queremos fidelidad al
 # contenido del proyecto y cero adornos que el director tendría que recortar.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.4
 jezyk_odpowiedzi: español
 kod_jezyka: es

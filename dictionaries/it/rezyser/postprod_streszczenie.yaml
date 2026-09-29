@@ -50,7 +50,7 @@ max_tokens_wyjscia: 2000
 
 # --- Parametri Anthropic ---
 # Temperatura bassa — vogliamo un registro fedele dei fatti, non creatività.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.3
 jezyk_odpowiedzi: italiano
 kod_jezyka: "it"

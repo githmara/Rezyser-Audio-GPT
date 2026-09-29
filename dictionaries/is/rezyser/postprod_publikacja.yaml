@@ -47,7 +47,7 @@ max_tokens_wyjscia: 3000
 # --- Anthropic-stillingar ---
 # Lágt hitastig: kort er lýsigögn, ekki prósa. Við viljum trúnað við innihald
 # verkefnisins og ekkert skraut sem leikstjórinn þyrfti að skera burt.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.4
 jezyk_odpowiedzi: íslensku
 kod_jezyka: is

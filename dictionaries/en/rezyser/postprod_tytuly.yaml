@@ -2,7 +2,7 @@
 #  POSTPRODUCTION: ASSIGN CHAPTER TITLES (AI)
 #  Tool for the Audiobook mode: iterates over chapters in the saved project
 #  file and generates a short literary title for each.
-#  Uses a cheap model (claude-sonnet-5) by default — the task is simple.
+#  Uses a cheap model (claude-sonnet-5-5) by default — the task is simple.
 # -----------------------------------------------------------------------------
 id: tytuly
 etykieta: "Assign Chapter Titles (AI)"
@@ -18,7 +18,7 @@ zakres: per_rozdzial
 max_tokens_wyjscia: 256
 
 # --- Anthropic parameters ---
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.7
 jezyk_odpowiedzi: English
 kod_jezyka: en

@@ -47,7 +47,7 @@ max_tokens_wyjscia: 2000
 
 # --- Параметры Anthropic ---
 # Низкая температура — нужна точная запись фактов, а не творчество.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.3
 jezyk_odpowiedzi: по-русски
 kod_jezyka: "ru"

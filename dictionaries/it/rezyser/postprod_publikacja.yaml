@@ -53,7 +53,7 @@ max_tokens_wyjscia: 3000
 # --- Parametri Anthropic ---
 # Temperatura bassa: una scheda è metadato, non prosa. Vogliamo fedeltà al
 # contenuto del progetto e zero ornamenti che il regista dovrebbe tagliare.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.4
 jezyk_odpowiedzi: italiano
 kod_jezyka: it

@@ -46,7 +46,7 @@ max_tokens_wyjscia: 2000
 
 # --- Anthropic parameters ---
 # Low temperature — we want a faithful record of facts, not creative writing.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.3
 jezyk_odpowiedzi: English
 kod_jezyka: "en"

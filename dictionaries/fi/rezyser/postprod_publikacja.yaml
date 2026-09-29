@@ -51,7 +51,7 @@ max_tokens_wyjscia: 3000
 # --- Anthropic-parametrit ---
 # Matala lämpötila: kortti on metatietoa, ei proosaa. Haluamme uskollisuutta
 # projektin sisällölle eikä yhtään koristetta, jonka ohjaaja joutuisi leikkaamaan.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.4
 jezyk_odpowiedzi: suomeksi
 kod_jezyka: fi

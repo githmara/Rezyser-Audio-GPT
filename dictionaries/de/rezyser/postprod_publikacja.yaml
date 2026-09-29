@@ -50,7 +50,7 @@ max_tokens_wyjscia: 3000
 # --- Anthropic-Parameter ---
 # Niedrige Temperatur: eine Karte ist Metadaten, keine Prosa. Wir wollen Treue
 # zum Projektinhalt und null Zierrat, den die Regie herausschneiden müsste.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.4
 jezyk_odpowiedzi: Deutsch
 kod_jezyka: de

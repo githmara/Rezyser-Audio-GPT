@@ -51,7 +51,7 @@ max_tokens_wyjscia: 3000
 # --- Параметры Anthropic ---
 # Низкая температура: карточка — это метаданные, а не проза. Нам нужна верность
 # содержанию проекта и ноль украшений, которые режиссёру пришлось бы вырезать.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.4
 jezyk_odpowiedzi: по-русски
 kod_jezyka: ru

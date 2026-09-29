@@ -46,7 +46,7 @@ max_tokens_wyjscia: 2000
 
 # --- Anthropic-stillingar ---
 # Lágt hitastig — við viljum trúverðuga skráningu staðreynda, ekki sköpun.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.3
 jezyk_odpowiedzi: á íslensku
 kod_jezyka: "is"

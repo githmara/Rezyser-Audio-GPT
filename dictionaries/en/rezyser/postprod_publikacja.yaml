@@ -49,7 +49,7 @@ max_tokens_wyjscia: 3000
 # --- Anthropic parameters ---
 # Low temperature: a card is metadata, not prose. We want fidelity to the
 # project's content and zero ornament the director would have to cut out.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 temperatura: 0.4
 jezyk_odpowiedzi: English
 kod_jezyka: en
