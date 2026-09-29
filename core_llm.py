@@ -542,6 +542,11 @@ def _co_odrzucono(exc: Exception) -> str | None:
     starej kolejności drabina zdjęłaby structured outputs, a ``thinking`` zostałby
     ten sam, co dało drugie 400. Z tej samej rodziny jest ``output_config.effort``
     (effort nieprzyjęty przy danym trybie myślenia), więc też idzie jako „thinking".
+    **Zmierzone żywo 2026-09-29: prawdziwe 400 brzmi INACZEJ niż w przewodniku** —
+    „To turn thinking off on this model, send "thinking": {"type": "between_tools"}
+    instead of {"type": "disabled"}. …" (bez ``thinking.type`` i bez
+    ``output_config``). Łapie je dopiero ogólne sprawdzenie ``"thinking"`` niżej,
+    więc tamto zostaje — oba warianty treści siedzą w ``test_thinking_dialekty``.
     """
     tresc = str(exc).lower()
     if "temperature" in tresc:

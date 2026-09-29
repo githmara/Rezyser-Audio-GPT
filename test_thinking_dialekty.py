@@ -31,7 +31,15 @@ BLAD_DISABLED = (
     '"thinking.type.adaptive" and "output_config.effort" to control thinking '
     'behavior.'
 )
-BLAD_BETWEEN = '"thinking.type.between_tools" is not supported for this model.'
+# Tresc ZMIERZONA zywo 2026-09-29 (req_011CfYSdFmuMWjwAHoaDiTiN) - rozna od
+# przewodnika: bez `thinking.type` i bez `output_config`.
+BLAD_DISABLED_ZYWY = (
+    'To turn thinking off on this model, send "thinking": {"type": '
+    '"between_tools"} instead of {"type": "disabled"}. The model does not think '
+    'before responding. The short updates it writes between tool calls come back '
+    'as thinking blocks.'
+)
+BLAD_BETWEEN ='"thinking.type.between_tools" is not supported for this model.'
 BLAD_BUDGET = (
     '"thinking.type.enabled" is not supported for this model. Use '
     '"thinking.type.adaptive" and "output_config.effort" to control thinking.'
@@ -139,6 +147,14 @@ def test_rozpoznanie_thinking_przed_output_config():
     assert cl._co_odrzucono(_Blad400(BLAD_DISABLED)) == "thinking"
     assert cl._co_odrzucono(_Blad400(BLAD_BETWEEN)) == "thinking"
     assert cl.czy_odrzucono_thinking(_Blad400(BLAD_DISABLED))
+    assert cl._co_odrzucono(_Blad400(BLAD_DISABLED_ZYWY)) == "thinking"
+
+
+def test_zywy_komunikat_przechodzi_na_between_tools():
+    _t, wyslane = _anthropic(
+        "egzotyk-6", [_Blad400(BLAD_DISABLED_ZYWY), "ok"], schema_json=SCHEMAT)
+    assert wyslane[1]["thinking"] == {"type": "between_tools"}
+    assert "format" in wyslane[1]["output_config"]
 
 
 def test_core_llm_nieznany_model_przechodzi_dialekty_po_kolei():
