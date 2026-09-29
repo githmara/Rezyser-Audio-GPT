@@ -348,7 +348,9 @@ def wywolaj_llm(
         # to 400, a przy myśleniu nie ma czego determinizować).
         kwargs["thinking"] = {"type": "adaptive"}
     else:
-        kwargs["thinking"] = {"type": "disabled"}
+        # „Bez myślenia" w dialekcie modelu: `between_tools` na Sonnet 5.5
+        # (`disabled` = 400), `disabled` na starszych — wiedza w `core_llm`.
+        cl.ustaw_thinking(kwargs, cl.thinking_bez_myslenia(model))
         # `temperature` wysyłamy TYLKO tam, gdzie ma szansę zadziałać — wiedzę
         # (baseline modeli + trwały autocache) dzielimy z runtimem przez
         # `core_llm`, zamiast trzymać trzecią kopię tej samej listy.
@@ -356,19 +358,32 @@ def wywolaj_llm(
         # z sygnatury `messages.create` (uzasadnienie i pomiar: `core_llm`).
         if cl.honoruje_temperature(model, TEMPERATURA_TLUMACZENIA):
             cl.wstaw_temperature(kwargs, TEMPERATURA_TLUMACZENIA)
-    try:
-        resp = klient.messages.create(**kwargs)
-    except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO odrzucenie `temperature`
-        # Reaktywna siatka bezpieczeństwa dla modelu spoza baseline'u (reżyser
-        # może podać własny `--model`). Rozpoznanie winowajcy bierzemy z
-        # `core_llm`, a wynik ZAPAMIĘTUJEMY — kolejne chunki tego przebiegu i
-        # kolejne przebiegi nie zapłacą już jałowym round-tripem.
-        if (not cl.temperatura_w_payloadzie(kwargs)
-                or not cl.czy_odrzucono_temperature(exc)):
+    # Reaktywna siatka bezpieczeństwa dla modelu spoza baseline'u (reżyser
+    # może podać własny `--model`). Degradujemy DWIE rzeczy, każdą rozpoznaną
+    # przez `core_llm`: odrzuconą `temperature` (wynik ZAPAMIĘTUJEMY — kolejne
+    # chunki i przebiegi nie zapłacą jałowym round-tripem) i odrzucony dialekt
+    # „bez myślenia" (następny wariant, nigdy dwa razy ten sam). Myślenie
+    # adaptacyjne (`myslenie=True`) nie degraduje się do „bez" — to świadomy
+    # wybór wołającego, więc 400 na nim leci wyżej.
+    wyprobowane_thinking = [kwargs.get("thinking")]
+    while True:
+        try:
+            resp = klient.messages.create(**kwargs)
+            break
+        except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO rozpoznane 400
+            if (cl.temperatura_w_payloadzie(kwargs)
+                    and cl.czy_odrzucono_temperature(exc)):
+                cl.zapamietaj_odrzucenie_temperatury(model)
+                cl.zdejmij_temperature(kwargs)
+                continue
+            if not myslenie and cl.czy_odrzucono_thinking(exc):
+                jest, wariant = cl.kolejny_wariant_bez_myslenia(
+                    model, wyprobowane_thinking)
+                if jest:
+                    wyprobowane_thinking.append(wariant)
+                    cl.ustaw_thinking(kwargs, wariant)
+                    continue
             raise
-        cl.zapamietaj_odrzucenie_temperatury(model)
-        cl.zdejmij_temperature(kwargs)
-        resp = klient.messages.create(**kwargs)
 
     if getattr(resp, "stop_reason", None) == "max_tokens":
         raise SystemExit(

@@ -346,6 +346,9 @@ _MODELE_BEZ_TEMPERATURY: tuple[str, ...] = (
     "claude-opus-5",
     "claude-opus-4-8",
     "claude-opus-4-7",
+    # `claude-sonnet-5-5` łapie też prefiks niżej — wpis jawny, żeby nikt
+    # nie musiał wiedzieć o kolizji prefiksów (ani jej przypadkiem zepsuć).
+    "claude-sonnet-5-5",
     "claude-sonnet-5",
 )
 
@@ -531,15 +534,128 @@ def _co_odrzucono(exc: Exception) -> str | None:
       * „`temperature` is deprecated for this model."
       * „output_config.format.schema: For 'array' type, property 'maxItems' …"
     Gdy wadliwe jest jedno i drugie, API zgłasza NAJPIERW schemat (zmierzone).
+
+    **`thinking.type` sprawdzamy PRZED `output_config` (migracja na Sonnet 5.5).**
+    Odrzucenie ``disabled`` brzmi: „"thinking.type.disabled" is not supported
+    for this model. Use "thinking.type.between_tools" … or "thinking.type.adaptive"
+    and "output_config.effort" …" — czyli zawiera słowo ``output_config``. Przy
+    starej kolejności drabina zdjęłaby structured outputs, a ``thinking`` zostałby
+    ten sam, co dało drugie 400. Z tej samej rodziny jest ``output_config.effort``
+    (effort nieprzyjęty przy danym trybie myślenia), więc też idzie jako „thinking".
     """
     tresc = str(exc).lower()
     if "temperature" in tresc:
         return "temperature"
+    if "thinking.type" in tresc or "output_config.effort" in tresc:
+        return "thinking"
     if "output_config" in tresc or "json_schema" in tresc:
         return "output_config"
     if "thinking" in tresc or "budget_tokens" in tresc:
         return "thinking"
     return None
+
+
+# ---------------------------------------------------------------------------
+# „Bez myślenia" zależy od modelu (migracja na Sonnet 5.5, v19.9)
+# ---------------------------------------------------------------------------
+# Runtime i rodzina autotłumaczy chodzą BEZ rozszerzonego myślenia (proza/JSON,
+# prompty dostrojone pod brak reasoningu — patrz uwaga przy `thinking` niżej).
+# Do Sonnet 5 wyrażało się to jednym payloadem `{"type": "disabled"}`. Od Sonnet
+# 5.5 są TRZY rozłączne dialekty i każdy model przyjmuje dokładnie jeden:
+#   * `disabled`       — Sonnet 5, Opus 5 (≤ high), 4.x, Haiku 4.5;
+#   * `between_tools`  — WYŁĄCZNIE Sonnet 5.5 (`disabled` = 400). Myślenie tylko
+#                        między wywołaniami narzędzi, a narzędzi nie używamy, więc
+#                        to ścisły odpowiednik dawnego `disabled`. Żadnych innych
+#                        pól w `thinking`, effort ≤ `high` (nie wysyłamy go);
+#   * pominięty param  — Opus 5.5, Fable, Mythos: myślenia nie da się wyłączyć,
+#                        każda jawna konfiguracja poza adaptive to 400.
+# Hardkod z tego samego powodu co `_MODELE_BEZ_TEMPERATURY`: lustro cudzej
+# macierzy modeli. Model spoza list (np. wpisany przez reżysera w YAML) dostaje
+# `disabled`, a gdy API go odrzuci, :func:`kolejny_wariant_bez_myslenia` podaje
+# następny wariant — drabina przejdzie wszystkie trzy, zanim się podda.
+# UWAGA na prefiksy: `claude-sonnet-5-5` zaczyna się od `claude-sonnet-5`, więc
+# listy sprawdzamy od najbardziej szczegółowej.
+_MODELE_BETWEEN_TOOLS: tuple[str, ...] = (
+    "claude-sonnet-5-5",
+)
+_MODELE_BEZ_WYLACZANIA_MYSLENIA: tuple[str, ...] = (
+    "claude-opus-5-5",
+    "claude-fable-5",
+    "claude-mythos-5",
+)
+
+THINKING_WYLACZONE: dict[str, str] = {"type": "disabled"}
+THINKING_MIEDZY_NARZEDZIAMI: dict[str, str] = {"type": "between_tools"}
+
+# Effort trybu quality (adaptive thinking). `high` = domyślny poziom Sonnet 5.5
+# podany JAWNIE, bo poziomy są rekalibrowane między modelami, a domyślny bywa
+# inny (Opus 5.5: `medium`) — jawna wartość nie zmieni się pod nami po cichu.
+EFFORT_QUALITY = "high"
+
+
+def _zdejmij_effort(kwargs: dict[str, Any]) -> None:
+    """Zdejmuje ``output_config.effort``; pusty ``output_config`` znika z nim.
+
+    Podmiana zamiast ``pop`` w miejscu — z tego samego powodu co w
+    :func:`zdejmij_temperature` (współdzielone płytkie kopie payloadu).
+    """
+    oc = kwargs.get("output_config")
+    if not oc or "effort" not in oc:
+        return
+    reszta = {k: v for k, v in oc.items() if k != "effort"}
+    if reszta:
+        kwargs["output_config"] = reszta
+    else:
+        kwargs.pop("output_config", None)
+
+
+def thinking_bez_myslenia(mdl: str) -> dict[str, str] | None:
+    """Payload ``thinking`` oznaczający „bez myślenia" dla tego modelu.
+
+    ``None`` = parametr POMIJAMY (model nie pozwala wyłączyć myślenia). Zwraca
+    świeżą kopię, żeby wołający mógł ją mutować bez ruszania stałych.
+    """
+    if any(mdl.startswith(p) for p in _MODELE_BETWEEN_TOOLS):
+        return dict(THINKING_MIEDZY_NARZEDZIAMI)
+    if any(mdl.startswith(p) for p in _MODELE_BEZ_WYLACZANIA_MYSLENIA):
+        return None
+    return dict(THINKING_WYLACZONE)
+
+
+def kolejny_wariant_bez_myslenia(
+    mdl: str, wyprobowane: list[dict[str, str] | None],
+) -> tuple[bool, dict[str, str] | None]:
+    """Następny nieprzetestowany wariant „bez myślenia" po odrzuceniu przez API.
+
+    Zwraca ``(jest, wariant)``; ``jest=False`` = wszystkie trzy już padły,
+    wołający ma rzucić oryginalny wyjątek. Kolejność: preferowany dla modelu,
+    potem pozostałe z :func:`thinking_bez_myslenia` — decyzja NIE opiera się na
+    parsowaniu komunikatu (ten wymienia kilka typów naraz), tylko na tym, co już
+    wysłaliśmy, więc pętla jest niemożliwa z konstrukcji.
+    """
+    kandydaci: list[dict[str, str] | None] = [thinking_bez_myslenia(mdl)]
+    for k in (dict(THINKING_WYLACZONE), dict(THINKING_MIEDZY_NARZEDZIAMI), None):
+        if k not in kandydaci:
+            kandydaci.append(k)
+    for k in kandydaci:
+        if k not in wyprobowane:
+            return True, k
+    return False, None
+
+
+def ustaw_thinking(kwargs: dict[str, Any], wariant: dict[str, str] | None) -> None:
+    """Wkłada wariant do payloadu; ``None`` zdejmuje klucz ``thinking``."""
+    if wariant is None:
+        kwargs.pop("thinking", None)
+    else:
+        kwargs["thinking"] = wariant
+
+
+def czy_odrzucono_thinking(exc: Exception) -> bool:
+    """Czy 400 dotyczy konfiguracji ``thinking`` — odpowiednik
+    :func:`czy_odrzucono_temperature` dla rodziny autotłumaczy z własnym klientem.
+    """
+    return _czy_zla_struktura(exc) and _co_odrzucono(exc) == "thinking"
 
 
 def schemat_do_api(schema: Any) -> Any:
@@ -1107,16 +1223,16 @@ def _wywolaj_anthropic(
     własnego samplingu domyślnego. Modele, które ``temperature`` honorują
     (np. Sonnet 4.6), nigdy nie trafiają w tę ścieżkę.
 
-    ``thinking_budget`` > 0 (18.11, tryb quality tłumacza AI) włącza extended
-    thinking: model dostaje budżet tokenów na wewnętrzne rozumowanie PRZED
-    odpowiedzią. Wymogi API: ``temperature`` musi zostać domyślna (parametr
-    POMIJAMY) i ``max_tokens`` > ``budget_tokens`` — budżet dokładamy PONAD
-    limit odpowiedzi wołającego, żeby semantyka ``stop_reason=="max_tokens"``
-    (guard uciętej odpowiedzi / bisekcja tłumacza) nie drgnęła. Bloki
-    ``thinking`` w odpowiedzi odfiltrowuje istniejąca sklejka ``type=="text"``.
-    Odrzucenie konfiguracji thinking przez model/endpoint (400/422) → retry
-    bez thinking i bez ``temperature`` (najbezpieczniejszy wariant — default
-    sampling akceptują wszystkie modele Claude).
+    ``thinking_budget`` > 0 (18.11, tryb quality tłumacza AI) włącza myślenie:
+    od v19.9 adaptive + ``output_config.effort`` = :data:`EFFORT_QUALITY`
+    (``budget_tokens`` zwraca 400 od Sonnet 5). ``temperature`` POMIJAMY,
+    a ``thinking_budget`` dokładamy PONAD limit odpowiedzi wołającego jako zapas
+    na namysł, żeby semantyka ``stop_reason=="max_tokens"`` (guard uciętej
+    odpowiedzi / bisekcja tłumacza) nie drgnęła. Bloki ``thinking`` w odpowiedzi
+    odfiltrowuje istniejąca sklejka ``type=="text"``. Odrzucenie konfiguracji
+    thinking (400/422) → retry z wariantem „bez myślenia" właściwym dla modelu
+    (:func:`kolejny_wariant_bez_myslenia` — ``disabled`` / ``between_tools`` /
+    pominięty), bez effort i bez ``temperature``.
 
     ``schema_json`` (v18.23) → ``output_config.format`` (structured outputs):
     kształt odpowiedzi egzekwuje API. Schemat musi być już przepuszczony przez
@@ -1150,8 +1266,12 @@ def _wywolaj_anthropic(
         system=system,
         messages=list(messages),
         max_tokens=max_tokens,
-        thinking={"type": "disabled"},
     )
+    # „Bez myślenia" per model (`disabled` / `between_tools` / pominięty) —
+    # dialekty i uzasadnienie przy `thinking_bez_myslenia`.
+    bez_myslenia = thinking_bez_myslenia(mdl)
+    ustaw_thinking(kwargs, bez_myslenia)
+    wyprobowane_thinking: list[dict[str, str] | None] = [bez_myslenia]
     # `temperature` wysyłamy TYLKO tam, gdzie ma szansę zadziałać (baseline +
     # autocache). Dla `claude-sonnet-5` i pokrewnych pomijamy ją od razu, więc
     # nie płacimy jałowym round-tripem przy każdej generacji.
@@ -1162,14 +1282,26 @@ def _wywolaj_anthropic(
             f"anthropic: model '{mdl}' nie honoruje niedomyślnej 'temperature' "
             f"({temperature}) — pomijam parametr bez próby (baseline/cache)."
         )
-    if thinking_budget > 0:
-        zdejmij_temperature(kwargs)
-        kwargs["thinking"] = {"type": "enabled", "budget_tokens": thinking_budget}
-        kwargs["max_tokens"] = max_tokens + thinking_budget
     if schema_json is not None:
         kwargs["output_config"] = {
             "format": {"type": "json_schema", "schema": schema_json},
         }
+    if thinking_budget > 0:
+        # Tryb quality. `budget_tokens` zwraca 400 od Sonnet 5 (do v19.9 drabina
+        # po cichu spadała na `disabled`, więc „quality" = zwykły tryb + jałowy
+        # round-trip). Dziś: adaptive thinking + jawny effort, a budżet zostaje
+        # ZAPASEM `max_tokens` — myślenie wlicza się w limit, więc bez zapasu
+        # guard `stop_reason=="max_tokens"` łapałby odpowiedzi ucięte namysłem.
+        zdejmij_temperature(kwargs)
+        kwargs["thinking"] = {"type": "adaptive"}
+        kwargs["output_config"] = {
+            **kwargs.get("output_config", {}), "effort": EFFORT_QUALITY,
+        }
+        kwargs["max_tokens"] = max_tokens + thinking_budget
+        # Wysłany jest adaptive, NIE `bez_myslenia` — gdyby ten ostatni stał na
+        # liście wypróbowanych, drabina po odrzuceniu quality pominęłaby
+        # właściwy dialekt modelu (złapane testem: 5.5 spadał na `disabled`).
+        wyprobowane_thinking = [dict(kwargs["thinking"])]
 
     # Degradacja CELOWANA: zdejmujemy to, co API wskazało w komunikacie 400
     # (patrz `_co_odrzucono`), a nie kolejny element listy. Ślepa kolejność
@@ -1179,7 +1311,10 @@ def _wywolaj_anthropic(
     # bez thinking, bez schematu = zachowanie ≤v18.22).
     resp = None
     zdjete: set[str] = set()
-    for _krok in range(4):
+    # 7 = temperature + output_config + do trzech wariantów thinking (plus
+    # wyjście z quality) + próba awaryjna. Każdy szczebel jest jednorazowy,
+    # więc limit tylko zabezpiecza, pętli nie ogranicza.
+    for _krok in range(7):
         try:
             resp = klient.sdk.with_options(timeout=timeout).messages.create(**kwargs)
             break
@@ -1207,12 +1342,22 @@ def _wywolaj_anthropic(
                 )
                 kwargs.pop("output_config", None)
             elif winowajca == "thinking":
+                # Z quality (adaptive + effort) schodzimy na „bez myślenia";
+                # z „bez myślenia" — na następny dialekt. Nigdy dwa razy ten sam.
+                jest, wariant = kolejny_wariant_bez_myslenia(
+                    mdl, wyprobowane_thinking)
+                if not jest:
+                    raise
                 _dev_log(
                     f"anthropic: model '{mdl}' odrzucił 'thinking' "
-                    f"({type(exc).__name__}) — ponawiam bez trybu quality."
+                    f"{kwargs.get('thinking')} ({type(exc).__name__}) — "
+                    f"ponawiam z {wariant} (bez trybu quality)."
                 )
-                kwargs["thinking"] = {"type": "disabled"}
+                wyprobowane_thinking.append(wariant)
+                ustaw_thinking(kwargs, wariant)
+                _zdejmij_effort(kwargs)
                 kwargs["max_tokens"] = max_tokens
+                continue   # szczebel thinking rozlicza `wyprobowane_thinking`
             else:
                 _dev_log(
                     f"anthropic: model '{mdl}' odrzucił payload komunikatem, "
@@ -1221,7 +1366,7 @@ def _wywolaj_anthropic(
                 )
                 zdejmij_temperature(kwargs)
                 kwargs.pop("output_config", None)
-                kwargs["thinking"] = {"type": "disabled"}
+                ustaw_thinking(kwargs, bez_myslenia)
                 kwargs["max_tokens"] = max_tokens
                 winowajca = "awaryjnie"
             zdjete.add(winowajca)
@@ -1237,7 +1382,11 @@ def _wywolaj_anthropic(
             "model":      mdl,
             "request_id": getattr(resp, "_request_id", None),
             "stop_reason": stop,
-            "schemat":    _odcisk_schematu(kwargs.get("output_config")),
+            # Sam `format` — `effort` trybu quality to nie schemat, a jego
+            # obecność zmieniłaby odcisk i udawała „inny schemat" w diagnozie.
+            "schemat":    _odcisk_schematu(
+                {"format": kwargs["output_config"]["format"]}
+                if "format" in kwargs.get("output_config", {}) else None),
             "wejscie_tok":  getattr(uzycie, "input_tokens", None),
             "wyjscie_tok":  getattr(uzycie, "output_tokens", None),
         })
@@ -1264,8 +1413,9 @@ def wywolaj_llm(
     Różnice API ukryte tu:
       * **prompt systemowy** — Anthropic ma osobny ``system=``; OpenAI dokleja go
         jako pierwszą wiadomość ``role=system`` (gdy niepusty).
-      * **reasoning** — Anthropic ``thinking``: domyślnie disabled (proza, bez
-        narzutu); ``thinking_budget`` > 0 włącza extended thinking (18.11,
+      * **reasoning** — Anthropic ``thinking``: domyślnie „bez myślenia" w
+        dialekcie modelu (``disabled``, na Sonnet 5.5 ``between_tools`` — patrz
+        :func:`thinking_bez_myslenia`); ``thinking_budget`` > 0 włącza myślenie (18.11,
         tryb quality tłumacza AI — patrz :func:`_wywolaj_anthropic`).
         W ``openai_compat`` parametr IGNOROWANY — cicha degradacja, ten sam
         wzorzec co ``segmenty``/``wymusz_json`` niżej.
