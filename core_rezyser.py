@@ -412,6 +412,25 @@ AUDIO_TAGS: frozenset[str] = frozenset({
 })
 
 
+def czy_audio_tag(tresc: str) -> bool:
+    """Czy treść nawiasu ``[...]`` to audio-tag, a nie nazwa mówcy.
+
+    Od Eleven v4 (v19.10) tag może być ZŁOŻONY: kilka dyrektyw po przecinku,
+    część w wolnej formie (``[whispers, holding back tears]``). Porównanie całej
+    treści z :data:`AUDIO_TAGS` brało taki tag za mówcę — wystarczy więc, że
+    JEDEN człon po przecinku jest znanym tagiem. Nazwa postaci nie zawiera
+    przecinka, a kolejność członów jest dowolna (``[holding back tears,
+    whispers]`` też jest tagiem). Tag w całości wolny, bez żadnego znanego
+    członu, nadal nie jest rozpoznawany — degraduje się to tak jak dotąd.
+
+    Args:
+        tresc: Zawartość nawiasu BEZ ``[`` i ``]``.
+    """
+    return any(
+        czlon.strip().lower() in AUDIO_TAGS for czlon in tresc.split(",")
+    )
+
+
 # =============================================================================
 # Rekoncyliacja narracji z dysku (v15.5) — wolne funkcje, czysto-Pythonowe,
 # w pełni testowalne bez I/O i bez wxPython.
@@ -929,7 +948,9 @@ def zastosuj_akcenty_uniwersalne(
             # (dopisane wyżej), a `current_speaker` się nie zmienia. Most
             # (`core_elevenlabs`) jest na to odporny inaczej — parsuje liniowo,
             # więc audio-tag w group(2) nigdy nie jest re-skanowany.
-            if nazwa_w_tagu in AUDIO_TAGS:
+            # v19.10: pełna treść nawiasu, nie `nazwa_w_tagu` — regex mówcy
+            # tnie na `-`, a tag złożony v4 ma przecinki (`czy_audio_tag`).
+            if czy_audio_tag(frag[1:-1]):
                 continue
             current_speaker = nazwa_w_tagu
         else:

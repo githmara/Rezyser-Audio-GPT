@@ -51,7 +51,7 @@ def _usun_audio_tagi(dialog: str) -> str:
     wpisał coś w nawiasach celowo). Scala powstałe podwójne spacje.
     """
     def repl(m: re.Match) -> str:
-        return "" if m.group(1).strip().lower() in cr.AUDIO_TAGS else m.group(0)
+        return "" if cr.czy_audio_tag(m.group(1)) else m.group(0)
 
     bez = _RE_NAWIAS.sub(repl, dialog)
     return re.sub(r"[ \t]{2,}", " ", bez).strip()
