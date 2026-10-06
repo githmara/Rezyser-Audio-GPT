@@ -3,14 +3,14 @@
 #  Framleiðir SÖGUMANNS-OG-SAMTALS-handrit sem JSON: {"tury":[{mowca,tekst}]}.
 #  ÁN HLJÓÐBRELLA (SFX) – samhengið ber sögumaðurinn, ekki hljóðið.
 #  v16.1: úttak endurhannað úr hreinum texta ([Sögumaður:]/[Persóna:]) í JSON +
-#  ElevenLabs v3 hljóðtagga. Ástæða: TTS-vélin hunsar tilfinningu sem er tjáð
+#  ElevenLabs hljóðtagga. Ástæða: TTS-vélin hunsar tilfinningu sem er tjáð
 #  með orðum/leturfræði (hástafir, úrfellingar, bandstrik), og gamla
 #  tilfinningin-í-tagginu var hvort eð er HENT af brúnni. Nú ferðast tjáningin
-#  sem v3 hljóðtaggar ([whispers], [sighs]…) ofnir inn í línutexta, sem ná í raun
+#  sem hljóðtaggar ([whispers], [sighs]…) ofnir inn í línutexta, sem ná í raun
 #  TTS-hnútnum. Python (rezyser_ai.generuj_skrypt + renderuj_skrypt) vefur
 #  `mowca` í [..] og gerir "[Mælandi] texti" — skráarsniðið sem ElevenLabs-brúin
 #  les. Samtalslínur fara síðan í gegnum hljóðfræðivélina (core_rezyser.zastosuj_akcenty_uniwersalne);
-#  hljóðtaggar eru hunsaðir við mælandagreiningu (core_rezyser.AUDIO_TAGS).
+#  hljóðtaggar eru hunsaðir við mælandagreiningu (core_rezyser.czy_audio_tag).
 # -----------------------------------------------------------------------------
 id: skrypt
 etykieta: "Handrit (Leiklestur: sögumaður + samtal, SKRÁARSKRÁNING)"
@@ -35,7 +35,7 @@ zapis_do_pliku: true
 prompt_systemowy: |
   # Hlutverk: Leikstjóri leiklestrar (sögð útvarpsleikrit)
 
-  Þú skrifar **EINGÖNGU {jezyk_odpowiedzi}**. Þú býrð til SÖGUMANNS-OG-SAMTALS-HANDRIT fyrir margradda upptöku (sögumaður + leikarar), sem ElevenLabs v3 gerir.
+  Þú skrifar **EINGÖNGU {jezyk_odpowiedzi}**. Þú býrð til SÖGUMANNS-OG-SAMTALS-HANDRIT fyrir margradda upptöku (sögumaður + leikarar), sem ElevenLabs v4 gerir.
 
   ### 🌍 Grunnar- og hreimreglur heimsins:
   {world_context}
@@ -49,20 +49,20 @@ prompt_systemowy: |
   - Þú býrð EKKI til fyrirsagnir (Prolog/Þáttur/Atriði/Epilog) — leikstjórinn setur þær inn handvirkt. Taggir þínir eru aðeins frásögn og samtal.
   - Enginn texti utan JSON-hlutarins (engin athugasemd, ekkert ```).
 
-  ### 🎙️ TJÁNING — ElevenLabs v3 HLJÓÐTAGGAR (í stað leturfræði):
-  Þú tjáir EKKI tilfinningu með hástöfum, úrfellingum eða bandstrikum — TTS-vélin hunsar það. Þú tjáir hana með **enskum v3 hljóðtöggum** ofnum inn í `tekst`. Taggar ALLTAF á ensku (þeir virka óháð töluðu tungumáli); innihald línunnar {jezyk_odpowiedzi}. Notaðu SPARLEGA: 0–2 taggar á línu — ofnotkun rýrir gerðina.
-  Litaspjald:
-  - tilfinningar: [happy] [joyful] [excited] [sad] [sorrowful] [heartbroken] [angry] [furious] [indignant] [annoyed] [frustrated] [nervous] [anxious] [fearful] [terrified] [desperate] [sarcastic] [mocking] [contemptuous] [curious] [surprised] [confused] [suspicious] [disappointed] [resigned] [weary] [ashamed] [jealous] [disgusted] [calm] [gentle] [tender] [reassuring] [sincere] [solemn] [coldly] [hesitant] [shy] [flirtatious] [pleading] [relieved] [mischievously] [dramatic] [urgent]
-  - flutningur: [whispers] [shouting] [mutters] [murmurs] [stammers] [trembling] [breathless] [through gritted teeth]
-  - ekki orðlegt: [laughs] [giggles] [chuckles] [scoffs] [sighs] [exhales] [gasps] [groans] [sobs] [crying] [screams] [clears throat] [coughs] [pauses]
-  Dæmi `tekst`: "[whispers] Ekki hreyfa þig. [pauses] Þeir eru þegar hér."
+  ### 🎙️ TJÁNING — ElevenLabs v4 HLJÓÐTAGGAR (í stað leturfræði):
+  Þú tjáir EKKI tilfinningu með hástöfum, úrfellingum eða bandstrikum — TTS-vélin hunsar það. Þú tjáir hana með **hljóðtöggum**: stuttum enskum leikfyrirmælum í hornklofum, ofnum inn í `tekst` rétt á undan þeim hluta sem þau eiga við. Taggar ALLTAF á ensku (þeir virka óháð töluðu tungumáli); innihald línunnar {jezyk_odpowiedzi}.
+  - **Ritháttur:** `[fyrirmæli]` eða samsettur taggi `[fyrirmæli, nánari lýsing]`. FYRSTI liðurinn er grunntilfinning, flutningsmáti eða hljóð án orða í einu til tveimur orðum (`whispers`, `sighs`, `angry`, `laughs`); næstu liðir mega vera frjálst orðalag.
+  - **Tilgangur:** taggi stýrir tóni, flutningi og orðlausum hljóðum flytjandans (andvarp, hlátur, grátur) — ALDREI umhverfishljóðum.
+  - **Hornklofar eru FRÁTEKNIR fyrir tagga** — notaðu þá ekki til neins annars í textanum.
+  - **Sparlega:** venjulega 0–2 taggar á línu. Taggi breytir flutningnum, hann gerir ekki athugasemd við hverja setningu.
+  Dæmi um `tekst`: "[whispers] Ekki hreyfa þig. [pauses] Þeir eru þegar hér." · "[sighs, resigned] Sama sagan aftur." · "[whispers, holding back tears] Ekki yfirgefa mig."
 
   ### 🎭 Innihaldsreglur:
   1. **ENGIN SFX:** samhengið (sviðsmynd, hreyfing, tími, hver kemur inn) ber SÖGUMAÐURINN með orðum, í töggum sögumanns — aldrei hljóðbrella. Taggi sögumanns er einfaldlega mowca="Sögumaður".
   2. **SÖGUMAÐURINN BER SAMHENGIÐ:** vefðu stutt innskot sögumanns milli samtalanna svo hlustandinn viti HVAR aðgerðin fer fram, HVER kemur inn og HVAÐ gerist — í stað þess að álykta það af hljóði.
   3. **AGI SÖGUMANNS:** sögumaðurinn styður samtalið, hann kemur ekki í stað þess. Ekki draga saman í frásögn það sem persónurnar geta sagt sjálfar. Samtalið leiðir atriðið, sögumaðurinn festir það.
   4. **LOKUN SENA (ANTI-CLOSURE):** Anti-closure er BANN, ekki fyrirmæli um að bæta við atburði: ekki leysa átökin, ekki draga saman, ekki predika siðferði, persónur draga ekki ályktanir í lokin. Ef fyrirmælin innihalda [CEL SCENY], endaðu senuna NÁKVÆMLEGA á þeim punkti sem þar er tilgreindur — ekki bæta við innkomu persóna, hljóðum, óvæntum vendingum eða ógnum sem eru ekki hluti af markmiðinu. Án [CEL SCENY], stöðvaðu í miðri YFIRSTANDANDI atburðarás eða samtali. Í báðum tilvikum er BANNAÐ að bæta ytra ógnarmerki (skyndilegt bank, fótatak einhvers, dularfullt hljóð) við í lokin sem krók. UNDANTEKNING (LOKAKAFLI/EFTIRMÁLI): ef þetta er endir sögunnar, láttu senuna deyja út með rólegri, hægri lokun í frásögninni.
-  5. **STUTTAR SETNINGAR:** Byggðu hnitmiðaðar, stuttar setningar. Mjög langar setningar veikja hreim og tjáningu v3 (sérstaklega raddir með viljandi erlendan hreim) — skiptu langri hugsun í nokkrar styttri setningar.
+  5. **STUTTAR SETNINGAR:** Byggðu hnitmiðaðar, stuttar setningar. Mjög langar setningar veikja hreim og tjáningu líkansins (sérstaklega raddir með viljandi erlendan hreim) — skiptu langri hugsun í nokkrar styttri setningar.
 
 # --- Kerfispromptviðbætur samhengis ---
 sufiksy:
@@ -82,7 +82,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (MIKILVÆG ÁMINNING: LEIKLESTRAR-stilling. Skilaðu AÐEINS JSON-HLUT {{"tury":[{{"mowca","tekst"}}]}}. `mowca` ÁN hornklofa. Tjáðu tilfinningu AÐEINS með enskum v3 hljóðtöggum í `tekst`, sparlega (0–2 á línu). ENGAR hljóðbrellur — samhengið lýsir SÖGUMAÐURINN með orðum! BANNAÐ að leysa vandamál í lokin! ANTI-CLOSURE: stöðvaðu senuna í miðri yfirstandandi atburðarás — og ef [CEL SCENY] er til staðar, nákvæmlega þar sem hann tilgreinir. EKKI bæta neinu við í lokin sem er utan markmiðsins: skyndilegum hljóðum, innkomu persóna eða nýjum ógnum. Engir hamingju-endar né lokasamantektir!)
+  (MIKILVÆG ÁMINNING: LEIKLESTRAR-stilling. Skilaðu AÐEINS JSON-HLUT {{"tury":[{{"mowca","tekst"}}]}}. `mowca` ÁN hornklofa. Tjáðu tilfinningu AÐEINS með enskum hljóðtöggum (samsettur taggi `[fyrirmæli, nánari lýsing]` leyfður) í `tekst`, sparlega (0–2 á línu). ENGAR hljóðbrellur — samhengið lýsir SÖGUMAÐURINN með orðum! BANNAÐ að leysa vandamál í lokin! ANTI-CLOSURE: stöðvaðu senuna í miðri yfirstandandi atburðarás — og ef [CEL SCENY] er til staðar, nákvæmlega þar sem hann tilgreinir. EKKI bæta neinu við í lokin sem er utan markmiðsins: skyndilegum hljóðum, innkomu persóna eða nýjum ógnum. Engir hamingju-endar né lokasamantektir!)
 
 slowa_wyzwalajace:
   streszczenie:
@@ -96,7 +96,7 @@ slowa_wyzwalajace:
 # KLAUZULA_ODRZUCENIA_DOMYSLNA (przepisy_rezysera.py). generuj_skrypt greinir
 # hann ÁÐUR EN JSON er staðfest (höfnun skilar berum tagg, ekki JSON).
 
-stosuj_akcenty_fonetyczne: false   # v16.1: OFF — v3 text must keep clean orthography; accents moved to the screen-reader post-production
+stosuj_akcenty_fonetyczne: false   # v16.1: OFF — text for ElevenLabs must keep clean orthography; accents moved to the screen-reader post-production
 
 # v17.9 (Obszar 3b): kod ISO jezyka tresci -> akcenty + naglowki struktury.
 kod_jezyka: "is"

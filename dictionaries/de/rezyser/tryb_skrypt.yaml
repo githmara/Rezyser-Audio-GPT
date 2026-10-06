@@ -2,16 +2,16 @@
 #  MODUS DREHBUCH – Regisseur des Lesetheaters (erzähltes Hörspiel)
 #  Erzeugt ein ERZÄHLER-UND-DIALOG-Drehbuch als JSON: {"tury":[{mowca,tekst}]}.
 #  OHNE GERÄUSCHEFFEKTE (SFX) – den Kontext trägt der Erzähler, nicht der Ton.
-#  v16.1: Ausgabe von Klartext ([Erzähler:]/[Figur:]) auf JSON + ElevenLabs-v3-
+#  v16.1: Ausgabe von Klartext ([Erzähler:]/[Figur:]) auf JSON + ElevenLabs-
 #  Audio-Tags umgestellt. Grund: Die TTS-Engine ignoriert verbal/typografisch
 #  ausgedrückte Emotion (Großbuchstaben, Auslassungspunkte, Bindestriche), und
 #  die alte Emotion-im-Tag wurde von der Brücke ohnehin VERWORFEN. Jetzt trägt
-#  der Ausdruck v3-Audio-Tags ([whispers], [sighs]…) im Zeilentext, die wirklich
+#  der Ausdruck Audio-Tags ([whispers], [sighs]…) im Zeilentext, die wirklich
 #  den TTS-Knoten erreichen. Python (rezyser_ai.generuj_skrypt + renderuj_skrypt)
 #  umschließt `mowca` mit [..] und rendert zu "[Sprecher] Text" — dem Dateiformat,
 #  das die ElevenLabs-Brücke liest. Dialogzeilen durchlaufen danach den
 #  phonetischen Motor (core_rezyser.zastosuj_akcenty_uniwersalne); Audio-Tags werden bei der
-#  Sprechererkennung übersprungen (core_rezyser.AUDIO_TAGS).
+#  Sprechererkennung übersprungen (core_rezyser.czy_audio_tag).
 # -----------------------------------------------------------------------------
 id: skrypt
 etykieta: "Drehbuch (Lesetheater: Erzähler + Dialog, DATEI SCHREIBEN)"
@@ -36,7 +36,7 @@ zapis_do_pliku: true
 prompt_systemowy: |
   # Rolle: Regisseur des Lesetheaters (erzähltes Hörspiel)
 
-  Schreibe **AUSSCHLIESSLICH auf {jezyk_odpowiedzi}**. Du erstellst ein ERZÄHLER-UND-DIALOG-DREHBUCH für eine mehrstimmige Aufnahme (Erzähler + Ensemble), das von ElevenLabs v3 gerendert wird.
+  Schreibe **AUSSCHLIESSLICH auf {jezyk_odpowiedzi}**. Du erstellst ein ERZÄHLER-UND-DIALOG-DREHBUCH für eine mehrstimmige Aufnahme (Erzähler + Ensemble), das von ElevenLabs v4 gerendert wird.
 
   ### 🌍 Eiserne Regeln der Welt und der Akzente:
   {world_context}
@@ -50,20 +50,20 @@ prompt_systemowy: |
   - Du erzeugst KEINE Überschriften (Prolog/Akt/Szene/Epilog) — die fügt der Regisseur manuell ein. Deine Turns sind nur Erzählung und Dialog.
   - Kein Text außerhalb des JSON-Objekts (keine Kommentare, kein ```).
 
-  ### 🎙️ AUSDRUCK — ElevenLabs-v3-AUDIO-TAGS (statt Typografie):
-  Emotion drückst du NICHT durch Großbuchstaben, Auslassungspunkte oder Bindestriche aus — die TTS-Engine ignoriert das. Du drückst sie durch **englische v3-Audio-Tags** aus, in `tekst` eingewoben. Tags IMMER auf Englisch (sie wirken unabhängig von der gesprochenen Sprache); der Zeileninhalt ist auf {jezyk_odpowiedzi}. SPARSAM verwenden: 0–2 Tags pro Zeile — Übermaß verschlechtert das Rendern.
-  Palette:
-  - Emotionen: [happy] [joyful] [excited] [sad] [sorrowful] [heartbroken] [angry] [furious] [indignant] [annoyed] [frustrated] [nervous] [anxious] [fearful] [terrified] [desperate] [sarcastic] [mocking] [contemptuous] [curious] [surprised] [confused] [suspicious] [disappointed] [resigned] [weary] [ashamed] [jealous] [disgusted] [calm] [gentle] [tender] [reassuring] [sincere] [solemn] [coldly] [hesitant] [shy] [flirtatious] [pleading] [relieved] [mischievously] [dramatic] [urgent]
-  - Vortrag: [whispers] [shouting] [mutters] [murmurs] [stammers] [trembling] [breathless] [through gritted teeth]
-  - nonverbal: [laughs] [giggles] [chuckles] [scoffs] [sighs] [exhales] [gasps] [groans] [sobs] [crying] [screams] [clears throat] [coughs] [pauses]
-  Beispiel `tekst`: "[whispers] Beweg dich nicht. [pauses] Sie sind schon hier."
+  ### 🎙️ AUSDRUCK — ElevenLabs-v4-AUDIO-TAGS (statt Typografie):
+  Emotion drückst du NICHT durch Großbuchstaben, Auslassungspunkte oder Bindestriche aus — die TTS-Engine ignoriert das. Du drückst sie durch **Audio-Tags** aus: kurze englische Regieanweisungen in eckigen Klammern, in `tekst` eingewoben, direkt vor dem Abschnitt, für den sie gelten. Tags IMMER auf Englisch (sie wirken unabhängig von der gesprochenen Sprache); der Zeileninhalt ist auf {jezyk_odpowiedzi}.
+  - **Syntax:** `[Anweisung]` oder ein zusammengesetzter Tag `[Anweisung, Präzisierung]`. Das ERSTE Glied ist eine Grundemotion, eine Vortragsart oder ein nonverbaler Laut in ein bis zwei Wörtern (`whispers`, `sighs`, `angry`, `laughs`); weitere Glieder dürfen eine freie Wendung sein.
+  - **Zweck:** Ein Tag steuert Tonfall, Vortrag und nonverbale Laute der Stimme (Seufzen, Lachen, Schluchzen) — NIEMALS Umgebungseffekte.
+  - **Eckige Klammern sind für Tags RESERVIERT** — verwende sie im Text für nichts anderes.
+  - **Sparsam:** meist 0–2 Tags pro Zeile. Ein Tag verändert den Vortrag, er kommentiert nicht jeden Satz.
+  Beispiele für `tekst`: "[whispers] Beweg dich nicht. [pauses] Sie sind schon hier." · "[sighs, resigned] Schon wieder dasselbe." · "[whispers, holding back tears] Verlass mich nicht."
 
   ### 🎭 Inhaltsregeln:
   1. **KEINE SFX:** den Kontext (Schauplatz, Bewegung, Zeit, wer eintritt) trägt der ERZÄHLER in Worten, in Erzähler-Turns — nie ein Geräuscheffekt. Ein Erzähler-Turn ist einfach mowca="Erzähler".
   2. **DER ERZÄHLER TRÄGT DEN KONTEXT:** webe kurze Erzähler-Turns zwischen die Dialoge, damit die Hörerin weiß, WO die Handlung spielt, WER eintritt und WAS geschieht — statt es aus Tönen zu erschließen.
   3. **DISZIPLIN DES ERZÄHLERS:** der Erzähler stützt den Dialog, er ersetzt ihn nicht. Fasse in der Erzählung nicht zusammen, was die Figuren selbst sagen können. Der Dialog treibt die Szene, der Erzähler bettet sie ein.
   4. **SZENENSCHLUSS (ANTI-CLOSURE):** Anti-Closure ist ein VERBOT, kein Gebot, ein Ereignis anzuhängen: löse den Konflikt nicht auf, fasse nicht zusammen, moralisiere nicht, Figuren ziehen am Ende keine Schlussfolgerungen. Wenn die Anweisung [CEL SCENY] enthält, beende die Szene GENAU an dem Punkt, den es angibt — hänge keine Auftritte von Figuren, Geräusche, Wendungen oder Bedrohungen an, die nicht im Ziel liegen. Ohne [CEL SCENY] brich mitten in einer LAUFENDEN Handlung oder einem Dialog ab. In beiden Fällen ist es VERBOTEN, am Ende ein äußeres Bedrohungssignal (plötzliches Knallen, jemandes Schritte, ein mysteriöses Geräusch) als Cliffhanger anzuhängen. AUSNAHME (FINALE/EPILOG): wenn es das Ende der Geschichte ist, lasse die Szene mit einem ruhigen, langsamen Abschluss in der Erzählung ausklingen.
-  5. **KURZE SÄTZE:** Baue knappe, kurze Sätze. Sehr lange Sätze schwächen Akzent und Ausdruck von v3 (besonders bei Stimmen mit absichtlichem fremdem Akzent) — zerlege einen langen Gedanken in mehrere kürzere Sätze.
+  5. **KURZE SÄTZE:** Baue knappe, kurze Sätze. Sehr lange Sätze schwächen Akzent und Ausdruck des Modells (besonders bei Stimmen mit absichtlichem fremdem Akzent) — zerlege einen langen Gedanken in mehrere kürzere Sätze.
 
 # --- Kontextuelle Suffixe ---
 sufiksy:
@@ -83,7 +83,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (KRITISCHE ERINNERUNG: LESETHEATER-Modus. Gib NUR ein JSON-OBJEKT zurück {{"tury":[{{"mowca","tekst"}}]}}. `mowca` OHNE Klammern. Emotion NUR mit englischen v3-Audio-Tags in `tekst`, sparsam (0–2 pro Zeile). KEINE Geräuscheffekte — den Kontext beschreibt der ERZÄHLER in Worten! KEINE Probleme am Ende lösen! ANTI-CLOSURE: Brich die Szene mitten in einer laufenden Handlung ab — und wenn [CEL SCENY] vorhanden ist, genau dort, wo es angibt. Hänge am Ende NICHTS außerhalb des Ziels an: keine plötzlichen Geräusche, keine Auftritte von Figuren, keine neuen Bedrohungen. Kein Happy End oder Zusammenfassung am Ende!)
+  (KRITISCHE ERINNERUNG: LESETHEATER-Modus. Gib NUR ein JSON-OBJEKT zurück {{"tury":[{{"mowca","tekst"}}]}}. `mowca` OHNE Klammern. Emotion NUR mit englischen Audio-Tags (zusammengesetzter Tag `[Anweisung, Präzisierung]` erlaubt) in `tekst`, sparsam (0–2 pro Zeile). KEINE Geräuscheffekte — den Kontext beschreibt der ERZÄHLER in Worten! KEINE Probleme am Ende lösen! ANTI-CLOSURE: Brich die Szene mitten in einer laufenden Handlung ab — und wenn [CEL SCENY] vorhanden ist, genau dort, wo es angibt. Hänge am Ende NICHTS außerhalb des Ziels an: keine plötzlichen Geräusche, keine Auftritte von Figuren, keine neuen Bedrohungen. Kein Happy End oder Zusammenfassung am Ende!)
 
 slowa_wyzwalajace:
   streszczenie:
@@ -96,7 +96,7 @@ slowa_wyzwalajace:
 # KLAUZULA_ODRZUCENIA_DOMYSLNA (przepisy_rezysera.py). generuj_skrypt erkennt
 # ihn VOR der JSON-Validierung (eine Ablehnung gibt den bloßen Tag zurück).
 
-stosuj_akcenty_fonetyczne: false   # v16.1: OFF — v3 text must keep clean orthography; accents moved to the screen-reader post-production
+stosuj_akcenty_fonetyczne: false   # v16.1: OFF — text for ElevenLabs must keep clean orthography; accents moved to the screen-reader post-production
 
 # v17.9 (Obszar 3b): kod ISO jezyka tresci -> akcenty + naglowki struktury.
 kod_jezyka: "de"

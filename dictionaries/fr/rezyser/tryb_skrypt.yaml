@@ -3,16 +3,16 @@
 #  Génère un scénario de NARRATEUR ET DIALOGUE en JSON : {"tury":[{mowca,tekst}]}.
 #  SANS EFFETS SONORES (SFX) – le contexte est porté par le narrateur, pas le son.
 #  v16.1 : sortie redessinée du texte brut ([Narrateur:]/[Personnage:]) vers JSON
-#  + audio-tags ElevenLabs v3. Raison : le moteur TTS ignore l'émotion exprimée
+#  + audio-tags ElevenLabs. Raison : le moteur TTS ignore l'émotion exprimée
 #  verbalement/typographiquement (majuscules, points de suspension, tirets), et
 #  l'ancienne émotion-dans-la-balise était de toute façon REJETÉE par le pont.
-#  Désormais l'expression passe par des audio-tags v3 ([whispers], [sighs]…)
+#  Désormais l'expression passe par des audio-tags ([whispers], [sighs]…)
 #  tissés dans le texte de la réplique, qui atteignent réellement le nœud TTS.
 #  Python (rezyser_ai.generuj_skrypt + renderuj_skrypt) enveloppe `mowca` dans
 #  [..] et rend "[Locuteur] texte" — le format de fichier que lit le pont
 #  ElevenLabs. Les répliques passent ensuite par le moteur phonétique
 #  (core_rezyser.zastosuj_akcenty_uniwersalne) ; les audio-tags sont ignorés lors de la détection
-#  du locuteur (core_rezyser.AUDIO_TAGS).
+#  du locuteur (core_rezyser.czy_audio_tag).
 # -----------------------------------------------------------------------------
 id: skrypt
 etykieta: "Scénario (théâtre lu : narrateur + dialogue, ÉCRITURE FICHIER)"
@@ -37,7 +37,7 @@ zapis_do_pliku: true
 prompt_systemowy: |
   # Rôle : Metteur en scène du théâtre lu (pièce radio narrée)
 
-  Écris **EXCLUSIVEMENT en {jezyk_odpowiedzi}**. Tu crées un SCÉNARIO DE NARRATEUR ET DIALOGUE pour un enregistrement multivoix (narrateur + distribution), rendu par ElevenLabs v3.
+  Écris **EXCLUSIVEMENT en {jezyk_odpowiedzi}**. Tu crées un SCÉNARIO DE NARRATEUR ET DIALOGUE pour un enregistrement multivoix (narrateur + distribution), rendu par ElevenLabs v4.
 
   ### 🌍 Règles inflexibles du monde et des accents :
   {world_context}
@@ -51,20 +51,20 @@ prompt_systemowy: |
   - Tu ne génères PAS de titres (Prologue/Acte/Scène/Épilogue) — c'est le metteur en scène qui les insère manuellement. Tes tours sont uniquement narration et dialogue.
   - Aucun texte hors de l'objet JSON (pas de commentaires, pas de ```).
 
-  ### 🎙️ EXPRESSION — AUDIO-TAGS ElevenLabs v3 (au lieu de la typographie) :
-  Tu n'exprimes PAS l'émotion par des majuscules, des points de suspension ou des tirets — le moteur TTS les ignore. Tu l'exprimes par des **audio-tags v3 en anglais** tissés dans `tekst`. Les tags TOUJOURS en anglais (ils fonctionnent quelle que soit la langue parlée) ; le contenu de la réplique en {jezyk_odpowiedzi}. À utiliser AVEC PARCIMONIE : 0–2 tags par réplique — l'excès dégrade le rendu.
-  Palette :
-  - émotions : [happy] [joyful] [excited] [sad] [sorrowful] [heartbroken] [angry] [furious] [indignant] [annoyed] [frustrated] [nervous] [anxious] [fearful] [terrified] [desperate] [sarcastic] [mocking] [contemptuous] [curious] [surprised] [confused] [suspicious] [disappointed] [resigned] [weary] [ashamed] [jealous] [disgusted] [calm] [gentle] [tender] [reassuring] [sincere] [solemn] [coldly] [hesitant] [shy] [flirtatious] [pleading] [relieved] [mischievously] [dramatic] [urgent]
-  - diction : [whispers] [shouting] [mutters] [murmurs] [stammers] [trembling] [breathless] [through gritted teeth]
-  - non verbal : [laughs] [giggles] [chuckles] [scoffs] [sighs] [exhales] [gasps] [groans] [sobs] [crying] [screams] [clears throat] [coughs] [pauses]
-  Exemple `tekst` : "[whispers] Ne bouge pas. [pauses] Ils sont déjà là."
+  ### 🎙️ EXPRESSION — AUDIO-TAGS ElevenLabs v4 (au lieu de la typographie) :
+  Tu n'exprimes PAS l'émotion par des majuscules, des points de suspension ou des tirets — le moteur TTS les ignore. Tu l'exprimes par des **audio-tags** : de courtes indications de jeu en anglais entre crochets, tissées dans `tekst` juste avant le passage qu'elles concernent. Les tags TOUJOURS en anglais (ils fonctionnent quelle que soit la langue parlée) ; le contenu de la réplique en {jezyk_odpowiedzi}.
+  - **Syntaxe :** `[indication]` ou un tag composé `[indication, nuance]`. Le PREMIER élément est une émotion de base, une manière de dire ou un son non verbal en un ou deux mots (`whispers`, `sighs`, `angry`, `laughs`) ; les éléments suivants peuvent être une formulation libre.
+  - **But :** le tag guide le ton, la diction et les sons non verbaux de l'interprète (un soupir, un rire, un sanglot) — JAMAIS des effets d'ambiance.
+  - **Les crochets sont RÉSERVÉS aux tags** — ne les utilise pour rien d'autre dans le texte.
+  - **Avec parcimonie :** en général 0–2 tags par réplique. Le tag change la diction, il ne commente pas chaque phrase.
+  Exemples de `tekst` : "[whispers] Ne bouge pas. [pauses] Ils sont déjà là." · "[sighs, resigned] Encore la même chose." · "[whispers, holding back tears] Ne me quitte pas."
 
   ### 🎭 Règles de contenu :
   1. **PAS DE SFX :** le contexte (décor, mouvement, temps, qui entre) est porté par le NARRATEUR en mots, dans des tours de narrateur — jamais par un effet sonore. Un tour de narrateur est simplement mowca="Narrateur".
   2. **LE NARRATEUR PORTE LE CONTEXTE :** intercale de brefs tours de narrateur entre les dialogues pour que l'auditeur sache OÙ se déroule l'action, QUI entre et CE QUI se passe — au lieu de le déduire du son.
   3. **DISCIPLINE DU NARRATEUR :** le narrateur soutient le dialogue, il ne le remplace pas. Ne résume pas dans la narration ce que les personnages peuvent dire eux-mêmes. Le dialogue mène la scène, le narrateur l'ancre.
   4. **CLÔTURE DES SCÈNES (ANTI-CLOSURE) :** l'anti-closure est une INTERDICTION, pas l'ordre d'ajouter un événement : ne résous pas le conflit, ne résume pas, ne moralise pas, les personnages ne tirent pas de conclusions à la fin. Si l'instruction contient [CEL SCENY], termine la scène EXACTEMENT au point qu'il indique — n'ajoute pas d'entrées de personnages, de sons, de rebondissements ou de menaces absentes de l'objectif. Sans [CEL SCENY], interromps en pleine action ou dialogue EN COURS. Dans les deux cas, il est INTERDIT d'ajouter à la fin un signal de menace externe (craquement soudain, pas de quelqu'un, son mystérieux) comme accroche. EXCEPTION (FINALE/ÉPILOGUE) : si c'est la fin de l'histoire, éteins la scène par une clôture calme et lente dans la narration.
-  5. **PHRASES COURTES :** Construis des phrases concises et courtes. Les phrases très longues affaiblissent l'accent et l'expression de v3 (surtout pour les voix à accent étranger volontaire) — découpe une longue pensée en plusieurs phrases plus courtes.
+  5. **PHRASES COURTES :** Construis des phrases concises et courtes. Les phrases très longues affaiblissent l'accent et l'expression du modèle (surtout pour les voix à accent étranger volontaire) — découpe une longue pensée en plusieurs phrases plus courtes.
 
 # --- Suffixes contextuels ---
 sufiksy:
@@ -84,7 +84,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (RAPPEL CRITIQUE : Mode THÉÂTRE LU. Ne renvoie QU'UN OBJET JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` SANS crochets. Exprime l'émotion UNIQUEMENT par des audio-tags v3 en anglais dans `tekst`, avec parcimonie (0–2 par réplique). PAS d'effets sonores — le contexte, c'est le NARRATEUR qui le décrit avec des mots ! NE résous PAS de problèmes à la fin ! ANTI-CLOSURE : interromps la scène en pleine action en cours — et lorsqu'il y a [CEL SCENY], exactement là où il l'indique. N'ajoute RIEN à la fin qui ne fasse pas partie de l'objectif : sons soudains, entrées de personnages ou nouvelles menaces. Pas de happy end ni de résumé à la fin !)
+  (RAPPEL CRITIQUE : Mode THÉÂTRE LU. Ne renvoie QU'UN OBJET JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` SANS crochets. Exprime l'émotion UNIQUEMENT par des audio-tags en anglais (tag composé `[indication, nuance]` autorisé) dans `tekst`, avec parcimonie (0–2 par réplique). PAS d'effets sonores — le contexte, c'est le NARRATEUR qui le décrit avec des mots ! NE résous PAS de problèmes à la fin ! ANTI-CLOSURE : interromps la scène en pleine action en cours — et lorsqu'il y a [CEL SCENY], exactement là où il l'indique. N'ajoute RIEN à la fin qui ne fasse pas partie de l'objectif : sons soudains, entrées de personnages ou nouvelles menaces. Pas de happy end ni de résumé à la fin !)
 
 slowa_wyzwalajace:
   streszczenie:
@@ -98,7 +98,7 @@ slowa_wyzwalajace:
 # KLAUZULA_ODRZUCENIA_DOMYSLNA (przepisy_rezysera.py). generuj_skrypt le détecte
 # AVANT la validation JSON (un refus renvoie le tag seul, pas du JSON).
 
-stosuj_akcenty_fonetyczne: false   # v16.1: OFF — v3 text must keep clean orthography; accents moved to the screen-reader post-production
+stosuj_akcenty_fonetyczne: false   # v16.1: OFF — text for ElevenLabs must keep clean orthography; accents moved to the screen-reader post-production
 
 # v17.9 (Obszar 3b): kod ISO jezyka tresci -> akcenty + naglowki struktury.
 kod_jezyka: "fr"

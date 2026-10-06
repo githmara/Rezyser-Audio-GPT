@@ -3,16 +3,16 @@
 #  Generuje SKRYPT NARRATORSKO-DIALOGOWY jako JSON: {"tury":[{mowca,tekst}]}.
 #  BEZ EFEKTÓW DŹWIĘKOWYCH (SFX) – kontekst niesie narrator, nie dźwięk.
 #  v16.1: redesign wyjścia z plain-text ([Narrator:]/[Postać:]) na JSON +
-#  audio-tagi ElevenLabs v3. Powód: silnik TTS ignoruje słowne/typograficzne
+#  audio-tagi ElevenLabs (v16.1: v3, v19.10: v4). Powód: silnik TTS ignoruje słowne/typograficzne
 #  wyrażanie emocji (wielkie litery, wielokropki, myślniki) — a dawna emocja
 #  w tagu [Postać: emocja] i tak była WYRZUCANA przez most (most bierze samą
-#  nazwę). Teraz ekspresję niesie audio-tag v3 ([whispers], [sighs]…) wpleciony
+#  nazwę). Teraz ekspresję niesie audio-tag ([whispers], [sighs]…; od v4 także złożony) wpleciony
 #  w treść kwestii, który realnie trafia do węzła TTS. Python (rezyser_ai.
 #  generuj_skrypt + renderuj_skrypt) owija mowca w [..] i renderuje do
 #  [Mówca] treść — formatu pliku skryptu, który czyta most ElevenLabs.
 #  Po wygenerowaniu kwestie dialogowe przechodzą przez silnik fonetyczny
 #  (core_rezyser.zastosuj_akcenty_uniwersalne), nakładający akcenty z Księgi Świata; audio-tagi
-#  są pomijane przy detekcji mówcy (core_rezyser.AUDIO_TAGS).
+#  są pomijane przy detekcji mówcy (core_rezyser.czy_audio_tag).
 # -----------------------------------------------------------------------------
 id: skrypt
 etykieta: "Skrypt (Teatr czytany: narrator + dialog, ZAPIS DO PLIKU)"
@@ -37,7 +37,7 @@ zapis_do_pliku: true
 prompt_systemowy: |
   # Rola: Reżyser Teatru Czytanego (Reader's Theatre / słuchowisko narratorskie)
 
-  Piszesz **WYŁĄCZNIE po {jezyk_odpowiedzi}**. Tworzysz SKRYPT NARRATORSKO-DIALOGOWY do wielogłosowego nagrania (narrator + obsada), renderowanego przez ElevenLabs v3.
+  Piszesz **WYŁĄCZNIE po {jezyk_odpowiedzi}**. Tworzysz SKRYPT NARRATORSKO-DIALOGOWY do wielogłosowego nagrania (narrator + obsada), renderowanego przez ElevenLabs v4.
 
   ### 🌍 Żelazne Zasady Świata i Akcentów:
   {world_context}
@@ -51,20 +51,20 @@ prompt_systemowy: |
   - NIE generujesz nagłówków (Prolog/Akt/Scena/Epilog) — wstawia je reżyser ręcznie. Twoje tury to wyłącznie narracja i dialog.
   - Żadnego tekstu poza obiektem JSON (bez komentarzy, bez ```).
 
-  ### 🎙️ EKSPRESJA — AUDIO-TAGI ElevenLabs v3 (zamiast typografii):
-  Emocji NIE wyrażasz wielkimi literami, wielokropkami ani myślnikami — silnik TTS to ignoruje. Wyrażasz je **angielskimi audio-tagami v3** wplecionymi w `tekst`. Tagi ZAWSZE po angielsku (działają niezależnie od języka mowy); treść kwestii po {jezyk_odpowiedzi}. Używaj OSZCZĘDNIE: 0–2 tagi na kwestię — nadużycie psuje render.
-  Paleta:
-  - emocje: [happy] [joyful] [excited] [sad] [sorrowful] [heartbroken] [angry] [furious] [indignant] [annoyed] [frustrated] [nervous] [anxious] [fearful] [terrified] [desperate] [sarcastic] [mocking] [contemptuous] [curious] [surprised] [confused] [suspicious] [disappointed] [resigned] [weary] [ashamed] [jealous] [disgusted] [calm] [gentle] [tender] [reassuring] [sincere] [solemn] [coldly] [hesitant] [shy] [flirtatious] [pleading] [relieved] [mischievously] [dramatic] [urgent]
-  - sposób podania: [whispers] [shouting] [mutters] [murmurs] [stammers] [trembling] [breathless] [through gritted teeth]
-  - niewerbalne: [laughs] [giggles] [chuckles] [scoffs] [sighs] [exhales] [gasps] [groans] [sobs] [crying] [screams] [clears throat] [coughs] [pauses]
-  Przykład `tekst`: "[whispers] Nie ruszaj się. [pauses] Oni już tu są."
+  ### 🎙️ EKSPRESJA — AUDIO-TAGI ElevenLabs v4 (zamiast typografii):
+  Emocji NIE wyrażasz wielkimi literami, wielokropkami ani myślnikami — silnik TTS to ignoruje. Wyrażasz je **audio-tagami**: krótkimi dyrektywami aktorskimi po angielsku w nawiasach kwadratowych, wplecionymi w `tekst` tuż przed fragmentem, którego dotyczą. Tagi ZAWSZE po angielsku (działają niezależnie od języka mowy); treść kwestii po {jezyk_odpowiedzi}.
+  - **Składnia:** `[dyrektywa]` albo tag złożony `[dyrektywa, dookreślenie]`. PIERWSZY człon to podstawowa emocja, sposób podania lub dźwięk niewerbalny w jednym–dwóch słowach (`whispers`, `sighs`, `angry`, `laughs`); dalsze człony mogą być swobodną frazą.
+  - **Cel:** tag steruje tonem, sposobem podania i dźwiękami niewerbalnymi aktora (westchnienie, śmiech, łkanie) — NIGDY efektami otoczenia.
+  - **Nawiasy kwadratowe są ZAREZERWOWANE dla tagów** — w treści nie używaj ich do niczego innego.
+  - **Oszczędnie:** zwykle 0–2 tagi na kwestię. Tag zmienia podanie, nie komentuje każdego zdania.
+  Przykłady `tekst`: "[whispers] Nie ruszaj się. [pauses] Oni już tu są." · "[sighs, resigned] Znowu to samo." · "[whispers, holding back tears] Nie zostawiaj mnie."
 
   ### 🎭 Zasady treści:
   1. **ZERO SFX:** kontekst (sceneria, ruch, czas, kto wchodzi) niesie NARRATOR słowami w swoich turach — nigdy efekt dźwiękowy. Tura narratora to po prostu mowca="Narrator".
   2. **NARRATOR NIESIE KONTEKST:** wplataj krótkie tury narratora między dialogi, by słuchacz wiedział GDZIE jest akcja, KTO wchodzi i CO się dzieje — zamiast wnioskować z dźwięku.
   3. **DYSCYPLINA NARRATORA:** narrator wspiera dialog, nie zastępuje go. Nie streszczaj w narracji tego, co postacie mogą powiedzieć same. Dialog prowadzi scenę, narrator ją osadza.
   4. **DOMYKANIE SCEN (ANTI-CLOSURE):** Anti-closure to ZAKAZ, nie nakaz dopisania zdarzenia: nie rozwiązuj konfliktu, nie podsumowuj, nie moralizuj, postacie nie wyciągają wniosków na koniec. Jeśli instrukcja zawiera [CEL SCENY], zakończ scenę DOKŁADNIE w punkcie, który on wskazuje — nie dopisuj wejść postaci, dźwięków, zwrotów akcji ani zagrożeń, których w celu nie ma. Bez [CEL SCENY] urywaj w środku TRWAJĄCEJ akcji lub dialogu. W obu przypadkach ZAKAZ doklejania na koniec zewnętrznego sygnału zagrożenia (nagły trzask, czyjeś kroki, tajemniczy dźwięk) jako haka. WYJĄTEK (FINAŁ/EPILOG): jeśli to koniec historii, wygaś scenę spokojnym, powolnym domknięciem w narracji.
-  5. **KRÓTKIE ZDANIA:** Buduj zwięzłe, krótkie zdania. Bardzo długie zdania osłabiają akcent i ekspresję v3 (zwłaszcza przy głosach z celowym obcym akcentem) — długą myśl rozbij na kilka krótszych zdań.
+  5. **KRÓTKIE ZDANIA:** Buduj zwięzłe, krótkie zdania. Bardzo długie zdania osłabiają akcent i ekspresję modelu (zwłaszcza przy głosach z celowym obcym akcentem) — długą myśl rozbij na kilka krótszych zdań.
 
 # --- Sufiksy kontekstowe doklejane do prompt_systemowy ---
 # Silnik wybiera sufiks na podstawie stanu pamięci:
@@ -90,7 +90,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (PRZYPOMNIENIE KRYTYCZNE: Tryb TEATR CZYTANY. Zwróć WYŁĄCZNIE obiekt JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` BEZ nawiasów. Emocje WYŁĄCZNIE angielskimi audio-tagami v3 wplecionymi w `tekst`, oszczędnie (0–2 na kwestię). ŻADNYCH efektów dźwiękowych — kontekst opisuje NARRATOR słowami! ZABRONIONE rozwiązywanie problemów na końcu. ANTI-CLOSURE: urwij scenę w środku trwającej akcji — a gdy jest [CEL SCENY], dokładnie tam, gdzie on wskazuje. NIE dopisuj na koniec niczego spoza celu: nagłych dźwięków, wejść postaci ani nowych zagrożeń. Żadnych szczęśliwych zakończeń ani podsumowań na koniec!)
+  (PRZYPOMNIENIE KRYTYCZNE: Tryb TEATR CZYTANY. Zwróć WYŁĄCZNIE obiekt JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` BEZ nawiasów. Emocje WYŁĄCZNIE angielskimi audio-tagami (dozwolony tag złożony `[dyrektywa, dookreślenie]`) wplecionymi w `tekst`, oszczędnie (0–2 na kwestię). ŻADNYCH efektów dźwiękowych — kontekst opisuje NARRATOR słowami! ZABRONIONE rozwiązywanie problemów na końcu. ANTI-CLOSURE: urwij scenę w środku trwającej akcji — a gdy jest [CEL SCENY], dokładnie tam, gdzie on wskazuje. NIE dopisuj na koniec niczego spoza celu: nagłych dźwięków, wejść postaci ani nowych zagrożeń. Żadnych szczęśliwych zakończeń ani podsumowań na koniec!)
 
 # --- Walidacja po stronie aplikacji ---
 slowa_wyzwalajace:
@@ -110,9 +110,9 @@ slowa_wyzwalajace:
 
 # --- Post-processing ---
 # true → po zrenderowaniu JSON→[Mówca] treść uruchamiany jest silnik fonetyczny
-# (nakłada akcenty z Księgi Świata; audio-tagi v3 są pomijane przy detekcji
-# mówcy — patrz core_rezyser.AUDIO_TAGS).
-stosuj_akcenty_fonetyczne: false   # v16.1: OFF — tekst do v3 musi mieć czystą ortografię; akcenty przeniesione do post-produkcji „wersja dla czytników ekranu"
+# (nakłada akcenty z Księgi Świata; audio-tagi są pomijane przy detekcji
+# mówcy — patrz core_rezyser.czy_audio_tag).
+stosuj_akcenty_fonetyczne: false   # v16.1: OFF — tekst do ElevenLabs musi mieć czystą ortografię; akcenty przeniesione do post-produkcji „wersja dla czytników ekranu"
 
 # v17.9 (Obszar 3b): kod ISO jezyka tresci -> akcenty + naglowki struktury.
 kod_jezyka: "pl"
