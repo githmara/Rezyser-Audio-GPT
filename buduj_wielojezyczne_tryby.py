@@ -44,7 +44,7 @@ Architektura (v18.15, Etap 3 roadmapy 18.13):
          bit w bit: tag `[ODRZUCENIE_AI]`, wrappery z `rezyser/baza.yaml`,
          angielskie nazwy pól formularza ElevenReadera (`Genres:`,
          `Target audience:` — po nich szuka `rezyser_ai.waliduj_karte_publikacji`),
-         audio-tagi v3 (`[whispers]`), klucze JSON (`"mowca"`).
+         audio-tagi ElevenLabs (`[whispers]`), klucze JSON (`"mowca"`).
      Kandydatów na kotwice wyłuskują regexy (backticki, nawiasy kwadratowe,
      `"cytat"`, `Nazwa pola:`), a ROZSTRZYGA je ORAKUŁ: literał jest kotwicą,
      jeśli występuje DOSŁOWNIE w ręcznie zrecenzowanej paczce odniesienia (`en`).

@@ -733,7 +733,7 @@ def generuj_burze(
 
 
 # =============================================================================
-# Tryb Skrypt (v16.1): strukturyzowane JSON wyjście (lista tur) + audio-tagi v3
+# Tryb Skrypt (v16.1): strukturyzowane JSON wyjście (lista tur) + audio-tagi ElevenLabs
 # =============================================================================
 # Do v16.0 Skrypt zwracał plain text `[Narrator: ton]` / `[Postać: emocja]` +
 # kwestia. Problem: most ElevenLabs i tak WYRZUCAŁ emocję z tagu (``_wytnij_mowce``
@@ -743,9 +743,9 @@ def generuj_burze(
 # v16.1: LLM zwraca STRUKTURYZOWANY JSON ``{"tury":[{"mowca","tekst"}]}``:
 #   - ``mowca``  — CZYSTA nazwa (bez nawiasów). Python owija ją w ``[...]``.
 #   - ``tekst``  — kwestia JUŻ sformatowana pod TTS: z audio-tagami ElevenLabs
-#                  v3 (``[whispers]``, ``[sighs]``, ``[excited]``…) wplecionymi
+#                  ElevenLabs (``[whispers]``, ``[sighs]``, ``[excited]``…) wplecionymi
 #                  w treść. W przeciwieństwie do dawnej emocji-w-tagu, te tagi
-#                  trafiają do ``tts_node.text`` i realnie sterują renderem v3.
+#                  trafiają do ``tts_node.text`` i realnie sterują renderem modelu ElevenLabs.
 # Nagłówków (Prolog/Akt/Scena/Epilog) LLM NIE generuje — wstawia je reżyser
 # z panelu struktury (``gui_rezyser._on_wstaw_*``). Stąd schema to płaska lista
 # tur, bez pola ``typ``. Wzorzec self-correction (retry+walidacja) jak w
@@ -770,7 +770,7 @@ SCHEMA_SKRYPT: dict[str, Any] = {
                     # Czysta nazwa mówcy / narratora — bez nawiasów, bez emocji.
                     # Python owija w [...] przy renderowaniu (``renderuj_skrypt``).
                     "mowca": {"type": "string", "minLength": 1, "maxLength": 100},
-                    # Kwestia sformatowana pod TTS (może zawierać audio-tagi v3).
+                    # Kwestia sformatowana pod TTS (może zawierać audio-tagi ElevenLabs).
                     "tekst": {"type": "string", "minLength": 1},
                 },
             },
@@ -792,7 +792,7 @@ class TuraSkryptu:
     Attributes:
         mowca: Czysta nazwa mówcy / narratora (bez nawiasów). Renderer owija
                ją w ``[...]``; most ElevenLabs mapuje na voice_id z obsady.
-        tekst: Treść kwestii, opcjonalnie z audio-tagami v3 (``[whispers]`` itd.)
+        tekst: Treść kwestii, opcjonalnie z audio-tagami ElevenLabs (``[whispers]`` itd.)
                wplecionymi przez LLM. Renderer normalizuje ją do JEDNEJ linii.
     """
     mowca: str

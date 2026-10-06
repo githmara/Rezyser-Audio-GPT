@@ -3033,7 +3033,7 @@ class RezyserPanel(wx.Panel):
         try:
             chapters = ce.buduj_chapters(tekst, obsada)
             # v16.1: język projektu = kod ISO 639-1 TREŚCI dla Studio. Naprawia
-            # nagłówki (v3 bez języka bywa na nich niespójny). Od v18.4: kod treści
+            # nagłówki (v3 bez języka bywał na nich niespójny). Od v18.4: kod treści
             # przepisu (`_kod_jezyka_aktywny`), NIE język UI — projekt może być w
             # innym języku niż interfejs (polski UI + fiński audiobook).
             project_id = ce.create_project(
@@ -3055,7 +3055,7 @@ class RezyserPanel(wx.Panel):
         """Generuje ``skrypty/<nazwa>_screen_reader.html`` z bieżącego skryptu.
 
         Tryb Skrypt, niezależny od ElevenLabs. Akcenty z Księgi Świata przez
-        psucie ortografii + ``<span lang>``; audio-tagi v3 usuwane. Czysty tekst
+        psucie ortografii + ``<span lang>``; audio-tagi ElevenLabs usuwane. Czysty tekst
         → generacja synchroniczna (bez wątku tła).
         """
         nazwa = self._txt_file_name.GetValue().strip()

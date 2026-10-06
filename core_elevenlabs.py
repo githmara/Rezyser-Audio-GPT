@@ -29,8 +29,9 @@ end-userowa → docs ``manual``, sekcja „Krok 1 — Obsada głosowa"):
     (zakładka „Explore") dodaje się przyciskiem „Add to My Voices".
   - Gdy głos jest już w „My Voices", przycisk „Copy Voice ID" jest dostępny od
     razu — bez rozwijania „More actions".
-  - By zminimalizować ewentualne regeneracje, najlepiej brać głosy z kolekcji
-    „Best for Eleven v3"; alternatywnie „Voice Design", a dla odważnych IVC/PVC.
+  - Z modelem Eleven v4 (v19.10) działa większość głosów — także tysiące
+    IVC/PVC przetrenowanych już na nowym modelu — więc warto eksperymentować;
+    dedykowane kolekcje v4 są dla części języków punktem wyjścia, nie wymogiem.
 """
 
 from __future__ import annotations
@@ -167,7 +168,13 @@ STUDIO_URL = "https://elevenlabs.io/app/studio"
 #: wplata w treść replik. Spike v16.1 potwierdził, że Studio Projects
 #: (from_content_json) przyjmuje ten model_id. Poprzednio: eleven_multilingual_v2
 #: (29 języków, ZERO tagów audio).
-DEFAULT_MODEL_ID = "eleven_v3"
+#: v19.10: eleven_v4 — wyraźnie lepsza ekspresja i tagi złożone
+#: (``[whispers, holding back tears]``, patrz ``core_rezyser.czy_audio_tag``).
+#: Identyfikator z dokumentacji ElevenLabs (elevenlabs.io/docs/models);
+#: wydanie stabilne, nie alpha. Render v4 w Studio sprawdził maintainer na
+#: własnym projekcie (październik 2026). ``eleven_v4_turbo`` to wariant
+#: czasu rzeczywistego — nie dla Studio.
+DEFAULT_MODEL_ID = "eleven_v4"
 _TIMEOUT_ODCZYT = 30
 _TIMEOUT_PROJEKT = 120
 
@@ -260,10 +267,11 @@ def create_project(
                            ``{"name": str, "blocks": [...]}``, blok to
                            ``{"sub_type": "h1"|"p", "nodes": [tts_node, ...]}``,
                            a tts_node to ``{"voice_id", "text", "type": "tts_node"}``.
-        model_id:          Domyślnie ``eleven_v3`` (:data:`DEFAULT_MODEL_ID`).
+        model_id:          Domyślnie ``eleven_v4`` (:data:`DEFAULT_MODEL_ID`).
         language:          Kod ISO 639-1 języka projektu (np. ``"pl"``, ``"de"``).
-                           Ustawia domyślny język Studio — bez niego v3 bywa
-                           niespójny na liniach nagłówkowych (Prolog/Akt/Scena).
+                           Ustawia domyślny język Studio — bez niego v3 bywał
+                           niespójny na liniach nagłówkowych (Prolog/Akt/Scena);
+                           dla v4 zostawiamy to samo zabezpieczenie.
                            ``None`` → pole pomijane (Studio decyduje samo).
                            UWAGA: dla głosu z celowo obcym akcentem (np. fiński
                            akcent na polskim tekście) ustawienie języka może
@@ -272,8 +280,8 @@ def create_project(
                            volume to meet audiobook standards"). Domyślnie ``True``
                            — wyrównuje głośność do standardu audiobooka i, co
                            ważne, ustawia to przez API, więc reżyser nie musi
-                           otwierać ustawień projektu w webie (gdzie v3-alpha
-                           wyświetla nagabywania o zmianę modelu na Flash/v2).
+                           otwierać ustawień projektu w webie (za czasów
+                           v3-alpha były tam nagabywania o zmianę modelu).
 
     Returns:
         ``project_id`` utworzonego projektu.

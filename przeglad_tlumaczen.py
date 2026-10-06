@@ -516,7 +516,7 @@ more than style here.
     value sets (the 22 genres, `Children`/`Young adult`/`Adult`/`All ages`,
     `Yes`/`No`) — the author copies them into an English-only form and
     `rezyser_ai.waliduj_karte_publikacji` matches on them;
-  * ElevenLabs v3 audio tags (`[whispers]`, `[pauses]`) and the JSON KEYS of the
+  * ElevenLabs audio tags (`[whispers]`, `[pauses]`) and the JSON KEYS of the
     Script mode (`"tury"`, `"mowca"`, `"tekst"`).
   What SHOULD be localized: placeholder values the model is told to write, e.g.
   `[do uzupełnienia ręcznie]` → `[to be filled in manually]`, and the speaker

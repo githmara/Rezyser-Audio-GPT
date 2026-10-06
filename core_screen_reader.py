@@ -1,9 +1,9 @@
 """Generator „wersji dla czytników ekranu" — warstwa logiki (bez GUI).
 
 v16.1. Tło: silnik akcentów (``core_rezyser.zastosuj_akcenty_uniwersalne``) psuje
-ortografię, by zasymulować obcy akcent. Dla ElevenLabs v3 to SZKODLIWE — psuta
+ortografię, by zasymulować obcy akcent. Dla modelu ElevenLabs (v3, v4) to SZKODLIWE — psuta
 ortografia myli detekcję języka modelu — dlatego tryb Skrypt ma
-``stosuj_akcenty_fonetyczne: false`` i do v3 idzie czysty tekst (akcent bierze się
+``stosuj_akcenty_fonetyczne: false`` i do ElevenLabs idzie czysty tekst (akcent bierze się
 z PRÓBKI GŁOSU). Żeby feature psucia ortografii nie przepadł, ten moduł generuje
 OSOBNĄ wersję HTML przeznaczoną dla czytników ekranu (NVDA itp.):
 
@@ -11,12 +11,12 @@ OSOBNĄ wersję HTML przeznaczoną dla czytników ekranu (NVDA itp.):
     PSUTĄ ORTOGRAFIĘ (silnik akcentów) i są owinięte w ``<span lang="<iso>">``,
     co przełącza syntezator NVDA na właściwy język — mocny, akcentowany odczyt;
   * pozostali mówcy i narrator: czysty tekst w języku projektu;
-  * audio-tagi ElevenLabs v3 (``[whispers]``, ``[sighs]``…) są USUWANE — czytnik
+  * audio-tagi ElevenLabs (``[whispers]``, ``[sighs]``…) są USUWANE — czytnik
     ekranu nie ma ich czytać na głos;
   * nagłówki struktury (Prolog/Akt/Scena) → ``<h1>`` / ``<h2>``.
 
 Most ElevenLabs i ten generator to dwa NIEZALEŻNE cele wyjścia tego samego
-skryptu: v3 (audio, akcent z głosu) oraz HTML dla NVDA (akcent z ortografii +
+skryptu: ElevenLabs (audio, akcent z głosu) oraz HTML dla NVDA (akcent z ortografii +
 ``lang``). Wsparcie 9 języków, zgodnie z resztą projektu.
 
 Moduł nie importuje ``wx``. Parser nagłówków/tagów współdzielony z

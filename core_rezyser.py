@@ -369,13 +369,13 @@ _PL_TO_ASCII = {
     "ś": "s", "ć": "c", "ń": "n", "ż": "z", "ź": "z",
 }
 
-# Audio-tagi ElevenLabs v3 (od v16.1). Słowa w nawiasach kwadratowych, które
-# model v3 interpretuje jako dyrektywy aktorskie/dźwiękowe — NIE jako mówcę.
+# Audio-tagi ElevenLabs (od v16.1 v3, od v19.10 v4). Słowa w nawiasach kwadratowych, które
+# model interpretuje jako dyrektywy aktorskie/dźwiękowe — NIE jako mówcę.
 # `zastosuj_akcenty_uniwersalne` pomija je przy detekcji mówcy (inaczej tag
 # typu [whispers] zresetowałby atrybucję akcentu). Tagi są ANGIELSKIE i wspólne
-# dla wszystkich języków projektu (v3 honoruje je niezależnie od języka mowy).
+# dla wszystkich języków projektu (model honoruje je niezależnie od języka mowy).
 #
-# To NIE jest pełna lista (zestaw v3 jest otwarty i zależny od głosu/kontekstu)
+# To NIE jest pełna lista (zestaw tagów jest otwarty i zależny od głosu/kontekstu)
 # — to lista DOMYŚLNIE DOZWOLONA, którą prompt trybu Skrypt (E3,
 # `dictionaries/<kod>/rezyser/tryb_skrypt.yaml`) narzuca modelowi. Tag spoza
 # zbioru nie wywala niczego — most jest na to odporny, a tu degraduje się
@@ -941,7 +941,7 @@ def zastosuj_akcenty_uniwersalne(
             nowe_fragmenty.append(frag)
             m = re.match(r"^\[([^:\]\-]+)", frag)
             nazwa_w_tagu = m.group(1).strip().lower() if m else None
-            # v16.1: audio-tagi ElevenLabs v3 ([whispers], [sighs]…) mają tę samą
+            # v16.1: audio-tagi ElevenLabs ([whispers], [sighs]…) mają tę samą
             # składnię co tag mówcy, ale są wplecione w treść kwestii. NIE wolno
             # ich brać za nowego mówcę — zresetowałyby atrybucję akcentu (dialog
             # po [whispers] straciłby akcent postaci). Zostają passthrough
