@@ -144,6 +144,10 @@ more defects in the code that reads script files, all now fixed:
 in the pre-16.1 form `[Name: …]`. In all nine languages it now says `[Name]` at
 the start of the line.
 
+**Dependency update:** `python-dotenv` 1.2.3 → 1.2.4, a patch release. The
+only call we make, `load_dotenv(path)`, has the same signature as before, and
+the key file still loads.
+
 ### Planned or deferred
 
 - The script file (`[Speaker] text`) is meant for the ElevenLabs bridge, which
