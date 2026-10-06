@@ -428,6 +428,29 @@ def _wytnij_mowce(tag: str) -> str | None:
 _RE_TAG = re.compile(r"\s*(\[[^\]]+\])(.*)")
 
 
+def dopasuj_tag_mowcy(linia: str):
+    """``_RE_TAG.match`` zawężony do TAGU MÓWCY — albo ``None``.
+
+    v19.10 (audyt): linia zaczynająca się znanym audio-tagiem (``[sighs] …``)
+    to kontynuacja kwestii bieżącego mówcy, nie nowa postać „sighs" z pustym
+    głosem w obsadzie. Regułę trzyma ``core_rezyser.czy_tag_mowcy`` — tę samą
+    stosuje silnik akcentów, więc obsada, sieroty, budowa projektu i wersja
+    dla NVDA zgadzają się co do tego, kto mówi. Import leniwy: ten moduł ma
+    działać (System Check) bez ładowania silnika Reżysera.
+    """
+    m = _RE_TAG.match(linia)
+    if m is None:
+        return None
+    import core_rezyser as cr
+    return m if cr.czy_tag_mowcy(m.group(1)[1:-1]) else None
+
+
+def linie_skryptu(tekst: str) -> list[str]:
+    """Linie skryptu bez BOM-u na początku pliku (odczyt ``utf-8`` go zostawia,
+    a ``\\s`` w ``_RE_TAG`` i wzorcach nagłówków go nie łapie — audyt v19.10)."""
+    return tekst.lstrip("\ufeff").splitlines()
+
+
 def wykryj_postacie(tekst: str):
     """Skanuje skrypt → ``(lista_postaci_z_kwestiami, czy_uzyto_narratora)``.
 
@@ -454,12 +477,12 @@ def wykryj_postacie(tekst: str):
         mowca_oryg = None
         ma_tekst = False
 
-    for linia in tekst.splitlines():
+    for linia in linie_skryptu(tekst):
         typ, _ = _klasyfikuj_naglowek(linia)
         if typ is not None:
             _flush()
             continue
-        m = _RE_TAG.match(linia)
+        m = dopasuj_tag_mowcy(linia)
         if m:
             _flush()
             sp = _wytnij_mowce(m.group(1))
@@ -476,7 +499,7 @@ def wykryj_postacie(tekst: str):
 def liczba_rozdzialow(tekst: str) -> int:
     """Liczy markery rozdziałów (Prolog/Akt/Rozdział/…) — do walidacji „≥1 akt"."""
     return sum(
-        1 for linia in tekst.splitlines()
+        1 for linia in linie_skryptu(tekst)
         if _klasyfikuj_naglowek(linia)[0] == "chapter"
     )
 
@@ -520,12 +543,12 @@ def wykryj_sieroty(tekst: str) -> list:
     """
     sieroty: list = []
     mowca_aktywny = False
-    for nr, linia in enumerate(tekst.splitlines(), start=1):
+    for nr, linia in enumerate(linie_skryptu(tekst), start=1):
         typ, _ = _klasyfikuj_naglowek(linia)
         if typ is not None:
             mowca_aktywny = False
             continue
-        m = _RE_TAG.match(linia)
+        m = dopasuj_tag_mowcy(linia)
         if m:
             mowca_aktywny = bool(_wytnij_mowce(m.group(1)))
             continue
@@ -596,7 +619,7 @@ def buduj_chapters(tekst: str, obsada: dict, *, domyslny_tytul: str = "1") -> li
         stan["mowca"] = None
         stan["bufor"] = []
 
-    for linia in tekst.splitlines():
+    for linia in linie_skryptu(tekst):
         typ, czysty = _klasyfikuj_naglowek(linia)
         if typ == "chapter":
             _flush()
@@ -608,7 +631,7 @@ def buduj_chapters(tekst: str, obsada: dict, *, domyslny_tytul: str = "1") -> li
             _flush()
             _h1(czysty)
             continue
-        m = _RE_TAG.match(linia)
+        m = dopasuj_tag_mowcy(linia)
         if m:
             _flush()
             sp = _wytnij_mowce(m.group(1))

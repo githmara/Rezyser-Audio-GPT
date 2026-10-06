@@ -431,6 +431,23 @@ def czy_audio_tag(tresc: str) -> bool:
     )
 
 
+def czy_tag_mowcy(tresc: str) -> bool:
+    """Czy nawias ``[...]`` stojący NA POCZĄTKU LINII to tag mówcy.
+
+    Jedna reguła dla silnika akcentów i wszystkich parserów mostu
+    (``core_elevenlabs.dopasuj_tag_mowcy``), żeby obsada, sieroty, budowa
+    projektu i wersja dla NVDA nie rozjeżdżały się co do tego, kto mówi.
+    Dwukropek rozstrzyga zawsze na korzyść mówcy — stary format
+    ``[Imię: emocja, emocja]`` ma w części emocji słowa z :data:`AUDIO_TAGS`
+    (audyt v19.10). Bez dwukropka mówcą jest wszystko, co nie jest znanym
+    audio-tagiem (linia zaczynająca się od ``[sighs]`` to kontynuacja kwestii).
+
+    Args:
+        tresc: Zawartość nawiasu BEZ ``[`` i ``]``.
+    """
+    return ":" in tresc or not czy_audio_tag(tresc)
+
+
 # =============================================================================
 # Rekoncyliacja narracji z dysku (v15.5) — wolne funkcje, czysto-Pythonowe,
 # w pełni testowalne bez I/O i bez wxPython.
@@ -957,25 +974,41 @@ def zastosuj_akcenty_uniwersalne(
             # (dopisane wyżej), a `current_speaker` się nie zmienia. Most
             # (`core_elevenlabs`) jest na to odporny inaczej — parsuje liniowo,
             # więc audio-tag w group(2) nigdy nie jest re-skanowany.
-            # v19.10: pełna treść nawiasu, nie `nazwa_w_tagu` — regex mówcy
-            # tnie na `-`, a tag złożony v4 ma przecinki (`czy_audio_tag`).
-            # Słownik zostaje już tylko dla linii zaczynającej się tagiem
-            # (zgodność ze starymi, ręcznie pisanymi plikami).
-            if czy_audio_tag(frag[1:-1]):
+            # v19.10: decyduje `czy_tag_mowcy` na pełnej treści nawiasu — ta
+            # sama reguła co parsery mostu (`core_elevenlabs.dopasuj_tag_mowcy`).
+            # Dwukropek = mówca (`[Ewa: nervous, tired]`), bez niego znany
+            # audio-tag na początku linii to kontynuacja kwestii (stare pliki).
+            if not czy_tag_mowcy(frag[1:-1]):
                 continue
             current_speaker = nazwa_w_tagu
         else:
-            dialog = frag
-            koniec = frag.rstrip(" \t")
+            # BOM na początku pliku (odczyt `utf-8`) nie jest treścią linii —
+            # inaczej pierwszy tag mówcy wypadałby „w środku linii" (audyt v19.10).
+            koniec = frag.rstrip(" \t").lstrip("\ufeff")
             if koniec:
                 na_poczatku_linii = koniec.endswith("\n")
-            if current_speaker and dialog.strip():
+            dopasowane_dane = None
+            if current_speaker and frag.strip():
                 dopasowane_dane = next(
                     (d for k, d in akcenty_map.items()
                      if k in current_speaker or current_speaker in k),
                     None,
                 )
-                if dopasowane_dane:
+            if not dopasowane_dane:
+                nowe_fragmenty.append(frag)
+                continue
+            # Fragment sięga do następnego nawiasu, więc może objąć nagłówek
+            # (`Scena 2`) stojący między kwestiami. Nagłówek kończy kwestię jak
+            # w moście (`buduj_chapters` zeruje mówcę) i NIE dostaje akcentu —
+            # wcześniej wychodziło „Scena dva" (audyt v19.10).
+            import core_elevenlabs as _ce   # leniwie: ce nie importuje nas na górze
+            linie = frag.splitlines(keepends=True)
+            for i, linia in enumerate(linie):
+                if i > 0 and _ce._klasyfikuj_naglowek(linia.rstrip("\r\n"))[0]:
+                    current_speaker = None
+                    nowe_fragmenty.extend(linie[i:])
+                    break
+                if linia.strip():
                     # Dynamiczny dispatch (v17.5): reguły czytamy z YAML-a
                     # akcentu w języku projektu, na bieżąco. Nazwa w mapie jest
                     # już KANONICZNYM `id` (v19.1 + v19.3 — parser Księgi nie
@@ -985,10 +1018,10 @@ def zastosuj_akcenty_uniwersalne(
                     # i natywnych `zastosuj_reguly_fonetyczne` dostawałoby
                     # nazwę, dla której `wariant_po_id` zwraca pustkę — czyli
                     # akcent „nałożony" bez ani jednej reguły, w ciszy.
-                    dialog = zastosuj_reguly_fonetyczne(
-                        dialog, dopasowane_dane["nazwa"], jezyk_projektu
+                    linia = zastosuj_reguly_fonetyczne(
+                        linia, dopasowane_dane["nazwa"], jezyk_projektu
                     )
-            nowe_fragmenty.append(dialog)
+                nowe_fragmenty.append(linia)
 
     return "".join(nowe_fragmenty)
 

@@ -123,6 +123,68 @@ def test_tag_zlozony_nie_resetuje_akcentu_mowcy():
     ), wynik
 
 
+# --- Audyt v19.10: cztery defekty dowiedzione wykonaniem ---------------------
+
+import core_elevenlabs as ce
+
+LORE_MAREK = "[Marek] - ma akcent francuski\n"
+
+
+def test_stary_tag_z_emocjami_po_dwukropku_to_mowca():
+    """F1: `[Ewa: nervous, tired]` — `tired` jest w AUDIO_TAGS, ale dwukropek
+    rozstrzyga: to mowca. Do poprawki Ewa dostawala akcent Marka."""
+    wynik = cr.zastosuj_akcenty_uniwersalne(
+        "[Marek] Wielka szansa.\n[Ewa: nervous, tired] Wielka szansa.\n",
+        LORE_MAREK, "pl",
+    )
+    assert wynik.endswith("[Ewa: nervous, tired] Wielka szansa.\n"), wynik
+    html = csr.generuj_html(
+        "[Marek] Wielka szansa.\n[Ewa: nervous, tired] Wielka szansa.\n",
+        LORE_MAREK, jezyk_projektu="pl",
+    )
+    assert "<strong>Ewa:</strong> Wielka szansa.</p>" in html, html
+
+
+SKRYPT_KONTYNUACJI = (
+    "[Marek] Wielka szansa.\n"
+    "[sighs] Wielka szansa. [softly] Dobrze.\n"
+    "Dalej mowi Marek [whispers] tak.\n"
+)
+
+
+def test_linia_od_audio_tagu_to_kontynuacja_we_wszystkich_parserach():
+    """F2: obsada, sieroty, most i HTML zgadzaja sie, ze `[sighs]` na poczatku
+    linii nie jest postacia."""
+    assert ce.wykryj_postacie(SKRYPT_KONTYNUACJI) == (["Marek"], False)
+    assert ce.wykryj_sieroty(SKRYPT_KONTYNUACJI) == []
+    bloki = ce.buduj_chapters(SKRYPT_KONTYNUACJI, {"marek": "V_M"})[0]["blocks"]
+    assert [(b["nodes"][0]["voice_id"]) for b in bloki] == ["V_M"], bloki
+    html = csr.generuj_html(SKRYPT_KONTYNUACJI, LORE_MAREK, jezyk_projektu="pl")
+    assert "sighs" not in html and "[" not in html, html
+    assert html.count('<span lang="fr">') == 3, html
+
+
+def test_naglowek_po_kwestii_nie_dostaje_akcentu():
+    """F3: `Scena 2` po kwestii Marka wychodzilo jako `Scena dva`."""
+    html = csr.generuj_html(
+        "Akt 1\n[Marek] Wielka szansa.\nScena 2\n[Ewa] Hej.\n",
+        LORE_MAREK, jezyk_projektu="pl",
+    )
+    assert "<h2>Scena 2</h2>" in html, html
+    assert '<strong>Marek:</strong> <span lang="fr">' in html, html
+
+
+def test_bom_nie_blokuje_akcentu_ani_mostu():
+    """F4: BOM z odczytu `utf-8` przesuwal pierwszy tag „w srodek linii"."""
+    bom = chr(0xFEFF)
+    bez = cr.zastosuj_akcenty_uniwersalne("[Marek] Wielka szansa.\n", LORE_MAREK, "pl")
+    z = cr.zastosuj_akcenty_uniwersalne(bom + "[Marek] Wielka szansa.\n", LORE_MAREK, "pl")
+    assert z == bom + bez, (z, bez)
+    assert ce.wykryj_postacie(bom + "[Marek] Hej.\n") == (["Marek"], False)
+    html = csr.generuj_html(bom + "[Marek] Wielka szansa.\n", LORE_MAREK, jezyk_projektu="pl")
+    assert "<strong>Marek:</strong>" in html, html
+
+
 # Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
 # raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
 # więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były

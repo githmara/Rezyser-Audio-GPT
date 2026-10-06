@@ -143,27 +143,38 @@ def generuj_html(
     corrupted = cr.zastosuj_akcenty_uniwersalne(tekst, lore_text, jezyk_projektu)
 
     body: list[str] = []
-    for linia in corrupted.splitlines():
+    iso_biezacy: str | None = None   # akcent mówcy, którego kwestię kontynuujemy
+    for linia in ce.linie_skryptu(corrupted):
         typ, czysty = ce._klasyfikuj_naglowek(linia)
         if typ == "chapter":
             body.append(f"  <h1>{_html.escape(czysty)}</h1>")
+            iso_biezacy = None
             continue
         if typ == "scene":
             body.append(f"  <h2>{_html.escape(czysty)}</h2>")
+            iso_biezacy = None
             continue
-        m = ce._RE_TAG.match(linia)
+        m = ce.dopasuj_tag_mowcy(linia)
         if not m:
-            if linia.strip():
-                body.append(f"  <p>{_html.escape(linia.strip())}</p>")
+            # v19.10 (audyt): linia kontynuacji — także zaczynająca się od
+            # audio-tagu — dostaje to samo co kwestia: bez tagów (NVDA nie
+            # czyta ich na głos) i w `lang` mówcy, którego kontynuuje.
+            dialog = _usun_audio_tagi(linia)
+            if dialog:
+                dialog_html = _html.escape(dialog)
+                if iso_biezacy:
+                    dialog_html = f'<span lang="{iso_biezacy}">{dialog_html}</span>'
+                body.append(f"  <p>{dialog_html}</p>")
             continue
         mowca = (ce._wytnij_mowce(m.group(1)) or "").strip()
+        iso_biezacy = (_iso_dla_mowcy(mowca.lower(), mapa, jezyk_projektu)
+                       if mowca else None)
         dialog = _usun_audio_tagi(m.group(2))
         if not mowca or not dialog:
             continue
-        iso = _iso_dla_mowcy(mowca.lower(), mapa, jezyk_projektu)
         dialog_html = _html.escape(dialog)
-        if iso:
-            dialog_html = f'<span lang="{iso}">{dialog_html}</span>'
+        if iso_biezacy:
+            dialog_html = f'<span lang="{iso_biezacy}">{dialog_html}</span>'
         body.append(
             f"  <p><strong>{_html.escape(mowca)}:</strong> {dialog_html}</p>"
         )

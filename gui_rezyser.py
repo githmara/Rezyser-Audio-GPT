@@ -3075,7 +3075,9 @@ class RezyserPanel(wx.Panel):
             )
             return
         try:
-            with open(sciezka_txt, "r", encoding="utf-8") as fh:
+            # `utf-8-sig`: plik zapisany Notatnikiem z BOM-em nie może
+            # przesunąć pierwszego tagu mówcy „w środek linii" (audyt v19.10).
+            with open(sciezka_txt, "r", encoding="utf-8-sig") as fh:
                 tekst = fh.read()
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
