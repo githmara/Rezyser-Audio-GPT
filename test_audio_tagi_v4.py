@@ -58,8 +58,52 @@ def test_czytnik_ekranu_usuwa_tag_zlozony():
     assert wynik == "Nie odchodz. Prosze.", wynik
 
 
-def test_czytnik_ekranu_zostawia_nawias_bez_znanego_czlonu():
-    assert csr._usun_audio_tagi("Patrz [tutaj].") == "Patrz [tutaj]."
+# Tagi z zywej proby Sonneta na prompcie v4 (helsinki_story, 2026-10-06):
+# 14 z 18 bylo spoza `AUDIO_TAGS`. Rozpoznanie idzie po POZYCJI, nie slowniku.
+TAGI_Z_PROBY = [
+    "softly", "firmly", "awkwardly", "flustered", "barely audible",
+    "voice thick", "faint smile", "a short, bitter laugh",
+    "stiffly, but warmer", "clearing his throat, earnest",
+]
+
+
+@pytest.mark.parametrize("tag", TAGI_Z_PROBY)
+def test_czytnik_ekranu_usuwa_tag_spoza_slownika(tag):
+    wynik = csr._usun_audio_tagi(f"[{tag}] Jutro tam pojde.")
+    assert wynik == "Jutro tam pojde.", wynik
+
+
+def test_html_dla_nvda_bez_tagow_z_proby():
+    skrypt = "".join(
+        f"[Hans] [{tag}] Kwestia {i}.\n" for i, tag in enumerate(TAGI_Z_PROBY)
+    )
+    html = csr.generuj_html(skrypt, "", jezyk_projektu="pl")
+    for tag in TAGI_Z_PROBY:
+        assert f"[{tag}]" not in html, tag
+    assert html.count("<strong>Hans:</strong>") == len(TAGI_Z_PROBY)
+
+
+@pytest.mark.parametrize("tag", TAGI_Z_PROBY)
+def test_tag_spoza_slownika_w_srodku_nie_resetuje_akcentu(tag):
+    lore = "[Marek] - ma akcent francuski\n"
+    wzorzec = cr.zastosuj_akcenty_uniwersalne(
+        "[Marek] Wielka szansa.\n", lore, "pl"
+    )
+    zakcentowane = wzorzec[len("[Marek] "):]
+    wynik = cr.zastosuj_akcenty_uniwersalne(
+        f"[Marek] [{tag}] Wielka szansa.\n", lore, "pl"
+    )
+    assert wynik == f"[Marek] [{tag}] " + zakcentowane, wynik
+
+
+def test_nawias_na_poczatku_kolejnej_linii_to_nowy_mowca():
+    """Druga linia nalezy do Ewy (bez akcentu) — mowca zmienia sie po `\\n`."""
+    lore = "[Marek] - ma akcent francuski\n"
+    wynik = cr.zastosuj_akcenty_uniwersalne(
+        "[Marek] [softly] Wielka szansa.\n  [Ewa] Wielka szansa.\n", lore, "pl"
+    )
+    assert wynik.endswith("  [Ewa] Wielka szansa.\n"), wynik
+    assert not wynik.startswith("[Marek] [softly] Wielka szansa.\n"), wynik
 
 
 def test_tag_zlozony_nie_resetuje_akcentu_mowcy():

@@ -375,12 +375,12 @@ _PL_TO_ASCII = {
 # typu [whispers] zresetowałby atrybucję akcentu). Tagi są ANGIELSKIE i wspólne
 # dla wszystkich języków projektu (model honoruje je niezależnie od języka mowy).
 #
-# To NIE jest pełna lista (zestaw tagów jest otwarty i zależny od głosu/kontekstu)
-# — to lista DOMYŚLNIE DOZWOLONA, którą prompt trybu Skrypt (E3,
-# `dictionaries/<kod>/rezyser/tryb_skrypt.yaml`) narzuca modelowi. Tag spoza
-# zbioru nie wywala niczego — most jest na to odporny, a tu degraduje się
-# najwyżej akcent jednego fragmentu (nie krytyczne). Porównanie po pierwszym
-# tokenie tagu, małymi literami (tak jak parser wyłuskuje mówcę).
+# To NIE jest pełna lista i od v19.10 nie musi nią być: zestaw tagów v4 jest
+# otwarty (`[softly]`, `[voice thick]`), a prompt trybu Skrypt uczy SKŁADNI,
+# nie palety. O tym, czy nawias to tag, decyduje POZYCJA — w środku kwestii
+# zawsze tag (`zastosuj_akcenty_uniwersalne`, `core_screen_reader`). Ten
+# słownik rozstrzyga już tylko nawias na POCZĄTKU linii (stare, ręcznie pisane
+# pliki, gdzie tag stoi bez mówcy) — przez `czy_audio_tag`.
 AUDIO_TAGS: frozenset[str] = frozenset({
     # — emocje / ton (szeroka paleta; prompt Skryptu zaleca głównie tę grupę) —
     "happy", "joyful", "ecstatic", "cheerful", "playful", "amused",
@@ -935,10 +935,19 @@ def zastosuj_akcenty_uniwersalne(
     fragmenty = re.split(r"(\[[^\]]+\])", tekst)
     nowe_fragmenty: list[str] = []
     current_speaker: str | None = None
+    # v19.10: mówcą może być WYŁĄCZNIE nawias na początku linii (format pliku
+    # `[Mówca] treść`, ta sama reguła co liniowy parser mostu). Nawias w środku
+    # kwestii to zawsze audio-tag — v4 ma otwarte słownictwo (`[softly]`,
+    # `[voice thick]`), którego żadna lista nie domknie.
+    na_poczatku_linii = True
 
     for frag in fragmenty:
         if frag.startswith("[") and frag.endswith("]"):
             nowe_fragmenty.append(frag)
+            byl_na_poczatku = na_poczatku_linii
+            na_poczatku_linii = False
+            if not byl_na_poczatku:
+                continue
             m = re.match(r"^\[([^:\]\-]+)", frag)
             nazwa_w_tagu = m.group(1).strip().lower() if m else None
             # v16.1: audio-tagi ElevenLabs ([whispers], [sighs]…) mają tę samą
@@ -950,11 +959,16 @@ def zastosuj_akcenty_uniwersalne(
             # więc audio-tag w group(2) nigdy nie jest re-skanowany.
             # v19.10: pełna treść nawiasu, nie `nazwa_w_tagu` — regex mówcy
             # tnie na `-`, a tag złożony v4 ma przecinki (`czy_audio_tag`).
+            # Słownik zostaje już tylko dla linii zaczynającej się tagiem
+            # (zgodność ze starymi, ręcznie pisanymi plikami).
             if czy_audio_tag(frag[1:-1]):
                 continue
             current_speaker = nazwa_w_tagu
         else:
             dialog = frag
+            koniec = frag.rstrip(" \t")
+            if koniec:
+                na_poczatku_linii = koniec.endswith("\n")
             if current_speaker and dialog.strip():
                 dopasowane_dane = next(
                     (d for k, d in akcenty_map.items()

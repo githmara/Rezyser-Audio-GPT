@@ -44,16 +44,17 @@ _RE_NAWIAS = re.compile(r"\[([^\]]+)\]")
 
 
 def _usun_audio_tagi(dialog: str) -> str:
-    """Usuwa z DIALOGU tokeny ``[audio-tag]`` (z :data:`core_rezyser.AUDIO_TAGS`).
+    """Usuwa z DIALOGU wszystkie tokeny ``[...]`` — to audio-tagi.
 
-    Działa na treści JUŻ po wycięciu tagu mówcy, więc każdy ``[...]`` to
-    kandydat na audio-tag. Tokeny spoza ``AUDIO_TAGS`` zostają (np. gdyby autor
-    wpisał coś w nawiasach celowo). Scala powstałe podwójne spacje.
+    Działa na treści JUŻ po wycięciu tagu mówcy, a nawiasy kwadratowe w treści
+    kwestii są zarezerwowane dla audio-tagów (ElevenLabs v4 + prompt trybu
+    Skrypt). v19.10: rozpoznanie po POZYCJI, nie po słowniku — do v19.9
+    usuwane były tylko tokeny z :data:`core_rezyser.AUDIO_TAGS`, a żywa próba
+    na v4 dała 14 z 18 tagów spoza listy (`[softly]`, `[voice thick]`,
+    `[stiffly, but warmer]`), które NVDA czytałby na głos. Scala powstałe
+    podwójne spacje.
     """
-    def repl(m: re.Match) -> str:
-        return "" if cr.czy_audio_tag(m.group(1)) else m.group(0)
-
-    bez = _RE_NAWIAS.sub(repl, dialog)
+    bez = _RE_NAWIAS.sub("", dialog)
     return re.sub(r"[ \t]{2,}", " ", bez).strip()
 
 
