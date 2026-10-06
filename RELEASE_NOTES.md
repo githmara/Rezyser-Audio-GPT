@@ -94,6 +94,72 @@
 
 ---
 
+## 19.10.0 — minor release
+
+### What's new
+
+**The ElevenLabs bridge now renders with Eleven v4.** New Studio projects are
+created on `eleven_v4`, the new expressive model from ElevenLabs. It is a stable
+release, not an alpha, so the manual no longer has the "alpha phase" section
+about crackling lines and prompts to switch models. Most voices work with v4,
+including thousands of IVC and PVC clones already retrained on it. The manual
+now encourages you to experiment instead of pointing to the "Best for Eleven v3"
+collection.
+
+**Script mode teaches the syntax of audio tags instead of a fixed list.** v4
+understands compound, free-form directions such as
+`[whispers, holding back tears]` or `[stiffly, but warmer]`. In all nine packs
+the prompt no longer lists the 74 v3 tags. Instead it explains:
+
+- the syntax: a core emotion, delivery or non-verbal sound comes first, then an
+  optional free phrase;
+- the purpose: tags shape the performer's voice and never add ambient effects;
+- that square brackets inside a line are reserved for tags.
+
+It also gives three examples. A live run on Sonnet 5.5 continued a published
+play. It used at most one tag per line, and 5 of its 18 tags were compound.
+
+**Audio tags are now recognised by position, not by a word list.** In the same
+live run, 14 tags were not on the old list (`[softly]`, `[voice thick]` and
+others). The screen-reader version would have read all of them aloud, and the
+accent engine would have treated them as new speakers. Now a bracket at the
+start of a line is a speaker, and every bracket inside a line is an audio tag,
+so the screen-reader HTML removes them all.
+
+Before the release, an audit proved every finding by running it. It found four
+more defects in the code that reads script files, all now fixed:
+
+- An old-style speaker tag with emotions after a colon, such as
+  `[Ewa: nervous, tired]`, is read as a speaker again. Before the fix, Ewa got
+  the previous speaker's accent.
+- A line that starts with a known audio tag now continues the current speaker,
+  and the cast list, the orphan check, the Studio project and the screen-reader
+  version all agree on this. Before, such a line created a character called
+  "sighs" with no voice.
+- A scene header right after a line of dialogue no longer gets that speaker's
+  accent. Before, "Scena 2" came out as "Scena dva".
+- A byte order mark at the start of the file no longer hides the first speaker.
+
+**Manual fix.** The paragraph about the format guard still showed speaker tags
+in the pre-16.1 form `[Name: …]`. In all nine languages it now says `[Name]` at
+the start of the line.
+
+### Planned or deferred
+
+- The script file (`[Speaker] text`) is meant for the ElevenLabs bridge, which
+  removes speaker tags before it sends the text. Do not import it into
+  ElevenReader as raw text: v4 reserves square brackets for audio tags, so
+  ElevenReader would read `[Narrator]` as a direction.
+- `eleven_v4_turbo`, the real-time variant, is not used. Studio renders projects
+  offline, so lower latency does not help.
+- The manual no longer says "over 70 languages", because the number of languages
+  v4 supports has not been checked. The maintainer's own v4 test used a Polish
+  project.
+- `elevenlabs` 2.69.0 and `markdown` 3.11 are still held one step below
+  (`elevenlabs<2.69`, `markdown<3.11`); see 19.8.1.
+
+---
+
 ## 19.9.0 — minor release
 
 ### What's new
