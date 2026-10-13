@@ -8,6 +8,11 @@ DOWOLNY endpoint zgodny z OpenAI (`base_url` + klucz + nazwa modelu) — OpenRou
 Cerebras, Fireworks, DeepSeek, Groq, endpoint OpenAI-compat Gemini, lokalne Ollama —
 JEDNĄ ścieżką kodu, bez utrzymywania osobnej integracji per provider.
 
+Od v19.11 OpenRouter ma WŁASNĄ gałąź (``LLM_PROVIDER=openrouter``): ta sama drabina
+co compat, ale stały adres, osobny klucz ``OPENROUTER_API_KEY``, mapowanie modelu
+z przepisu (``claude-sonnet-5-5`` → ``anthropic/claude-sonnet-5.5``) i schemat JSON
+przez ``response_format``. Z tej gałęzi korzysta też fallback autotłumaczy.
+
 Zasada: **Anthropic / Claude = domyślny, rekomendowany filar jakości** (prompty są pod
 niego dostrojone). OpenAI-compat = opcja zaawansowana (bring-your-own-endpoint); inne
 modele mogą dać niższą jakość — to świadomy wybór reżysera (koszt↔jakość).
@@ -30,10 +35,18 @@ from typing import Any
 # Identyfikatory providerów (wartość pola `LLM_PROVIDER` w golden_key.env).
 PROVIDER_ANTHROPIC = "anthropic"
 PROVIDER_OPENAI_COMPAT = "openai_compat"
+PROVIDER_OPENROUTER = "openrouter"
+PROVIDERZY = (PROVIDER_ANTHROPIC, PROVIDER_OPENAI_COMPAT, PROVIDER_OPENROUTER)
 
 # Brak/niepoprawny `LLM_PROVIDER` → Anthropic (end-user z samym ANTHROPIC_API_KEY
 # nie zauważa żadnej zmiany względem ≤v18.3).
 DOMYSLNY_PROVIDER = PROVIDER_ANTHROPIC
+
+# OpenRouter (v19.11): adres NA SZTYWNO, klucz we WŁASNEJ zmiennej. Zasada przeniesiona
+# z `accessible_text_analyst` v1.7.0: zmienna z kluczem jest przywiązana do jednego
+# hosta, więc `OPENROUTER_API_KEY` nigdy nie poleci pod `LLM_BASE_URL` ani odwrotnie.
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+_HOST_OPENROUTER = "openrouter.ai"
 
 
 # ---------------------------------------------------------------------------
@@ -77,28 +90,104 @@ class BladKontekstuLLM(BladLLM):
     """
 
 
+class BladModeluLLM(BladLLM):
+    """Endpoint nie zna modelu (v19.11) — typowo OpenRouter po migracji silnika.
+
+    Scenariusz, dla którego to istnieje: Anthropic ogłasza nowy model, maintainer
+    przenosi na niego przepisy (``model: claude-…``), a OpenRouter jeszcze go nie
+    wystawił. Odpowiedź to 400 „… is not a valid model ID", czyli TEN SAM kod,
+    którym endpoint zgłasza zły kształt payloadu — bez rozróżnienia drabina
+    w :func:`_wywolaj_openai_compat` przeszłaby wszystkie szczeble z tym samym,
+    nieistniejącym modelem, a użytkownik dostałby surowy, angielski wyjątek
+    z identyfikatorem konta OpenRoutera w treści.
+
+    ``str()`` to już komunikat zlokalizowany (``common.llm_nieznany_model``), bo
+    większość handlerów GUI pokazuje nieznane wyjątki przez ``str(exc)`` — nowy
+    typ nie wymaga więc zmian w żadnym z nich.
+    """
+
+    def __init__(self, model: str, provider: str) -> None:
+        self.model = model
+        self.provider = provider
+        super().__init__(self._komunikat())
+
+    def _komunikat(self) -> str:
+        try:
+            import i18n
+
+            return i18n.t("common.llm_nieznany_model", model=self.model)
+        except Exception:  # noqa: BLE001 — dev-tooling bez paczki GUI też musi coś powiedzieć
+            return (
+                f"The endpoint does not know the model '{self.model}'. If the "
+                "engine was just migrated to a new Claude model, OpenRouter may "
+                "not list it yet — set LLM_MODEL in golden_key.env to a model "
+                "it does list (e.g. anthropic/claude-sonnet-5.5)."
+            )
+
+
 # ---------------------------------------------------------------------------
 # Konfiguracja czytana z golden_key.env (po load_dotenv przez wołającego)
 # ---------------------------------------------------------------------------
+def czy_adres_openroutera(base_url: str) -> bool:
+    """Czy ``LLM_BASE_URL`` wskazuje host OpenRoutera (porównanie po HOŚCIE, nie substringu).
+
+    Substring przepuściłby ``https://openrouter.ai.evil.example/`` — a od wyniku
+    zależy, czy wyślemy tam ``OPENROUTER_API_KEY``.
+    """
+    from urllib.parse import urlparse
+
+    try:
+        host = (urlparse(base_url.strip()).hostname or "").lower()
+    except ValueError:
+        return False
+    return host == _HOST_OPENROUTER or host.endswith("." + _HOST_OPENROUTER)
+
+
+def rozstrzygnij_providera(provider_surowy: str, base_url: str) -> str:
+    """Jedno źródło decyzji „który provider" — dla runtime'u i dla System Check.
+
+    Dwie drogi do ``openrouter`` (decyzja maintainera 2026-10-13):
+      * jawna: ``LLM_PROVIDER=openrouter``;
+      * zgodność wsteczna: ``LLM_PROVIDER=openai_compat`` + ``LLM_BASE_URL`` na
+        hoście OpenRoutera — tak wyglądała każda konfiguracja OpenRoutera sprzed
+        v19.11 (podręcznik podawał ten adres jako przykład). Działa dalej bez
+        edycji pliku, a przy okazji dostaje mapowanie modelu i ``json_schema``.
+
+    Nieznana wartość → cichy fallback do Anthropic (stan ≤v18.3).
+    """
+    provider = (provider_surowy or DOMYSLNY_PROVIDER).strip().lower()
+    if provider not in PROVIDERZY:
+        return DOMYSLNY_PROVIDER
+    if provider == PROVIDER_OPENAI_COMPAT and czy_adres_openroutera(base_url):
+        return PROVIDER_OPENROUTER
+    return provider
+
+
 @dataclass(frozen=True)
 class KonfiguracjaLLM:
     """Migawka konfiguracji LLM z ``golden_key.env``.
 
-    Pola ``base_url``/``model`` mają znaczenie wyłącznie dla ``openai_compat``.
-    W trybie ``anthropic`` model bierze się z YAML przepisu (``claude-sonnet-5-5``).
+    Pola ``base_url``/``model`` mają znaczenie wyłącznie dla ``openai_compat``
+    (``model`` także dla ``openrouter``, gdzie jest OPCJONALNY — patrz
+    :func:`model_dla_openroutera`). W trybie ``anthropic`` model bierze się
+    z YAML przepisu (``claude-sonnet-5-5``).
     """
 
     provider: str = DOMYSLNY_PROVIDER
     anthropic_key: str = ""
     openai_key: str = ""
     base_url: str = ""
-    model: str = ""   # LLM_MODEL — nadpisuje `przepis.model` w trybie compat
+    model: str = ""   # LLM_MODEL — nadpisuje `przepis.model` w trybie compat/openrouter
+    openrouter_key: str = ""
 
     @property
     def kompletna(self) -> bool:
         """Czy konfiguracja wystarcza do zbudowania działającego klienta."""
         if self.provider == PROVIDER_OPENAI_COMPAT:
             return bool(self.openai_key and self.base_url and self.model)
+        if self.provider == PROVIDER_OPENROUTER:
+            # Bez `LLM_MODEL`: model wynika z przepisu (mapowanie id).
+            return bool(self.openrouter_key)
         # Anthropic: ten sam warunek co dawny `_init_api` (`sk-ant-`).
         return bool(self.anthropic_key and self.anthropic_key.startswith("sk-ant-"))
 
@@ -108,17 +197,68 @@ def wczytaj_konfiguracje() -> KonfiguracjaLLM:
 
     Nieznana wartość ``LLM_PROVIDER`` → cichy fallback do Anthropic (bezpieczny
     default, zgodny ze stanem ≤v18.3).
+
+    Klucz OpenRoutera: ``OPENROUTER_API_KEY``. W drodze zgodności wstecznej
+    (``openai_compat`` + adres OpenRoutera, patrz :func:`rozstrzygnij_providera`)
+    stara konfiguracja trzymała go w ``OPENAI_API_KEY`` — bierzemy go stamtąd
+    TYLKO wtedy, gdy dedykowanej zmiennej brak. To nie jest wyciek, przed którym
+    chroni stały adres: użytkownik sam wskazał ten host dla tego klucza.
     """
-    provider = (os.getenv("LLM_PROVIDER", "") or DOMYSLNY_PROVIDER).strip().lower()
-    if provider not in (PROVIDER_ANTHROPIC, PROVIDER_OPENAI_COMPAT):
-        provider = DOMYSLNY_PROVIDER
+    base_url = os.getenv("LLM_BASE_URL", "").strip()
+    surowy = os.getenv("LLM_PROVIDER", "")
+    provider = rozstrzygnij_providera(surowy, base_url)
+    openai_key = os.getenv("OPENAI_API_KEY", "").strip()
+    openrouter_key = os.getenv("OPENROUTER_API_KEY", "").strip()
+    if (provider == PROVIDER_OPENROUTER and not openrouter_key
+            and surowy.strip().lower() == PROVIDER_OPENAI_COMPAT):
+        openrouter_key = openai_key
     return KonfiguracjaLLM(
         provider=provider,
         anthropic_key=os.getenv("ANTHROPIC_API_KEY", "").strip(),
-        openai_key=os.getenv("OPENAI_API_KEY", "").strip(),
-        base_url=os.getenv("LLM_BASE_URL", "").strip(),
+        openai_key=openai_key,
+        base_url=base_url,
         model=os.getenv("LLM_MODEL", "").strip(),
+        openrouter_key=openrouter_key,
     )
+
+
+# Sufiks daty w id Anthropic (`claude-haiku-4-5-20251001`) — OpenRouter go nie zna.
+_SUFIKS_DATY_MODELU = re.compile(r"-\d{8}$")
+# Myślnik MIĘDZY cyframi = separator numeru wersji (`5-5` → `5.5`, `4-5` → `4.5`).
+_MYSLNIK_WERSJI = re.compile(r"(?<=\d)-(?=\d)")
+
+
+def model_dla_openroutera(mdl: str) -> str:
+    """Id modelu z przepisu → id OpenRoutera: ``claude-sonnet-5-5`` → ``anthropic/claude-sonnet-5.5``.
+
+    Przepisy Reżysera (YAML ``model:``) i stałe ``MODEL_*`` zawsze nazywają model
+    Anthropic, więc prefiks ``anthropic/`` jest stały. OpenRouter pisze numer
+    wersji z KROPKĄ i bez sufiksu daty — zweryfikowane na liście
+    ``/api/v1/models`` 2026-10-13 (``claude-fable-5.1``, ``claude-haiku-4.5``,
+    ``claude-opus-4.8``; wersja jednocyfrowa bez zmian: ``claude-sonnet-5``).
+
+    Id zawierające ``/`` jest już identyfikatorem OpenRoutera (np. wpisanym
+    w YAML albo w ``LLM_MODEL``) i przechodzi nietknięte. Model, którego
+    OpenRouter jeszcze nie ma, NIE jest tu wykrywany — wiedzę daje dopiero
+    odpowiedź API (:class:`BladModeluLLM`), lista modeli zmienia się bez nas.
+    """
+    m = (mdl or "").strip()
+    if not m or "/" in m:
+        return m
+    m = _SUFIKS_DATY_MODELU.sub("", m)
+    return "anthropic/" + _MYSLNIK_WERSJI.sub(".", m)
+
+
+def model_natywny(mdl: str) -> str:
+    """Odwrotność :func:`model_dla_openroutera` dla modeli Anthropic (dla baseline'ów).
+
+    Listy :data:`_MODELE_BEZ_TEMPERATURY` i dialektów „bez myślenia" znają nazwy
+    natywne (``claude-sonnet-5-5``), więc decyzja o ``temperature`` na OpenRouterze
+    pyta je o model w tej postaci. Id spoza ``anthropic/`` wraca bez zmian.
+    """
+    if not mdl.startswith("anthropic/"):
+        return mdl
+    return re.sub(r"(?<=\d)\.(?=\d)", "-", mdl[len("anthropic/"):])
 
 
 # ---------------------------------------------------------------------------
@@ -136,6 +276,70 @@ class KlientLLM:
     provider: str
     sdk: Any
     model_override: str = ""
+    # Fallback autotłumaczy (v19.11, WYŁĄCZNIE dev-tooling — runtime GUI go nie
+    # ustawia). Wołane z powodem (`ZAPAS_*`), zwraca klienta OpenRoutera albo
+    # `None` (brak zgody/klucza). Polityka zgody żyje w `tlumacz_bramki`, nie
+    # tu: `core_llm` nie pyta człowieka o nic.
+    zapas: Any = None
+
+    def przelacz_na(self, inny: "KlientLLM") -> None:
+        """Podmienia klienta W MIEJSCU, żeby każdy, kto trzyma referencję, jechał dalej nowym.
+
+        Bracia tłumaczy trzymają klienta w zmiennych lokalnych i listach
+        (``_klient.append(...)``) — nowy obiekt nie dotarłby do nich, mutacja tak.
+        Zapas jest jednorazowy: po przełączeniu nie ma już dokąd uciekać.
+        """
+        self.provider = inny.provider
+        self.sdk = inny.sdk
+        self.model_override = inny.model_override
+        self.zapas = None
+
+
+# Powody, z którymi `KlientLLM.zapas` jest wołany. `klucz` = klucz Anthropic
+# odrzucony (401) — przełączenie AUTOMATYCZNE (decyzja maintainera 2026-10-13);
+# `limit` = 429 albo wyczerpane kredyty w trakcie pracy — przełączenie OPT-IN.
+ZAPAS_KLUCZ = "klucz"
+ZAPAS_LIMIT = "limit"
+
+
+def czy_odrzucony_klucz(exc: Exception) -> bool:
+    """Czy wyjątek to odrzucony klucz API (401, ``AuthenticationError`` w obu SDK)."""
+    if type(exc).__name__ == "AuthenticationError":
+        return True
+    status = getattr(exc, "status_code", None)
+    if status is None:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+    return status == 401
+
+
+def powod_zapasu(exc: Exception) -> str | None:
+    """Czy ten wyjątek uzasadnia fallback — i z jakim powodem (``None`` = nie)."""
+    if czy_odrzucony_klucz(exc):
+        return ZAPAS_KLUCZ
+    if isinstance(exc, BladLimituLLM) or _czy_rate_limit(exc):
+        return ZAPAS_LIMIT
+    return None
+
+
+def przelacz_na_zapas(klient: KlientLLM, exc: Exception) -> bool:
+    """Próbuje przełączyć klienta Anthropic na OpenRoutera po tym wyjątku.
+
+    Publiczne, bo woła je też ``tlumacz_rdzen``, który ma WŁASNĄ ścieżkę
+    przez SDK Anthropic (structured outputs) poza :func:`wywolaj_llm`.
+    """
+    if klient.provider != PROVIDER_ANTHROPIC or klient.zapas is None:
+        return False
+    powod = powod_zapasu(exc)
+    if powod is None:
+        return False
+    nowy = klient.zapas(powod)
+    if nowy is None:
+        # Brak zgody albo brak klucza: nie pytamy przy każdym kolejnym chunku.
+        klient.zapas = None
+        return False
+    klient.przelacz_na(nowy)
+    return True
+
 
 
 def zbuduj_klienta(konfig: KonfiguracjaLLM) -> "KlientLLM | None":
@@ -152,11 +356,27 @@ def zbuduj_klienta(konfig: KonfiguracjaLLM) -> "KlientLLM | None":
             import openai  # noqa: PLC0415
             sdk = openai.OpenAI(api_key=konfig.openai_key, base_url=konfig.base_url)
             return KlientLLM(PROVIDER_OPENAI_COMPAT, sdk, model_override=konfig.model)
+        if konfig.provider == PROVIDER_OPENROUTER:
+            return zbuduj_klienta_openrouter(konfig.openrouter_key, konfig.model)
         import anthropic  # noqa: PLC0415
         sdk = anthropic.Anthropic(api_key=konfig.anthropic_key)
         return KlientLLM(PROVIDER_ANTHROPIC, sdk)
     except Exception:  # noqa: BLE001 — zły klucz/URL/SDK = brak klienta, nie crash startu
         return None
+
+
+def zbuduj_klienta_openrouter(klucz: str, model_override: str = "") -> KlientLLM:
+    """Klient OpenRoutera ze STAŁYM adresem — także dla fallbacku autotłumaczy.
+
+    ``base_url`` podajemy jawnie: SDK ``openai`` samo czyta ``OPENAI_BASE_URL``
+    ze środowiska, a ta zmienna nie może przekierować klucza OpenRoutera gdzie
+    indziej. Rzuca, gdy SDK nie wstanie — :func:`zbuduj_klienta` zamienia to na
+    ``None``, a dev-tooling chce przyczyny.
+    """
+    import openai  # noqa: PLC0415
+
+    sdk = openai.OpenAI(api_key=klucz, base_url=OPENROUTER_BASE_URL)
+    return KlientLLM(PROVIDER_OPENROUTER, sdk, model_override=model_override)
 
 
 # ---------------------------------------------------------------------------
@@ -173,7 +393,49 @@ def _czy_rate_limit(exc: Exception) -> bool:
     status = getattr(exc, "status_code", None)
     if status is None:
         status = getattr(getattr(exc, "response", None), "status_code", None)
-    return status == 429
+    return status == 429 or czy_brak_kredytow(exc)
+
+
+# Wyczerpane kredyty NIE przychodzą jako 429 (v19.11). Anthropic odpowiada 400
+# „Your credit balance is too low to access the Anthropic API", OpenRouter 402
+# „Insufficient credits" / „requires more credits". Bez rozpoznania 400 wpadało
+# w `_czy_zla_struktura` i uruchamiało drabinę degradacji payloadu, której żaden
+# szczebel nie mógł pomóc — a fallback autotłumaczy na OpenRouter, który ma
+# osobne konto, nie dostawał sygnału, na który czeka.
+_FRAZY_BRAKU_KREDYTOW = (
+    "credit balance is too low",
+    "insufficient credits",
+    "requires more credits",
+)
+
+
+def czy_brak_kredytow(exc: Exception) -> bool:
+    """Czy wyjątek to wyczerpane kredyty konta (400 Anthropic / 402 OpenRouter)."""
+    status = getattr(exc, "status_code", None)
+    if status is None:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+    if status == 402:
+        return True
+    tresc = str(exc).lower()
+    return any(fraza in tresc for fraza in _FRAZY_BRAKU_KREDYTOW)
+
+
+# Odpowiedzi „nie znam tego modelu" (v19.11) — zebrane z realnych komunikatów:
+#   OpenRouter (zmierzone 2026-10-13): 400 „anthropic/claude-sonnet-9.9 is not
+#              a valid model ID"
+#   OpenAI:    404 code „model_not_found", „The model `x` does not exist or you
+#              do not have access to it."
+_FRAZY_NIEZNANEGO_MODELU = (
+    "is not a valid model id",
+    "model_not_found",
+    "does not exist or you do not have access",
+)
+
+
+def _czy_nieznany_model(exc: Exception) -> bool:
+    """Czy endpoint odrzucił samą NAZWĘ modelu (patrz :class:`BladModeluLLM`)."""
+    tresc = str(exc).lower()
+    return any(fraza in tresc for fraza in _FRAZY_NIEZNANEGO_MODELU)
 
 
 def _czy_timeout(exc: Exception) -> bool:
@@ -239,6 +501,10 @@ def _czy_zla_struktura(exc: Exception) -> bool:
     :func:`wywolaj_llm` → :class:`BladKontekstuLLM`.
     """
     if _czy_przepelniony_kontekst(exc):
+        return False
+    # v19.11: nieznany model i brak kredytów też przychodzą jako 400, a żadna
+    # degradacja payloadu ich nie naprawi — tak samo jak przepełnienia.
+    if _czy_nieznany_model(exc) or czy_brak_kredytow(exc):
         return False
     if type(exc).__name__ in ("BadRequestError", "UnprocessableEntityError"):
         return True
@@ -1112,7 +1378,28 @@ def _openai_chat(
     choice = resp.choices[0]
     tekst = choice.message.content or ""
     finish = getattr(choice, "finish_reason", None)
-    return tekst, ("max_tokens" if finish == "length" else finish)
+    if finish == "length":
+        return tekst, "max_tokens"
+    # v19.11: Anthropic przez OpenRoutera potrafi zwrócić `content_filter`
+    # z pustą treścią i polem `message.refusal` (zmierzone w analizatorze
+    # 2026-10-13). To ta sama odmowa klasyfikatora, którą natywne API zgłasza
+    # jako `stop_reason="refusal"` — normalizujemy, żeby wołający trzymali JEDEN
+    # warunek (inaczej pusta odpowiedź szłaby jako „błąd struktury").
+    if finish == "content_filter" or (
+            not tekst and getattr(choice.message, "refusal", None)):
+        return tekst, STOP_ODRZUCENIE
+    return tekst, finish
+
+
+# Szczebel `json_schema` odrzucony w tej sesji per (provider, model) — kolejne
+# wywołania zaczynają od `json_object` i nie płacą jałowym 400 (wzorzec
+# `_WORKING_MODE` z `accessible_text_analyst.llm_klient`). Tylko w pamięci:
+# endpoint może zacząć wspierać schemat, a sesja to rozsądny horyzont nauki.
+_BEZ_JSON_SCHEMA: set[tuple[str, str]] = set()
+
+# Nazwa schematu w `response_format.json_schema.name` — stała, bo kompilacja
+# schematu po stronie providera bywa cache'owana bajtowo (jak u Anthropic).
+_NAZWA_SCHEMATU = "odpowiedz"
 
 
 def _wywolaj_openai_compat(
@@ -1125,33 +1412,45 @@ def _wywolaj_openai_compat(
     max_tokens: int,
     temperature: float,
     timeout: float,
+    schema_json: dict | None = None,
+    model_baseline: str = "",
 ) -> tuple[str, str | None]:
-    """Gałąź OpenAI-compatible z payloadem ROL + ``response_format`` + drabiną degradacji.
+    """Gałąź OpenAI-compatible (także OpenRouter) z payloadem ROL + formatem JSON + drabiną degradacji.
 
-    Dwie „zaawansowane" cechy payloadu przywrócone z ery pre-v18 (obie z cichym
-    fallbackiem, bo egzotyczny gateway może ich nie obsłużyć):
+    Trzy „zaawansowane" cechy payloadu (każda z cichym fallbackiem, bo egzotyczny
+    gateway może jej nie obsłużyć):
       * **role** (gdy ``segmenty`` podane): kontekst narracyjny jako ``assistant``,
         retry/korekty języka jako ``system``, instrukcja jako ``user`` — odtwarza
         jakość utraconą przez zwijanie do jednego ``user``.
-      * **response_format** (gdy ``wymusz_json``): ``{"type": "json_object"}`` dla
-        trybów, które WALIDUJĄ JSON (Burza/Skrypt/tura Opowieści). Sygnał jest
-        JAWNY (flaga wołającego), NIE heurystyką „json w prompcie" — ta dawałaby
+      * **json_schema** (v19.11, gdy ``schema_json``): ten sam schemat, który gałąź
+        Anthropic wysyła w ``output_config.format``, tu jako
+        ``response_format={"type": "json_schema", "json_schema": {..., "strict": true}}``.
+        Zmierzone 2026-10-13: OpenRouter przepuszcza go do Claude'a razem
+        z ``anyOf`` na roocie (gałąź odmowy z :func:`schemat_z_dyskryminatorem`).
+        Do v19.10 compat miał tylko ``json_object``, więc kształt odpowiedzi
+        trzymał wyłącznie prompt.
+      * **json_object** (gdy ``wymusz_json`` albo schemat odpadł): sygnał JAWNY
+        (flaga wołającego), NIE heurystyka „json w prompcie" — ta dawałaby
         false-positive np. na /visualize, którego prompt zawiera „Format: czysty
         tekst (nie JSON)".
 
-    Drabina degradacji (najpełniejszy → dotychczasowe zachowanie v18.3): degradujemy
-    NAJPIERW ``response_format`` (najczęściej nieobsługiwany), potem role, aż do
-    płaskiego ``user`` bez formatu. Każdy szczebel niżej po błędzie STRUKTURY
-    (400/422 via :func:`_czy_zla_struktura`). Na OSTATNIM szczeblu błąd leci wyżej;
-    nie-struktura (429/timeout/sieć) leci wyżej NATYCHMIAST (→ :func:`wywolaj_llm`).
+    Drabina degradacji (najpełniejszy → zachowanie v18.3): ``json_schema`` →
+    ``json_object`` → same role → płaski ``user`` bez formatu. Każdy szczebel niżej
+    po błędzie STRUKTURY (400/422 via :func:`_czy_zla_struktura`). Na OSTATNIM
+    szczeblu błąd leci wyżej; nie-struktura (429/timeout/sieć/kontekst/nieznany
+    model) leci wyżej NATYCHMIAST (→ :func:`wywolaj_llm`).
 
-    Po szczeblach KSZTAŁTU idą jeszcze szczeble PARAMETRÓW (v18.9): bez
-    ``temperature`` i z ``max_completion_tokens`` zamiast ``max_tokens``.
-    Gałąź Anthropic miała degradację ``temperature`` od v18.7, compat nie —
-    wszystkie jej szczeble wysyłały te same parametry, więc modele wymagające
-    domyślnego samplingu (rodziny o-*, gpt-5) padały na KAŻDYM z nich surowym,
-    angielskim wyjątkiem, wbrew obietnicy „dowolny endpoint zgodny z OpenAI"
-    z v18.4.
+    Po szczeblach KSZTAŁTU idą szczeble PARAMETRÓW (v18.9): bez ``temperature``
+    i z ``max_completion_tokens`` zamiast ``max_tokens`` (rodziny o-*, gpt-5).
+
+    **``temperature`` degraduje się CELOWANIE (v19.11), jak w gałęzi Anthropic.**
+    Do v19.10 400 o ``temperature`` zdejmowało najpierw FORMAT i role, bo
+    parametry stały na końcu drabiny — na modelu odrzucającym niedomyślną wartość
+    każde wywołanie kończyło jako płaski tekst bez JSON-a. Teraz: decyzja wstępna
+    z baseline'u (:func:`honoruje_temperature` pytane o ``model_baseline``, czyli
+    nazwę natywną — na OpenRouterze ``anthropic/claude-sonnet-5.5`` to
+    ``claude-sonnet-5-5``), a 400 rozpoznane przez :func:`_co_odrzucono` jako
+    ``temperature`` powtarza TEN SAM szczebel bez parametru.
     """
     plaskie: list[dict] = list(messages)
     if system:
@@ -1166,18 +1465,28 @@ def _wywolaj_openai_compat(
                 rola = "user"
             bogate.append({"role": rola, "content": s.get("content", "")})
 
-    rf: dict | None = {"type": "json_object"} if wymusz_json else None
+    klucz_schematu = (klient.provider, mdl)
+    rs: dict | None = None
+    if schema_json is not None and klucz_schematu not in _BEZ_JSON_SCHEMA:
+        rs = {
+            "type": "json_schema",
+            "json_schema": {
+                "name": _NAZWA_SCHEMATU, "strict": True, "schema": schema_json,
+            },
+        }
+    rf: dict | None = (
+        {"type": "json_object"} if (wymusz_json or schema_json is not None) else None
+    )
     glowny = bogate if bogate is not None else plaskie
+    sufiks_rol = "+role" if bogate is not None else ""
 
     # Szczeble KSZTAŁTU: od najpełniejszego do „flat bez formatu" (= v18.3).
-    # Płaski user-only zamyka tę grupę — gwarantuje powrót do dotychczasowego
-    # zachowania. Krotka: (wiadomości, response_format, opis, bez_temperatury,
-    # klucz limitu tokenów).
+    # Krotka: (wiadomości, response_format, opis, bez_temperatury, klucz limitu).
     proby: list[tuple[list[dict], dict | None, str, bool, str]] = []
+    if rs is not None:
+        proby.append((glowny, rs, "json_schema" + sufiks_rol, False, "max_tokens"))
     if rf is not None:
-        proby.append(
-            (glowny, rf, "json" + ("+role" if bogate is not None else ""),
-             False, "max_tokens"))
+        proby.append((glowny, rf, "json" + sufiks_rol, False, "max_tokens"))
     if bogate is not None:
         proby.append((bogate, None, "role", False, "max_tokens"))
     proby.append((plaskie, None, "flat", False, "max_tokens"))
@@ -1189,20 +1498,37 @@ def _wywolaj_openai_compat(
         (plaskie, None, "flat bez temperature + max_completion_tokens",
          True, "max_completion_tokens"))
 
+    bez_temp = not honoruje_temperature(model_baseline or mdl, temperature)
     ostatni = len(proby) - 1
-    for i, (msgs, fmt, opis, bez_temp, klucz_tok) in enumerate(proby):
+    i = 0
+    while i <= ostatni:
+        msgs, fmt, opis, bez_temp_szczebla, klucz_tok = proby[i]
         try:
             return _openai_chat(
                 klient, mdl, msgs, max_tokens, temperature, timeout, fmt,
-                bez_temperatury=bez_temp, klucz_tokenow=klucz_tok,
+                bez_temperatury=bez_temp or bez_temp_szczebla,
+                klucz_tokenow=klucz_tok,
             )
         except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO błąd struktury
-            if i == ostatni or not _czy_zla_struktura(exc):
-                raise  # wyczerpana drabina ALBO 429/timeout/sieć → wyżej
+            if not _czy_zla_struktura(exc):
+                raise  # 429/timeout/sieć/kontekst/nieznany model → wyżej
+            if not (bez_temp or bez_temp_szczebla) and _co_odrzucono(exc) == "temperature":
+                _dev_log(
+                    f"{klient.provider}: model '{mdl}' odrzucił 'temperature' — "
+                    f"powtarzam szczebel '{opis}' bez tego parametru."
+                )
+                bez_temp = True
+                zapamietaj_odrzucenie_temperatury(mdl)
+                continue   # ten sam szczebel, bez `temperature`
+            if i == ostatni:
+                raise  # wyczerpana drabina
+            if fmt is rs and rs is not None:
+                _BEZ_JSON_SCHEMA.add(klucz_schematu)
             _dev_log(
-                f"openai_compat: endpoint odrzucił payload '{opis}' "
+                f"{klient.provider}: endpoint odrzucił payload '{opis}' "
                 f"({type(exc).__name__}) — degraduję do prostszego."
             )
+            i += 1
     raise RuntimeError("unreachable")  # pętla zawsze zwraca lub rzuca
 
 
@@ -1454,12 +1780,13 @@ def wywolaj_llm(
     obsłuży). NIE używamy heurystyki „json w prompcie": /visualize ma prompt
     „czysty tekst (nie JSON)", więc substring dałby false-positive i zepsuł prozę.
 
-    ``schema_json`` (v18.23, TYLKO Anthropic) — schemat structured outputs
-    (``output_config.format``), już okrojony przez :func:`schemat_do_api`. To on
-    zastąpił dawne „Anthropic IGNORUJE ``wymusz_json`` — wymusza JSON promptem":
-    kształt egzekwuje teraz API. ``openai_compat`` go IGNORUJE i zostaje przy
-    ``response_format`` + tolerancyjnym parsowaniu (:func:`napraw_luzny_json`)
-    u wołającego — ten sam wzorzec cichej degradacji, co ``segmenty``.
+    ``schema_json`` (v18.23) — schemat structured outputs, już okrojony przez
+    :func:`schemat_do_api`. Anthropic wysyła go w ``output_config.format``; od
+    v19.11 gałąź compat/OpenRouter wysyła ten sam schemat jako
+    ``response_format`` typu ``json_schema`` (strict) na szczycie drabiny, a gdy
+    endpoint go odrzuci, schodzi do ``json_object`` + tolerancyjnego parsowania
+    (:func:`napraw_luzny_json`) u wołającego — ten sam wzorzec cichej
+    degradacji, co ``segmenty``.
 
     ``slad`` (v18.23, TYLKO Anthropic) — lista, do której dopisujemy metrykę
     każdego wywołania (próba, ``request_id``, ``stop_reason``, tokeny). Wyłącznie
@@ -1468,26 +1795,34 @@ def wywolaj_llm(
 
     W trybie ``openai_compat`` nazwę modelu nadpisuje ``klient.model_override``
     (``LLM_MODEL``) — argument ``model`` (z przepisu YAML) jest wtedy ignorowany.
+    W trybie ``openrouter`` ``LLM_MODEL`` jest OPCJONALNY: bez niego model
+    z przepisu przechodzi przez :func:`model_dla_openroutera`. Endpoint, który
+    modelu nie zna, daje :class:`BladModeluLLM` (zlokalizowany ``str``).
 
     ``temperature`` w gałęzi Anthropic ma degradację (patrz :func:`_wywolaj_anthropic`):
     modele, które odrzucają niedomyślną wartość (Claude Sonnet 5 i nowsze), dostają
     retry bez tego parametru zamiast wywalać wyjątek — patrz [[reguly_architektury]].
 
-    Rate-limit (429) → :class:`BladLimituLLM`, timeout → :class:`BladTimeoutLLM`,
+    Rate-limit (429) i wyczerpane kredyty (400/402, :func:`czy_brak_kredytow`)
+    → :class:`BladLimituLLM`, timeout → :class:`BladTimeoutLLM`,
     przepełnione okno kontekstowe (400 z frazą / 413) → :class:`BladKontekstuLLM`
     (wszystkie dla dowolnego providera). Pozostałe wyjątki SDK propagują natywnie
     (łapie je szeroki ``except`` wołającego).
     """
     if klient.provider == PROVIDER_OPENAI_COMPAT and klient.model_override:
         mdl = klient.model_override
+    elif klient.provider == PROVIDER_OPENROUTER:
+        mdl = klient.model_override or model_dla_openroutera(model)
     else:
         mdl = model
 
     try:
-        if klient.provider == PROVIDER_OPENAI_COMPAT:
+        if klient.provider in (PROVIDER_OPENAI_COMPAT, PROVIDER_OPENROUTER):
             return _wywolaj_openai_compat(
                 klient, mdl, system, messages, segmenty, wymusz_json,
                 max_tokens, temperature, timeout,
+                schema_json=schema_json,
+                model_baseline=model_natywny(mdl),
             )
 
         # Anthropic (domyślny filar jakości) — `segmenty`/`wymusz_json` celowo
@@ -1500,6 +1835,18 @@ def wywolaj_llm(
         )
 
     except Exception as exc:  # noqa: BLE001 — 429/timeout/kontekst opakowujemy; reszta leci dalej
+        if przelacz_na_zapas(klient, exc):
+            # Ten sam request, już przez OpenRoutera. `zapas` jest po
+            # przełączeniu `None`, więc rekurencja ma dokładnie jeden poziom.
+            return wywolaj_llm(
+                klient, model=model, system=system, messages=messages,
+                max_tokens=max_tokens, temperature=temperature, timeout=timeout,
+                segmenty=segmenty, wymusz_json=wymusz_json,
+                thinking_budget=thinking_budget, schema_json=schema_json,
+                slad=slad,
+            )
+        if _czy_nieznany_model(exc):
+            raise BladModeluLLM(mdl, klient.provider) from exc
         if _czy_rate_limit(exc):
             raise BladLimituLLM(str(exc)) from exc
         if _czy_timeout(exc):

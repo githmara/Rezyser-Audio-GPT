@@ -379,8 +379,9 @@ def _wywolaj_rdzen(model, odpowiedzi):
 
     wyslane = []
     sdk = _MockSDK(odpowiedzi, wyslane)
+    # Od v19.11 rdzeń przyjmuje `core_llm.KlientLLM` (zapas na OpenRoutera).
     mapa = tr.wywolaj_llm(
-        sdk, model=model, system="Translate.", nazwa_celu="Suomi", kod="fi",
+        cl.KlientLLM(cl.PROVIDER_ANTHROPIC, sdk), model=model, system="Translate.", nazwa_celu="Suomi", kod="fi",
         pozycje=POZYCJE_FI, max_tokens=1000,
     )
     return mapa, wyslane
@@ -462,7 +463,7 @@ def test_builder_ui_dostal_ten_sam_kontrakt_co_rdzen():
 
     wyslane = []
     sdk = _MockSDK([ODP_TLUMACZENIA], wyslane)
-    mapa = bu.wywolaj_llm(sdk, "claude-sonnet-5", "Suomi", "fi", [(1, "Dom")])
+    mapa = bu.wywolaj_llm(cl.KlientLLM(cl.PROVIDER_ANTHROPIC, sdk), "claude-sonnet-5", "Suomi", "fi", [(1, "Dom")])
     assert mapa == {1: "Talo"}
     assert len(wyslane) == 1 and not cl.temperatura_w_payloadzie(wyslane[0])
 

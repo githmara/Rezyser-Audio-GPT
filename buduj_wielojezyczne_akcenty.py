@@ -1892,6 +1892,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
         "-f", "--finalizuj", action="store_true",
         help="No API: strips the DRAFT banner from accent pairs (after the review), "
              "keeping the content with its manual fixes. Narrow it with `--jezyki`.")
+    tlumacz_rdzen.dodaj_flage_fallbacku(parser)
     return parser.parse_args()
 
 

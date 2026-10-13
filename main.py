@@ -21,6 +21,7 @@ import wx
 import sciezki
 
 import core_elevenlabs
+import core_llm
 import core_poliglota
 import core_updater
 import gui_diagnostyka
@@ -514,8 +515,14 @@ class HomePanel(wx.Panel):
             )
             return
 
-        # Tryb OpenAI-compatible (v18.4) — walidujemy trójkę zamiast klucza Anthropic.
-        if self._czy_tryb_compat(zawartosc):
+        # Provider spoza Anthropic — decyzja z TEJ SAMEJ funkcji, której używa
+        # runtime (`core_llm.rozstrzygnij_providera`), więc System Check nie może
+        # pokazać innego trybu, niż ten, w którym silnik faktycznie ruszy.
+        provider = self._provider(zawartosc)
+        if provider == core_llm.PROVIDER_OPENROUTER:
+            self._sprawdz_openrouter(zawartosc)
+            return
+        if provider == core_llm.PROVIDER_OPENAI_COMPAT:
             self._sprawdz_compat(zawartosc)
             return
 
@@ -555,19 +562,50 @@ class HomePanel(wx.Panel):
         surowa = cls._surowa_wartosc_zmiennej(zawartosc, nazwa)
         return "" if surowa is None else surowa.strip()
 
-    def _czy_tryb_compat(self, zawartosc: str) -> bool:
-        """True, gdy aktywny ``LLM_PROVIDER=openai_compat`` (endpoint OpenAI-compatible)."""
-        return self._wartosc_zmiennej(zawartosc, "LLM_PROVIDER").lower() == "openai_compat"
+    def _provider(self, zawartosc: str) -> str:
+        """Aktywny provider wg ``LLM_PROVIDER`` + ``LLM_BASE_URL`` (v19.11).
+
+        Do v19.10 było tu porównanie z ``openai_compat``; od wprowadzenia gałęzi
+        ``openrouter`` stara konfiguracja compat z adresem OpenRoutera jest
+        OpenRouterem — i musi nim być także tutaj.
+        """
+        return core_llm.rozstrzygnij_providera(
+            self._wartosc_zmiennej(zawartosc, "LLM_PROVIDER"),
+            self._wartosc_zmiennej(zawartosc, "LLM_BASE_URL"),
+        )
+
+    _PLACEHOLDERY_KLUCZA = ("PASTE_YOUR_KEY_HERE", "TUTAJ_WKLEJ_SWOJ_KLUCZ")
+
+    def _sprawdz_openrouter(self, zawartosc: str) -> None:
+        """System Check trybu OpenRouter (v19.11): klucz wymagany, model opcjonalny.
+
+        Klucz: ``OPENROUTER_API_KEY``, a w starej konfiguracji compat — także
+        ``OPENAI_API_KEY`` (lustro :func:`core_llm.wczytaj_konfiguracje`).
+        """
+        klucz = self._wartosc_zmiennej(zawartosc, "OPENROUTER_API_KEY")
+        stara = self._wartosc_zmiennej(zawartosc, "LLM_PROVIDER").lower() == "openai_compat"
+        if not klucz and stara:
+            klucz = self._wartosc_zmiennej(zawartosc, "OPENAI_API_KEY")
+        if not klucz or any(ph in klucz for ph in self._PLACEHOLDERY_KLUCZA):
+            self._set_status(t("home.openrouter_err_brak_klucza"), kind="warning")
+            return
+        model = self._wartosc_zmiennej(zawartosc, "LLM_MODEL")
+        tresc = t("home.openrouter_ok",
+                  model=model or t("home.openrouter_model_z_przepisow"))
+        # Claude przez OpenRoutera to te same modele, pod które strojone są
+        # prompty — notka o jakości dotyczy tylko modelu spoza Anthropic.
+        if model and not model.startswith("anthropic/"):
+            tresc += "\n\n" + t("home.compat_jakosc_info")
+        self._set_status(tresc, kind="ok")
 
     def _sprawdz_compat(self, zawartosc: str) -> None:
         """System Check trybu OpenAI-compatible: ``LLM_BASE_URL`` + ``OPENAI_API_KEY`` + ``LLM_MODEL``."""
         base_url = self._wartosc_zmiennej(zawartosc, "LLM_BASE_URL")
         klucz    = self._wartosc_zmiennej(zawartosc, "OPENAI_API_KEY")
         model    = self._wartosc_zmiennej(zawartosc, "LLM_MODEL")
-        placeholdery = ("PASTE_YOUR_KEY_HERE", "TUTAJ_WKLEJ_SWOJ_KLUCZ")
         kompletny = bool(
             base_url and model and klucz
-            and not any(ph in klucz for ph in placeholdery)
+            and not any(ph in klucz for ph in self._PLACEHOLDERY_KLUCZA)
         )
         if not kompletny:
             self._set_status(t("home.compat_err_niekompletny"), kind="warning")
@@ -725,16 +763,24 @@ class HomePanel(wx.Panel):
                         "(with an underscore, not sk-):\n"
                         "# ELEVENLABS_API_KEY=\n"
                         "\n"
-                        "# --- Advanced (v18.4): use an OpenAI-compatible provider "
-                        "instead of Anthropic ---\n"
+                        "# --- Advanced (v19.11): route the engine through OpenRouter ---\n"
+                        "# Uncomment the first two lines to use the same Claude models through\n"
+                        "# an OpenRouter account (openrouter.ai) instead of an Anthropic key.\n"
+                        "# LLM_MODEL is optional: without it, the Claude model from each recipe\n"
+                        "# is used; with it, the whole engine uses that OpenRouter model id.\n"
+                        "# LLM_PROVIDER=openrouter\n"
+                        "# OPENROUTER_API_KEY=PASTE_YOUR_KEY_HERE\n"
+                        "# LLM_MODEL=anthropic/claude-sonnet-5.5\n"
+                        "\n"
+                        "# --- Advanced (v18.4): use another OpenAI-compatible provider ---\n"
                         "# Uncomment and fill ALL FOUR lines to route the ENTIRE engine to any\n"
-                        "# OpenAI-compatible endpoint (OpenRouter, Groq, Fireworks, local Ollama, …).\n"
+                        "# OpenAI-compatible endpoint (Groq, Fireworks, DeepSeek, local Ollama, …).\n"
                         "# Claude (Anthropic) above stays the recommended quality baseline —\n"
                         "# other models may produce lower quality (a deliberate cost/quality choice).\n"
                         "# LLM_PROVIDER=openai_compat\n"
-                        "# LLM_BASE_URL=https://openrouter.ai/api/v1\n"
+                        "# LLM_BASE_URL=https://api.groq.com/openai/v1\n"
                         "# OPENAI_API_KEY=PASTE_YOUR_KEY_HERE\n"
-                        "# LLM_MODEL=anthropic/claude-sonnet-5\n"
+                        "# LLM_MODEL=model_name_on_that_endpoint\n"
                     )
             except Exception as exc:
                 wx.MessageBox(

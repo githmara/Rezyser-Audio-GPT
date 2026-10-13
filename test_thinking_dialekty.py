@@ -96,8 +96,8 @@ def _rdzen(model, odpowiedzi):
     wyslane = []
     odp = json.dumps({"translations": [{"id": 1, "target": "Talo"}]})
     mapa = tr.wywolaj_llm(
-        _MockSDK([o if isinstance(o, Exception) else odp for o in odpowiedzi],
-                 wyslane),
+        cl.KlientLLM(cl.PROVIDER_ANTHROPIC, _MockSDK(
+            [o if isinstance(o, Exception) else odp for o in odpowiedzi], wyslane)),
         model=model, system="Translate.", nazwa_celu="Suomi", kod="fi",
         pozycje=[(1, "pole", "Dom")], max_tokens=1000,
     )

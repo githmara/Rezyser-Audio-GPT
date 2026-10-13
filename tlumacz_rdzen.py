@@ -35,6 +35,8 @@ byłaby nieaktualna dokładnie w trybie user-data.
 """
 from __future__ import annotations
 
+import argparse
+import dataclasses
 import json
 import os
 import re
@@ -194,24 +196,150 @@ NAZWA_PLIKU_KLUCZA = "golden_key.env"
 # kogo pominąć bez próby, rozstrzyga `core_llm.honoruje_temperature`.
 TEMPERATURA_TLUMACZENIA = 0.0
 
+# Timeout wywołania przez OpenRoutera (v19.11). Ścieżka Anthropic zostaje przy
+# domyślnym timeoucie SDK; `core_llm.wywolaj_llm` wymaga jawnej wartości, a duży
+# chunk tłumaczenia potrafi generować kilka minut.
+TIMEOUT_OPENROUTER = 600.0
 
-def zainicjuj_klienta_anthropic(root: Path) -> Any:
-    """Zwraca klienta `anthropic.Anthropic` z kluczem z `golden_key.env`.
 
-    Structured outputs (`output_config`) są dziś dostępne wyłącznie przez surowe
-    SDK Anthropic, dlatego pięciu braci korzystających z rdzenia (przepisy, akcenty,
-    Opowieści, Poliglota i — od v18.25 — UI) NIE idzie przez `core_llm` i nie
-    honoruje `LLM_PROVIDER`. Koszt jest świadomy, ale od v18.24 przestaje być
-    MILCZĄCY — patrz `tlumacz_bramki.ostrzez_o_kontrakcie_providera`.
+# ---------------------------------------------------------------------------
+# FALLBACK NA OPENROUTERA (v19.11)
+# ---------------------------------------------------------------------------
+# Decyzja maintainera z 2026-10-13, dwa różne momenty, dwie różne polityki:
+#   * START — klucza Anthropic brak albo ma zły format: przełączamy SAMI. Bez
+#     klucza po cichu (to po prostu konfiguracja „tylko OpenRouter"), przy złym
+#     formacie głośno (ktoś coś wkleił i powinien się o tym dowiedzieć). 401 przy
+#     pierwszym wywołaniu to ten sam przypadek, tylko wykryty przez API.
+#   * W TRAKCIE PRACY — 429 albo wyczerpane kredyty: przełączenie jest OPT-IN,
+#     bo OpenRouter to INNE, osobno płatne konto. Pytamy raz; w sesji
+#     nieinteraktywnej zgodę daje wyłącznie flaga `--openrouter-fallback`
+#     (wzorzec `-y` z `tlumacz_bramki._potwierdz_endpoint_obcy`).
+# OpenRouter mówi Chat Completions, a strict `json_schema` przechodzi przez
+# niego do Claude'a (zmierzone 2026-10-13), więc kontrakt `id → target` zostaje
+# wymuszony przez API także po przełączeniu.
+FLAGA_FALLBACKU = "--openrouter-fallback"
+_ZGODA_Z_FLAGI = False
+
+_PLACEHOLDERY_KLUCZA = ("PASTE_YOUR_KEY_HERE", "TUTAJ_WKLEJ_SWOJ_KLUCZ")
+
+
+class _AkcjaZgodyNaFallback(argparse.Action):
+    """`--openrouter-fallback` ustawia zgodę w module już przy parsowaniu.
+
+    Dzięki temu brat potrzebuje JEDNEJ linii (:func:`dodaj_flage_fallbacku`),
+    a nie dwóch, z których drugą łatwo zgubić w kolejnym bracie.
     """
-    try:
-        import anthropic
-    except ImportError as exc:
-        raise SystemExit(
-            "❌ Missing `anthropic` module. Install (project venv):\n"
-            "   .venv/Scripts/pip install anthropic"
-        ) from exc
 
+    def __call__(self, parser, namespace, values, option_string=None):
+        global _ZGODA_Z_FLAGI
+        _ZGODA_Z_FLAGI = True
+        setattr(namespace, self.dest, True)
+
+
+def dodaj_flage_fallbacku(parser: argparse.ArgumentParser) -> None:
+    """Dokłada `--openrouter-fallback` do parsera brata (wspólny tekst pomocy)."""
+    parser.add_argument(
+        FLAGA_FALLBACKU, nargs=0, action=_AkcjaZgodyNaFallback, default=False,
+        help="If Anthropic runs out of credits or hits its rate limit during "
+             "the run, continue through OpenRouter (OPENROUTER_API_KEY) without "
+             "asking. OpenRouter is a separate, separately billed account. "
+             "Without this flag the tool asks once, and a non-interactive "
+             "session stops instead.",
+    )
+
+
+def _klucz_uzyteczny(klucz: str) -> bool:
+    return bool(klucz) and not any(ph in klucz for ph in _PLACEHOLDERY_KLUCZA)
+
+
+def _zapas_openrouter(klucz_or: str):
+    """Polityka zgody dla :attr:`core_llm.KlientLLM.zapas` (wołana raz)."""
+
+    def _zapas(powod: str) -> "cl.KlientLLM | None":
+        if powod == cl.ZAPAS_KLUCZ:
+            print(
+                "⚠️  Anthropic rejected ANTHROPIC_API_KEY (HTTP 401). Switching this\n"
+                "    run to OpenRouter (OPENROUTER_API_KEY) — a separate account,\n"
+                "    billed there. Fix the Anthropic key in `golden_key.env` to\n"
+                "    translate through Anthropic again."
+            )
+            return cl.zbuduj_klienta_openrouter(klucz_or)
+        print(
+            "⚠️  Anthropic stopped answering: out of credits or rate-limited.\n"
+            "    OPENROUTER_API_KEY is configured, so the remaining work can go\n"
+            "    through OpenRouter — a SEPARATE, separately billed account."
+        )
+        if not _ZGODA_Z_FLAGI:
+            try:
+                odp = input("Continue through OpenRouter? (y/n): ").strip().lower()
+            except EOFError:
+                print(
+                    "❌ Non-interactive session — nobody can approve the switch.\n"
+                    f"   Pass {FLAGA_FALLBACKU} to approve it up front."
+                )
+                return None
+            if odp not in ("y", "t"):   # `t` — historyczny alias „tak"
+                return None
+        print("→ Continuing through OpenRouter.")
+        return cl.zbuduj_klienta_openrouter(klucz_or)
+
+    return _zapas
+
+
+def zbuduj_klienta_tlumacza(
+    konfig: "cl.KonfiguracjaLLM", *, honoruj_providera: bool = False,
+) -> "cl.KlientLLM | None":
+    """Klient rodziny tłumaczy: Anthropic z zapasem na OpenRoutera albo sam OpenRouter.
+
+    Args:
+        honoruj_providera: ``True`` tylko u brata od dokumentacji, który
+            honoruje `LLM_PROVIDER` (tłumaczy prozę przez `core_llm`). Wtedy
+            provider inny niż Anthropic dostaje zwykłego klienta z
+            :func:`core_llm.zbuduj_klienta`, bez zapasu.
+
+    Returns:
+        ``None``, gdy nie da się zbudować żadnego klienta — komunikat
+        o brakującej konfiguracji należy do wołającego (każdy brat ma swój).
+    """
+    if honoruj_providera and konfig.provider != cl.PROVIDER_ANTHROPIC:
+        return cl.zbuduj_klienta(konfig)
+    klucz = konfig.anthropic_key
+    klucz_or = konfig.openrouter_key if _klucz_uzyteczny(konfig.openrouter_key) else ""
+    if not _klucz_uzyteczny(klucz):
+        # Cicho: brak klucza Anthropic to po prostu konfiguracja „tylko OpenRouter".
+        return cl.zbuduj_klienta_openrouter(klucz_or) if klucz_or else None
+    if not klucz.startswith("sk-ant-"):
+        if not klucz_or:
+            return None
+        print(
+            "⚠️  ANTHROPIC_API_KEY in `golden_key.env` does not look like an\n"
+            "    Anthropic key (it must start with sk-ant-). Translating through\n"
+            "    OpenRouter (OPENROUTER_API_KEY) instead — a separate account,\n"
+            "    billed there."
+        )
+        return cl.zbuduj_klienta_openrouter(klucz_or)
+    klient = cl.zbuduj_klienta(
+        dataclasses.replace(konfig, provider=cl.PROVIDER_ANTHROPIC))
+    if klient is not None and klucz_or:
+        klient.zapas = _zapas_openrouter(klucz_or)
+    return klient
+
+
+def zainicjuj_klienta_anthropic(root: Path) -> "cl.KlientLLM":
+    """Zwraca klienta rodziny z kluczami z `golden_key.env` (nazwa sprzed v19.11).
+
+    Od v19.11 to :class:`core_llm.KlientLLM`: Anthropic (``.sdk`` =
+    ``anthropic.Anthropic``) z zapasem na OpenRoutera, albo od razu OpenRouter,
+    gdy klucza Anthropic brak lub ma zły format — patrz sekcja wyżej. Nazwę
+    zostawiamy, bo woła ją sześć miejsc w braciach, a domyślnie to nadal jest
+    klient Anthropic.
+
+    Structured outputs: na Anthropic `output_config`, na OpenRouterze strict
+    `json_schema` przez `core_llm` — a mimo to pięciu braci korzystających
+    z rdzenia nadal NIE honoruje `LLM_PROVIDER`: Anthropic jest pierwszym
+    wyborem, OpenRouter wyłącznie zapasem. Komunikat o tym →
+    `tlumacz_bramki.ostrzez_o_kontrakcie_providera`.
+    """
     try:
         from dotenv import load_dotenv
         env_path = root / NAZWA_PLIKU_KLUCZA
@@ -222,14 +350,21 @@ def zainicjuj_klienta_anthropic(root: Path) -> Any:
 
     tlumacz_bramki.ostrzez_o_kontrakcie_providera(honoruje=False)
 
-    klucz = os.environ.get("ANTHROPIC_API_KEY")
-    if not klucz or not klucz.startswith("sk-ant-"):
+    try:
+        klient = zbuduj_klienta_tlumacza(cl.wczytaj_konfiguracje())
+    except ImportError as exc:
         raise SystemExit(
-            "❌ Missing or invalid ANTHROPIC_API_KEY.\n"
+            f"❌ Missing `{exc.name}` module. Install (project venv):\n"
+            "   .venv/Scripts/pip install -r requirements.txt"
+        ) from exc
+    if klient is None:
+        raise SystemExit(
+            "❌ Missing or invalid ANTHROPIC_API_KEY, and no OPENROUTER_API_KEY\n"
+            "   to fall back to.\n"
             f"   Check `{NAZWA_PLIKU_KLUCZA}` in the project directory (the same\n"
             "   file the GUI uses — System Check in Director mode)."
         )
-    return anthropic.Anthropic(api_key=klucz)
+    return klient
 
 
 def wywolaj_llm(
@@ -246,6 +381,7 @@ def wywolaj_llm(
     pola_payloadu: dict[str, Any] | None = None,
     myslenie: bool = False,
     uciecie_mozna_pominac: bool = False,
+    _powtorka_mojibake: bool = False,
 ) -> dict[int, str]:
     """Wysyła jeden chunk `(id, kind, source)`. Zwraca mapę id → target.
 
@@ -366,9 +502,10 @@ def wywolaj_llm(
     # adaptacyjne (`myslenie=True`) nie degraduje się do „bez" — to świadomy
     # wybór wołającego, więc 400 na nim leci wyżej.
     wyprobowane_thinking = [kwargs.get("thinking")]
-    while True:
+    resp = None
+    while klient.provider == cl.PROVIDER_ANTHROPIC:
         try:
-            resp = klient.messages.create(**kwargs)
+            resp = klient.sdk.messages.create(**kwargs)
             break
         except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO rozpoznane 400
             if (cl.temperatura_w_payloadzie(kwargs)
@@ -383,9 +520,33 @@ def wywolaj_llm(
                     wyprobowane_thinking.append(wariant)
                     cl.ustaw_thinking(kwargs, wariant)
                     continue
+            # v19.11: 401 / 429 / brak kredytów → zapas na OpenRoutera (polityka
+            # zgody wyżej). Po przełączeniu pętla się kończy, a ten sam chunk
+            # idzie gałęzią niżej.
+            if cl.przelacz_na_zapas(klient, exc):
+                break
             raise
 
-    if getattr(resp, "stop_reason", None) == "max_tokens":
+    if resp is not None:
+        stop = getattr(resp, "stop_reason", None)
+        surowa = "".join(
+            b.text for b in resp.content if getattr(b, "type", None) == "text"
+        )
+    else:
+        # OpenRouter (zapas albo konfiguracja bez klucza Anthropic). Ten sam
+        # schemat jako strict `json_schema`; `core_llm` schodzi do `json_object`,
+        # gdy model go nie przyjmie, więc tolerancyjna naprawa składni zostaje
+        # pasem bezpieczeństwa. `myslenie` przepada (compat nie ma `thinking`),
+        # a `temperature` decyduje baseline po nazwie natywnej modelu.
+        surowa, stop = cl.wywolaj_llm(
+            klient, model=model, system=system, messages=kwargs["messages"],
+            max_tokens=max_tokens, temperature=TEMPERATURA_TLUMACZENIA,
+            timeout=TIMEOUT_OPENROUTER, wymusz_json=True,
+            schema_json=cl.schemat_do_api(SCHEMA_TLUMACZENIA),
+        )
+        surowa = cl.napraw_luzny_json(surowa)
+
+    if stop == "max_tokens":
         raise SystemExit(
             f"❌ {kod}: the model hit the max_tokens={max_tokens} limit — the "
             f"response is truncated and the JSON incomplete. "
@@ -394,9 +555,6 @@ def wywolaj_llm(
                else " Aborted the ENTIRE run.")
         )
 
-    surowa = "".join(
-        b.text for b in resp.content if getattr(b, "type", None) == "text"
-    )
     try:
         dane = json.loads(surowa)
     except json.JSONDecodeError as exc:
@@ -423,6 +581,34 @@ def wywolaj_llm(
             f"Could not parse a single id→target pair.\n"
             f"First 400 characters of the raw response: {surowa[:400]!r}"
         )
+
+    # BRAMKA MOJIBAKE (v19.11). Złapana w przeglądzie 19.11: `fi` dostał
+    # „sitÃ¤ kÃ¤yttÃ¶Ã¶n" i „â€ž{model}" obok poprawnego „ehkä ole vielä" —
+    # w JEDNEJ wartości, przez Anthropic, przy czystym JSON-ie. Parzystość
+    # markerów i odcisk struktury tego nie widzą (tekst jest poprawnym
+    # Unicode), a ręczny przegląd ma tylko szczęście. Pozycje z mojibake
+    # zamawiamy RAZ jeszcze, same; drugi raz = błąd chunku, nie zapis.
+    zepsute = {i for i, t in mapa.items() if tlumacz_bramki.mojibake(t)}
+    if zepsute:
+        if _powtorka_mojibake:
+            raise RuntimeError(
+                f"{kod}: {len(zepsute)} item(s) came back as mojibake twice "
+                f"(UTF-8 read as cp1252, e.g. "
+                f"{tlumacz_bramki.mojibake(mapa[min(zepsute)])[0]!r}): "
+                f"ids {sorted(zepsute)[:10]}."
+            )
+        print(f"⚠️  {kod}: {len(zepsute)} item(s) came back as mojibake "
+              f"(e.g. {tlumacz_bramki.mojibake(mapa[min(zepsute)])[0]!r}) — "
+              "requesting them once more.")
+        poprawki = wywolaj_llm(
+            klient, model=model, system=system, nazwa_celu=nazwa_celu, kod=kod,
+            pozycje=[p for p in pozycje if p[0] in zepsute],
+            max_tokens=max_tokens, wskazowka_limitu=wskazowka_limitu,
+            kontekst_paczki=kontekst_paczki, pola_payloadu=pola_payloadu,
+            myslenie=myslenie, uciecie_mozna_pominac=uciecie_mozna_pominac,
+            _powtorka_mojibake=True,
+        )
+        mapa.update({i: v for i, v in poprawki.items() if i in zepsute})
     return mapa
 
 

@@ -46,6 +46,7 @@ common:
 # -----------------------------------------------------------------------------
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
+  llm_nieznany_model: "AI-palveluntarjoaja ei tunne mallia „{model}”.\nJos ohjelma siirtyi juuri uuteen Claude-malliin, OpenRouter ei ehkä ole vielä ottanut sitä käyttöön. Kirjoita golden_key.env-tiedostoon rivi LLM_MODEL= sellaisella mallilla, jonka OpenRouter jo tarjoaa (esim. anthropic/claude-sonnet-5.5), ja käynnistä ohjelma uudelleen."
 main:
   menu:
     narzedzia: "&Työkalut"
@@ -202,6 +203,9 @@ home:
   compat_ok: "✅ OpenAI-compatible-kokoonpano havaittu (malli: {model}).\nKaikki moduulit ovat valmiina käyttöön."
   compat_err_niekompletny: "⚠️ OpenAI-compatible-tila on puutteellinen.\nTäytä golden_key.env-tiedostoon kaikki kolme kenttää: LLM_BASE_URL, OPENAI_API_KEY ja LLM_MODEL."
   compat_jakosc_info: ℹ️ Kehotteet on viritetty Claude (Anthropic) -mallille. Muut mallit voivat tuottaa heikomman laadun — tämä on ohjaajan tietoinen valinta (kustannus vs. laatu).
+  openrouter_ok: "✅ OpenRouter-kokoonpano havaittu (malli: {model}).\nKaikki moduulit ovat valmiina käyttöön."
+  openrouter_model_z_przepisow: ohjelman reseptien Claude-mallit
+  openrouter_err_brak_klucza: "⚠️ OpenRouter-tila on puutteellinen.\nKirjoita golden_key.env-tiedostoon rivi OPENROUTER_API_KEY= ja liitä siihen openrouter.ai-palvelusta saatu avain (se alkaa merkeillä sk-or-)."
 rezyser:
   panel_name: "Ääniohjaaja GPT -paneeli"
   heading: "🎬  Ääniohjaaja GPT – Hybridi Luova Studio"

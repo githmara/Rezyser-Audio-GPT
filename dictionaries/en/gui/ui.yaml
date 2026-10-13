@@ -46,6 +46,7 @@ common:
 # -----------------------------------------------------------------------------
 # DIAG – raport pominiętych reguł (gui_diagnostyka.py, od v18.24.2)
 # -----------------------------------------------------------------------------
+  llm_nieznany_model: "The AI provider doesn't recognize the model \"{model}\".\nIf the program has just switched to a new Claude model, OpenRouter may not have made it available yet. Add a line LLM_MODEL= to golden_key.env with a model OpenRouter already supports (e.g. anthropic/claude-sonnet-5.5), and restart the program."
 diag:
   tytul: "Rule Warnings"
   wstep: |-
@@ -282,6 +283,9 @@ home:
   compat_ok: "✅ OpenAI-compatible configuration detected (model: {model}).\nAll modules are ready to use."
   compat_err_niekompletny: "⚠️ OpenAI-compatible mode is incomplete.\nPlease fill in all three fields in golden_key.env: LLM_BASE_URL, OPENAI_API_KEY, and LLM_MODEL."
   compat_jakosc_info: ℹ️ Prompts are fine-tuned for the Claude (Anthropic) model. Other models may produce lower quality results — this is a deliberate director's choice (cost vs. quality).
+  openrouter_ok: "✅ OpenRouter configuration detected (model: {model}).\nAll modules are ready to use."
+  openrouter_model_z_przepisow: Claude models from the program's recipes
+  openrouter_err_brak_klucza: "⚠️ OpenRouter mode is incomplete.\nAdd a line OPENROUTER_API_KEY= to golden_key.env with your key from openrouter.ai (it starts with sk-or-)."
 rezyser:
   panel_name: "Audio Director GPT Panel"
   heading: "🎬  Audio Director GPT – Hybrid Creative Studio"

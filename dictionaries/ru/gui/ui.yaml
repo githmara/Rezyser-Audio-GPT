@@ -46,6 +46,7 @@ common:
 # -----------------------------------------------------------------------------
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
+  llm_nieznany_model: "Поставщик ИИ не знает модель «{model}».\nЕсли программа только что перешла на новую модель Claude, OpenRouter мог ещё не добавить её. Впишите в golden_key.env строку LLM_MODEL= с моделью, которая уже есть в OpenRouter (например, anthropic/claude-sonnet-5.5), и перезапустите программу."
 main:
   menu:
     narzedzia: "&Инструменты"
@@ -202,6 +203,9 @@ home:
   compat_ok: "✅ Обнаружена конфигурация OpenAI-compatible (модель: {model}).\nВсе модули готовы к работе."
   compat_err_niekompletny: "⚠️ Режим OpenAI-compatible настроен не полностью.\nДобавьте в golden_key.env все три поля: LLM_BASE_URL, OPENAI_API_KEY и LLM_MODEL."
   compat_jakosc_info: ℹ️ Промпты оптимизированы под модель Claude (Anthropic). Другие модели могут давать более низкое качество — это осознанный выбор режиссёра (стоимость против качества).
+  openrouter_ok: "✅ Конфигурация OpenRouter обнаружена (модель: {model}).\nВсе модули готовы к работе."
+  openrouter_model_z_przepisow: модели Claude из правил программы
+  openrouter_err_brak_klucza: "⚠️ Режим OpenRouter настроен не полностью.\nВпишите в golden_key.env строку OPENROUTER_API_KEY= с ключом с openrouter.ai (он начинается с sk-or-)."
 rezyser:
   panel_name: "Панель Режиссера Audio GPT"
   heading: "🎬  Режиссер Audio GPT – Гибридная Творческая Студия"

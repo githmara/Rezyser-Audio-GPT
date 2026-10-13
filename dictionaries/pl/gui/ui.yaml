@@ -49,6 +49,10 @@ common:
   plik_nie_istnieje_tytul: "Plik nie istnieje"
   sukces_tytul:          "Sukces"
   informacja_tytul:      "Informacja"
+  # v19.11: dostawca (typowo OpenRouter) nie zna modelu — np. tuż po migracji silnika na nowy model Claude
+  llm_nieznany_model: |-
+    Dostawca AI nie zna modelu „{model}”.
+    Jeśli program przeszedł właśnie na nowy model Claude, OpenRouter mógł jeszcze go nie udostępnić. Wpisz w golden_key.env linię LLM_MODEL= z modelem, który OpenRouter już ma (np. anthropic/claude-sonnet-5.5), i uruchom program ponownie.
 
 # -----------------------------------------------------------------------------
 # DIAG – raport pominiętych reguł (gui_diagnostyka.py, od v18.24.2)
@@ -270,6 +274,14 @@ home:
     Uzupełnij w golden_key.env wszystkie trzy pola: LLM_BASE_URL, OPENAI_API_KEY oraz LLM_MODEL.
   compat_jakosc_info: |-
     ℹ️ Prompty są dostrojone pod model Claude (Anthropic). Inne modele mogą dać niższą jakość — to świadomy wybór reżysera (koszt kontra jakość).
+  # Provider OpenRouter (v19.11) — LLM_PROVIDER=openrouter albo stara konfiguracja openai_compat z adresem openrouter.ai
+  openrouter_ok: |-
+    ✅ Konfiguracja OpenRouter wykryta (model: {model}).
+    Wszystkie moduły są gotowe do pracy.
+  openrouter_model_z_przepisow: "modele Claude z przepisów programu"
+  openrouter_err_brak_klucza: |-
+    ⚠️ Tryb OpenRouter jest niekompletny.
+    Wpisz w golden_key.env linię OPENROUTER_API_KEY= z kluczem z openrouter.ai (zaczyna się od sk-or-).
   # Przyciski akcji panelu startowego
   btn_generate:          "Wygeneruj plik golden_key.env i otwórz edytor tekstu"
   btn_open:              "📝 Otwórz plik golden_key.env w edytorze tekstu"

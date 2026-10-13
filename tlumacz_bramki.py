@@ -160,6 +160,34 @@ def znaki_niewidoczne(tekst: str) -> list[str]:
     return wynik
 
 
+# Mojibake (v19.11): tekst UTF-8 odczytany jako cp1252 — „ä" staje się „Ã¤",
+# „„" staje się „â€ž". Wykrywamy KONSTRUKCYJNIE, nie listą par: ciąg znaków
+# spoza ASCII, który zakodowany w cp1252 daje POPRAWNE UTF-8, jest w praktyce
+# zawsze mojibake. Prawdziwy tekst prawie nigdy nie układa się w taki bajtowy
+# wzór (samotne „ä" to bajt E4 bez kontynuacji), a jedyne realne kolizje —
+# np. niemieckie „ß" tuż przed „“" (DF 93 → U+07D3, NKo) — odsiewa warunek, że
+# zdekodowany znak musi leżeć w zakresach, które mojibake faktycznie produkuje.
+_RE_NIEASCII = re.compile(r"[^\x00-\x7f]{2,}")
+_ZAKRESY_MOJIBAKE = ((0x0080, 0x05FF), (0x2000, 0x20FF))
+
+
+def mojibake(tekst: str) -> list[str]:
+    """Fragmenty wyglądające na mojibake (pusta lista = czysto)."""
+    wynik: list[str] = []
+    for m in _RE_NIEASCII.finditer(tekst):
+        fragment = m.group(0)
+        try:
+            zdekodowany = fragment.encode("cp1252").decode("utf-8")
+        except UnicodeError:
+            continue
+        if zdekodowany != fragment and all(
+            any(od <= ord(z) <= do for od, do in _ZAKRESY_MOJIBAKE)
+            for z in zdekodowany
+        ):
+            wynik.append(fragment)
+    return wynik
+
+
 def stosunek_dlugosci(src: str, tgt: str, *, prog: int = 200) -> float:
     """Iloraz długości tłumaczenia do źródła. ``0.0`` = źródło krótsze niż `prog`.
 
@@ -415,15 +443,41 @@ def wyglada_jak_prompt(tekst: str, sciezka_klucza: str = "") -> bool:
 # `-y/--yes` (builder docsów) pomija wywołanie w całości — kto ją podaje, ten
 # kontrakt już zna.
 PROVIDER_COMPAT = "openai_compat"
+PROVIDER_OPENROUTER = "openrouter"
+_HOST_OPENROUTER = "openrouter.ai"
+
+
+def _adres_openroutera(base_url: str) -> bool:
+    """Lustro `core_llm.czy_adres_openroutera` — tu bez importu silnika (patrz docstring modułu)."""
+    from urllib.parse import urlparse
+
+    try:
+        host = (urlparse(base_url.strip()).hostname or "").lower()
+    except ValueError:
+        return False
+    return host == _HOST_OPENROUTER or host.endswith("." + _HOST_OPENROUTER)
 
 
 def wybrano_endpoint_obcy() -> bool:
-    """Czy środowisko wskazuje endpoint OpenAI-compatible.
+    """Czy środowisko wskazuje endpoint, za który trzeba wziąć odpowiedzialność.
+
+    Do v19.10: każde `LLM_PROVIDER=openai_compat`. Od v19.11 OpenRouter (jawny
+    albo stara konfiguracja compat z jego adresem) z modelem Claude to TEN SAM
+    model, pod który strojone są prompty — pytamy więc tylko wtedy, gdy
+    `LLM_MODEL` wskazuje model spoza `anthropic/`. Lista warunków jest lustrem
+    `core_llm.rozstrzygnij_providera`; test `test_openrouter` pilnuje zgodności.
 
     Wołający ładuje `golden_key.env` PRZED tym wywołaniem (tak samo, jak przed
     odczytem klucza) — moduł jest bez zależności i sam `dotenv` nie dotyka.
     """
-    return os.environ.get("LLM_PROVIDER", "").strip().lower() == PROVIDER_COMPAT
+    provider = os.environ.get("LLM_PROVIDER", "").strip().lower()
+    adres = os.environ.get("LLM_BASE_URL", "")
+    openrouter = provider == PROVIDER_OPENROUTER or (
+        provider == PROVIDER_COMPAT and _adres_openroutera(adres))
+    if openrouter:
+        model = os.environ.get("LLM_MODEL", "").strip()
+        return bool(model) and not model.startswith("anthropic/")
+    return provider == PROVIDER_COMPAT
 
 
 def _potwierdz_endpoint_obcy() -> None:
@@ -461,9 +515,10 @@ def ostrzez_o_kontrakcie_providera(*, honoruje: bool) -> None:
     """
     if not wybrano_endpoint_obcy():
         return
+    wartosc = os.environ.get("LLM_PROVIDER", "").strip()
     if honoruje:
         print(
-            "⚠️  LLM_PROVIDER=openai_compat — this is the ONLY translator in the\n"
+            f"⚠️  LLM_PROVIDER={wartosc} — this is the ONLY translator in the\n"
             "    family that honors the switch. Two things to know BEFORE you\n"
             "    review the draft:\n"
             "      * no structured outputs on this path — the response shape is\n"
@@ -476,10 +531,12 @@ def ostrzez_o_kontrakcie_providera(*, honoruje: bool) -> None:
         _potwierdz_endpoint_obcy()
         return
     print(
-        "⚠️  LLM_PROVIDER=openai_compat is set, but this tool IGNORES it and talks\n"
-        "    to Anthropic directly — so it still needs ANTHROPIC_API_KEY.\n"
+        f"⚠️  LLM_PROVIDER={wartosc} is set, but this tool IGNORES it and talks\n"
+        "    to Anthropic first — ANTHROPIC_API_KEY, with OPENROUTER_API_KEY only\n"
+        "    as a fallback (Claude through OpenRouter, never LLM_MODEL).\n"
         "    Dev-tooling contract: only buduj_wielojezyczne_docs.py honors the\n"
         "    switch, because it translates prose through the runtime engine. The\n"
-        "    other translators exchange item lists whose shape is enforced by\n"
-        "    Anthropic structured outputs, which the compat branch cannot send."
+        "    other translators exchange item lists whose shape must be enforced\n"
+        "    by structured outputs — natively on Anthropic, as a strict\n"
+        "    json_schema on OpenRouter; an arbitrary endpoint gives no such promise."
     )

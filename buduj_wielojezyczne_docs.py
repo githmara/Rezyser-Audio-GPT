@@ -2224,6 +2224,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "`prog_rozdmuchania` in jezyki_docelowe.yaml), the artifacts are "
              "deleted, and the next normal run uses the accepted text.",
     )
+    tlumacz_rdzen.dodaj_flage_fallbacku(parser)
     args = parser.parse_args()
     if args.audyt and (args.klucz or args.skip_existing or args.dry_run
                        or args.finalizuj):
@@ -2329,11 +2330,18 @@ def _zainicjuj_klienta(*, potwierdz: bool = True) -> Any:
     if potwierdz:
         tlumacz_bramki.ostrzez_o_kontrakcie_providera(honoruje=True)
 
-    klient = cl.zbuduj_klienta(cl.wczytaj_konfiguracje())
+    # v19.11: ten sam klient co u braci od rdzenia — Anthropic z zapasem na
+    # OpenRoutera (401/429/brak kredytów) albo od razu OpenRouter, gdy klucza
+    # Anthropic brak lub ma zły format. Jawny `LLM_PROVIDER` wygrywa (ten brat
+    # go honoruje), więc compat/openrouter z pliku idą wprost, bez zapasu.
+    klient = tlumacz_rdzen.zbuduj_klienta_tlumacza(
+        cl.wczytaj_konfiguracje(), honoruj_providera=True)
     if klient is None:
         raise SystemExit(
             "❌ No valid LLM configuration in `golden_key.env`.\n"
             "   Anthropic (default): set ANTHROPIC_API_KEY (sk-ant-…).\n"
+            "   OpenRouter: OPENROUTER_API_KEY (also the fallback when the\n"
+            "   Anthropic key is missing, invalid or out of credits).\n"
             "   OpenAI-compat: LLM_PROVIDER=openai_compat + LLM_BASE_URL\n"
             "   + OPENAI_API_KEY + LLM_MODEL.\n"
             "   The same file the GUI uses (System Check in Director mode)."

@@ -1687,6 +1687,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
         help="No API: strips the DRAFT banner from the chosen files, keeping the "
              "content (including the reviewer's manual fixes) and the translated "
              "author header. This is the right step once the review is accepted.")
+    tlumacz_rdzen.dodaj_flage_fallbacku(parser)
     args = parser.parse_args()
     tryby_lokalne = sum(bool(x) for x in (args.finalizuj, args.tylko_walidacja))
     if tryby_lokalne and (args.skip_existing or args.dry_run):

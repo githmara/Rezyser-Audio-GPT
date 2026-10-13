@@ -46,6 +46,7 @@ common:
 # -----------------------------------------------------------------------------
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
+  llm_nieznany_model: "AI-þjónustuveitandinn þekkir ekki líkanið „{model}“.\nEf forritið var að skipta yfir í nýtt Claude-líkan gæti OpenRouter ekki enn hafa gert það aðgengilegt. Skrifaðu línuna LLM_MODEL= í golden_key.env með líkani sem OpenRouter býður nú þegar (t.d. anthropic/claude-sonnet-5.5) og ræstu forritið aftur."
 main:
   menu:
     narzedzia: "&Verkfæri"
@@ -202,6 +203,9 @@ home:
   compat_ok: "✅ OpenAI-compatible uppsetning greind (líkan: {model}).\nAllar einingar eru tilbúnar til notkunar."
   compat_err_niekompletny: "⚠️ OpenAI-compatible stilling er ófullnægjandi.\nFylltu inn öll þrjú reiti í golden_key.env: LLM_BASE_URL, OPENAI_API_KEY og LLM_MODEL."
   compat_jakosc_info: ℹ️ Kvaðningar eru fínstilltar fyrir Claude líkanið (Anthropic). Önnur líkön geta gefið lægri gæði — þetta er meðvituð ákvörðun leikstjórans (kostnaður á móti gæðum).
+  openrouter_ok: "✅ OpenRouter-stillingar fundust (líkan: {model}).\nAllar einingar eru tilbúnar til notkunar."
+  openrouter_model_z_przepisow: Claude-líkön úr forskriftum forritsins
+  openrouter_err_brak_klucza: "⚠️ OpenRouter-stillingarnar eru ófullkomnar.\nSkrifaðu línuna OPENROUTER_API_KEY= í golden_key.env með lyklinum frá openrouter.ai (hann byrjar á sk-or-)."
 rezyser:
   panel_name: "Hljóðstjóri GPT spjald"
   heading: "🎬  Hljóðstjóri GPT – Blönduð Skapandi Stúdíó"

@@ -840,6 +840,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "Requires that `<kod>/gui/ui.yaml` already exists — full translation first, "
              "then a surgical update of the selected keys.",
     )
+    tlumacz_rdzen.dodaj_flage_fallbacku(parser)
     args = parser.parse_args()
     if args.klucz and args.skip_existing:
         parser.error("--klucz and --skip-existing are mutually exclusive "

@@ -46,6 +46,7 @@ common:
 # -----------------------------------------------------------------------------
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
+  llm_nieznany_model: "Le fournisseur d'IA ne reconnaît pas le modèle « {model} ».\nSi le programme vient de passer à un nouveau modèle Claude, OpenRouter ne l'a peut-être pas encore mis à disposition. Ajoutez dans golden_key.env une ligne LLM_MODEL= avec un modèle déjà proposé par OpenRouter (par ex. anthropic/claude-sonnet-5.5), puis relancez le programme."
 main:
   menu:
     narzedzia: "&Outils"
@@ -202,6 +203,9 @@ home:
   compat_ok: "✅ Configuration OpenAI-compatible détectée (modèle : {model}).\nTous les modules sont prêts à fonctionner."
   compat_err_niekompletny: "⚠️ Le mode OpenAI-compatible est incomplet.\nComplétez les trois champs suivants dans golden_key.env : LLM_BASE_URL, OPENAI_API_KEY et LLM_MODEL."
   compat_jakosc_info: ℹ️ Les prompts sont optimisés pour le modèle Claude (Anthropic). D'autres modèles peuvent produire une qualité moindre — c'est un choix délibéré du réalisateur (coût versus qualité).
+  openrouter_ok: "✅ Configuration OpenRouter détectée (modèle : {model}).\nTous les modules sont prêts à fonctionner."
+  openrouter_model_z_przepisow: modèles Claude issus des recettes du programme
+  openrouter_err_brak_klucza: "⚠️ Le mode OpenRouter est incomplet.\nAjoutez dans golden_key.env une ligne OPENROUTER_API_KEY= avec la clé obtenue sur openrouter.ai (elle commence par sk-or-)."
 rezyser:
   panel_name: "Panneau Réalisateur Audio GPT"
   heading: "🎬  Réalisateur Audio GPT — Studio Créatif Hybride"
