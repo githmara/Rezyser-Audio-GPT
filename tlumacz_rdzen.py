@@ -203,28 +203,36 @@ TIMEOUT_OPENROUTER = 600.0
 
 
 # ---------------------------------------------------------------------------
-# FALLBACK NA OPENROUTERA (v19.11)
+# DWA KONTA: ANTHROPIC ⟷ OPENROUTER, jedno pierwsze, drugie zapasem (v19.11)
 # ---------------------------------------------------------------------------
-# Decyzja maintainera z 2026-10-13, dwa różne momenty, dwie różne polityki:
-#   * START — klucza Anthropic brak albo ma zły format: przełączamy SAMI. Bez
-#     klucza po cichu (to po prostu konfiguracja „tylko OpenRouter"), przy złym
-#     formacie głośno (ktoś coś wkleił i powinien się o tym dowiedzieć). 401 przy
-#     pierwszym wywołaniu to ten sam przypadek, tylko wykryty przez API.
+# KOLEJNOŚĆ wynika z `golden_key.env` (decyzje maintainera z 2026-10-13):
+#   * domyślnie (i przy `openai_compat`) — Anthropic pierwszy, OpenRouter zapasem
+#     (Claude z mapowania, nigdy `LLM_MODEL`). Compat zostaje przy ostrzeżeniu
+#     z `tlumacz_bramki`: dowolny endpoint nie gwarantuje structured outputs;
+#   * `LLM_PROVIDER=openrouter` (albo stara konfiguracja compat z adresem
+#     OpenRoutera) — OpenRouter pierwszy, Z `LLM_MODEL`, a Anthropic zapasem.
+#     Model na Anthropicu: natywny odpowiednik `anthropic/…` z `LLM_MODEL`,
+#     a dla modelu spoza tej rodziny — domyślny model narzędzia.
+# Dwa momenty przełączenia, dwie polityki (symetryczne w obu kierunkach):
+#   * START — klucza pierwszego konta brak albo ma zły format: przełączamy SAMI.
+#     Bez klucza po cichu (to po prostu konfiguracja „tylko drugie konto"), przy
+#     złym formacie głośno. 401 przy pierwszym wywołaniu to ten sam przypadek,
+#     tylko wykryty przez API.
 #   * W TRAKCIE PRACY — 429 albo wyczerpane kredyty: przełączenie jest OPT-IN,
-#     bo OpenRouter to INNE, osobno płatne konto. Pytamy raz; w sesji
-#     nieinteraktywnej zgodę daje wyłącznie flaga `--openrouter-fallback`
-#     (wzorzec `-y` z `tlumacz_bramki._potwierdz_endpoint_obcy`).
+#     bo to INNE, osobno płatne konto. Pytamy raz; w sesji nieinteraktywnej
+#     zgodę daje wyłącznie flaga `--provider-fallback` (wzorzec `-y`
+#     z `tlumacz_bramki._potwierdz_endpoint_obcy`).
 # OpenRouter mówi Chat Completions, a strict `json_schema` przechodzi przez
-# niego do Claude'a (zmierzone 2026-10-13), więc kontrakt `id → target` zostaje
-# wymuszony przez API także po przełączeniu.
-FLAGA_FALLBACKU = "--openrouter-fallback"
+# niego do Claude'a (zmierzone 2026-10-13), więc kontrakt `id → target` jest
+# wymuszony przez API na obu kontach.
+FLAGA_FALLBACKU = "--provider-fallback"
 _ZGODA_Z_FLAGI = False
 
 _PLACEHOLDERY_KLUCZA = ("PASTE_YOUR_KEY_HERE", "TUTAJ_WKLEJ_SWOJ_KLUCZ")
 
 
 class _AkcjaZgodyNaFallback(argparse.Action):
-    """`--openrouter-fallback` ustawia zgodę w module już przy parsowaniu.
+    """`--provider-fallback` ustawia zgodę w module już przy parsowaniu.
 
     Dzięki temu brat potrzebuje JEDNEJ linii (:func:`dodaj_flage_fallbacku`),
     a nie dwóch, z których drugą łatwo zgubić w kolejnym bracie.
@@ -237,14 +245,15 @@ class _AkcjaZgodyNaFallback(argparse.Action):
 
 
 def dodaj_flage_fallbacku(parser: argparse.ArgumentParser) -> None:
-    """Dokłada `--openrouter-fallback` do parsera brata (wspólny tekst pomocy)."""
+    """Dokłada `--provider-fallback` do parsera brata (wspólny tekst pomocy)."""
     parser.add_argument(
         FLAGA_FALLBACKU, nargs=0, action=_AkcjaZgodyNaFallback, default=False,
-        help="If Anthropic runs out of credits or hits its rate limit during "
-             "the run, continue through OpenRouter (OPENROUTER_API_KEY) without "
-             "asking. OpenRouter is a separate, separately billed account. "
-             "Without this flag the tool asks once, and a non-interactive "
-             "session stops instead.",
+        help="If the first provider (Anthropic, or OpenRouter when "
+             "LLM_PROVIDER=openrouter) runs out of credits or hits its rate "
+             "limit during the run, continue through the other one without "
+             "asking. It is a separate, separately billed account. Without "
+             "this flag the tool asks once, and a non-interactive session "
+             "stops instead.",
     )
 
 
@@ -252,26 +261,35 @@ def _klucz_uzyteczny(klucz: str) -> bool:
     return bool(klucz) and not any(ph in klucz for ph in _PLACEHOLDERY_KLUCZA)
 
 
-def _zapas_openrouter(klucz_or: str):
-    """Polityka zgody dla :attr:`core_llm.KlientLLM.zapas` (wołana raz)."""
+# (nazwa konta, zmienna z kluczem) — do komunikatów zapasu.
+_ANTHROPIC = ("Anthropic", "ANTHROPIC_API_KEY")
+_OPENROUTER = ("OpenRouter", "OPENROUTER_API_KEY")
 
-    def _zapas(powod: str) -> "cl.KlientLLM | None":
+
+def _zapas(zrodlo: tuple[str, str], cel: tuple[str, str], buduj):
+    """Polityka zgody dla :attr:`core_llm.KlientLLM.zapas` (wołana raz).
+
+    ``buduj`` to bezargumentowa fabryka klienta celu — klient powstaje dopiero
+    przy przełączeniu, więc jego SDK nie jest ładowane na zapas.
+    """
+    (konto, zmienna), (konto_cel, zmienna_cel) = zrodlo, cel
+
+    def _wybierz(powod: str) -> "cl.KlientLLM | None":
         if powod == cl.ZAPAS_KLUCZ:
             print(
-                "⚠️  Anthropic rejected ANTHROPIC_API_KEY (HTTP 401). Switching this\n"
-                "    run to OpenRouter (OPENROUTER_API_KEY) — a separate account,\n"
-                "    billed there. Fix the Anthropic key in `golden_key.env` to\n"
-                "    translate through Anthropic again."
+                f"⚠️  {konto} rejected {zmienna} (HTTP 401). Switching this run to\n"
+                f"    {konto_cel} ({zmienna_cel}) — a separate account, billed there.\n"
+                f"    Fix the key in `golden_key.env` to translate through {konto} again."
             )
-            return cl.zbuduj_klienta_openrouter(klucz_or)
+            return buduj()
         print(
-            "⚠️  Anthropic stopped answering: out of credits or rate-limited.\n"
-            "    OPENROUTER_API_KEY is configured, so the remaining work can go\n"
-            "    through OpenRouter — a SEPARATE, separately billed account."
+            f"⚠️  {konto} stopped answering: out of credits or rate-limited.\n"
+            f"    {zmienna_cel} is configured, so the remaining work can go through\n"
+            f"    {konto_cel} — a SEPARATE, separately billed account."
         )
         if not _ZGODA_Z_FLAGI:
             try:
-                odp = input("Continue through OpenRouter? (y/n): ").strip().lower()
+                odp = input(f"Continue through {konto_cel}? (y/n): ").strip().lower()
             except EOFError:
                 print(
                     "❌ Non-interactive session — nobody can approve the switch.\n"
@@ -280,29 +298,23 @@ def _zapas_openrouter(klucz_or: str):
                 return None
             if odp not in ("y", "t"):   # `t` — historyczny alias „tak"
                 return None
-        print("→ Continuing through OpenRouter.")
-        return cl.zbuduj_klienta_openrouter(klucz_or)
+        print(f"→ Continuing through {konto_cel}.")
+        return buduj()
 
-    return _zapas
+    return _wybierz
 
 
-def zbuduj_klienta_tlumacza(
-    konfig: "cl.KonfiguracjaLLM", *, honoruj_providera: bool = False,
+def _klient_anthropic(
+    konfig: "cl.KonfiguracjaLLM", model_override: str = "",
 ) -> "cl.KlientLLM | None":
-    """Klient rodziny tłumaczy: Anthropic z zapasem na OpenRoutera albo sam OpenRouter.
+    klient = cl.zbuduj_klienta(
+        dataclasses.replace(konfig, provider=cl.PROVIDER_ANTHROPIC))
+    if klient is not None:
+        klient.model_override = model_override
+    return klient
 
-    Args:
-        honoruj_providera: ``True`` tylko u brata od dokumentacji, który
-            honoruje `LLM_PROVIDER` (tłumaczy prozę przez `core_llm`). Wtedy
-            provider inny niż Anthropic dostaje zwykłego klienta z
-            :func:`core_llm.zbuduj_klienta`, bez zapasu.
 
-    Returns:
-        ``None``, gdy nie da się zbudować żadnego klienta — komunikat
-        o brakującej konfiguracji należy do wołającego (każdy brat ma swój).
-    """
-    if honoruj_providera and konfig.provider != cl.PROVIDER_ANTHROPIC:
-        return cl.zbuduj_klienta(konfig)
+def _anthropic_najpierw(konfig: "cl.KonfiguracjaLLM") -> "cl.KlientLLM | None":
     klucz = konfig.anthropic_key
     klucz_or = konfig.openrouter_key if _klucz_uzyteczny(konfig.openrouter_key) else ""
     if not _klucz_uzyteczny(klucz):
@@ -318,27 +330,84 @@ def zbuduj_klienta_tlumacza(
             "    billed there."
         )
         return cl.zbuduj_klienta_openrouter(klucz_or)
-    klient = cl.zbuduj_klienta(
-        dataclasses.replace(konfig, provider=cl.PROVIDER_ANTHROPIC))
+    klient = _klient_anthropic(konfig)
     if klient is not None and klucz_or:
-        klient.zapas = _zapas_openrouter(klucz_or)
+        klient.zapas = _zapas(_ANTHROPIC, _OPENROUTER,
+                              lambda: cl.zbuduj_klienta_openrouter(klucz_or))
     return klient
+
+
+def model_anthropic_dla(model_openrouter: str) -> str:
+    """Model na zapasowym Anthropicu dla ``LLM_MODEL`` z trybu OpenRouter.
+
+    ``anthropic/claude-opus-5.5`` → ``claude-opus-5-5``; model spoza rodziny
+    Anthropic (albo brak ``LLM_MODEL``) → ``""``, czyli domyślny model
+    narzędzia (``--model`` / ``MODEL_DOMYSLNY``).
+    """
+    if model_openrouter.startswith("anthropic/"):
+        return cl.model_natywny(model_openrouter)
+    return ""
+
+
+def _openrouter_najpierw(konfig: "cl.KonfiguracjaLLM") -> "cl.KlientLLM | None":
+    klucz = konfig.openrouter_key
+    klucz_ant = konfig.anthropic_key
+    if not (_klucz_uzyteczny(klucz_ant) and klucz_ant.startswith("sk-ant-")):
+        klucz_ant = ""
+    model_ant = model_anthropic_dla(konfig.model)
+    if not _klucz_uzyteczny(klucz):
+        # Cicho: tryb OpenRouter bez jego klucza = konfiguracja „tylko Anthropic".
+        return _klient_anthropic(konfig, model_ant) if klucz_ant else None
+    if not klucz.startswith("sk-or-") and klucz_ant:
+        print(
+            "⚠️  OPENROUTER_API_KEY in `golden_key.env` does not look like an\n"
+            "    OpenRouter key (it must start with sk-or-). Translating through\n"
+            "    Anthropic (ANTHROPIC_API_KEY) instead — a separate account,\n"
+            "    billed there."
+        )
+        return _klient_anthropic(konfig, model_ant)
+    klient = cl.zbuduj_klienta_openrouter(klucz, konfig.model)
+    if klucz_ant:
+        klient.zapas = _zapas(_OPENROUTER, _ANTHROPIC,
+                              lambda: _klient_anthropic(konfig, model_ant))
+    return klient
+
+
+def zbuduj_klienta_tlumacza(
+    konfig: "cl.KonfiguracjaLLM", *, honoruj_compat: bool = False,
+) -> "cl.KlientLLM | None":
+    """Klient rodziny tłumaczy: jedno konto pierwsze, drugie zapasem (sekcja wyżej).
+
+    Args:
+        honoruj_compat: ``True`` tylko u brata od dokumentacji, który tłumaczy
+            prozę przez `core_llm` i dlatego może jechać na DOWOLNYM endpoincie
+            `openai_compat` — dostaje wtedy zwykłego klienta compat, bez zapasu.
+            Pozostali bracia przy compat zostają przy Anthropicu (z ostrzeżeniem
+            w `tlumacz_bramki`).
+
+    Returns:
+        ``None``, gdy nie da się zbudować żadnego klienta — komunikat
+        o brakującej konfiguracji należy do wołającego (każdy brat ma swój).
+    """
+    if konfig.provider == cl.PROVIDER_OPENROUTER:
+        return _openrouter_najpierw(konfig)
+    if konfig.provider == cl.PROVIDER_OPENAI_COMPAT and honoruj_compat:
+        return cl.zbuduj_klienta(konfig)
+    return _anthropic_najpierw(konfig)
 
 
 def zainicjuj_klienta_anthropic(root: Path) -> "cl.KlientLLM":
     """Zwraca klienta rodziny z kluczami z `golden_key.env` (nazwa sprzed v19.11).
 
-    Od v19.11 to :class:`core_llm.KlientLLM`: Anthropic (``.sdk`` =
-    ``anthropic.Anthropic``) z zapasem na OpenRoutera, albo od razu OpenRouter,
-    gdy klucza Anthropic brak lub ma zły format — patrz sekcja wyżej. Nazwę
-    zostawiamy, bo woła ją sześć miejsc w braciach, a domyślnie to nadal jest
-    klient Anthropic.
+    Od v19.11 to :class:`core_llm.KlientLLM` z zapasem na drugie konto
+    (Anthropic ⟷ OpenRouter, kolejność z `LLM_PROVIDER` — patrz sekcja wyżej).
+    Nazwę zostawiamy, bo woła ją sześć miejsc w braciach, a domyślnie to nadal
+    jest klient Anthropic.
 
     Structured outputs: na Anthropic `output_config`, na OpenRouterze strict
-    `json_schema` przez `core_llm` — a mimo to pięciu braci korzystających
-    z rdzenia nadal NIE honoruje `LLM_PROVIDER`: Anthropic jest pierwszym
-    wyborem, OpenRouter wyłącznie zapasem. Komunikat o tym →
-    `tlumacz_bramki.ostrzez_o_kontrakcie_providera`.
+    `json_schema` przez `core_llm`. `LLM_PROVIDER=openai_compat` pięciu braci
+    korzystających z rdzenia nadal IGNORUJE — dowolny endpoint nie daje
+    gwarancji kształtu; komunikat → `tlumacz_bramki.ostrzez_o_kontrakcie_providera`.
     """
     try:
         from dotenv import load_dotenv
@@ -359,8 +428,8 @@ def zainicjuj_klienta_anthropic(root: Path) -> "cl.KlientLLM":
         ) from exc
     if klient is None:
         raise SystemExit(
-            "❌ Missing or invalid ANTHROPIC_API_KEY, and no OPENROUTER_API_KEY\n"
-            "   to fall back to.\n"
+            "❌ No usable key: ANTHROPIC_API_KEY (sk-ant-…) and\n"
+            "   OPENROUTER_API_KEY (sk-or-…) are both missing or invalid.\n"
             f"   Check `{NAZWA_PLIKU_KLUCZA}` in the project directory (the same\n"
             "   file the GUI uses — System Check in Director mode)."
         )
@@ -443,6 +512,10 @@ def wywolaj_llm(
     po którym dalsza praca nie ma sensu (ucięta odpowiedź = niekompletny JSON)
     — CHYBA że wołający zadeklarował `uciecie_mozna_pominac`.
     """
+    # Zapas z trybu OpenRouter niesie natywny model z `LLM_MODEL`
+    # (`anthropic/claude-opus-5.5` → `claude-opus-5-5`); bez niego — model brata.
+    if klient.provider == cl.PROVIDER_ANTHROPIC and klient.model_override:
+        model = klient.model_override
     payload: dict[str, Any] = {"target_language": nazwa_celu}
     if kontekst_paczki:
         payload["existing_terminology"] = kontekst_paczki

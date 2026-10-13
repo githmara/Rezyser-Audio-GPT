@@ -79,22 +79,36 @@ what automated agents do — call the interpreter by path instead:
 ```
 
 AI-backed tooling reads keys from **`golden_key.env`** in the repo root
-(git-ignored). Set `ANTHROPIC_API_KEY` (`sk-ant-…`) — for the dev tooling this is
-not optional, see the contract below. Since v18.4 the **application at runtime**
-can instead be pointed at any OpenAI-compatible endpoint with
-`LLM_PROVIDER=openai_compat` + `LLM_BASE_URL` + `OPENAI_API_KEY` + `LLM_MODEL`
-(Claude stays the recommended quality baseline — prompts are tuned for it).
+(git-ignored). Set `ANTHROPIC_API_KEY` (`sk-ant-…`), `OPENROUTER_API_KEY`
+(`sk-or-…`), or both — see the contract below. The **application at runtime** can
+also be pointed at OpenRouter with `LLM_PROVIDER=openrouter` (since v19.11;
+`LLM_MODEL` optional — without it the Claude model of each recipe is mapped to its
+OpenRouter id, `claude-sonnet-5-5` → `anthropic/claude-sonnet-5.5`), or at any
+OpenAI-compatible endpoint with `LLM_PROVIDER=openai_compat` + `LLM_BASE_URL` +
+`OPENAI_API_KEY` + `LLM_MODEL` (since v18.4). Claude stays the recommended quality
+baseline — prompts are tuned for it.
 
-**Provider contract for the dev tooling.** `LLM_PROVIDER` is a global switch, but
-in the translator family exactly one tool honors it: `buduj_wielojezyczne_docs.py`.
-That is a consequence of protocol, not preference. The docs tool translates long
-*prose* through the same engine the shipped app uses (text in, text out), so it
-rides the provider-agnostic layer for free. Every other translator exchanges
-*item lists* (`{id, source}` → `{id, target}`) whose shape is enforced by Anthropic
-structured outputs — something the OpenAI-compatible branch cannot send today. So:
+**Provider contract for the dev tooling.** The translators send structured
+requests (`{id, source}` → `{id, target}`) whose shape must be enforced by the API:
+natively on Anthropic, as a strict `json_schema` on OpenRouter. An arbitrary
+OpenAI-compatible endpoint gives no such promise. So:
 
-* the other translators **ignore** `LLM_PROVIDER` and need `ANTHROPIC_API_KEY`
-  regardless of what you set (they say so on startup rather than failing silently);
+* **Anthropic and OpenRouter are two accounts, one first and the other a
+  fallback.** By default Anthropic goes first. With `LLM_PROVIDER=openrouter`
+  the order flips: OpenRouter first (honoring `LLM_MODEL`), Anthropic as the
+  fallback (the native counterpart of an `anthropic/…` `LLM_MODEL`, otherwise the
+  tool's default model).
+* **At startup the switch is automatic:** a missing first key falls back
+  silently, a malformed one (or HTTP 401 on the first call) falls back with a
+  warning. **During a run it is opt-in**, because the other account is billed
+  separately: on a rate limit or exhausted credits the tool asks once
+  (`y/n`), and a non-interactive session stops unless you pass
+  `--provider-fallback` (every `buduj_wielojezyczne_*.py` accepts it).
+* `LLM_PROVIDER=openai_compat` is honored by exactly one tool,
+  `buduj_wielojezyczne_docs.py`, which translates long *prose* through the same
+  engine the shipped app uses (text in, text out). The other translators
+  **ignore** it and go Anthropic-first (they say so on startup rather than
+  failing silently).
 * on the docs tool, a compat endpoint works but is **not** shape-checked by the API,
   and the prompts are tuned for Claude — read that draft with extra care. Because
   that warning would otherwise scroll away under minutes of progress output, the

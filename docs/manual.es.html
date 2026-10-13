@@ -69,17 +69,28 @@ code { font-family: ui-monospace, Consolas, monospace; }
 3. En la pantalla de inicio del programa, haz clic en el botón "Generar archivo golden_key.env y abrir editor de texto". El sistema creará automáticamente un archivo de configuración limpio en el lugar correcto y abrirá el Bloc de notas con una plantilla lista para editar.<br>
 4. En el archivo abierto verás la línea: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Elimina el texto de marcador de posición y pega tu clave directamente después del signo igual (sin espacios ni comillas). Guarda el archivo y reinicia la aplicación.</p>
 <p><strong>Consejo:</strong> Tras reiniciar, la aplicación comprobará el archivo y en la sección "System Check" mostrará el estado de la clave. Debe aparecer en verde para que todos los módulos de IA estén listos para funcionar. Si la clave falta o es incorrecta, el programa lo indicará claramente y permitirá abrir el editor de texto para corregir el error rápidamente.</p>
-<h2>PASO 2B (avanzado, opcional): Proveedor de IA propio compatible con OpenAI</h2>
-<p>La mayoría de los usuarios debería quedarse con el Anthropic recomendado (PASO 2) — es el que ofrece la mayor calidad. Sin embargo, si tienes una razón propia (coste, acceso, privacidad, modelo local propio), a partir de la versión 18.4 puedes indicar CUALQUIER endpoint compatible con la API de OpenAI — por ejemplo OpenRouter, Groq, Fireworks, DeepSeek, Ollama local o un endpoint de Gemini compatible con OpenAI. Todo el motor de IA sigue entonces un único camino hacia ese endpoint, sin integración separada por proveedor.</p>
-<p>Esta es una opción para usuarios avanzados: la configuras manualmente en el archivo golden_key.env, añadiendo junto a (o en lugar de) la clave de Anthropic tres líneas y la clave del proveedor elegido:</p>
+<h2>PASO 2B (avanzado, opcional): OpenRouter u otro proveedor compatible con OpenAI</h2>
+<p>La mayoría de los usuarios debería quedarse con el Anthropic recomendado (PASO 2): es el que ofrece la mayor calidad. Sin embargo, si tienes un motivo propio (coste, acceso, privacidad, un modelo local propio), el programa admite dos variantes avanzadas. Ambas se configuran manualmente en el archivo golden_key.env.</p>
+<h3>Variante 1: OpenRouter (desde la versión 19.11)</h3>
+<p>OpenRouter (openrouter.ai) es una sola cuenta a través de la cual usas modelos de muchos proveedores, incluidos esos mismos modelos Claude para los que están ajustados los prompts del programa. Bastan dos líneas:</p>
+<p>LLM_PROVIDER=openrouter<br>
+OPENROUTER_API_KEY=tu_clave_de_openrouter.ai (empieza por sk-or-)</p>
+<p>Cómo funciona:<br>
+•  Sin la línea LLM_MODEL, el programa usa los mismos modelos Claude que en el PASO 2, solo que a través de la cuenta de OpenRouter; los nombres de los modelos los convierte él mismo. La calidad es la misma que con una clave de Anthropic.<br>
+•  La línea LLM_MODEL=identificador_del_modelo_en_OpenRouter (p. ej. anthropic/claude-opus-5.5 o un modelo de otro proveedor) cambia TODO el motor al modelo indicado. Un modelo ajeno a la familia Claude puede dar una calidad inferior; consulta la nota al final de este paso.<br>
+•  Si el programa informa de que el proveedor de IA no conoce el modelo, normalmente significa que la aplicación ha pasado a un nuevo modelo Claude que OpenRouter todavía no ha puesto a disposición. En ese caso, escribe una línea LLM_MODEL con un modelo que veas en la lista de openrouter.ai.<br>
+•  La configuración de versiones anteriores (LLM_PROVIDER=openai_compat con la dirección https://openrouter.ai/api/v1 y la clave en OPENAI_API_KEY) sigue funcionando sin ningún cambio: el programa la reconoce como modo OpenRouter.</p>
+<p><strong>Privacidad:</strong> en los ajustes de tu cuenta de OpenRouter puedes excluir a los proveedores que se reservan el derecho de entrenar modelos con los contenidos enviados. Si envías texto inédito, compruébalo antes del primer uso.</p>
+<h3>Variante 2: cualquier endpoint compatible con OpenAI (desde la versión 18.4)</h3>
+<p>También puedes indicar CUALQUIER endpoint compatible con la API de OpenAI, por ejemplo Groq, Fireworks, DeepSeek, Ollama local o el endpoint OpenAI-compatible de Gemini. Entonces todo el motor de IA va por un único camino hacia ese endpoint, sin una integración aparte por proveedor. Añade, junto a la clave de Anthropic (o en su lugar), tres líneas y la clave del proveedor elegido:</p>
 <p>LLM_PROVIDER=openai_compat<br>
-LLM_BASE_URL=dirección_del_endpoint (p. ej. https://openrouter.ai/api/v1)<br>
-LLM_MODEL=nombre_del_modelo_en_el_proveedor (p. ej. openai/gpt-4o-mini)<br>
+LLM_BASE_URL=dirección_del_endpoint (p. ej. https://api.groq.com/openai/v1)<br>
+LLM_MODEL=nombre_del_modelo_en_el_proveedor<br>
 OPENAI_API_KEY=tu_clave_en_ese_proveedor</p>
 <p>Cómo funciona:<br>
 •  Cuando LLM_PROVIDER=openai_compat, TODO el motor de IA (Director, Historias, Políglota, títulos, detección de idioma) utiliza el endpoint indicado, y LLM_MODEL sobrescribe el nombre del modelo de los archivos de configuración.<br>
-•  Cuando la línea LLM_PROVIDER no existe (o tiene el valor anthropic), la aplicación funciona como en el PASO 2 — exclusivamente con la clave de Anthropic. No necesitas cambiar nada.</p>
-<p><strong>Importante (calidad):</strong> los prompts del sistema de la aplicación están escritos y ajustados para Claude. Otro modelo puede ofrecer menor calidad — respetar peor las reglas del mundo, perder la estructura JSON en los modos con elecciones o devolver el texto en un idioma incorrecto. Es un compromiso consciente coste↔calidad de tu parte. Si lo que te importa es el mejor resultado, quédate con Anthropic.</p>
+•  Cuando falta la línea LLM_PROVIDER (o tiene el valor anthropic), la aplicación funciona como en el PASO 2: exclusivamente con la clave de Anthropic. No tienes que cambiar nada.</p>
+<p><strong>Importante (calidad):</strong> los prompts de sistema de la aplicación están escritos y ajustados para Claude. Otro modelo puede dar una calidad inferior: respetar peor las reglas del mundo, perder la estructura JSON en los modos con elecciones o devolver el texto en un idioma equivocado. Es un compromiso consciente entre coste y calidad por tu parte. Si te importa el mejor resultado, quédate con Anthropic.</p>
 <h2>PASO 3: El Estudio de Dirección Principal</h2>
 <p>Este es tu centro de mando para idear historias y escribir guiones. Accede a él haciendo clic en el botón "🎬  Director" de la barra de botones o seleccionando Herramientas → Director en el menú (atajo: Ctrl+1).</p>
 <h3>Importante: Formato de archivos de proyecto — regreso a .txt</h3>

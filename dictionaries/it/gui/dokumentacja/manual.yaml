@@ -95,22 +95,39 @@ tresc:
 
     **Suggerimento:** Dopo il riavvio, l'applicazione verificherà il file e nella sezione "{home.heading_system_check}" mostrerà lo stato della chiave. Deve essere verde affinché tutti i moduli AI siano pronti all'uso. Se la chiave è assente o errata, il programma lo indicherà chiaramente e consentirà di aprire l'editor di testo per correggere rapidamente l'errore.
   krok_2b_dostawca_zaawansowany: |
-    ## PASSO 2B (avanzato, opzionale): Provider AI personalizzato compatibile con OpenAI
+    ## PASSO 2B (avanzato, facoltativo): OpenRouter o un altro provider compatibile con OpenAI
 
-    La maggior parte degli utenti dovrebbe restare con il consigliato Anthropic (PASSO 2) — è quello che garantisce la qualità più elevata. Se però hai una ragione specifica (costo, accesso, privacy, modello locale personalizzato), dalla versione 18.4 puoi indicare QUALSIASI endpoint compatibile con le API OpenAI — ad esempio OpenRouter, Groq, Fireworks, DeepSeek, Ollama locale o un endpoint Gemini compatibile con OpenAI. L'intero motore AI segue allora un unico percorso verso quell'endpoint, senza integrazione separata per provider.
+    La maggior parte degli utenti dovrebbe restare con Anthropic, il provider consigliato (PASSO 2): è quello che offre la qualità più alta. Se però hai un motivo personale (costo, accesso, privacy, un modello locale tutto tuo), il programma supporta due varianti avanzate. Entrambe si configurano a mano nel file golden_key.env.
 
-    Questa è un'opzione per utenti avanzati: la configuri manualmente nel file golden_key.env, aggiungendo accanto (o al posto) della chiave Anthropic tre righe e la chiave del provider scelto:
+    ### Variante 1: OpenRouter (dalla versione 19.11)
 
-    LLM_PROVIDER=openai_compat
-    LLM_BASE_URL=indirizzo_endpoint (es. https://openrouter.ai/api/v1)
-    LLM_MODEL=nome_modello_presso_il_provider (es. openai/gpt-4o-mini)
-    OPENAI_API_KEY=tua_chiave_presso_questo_provider
+    OpenRouter (openrouter.ai) è un unico account attraverso il quale usi i modelli di molti provider — compresi gli stessi modelli Claude su cui sono tarati i prompt del programma. Bastano due righe:
+
+    LLM_PROVIDER=openrouter
+    OPENROUTER_API_KEY=la_tua_chiave_da_openrouter.ai (inizia con sk-or-)
 
     Come funziona:
-    •  Quando LLM_PROVIDER=openai_compat, L'INTERO motore AI (Regista, Racconti, Poliglotta, titoli, rilevamento lingua) utilizza l'endpoint indicato, e il nome del modello nei file di configurazione viene sovrascritto da LLM_MODEL.
+    •  Senza la riga LLM_MODEL il programma usa gli stessi modelli Claude del PASSO 2, solo tramite l'account OpenRouter — converte da solo i nomi dei modelli. La qualità è identica a quella ottenuta con la chiave Anthropic.
+    •  La riga LLM_MODEL=identificatore_del_modello_su_OpenRouter (ad es. anthropic/claude-opus-5.5 oppure un modello di un altro provider) fa passare TUTTO il motore al modello indicato. Un modello al di fuori della famiglia Claude può dare una qualità inferiore — vedi la nota alla fine di questo passo.
+    •  Se il programma segnala che il provider AI non conosce il modello, di solito significa che l'applicazione è passata a un nuovo modello Claude che OpenRouter non ha ancora reso disponibile. In tal caso inserisci una riga LLM_MODEL con un modello che vedi nell'elenco su openrouter.ai.
+    •  La configurazione delle versioni precedenti (LLM_PROVIDER=openai_compat con l'indirizzo https://openrouter.ai/api/v1 e la chiave in OPENAI_API_KEY) continua a funzionare senza alcuna modifica — il programma la riconosce come modalità OpenRouter.
+
+    **Privacy:** nelle impostazioni dell'account OpenRouter puoi escludere i provider che si riservano il diritto di addestrare i modelli sui contenuti inviati. Se invii testo non pubblicato, verificalo prima del primo utilizzo.
+
+    ### Variante 2: qualsiasi endpoint compatibile con OpenAI (dalla versione 18.4)
+
+    Puoi anche indicare QUALSIASI endpoint compatibile con l'API di OpenAI — per esempio Groq, Fireworks, DeepSeek, Ollama in locale o l'endpoint OpenAI-compatible di Gemini. L'intero motore AI segue allora un unico percorso verso quell'endpoint, senza un'integrazione separata per ciascun provider. Aggiungi accanto alla chiave Anthropic (o al suo posto) tre righe e la chiave del provider scelto:
+
+    LLM_PROVIDER=openai_compat
+    LLM_BASE_URL=indirizzo_dell_endpoint (ad es. https://api.groq.com/openai/v1)
+    LLM_MODEL=nome_del_modello_presso_il_provider
+    OPENAI_API_KEY=la_tua_chiave_presso_questo_provider
+
+    Come funziona:
+    •  Quando LLM_PROVIDER=openai_compat, l'INTERO motore AI (Regista, Racconti, Poliglotta, titoli, rilevamento della lingua) utilizza l'endpoint indicato, e il nome del modello presente nei file di configurazione viene sovrascritto da LLM_MODEL.
     •  Quando la riga LLM_PROVIDER è assente (o ha il valore anthropic), l'applicazione funziona come nel PASSO 2 — esclusivamente con la chiave Anthropic. Non devi cambiare nulla.
 
-    **Importante (qualità):** i prompt di sistema dell'applicazione sono scritti e ottimizzati per Claude. Un modello diverso potrebbe offrire una qualità inferiore — rispettare meno le regole del mondo, perdere la struttura JSON nelle modalità con scelte oppure restituire il testo nella lingua sbagliata. Si tratta di un compromesso consapevole costo↔qualità da parte tua. Se tieni al miglior risultato possibile, resta con Anthropic.
+    **Importante (qualità):** i prompt di sistema dell'applicazione sono scritti e tarati per Claude. Un altro modello può dare una qualità inferiore — rispettare con meno rigore le regole del mondo narrativo, perdere la struttura JSON nelle modalità con scelte oppure restituire il testo nella lingua sbagliata. Si tratta di un compromesso consapevole tra costo e qualità, a tuo carico. Se ti interessa il miglior risultato possibile, resta con Anthropic.
   krok_3_glowne_studio: |
     ## PASSO 3: Studio di Regia Principale
 

@@ -145,15 +145,32 @@ tresc:
 
     **Wskazówka:** Po ponownym uruchomieniu aplikacja sprawdzi plik i w sekcji "{home.heading_system_check}" pokaże status klucza. Musi być zielony, aby wszystkie moduły AI były gotowe do pracy. Jeśli klucza brakuje lub jest błędny, program jasno to wskaże i pozwoli otworzyć edytor tekstu, aby szybko naprawić błąd.
   krok_2b_dostawca_zaawansowany: |
-    ## KROK 2B (zaawansowane, opcjonalne): Własny dostawca AI zgodny z OpenAI
+    ## KROK 2B (zaawansowane, opcjonalne): OpenRouter albo inny dostawca zgodny z OpenAI
 
-    Większość użytkowników powinna zostać przy zalecanym Anthropic (KROK 2) — to on daje najwyższą jakość. Jeśli jednak masz własny powód (koszt, dostęp, prywatność, własny lokalny model), od wersji 18.4 możesz wskazać DOWOLNY endpoint zgodny z API OpenAI — na przykład OpenRouter, Groq, Fireworks, DeepSeek, lokalne Ollama czy endpoint OpenAI-compatible Gemini. Cały silnik AI idzie wtedy jedną ścieżką do tego endpointu, bez osobnej integracji per dostawca.
+    Większość użytkowników powinna zostać przy zalecanym Anthropic (KROK 2) — to on daje najwyższą jakość. Jeśli jednak masz własny powód (koszt, dostęp, prywatność, własny lokalny model), program obsługuje dwa warianty zaawansowane. Oba konfigurujesz ręcznie w pliku golden_key.env.
 
-    To opcja dla zaawansowanych: konfigurujesz ją ręcznie w pliku golden_key.env, dopisując obok (lub zamiast) klucza Anthropic trzy linie oraz klucz wybranego dostawcy:
+    ### Wariant 1: OpenRouter (od wersji 19.11)
+
+    OpenRouter (openrouter.ai) to jedno konto, przez które korzystasz z modeli wielu dostawców — także z tych samych modeli Claude, pod które strojone są prompty programu. Wystarczą dwie linie:
+
+    LLM_PROVIDER=openrouter
+    OPENROUTER_API_KEY=twój_klucz_z_openrouter.ai (zaczyna się od sk-or-)
+
+    Jak to działa:
+    •  Bez linii LLM_MODEL program używa tych samych modeli Claude co w KROK 2, tylko przez konto OpenRouter — nazwy modeli przelicza sam. Jakość jest taka sama jak z kluczem Anthropic.
+    •  Linia LLM_MODEL=identyfikator_modelu_w_OpenRouter (np. anthropic/claude-opus-5.5 albo model innego dostawcy) przełącza CAŁY silnik na wskazany model. Model spoza rodziny Claude może dać niższą jakość — patrz uwaga na końcu tego kroku.
+    •  Jeśli program zgłosi, że dostawca AI nie zna modelu, zwykle znaczy to, że aplikacja przeszła na nowy model Claude, którego OpenRouter jeszcze nie udostępnił. Wpisz wtedy linię LLM_MODEL z modelem, który widzisz na liście w openrouter.ai.
+    •  Konfiguracja z wcześniejszych wersji (LLM_PROVIDER=openai_compat z adresem https://openrouter.ai/api/v1 i kluczem w OPENAI_API_KEY) działa dalej bez żadnych zmian — program rozpoznaje ją jako tryb OpenRouter.
+
+    **Prywatność:** w ustawieniach konta OpenRouter możesz wykluczyć dostawców, którzy zastrzegają sobie prawo do trenowania modeli na przesłanych treściach. Jeśli wysyłasz nieopublikowany tekst, sprawdź to przed pierwszym użyciem.
+
+    ### Wariant 2: dowolny endpoint zgodny z OpenAI (od wersji 18.4)
+
+    Możesz też wskazać DOWOLNY endpoint zgodny z API OpenAI — na przykład Groq, Fireworks, DeepSeek, lokalne Ollama czy endpoint OpenAI-compatible Gemini. Cały silnik AI idzie wtedy jedną ścieżką do tego endpointu, bez osobnej integracji per dostawca. Dopisz obok (lub zamiast) klucza Anthropic trzy linie oraz klucz wybranego dostawcy:
 
     LLM_PROVIDER=openai_compat
-    LLM_BASE_URL=adres_endpointu (np. https://openrouter.ai/api/v1)
-    LLM_MODEL=nazwa_modelu_u_dostawcy (np. openai/gpt-4o-mini)
+    LLM_BASE_URL=adres_endpointu (np. https://api.groq.com/openai/v1)
+    LLM_MODEL=nazwa_modelu_u_dostawcy
     OPENAI_API_KEY=twój_klucz_u_tego_dostawcy
 
     Jak to działa:

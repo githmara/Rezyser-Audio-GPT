@@ -268,17 +268,19 @@ def model_natywny(mdl: str) -> str:
 class KlientLLM:
     """Lekki wrapper nad klientem SDK + znacznik providera.
 
-    ``model_override`` (z ``LLM_MODEL``) służy tylko trybowi ``openai_compat`` —
-    nadpisuje nazwę modelu z przepisu YAML (na cudzym endpoincie ``claude-sonnet-5-5``
-    nie istnieje). W trybie Anthropic pozostaje pusty i model bierze się z przepisu.
+    ``model_override`` (z ``LLM_MODEL``) służy trybom ``openai_compat`` i
+    ``openrouter`` — nadpisuje nazwę modelu z przepisu YAML (na cudzym endpoincie
+    ``claude-sonnet-5-5`` nie istnieje). W trybie Anthropic runtime zostawia go
+    pustym (model z przepisu); ustawia go tylko zapas autotłumaczy z trybu
+    OpenRouter, żeby ``anthropic/claude-opus-5.5`` z ``LLM_MODEL`` został Opusem.
     """
 
     provider: str
     sdk: Any
     model_override: str = ""
     # Fallback autotłumaczy (v19.11, WYŁĄCZNIE dev-tooling — runtime GUI go nie
-    # ustawia). Wołane z powodem (`ZAPAS_*`), zwraca klienta OpenRoutera albo
-    # `None` (brak zgody/klucza). Polityka zgody żyje w `tlumacz_bramki`, nie
+    # ustawia). Wołane z powodem (`ZAPAS_*`), zwraca klienta DRUGIEGO konta albo
+    # `None` (brak zgody/klucza). Polityka zgody żyje w `tlumacz_rdzen`, nie
     # tu: `core_llm` nie pyta człowieka o nic.
     zapas: Any = None
 
@@ -295,7 +297,7 @@ class KlientLLM:
         self.zapas = None
 
 
-# Powody, z którymi `KlientLLM.zapas` jest wołany. `klucz` = klucz Anthropic
+# Powody, z którymi `KlientLLM.zapas` jest wołany. `klucz` = klucz pierwszego konta
 # odrzucony (401) — przełączenie AUTOMATYCZNE (decyzja maintainera 2026-10-13);
 # `limit` = 429 albo wyczerpane kredyty w trakcie pracy — przełączenie OPT-IN.
 ZAPAS_KLUCZ = "klucz"
@@ -322,12 +324,14 @@ def powod_zapasu(exc: Exception) -> str | None:
 
 
 def przelacz_na_zapas(klient: KlientLLM, exc: Exception) -> bool:
-    """Próbuje przełączyć klienta Anthropic na OpenRoutera po tym wyjątku.
+    """Próbuje przełączyć klienta na drugie konto (Anthropic ⟷ OpenRouter) po tym wyjątku.
 
-    Publiczne, bo woła je też ``tlumacz_rdzen``, który ma WŁASNĄ ścieżkę
-    przez SDK Anthropic (structured outputs) poza :func:`wywolaj_llm`.
+    Kierunek zna tylko polityka w ``klient.zapas`` (``tlumacz_rdzen``); runtime
+    GUI zapasu nie ustawia, więc dla niego to zawsze ``False``. Publiczne, bo
+    woła je też ``tlumacz_rdzen``, który ma WŁASNĄ ścieżkę przez SDK Anthropic
+    (structured outputs) poza :func:`wywolaj_llm`.
     """
-    if klient.provider != PROVIDER_ANTHROPIC or klient.zapas is None:
+    if klient.zapas is None:
         return False
     powod = powod_zapasu(exc)
     if powod is None:
@@ -1814,7 +1818,9 @@ def wywolaj_llm(
     elif klient.provider == PROVIDER_OPENROUTER:
         mdl = klient.model_override or model_dla_openroutera(model)
     else:
-        mdl = model
+        # Anthropic: override ustawia WYŁĄCZNIE zapas autotłumaczy z trybu
+        # OpenRouter (natywny odpowiednik `anthropic/…` z `LLM_MODEL`).
+        mdl = klient.model_override or model
 
     try:
         if klient.provider in (PROVIDER_OPENAI_COMPAT, PROVIDER_OPENROUTER):

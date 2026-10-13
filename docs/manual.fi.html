@@ -69,17 +69,28 @@ code { font-family: ui-monospace, Consolas, monospace; }
 3. Napsauta ohjelman aloitusnäytöllä painiketta "Luo golden_key.env-tiedosto ja avaa tekstieditori". Järjestelmä luo automaattisesti puhtaan konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistiossa valmiin mallin, jota voit muokata.<br>
 4. Avautuneessa tiedostossa näet rivin: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Poista paikkamerkkiteksti ja liitä avaimesi suoraan yhtäläisyysmerkin jälkeen (ilman välilyöntejä ja ilman lainausmerkkejä). Tallenna tiedosto ja käynnistä sovellus uudelleen.</p>
 <p><strong>Vinkki:</strong> Uudelleenkäynnistyksen jälkeen sovellus tarkistaa tiedoston ja näyttää osiossa "Järjestelmän tarkistus" avaimen tilan. Sen on oltava vihreä, jotta kaikki tekoälymoduulit ovat valmiita käyttöön. Jos avain puuttuu tai on virheellinen, ohjelma ilmoittaa siitä selkeästi ja antaa avata tekstieditorin virheen nopeaa korjaamista varten.</p>
-<h2>VAIHE 2B (edistynyt, valinnainen): Oma OpenAI-yhteensopiva AI-palveluntarjoaja</h2>
-<p>Useimpien käyttäjien kannattaa pysyä suositellussa Anthropicissa (VAIHE 2) — se tarjoaa parhaan laadun. Jos sinulla on kuitenkin oma syy (kustannukset, saatavuus, yksityisyys, oma paikallinen malli), voit versiosta 18.4 alkaen osoittaa MINKÄ TAHANSA OpenAI API -yhteensopivan endpointin — esimerkiksi OpenRouter, Groq, Fireworks, DeepSeek, paikallinen Ollama tai OpenAI-yhteensopiva Gemini-endpoint. Koko AI-moottori kulkee silloin yhtä polkua kyseiseen endpointiin, ilman erillistä integraatiota palveluntarjoajakohtaisesti.</p>
-<p>Tämä on edistyneiden käyttäjien vaihtoehto: se konfiguroidaan manuaalisesti tiedostossa golden_key.env lisäämällä Anthropic-avaimen rinnalle (tai tilalle) kolme riviä sekä valitun palveluntarjoajan avain:</p>
+<h2>VAIHE 2B (edistynyt, valinnainen): OpenRouter tai muu OpenAI-yhteensopiva palveluntarjoaja</h2>
+<p>Useimpien käyttäjien kannattaa pysyä suositellussa Anthropicissa (VAIHE 2) — se tuottaa korkeimman laadun. Jos sinulla on kuitenkin oma syysi (kustannukset, saatavuus, yksityisyys, oma paikallinen malli), ohjelma tukee kahta edistynyttä vaihtoehtoa. Molemmat määrität käsin tiedostossa golden_key.env.</p>
+<h3>Vaihtoehto 1: OpenRouter (versiosta 19.11 alkaen)</h3>
+<p>OpenRouter (openrouter.ai) on yksi tili, jonka kautta käytät usean palveluntarjoajan malleja — myös samoja Claude-malleja, joiden mukaan ohjelman promptit on viritetty. Kaksi riviä riittää:</p>
+<p>LLM_PROVIDER=openrouter<br>
+OPENROUTER_API_KEY=avaimesi_openrouter.aista (alkaa merkkijonolla sk-or-)</p>
+<p>Näin se toimii:<br>
+•  Ilman LLM_MODEL-riviä ohjelma käyttää samoja Claude-malleja kuin VAIHEESSA 2, vain OpenRouter-tilin kautta — mallien nimet se muuntaa itse. Laatu on sama kuin Anthropic-avaimella.<br>
+•  Rivi LLM_MODEL=mallin_tunniste_OpenRouterissa (esim. anthropic/claude-opus-5.5 tai toisen palveluntarjoajan malli) vaihtaa KOKO moottorin osoittamaasi malliin. Claude-perheen ulkopuolinen malli voi tuottaa heikomman laadun — katso huomautus tämän vaiheen lopussa.<br>
+•  Jos ohjelma ilmoittaa, ettei tekoälypalveluntarjoaja tunne mallia, se tarkoittaa yleensä, että sovellus on siirtynyt uuteen Claude-malliin, jota OpenRouter ei ole vielä julkaissut. Kirjoita silloin LLM_MODEL-rivi mallilla, jonka näet openrouter.ai:n luettelossa.<br>
+•  Aiempien versioiden asetukset (LLM_PROVIDER=openai_compat osoitteella https://openrouter.ai/api/v1 ja avaimella OPENAI_API_KEY-rivillä) toimivat edelleen ilman muutoksia — ohjelma tunnistaa ne OpenRouter-tilaksi.</p>
+<p><strong>Yksityisyys:</strong> OpenRouter-tilin asetuksissa voit sulkea pois palveluntarjoajat, jotka pidättävät oikeuden kouluttaa malleja lähetetyillä sisällöillä. Jos lähetät julkaisematonta tekstiä, tarkista tämä ennen ensimmäistä käyttökertaa.</p>
+<h3>Vaihtoehto 2: mikä tahansa OpenAI-yhteensopiva päätepiste (versiosta 18.4 alkaen)</h3>
+<p>Voit myös osoittaa MITÄ TAHANSA OpenAI-rajapinnan kanssa yhteensopivaa päätepistettä — esimerkiksi Groq, Fireworks, DeepSeek, paikallinen Ollama tai Geminin OpenAI-compatible-päätepiste. Koko tekoälymoottori kulkee silloin yhtä reittiä tähän päätepisteeseen, ilman erillistä integraatiota palveluntarjoajaa kohti. Lisää Anthropic-avaimen viereen (tai sen tilalle) kolme riviä sekä valitsemasi palveluntarjoajan avain:</p>
 <p>LLM_PROVIDER=openai_compat<br>
-LLM_BASE_URL=endpointin_osoite (esim. https://openrouter.ai/api/v1)<br>
-LLM_MODEL=mallin_nimi_palveluntarjoajalla (esim. openai/gpt-4o-mini)<br>
-OPENAI_API_KEY=sinun_avaimesi_kyseiseltä_palveluntarjoajalta</p>
-<p>Miten se toimii:<br>
-•  Kun LLM_PROVIDER=openai_compat, KOKO AI-moottori (Ohjaaja, Tarinat, Polyglootti, otsikot, kielen tunnistus) käyttää määritettyä endpointia, ja konfiguraatiotiedostojen mallinimi korvataan LLM_MODEL-arvolla.<br>
-•  Kun LLM_PROVIDER-riviä ei ole (tai sen arvo on anthropic), sovellus toimii kuten VAIHEESSA 2 — yksinomaan Anthropic-avaimella. Sinun ei tarvitse muuttaa mitään.</p>
-<p><strong>Tärkeää (laatu):</strong> sovelluksen järjestelmäpromptit on kirjoitettu ja viritetty Claudea varten. Muu malli saattaa tuottaa heikompaa laatua — se saattaa noudattaa maailman sääntöjä heikommin, menettää JSON-rakenteen valintoja sisältävissä tiloissa tai palauttaa tekstiä väärällä kielellä. Tämä on tietoinen kustannus↔laatu-kompromissi sinun puoleltasi. Jos haluat parhaan tuloksen, pysy Anthropicissa.</p>
+LLM_BASE_URL=päätepisteen_osoite (esim. https://api.groq.com/openai/v1)<br>
+LLM_MODEL=mallin_nimi_palveluntarjoajalla<br>
+OPENAI_API_KEY=avaimesi_tältä_palveluntarjoajalta</p>
+<p>Näin se toimii:<br>
+•  Kun LLM_PROVIDER=openai_compat, KOKO tekoälymoottori (Ohjaaja, Tarinat, Polyglotti, otsikot, kielentunnistus) käyttää osoitettua päätepistettä, ja asetustiedostojen mallin nimen korvaa LLM_MODEL.<br>
+•  Kun LLM_PROVIDER-riviä ei ole (tai sen arvo on anthropic), sovellus toimii kuten VAIHEESSA 2 — ainoastaan Anthropic-avaimella. Sinun ei tarvitse muuttaa mitään.</p>
+<p><strong>Tärkeää (laatu):</strong> sovelluksen järjestelmäpromptit on kirjoitettu ja viritetty Claudelle. Toinen malli voi tuottaa heikomman laadun — se voi pitää maailman säännöistä huonommin kiinni, hukata JSON-rakenteen valintatiloissa tai palauttaa tekstin väärällä kielellä. Tämä on tietoinen kustannus↔laatu-kompromissi, jonka teet itse. Jos tärkeintä on paras mahdollinen lopputulos, pysy Anthropicissa.</p>
 <h2>VAIHE 3: Pääohjaamo</h2>
 <p>Tämä on komentokeskuksesi tarinoiden keksimistä ja käsikirjoitusten kirjoittamista varten. Siirry sinne napsauttamalla "🎬  Ohjaaja"-painiketta painikepalkissa tai valitsemalla Työkalut → Ohjaaja valikosta (pikakuvake: Ctrl+1).</p>
 <h3>Tärkeää: Projektitiedostojen muoto — paluu .txt-tiedostoihin</h3>

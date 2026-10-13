@@ -470,14 +470,21 @@ def wybrano_endpoint_obcy() -> bool:
     Wołający ładuje `golden_key.env` PRZED tym wywołaniem (tak samo, jak przed
     odczytem klucza) — moduł jest bez zależności i sam `dotenv` nie dotyka.
     """
-    provider = os.environ.get("LLM_PROVIDER", "").strip().lower()
-    adres = os.environ.get("LLM_BASE_URL", "")
-    openrouter = provider == PROVIDER_OPENROUTER or (
-        provider == PROVIDER_COMPAT and _adres_openroutera(adres))
-    if openrouter:
+    rodzaj = _rodzaj_providera()
+    if rodzaj == PROVIDER_OPENROUTER:
         model = os.environ.get("LLM_MODEL", "").strip()
         return bool(model) and not model.startswith("anthropic/")
-    return provider == PROVIDER_COMPAT
+    return rodzaj == PROVIDER_COMPAT
+
+
+def _rodzaj_providera() -> str:
+    """``openrouter`` / ``openai_compat`` / ``""`` (Anthropic) — lustro `core_llm`."""
+    provider = os.environ.get("LLM_PROVIDER", "").strip().lower()
+    if provider == PROVIDER_OPENROUTER or (
+            provider == PROVIDER_COMPAT
+            and _adres_openroutera(os.environ.get("LLM_BASE_URL", ""))):
+        return PROVIDER_OPENROUTER
+    return PROVIDER_COMPAT if provider == PROVIDER_COMPAT else ""
 
 
 def _potwierdz_endpoint_obcy() -> None:
@@ -492,7 +499,7 @@ def _potwierdz_endpoint_obcy() -> None:
         odp = input("Continue on this endpoint? (y/n): ").strip().lower()
     except EOFError:
         raise SystemExit(
-            "❌ Non-interactive session — nobody can confirm the compat endpoint.\n"
+            "❌ Non-interactive session — nobody can confirm this endpoint.\n"
             "   Pass -y/--yes to accept the contract above up front, or unset\n"
             "   LLM_PROVIDER to translate through Anthropic."
         ) from None
@@ -502,24 +509,41 @@ def _potwierdz_endpoint_obcy() -> None:
 
 
 def ostrzez_o_kontrakcie_providera(*, honoruje: bool) -> None:
-    """Wypisuje kontrakt providera, gdy wybrano compat. Cisza, gdy domyślny.
+    """Wypisuje kontrakt providera, gdy wybrano obcy endpoint. Cisza, gdy domyślny.
 
     Args:
-        honoruje: czy TO narzędzie faktycznie pójdzie na wskazany endpoint
+        honoruje: czy TO narzędzie pójdzie na DOWOLNY endpoint `openai_compat`
             (``True`` wyłącznie w `buduj_wielojezyczne_docs.py`).
 
-    Na ścieżce honorującej (``honoruje=True``) funkcja dodatkowo ŻĄDA
-    potwierdzenia i przy odmowie kończy przebieg (``SystemExit``) — patrz
-    komentarz sekcji. Na ścieżce ignorującej przełącznik zostaje sam komunikat:
-    nie ma tam czego potwierdzać, bo narzędzie i tak pójdzie do Anthropica.
+    Dwa przypadki (v19.11):
+      * `openai_compat` — builder docsów ŻĄDA potwierdzenia (``SystemExit`` przy
+        odmowie, patrz komentarz sekcji); pozostali bracia go ignorują i mówią
+        o tym jednym komunikatem.
+      * `openrouter` z `LLM_MODEL` spoza Claude'a — honorują go WSZYSCY bracia
+        (OpenRouter pierwszy, Anthropic zapasem, patrz `tlumacz_rdzen`), więc
+        komunikat dotyczy jakości modelu, nie ignorowania. Potwierdzenia żąda
+        tylko builder docsów: jako jedyny ma `-y`, a bracia mają kształt
+        odpowiedzi wymuszany strict `json_schema`.
     """
     if not wybrano_endpoint_obcy():
         return
     wartosc = os.environ.get("LLM_PROVIDER", "").strip()
+    if _rodzaj_providera() == PROVIDER_OPENROUTER:
+        model = os.environ.get("LLM_MODEL", "").strip()
+        print(
+            f"⚠️  LLM_PROVIDER={wartosc} with LLM_MODEL={model} — not a Claude\n"
+            "    model. The prompts are tuned for Claude, and a weaker model\n"
+            "    degrades content quality in ways no gate can catch (invented\n"
+            "    sections, fluent nonsense). The gates check structure, not truth.\n"
+            "    Read the draft with extra care before `--finalizuj`."
+        )
+        if honoruje:
+            _potwierdz_endpoint_obcy()
+        return
     if honoruje:
         print(
             f"⚠️  LLM_PROVIDER={wartosc} — this is the ONLY translator in the\n"
-            "    family that honors the switch. Two things to know BEFORE you\n"
+            "    family that honors this switch. Two things to know BEFORE you\n"
             "    review the draft:\n"
             "      * no structured outputs on this path — the response shape is\n"
             "        enforced only by the checks in this tool, not by the API;\n"
@@ -534,9 +558,10 @@ def ostrzez_o_kontrakcie_providera(*, honoruje: bool) -> None:
         f"⚠️  LLM_PROVIDER={wartosc} is set, but this tool IGNORES it and talks\n"
         "    to Anthropic first — ANTHROPIC_API_KEY, with OPENROUTER_API_KEY only\n"
         "    as a fallback (Claude through OpenRouter, never LLM_MODEL).\n"
-        "    Dev-tooling contract: only buduj_wielojezyczne_docs.py honors the\n"
-        "    switch, because it translates prose through the runtime engine. The\n"
-        "    other translators exchange item lists whose shape must be enforced\n"
-        "    by structured outputs — natively on Anthropic, as a strict\n"
-        "    json_schema on OpenRouter; an arbitrary endpoint gives no such promise."
+        "    Dev-tooling contract: only buduj_wielojezyczne_docs.py honors\n"
+        "    openai_compat, because it translates prose through the runtime\n"
+        "    engine. The other translators exchange item lists whose shape must\n"
+        "    be enforced by structured outputs — natively on Anthropic, as a\n"
+        "    strict json_schema on OpenRouter (LLM_PROVIDER=openrouter is\n"
+        "    honored by all of them); an arbitrary endpoint gives no such promise."
     )

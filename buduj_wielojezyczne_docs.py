@@ -2208,7 +2208,8 @@ def _parsuj_argumenty() -> argparse.Namespace:
         "-y", "--yes",
         action="store_true",
         help="Skip the interactive confirmation shown when LLM_PROVIDER="
-             "openai_compat sends this run to a non-Anthropic endpoint. Nothing "
+             "openai_compat sends this run to a non-Anthropic endpoint (or when "
+             "LLM_PROVIDER=openrouter comes with a non-Claude LLM_MODEL). Nothing "
              "else changes: the provider contract, the gates and the draft "
              "workflow stay exactly as they are. Use case: CI/CD or automation by "
              "an agent, where there is nobody to answer the prompt.",
@@ -2330,12 +2331,12 @@ def _zainicjuj_klienta(*, potwierdz: bool = True) -> Any:
     if potwierdz:
         tlumacz_bramki.ostrzez_o_kontrakcie_providera(honoruje=True)
 
-    # v19.11: ten sam klient co u braci od rdzenia — Anthropic z zapasem na
-    # OpenRoutera (401/429/brak kredytów) albo od razu OpenRouter, gdy klucza
-    # Anthropic brak lub ma zły format. Jawny `LLM_PROVIDER` wygrywa (ten brat
-    # go honoruje), więc compat/openrouter z pliku idą wprost, bez zapasu.
+    # v19.11: ten sam klient co u braci od rdzenia — jedno konto pierwsze
+    # (Anthropic albo, przy `LLM_PROVIDER=openrouter`, OpenRouter), drugie
+    # zapasem (401/429/brak kredytów). Ten brat jako jedyny honoruje też
+    # `openai_compat`: dostaje wtedy zwykłego klienta compat, bez zapasu.
     klient = tlumacz_rdzen.zbuduj_klienta_tlumacza(
-        cl.wczytaj_konfiguracje(), honoruj_providera=True)
+        cl.wczytaj_konfiguracje(), honoruj_compat=True)
     if klient is None:
         raise SystemExit(
             "❌ No valid LLM configuration in `golden_key.env`.\n"

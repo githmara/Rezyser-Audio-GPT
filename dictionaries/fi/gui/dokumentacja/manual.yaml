@@ -92,22 +92,39 @@ tresc:
 
     **Vinkki:** Uudelleenkäynnistyksen jälkeen sovellus tarkistaa tiedoston ja näyttää osiossa "{home.heading_system_check}" avaimen tilan. Sen on oltava vihreä, jotta kaikki tekoälymoduulit ovat valmiita käyttöön. Jos avain puuttuu tai on virheellinen, ohjelma ilmoittaa siitä selkeästi ja antaa avata tekstieditorin virheen nopeaa korjaamista varten.
   krok_2b_dostawca_zaawansowany: |
-    ## VAIHE 2B (edistynyt, valinnainen): Oma OpenAI-yhteensopiva AI-palveluntarjoaja
+    ## VAIHE 2B (edistynyt, valinnainen): OpenRouter tai muu OpenAI-yhteensopiva palveluntarjoaja
 
-    Useimpien käyttäjien kannattaa pysyä suositellussa Anthropicissa (VAIHE 2) — se tarjoaa parhaan laadun. Jos sinulla on kuitenkin oma syy (kustannukset, saatavuus, yksityisyys, oma paikallinen malli), voit versiosta 18.4 alkaen osoittaa MINKÄ TAHANSA OpenAI API -yhteensopivan endpointin — esimerkiksi OpenRouter, Groq, Fireworks, DeepSeek, paikallinen Ollama tai OpenAI-yhteensopiva Gemini-endpoint. Koko AI-moottori kulkee silloin yhtä polkua kyseiseen endpointiin, ilman erillistä integraatiota palveluntarjoajakohtaisesti.
+    Useimpien käyttäjien kannattaa pysyä suositellussa Anthropicissa (VAIHE 2) — se tuottaa korkeimman laadun. Jos sinulla on kuitenkin oma syysi (kustannukset, saatavuus, yksityisyys, oma paikallinen malli), ohjelma tukee kahta edistynyttä vaihtoehtoa. Molemmat määrität käsin tiedostossa golden_key.env.
 
-    Tämä on edistyneiden käyttäjien vaihtoehto: se konfiguroidaan manuaalisesti tiedostossa golden_key.env lisäämällä Anthropic-avaimen rinnalle (tai tilalle) kolme riviä sekä valitun palveluntarjoajan avain:
+    ### Vaihtoehto 1: OpenRouter (versiosta 19.11 alkaen)
+
+    OpenRouter (openrouter.ai) on yksi tili, jonka kautta käytät usean palveluntarjoajan malleja — myös samoja Claude-malleja, joiden mukaan ohjelman promptit on viritetty. Kaksi riviä riittää:
+
+    LLM_PROVIDER=openrouter
+    OPENROUTER_API_KEY=avaimesi_openrouter.aista (alkaa merkkijonolla sk-or-)
+
+    Näin se toimii:
+    •  Ilman LLM_MODEL-riviä ohjelma käyttää samoja Claude-malleja kuin VAIHEESSA 2, vain OpenRouter-tilin kautta — mallien nimet se muuntaa itse. Laatu on sama kuin Anthropic-avaimella.
+    •  Rivi LLM_MODEL=mallin_tunniste_OpenRouterissa (esim. anthropic/claude-opus-5.5 tai toisen palveluntarjoajan malli) vaihtaa KOKO moottorin osoittamaasi malliin. Claude-perheen ulkopuolinen malli voi tuottaa heikomman laadun — katso huomautus tämän vaiheen lopussa.
+    •  Jos ohjelma ilmoittaa, ettei tekoälypalveluntarjoaja tunne mallia, se tarkoittaa yleensä, että sovellus on siirtynyt uuteen Claude-malliin, jota OpenRouter ei ole vielä julkaissut. Kirjoita silloin LLM_MODEL-rivi mallilla, jonka näet openrouter.ai:n luettelossa.
+    •  Aiempien versioiden asetukset (LLM_PROVIDER=openai_compat osoitteella https://openrouter.ai/api/v1 ja avaimella OPENAI_API_KEY-rivillä) toimivat edelleen ilman muutoksia — ohjelma tunnistaa ne OpenRouter-tilaksi.
+
+    **Yksityisyys:** OpenRouter-tilin asetuksissa voit sulkea pois palveluntarjoajat, jotka pidättävät oikeuden kouluttaa malleja lähetetyillä sisällöillä. Jos lähetät julkaisematonta tekstiä, tarkista tämä ennen ensimmäistä käyttökertaa.
+
+    ### Vaihtoehto 2: mikä tahansa OpenAI-yhteensopiva päätepiste (versiosta 18.4 alkaen)
+
+    Voit myös osoittaa MITÄ TAHANSA OpenAI-rajapinnan kanssa yhteensopivaa päätepistettä — esimerkiksi Groq, Fireworks, DeepSeek, paikallinen Ollama tai Geminin OpenAI-compatible-päätepiste. Koko tekoälymoottori kulkee silloin yhtä reittiä tähän päätepisteeseen, ilman erillistä integraatiota palveluntarjoajaa kohti. Lisää Anthropic-avaimen viereen (tai sen tilalle) kolme riviä sekä valitsemasi palveluntarjoajan avain:
 
     LLM_PROVIDER=openai_compat
-    LLM_BASE_URL=endpointin_osoite (esim. https://openrouter.ai/api/v1)
-    LLM_MODEL=mallin_nimi_palveluntarjoajalla (esim. openai/gpt-4o-mini)
-    OPENAI_API_KEY=sinun_avaimesi_kyseiseltä_palveluntarjoajalta
+    LLM_BASE_URL=päätepisteen_osoite (esim. https://api.groq.com/openai/v1)
+    LLM_MODEL=mallin_nimi_palveluntarjoajalla
+    OPENAI_API_KEY=avaimesi_tältä_palveluntarjoajalta
 
-    Miten se toimii:
-    •  Kun LLM_PROVIDER=openai_compat, KOKO AI-moottori (Ohjaaja, Tarinat, Polyglootti, otsikot, kielen tunnistus) käyttää määritettyä endpointia, ja konfiguraatiotiedostojen mallinimi korvataan LLM_MODEL-arvolla.
-    •  Kun LLM_PROVIDER-riviä ei ole (tai sen arvo on anthropic), sovellus toimii kuten VAIHEESSA 2 — yksinomaan Anthropic-avaimella. Sinun ei tarvitse muuttaa mitään.
+    Näin se toimii:
+    •  Kun LLM_PROVIDER=openai_compat, KOKO tekoälymoottori (Ohjaaja, Tarinat, Polyglotti, otsikot, kielentunnistus) käyttää osoitettua päätepistettä, ja asetustiedostojen mallin nimen korvaa LLM_MODEL.
+    •  Kun LLM_PROVIDER-riviä ei ole (tai sen arvo on anthropic), sovellus toimii kuten VAIHEESSA 2 — ainoastaan Anthropic-avaimella. Sinun ei tarvitse muuttaa mitään.
 
-    **Tärkeää (laatu):** sovelluksen järjestelmäpromptit on kirjoitettu ja viritetty Claudea varten. Muu malli saattaa tuottaa heikompaa laatua — se saattaa noudattaa maailman sääntöjä heikommin, menettää JSON-rakenteen valintoja sisältävissä tiloissa tai palauttaa tekstiä väärällä kielellä. Tämä on tietoinen kustannus↔laatu-kompromissi sinun puoleltasi. Jos haluat parhaan tuloksen, pysy Anthropicissa.
+    **Tärkeää (laatu):** sovelluksen järjestelmäpromptit on kirjoitettu ja viritetty Claudelle. Toinen malli voi tuottaa heikomman laadun — se voi pitää maailman säännöistä huonommin kiinni, hukata JSON-rakenteen valintatiloissa tai palauttaa tekstin väärällä kielellä. Tämä on tietoinen kustannus↔laatu-kompromissi, jonka teet itse. Jos tärkeintä on paras mahdollinen lopputulos, pysy Anthropicissa.
   krok_3_glowne_studio: |
     ## VAIHE 3: Pääohjaamo
 

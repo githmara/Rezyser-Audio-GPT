@@ -345,7 +345,8 @@ def test_start_bez_zadnego_klucza_to_none():
 def _klient_anthropic(bledy):
     sdk = _AnthropicMock(bledy)
     k = cl.KlientLLM(cl.PROVIDER_ANTHROPIC, sdk,
-                     zapas=tr._zapas_openrouter("sk-or-x"))
+                     zapas=tr._zapas(tr._ANTHROPIC, tr._OPENROUTER,
+                                     lambda: cl.zbuduj_klienta_openrouter("sk-or-x")))
     return k, sdk
 
 
@@ -388,7 +389,7 @@ def test_flaga_daje_zgode_z_gory(zapasowy, monkeypatch):
 
     parser = argparse.ArgumentParser()
     tr.dodaj_flage_fallbacku(parser)
-    assert parser.parse_args([tr.FLAGA_FALLBACKU]).openrouter_fallback is True
+    assert parser.parse_args([tr.FLAGA_FALLBACKU]).provider_fallback is True
     monkeypatch.setattr("builtins.input", lambda *_: pytest.fail("asked"))
     klient, _ = _klient_anthropic([BadRequestError(
         "Your credit balance is too low to access the Anthropic API.")])
@@ -400,6 +401,117 @@ def test_fallback_w_core_llm_dla_buildera_docsow(zapasowy, monkeypatch):
     klient, _ = _klient_anthropic([RateLimitError("429")])
     tekst, stop = _wywolaj(klient, temperature=0.0)
     assert stop == "stop" and klient.provider == cl.PROVIDER_OPENROUTER
+
+
+# --- Tryb OpenRouter w configu: kolejność odwrócona (decyzja 2026-10-13) ---
+class _AnthropicOk:
+    """Surowe SDK Anthropic, które odpowiada poprawnym tłumaczeniem."""
+
+    def __init__(self) -> None:
+        self.wyslane: list[dict] = []
+        self.messages = self
+
+    def with_options(self, **_kw):
+        return self
+
+    def create(self, **kwargs):
+        self.wyslane.append(kwargs)
+        return SimpleNamespace(
+            content=[SimpleNamespace(type="text", text=ODP_JSON)],
+            stop_reason="end_turn", usage=None)
+
+
+@pytest.fixture
+def anthropic_zapasowy(monkeypatch):
+    sdk = _AnthropicOk()
+    prawdziwy = cl.zbuduj_klienta
+
+    def _buduj(konfig):
+        if konfig.provider == cl.PROVIDER_ANTHROPIC:
+            return cl.KlientLLM(cl.PROVIDER_ANTHROPIC, sdk)
+        return prawdziwy(konfig)
+
+    monkeypatch.setattr(cl, "zbuduj_klienta", _buduj)
+    monkeypatch.setattr(tr, "_ZGODA_Z_FLAGI", False)
+    return sdk.wyslane
+
+
+def _konfig_or(**pola):
+    return cl.KonfiguracjaLLM(provider=cl.PROVIDER_OPENROUTER, **pola)
+
+
+def test_openrouter_w_configu_jest_pierwszy_z_llm_model(anthropic_zapasowy):
+    k = tr.zbuduj_klienta_tlumacza(_konfig_or(
+        openrouter_key="sk-or-x", anthropic_key="sk-ant-x",
+        model="openai/gpt-6.1-sol"))
+    assert k.provider == cl.PROVIDER_OPENROUTER
+    assert k.model_override == "openai/gpt-6.1-sol" and k.zapas is not None
+
+
+def test_openrouter_bez_klucza_cicho_na_anthropic(anthropic_zapasowy, capsys):
+    k = tr.zbuduj_klienta_tlumacza(_konfig_or(anthropic_key="sk-ant-x"))
+    assert k.provider == cl.PROVIDER_ANTHROPIC and capsys.readouterr().out == ""
+
+
+def test_openrouter_ze_zlym_kluczem_glosno_na_anthropic(anthropic_zapasowy, capsys):
+    k = tr.zbuduj_klienta_tlumacza(_konfig_or(
+        openrouter_key="sk-proj-pomylka", anthropic_key="sk-ant-x"))
+    assert k.provider == cl.PROVIDER_ANTHROPIC
+    assert "sk-or-" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("llm_model, model_anthropic", [
+    ("anthropic/claude-opus-5.5", "claude-opus-5-5"),
+    ("openai/gpt-6.1-sol", "claude-sonnet-5-5"),   # spoza rodziny → domyślny brata
+    ("", "claude-sonnet-5-5"),
+])
+def test_zapas_na_anthropic_dobiera_model(anthropic_zapasowy, monkeypatch,
+                                          llm_model, model_anthropic):
+    monkeypatch.setattr("builtins.input", lambda *_: "y")
+    k = tr.zbuduj_klienta_tlumacza(_konfig_or(
+        openrouter_key="sk-or-x", anthropic_key="sk-ant-x", model=llm_model))
+    k.sdk = _Sdk([RateLimitError("429")])   # OpenRouter bez kredytów
+    assert _rdzen(k) == {1: "Talo"}
+    assert k.provider == cl.PROVIDER_ANTHROPIC
+    assert anthropic_zapasowy[0]["model"] == model_anthropic
+    assert "output_config" in anthropic_zapasowy[0]
+    # Następny chunk — od razu Anthropic, surowa ścieżka rdzenia, ten sam model.
+    assert _rdzen(k) == {1: "Talo"}
+    assert anthropic_zapasowy[1]["model"] == model_anthropic
+
+
+def test_401_openroutera_przelacza_na_anthropic_bez_pytania(anthropic_zapasowy,
+                                                           monkeypatch):
+    monkeypatch.setattr("builtins.input", lambda *_: pytest.fail("asked"))
+    k = tr.zbuduj_klienta_tlumacza(_konfig_or(
+        openrouter_key="sk-or-x", anthropic_key="sk-ant-x"))
+    k.sdk = _Sdk([AuthenticationError("No auth credentials found")])
+    assert _rdzen(k) == {1: "Talo"} and k.provider == cl.PROVIDER_ANTHROPIC
+
+
+def test_compat_dalej_anthropic_najpierw(anthropic_zapasowy):
+    k = tr.zbuduj_klienta_tlumacza(cl.KonfiguracjaLLM(
+        provider=cl.PROVIDER_OPENAI_COMPAT, anthropic_key="sk-ant-x",
+        openai_key="gsk", base_url="https://api.groq.com/v1", model="llama"))
+    assert k.provider == cl.PROVIDER_ANTHROPIC
+    # …a builder docsów honoruje compat wprost, bez zapasu.
+    k2 = tr.zbuduj_klienta_tlumacza(cl.KonfiguracjaLLM(
+        provider=cl.PROVIDER_OPENAI_COMPAT, openai_key="gsk",
+        base_url="https://api.groq.com/v1", model="llama"), honoruj_compat=True)
+    assert k2.provider == cl.PROVIDER_OPENAI_COMPAT and k2.zapas is None
+
+
+@pytest.mark.parametrize("env, tekst, nie", [
+    ({"LLM_PROVIDER": "openai_compat", "LLM_BASE_URL": "https://api.groq.com/v1"},
+     "IGNORES", "not a Claude"),
+    ({"LLM_PROVIDER": "openrouter", "LLM_MODEL": "openai/gpt-6.1-sol"},
+     "not a Claude", "IGNORES"),
+])
+def test_komunikat_braci_zalezy_od_providera(monkeypatch, capsys, env, tekst, nie):
+    _env(monkeypatch, **env)
+    tb.ostrzez_o_kontrakcie_providera(honoruje=False)
+    wynik = capsys.readouterr().out
+    assert tekst in wynik and nie not in wynik
 
 
 @pytest.mark.parametrize("env, wynik", [

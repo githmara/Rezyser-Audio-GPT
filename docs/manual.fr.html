@@ -69,17 +69,28 @@ code { font-family: ui-monospace, Consolas, monospace; }
 3. Sur l'écran de démarrage du programme, cliquez sur le bouton "Générer le fichier golden_key.env et ouvrir l'éditeur de texte". Le système créera automatiquement un fichier de configuration vierge au bon emplacement et ouvrira le Bloc-notes avec un modèle prêt à être édité.<br>
 4. Dans le fichier ouvert, vous verrez la ligne : ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Supprimez le texte de remplacement et collez votre clé directement après le signe égal (sans espace ni guillemets). Enregistrez le fichier et relancez l'application.</p>
 <p><strong>Conseil:</strong> Après le redémarrage, l'application vérifiera le fichier et affichera le statut de la clé dans la section "Vérification du Système". Il doit être vert pour que tous les modules IA soient prêts à fonctionner. Si la clé est absente ou incorrecte, le programme l'indiquera clairement et vous permettra d'ouvrir l'éditeur de texte pour corriger rapidement l'erreur.</p>
-<h2>ÉTAPE 2B (avancé, optionnel) : Fournisseur d'IA personnalisé compatible OpenAI</h2>
-<p>La plupart des utilisateurs devraient rester avec Anthropic recommandé (ÉTAPE 2) — c'est lui qui offre la meilleure qualité. Cependant, si vous avez une raison particulière (coût, accès, confidentialité, modèle local personnel), à partir de la version 18.4 vous pouvez indiquer N'IMPORTE QUEL endpoint compatible avec l'API OpenAI — par exemple OpenRouter, Groq, Fireworks, DeepSeek, Ollama local ou un endpoint Gemini compatible OpenAI. Tout le moteur IA emprunte alors un seul chemin vers cet endpoint, sans intégration séparée par fournisseur.</p>
-<p>Il s'agit d'une option pour utilisateurs avancés : vous la configurez manuellement dans le fichier golden_key.env, en ajoutant à côté (ou à la place) de la clé Anthropic trois lignes ainsi que la clé du fournisseur choisi :</p>
+<h2>ÉTAPE 2B (avancé, facultatif) : OpenRouter ou un autre fournisseur compatible OpenAI</h2>
+<p>La plupart des utilisateurs devraient s'en tenir à Anthropic, qui est recommandé (ÉTAPE 2) — c'est lui qui offre la meilleure qualité. Si toutefois vous avez une raison personnelle (coût, accès, confidentialité, modèle local à vous), le programme prend en charge deux variantes avancées. Vous configurez les deux à la main dans le fichier golden_key.env.</p>
+<h3>Variante 1 : OpenRouter (depuis la version 19.11)</h3>
+<p>OpenRouter (openrouter.ai) est un compte unique grâce auquel vous utilisez les modèles de nombreux fournisseurs — y compris ces mêmes modèles Claude sur lesquels sont réglés les prompts du programme. Deux lignes suffisent :</p>
+<p>LLM_PROVIDER=openrouter<br>
+OPENROUTER_API_KEY=votre_clé_obtenue_sur_openrouter.ai (commence par sk-or-)</p>
+<p>Comment cela fonctionne :<br>
+•  Sans la ligne LLM_MODEL, le programme utilise les mêmes modèles Claude qu'à l'ÉTAPE 2, simplement via le compte OpenRouter — il convertit lui-même les noms de modèles. La qualité est identique à celle obtenue avec une clé Anthropic.<br>
+•  La ligne LLM_MODEL=identifiant_du_modèle_dans_OpenRouter (p. ex. anthropic/claude-opus-5.5 ou un modèle d'un autre fournisseur) fait basculer TOUT le moteur sur le modèle indiqué. Un modèle extérieur à la famille Claude peut donner une qualité inférieure — voir la remarque à la fin de cette étape.<br>
+•  Si le programme signale que le fournisseur d'IA ne connaît pas le modèle, cela signifie généralement que l'application est passée à un nouveau modèle Claude qu'OpenRouter n'a pas encore mis à disposition. Saisissez alors une ligne LLM_MODEL avec un modèle que vous voyez dans la liste sur openrouter.ai.<br>
+•  La configuration des versions précédentes (LLM_PROVIDER=openai_compat avec l'adresse https://openrouter.ai/api/v1 et la clé dans OPENAI_API_KEY) continue de fonctionner sans aucun changement — le programme la reconnaît comme le mode OpenRouter.</p>
+<p><strong>Confidentialité :</strong> dans les paramètres de votre compte OpenRouter, vous pouvez exclure les fournisseurs qui se réservent le droit d'entraîner leurs modèles sur les contenus envoyés. Si vous envoyez un texte non publié, vérifiez ce point avant la première utilisation.</p>
+<h3>Variante 2 : n'importe quel endpoint compatible OpenAI (depuis la version 18.4)</h3>
+<p>Vous pouvez aussi désigner N'IMPORTE QUEL endpoint compatible avec l'API OpenAI — par exemple Groq, Fireworks, DeepSeek, Ollama en local ou l'endpoint OpenAI-compatible de Gemini. Tout le moteur d'IA passe alors par un seul chemin vers cet endpoint, sans intégration distincte par fournisseur. Ajoutez à côté de la clé Anthropic (ou à sa place) trois lignes ainsi que la clé du fournisseur choisi :</p>
 <p>LLM_PROVIDER=openai_compat<br>
-LLM_BASE_URL=adresse_de_l'endpoint (ex. https://openrouter.ai/api/v1)<br>
-LLM_MODEL=nom_du_modèle_chez_le_fournisseur (ex. openai/gpt-4o-mini)<br>
+LLM_BASE_URL=adresse_de_l_endpoint (p. ex. https://api.groq.com/openai/v1)<br>
+LLM_MODEL=nom_du_modèle_chez_le_fournisseur<br>
 OPENAI_API_KEY=votre_clé_chez_ce_fournisseur</p>
-<p>Comment ça fonctionne :<br>
-•  Lorsque LLM_PROVIDER=openai_compat, TOUT le moteur IA (Réalisateur, Histoires, Polyglotte, titres, détection de langue) utilise l'endpoint indiqué, et le nom du modèle issu des fichiers de configuration est remplacé par LLM_MODEL.<br>
-•  Lorsque la ligne LLM_PROVIDER est absente (ou a la valeur anthropic), l'application fonctionne comme à l'ÉTAPE 2 — exclusivement avec la clé Anthropic. Vous n'avez rien à modifier.</p>
-<p><strong>Important (qualité):</strong> les prompts système de l'application sont écrits et ajustés pour Claude. Un autre modèle peut produire une qualité inférieure — respecter moins bien les règles du monde, perdre la structure JSON dans les modes avec choix ou renvoyer du texte dans une mauvaise langue. Il s'agit d'un compromis délibéré coût↔qualité de votre côté. Si vous tenez au meilleur résultat, restez avec Anthropic.</p>
+<p>Comment cela fonctionne :<br>
+•  Lorsque LLM_PROVIDER=openai_compat, TOUT le moteur d'IA (Réalisateur, Récits, Polyglotte, titres, détection de la langue) utilise l'endpoint indiqué, et le nom du modèle figurant dans les fichiers de configuration est remplacé par LLM_MODEL.<br>
+•  Lorsque la ligne LLM_PROVIDER est absente (ou vaut anthropic), l'application fonctionne comme à l'ÉTAPE 2 — uniquement avec la clé Anthropic. Vous n'avez rien à modifier.</p>
+<p><strong>Important (qualité) :</strong> les prompts système de l'application sont écrits et réglés pour Claude. Un autre modèle peut donner une qualité inférieure — respecter moins bien les règles du monde, perdre la structure JSON dans les modes avec choix, ou renvoyer un texte dans la mauvaise langue. C'est un compromis coût↔qualité que vous faites en connaissance de cause. Si vous tenez au meilleur résultat, restez chez Anthropic.</p>
 <h2>ÉTAPE 3 : Le Studio de Mise en Scène Principal</h2>
 <p>C'est votre centre de commandement pour inventer des histoires et écrire des scénarios. Accédez-y en cliquant sur le bouton "🎬  Réalisateur" dans la barre de boutons ou en sélectionnant Outils → Réalisateur dans le menu (raccourci : Ctrl+1).</p>
 <h3>Important : Format des fichiers de projet — retour au .txt</h3>
