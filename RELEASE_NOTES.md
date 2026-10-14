@@ -94,6 +94,94 @@
 
 ---
 
+## 19.12.0 — minor release
+
+### What's new
+
+**The installer now writes an installation log.** Until now a user asked to
+attach the installation log had nothing of ours to attach. Each installation
+or update now leaves `Setup Log YYYY-MM-DD #NNN.txt` in the user's `%TEMP%`
+folder (type `%TEMP%` in the Explorer address bar to open it). The newest file
+for the day has the highest number. Nothing else about installing changes.
+
+**The issue-intake bot moves to `gpt-6-luna`.** OpenAI retires `gpt-4o-mini`,
+the bot's model until now, on January 14, 2027. `gpt-6-luna` is the cheapest
+model of the GPT-6 family and also cheaper than its predecessor ($0.10 / $0.50
+per million input / output tokens, against $0.15 / $0.60). Changing only the
+name would not have worked. The GPT-6 family accepts only the default
+temperature and rejects any other value with HTTP 400. The bot used to send
+0.3, caught the error and fell back to its no-model mode on every report, and
+the mail looked like an ordinary API outage. The bot now sends no temperature
+at all, and a test fails if it comes back.
+
+The protection against instructions hidden in attachments was measured again
+on the new model with the same production code and payloads as in 19.0, five
+attempts per case. Clean bug reports kept all 4 sections (5/5) and clean
+questions both sections (5/5). The injected attachment kept the format too,
+the canary never appeared (0/5), no line of the injected instruction reached
+the prompt, and the model itself flagged the attachment as text posing as an
+instruction (5/5). The format check introduced in 19.0 therefore no longer
+fires on this payload. It stays in place, because it does not depend on the
+model obeying, and a model change is exactly when that has to be measured
+again.
+
+**Attachments are cut at line boundaries, keep the end of the log, and are
+checked for relevance.** Three changes to how the bot reads attached files:
+
+- **Cutting.** The 60 000-byte limit used to apply to the download, so a file
+  was cut in the middle of a line, always from the start. The end of a log,
+  where the newest error is, never reached the prompt. The bot now downloads
+  up to 5 MB and builds an excerpt of at most 60 000 bytes from whole lines:
+  the beginning, windows around error lines (`Traceback`, the headers of our
+  crash and AI-diagnostic logs, `Error`/`Exception`/`Failed`), newest first,
+  and the end. Every gap says how many lines were skipped.
+- **Relevance.** The bot reads only what a file says about itself. An Inno
+  Setup log names the installer that wrote it (`Original Setup EXE`), and our
+  logs carry the application name or source module names. An installer log
+  of another program with no trace of this application is marked as most
+  likely off-topic and shrunk to 4 000 bytes. A file with no trace of the
+  application only gets a note and is not shrunk, because a document that
+  breaks the Polyglot is on topic and has no such trace either.
+- **`.zip` archives are unpacked.** Text files inside go through the same
+  excerpt and relevance check. Binary files are listed by name. Encrypted,
+  damaged and nested archives get a note instead of an error. Unpacking
+  happens in memory, and each file is read only up to the 5 MB limit after
+  decompression, so a zip bomb costs no more than an ordinary large file.
+  Archive members count towards the limit of five inlined files, and files
+  over that limit are listed in a single line.
+- **At most five downloads per report.** Failed downloads and archives with no
+  text inside now count too. Until now a report with a few hundred attachment
+  links could keep the bot downloading for hours.
+
+Measured on the case from 19.0, a real `error_log.txt` plus a 1.77 MB Visual
+Studio Code installer log. As two separate attachments the prompt carries
+1 565 tokens, and the model wrote on its own that the installation log belongs
+to Visual Studio Code and is probably unrelated. As one combined file it still
+costs about as much as before (22 903 tokens against 23 509), because the file
+also contains our log and keeps the full budget, but it now includes the end
+of the log and a note about the foreign installer.
+
+Before closing, the new attachment code was audited with every finding proven
+by running it. Nine defects were found and fixed, each with a regression test
+that fails on the code before the fix. Among them: an archive with thousands
+of small text files produced several megabytes of "skipped" lines, a damaged
+archive could stop the bot entirely, and the excerpt could exceed its budget
+by half when a log had many separate error lines.
+
+### Planned or deferred
+
+- Screenshots are still only listed for the maintainer to look at. Reading
+  text from images (OCR) is not part of this release.
+- The manuals do not yet say where the installation log is saved. For now
+  this release section is the only description.
+- When one file combines our log with another program's installer log, the
+  bot notes it but still uses the full 60 000-byte budget, because it cannot
+  tell where one log ends and the other begins.
+- `anthropic`, `elevenlabs`, `markdown` and `openai` are still held below their
+  bounds (`anthropic<1.8`, `elevenlabs<2.69`, `markdown<3.11`, `openai<3.17`).
+
+---
+
 ## 19.11.0 — minor release
 
 ### What's new

@@ -34,6 +34,7 @@ mail niesie bezwarunkowo (i tylko ona ma inline'owaną treść załączników).
 
 from __future__ import annotations
 
+import http.client
 import io
 import os
 import re
@@ -44,6 +45,7 @@ import urllib.error
 import urllib.request
 import zipfile
 from email.message import EmailMessage
+from pathlib import Path
 
 import bot_i18n
 
@@ -433,17 +435,30 @@ def _pobierz_zalacznik(url: str, limit: int = _ZALACZNIK_MAX_POBRANIE
                 return None, False, (
                     f"przekierowanie poza GitHub ({koncowy[:120]}) — nie pobieram")
             surowe = resp.read(limit + 1)
-    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+    # `IncompleteRead` (zerwany transfer) to `HTTPException`, nie `OSError` —
+    # bez niego jeden urwany załącznik wywracał cały intake (audyt 19.12).
+    except (urllib.error.URLError, http.client.HTTPException, TimeoutError,
+            OSError, ValueError) as exc:
         return None, False, f"pobranie nie powiodło się ({exc})"
     return surowe[:limit], len(surowe) > limit, None
 
 
 def _dekoduj(surowe: bytes) -> str:
-    """Bajty → tekst. UTF-16 tylko po BOM-ie (tak zapisuje część narzędzi
-    Windows); wszystko inne jako UTF-8 z podmianą. BOM UTF-8 zdejmujemy, bo
-    log instalatora Inno zaczyna się właśnie od niego."""
+    """Bajty → tekst. BOM rozstrzyga UTF-32/UTF-16; UTF-16LE bez BOM-u poznajemy
+    po zerach w co drugim bajcie (tak zapisuje PowerShell 5 `>`); reszta jako
+    UTF-8 z podmianą. BOM UTF-8 zdejmujemy, bo log Inno zaczyna się od niego.
+
+    Kolejność ma znaczenie: BOM UTF-32LE (`ff fe 00 00`) ZACZYNA SIĘ od BOM-u
+    UTF-16LE, więc sprawdzony jako drugi dawał tekst z NUL-ami między znakami,
+    w którym `_SYGNAL_BLEDU` nie widział już „Traceback" (audyt 19.12).
+    """
+    if surowe[:4] in (b"\xff\xfe\x00\x00", b"\x00\x00\xfe\xff"):
+        return surowe.decode("utf-32", errors="replace")
     if surowe[:2] in (b"\xff\xfe", b"\xfe\xff"):
         return surowe.decode("utf-16", errors="replace")
+    probka = surowe[:2000]
+    if len(probka) >= 8 and probka[1::2].count(0) > len(probka) // 2 * 0.6:
+        return surowe.decode("utf-16-le", errors="replace")
     return surowe.decode("utf-8", errors="replace").lstrip("﻿")
 
 
@@ -453,12 +468,31 @@ def _dekoduj(surowe: bytes) -> str:
 _SYGNAL_BLEDU = re.compile(
     r"Traceback \(most recent call last\)|CRASH REPORT|AI DIAGNOSTIC LOG"
     r"|\b(?:Error|ERROR|Exception|FATAL|CRITICAL|Failed|failed)\b|[Bb]łąd")
+
+
+def _moduly_repo() -> list[str]:
+    """Nazwy NASZYCH modułów źródła (`gui_*.py`, `core_*.py`…) z checkoutu.
+
+    Wzorzec `(gui|core)_[a-z_]+\\.py` łapał moduł DOWOLNEGO programu
+    (`core_utils.py` innej aplikacji robił z obcego logu „ślad Reżysera" —
+    audyt 19.12). Lista z dysku zamiast z pamięci: nowy moduł wchodzi sam.
+    Runner ma pełny checkout (bot importuje `i18n` z korzenia repo).
+    """
+    korzen = Path(__file__).resolve().parents[2]
+    return sorted(p.name for p in korzen.glob("*.py")
+                  if p.name.startswith(("gui_", "core_", "opowiesci_", "rezyser_",
+                                        "przepisy_", "bledy_ai")))
+
+
 # Ślad, że plik dotyczy NASZEJ aplikacji: nazwa (także w ścieżce instalacji
-# „Reżyser Audio GPT"), nazwa instalatora, moduły źródła w tracebacku. Nazwa
-# aplikacji w paczkach obcych jest przetłumaczona, ale katalog instalacji
+# „Reżyser Audio GPT" i w nazwie instalatora), moduły źródła w tracebacku.
+# Nazwa aplikacji w paczkach obcych jest przetłumaczona, ale katalog instalacji
 # i nazwa instalatora — nie, więc to wspólny mianownik wszystkich 9 języków.
+# Jedna grupa `\b(?:a|b|…)\b`, nie 19 osobnych alternatyw z `\b` — na 5 MB
+# logu to 0,34 s zamiast 1,41 s (zmierzone).
 _SLAD_REZYSERA = re.compile(
-    r"re[żz]yser|\b(?:gui|core)_[a-z_]+\.py\b|\bopowiesci_ai\.py\b",
+    r"re[żz]yser|\b(?:" + "|".join(map(re.escape, _moduly_repo())) + r")\b"
+    if _moduly_repo() else r"re[żz]yser",
     re.IGNORECASE)
 # Log Inno Setup podaje ścieżkę instalatora, który go napisał.
 _INNO_EXE = re.compile(r"Original Setup EXE:\s*(.+)")
@@ -491,21 +525,26 @@ def ocen_trafnosc(tekst: str) -> tuple[str, int]:
     return "", _ZALACZNIK_MAX_BAJTY
 
 
+# Koszt znacznika luki „…[pominięto 1,234,567 linii]…" w UTF-8, z zapasem.
+_KOSZT_LUKI = 48
+
+
 def wytnij_fragment(tekst: str, budzet: int = _ZALACZNIK_MAX_BAJTY) -> str:
     """Tekst mieszczący się w `budzet` bajtach UTF-8 — ZAWSZE pełnymi liniami.
 
     Do 19.11 plik był ucinany na sztywnym bajcie: w połowie linii (a w UTF-8
     nawet w połowie znaku), i zawsze od początku — a w logu najnowszy błąd stoi
     na KOŃCU. Teraz: początek (kontekst: wersja, system), koniec (najnowsze
-    wpisy) i okna wokół linii z sygnałem błędu, od najnowszego. Luki są
-    oznaczone liczbą pominiętych linii, żeby nikt nie wziął wycinka za całość.
+    wpisy) i okna wokół linii z sygnałem błędu, od najnowszego; budżetu, którego
+    okna nie zużyły, dostaje koniec. Luki są oznaczone liczbą pominiętych
+    linii, żeby nikt nie wziął wycinka za całość.
     """
     if len(tekst.encode("utf-8")) <= budzet:
         return tekst
     linie = tekst.splitlines()
     rozmiar = [len(linia.encode("utf-8")) + 1 for linia in linie]
-    # Rezerwa na nagłówek wycinka i znaczniki luk.
-    netto = max(budzet - 400, budzet // 2)
+    # Rezerwa na nagłówek wycinka i końcowy znacznik luki.
+    netto = max(budzet - 200, budzet // 2)
     wybrane: set[int] = set()
     zuzyte = 0
 
@@ -513,10 +552,16 @@ def wytnij_fragment(tekst: str, budzet: int = _ZALACZNIK_MAX_BAJTY) -> str:
         nonlocal zuzyte
         if i in wybrane:
             return True
-        if zuzyte + rozmiar[i] > pulap:
+        # Linia, która nie przylega do już wybranej, otwiera NOWĄ lukę — jej
+        # znacznik też kosztuje. Bez tego log z „Error" co 30 linii wychodził
+        # na 148 % budżetu (1 044 znaczniki; audyt 19.12).
+        koszt = rozmiar[i]
+        if (i - 1) not in wybrane and (i + 1) not in wybrane:
+            koszt += _KOSZT_LUKI
+        if zuzyte + koszt > pulap:
             return False
         wybrane.add(i)
-        zuzyte += rozmiar[i]
+        zuzyte += koszt
         return True
 
     for i in range(len(linie)):                       # początek: 15 %
@@ -526,11 +571,19 @@ def wytnij_fragment(tekst: str, budzet: int = _ZALACZNIK_MAX_BAJTY) -> str:
         if not wez(i, netto * 65 // 100):
             break
     sygnaly = [i for i, linia in enumerate(linie) if _SYGNAL_BLEDU.search(linia)]
+    jalowe = 0
     for i in reversed(sygnaly):                       # okna błędów: reszta
-        if zuzyte >= netto:
+        # Reszta budżetu mniejsza od każdej linii okna → kolejne okna też nic
+        # nie wezmą. Bez tego 5 MB samych „Error" mieliło się 8 s (audyt 19.12).
+        if zuzyte >= netto or jalowe >= 50:
             break
+        przed = len(wybrane)
         for j in range(max(0, i - 2), min(len(linie), i + 13)):
             wez(j, netto)
+        jalowe = jalowe + 1 if len(wybrane) == przed else 0
+    for i in reversed(range(len(linie))):             # niezużyte → koniec
+        if not wez(i, netto):
+            break
 
     if not wybrane:
         # Linie dłuższe od budżetu (np. zminifikowany JSON) — tniemy na
@@ -549,22 +602,35 @@ def wytnij_fragment(tekst: str, budzet: int = _ZALACZNIK_MAX_BAJTY) -> str:
         poprzednia = i
     if poprzednia < len(linie) - 1:
         wynik.append(f"…[pominięto {len(linie) - 1 - poprzednia:,} linii]…")
-    return "\n".join(wynik)
+    tekst_wyniku = "\n".join(wynik)
+    # Straż ostatniej linii: kontrakt „≤ budżet" nie może zależeć od tego, czy
+    # rachunek kosztów wyżej jest dokładny.
+    if len(tekst_wyniku.encode("utf-8")) > budzet:
+        ciete = tekst_wyniku.encode("utf-8")[:budzet - 32].decode("utf-8", errors="ignore")
+        tekst_wyniku = ciete[:ciete.rfind("\n")] + "\n…[reszta pominięta]…"
+    return tekst_wyniku
 
 
-def _przygotuj_tekst(surowe: bytes, obciete: bool) -> tuple[str, str]:
+def _przygotuj_tekst(surowe: bytes, obciete: bool,
+                     gdzie_reszta: str = "zobaczysz pod linkiem") -> tuple[str, str]:
     """Bajty pliku → (wycinek gotowy do promptu i maila, nota trafności)."""
     tekst = _dekoduj(surowe)
     nota, budzet = ocen_trafnosc(tekst)
     wycinek = wytnij_fragment(tekst, budzet).strip()
     if obciete:
         wycinek += (f"\n…[plik większy niż {_ZALACZNIK_MAX_POBRANIE // 1_000_000} MB"
-                    " — Sami pobrała tylko początek; koniec zobaczysz pod linkiem]")
+                    f" — Sami pobrała tylko początek; koniec {gdzie_reszta}]")
     return (wycinek or "(plik pusty)"), nota
 
 
 def _naglowek(nazwa: str, nota: str) -> str:
     return f"### {nazwa} — UWAGA: {nota}" if nota else f"### {nazwa}"
+
+
+def _spis(nazwy: list[str]) -> str:
+    """Pierwsze 20 nazw + licznik reszty — lista nigdy nie rośnie z wejściem."""
+    reszta = len(nazwy) - 20
+    return ", ".join(nazwy[:20]) + (f" … i {reszta:,} innych" if reszta > 0 else "")
 
 
 def _sekcje_archiwum(nazwa: str, surowe: bytes, wolne: int) -> tuple[list[str], int]:
@@ -577,20 +643,25 @@ def _sekcje_archiwum(nazwa: str, surowe: bytes, wolne: int) -> tuple[list[str], 
     try:
         archiwum = zipfile.ZipFile(io.BytesIO(surowe))
         czlonkowie = [i for i in archiwum.infolist() if not i.is_dir()]
-    except (zipfile.BadZipFile, OSError, ValueError, EOFError) as exc:
+    # `Exception`, nie lista: `ZipFile()` rzuca też `NotImplementedError`
+    # („zip file version X" przy jednym bajcie katalogu centralnego) — z wąską
+    # krotką uciekało to z intake'u w ~2 % losowo uszkodzonych archiwów.
+    except Exception as exc:  # noqa: BLE001
         return [f"### {nazwa} (archiwum nieczytelne: {exc} — obejrzyj ręcznie)"], 0
     sekcje: list[str] = []
-    pominiete: list[str] = []
+    nietekstowe: list[str] = []
+    ponad_limit: list[str] = []
     uzyte = 0
     for info in czlonkowie:
         nazwa_cz = _bezpieczna_nazwa(info.filename)
         etykieta = f"{nazwa} › {nazwa_cz}"
         if not info.filename.lower().endswith(_ZALACZNIK_TEKST_EXT):
-            pominiete.append(nazwa_cz)
+            nietekstowe.append(nazwa_cz)
             continue
         if uzyte >= wolne:
-            sekcje.append(f"### {etykieta} (pominięto — limit "
-                          f"{_ZALACZNIK_LIMIT_PLIKOW} plików)")
+            # JEDNA linia na wszystkie, nie nagłówek na każdego: archiwum
+            # z 30 000 pustych `.txt` dawało 4,8 MB samych „pominięto" (audyt 19.12).
+            ponad_limit.append(nazwa_cz)
             continue
         try:
             with archiwum.open(info) as f:
@@ -600,15 +671,24 @@ def _sekcje_archiwum(nazwa: str, surowe: bytes, wolne: int) -> tuple[list[str], 
             continue
         uzyte += 1
         tekst, nota = _przygotuj_tekst(dane[:_ZALACZNIK_MAX_POBRANIE],
-                                       len(dane) > _ZALACZNIK_MAX_POBRANIE)
+                                       len(dane) > _ZALACZNIK_MAX_POBRANIE,
+                                       "jest w archiwum pod linkiem")
         sekcje.append(f"{_naglowek(etykieta, nota)}\n---\n{tekst}")
-    if pominiete:
-        spis = ", ".join(pominiete[:20]) + (" …" if len(pominiete) > 20 else "")
+    if ponad_limit:
+        sekcje.append(f"### {nazwa} — pominięto (limit {_ZALACZNIK_LIMIT_PLIKOW} "
+                      f"plików): {_spis(ponad_limit)}")
+    if nietekstowe:
         sekcje.append(f"### {nazwa} — pliki nietekstowe w archiwum, nie "
-                      f"rozpakowano: {spis}")
+                      f"rozpakowano: {_spis(nietekstowe)}")
     if not czlonkowie:
         sekcje.append(f"### {nazwa} (archiwum puste)")
     return sekcje, uzyte
+
+
+# Twardy sufit całego bloku: limit plików × budżet wycinka + zapas na nagłówki
+# i notki. Liczniki wyżej powinny go trzymać same — to straż na wypadek, gdyby
+# któraś gałąź znów zaczęła produkować tekst proporcjonalny do wejścia.
+_ZALACZNIK_MAX_BLOK = _ZALACZNIK_LIMIT_PLIKOW * _ZALACZNIK_MAX_BAJTY + 40_000
 
 
 def _zbierz_tresc_zalacznikow(issue_body: str) -> str:
@@ -618,12 +698,18 @@ def _zbierz_tresc_zalacznikow(issue_body: str) -> str:
     pozostałe (obrazy) tylko WYMIENIA, żeby Centrum wiedziało, że trzeba je
     obejrzeć ręcznie. Nigdy nie rzuca — błąd pobrania ląduje jako notatka przy
     linku (graceful degradation).
+
+    Dwa liczniki: `proby` liczy POBRANIA (także nieudane i archiwa bez tekstu)
+    i chroni runner — body issue to do 65 536 znaków, czyli setki linków po
+    20 s timeoutu albo 10 MB każdy (workflow nie ma `timeout-minutes`);
+    `wstawione` liczy pliki, które trafiły do promptu (członkowie `.zip` też).
     """
     linki = _wykryj_linki_zalacznikow(issue_body)
     if not linki:
         return ""
     sekcje: list[str] = []
-    pobrane = 0
+    proby = 0
+    wstawione = 0
     for nazwa_surowa, url in linki:
         # Etykieta markdown jest user-inputem, a robimy z niej nagłówek `###`.
         nazwa = _bezpieczna_nazwa(nazwa_surowa)
@@ -631,11 +717,12 @@ def _zbierz_tresc_zalacznikow(issue_body: str) -> str:
         if not archiwum and not _czy_tekstowy(nazwa, url):
             sekcje.append(f"### {nazwa} (nietekstowy — nie pobrano, obejrzyj ręcznie)\n{url}")
             continue
-        if pobrane >= _ZALACZNIK_LIMIT_PLIKOW:
+        if proby >= _ZALACZNIK_LIMIT_PLIKOW or wstawione >= _ZALACZNIK_LIMIT_PLIKOW:
             sekcje.append(
                 f"### {nazwa} (pominięto — limit {_ZALACZNIK_LIMIT_PLIKOW} plików)\n{url}"
             )
             continue
+        proby += 1
         limit = _ZALACZNIK_ZIP_MAX_POBRANIE if archiwum else _ZALACZNIK_MAX_POBRANIE
         surowe, obciete, blad = _pobierz_zalacznik(url, limit)
         if blad:
@@ -648,14 +735,19 @@ def _zbierz_tresc_zalacznikow(issue_body: str) -> str:
                               f"nie rozpakowano, obejrzyj ręcznie)\n{url}")
                 continue
             czesci, uzyte = _sekcje_archiwum(nazwa, surowe,
-                                             _ZALACZNIK_LIMIT_PLIKOW - pobrane)
-            pobrane += uzyte
+                                             _ZALACZNIK_LIMIT_PLIKOW - wstawione)
+            wstawione += uzyte
             sekcje.append(f"{url}\n" + "\n\n".join(czesci))
             continue
-        pobrane += 1
+        wstawione += 1
         tekst, nota = _przygotuj_tekst(surowe, obciete)
         sekcje.append(f"{_naglowek(nazwa, nota)}\n{url}\n---\n{tekst}")
-    return "\n\n".join(sekcje)
+    blok = "\n\n".join(sekcje)
+    if len(blok.encode("utf-8")) > _ZALACZNIK_MAX_BLOK:
+        blok = (blok.encode("utf-8")[:_ZALACZNIK_MAX_BLOK]
+                .decode("utf-8", errors="ignore")
+                + "\n…[blok załączników ucięty do limitu — reszta pod linkami w issue]")
+    return blok
 
 
 # --- Kontrola KONTRAKTU FORMATU (19.0) -------------------------------------

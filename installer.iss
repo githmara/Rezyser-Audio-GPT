@@ -52,6 +52,12 @@ OutputBaseFilename=Rezyser_Audio_v{#MyAppVersion}_Installer
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=lowest
+; Log instalacji (19.12): Inno zapisuje go jako `Setup Log RRRR-MM-DD #NNN.txt`
+; w %TEMP% użytkownika (PrivilegesRequired=lowest → TEMP bieżącego konta). Do
+; 19.11 użytkownik proszony o „log instalacji" nie miał czego załączyć. Bot Sami
+; rozpoznaje nasz log po linii `Original Setup EXE: …Rezyser_Audio_v…`, a log
+; instalatora innego programu oznacza jako nie na temat.
+SetupLogging=yes
 OutputDir=.
 
 [Files]

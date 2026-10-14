@@ -522,7 +522,120 @@ def test_zip_nazwa_czlonka_nie_wstrzyknie_naglowka():
 def test_zip_czlonkowie_licza_sie_do_limitu_plikow():
     pliki = {f"log{i}.txt": f"wpis {i}" for i in range(sami._ZALACZNIK_LIMIT_PLIKOW + 2)}
     blok = _blok_z_zipem(_zip(pliki))
-    assert blok.count("(pominięto — limit") == 2
+    assert blok.count("### logi.zip ›") == sami._ZALACZNIK_LIMIT_PLIKOW
+    assert "pominięto (limit 5 plików): log5.txt, log6.txt" in blok
+
+
+# ---------------------------------------------------------------------------
+# 12. Regresje z audytu 19.12 — kazda odtworzona wykonaniem przed poprawka
+# ---------------------------------------------------------------------------
+def test_zip_z_tysiacami_czlonkow_nie_rozdmuchuje_bloku():
+    """Audyt pkt 1: 30 000 pustych .txt dawalo 4,8 MB samych „pominieto"."""
+    blok = _blok_z_zipem(_zip({f"x{i}.txt": "" for i in range(3_000)}))
+    assert len(blok.encode("utf-8")) < 10_000, len(blok)
+    assert "… i 2,975 innych" in blok
+
+
+def test_zip_z_nieobslugiwana_wersja_nie_rzuca():
+    """Audyt pkt 2: `ZipFile()` rzuca NotImplementedError („zip file version")."""
+    dane = bytearray(_zip({"a.txt": "x"}))
+    cd = dane.find(b"PK\x01\x02")
+    dane[cd + 6] = 0xFF            # „version needed to extract" w katalogu centralnym
+    assert "archiwum nieczytelne" in _blok_z_zipem(bytes(dane))
+
+
+def test_zerwany_transfer_nie_rzuca():
+    """Audyt pkt 3: IncompleteRead to HTTPException, nie OSError."""
+    import http.client
+
+    class _Zerwana(_Odp):
+        def read(self, n=-1):
+            raise http.client.IncompleteRead(b"abc", 1000)
+
+    sami.urllib.request.urlopen = lambda req, timeout=None: _Zerwana(
+        b"", "https://github.com/user-attachments/files/1/a.txt")
+    blok = sami._zbierz_tresc_zalacznikow(
+        "[a.txt](https://github.com/user-attachments/files/1/a.txt)")
+    assert "pobranie nie powiodło się" in blok
+
+
+@pytest.mark.parametrize("ladunek", [
+    None,                                   # kazde pobranie konczy sie bledem
+    "tylko_png",                            # archiwum bez plikow tekstowych
+    b"PK\x03\x04 uszkodzone",               # archiwum nieczytelne
+])
+def test_limit_prob_pobrania_obejmuje_nieudane(ladunek):
+    """Audyt pkt 4: 40 linkow = 40 pobran (po 20 s albo 10 MB kazde)."""
+    import urllib.error
+    wywolania = []
+
+    def atrapa(req, timeout=None):
+        wywolania.append(req.full_url)
+        if ladunek is None:
+            raise urllib.error.URLError("brak sieci")
+        dane = _zip({"a.png": b"x"}) if ladunek == "tylko_png" else ladunek
+        return _Odp(dane, req.full_url)
+
+    sami.urllib.request.urlopen = atrapa
+    ext = "txt" if ladunek is None else "zip"
+    body = "\n".join(f"[f{i}.{ext}](https://github.com/user-attachments/files/{i}/f{i}.{ext})"
+                     for i in range(40))
+    sami._zbierz_tresc_zalacznikow(body)
+    assert len(wywolania) == sami._ZALACZNIK_LIMIT_PLIKOW, len(wywolania)
+
+
+@pytest.mark.parametrize("co_ile", [3, 30, 40])
+def test_wycinek_z_wieloma_lukami_miesci_sie_w_budzecie(co_ile):
+    """Audyt pkt 5: „Error" co 30 linii, reszta pusta -> 148 % budzetu."""
+    linie = ["Error x" if i % co_ile == 0 else "" for i in range(200_000)]
+    for budzet in (60_000, 4_000):
+        wynik = sami.wytnij_fragment("\n".join(linie), budzet)
+        assert len(wynik.encode("utf-8")) <= budzet, (co_ile, budzet, len(wynik.encode("utf-8")))
+
+
+def test_bez_sygnalow_budzet_wraca_do_konca_logu():
+    """Audyt pkt 6: bez linii bledow wycinek zuzywal tylko ~65 % budzetu."""
+    wynik = sami.wytnij_fragment(_log(100_000), 60_000)
+    assert len(wynik.encode("utf-8")) > 55_000, len(wynik.encode("utf-8"))
+
+
+def test_wycinek_z_samych_bledow_nie_jest_wolniejszy_od_zwyklego_logu():
+    """Audyt pkt 7: 5 MB samych „Error" mielilo sie 8 s (petla okien szla po
+    WSZYSTKICH sygnalach, gdy reszta budzetu byla mniejsza od linii).
+
+    Proba WZGLEDNA, nie prog w sekundach: bezwzgledny czas zalezy od maszyny,
+    a stary kod miescil sie w 3 s na tej — test z takim progiem nie mial jak
+    zawiesc. Zmierzone: stary kod 1,58 s wobec ~0,3 s zwyklego logu (x5),
+    nowy ~0,3 s w obu przypadkach.
+    """
+    import time
+
+    def czas(tekst):
+        start = time.perf_counter()
+        sami.wytnij_fragment(tekst, 60_000)
+        return time.perf_counter() - start
+
+    zwykly = min(czas("Debug\n" * 870_000) for _ in range(2))
+    bledy = min(czas("Error\n" * 870_000) for _ in range(2))
+    assert bledy < zwykly * 2.5, (bledy, zwykly)
+
+
+@pytest.mark.parametrize("kodowanie", ["utf-32", "utf-16-le"])
+def test_traceback_w_utf32_i_utf16_bez_bom_jest_widoczny(kodowanie):
+    """Audyt pkt 8: BOM UTF-32LE zaczyna sie od BOM-u UTF-16LE."""
+    tekst = 'Traceback (most recent call last):\n  File "core_rezyser.py", line 1'
+    dane = tekst.encode(kodowanie)       # utf-32 dokleja BOM, utf-16-le — nie
+    assert sami._dekoduj(dane) == tekst
+
+
+def test_obcy_modul_core_nie_jest_sladem_rezysera():
+    """Audyt pkt 9: `core_utils.py` innego programu robil ze smieci log na temat."""
+    tekst = (INNO_OBCY.replace("vscode\\CodeSetup-stable-2a59.exe", "OtherApp-setup.exe")
+             + 'File "C:\\other\\core_utils.py", line 3\n')
+    nota, budzet = sami.ocen_trafnosc(tekst)
+    assert "nie na temat" in nota and budzet == sami._ZALACZNIK_MAX_NIE_NA_TEMAT
+    nasz = 'File "C:\\x\\core_llm.py", line 3\n'
+    assert sami.ocen_trafnosc(nasz) == ("", sami._ZALACZNIK_MAX_BAJTY)
 
 
 # Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
