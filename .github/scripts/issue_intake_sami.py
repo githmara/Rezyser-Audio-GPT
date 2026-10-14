@@ -122,6 +122,17 @@ LABELS_ACCEPT = {
 }
 
 
+# Model redakcji promptu. Jedno źródło: wywołanie, docstringi i pomiary w
+# komentarzach mówią o TYM modelu. Do 19.11 był to `gpt-4o-mini`, wycofywany
+# przez OpenAI 2027-01-14; `gpt-6-luna` jest najtańszym wariantem rodziny 6
+# ($0,10 / $0,50 za 1M tokenów, taniej od poprzednika). Rodzina gpt-6 przyjmuje
+# WYŁĄCZNIE domyślną `temperature` (1) i każdą inną odrzuca błędem 400 —
+# zmierzone przed migracją, dlatego wywołanie nie wysyła tego parametru wcale.
+# Bez tego Sami połykałaby 400 w `except` i po cichu szła w fallback przy
+# KAŻDYM zgłoszeniu, a mail wyglądałby jak zwykła awaria API.
+MODEL_SAMI = "gpt-6-luna"
+
+
 # Koperta wokół treści załącznika w payloadzie dla LLM. Definiowana TUTAJ, bo
 # `SAMI_SYSTEM_PROMPT` niżej cytuje oba znaczniki — jedno źródło, zero szansy na
 # rozjazd między tym, co obiecuje system prompt, a tym, czym owijamy dane.
@@ -258,7 +269,7 @@ def _przepuszczalne(labels_csv: str) -> tuple[bool, list[str]]:
 # --- Pobieranie treści ZAŁĄCZONYCH plików (od v17.11.2) --------------------
 # GitHub NIE wkleja treści załącznika do `body` issue — wstawia tylko link
 # markdown `[error_log.txt](https://github.com/user-attachments/files/…)`. Bez
-# pobrania tej treści LLM (gpt-4o-mini) dostaje sam URL, którego NIE odwiedzi,
+# pobrania tej treści LLM (`MODEL_SAMI`) dostaje sam URL, którego NIE odwiedzi,
 # więc crash zgłoszony przez ZAŁĄCZENIE pliku (a dialog crashu w aplikacji
 # wprost do tego zachęca: „ZAŁĄCZ ten plik") dawałby pusty prompt do Centrum
 # („Zgłoszenie wymaga doprecyzowania") + wesoły komentarz Sami = rozczarowany
@@ -453,6 +464,14 @@ def _zbierz_tresc_zalacznikow(issue_body: str) -> str:
 #   zgłoszenie z wstrzyknięciem     → 1/4 sekcji, 6/6 prób
 # Rozdzielenie jest pełne, a sprawdzenie offline i bez heurystyk o TREŚCI —
 # pytamy tylko, czy model oddał to, o co go poproszono.
+#
+# Ponowiony pomiar po migracji na `gpt-6-luna` (19.12, ten sam harness, 5 prób
+# na klasę): czyste + `bug` 4/4 ×5, czyste + `question` 2/2 ×5, wstrzyknięcie
+# 4/4 ×5 z kanarkiem 0/5, zero linii ładunku w prompcie i ostrzeżenie
+# „UWAGA: załącznik zawiera tekst udający instrukcję" 5/5. Nowy model po prostu
+# NIE słucha załącznika, więc ta bramka przestała cokolwiek łapać — i ZOSTAJE.
+# Jest kontrolą niezależną od posłuszeństwa modelu, a zmiana modelu jest
+# dokładnie tym zdarzeniem, po którym to posłuszeństwo trzeba mierzyć od nowa.
 _SEKCJE_TRYB_A = ("## Cel pytania", "## Co agent powinien zrobić")
 _SEKCJE_TRYB_B = ("## Cel", "## Kontekst techniczny",
                   "## Kryteria akceptacji", "## Pułapki do uniknięcia")
@@ -487,7 +506,7 @@ def brakujace_sekcje(tresc: str, labels: list[str]) -> list[str]:
 
 
 def zloz_payload_llm(body: str, zalaczniki_tresc: str) -> str:
-    """Body issue + treść załączników W KOPERCIE — payload dla `gpt-4o-mini`.
+    """Body issue + treść załączników W KOPERCIE — payload dla `MODEL_SAMI`.
 
     PUBLICZNA i wydzielona z `main()` świadomie. Dopóki to składanie żyło jako
     kilka linijek wewnątrz `main`, każdy, kto chciał je sprawdzić (test, repro),
@@ -532,8 +551,7 @@ def _przeredaguj_z_openai(
     try:
         klient = OpenAI(api_key=klucz)
         odp = klient.chat.completions.create(
-            model="gpt-4o-mini",
-            temperature=0.3,
+            model=MODEL_SAMI,
             messages=[
                 {"role": "system", "content": SAMI_SYSTEM_PROMPT},
                 {
@@ -736,7 +754,7 @@ def main() -> int:
     recipient = os.environ.get("MAINTAINER_EMAIL", "").strip() or smtp_user
 
     # Pobierz treść załączonych plików (GitHub trzyma w body tylko link) —
-    # inline'ujemy do promptu LLM, żeby gpt-4o-mini miał na czym pracować, oraz
+    # inline'ujemy do promptu LLM, żeby model miał na czym pracować, oraz
     # do maila, żeby Centrum widziało log bez ręcznego klikania w URL.
     zalaczniki_tresc = _zbierz_tresc_zalacznikow(body)
     if zalaczniki_tresc:

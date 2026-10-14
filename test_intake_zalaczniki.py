@@ -299,6 +299,49 @@ def test_granice_w_workflowach_zgadzaja_sie_z_requirements():
     assert not braki, "granice rozjechane z manifestem: " + "; ".join(braki)
 
 
+# ---------------------------------------------------------------------------
+# 8. Model (19.12): gpt-6 przyjmuje tylko domyslna temperature
+# ---------------------------------------------------------------------------
+class _AtrapaOpenAI:
+    """Zapisuje kwargs wywolania i oddaje poprawna odpowiedz TRYBU B."""
+
+    wywolania: list = []
+
+    def __init__(self, api_key):
+        self.chat = self
+        self.completions = self
+
+    def create(self, **kwargs):
+        _AtrapaOpenAI.wywolania.append(kwargs)
+        tresc = "\n".join(f"{s}\nx" for s in sami._SEKCJE_TRYB_B)
+        wiad = type("M", (), {"content": tresc})()
+        return type("R", (), {"choices": [type("C", (), {"message": wiad})()]})()
+
+
+def test_wywolanie_bez_temperature_i_na_stalej_modelu(monkeypatch):
+    """Rodzina gpt-6 odrzuca kazda temperature != 1 bledem 400 (zmierzone).
+
+    Wyjatek ginie w `except` i Sami szlaby po cichu w fallback przy KAZDYM
+    zgloszeniu — mail wygladalby jak zwykla awaria API. Stad: zero
+    `temperature`, a model tylko ze stalej `MODEL_SAMI`.
+    """
+    import openai
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    monkeypatch.setattr(openai, "OpenAI", _AtrapaOpenAI)
+    _AtrapaOpenAI.wywolania.clear()
+    tresc, czy_llm = sami._przeredaguj_z_openai("t", "b", ["bug"])
+    assert czy_llm, tresc
+    (kw,) = _AtrapaOpenAI.wywolania
+    assert "temperature" not in kw
+    assert kw["model"] == sami.MODEL_SAMI
+
+
+def test_zaden_wycofywany_model_w_kodzie_bota():
+    """OpenAI wycofuje gpt-4o, gpt-4o-mini, gpt-4.1 i gpt-4.1-mini 2027-01-14."""
+    assert not re.search(r"""model\s*=\s*["']gpt-4""", SKRYPT)
+    assert not re.match(r"gpt-4", sami.MODEL_SAMI)
+
+
 # Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
 # raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
 # więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
