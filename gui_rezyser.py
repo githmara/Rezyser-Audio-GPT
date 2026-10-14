@@ -542,7 +542,10 @@ class RezyserPanel(wx.Panel):
 
         Od v18.4 provider-agnostic: domyślnie Anthropic Claude (`ANTHROPIC_API_KEY`,
         `sk-ant-`), a gdy `LLM_PROVIDER=openai_compat` — dowolny endpoint zgodny z
-        OpenAI (`LLM_BASE_URL` + `OPENAI_API_KEY` + `LLM_MODEL`). WSZYSTKIE wywołania
+        OpenAI (`LLM_BASE_URL` + `OPENAI_API_KEY` + `LLM_MODEL`), a od v19.11
+        `LLM_PROVIDER=openrouter` (`OPENROUTER_API_KEY`, model z przepisu
+        mapowany na id OpenRoutera). Runtime NIE ma zapasu na drugie konto —
+        to wyłącznie cecha autotłumaczy. WSZYSTKIE wywołania
         Reżysera (tryby narracyjne + postprodukcje + mikro-call kodu języka)
         idą przez `_klient_llm`. `_api_dostepne` = klient zbudowany (konfiguracja
         kompletna). Claude pozostaje rekomendowanym filarem jakości.

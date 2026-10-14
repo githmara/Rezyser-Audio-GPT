@@ -321,7 +321,8 @@ def inicjalizuj_klienta(app_dir: str | None = None) -> Any | None:
 
     Od v18.4 provider-agnostic (przez ``core_llm``): domyślnie Anthropic Claude
     (``ANTHROPIC_API_KEY``/``sk-ant-``), a przy ``LLM_PROVIDER=openai_compat`` —
-    dowolny endpoint zgodny z OpenAI. Zwraca ``None`` gdy konfiguracja niekompletna
+    dowolny endpoint zgodny z OpenAI, a od v19.11 przy ``LLM_PROVIDER=openrouter`` —
+    OpenRouter. Zwraca ``None`` gdy konfiguracja niekompletna
     (panel pokaże ``brak_api_tresc`` przy próbie wysyłki). Nigdy nie rzuca — błąd
     inicjalizacji nie powinien blokować otwarcia panelu.
     """

@@ -445,7 +445,8 @@ class PoliglotaPanel(wx.Panel):
         if os.path.exists(env_path):
             load_dotenv(env_path)
             # v18.4 provider-agnostic (przez core_llm): domyślnie Anthropic Claude,
-            # a przy LLM_PROVIDER=openai_compat dowolny endpoint zgodny z OpenAI.
+            # a przy LLM_PROVIDER=openai_compat dowolny endpoint zgodny z OpenAI
+            # (od v19.11 także LLM_PROVIDER=openrouter).
             self._client = cl.zbuduj_klienta(cl.wczytaj_konfiguracje())
             self._api_dostepne = self._client is not None
 

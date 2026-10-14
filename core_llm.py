@@ -283,6 +283,10 @@ class KlientLLM:
     # `None` (brak zgody/klucza). Polityka zgody żyje w `tlumacz_rdzen`, nie
     # tu: `core_llm` nie pyta człowieka o nic.
     zapas: Any = None
+    # Czy to konto odpowiedziało już choć raz (v19.11, audyt). Rozdziela 401
+    # „na starcie" (zły klucz — automat) od 401 „w trakcie" (klucz unieważniony
+    # po udanych chunkach — przełączenie na inne konto wymaga zgody).
+    udane: bool = False
 
     def przelacz_na(self, inny: "KlientLLM") -> None:
         """Podmienia klienta W MIEJSCU, żeby każdy, kto trzyma referencję, jechał dalej nowym.
@@ -295,12 +299,15 @@ class KlientLLM:
         self.sdk = inny.sdk
         self.model_override = inny.model_override
         self.zapas = None
+        self.udane = False
 
 
 # Powody, z którymi `KlientLLM.zapas` jest wołany. `klucz` = klucz pierwszego konta
-# odrzucony (401) — przełączenie AUTOMATYCZNE (decyzja maintainera 2026-10-13);
-# `limit` = 429 albo wyczerpane kredyty w trakcie pracy — przełączenie OPT-IN.
+# odrzucony (401) PRZED pierwszą udaną odpowiedzią — przełączenie AUTOMATYCZNE
+# (decyzja maintainera 2026-10-13); `limit` = 429 albo wyczerpane kredyty w trakcie
+# pracy, `klucz_w_trakcie` = 401 po udanych wywołaniach — oba OPT-IN.
 ZAPAS_KLUCZ = "klucz"
+ZAPAS_KLUCZ_W_TRAKCIE = "klucz_w_trakcie"
 ZAPAS_LIMIT = "limit"
 
 
@@ -336,6 +343,8 @@ def przelacz_na_zapas(klient: KlientLLM, exc: Exception) -> bool:
     powod = powod_zapasu(exc)
     if powod is None:
         return False
+    if powod == ZAPAS_KLUCZ and klient.udane:
+        powod = ZAPAS_KLUCZ_W_TRAKCIE
     nowy = klient.zapas(powod)
     if nowy is None:
         # Brak zgody albo brak klucza: nie pytamy przy każdym kolejnym chunku.
@@ -1522,7 +1531,10 @@ def _wywolaj_openai_compat(
                     f"powtarzam szczebel '{opis}' bez tego parametru."
                 )
                 bez_temp = True
-                zapamietaj_odrzucenie_temperatury(mdl)
+                # Zapis pod TĄ SAMĄ nazwą, o którą pyta `honoruje_temperature`
+                # wyżej (audyt v19.11: zapis pod id OpenRoutera, odczyt pod
+                # natywnym = jałowe 400 przy każdym wywołaniu).
+                zapamietaj_odrzucenie_temperatury(model_baseline or mdl)
                 continue   # ten sam szczebel, bez `temperature`
             if i == ostatni:
                 raise  # wyczerpana drabina
@@ -1816,7 +1828,9 @@ def wywolaj_llm(
     if klient.provider == PROVIDER_OPENAI_COMPAT and klient.model_override:
         mdl = klient.model_override
     elif klient.provider == PROVIDER_OPENROUTER:
-        mdl = klient.model_override or model_dla_openroutera(model)
+        # Mapowanie także dla `LLM_MODEL` (audyt v19.11): `claude-opus-5-5`
+        # w configu to ten sam Opus; id z `/` przechodzi nietknięte.
+        mdl = model_dla_openroutera(klient.model_override or model)
     else:
         # Anthropic: override ustawia WYŁĄCZNIE zapas autotłumaczy z trybu
         # OpenRouter (natywny odpowiednik `anthropic/…` z `LLM_MODEL`).
@@ -1824,21 +1838,23 @@ def wywolaj_llm(
 
     try:
         if klient.provider in (PROVIDER_OPENAI_COMPAT, PROVIDER_OPENROUTER):
-            return _wywolaj_openai_compat(
+            wynik = _wywolaj_openai_compat(
                 klient, mdl, system, messages, segmenty, wymusz_json,
                 max_tokens, temperature, timeout,
                 schema_json=schema_json,
                 model_baseline=model_natywny(mdl),
             )
-
-        # Anthropic (domyślny filar jakości) — `segmenty`/`wymusz_json` celowo
-        # nieużywane; kształt JSON wymusza `schema_json` (structured outputs).
-        return _wywolaj_anthropic(
-            klient, mdl, system, messages, max_tokens, temperature, timeout,
-            thinking_budget=thinking_budget,
-            schema_json=schema_json,
-            slad=slad,
-        )
+        else:
+            # Anthropic (domyślny filar jakości) — `segmenty`/`wymusz_json` celowo
+            # nieużywane; kształt JSON wymusza `schema_json` (structured outputs).
+            wynik = _wywolaj_anthropic(
+                klient, mdl, system, messages, max_tokens, temperature, timeout,
+                thinking_budget=thinking_budget,
+                schema_json=schema_json,
+                slad=slad,
+            )
+        klient.udane = True
+        return wynik
 
     except Exception as exc:  # noqa: BLE001 — 429/timeout/kontekst opakowujemy; reszta leci dalej
         if przelacz_na_zapas(klient, exc):

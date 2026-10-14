@@ -594,7 +594,7 @@ class HomePanel(wx.Panel):
                   model=model or t("home.openrouter_model_z_przepisow"))
         # Claude przez OpenRoutera to te same modele, pod które strojone są
         # prompty — notka o jakości dotyczy tylko modelu spoza Anthropic.
-        if model and not model.startswith("anthropic/"):
+        if model and not model.startswith(("anthropic/", "claude-")):
             tresc += "\n\n" + t("home.compat_jakosc_info")
         self._set_status(tresc, kind="ok")
 

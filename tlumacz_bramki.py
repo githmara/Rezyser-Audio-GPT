@@ -169,6 +169,14 @@ def znaki_niewidoczne(tekst: str) -> list[str]:
 # zdekodowany znak musi leżeć w zakresach, które mojibake faktycznie produkuje.
 _RE_NIEASCII = re.compile(r"[^\x00-\x7f]{2,}")
 _ZAKRESY_MOJIBAKE = ((0x0080, 0x05FF), (0x2000, 0x20FF))
+# Audyt v19.11: poprawny WERSALIK z diakrytykiem tuż przed cudzysłowem, myślnikiem
+# albo NBSP układa się w poprawne UTF-8 (fi „KYLLÄ”" → `Ä”` = C4 94, fr
+# „RÉSUMÉ :" → C9 A0, is „„NÓ“" → D3 93). Taki znak ZAMYKAJĄCY odcinamy przed
+# próbą dekodowania. `Ã`/`Â` nie dostają tego zwolnienia: to klasyczne bajty
+# wiodące mojibake, a w naszych dziewięciu językach nie stoją jako wersalik
+# przed cudzysłowem. Świadomie BEZ `…` i `‚`/`›`: „Ä…" to mojibake polskiego „ą",
+# „Å‚"/„Å›" — „ł"/„ś".
+_PO_WERSALIKU = "”“„‘’«»–— "
 
 
 def mojibake(tekst: str) -> list[str]:
@@ -176,6 +184,11 @@ def mojibake(tekst: str) -> list[str]:
     wynik: list[str] = []
     for m in _RE_NIEASCII.finditer(tekst):
         fragment = m.group(0)
+        if (fragment[-1] in _PO_WERSALIKU and fragment[-2].isupper()
+                and fragment[-2] not in "ÃÂ"):
+            fragment = fragment[:-1]
+            if len(fragment) < 2:
+                continue
         try:
             zdekodowany = fragment.encode("cp1252").decode("utf-8")
         except UnicodeError:
@@ -473,7 +486,9 @@ def wybrano_endpoint_obcy() -> bool:
     rodzaj = _rodzaj_providera()
     if rodzaj == PROVIDER_OPENROUTER:
         model = os.environ.get("LLM_MODEL", "").strip()
-        return bool(model) and not model.startswith("anthropic/")
+        # `claude-…` (forma natywna) też jest Claude'em — `core_llm` mapuje ją
+        # na `anthropic/…` (audyt v19.11).
+        return bool(model) and not model.startswith(("anthropic/", "claude-"))
     return rodzaj == PROVIDER_COMPAT
 
 

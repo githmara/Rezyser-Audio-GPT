@@ -218,7 +218,9 @@ TIMEOUT_OPENROUTER = 600.0
 #     Bez klucza po cichu (to po prostu konfiguracja „tylko drugie konto"), przy
 #     złym formacie głośno. 401 przy pierwszym wywołaniu to ten sam przypadek,
 #     tylko wykryty przez API.
-#   * W TRAKCIE PRACY — 429 albo wyczerpane kredyty: przełączenie jest OPT-IN,
+#   * W TRAKCIE PRACY — 429, wyczerpane kredyty albo 401 PO udanym wywołaniu
+#     (klucz unieważniony w trakcie — `KlientLLM.udane`, audyt v19.11):
+#     przełączenie jest OPT-IN,
 #     bo to INNE, osobno płatne konto. Pytamy raz; w sesji nieinteraktywnej
 #     zgodę daje wyłącznie flaga `--provider-fallback` (wzorzec `-y`
 #     z `tlumacz_bramki._potwierdz_endpoint_obcy`).
@@ -282,11 +284,19 @@ def _zapas(zrodlo: tuple[str, str], cel: tuple[str, str], buduj):
                 f"    Fix the key in `golden_key.env` to translate through {konto} again."
             )
             return buduj()
-        print(
-            f"⚠️  {konto} stopped answering: out of credits or rate-limited.\n"
-            f"    {zmienna_cel} is configured, so the remaining work can go through\n"
-            f"    {konto_cel} — a SEPARATE, separately billed account."
-        )
+        if powod == cl.ZAPAS_KLUCZ_W_TRAKCIE:
+            print(
+                f"⚠️  {konto} rejected {zmienna} (HTTP 401) in the middle of the run,\n"
+                f"    after earlier calls had succeeded. {zmienna_cel} is configured, so\n"
+                f"    the remaining work can go through {konto_cel} — a SEPARATE,\n"
+                "    separately billed account."
+            )
+        else:
+            print(
+                f"⚠️  {konto} stopped answering: out of credits or rate-limited.\n"
+                f"    {zmienna_cel} is configured, so the remaining work can go through\n"
+                f"    {konto_cel} — a SEPARATE, separately billed account."
+            )
         if not _ZGODA_Z_FLAGI:
             try:
                 odp = input(f"Continue through {konto_cel}? (y/n): ").strip().lower()
@@ -346,6 +356,8 @@ def model_anthropic_dla(model_openrouter: str) -> str:
     """
     if model_openrouter.startswith("anthropic/"):
         return cl.model_natywny(model_openrouter)
+    if model_openrouter.startswith("claude-"):   # audyt v19.11: forma natywna
+        return model_openrouter
     return ""
 
 
@@ -579,6 +591,7 @@ def wywolaj_llm(
     while klient.provider == cl.PROVIDER_ANTHROPIC:
         try:
             resp = klient.sdk.messages.create(**kwargs)
+            klient.udane = True
             break
         except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO rozpoznane 400
             if (cl.temperatura_w_payloadzie(kwargs)
@@ -598,6 +611,8 @@ def wywolaj_llm(
             # idzie gałęzią niżej.
             if cl.przelacz_na_zapas(klient, exc):
                 break
+            if cl.powod_zapasu(exc) == cl.ZAPAS_LIMIT:
+                raise cl.BladLimituLLM(str(exc)) from exc
             raise
 
     if resp is not None:
@@ -682,6 +697,14 @@ def wywolaj_llm(
             _powtorka_mojibake=True,
         )
         mapa.update({i: v for i, v in poprawki.items() if i in zepsute})
+        # Audyt v19.11: powtórka, która ZGUBI id, zostawiała w mapie zepsutą
+        # wartość z pierwszej odpowiedzi — a bramki obecności id jej nie widzą.
+        nadal = sorted(i for i in zepsute if tlumacz_bramki.mojibake(mapa[i]))
+        if nadal:
+            raise RuntimeError(
+                f"{kod}: {len(nadal)} item(s) still mojibake after the retry "
+                f"(missing from or broken in the second response): ids {nadal[:10]}."
+            )
     return mapa
 
 

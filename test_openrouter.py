@@ -378,7 +378,7 @@ def test_limit_w_sesji_nieinteraktywnej_bez_flagi_zatrzymuje(zapasowy, monkeypat
         raise EOFError
     monkeypatch.setattr("builtins.input", _eof)
     klient, _ = _klient_anthropic([RateLimitError("429"), RateLimitError("429")])
-    with pytest.raises(RateLimitError):
+    with pytest.raises(cl.BladLimituLLM):   # v19.11: jeden typ na obu ścieżkach
         _rdzen(klient)
     assert klient.zapas is None, "would ask again on every chunk"
     assert not zapasowy
@@ -581,6 +581,98 @@ def test_rdzen_dwa_razy_mojibake_to_blad_chunku():
         tr.wywolaj_llm(klient, model="claude-sonnet-5-5", system="T.",
                        nazwa_celu="Suomi", kod="fi", pozycje=[(1, "pole", "to")],
                        max_tokens=1000)
+
+
+# ---------------------------------------------------------------------------
+# 7. Regresje z audytu subagenta v19.11 (każda miała dowód przez wykonanie)
+# ---------------------------------------------------------------------------
+def test_audyt1_powtorka_gubiaca_id_nie_przepuszcza_mojibake():
+    zepsuta = ('{"translations": [{"id": 1, "target": "sitÃ¤"}, '
+               '{"id": 2, "target": "kÃ¤yttÃ¶Ã¶n"}]}')
+    tylko_jedna = '{"translations": [{"id": 1, "target": "sitä"}]}'
+    klient = cl.KlientLLM(cl.PROVIDER_OPENROUTER,
+                          _Sdk([(zepsuta, "stop"), (tylko_jedna, "stop")]))
+    with pytest.raises(RuntimeError, match="still mojibake"):
+        tr.wywolaj_llm(klient, model="claude-sonnet-5-5", system="T.",
+                       nazwa_celu="Suomi", kod="fi",
+                       pozycje=[(1, "pole", "a"), (2, "pole", "b")], max_tokens=1000)
+
+
+def test_audyt2_nauka_temperatury_pod_nazwa_natywna():
+    klient, wyslane = _klient([
+        BadRequestError("`temperature` is deprecated for this model."),
+        ("ok", "stop"), ("ok", "stop"),
+    ], model_override="anthropic/claude-nowy-7.1")
+    _wywolaj(klient)
+    assert "claude-nowy-7-1" in cl._NAUCZONE_BEZ_TEMPERATURY
+    _wywolaj(klient)
+    assert len(wyslane) == 3 and "temperature" not in wyslane[2]
+
+
+@pytest.mark.parametrize("tekst", [
+    "Vastaa ”KYLLÄ” tai ”EI”.", "RÉSUMÉ : fin", "Segðu „NÓ“ núna.",
+    "„ÄRGER“ — GROSSES Ü—Zeichen",
+])
+def test_audyt3_wersalik_przed_cudzyslowem_to_nie_mojibake(tekst):
+    assert tb.mojibake(tekst) == []
+
+
+def test_audyt3_polskie_mojibake_z_wielokropkiem_dalej_lapane():
+    assert tb.mojibake("zaÅ‚oÅ¼yÄ… projekt")   # „założyą" przez cp1252
+
+
+def test_audyt4_natywny_llm_model_jest_mapowany():
+    klient, wyslane = _klient([("ok", "stop")], model_override="claude-opus-5-5")
+    _wywolaj(klient)
+    assert wyslane[0]["model"] == "anthropic/claude-opus-5.5"
+    assert tr.model_anthropic_dla("claude-opus-5-5") == "claude-opus-5-5"
+
+
+def test_audyt4_natywny_claude_nie_wywoluje_ostrzezenia(monkeypatch):
+    _env(monkeypatch, LLM_PROVIDER="openrouter", LLM_MODEL="claude-opus-5-5")
+    assert tb.wybrano_endpoint_obcy() is False
+
+
+class _AnthropicSekwencja(_AnthropicOk):
+    """Najpierw udane odpowiedzi, potem przygotowane wyjątki."""
+
+    def __init__(self, bledy_po: int, blad: Exception) -> None:
+        super().__init__()
+        self.bledy_po, self.blad = bledy_po, blad
+
+    def create(self, **kwargs):
+        if len(self.wyslane) >= self.bledy_po:
+            self.wyslane.append(kwargs)
+            raise self.blad
+        return super().create(**kwargs)
+
+
+def test_audyt5_401_w_trakcie_pracy_pyta_o_zgode(zapasowy, monkeypatch):
+    pytania = []
+    monkeypatch.setattr("builtins.input", lambda *a: pytania.append(a) or "n")
+    sdk = _AnthropicSekwencja(1, AuthenticationError("invalid x-api-key"))
+    klient = cl.KlientLLM(cl.PROVIDER_ANTHROPIC, sdk, zapas=tr._zapas(
+        tr._ANTHROPIC, tr._OPENROUTER, lambda: cl.zbuduj_klienta_openrouter("x")))
+    assert _rdzen(klient) == {1: "Talo"} and klient.udane
+    with pytest.raises(AuthenticationError):
+        _rdzen(klient)
+    assert len(pytania) == 1 and klient.provider == cl.PROVIDER_ANTHROPIC
+
+
+def test_audyt5_401_przed_pierwszym_sukcesem_dalej_automatyczny(zapasowy, monkeypatch):
+    monkeypatch.setattr("builtins.input", lambda *_: pytest.fail("asked"))
+    sdk = _AnthropicSekwencja(0, AuthenticationError("invalid x-api-key"))
+    klient = cl.KlientLLM(cl.PROVIDER_ANTHROPIC, sdk, zapas=tr._zapas(
+        tr._ANTHROPIC, tr._OPENROUTER, lambda: cl.zbuduj_klienta_openrouter("x")))
+    assert _rdzen(klient) == {1: "Talo"}
+    assert klient.provider == cl.PROVIDER_OPENROUTER and klient.udane
+
+
+def test_limit_bez_zapasu_na_surowej_sciezce_to_blad_limitu():
+    sdk = _AnthropicSekwencja(0, RateLimitError("429"))
+    klient = cl.KlientLLM(cl.PROVIDER_ANTHROPIC, sdk)
+    with pytest.raises(cl.BladLimituLLM):
+        _rdzen(klient)
 
 
 if __name__ == "__main__":
