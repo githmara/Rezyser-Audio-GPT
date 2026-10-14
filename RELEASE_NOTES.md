@@ -94,6 +94,93 @@
 
 ---
 
+## 19.11.0 — minor release
+
+### What's new
+
+**OpenRouter is now a provider of its own.** Two lines in `golden_key.env`,
+`LLM_PROVIDER=openrouter` and `OPENROUTER_API_KEY`, route the whole engine
+through an OpenRouter account. `LLM_MODEL` is optional. Without it, the Claude
+model of each recipe is converted to its OpenRouter id
+(`claude-sonnet-5-5` → `anthropic/claude-sonnet-5.5`), so you get the same
+models the prompts are tuned for. The OpenRouter address is fixed in the code
+and its key has its own variable, so a key is only ever sent to the host it was
+issued for.
+
+- Older configurations keep working without changes. `LLM_PROVIDER=openai_compat`
+  with the address `https://openrouter.ai/api/v1` and the key in
+  `OPENAI_API_KEY` is now recognised as OpenRouter mode.
+- `OPENAI_API_KEY` stays the key of `openai_compat`, which still points the
+  engine at any OpenAI-compatible endpoint.
+- System Check on the home screen recognises the new mode and shows which model
+  is used.
+- When OpenRouter does not know a model, you get a message in your language that
+  tells you to set `LLM_MODEL`, instead of a raw error. This typically happens
+  right after the program moves to a new Claude model that OpenRouter has not
+  listed yet.
+
+**JSON answers through OpenRouter and other endpoints are enforced by the API.**
+Brainstorm, Script and Stories turns now send their JSON schema as a strict
+`json_schema` response format, the same schema Anthropic receives. If an
+endpoint rejects it, the program falls back to plain JSON mode, as before, and
+remembers that for the session. A model that rejects `temperature` now loses
+only that parameter, not the JSON format.
+
+**Clearer errors.** Exhausted credits (Anthropic answers 400, OpenRouter 402)
+are now treated as a limit, not as a malformed request, so the program no longer
+retries a request that cannot succeed. A refusal that OpenRouter reports as
+`content_filter` is handled like Anthropic's own refusal.
+
+**Manual.** Step 2B in all nine languages now describes two variants: OpenRouter,
+with a note on the account's privacy settings (they let you exclude providers
+that may train on your text), and any OpenAI-compatible endpoint. The readme
+lists OpenRouter among the AI providers.
+
+**For contributors: the translator tools use two accounts.** The
+`buduj_wielojezyczne_*.py` tools treat Anthropic and OpenRouter as two accounts,
+one first and the other as a fallback. Anthropic goes first by default. With
+`LLM_PROVIDER=openrouter` the order flips and `LLM_MODEL` is honoured.
+
+- At startup the switch is automatic: silent when the first key is missing, with
+  a warning when it is malformed or rejected.
+- During a run it is opt-in, because the other account is billed separately. This
+  covers a rate limit, exhausted credits, and a key rejected after earlier calls
+  succeeded. The tool asks once, and a non-interactive run needs the new
+  `--provider-fallback` flag.
+- A new mojibake gate catches UTF-8 text read as cp1252. It requests the broken
+  items once more and otherwise fails the chunk. It was added because the
+  Finnish interface strings for this release came back with
+  `sitÃ¤ kÃ¤yttÃ¶Ã¶n` next to correct text.
+
+Before the release, an audit proved every finding by running it. It found five
+defects, all now fixed and covered by regression tests:
+
+- The mojibake gate let a broken value through when the retry dropped its id.
+- The note that a model rejects `temperature` was stored under the OpenRouter
+  id but looked up under the native name, so every call paid an extra failed
+  request.
+- The mojibake gate flagged correct text, such as a capital letter with a
+  diacritic before a quote mark (Finnish `”KYLLÄ”`).
+- `LLM_MODEL=claude-opus-5-5`, written in the native form, was not converted for
+  OpenRouter.
+- A key rejected in the middle of a run switched accounts without asking.
+
+**Dependency update:** `wxpython` 4.3.1 → 4.3.2, a patch release built on
+wxWidgets 3.3.4. The main window and all six panels build as before, and all 640
+tests pass.
+
+### Planned or deferred
+
+- The application itself has no fallback account. It uses exactly the provider
+  set in `golden_key.env`. The two-account fallback belongs to the translator
+  tools only.
+- Through OpenRouter and `openai_compat`, extended thinking is not sent. The
+  Polyglot quality mode and the accent generator run without it on those paths.
+- `elevenlabs` 2.72.0, `markdown` 3.11.1 and `openai` 3.30.0 are still held below
+  their bounds (`elevenlabs<2.69`, `markdown<3.11`, `openai<3.17`).
+
+---
+
 ## 19.10.0 — minor release
 
 ### What's new
