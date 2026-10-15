@@ -49,6 +49,9 @@ common:
   llm_nieznany_model: "AI-palveluntarjoaja ei tunne mallia „{model}”.\nJos ohjelma siirtyi juuri uuteen Claude-malliin, OpenRouter ei ehkä ole vielä ottanut sitä käyttöön. Kirjoita golden_key.env-tiedostoon rivi LLM_MODEL= sellaisella mallilla, jonka OpenRouter jo tarjoaa (esim. anthropic/claude-sonnet-5.5), ja käynnistä ohjelma uudelleen."
   pdf_bez_tekstu_tytul: PDF ilman tekstiä
   pdf_bez_tekstu_tresc: "Tiedostossa {nazwa_pliku} ei ole tekstikerrosta – kyseessä on todennäköisesti skannaus tai kuvia sivuista.\n\nOhjelma lukee vain PDF-tiedostoon tallennetun tekstin eikä tunnista tekstiä kuvista (OCR). Jos sinulla on tämä asiakirja jossakin toisessa muodossa (Word, teksti, HTML), avaa se PDF-tiedoston sijaan."
+  pdf_otwarcie_tytul: PDF-tiedostoa ei voi avata
+  pdf_haslo_tresc: "Tiedosto {nazwa_pliku} on salasanasuojattu, joten ohjelma ei voi lukea sitä.\n\nAvaa se PDF-katseluohjelmassa ja tallenna salasanaton kopio tai vie sisältö Word- tai tekstitiedostoon ja lataa se PDF-tiedoston sijaan.\n\nTekniset tiedot: {szczegol}"
+  pdf_uszkodzony_tresc: "Tiedoston {nazwa_pliku} avaaminen epäonnistui – se on vioittunut tai ei ole kelvollinen PDF-tiedosto.\n\nTekniset tiedot: {szczegol}"
 main:
   menu:
     narzedzia: "&Työkalut"
@@ -895,7 +898,7 @@ poliglota:
   per_akapit_nadpisanie_tytul: Korvataanko asetetut koodit?
   per_akapit_nadpisanie_tresc: "Tämä toiminto asettaa koodin kaikkiin kappaleisiin kerralla, ja {liczba_zmienionych} niistä on nyt eri koodi kuin listaa avattaessa.\n\nMuutosta ei voi peruuttaa. Jatketaanko?"
   pdf_wczytany_tytul: Teksti luettu PDF-tiedostosta
-  pdf_wczytany_tresc: "Tiedostosta {nazwa_pliku} luettiin teksti: {liczba_stron} sivua, {liczba_akapitow} kappaletta.\n\nOhjelma muodosti kappaleet uudelleen sivujen asettelusta, yhdisti seuraavalle riville siirtyneet sanat ja ohitti sivunumerot. Tulos tallennetaan .html-tiedostona, koska ohjelma ei tallenna PDF-tiedostoja."
+  pdf_wczytany_tresc: "Tiedostosta {nazwa_pliku} luettiin teksti (sivuja: {liczba_stron}, kappaleita: {liczba_akapitow}).\n\nOhjelma muodosti kappaleet uudelleen sivujen asettelusta, yhdisti seuraavalle riville siirtyneet sanat ja ohitti sivunumerot. Tulos tallennetaan .html-tiedostona, koska ohjelma ei tallenna PDF-tiedostoja."
   pdf_kolontytuly: 'Toistuvat sivujen ylä- ja alatunnisteet ohitettiin: {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Huomio: näillä sivuilla ei ole tekstiä (todennäköisesti ne ovat skannauksia), eikä niiden sisältöä tule tulokseen: {lista_stron}'
 konwerter:

@@ -18,22 +18,32 @@ stronę): ATA i tak dzieli korpus od nowa w `cell_para`, a Poliglota stempluje
 produktu. Podział z geometrii linii (`_podziel_na_akapity`).
 
 Kolontytuły rozpoznajemy po POZYCJI, nie po słowach: ten sam tekst (po zdjęciu
-cyfr) w tym samym pasie wysokości, w górnym lub dolnym marginesie, na co
-najmniej ćwierci stron. ATA chroni nagłówki scen listą słów w sześciu językach;
+numeru — albo z numerem rosnącym razem ze stroną) w tym samym pasie wysokości,
+w górnym lub dolnym marginesie, na co najmniej ćwierci stron. ATA chroni nagłówki scen listą słów w sześciu językach;
 tu ochrona wynika z geometrii — „SCENA 2" w środku strony nie jest w marginesie,
 a lista słów w Pythonie byłaby wzorcem §6.7b (języki wypisane ręcznie w kodzie).
 """
 
 from __future__ import annotations
 
+import math
 import re
 import statistics
+import unicodedata
 from collections import Counter
 from dataclasses import dataclass, field
 
 
 class BrakWarstwyTekstu(Exception):
     """PDF bez warstwy tekstu (skan / obraz). Reżyser nie ma OCR — GUI mówi to wprost."""
+
+
+class PdfNieDoOtwarcia(Exception):
+    """PDFium nie otworzył pliku: hasło (`haslo=True`) albo plik uszkodzony."""
+
+    def __init__(self, sciezka: str, haslo: bool, szczegol: str) -> None:
+        super().__init__(szczegol)
+        self.sciezka, self.haslo, self.szczegol = sciezka, haslo, szczegol
 
 
 @dataclass
@@ -67,23 +77,22 @@ class _Linia:
     def wysokosc(self) -> float:
         return self.gora - self.dol
 
-
 # Ligatury typograficzne PDFium oddaje jako jeden znak; syntezator i lingua
 # potrzebują liter. Mapa celowo wąska (NFKC zmieniłby też ½, ², ℃ itd.).
 _LIGATURY = str.maketrans({
-    "ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl", "ﬃ": "ffi",
-    "ﬄ": "ffl", "ﬅ": "st", "ﬆ": "st",
+    "\ufb00": "ff", "\ufb01": "fi", "\ufb02": "fl", "\ufb03": "ffi",
+    "\ufb04": "ffl", "\ufb05": "st", "\ufb06": "st",
     # Dywiz automatycznego dzielenia wyrazów (Word) PDFium oddaje jako
     # U+FFFE (pypdfium2 5.14, zmierzone); \x02 to wariant opisywany dla
-    # innych buildów PDFium, niezweryfikowany — mapowany na wszelki wypadek. Bez tej
-    # zamiany wypadał razem ze sterującymi i w środku słowa zostawała spacja:
-    # „wier sza".
-    "￾": "­", "\x02": "­",
+    # innych buildów PDFium, niezweryfikowany — mapowany na wszelki wypadek.
+    # Bez tej zamiany wypadał razem ze sterującymi i w środku słowa zostawała
+    # spacja: „wier sza".
+    "\ufffe": "\u00ad", "\x02": "\u00ad",
 })
 # Znaki sterujące poza \n i \t (PDFium potrafi oddać \x00 itp.).
-_RE_STERUJACE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f￿]")
+_RE_STERUJACE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f\uffff]")
 # Przeniesienie: litera + dywiz (zwykły, miękki, U+2010) na KOŃCU linii.
-_RE_PRZENIESIENIE = re.compile(r"(\w)[-­‐]$")
+_RE_PRZENIESIENIE = re.compile(r"(\w)[-\u00ad\u2010]$")
 _RE_KONIEC_ZDANIA = re.compile(r"[.!?…:;»”\"')\]]$")
 # Punktor graficzny zaczyna punkt listy zawsze; myślnik i numer — tylko po
 # zakończonym zdaniu albo krótkiej linii, bo „– Zagadnienia…" w środku zdania
@@ -92,29 +101,102 @@ _RE_PUNKTOR = re.compile(r"^[•●▪◦‣∙·*]\s")
 _RE_PUNKT_SLABY = re.compile(r"^(?:[–—-]\s|\(?\d{1,3}[.)]\s|[a-zA-Z][.)]\s)")
 # Pozycja spisu treści: kropki prowadzące + numer strony na końcu linii.
 _RE_POZYCJA_SPISU = re.compile(r"(?:\.\s?){4,}\s*\d{1,4}$")
+# Kształt gołego numeru strony: „7”, „- 7 -”, „xii”, „7 / 120”, „7 z 120”,
+# „7 of 120”, „7 из 120”, „7 af 120”. SAM KSZTAŁT NIE WYSTARCZA do usunięcia
+# (audyt 19.13: „II”, „MIX”, „did” z marginesu znikały) — patrz
+# `_numery_stron_do_usuniecia`. Bliźniak 1:1: ATA `_PAGE_NUMBER_LINE`.
 _RE_NUMER_STRONY = re.compile(
-    r"^[-–—\s]*(?:\d{1,4}|[ivxlcdmIVXLCDM]{1,6})(?:\s*(?:/|z|of|из|af)\s*\d{1,4})?[-–—\s]*$")
+    r"^[-–—\s]*(\d{1,4}|[ivxlcdmIVXLCDM]{1,6})(?:\s*(?:/|z|of|из|af)\s*\d{1,4})?[-–—\s]*$")
 _RE_TAG_NAWIASOWY = re.compile(r"^\s*(?:\[[^\]]+\]|\([^)]+\))\s*$")
+_RE_NUMER_NA_BRZEGU = re.compile(r"^\s*(\d{1,4})\s+(.*\S)\s*$|^\s*(.*\S)\s+(\d{1,4})\s*$")
 
 _RE_BIALE = re.compile(r"[ \t]+")
 _DOKLEJANE = frozenset(",.;:!?)]»”…")
 
 #: Pas marginesu (ułamek wysokości strony od góry i od dołu), w którym szukamy
-#: kolontytułów i numerów stron.
-PAS_MARGINESU = 0.12
-#: Minimalny ułamek stron z tym samym kolontytułem (jak `min_fraction` w ATA).
+#: kolontytułów i numerów stron. 7%, nie 12%: margines Worda to 72 pt, czyli
+#: 8,5% strony A4, więc pas 12% obejmował pierwszą i ostatnią linię TREŚCI
+#: każdej strony (audyt 19.13).
+PAS_MARGINESU = 0.07
+#: Minimalny ułamek stron z tym samym kolontytułem / numerem.
 UDZIAL_STRON = 0.25
+#: Ułamek wystąpień rdzenia, którego numer musi rosnąć razem ze stroną.
+ZGODNOSC_NUMERU = 0.8
+
+_RZYMSKIE = {"i": 1, "v": 5, "x": 10, "l": 50, "c": 100, "d": 500, "m": 1000}
 
 
 def _czysc(tekst: str) -> str:
     return _RE_STERUJACE.sub("", tekst.translate(_LIGATURY).replace("\r", ""))
 
 
+def _rzymska(tekst: str) -> int | None:
+    """Wartość POPRAWNEJ liczby rzymskiej (kanoniczny zapis), inaczej None."""
+    s = tekst.lower()
+    if not s or any(z not in _RZYMSKIE for z in s):
+        return None
+    wartosc = 0
+    for a, b in zip(s, s[1:] + " "):
+        va, vb = _RZYMSKIE[a], _RZYMSKIE.get(b, 0)
+        wartosc += -va if va < vb else va
+    if not 0 < wartosc < 4000:
+        return None
+    # Kanoniczność: „IIII”, „VX”, „DID” nie są numerami stron.
+    kanon, reszta = "", wartosc
+    for v, z in ((1000, "m"), (900, "cm"), (500, "d"), (400, "cd"), (100, "c"),
+                 (90, "xc"), (50, "l"), (40, "xl"), (10, "x"), (9, "ix"),
+                 (5, "v"), (4, "iv"), (1, "i")):
+        while reszta >= v:
+            kanon += z
+            reszta -= v
+    return wartosc if kanon == s else None
+
+
+def _wartosc_numeru(tekst: str) -> int | None:
+    m = _RE_NUMER_STRONY.match(tekst)
+    if not m:
+        return None
+    rdzen = m.group(1)
+    return int(rdzen) if rdzen.isdigit() else _rzymska(rdzen)
+
+
+def _znaki_strony(tp) -> list[tuple[int, str]]:
+    """(indeks znaku PDFium, znak) — indeks to argument dla `get_charbox`.
+
+    Szybka ścieżka: jeden `get_text_range()`, gdy jego długość równa się
+    `count_chars()` (indeksy 1:1, zmierzone na 93 stronach). Inaczej znak po
+    znaku przez `FPDFText_GetUnicode`: glif bez Unicode (0) wypada z
+    `get_text_range`, więc od tego miejsca indeksy się rozjeżdżały i ramki
+    należały do sąsiednich znaków (audyt 19.13: „ko ncu wiersza”); znaki spoza
+    BMP przychodzą jako pary surogatów i są sklejane.
+    """
+    n = tp.count_chars()
+    pelny = tp.get_text_range()
+    if len(pelny) == n:
+        return list(enumerate(pelny))
+    import pypdfium2.raw as pdfium_c
+    wynik: list[tuple[int, str]] = []
+    wysoki: tuple[int, int] | None = None
+    for i in range(n):
+        u = pdfium_c.FPDFText_GetUnicode(tp.raw, i)
+        if u == 0:
+            continue
+        if 0xD800 <= u < 0xDC00:
+            wysoki = (i, u)
+            continue
+        if 0xDC00 <= u < 0xE000 and wysoki is not None:
+            wynik.append((wysoki[0], chr(0x10000 + ((wysoki[1] - 0xD800) << 10) + (u - 0xDC00))))
+            wysoki = None
+            continue
+        wysoki = None
+        wynik.append((i, chr(u)))
+    return wynik
+
+
 def _linie_strony(strona) -> list[_Linia]:
     """Linie WIZUALNE strony w kolejności strumienia treści.
 
-    Tekst bierzemy JEDNYM `get_text_range()` (indeksy tekstu i znaków są 1:1,
-    zmierzone na 93 stronach), a linie budujemy z ramki KAŻDEGO znaku
+    Tekst bierzemy z `_znaki_strony`, a linie budujemy z ramki KAŻDEGO znaku
     (`loose=True` = wysokość czcionki, nie obrys glifu; 152 tys. znaków
     w 0,36 s). Dwa skróty okazały się błędne:
       * `get_rect` + `get_text_bounded` — prostokąty biegów zachodzą na siebie
@@ -126,11 +208,12 @@ def _linie_strony(strona) -> list[_Linia]:
     Dlatego `\\r\\n` z PDFium jest tu tylko odstępem, a nową linię wyznacza
     wyłącznie geometria: brak pionowego pokrycia z bieżącą linią albo
     cofnięcie w lewo (zawinięcie). Bieg innym krojem na tej samej wysokości
-    („…как | , словообразование") zostaje w tej samej linii.
+    („…как | , словообразование") zostaje w tej samej linii. Pismo od prawej
+    do lewej (hebrajski, arabski) idzie w lewo z natury, więc jego znaki nie
+    liczą się jako cofnięcie — inaczej linia rozpadała się co 2–3 litery.
     """
     tp = strona.get_textpage()
     try:
-        pelny = tp.get_text_range()
         linie: list[_Linia] = []
         znaki: list[str] = []
         ramka: list[float] = []
@@ -145,7 +228,7 @@ def _linie_strony(strona) -> list[_Linia]:
             ramka.clear()
             wysokosci.clear()
 
-        for i, z in enumerate(pelny):
+        for i, z in _znaki_strony(tp):
             if z.isspace():
                 if znaki and znaki[-1] != " ":
                     znaki.append(" ")
@@ -159,7 +242,8 @@ def _linie_strony(strona) -> list[_Linia]:
                 # w indeksie górnym („…Шанский и А¹ | . Однако…").
                 pokrycie = min(gora, g) - max(dol, d)
                 inna_wysokosc = pokrycie < min(gora - dol, g - d, wys) * 0.5
-                cofniecie = l < prawo - wys
+                rtl = unicodedata.bidirectional(z) in ("R", "AL")
+                cofniecie = not rtl and l < prawo - wys
                 if inna_wysokosc or cofniecie:
                     zamknij()
             if not ramka:
@@ -177,74 +261,167 @@ def _linie_strony(strona) -> list[_Linia]:
         tp.close()
 
 
-def _klucz_kolontytulu(tekst: str) -> str:
-    """Tekst do porównania między stronami: bez cyfr na brzegach, małe litery."""
-    s = re.sub(r"^\s*\d+\s*", "", tekst)
-    s = re.sub(r"\s*\d+\s*$", "", s)
-    return re.sub(r"\s+", " ", s).lower().strip()
+def _linie_bez_geometrii(strona) -> list[_Linia]:
+    """Strona obrócona o 90°/270°: linie z kolejności tekstu, bez geometrii.
 
-
-def _w_marginesie(linia: _Linia, wys_strony: float) -> bool:
-    pas = wys_strony * PAS_MARGINESU
-    return linia.gora >= wys_strony - pas or linia.dol <= pas
-
-
-def _usun_kolontytuly(strony: list[tuple[list[_Linia], float]]) -> tuple[list[list[_Linia]], list[str]]:
-    """Usuwa kolontytuły (pozycja + powtórzenie) i gołe numery stron z marginesu.
-
-    Kolontytuł = ten sam klucz tekstu w tym samym pasie wysokości (±3 pt,
-    zaokrąglenie do 6 pt) na co najmniej `UDZIAL_STRON` stron, ale nie mniej
-    niż 2. Linie-tagi `[...]`/`(...)` są chronione zawsze — to składnia
-    Reżysera i didaskalia, nie stopka.
+    Ramki znaków PDFium są w układzie NIEOBRÓCONYM, więc na takiej stronie
+    „pionowe pokrycie” i „cofnięcie” mierzą niewłaściwą oś (audyt 19.13:
+    kolejność linii odwrócona przy 90°). Linie bierzemy z łamań PDFium i
+    nadajemy im współrzędne środka strony — akapity dzielą wtedy wyłącznie
+    reguły tekstowe, a kolontytuły i numery stron nie są tu usuwane.
     """
-    prog = max(2, int(len(strony) * UDZIAL_STRON))
-    licznik: Counter = Counter()
-    # Pierwsze wystąpienie W ORYGINALE — do komunikatu. Klucz porównania
-    # (małe litery, bez cyfr na brzegach) czytany na głos brzmiał jak błąd:
-    # „kwartalnik testowy – nr 3/".
-    oryginal: dict[str, str] = {}
-    for linie, wys in strony:
-        widziane = set()
-        for linia in linie:
-            if not _w_marginesie(linia, wys) or _RE_TAG_NAWIASOWY.match(linia.tekst):
+    tp = strona.get_textpage()
+    try:
+        tekst = "".join(z for _, z in _znaki_strony(tp))
+    finally:
+        tp.close()
+    linie = []
+    for nr, kawalek in enumerate(re.split(r"\r\n|\n|\r", tekst)):
+        czysty = _RE_BIALE.sub(" ", _czysc(kawalek)).strip()
+        if czysty:
+            linie.append(_Linia(czysty, 0.0, -12.0 * nr, 1000.0, -12.0 * nr + 10, czcionka=10.0))
+    return linie
+
+
+@dataclass
+class _Strona:
+    linie: list[_Linia]
+    dol: float
+    gora: float
+    #: False dla stron obróconych o 90°/270° — margines nie jest wtedy znany.
+    geometria: bool = True
+
+    def w_marginesie(self, linia: _Linia) -> bool:
+        if not self.geometria:
+            return False
+        pas = (self.gora - self.dol) * PAS_MARGINESU
+        return linia.gora >= self.gora - pas or linia.dol <= self.dol + pas
+
+
+def _numery_stron_do_usuniecia(strony: list[_Strona]) -> set[tuple[int, int]]:
+    """(strona, indeks linii) gołych numerów stron, które wolno usunąć.
+
+    Kształt numeru to za mało: linia w marginesie znika tylko wtedy, gdy jej
+    wartość rośnie RAZEM ze stroną — ta sama różnica „numer − indeks strony”
+    w tym samym pasie (góra/dół) na co najmniej max(2, ⌈UDZIAL_STRON·N⌉)
+    stronach. Rzymski nagłówek „II” na jednej stronie, słowo „MIX” czy rok
+    „2026” w stopce tej różnicy nie dzielą i zostają. Dokument jednostronicowy
+    nie traci nic.
+    """
+    kandydaci: dict[tuple[str, int], list[tuple[int, int]]] = {}
+    for s_nr, strona in enumerate(strony):
+        for l_nr, linia in enumerate(strona.linie):
+            if not strona.w_marginesie(linia):
                 continue
-            klucz = (_klucz_kolontytulu(linia.tekst), round(linia.dol / 6))
+            wartosc = _wartosc_numeru(linia.tekst)
+            if wartosc is None:
+                continue
+            pas = "gora" if linia.gora >= (strona.dol + strona.gora) / 2 else "dol"
+            kandydaci.setdefault((pas, wartosc - s_nr), []).append((s_nr, l_nr))
+    prog = max(2, math.ceil(len(strony) * UDZIAL_STRON))
+    wynik: set[tuple[int, int]] = set()
+    for miejsca in kandydaci.values():
+        if len({s for s, _ in miejsca}) >= prog:
+            wynik.update(miejsca)
+    return wynik
+
+
+def _usun_kolontytuly(strony: list[_Strona]) -> tuple[list[list[_Linia]], list[str]]:
+    """Usuwa kolontytuły i gołe numery stron z pasa marginesu.
+
+    Kolontytuł = linia w pasie marginesu (±1 krok 6 pt wysokości), której
+    tekst powtarza się 1:1 na co najmniej max(3, ⌈UDZIAL_STRON·N⌉) stronach,
+    albo której rdzeń bez numeru na brzegu powtarza się tak samo, a numer
+    rośnie razem ze stroną (stała różnica numer − indeks w ≥ ZGODNOSC_NUMERU
+    wystąpień). Do 19.13 numer był po prostu zdejmowany, więc „Rozdział 1…8”
+    na górze kolejnych stron dawało jeden klucz i znikało jako kolontytuł
+    (audyt 19.13) — dokładnie ta reguła zawiodła wcześniej w ATA. Dokumenty
+    krótsze niż 3 strony są nietknięte. Linie-tagi `[...]`/`(...)` są
+    chronione zawsze — to składnia Reżysera i didaskalia, nie stopka.
+    """
+    n = len(strony)
+    numery = _numery_stron_do_usuniecia(strony)
+    if n < 3:
+        return ([[l for i, l in enumerate(s.linie) if (s_nr, i) not in numery]
+                 for s_nr, s in enumerate(strony)], [])
+    prog = max(3, math.ceil(n * UDZIAL_STRON))
+
+    def kandydat(strona: _Strona, linia: _Linia) -> bool:
+        return strona.w_marginesie(linia) and not _RE_TAG_NAWIASOWY.match(linia.tekst)
+
+    def norm(t: str) -> str:
+        return re.sub(r"\s+", " ", t).lower().strip()
+
+    dokladne: Counter = Counter()
+    rdzenie: dict[tuple[str, int], list[int]] = {}
+    oryginal: dict[tuple, str] = {}
+    for s_nr, strona in enumerate(strony):
+        widziane = set()
+        for linia in strona.linie:
+            if not kandydat(strona, linia):
+                continue
+            y = round(linia.dol / 6)
+            klucz = (norm(linia.tekst), y)
             if len(klucz[0]) >= 3 and klucz not in widziane:
-                licznik[klucz] += 1
+                dokladne[klucz] += 1
                 widziane.add(klucz)
-                oryginal.setdefault(klucz[0], linia.tekst)
-    kolontytuly = {k for k, n in licznik.items() if n >= prog}
-    # Pas ±1 kroku zaokrąglenia — ta sama stopka bywa przesunięta o ułamek punktu.
-    rozmyte = {(t, y + dy) for t, y in kolontytuly for dy in (-1, 0, 1)}
+                oryginal.setdefault(klucz, linia.tekst)
+            m = _RE_NUMER_NA_BRZEGU.match(linia.tekst)
+            if m:
+                numer = int(m.group(1) or m.group(4))
+                rdzen = norm(m.group(2) or m.group(3))
+                if len(rdzen) >= 3 and (rdzen, y) not in widziane:
+                    rdzenie.setdefault((rdzen, y), []).append(numer - s_nr)
+                    widziane.add((rdzen, y))
+                    oryginal.setdefault((rdzen, y), linia.tekst)
+    naglowki = {k for k, c in dokladne.items() if c >= prog}
+    numerowane = {k for k, off in rdzenie.items()
+                  if len(off) >= prog
+                  and Counter(off).most_common(1)[0][1] >= ZGODNOSC_NUMERU * len(off)}
+
+    def pasuje(zbior: set, tekst: str, y: int) -> bool:
+        return any((tekst, y + dy) in zbior for dy in (-1, 0, 1))
 
     wynik: list[list[_Linia]] = []
-    for linie, wys in strony:
+    for s_nr, strona in enumerate(strony):
         zostaja = []
-        for linia in linie:
-            if _w_marginesie(linia, wys) and not _RE_TAG_NAWIASOWY.match(linia.tekst):
-                if (_klucz_kolontytulu(linia.tekst), round(linia.dol / 6)) in rozmyte:
+        for l_nr, linia in enumerate(strona.linie):
+            if (s_nr, l_nr) in numery:
+                continue
+            if kandydat(strona, linia):
+                y = round(linia.dol / 6)
+                if pasuje(naglowki, norm(linia.tekst), y):
                     continue
-                if _RE_NUMER_STRONY.match(linia.tekst):
+                m = _RE_NUMER_NA_BRZEGU.match(linia.tekst)
+                if m and pasuje(numerowane, norm(m.group(2) or m.group(3)), y):
                     continue
             zostaja.append(linia)
         wynik.append(zostaja)
-    return wynik, sorted({oryginal[t] for t, _ in kolontytuly})
+    usuniete = sorted({oryginal[k] for k in naglowki | numerowane})
+    return wynik, usuniete
 
 
-def _sklej(lewy: str, prawy: str) -> str:
+def _sklej(lewy: str, prawy: str, dzielenie_auto: bool = False) -> str:
     """Łączy dwie linie akapitu, zdejmując przeniesienie wyrazu.
 
-    Miękki dywiz (z dzielenia automatycznego) skleja zawsze. Zwykły dywiz —
-    tylko przed małą literą, bo „Jean-|Paul" i „PKO-|BP" to łączniki.
+    Miękki dywiz (dzielenie automatyczne) skleja zawsze. Zwykły dywiz:
+      * gdy dokument ma dzielenie automatyczne (PDF z Worda), zwykły dywiz na
+        końcu linii jest PRAWDZIWY — „biało-|czerwona” → „biało-czerwona”,
+        „e-|mail” → „e-mail” (audyt 19.13: wychodziło „białoczerwona”);
+      * bez dzielenia automatycznego przed małą literą to przeniesienie
+        („przy-|kład” → „przykład”), przed wielką albo cyfrą łącznik bez
+        spacji („Jean-|Paul” → „Jean-Paul”).
     """
-    if lewy.endswith("­"):
+    if lewy.endswith("\u00ad"):
         return lewy[:-1] + prawy
-    if _RE_PRZENIESIENIE.search(lewy) and prawy[:1].islower():
+    if _RE_PRZENIESIENIE.search(lewy):
+        if dzielenie_auto or not prawy[:1].islower():
+            return lewy + prawy
         return lewy[:-1] + prawy
     return lewy + " " + prawy
 
 
-def _podziel_na_akapity(linie: list[_Linia]) -> list[str]:
+def _podziel_na_akapity(linie: list[_Linia], dzielenie_auto: bool = False) -> list[str]:
     """Skleja linie jednej strony w akapity.
 
     Granica akapitu, gdy:
@@ -256,8 +433,7 @@ def _podziel_na_akapity(linie: list[_Linia]) -> list[str]:
       * kolejna linia zaczyna punkt listy (myślnik/numer — tylko po końcu
         zdania albo krótkiej linii),
       * poprzednia linia jest pozycją spisu treści (kropki + numer strony).
-    Przeniesienie wyrazu („przy-\\nkład") skleja się bez dywizu tylko wtedy,
-    gdy następna linia zaczyna się małą literą — „Jean-\\nPaul" zostaje.
+    Przeniesienia wyrazów skleja `_sklej`.
     """
     if not linie:
         return []
@@ -296,12 +472,19 @@ def _podziel_na_akapity(linie: list[_Linia]) -> list[str]:
             (nast.gora > poprz.gora + wys * 0.5 and not ciag_dalszy)
             or (abs(nast.lewo - poprz.lewo) > szer * 0.5 and not ciag_dalszy)
             or odstep > typowy + wys * 0.6
+            # Bezwzględnie: przerwa na półtora wiersza to akapit. Na stronie
+            # z dwiema liniami „typowy” odstęp to ten jeden, więc reguła
+            # względna nigdy nie zadziałała (zmierzone na prawdziwym PDF-ie).
+            # Podwójna interlinia to ok. jeden wiersz przerwy — mieści się.
+            # Zdanie ciągnące się małą literą przez rozstrzeloną stronę
+            # tytułową („…работа, | написанная…”) zostaje w całości.
+            or (odstep > wys * 1.5 and not ciag_dalszy)
             # Zmiana wielkości czcionki: nagłówek „ROZDZIAŁ 1" nad akapitem.
             or abs(nast.czcionka - poprz.czcionka) > wys * 0.2
             or (konczy and krotka)
             # Krótka linia bez kropki przed wielką literą: tytuł albo nagłówek
             # w tym samym kroju co tekst. Przecinek i dywiz na końcu = ciąg dalszy.
-            or (krotka and not poprz.tekst.endswith((",", "-", "­"))
+            or (krotka and not poprz.tekst.endswith((",", "-", "\u00ad"))
                 and (nast.tekst[:1].isupper() or nast.tekst[:1].isdigit()))
             or _RE_POZYCJA_SPISU.search(poprz.tekst)
             or _RE_PUNKTOR.match(nast.tekst)
@@ -311,11 +494,11 @@ def _podziel_na_akapity(linie: list[_Linia]) -> list[str]:
             akapity.append(biezacy)
             biezacy = nast.tekst
             continue
-        biezacy = _sklej(biezacy, nast.tekst)
+        biezacy = _sklej(biezacy, nast.tekst, dzielenie_auto)
     akapity.append(biezacy)
     wynik: list[str] = []
     # Miękki dywiz w środku linii nic nie znaczy dla syntezatora — wypada.
-    for a in (x.replace("­", "").strip() for x in akapity):
+    for a in (x.replace("\u00ad", "").strip() for x in akapity):
         if not a:
             continue
         # Sama interpunkcja (osierocony przecinek po biegu kursywy) to koniec
@@ -331,10 +514,13 @@ def wyciagnij(sciezka: str) -> WynikPdf:
     """Czyta warstwę tekstu PDF i zwraca akapity.
 
     Raises:
-        BrakWarstwyTekstu: żadna strona nie ma tekstu (skan / obraz).
+        BrakWarstwyTekstu: żadna strona nie daje tekstu — skan / obraz, ale też
+            PDF, w którym po zdjęciu numerów stron nie zostaje ani jeden akapit
+            (audyt 19.13: Poliglota „wczytywała” 0 akapitów, Konwerter
+            zapisywał pusty .docx z dialogiem „Sukces”).
         RuntimeError: brak `pypdfium2` w środowisku — głośno, nie ciszą.
-        pypdfium2.PdfiumError: plik uszkodzony albo zaszyfrowany hasłem
-            (GUI pokazuje treść błędu w ogólnym dialogu odczytu).
+        PdfNieDoOtwarcia: plik chroniony hasłem albo uszkodzony
+            (GUI zamienia to na przetłumaczony komunikat).
     """
     try:
         import pypdfium2 as pdfium
@@ -345,18 +531,33 @@ def wyciagnij(sciezka: str) -> WynikPdf:
             "requirements.txt)."
         ) from exc
 
-    pdf = pdfium.PdfDocument(sciezka)
     try:
-        strony: list[tuple[list[_Linia], float]] = []
+        pdf = pdfium.PdfDocument(sciezka)
+    except pdfium.PdfiumError as exc:
+        # Audyt 19.13: użytkownik dostawał surowe „Failed to load document
+        # (PDFium: Incorrect password error)”, a dla PDF-a bez stron wręcz
+        # „(PDFium: Success)”. GUI pokazuje przetłumaczony komunikat, techniczny
+        # szczegół zostaje w osobnej linii.
+        raise PdfNieDoOtwarcia(sciezka, "password" in str(exc).lower(), str(exc)) from exc
+    try:
+        strony: list[_Strona] = []
         bez_tekstu: list[int] = []
         for nr in range(len(pdf)):
             strona = pdf[nr]
             try:
-                linie = _linie_strony(strona)
-                strony.append((linie, strona.get_height()))
+                # Pas marginesu z cropboxu w układzie NIEOBRÓCONYM — w tym
+                # samym układzie PDFium podaje ramki znaków. `get_height()`
+                # zwraca wysokość po obrocie (595 zamiast 842 przy 90°/270°),
+                # więc „margines” trafiał w środek strony (audyt 19.13).
+                _l, dol, _p, gora = strona.get_cropbox()
+                if strona.get_rotation() in (90, 270):
+                    s = _Strona(_linie_bez_geometrii(strona), dol, gora, geometria=False)
+                else:
+                    s = _Strona(_linie_strony(strona), dol, gora)
             finally:
                 strona.close()
-            if not linie:
+            strony.append(s)
+            if not s.linie:
                 bez_tekstu.append(nr + 1)
         liczba = len(pdf)
     finally:
@@ -365,14 +566,17 @@ def wyciagnij(sciezka: str) -> WynikPdf:
     if liczba == 0 or len(bez_tekstu) == liczba:
         raise BrakWarstwyTekstu(sciezka)
 
+    dzielenie_auto = any("\u00ad" in l.tekst for s in strony for l in s.linie)
     oczyszczone, kolontytuly = _usun_kolontytuly(strony)
     akapity: list[str] = []
     for linie in oczyszczone:
-        nowe = _podziel_na_akapity(linie)
+        nowe = _podziel_na_akapity(linie, dzielenie_auto)
         # Akapit przerwany granicą strony: poprzedni nie kończy zdania, a nowy
         # zaczyna się małą literą — to jedno zdanie, nie dwa akapity.
         if akapity and nowe and not _RE_KONIEC_ZDANIA.search(akapity[-1]) \
                 and nowe[0][:1].islower():
-            akapity[-1] = _sklej(akapity[-1], nowe.pop(0))
+            akapity[-1] = _sklej(akapity[-1], nowe.pop(0), dzielenie_auto)
         akapity.extend(nowe)
+    if not akapity:
+        raise BrakWarstwyTekstu(sciezka)
     return WynikPdf(akapity, liczba, bez_tekstu, kolontytuly)

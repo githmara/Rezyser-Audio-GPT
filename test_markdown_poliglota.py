@@ -149,11 +149,43 @@ def test_c_wildcard_wymienia_kazde_obslugiwane_rozszerzenie() -> None:
         assert isinstance(wildcard, str) and wildcard.strip(), (
             f"{kod}/gui/ui.yaml: brak `poliglota.file_dlg_wildcard`")
         # 19.13: EXT_WEJSCIA (zapisywane + `.pdf`) — okno pokazuje, co GUI WCZYTUJE.
-        braki = [ext for ext in cp.EXT_WEJSCIA if f"*{ext}" not in wildcard]
+        # Porównanie ZBIORÓW wzorców pierwszego filtra, nie podciągu: audyt 19.13
+        # pokazał, że `*.htm` „było” w `*.html`, a `*.pdf` w etykiecie przy
+        # `*.pdfx` w filtrze.
+        braki = sorted({f"*{ext}" for ext in cp.EXT_WEJSCIA} - _wzorce_pierwszego_filtra(wildcard))
         assert not braki, (
             f"{kod}/gui/ui.yaml: wildcard nie wymienia {braki} — silnik te "
             f"pliki obsluguje, wiec okno wyboru ma je pokazywac "
-            f"(wzorce `*{braki[0]}` to LITERAL, nie tekst do tlumaczenia)")
+            f"(wzorce `{braki[0]}` to LITERAL, nie tekst do tlumaczenia)")
+
+
+def _wzorce_pierwszego_filtra(wildcard: str) -> set[str]:
+    """Wzorce filtra „wszystkie obsługiwane”: `etykieta|wzorce|etykieta|wzorce…`."""
+    czesci = wildcard.strip().split("|")
+    assert len(czesci) >= 2 and len(czesci) % 2 == 0, f"zly ksztalt wildcardu: {wildcard!r}"
+    return {w.strip() for w in czesci[1].split(";")}
+
+
+def test_c2_wildcard_konwertera_wymienia_jego_formaty() -> None:
+    """C2 (19.13): Konwerter czyta .txt, .docx i warstwę tekstu .pdf."""
+    for kod in cp.dostepne_jezyki_bazowe():
+        dane = yaml.safe_load((KATALOG / "dictionaries" / kod / "gui" / "ui.yaml")
+                              .read_text(encoding="utf-8"))
+        wzorce = _wzorce_pierwszego_filtra(dane["konwerter"]["file_dlg_wildcard"])
+        braki = {"*.txt", "*.docx", "*.pdf"} - wzorce
+        assert not braki, f"{kod}: wildcard Konwertera bez {sorted(braki)}"
+
+
+@pytest.mark.parametrize("wejscie,wynik", [
+    ("---\ntitle: X\ntags: [a]\n---\n# T", "# T"),
+    (chr(0xFEFF) + "---\ntitle: X\n---\n# T", "# T"),
+    ("---\ntitle: X\n...\n# T", "# T"),
+    # Audyt 19.13: linia pozioma na początku NIE jest metadanymi.
+    ("---\n\nAkapit.\n\nDrugi.\n\n---\n\nKoniec.", "---\n\nAkapit.\n\nDrugi.\n\n---\n\nKoniec."),
+    ("---\ntekst\n---\nKoniec.", "---\ntekst\n---\nKoniec."),
+])
+def test_f_front_matter_tylko_gdy_to_mapa_yaml(wejscie, wynik) -> None:
+    assert core_markdown.zdejmij_front_matter(wejscie) == wynik
 
 
 def test_d_wspolny_renderer_dwie_konfiguracje() -> None:

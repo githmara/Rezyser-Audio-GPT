@@ -49,6 +49,9 @@ common:
   llm_nieznany_model: "Il provider AI non riconosce il modello «{model}».\nSe il programma è passato da poco a un nuovo modello Claude, OpenRouter potrebbe non averlo ancora reso disponibile. Inserisci in golden_key.env una riga LLM_MODEL= con un modello già presente su OpenRouter (ad es. anthropic/claude-sonnet-5.5) e riavvia il programma."
   pdf_bez_tekstu_tytul: PDF senza testo
   pdf_bez_tekstu_tresc: "Il file {nazwa_pliku} non contiene un livello di testo: con ogni probabilità è una scansione o un insieme di immagini delle pagine.\n\nIl programma legge soltanto il testo memorizzato nel PDF e non riconosce il testo nelle immagini (OCR). Se hai questo documento in un altro formato (Word, testo, HTML), carica quello al posto del PDF."
+  pdf_otwarcie_tytul: Impossibile aprire il PDF
+  pdf_haslo_tresc: "Il file {nazwa_pliku} è protetto da password, quindi il programma non riesce a leggerlo.\n\nAprilo in un visualizzatore PDF e salvane una copia senza password, oppure esporta il contenuto in un file Word o di testo e caricalo al posto del PDF.\n\nDettagli tecnici: {szczegol}"
+  pdf_uszkodzony_tresc: "Impossibile aprire il file {nazwa_pliku}: è danneggiato oppure non è un file PDF valido.\n\nDettagli tecnici: {szczegol}"
 main:
   menu:
     narzedzia: "&Strumenti"
@@ -897,7 +900,7 @@ poliglota:
   per_akapit_nadpisanie_tytul: Sovrascrivere i codici impostati?
   per_akapit_nadpisanie_tresc: "Questa operazione imposterà il codice in tutti i paragrafi contemporaneamente, e {liczba_zmienionych} di essi ha attualmente un codice diverso da quello con cui l'elenco è stato aperto.\n\nLa modifica non potrà essere annullata. Continuare?"
   pdf_wczytany_tytul: Testo estratto dal PDF
-  pdf_wczytany_tresc: "Dal file {nazwa_pliku} è stato estratto il testo: {liczba_stron} pagine, {liczba_akapitow} paragrafi.\n\nIl programma ha ricostruito i paragrafi a partire dall'impaginazione, ha riunito le parole divise a fine riga e ha ignorato i numeri di pagina. Il risultato verrà salvato come file .html, perché il programma non salva in formato PDF."
+  pdf_wczytany_tresc: "Dal file {nazwa_pliku} è stato estratto il testo (pagine: {liczba_stron}, paragrafi: {liczba_akapitow}).\n\nIl programma ha ricostruito i paragrafi a partire dall'impaginazione, ha riunito le parole divise a fine riga e ha ignorato i numeri di pagina. Il risultato verrà salvato come file .html, perché il programma non salva in formato PDF."
   pdf_kolontytuly: 'Intestazioni e piè di pagina ripetuti ignorati: {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Attenzione: queste pagine non contengono testo (con ogni probabilità sono scansioni) e il loro contenuto non sarà presente nel risultato: {lista_stron}'
 konwerter:

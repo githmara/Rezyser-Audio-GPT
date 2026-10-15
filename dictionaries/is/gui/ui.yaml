@@ -49,6 +49,9 @@ common:
   llm_nieznany_model: "AI-þjónustuveitandinn þekkir ekki líkanið „{model}“.\nEf forritið var að skipta yfir í nýtt Claude-líkan gæti OpenRouter ekki enn hafa gert það aðgengilegt. Skrifaðu línuna LLM_MODEL= í golden_key.env með líkani sem OpenRouter býður nú þegar (t.d. anthropic/claude-sonnet-5.5) og ræstu forritið aftur."
   pdf_bez_tekstu_tytul: PDF án texta
   pdf_bez_tekstu_tresc: "Skráin {nazwa_pliku} inniheldur ekkert textalag – líklega er þetta skönnun eða myndir af síðum.\n\nForritið les aðeins texta sem er vistaður í PDF-skjalinu og þekkir ekki texta í myndum (OCR). Ef þú átt skjalið á öðru sniði (Word, texti, HTML) skaltu opna það í staðinn fyrir PDF-skjalið."
+  pdf_otwarcie_tytul: Ekki er hægt að opna PDF-skrána
+  pdf_haslo_tresc: "Skráin {nazwa_pliku} er varin með lykilorði og forritið getur því ekki lesið hana.\n\nOpnaðu hana í PDF-skoðara, vistaðu afrit án lykilorðs eða fluttu efnið út í Word-skjal eða textaskrá og hladdu henni inn í staðinn fyrir PDF-skrána.\n\nTæknilegar upplýsingar: {szczegol}"
+  pdf_uszkodzony_tresc: "Ekki tókst að opna skrána {nazwa_pliku} – hún er skemmd eða er ekki gild PDF-skrá.\n\nTæknilegar upplýsingar: {szczegol}"
 main:
   menu:
     narzedzia: "&Verkfæri"
@@ -897,7 +900,7 @@ poliglota:
   per_akapit_nadpisanie_tytul: Skrifa yfir stillta kóða?
   per_akapit_nadpisanie_tresc: "Þessi aðgerð stillir kóðann í öllum efnisgreinum í einu og {liczba_zmienionych} þeirra eru núna með annan kóða en þann sem listinn opnaðist með.\n\nEkki er hægt að afturkalla breytinguna. Halda áfram?"
   pdf_wczytany_tytul: Texti lesinn úr PDF-skjali
-  pdf_wczytany_tresc: "Texti var lesinn úr skránni {nazwa_pliku}: {liczba_stron} síður, {liczba_akapitow} málsgreinar.\n\nForritið endurbyggði málsgreinarnar út frá uppsetningu síðnanna, tengdi saman orð sem voru brotin á milli lína og sleppti blaðsíðutölum. Niðurstaðan verður vistuð sem .html skrá, því forritið vistar ekki PDF-skjöl."
+  pdf_wczytany_tresc: "Texti var lesinn úr skránni {nazwa_pliku} (síður: {liczba_stron}, málsgreinar: {liczba_akapitow}).\n\nForritið endurbyggði málsgreinarnar út frá uppsetningu síðnanna, tengdi saman orð sem voru brotin á milli lína og sleppti blaðsíðutölum. Niðurstaðan verður vistuð sem .html skrá, því forritið vistar ekki PDF-skjöl."
   pdf_kolontytuly: 'Endurteknum síðuhausum og síðufótum var sleppt: {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Athugið: þessar síður eru án texta (líklega skannaðar) og efni þeirra verður ekki með í niðurstöðunni: {lista_stron}'
 konwerter:

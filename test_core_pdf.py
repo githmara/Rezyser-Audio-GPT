@@ -51,6 +51,9 @@ class _AtrapaTp:
     def __init__(self, tekst, ramki):
         self.tekst, self.ramki = tekst, ramki
 
+    def count_chars(self):
+        return len(self.tekst)
+
     def get_text_range(self):
         return self.tekst
 
@@ -95,7 +98,7 @@ def test_zawiniecie_akapitu_bez_crlf_daje_osobne_linie():
 
 
 def test_dywiz_dzielenia_ufffe_skleja_wyraz():
-    strona = _strona(("granicy wier￾", 90, 600, 12), ("sza. Koniec", 90, 584, 12))
+    strona = _strona(("granicy wier\ufffe", 90, 600, 12), ("sza. Koniec", 90, 584, 12))
     linie = core_pdf._linie_strony(strona)
     assert core_pdf._podziel_na_akapity(linie) == ["granicy wiersza. Koniec"]
 
@@ -163,13 +166,18 @@ def test_skok_szpalty_w_srodku_zdania_to_ciag_dalszy():
         "Tekst lewej szpalty, który ciągnie się i przechodzi do prawej."]
 
 
-@pytest.mark.parametrize("lewy,prawy,wynik", [
-    ("przy­", "Kład", "przyKład"),       # miękki dywiz skleja zawsze
-    ("przy-", "kład", "przykład"),            # zwykły — przed małą literą
-    ("Jean-", "Paul", "Jean- Paul"),          # łącznik przed wielką zostaje
+MIEKKI = chr(0xAD)
+
+
+@pytest.mark.parametrize("lewy,prawy,auto,wynik", [
+    ("przy" + MIEKKI, "Kład", False, "przyKład"),   # miękki dywiz skleja zawsze
+    ("przy-", "kład", False, "przykład"),            # bez dzielenia auto: przeniesienie
+    ("Jean-", "Paul", False, "Jean-Paul"),           # łącznik przed wielką, bez spacji
+    ("biało-", "czerwona", True, "biało-czerwona"),  # Word: zwykły dywiz jest prawdziwy
+    ("e-", "mail", True, "e-mail"),
 ])
-def test_sklejanie_przeniesien(lewy, prawy, wynik):
-    assert core_pdf._sklej(lewy, prawy) == wynik
+def test_sklejanie_przeniesien(lewy, prawy, auto, wynik):
+    assert core_pdf._sklej(lewy, prawy, auto) == wynik
 
 
 def test_pozycja_spisu_tresci_konczy_akapit():
@@ -179,35 +187,79 @@ def test_pozycja_spisu_tresci_konczy_akapit():
 
 # --------------------------------------------------------------------- C ---
 
+def S(*linie):
+    return core_pdf._Strona(list(linie), 0.0, WYS_STRONY)
+
+
 def _strony_z_kolontytulem(n=4):
-    strony = []
-    for nr in range(1, n + 1):
-        linie = [
-            L(f"Kwartalnik Testowy – Nr {nr}", 90, 790, 300),   # górny margines
-            L("[scena 1]", 90, 770, 160),                      # tag w marginesie
-            L("SCENA 2", 90, 400, 160),                        # środek strony
-            L(f"Treść strony {nr}.", 90, 380, 300),
-            L(str(nr), 290, 30, 300),                          # numer strony
-        ]
-        strony.append((linie, WYS_STRONY))
-    return strony
+    return [S(
+        L("Kwartalnik Testowy", 90, 815, 300),        # górny margines (7% = 59 pt)
+        L("[scena 1]", 90, 800, 160),                 # tag w marginesie
+        L("SCENA 2", 90, 400, 160),                   # środek strony
+        L(f"Treść strony {nr}.", 90, 380, 300),
+        L(str(nr), 290, 25, 300),                     # numer strony = indeks + 1
+    ) for nr in range(1, n + 1)]
 
 
-def test_kolontytul_po_pozycji_znika_tresc_zostaje():
+def test_kolontytul_i_numery_stron_znikaja_tresc_zostaje():
     wynik, kolontytuly = core_pdf._usun_kolontytuly(_strony_z_kolontytulem())
-    teksty = [x.tekst for x in wynik[0]]
-    assert "Kwartalnik Testowy – Nr 1" not in teksty
-    assert "1" not in teksty
-    assert teksty == ["[scena 1]", "SCENA 2", "Treść strony 1."]
-    assert kolontytuly == ["Kwartalnik Testowy – Nr 1"]   # oryginał, nie klucz
+    assert [x.tekst for x in wynik[0]] == ["[scena 1]", "SCENA 2", "Treść strony 1."]
+    assert kolontytuly == ["Kwartalnik Testowy"]
+
+
+def test_rozdzial_w_marginesie_nie_jest_kolontytulem():
+    # Audyt 19.13: „Rozdział N” traciło numer w kluczu i znikało ze wszystkich
+    # stron. Numer, który NIE rośnie razem ze stroną, to treść.
+    numery = [1, 1, 2, 2, 3, 3]
+    strony = [S(L(f"Rozdział {n}", 90, 815, 200), L("Proza.", 90, 400, 300)) for n in numery]
+    wynik, kolontytuly = core_pdf._usun_kolontytuly(strony)
+    assert kolontytuly == []
+    assert [s[0].tekst for s in wynik] == [f"Rozdział {n}" for n in numery]
+
+
+def test_kolontytul_numerowany_rosnacy_ze_strona_znika():
+    strony = [S(L(f"Historia Polski {i + 11}", 90, 815, 300), L("Proza.", 90, 400, 300))
+              for i in range(5)]
+    wynik, kolontytuly = core_pdf._usun_kolontytuly(strony)
+    assert all([x.tekst for x in s] == ["Proza."] for s in wynik)
+    assert kolontytuly == ["Historia Polski 11"]
+
+
+@pytest.mark.parametrize("slowo", ["II", "MIX", "did", "2026", "Ill"])
+def test_pojedyncze_slowo_w_marginesie_zostaje(slowo):
+    # Audyt 19.13: kształt numeru wystarczał do usunięcia — „II” (rzymski
+    # nagłówek), „MIX”, „did” znikały z jednej strony bez żadnego powtórzenia.
+    strony = [S(L(slowo, 90, 815, 120), L("Proza.", 90, 400, 300)),
+              S(L("Proza dalej.", 90, 400, 300)), S(L("Koniec.", 90, 400, 300))]
+    wynik, _ = core_pdf._usun_kolontytuly(strony)
+    assert wynik[0][0].tekst == slowo
+
+
+def test_rzymska_numeracja_wstepu_znika():
+    strony = [S(L(r, 290, 25, 300), L("Proza.", 90, 400, 300))
+              for r in ("i", "ii", "iii", "iv")]
+    wynik, _ = core_pdf._usun_kolontytuly(strony)
+    assert all([x.tekst for x in s] == ["Proza."] for s in wynik)
+
+
+def test_rzymska_niekanoniczna_to_nie_liczba():
+    assert core_pdf._rzymska("XIV") == 14
+    assert core_pdf._rzymska("IIII") is None and core_pdf._rzymska("did") is None
 
 
 def test_ta_sama_linia_na_innej_wysokosci_to_nie_kolontytul():
     # Refren w środku stron — powtarza się, ale nie w marginesie.
-    strony = [([L("Hej, sokoły, omijajcie", 90, 300 + 40 * i, 400)], WYS_STRONY)
-              for i in range(4)]
+    strony = [S(L("Hej, sokoły, omijajcie", 90, 300 + 40 * i, 400)) for i in range(4)]
     wynik, kolontytuly = core_pdf._usun_kolontytuly(strony)
     assert kolontytuly == [] and all(len(s) == 1 for s in wynik)
+
+
+def test_dwie_strony_z_ta_sama_pierwsza_linia_zostaja():
+    # Audyt 19.13: przy progu 2 dwie strony traciły wspólną pierwszą linię prozy.
+    strony = [S(L("kropka, żeby silnik miał co sklejać", 90, 815, 400), L("Proza.", 90, 400, 300))
+              for _ in range(2)]
+    wynik, kolontytuly = core_pdf._usun_kolontytuly(strony)
+    assert kolontytuly == [] and all(len(s) == 2 for s in wynik)
 
 
 # --------------------------------------------------------------------- D ---
@@ -221,7 +273,8 @@ class _AtrapaPdf:
 
     def __getitem__(self, i):
         strona = self.strony[i]
-        strona.get_height = lambda: WYS_STRONY
+        strona.get_cropbox = lambda: (0.0, 0.0, 595.0, WYS_STRONY)
+        strona.get_rotation = lambda: 0
         strona.close = lambda: None
         return strona
 
@@ -245,6 +298,78 @@ def test_strony_bez_tekstu_sa_raportowane(monkeypatch):
     assert wynik.akapity == ["Tekst."]
     assert wynik.strony_bez_tekstu == [2]
     assert wynik.tekst == "Tekst."
+
+
+def test_glif_bez_unicode_nie_przesuwa_ramek(monkeypatch):
+    # Audyt 19.13: znak bez Unicode (0) wypada z get_text_range(), więc indeksy
+    # tekstu i ramek się rozjeżdżały. Ścieżka znak po znaku go pomija.
+    import pypdfium2.raw as pdfium_c
+    kody = [ord("a"), 0, ord("b"), 0xD83D, 0xDE00]       # a, glif bez Unicode, b, emoji
+
+    class Tp:
+        raw = None
+
+        def count_chars(self):
+            return len(kody)
+
+        def get_text_range(self):
+            return "ab" + chr(0x1F600)
+
+    monkeypatch.setattr(pdfium_c, "FPDFText_GetUnicode", lambda _r, i: kody[i])
+    assert core_pdf._znaki_strony(Tp()) == [(0, "a"), (2, "b"), (3, chr(0x1F600))]
+
+
+# --------------------------------------------------------------------- E ---
+# Prawdziwe PDF-y z surowego API PDFium (builder z audytu 19.13) — reszta
+# testów idzie na atrapach, więc to jest jedyny dowód na prawdziwym pliku.
+
+def _zbuduj_pdf(sciezka, strony, rotacja=0):
+    import ctypes
+    import pypdfium2 as pdfium
+    import pypdfium2.raw as c
+    pdf = pdfium.PdfDocument.new()
+    font = c.FPDFText_LoadStandardFont(pdf.raw, b"Helvetica")
+    bufory = []
+    for linie in strony:
+        page = pdf.new_page(595, 842)
+        for tekst, x, y in linie:
+            obj = c.FPDFPageObj_CreateTextObj(pdf.raw, font, 11.0)
+            b = (tekst + "\0").encode("utf-16-le")
+            buf = ctypes.create_string_buffer(b, len(b))
+            bufory.append(buf)
+            assert c.FPDFText_SetText(obj, ctypes.cast(buf, c.FPDF_WIDESTRING))
+            c.FPDFPageObj_Transform(obj, 1, 0, 0, 1, float(x), float(y))
+            c.FPDFPage_InsertObject(page.raw, obj)
+        if rotacja:
+            page.set_rotation(rotacja)
+        page.gen_content()
+        page.close()
+    pdf.save(str(sciezka))
+    pdf.close()
+
+
+def test_prawdziwy_pdf_kolontytul_numery_i_tresc(tmp_path):
+    p = tmp_path / "doc.pdf"
+    _zbuduj_pdf(p, [[("Kwartalnik Testowy", 72, 815), (f"Akapit strony {i}.", 72, 700),
+                     ("Rozdzial II", 72, 650), (str(i), 290, 25)] for i in range(1, 5)])
+    w = core_pdf.wyciagnij(str(p))
+    assert w.kolontytuly == ["Kwartalnik Testowy"]
+    assert w.akapity[:2] == ["Akapit strony 1.", "Rozdzial II"]
+    assert not any(a.strip().isdigit() for a in w.akapity)
+
+
+def test_prawdziwy_pdf_obrocony_nie_traci_tresci(tmp_path):
+    p = tmp_path / "rot.pdf"
+    _zbuduj_pdf(p, [[("Naglowek", 72, 815), ("Tresc strony.", 72, 400)]], rotacja=90)
+    w = core_pdf.wyciagnij(str(p))
+    assert "Naglowek" in " ".join(w.akapity) and "Tresc strony." in " ".join(w.akapity)
+
+
+def test_prawdziwy_pdf_z_samymi_numerami_to_brak_tekstu(tmp_path):
+    p = tmp_path / "numery.pdf"
+    _zbuduj_pdf(p, [[(str(i), 290, 25)] for i in range(1, 4)])
+    with pytest.raises(core_pdf.BrakWarstwyTekstu):
+        core_pdf.wyciagnij(str(p))
 
 
 # Uruchomienie jako skrypt — deleguje do pytesta (kanon v19.2.1).

@@ -49,6 +49,9 @@ common:
   llm_nieznany_model: "Le fournisseur d'IA ne reconnaît pas le modèle « {model} ».\nSi le programme vient de passer à un nouveau modèle Claude, OpenRouter ne l'a peut-être pas encore mis à disposition. Ajoutez dans golden_key.env une ligne LLM_MODEL= avec un modèle déjà proposé par OpenRouter (par ex. anthropic/claude-sonnet-5.5), puis relancez le programme."
   pdf_bez_tekstu_tytul: PDF sans texte
   pdf_bez_tekstu_tresc: "Le fichier {nazwa_pliku} ne contient pas de couche de texte ; il s'agit très probablement d'un scan ou de photos de pages.\n\nLe programme lit uniquement le texte enregistré dans le PDF et ne reconnaît pas le texte des images (OCR). Si vous disposez de ce document sous une autre forme (Word, texte, HTML), chargez-la à la place du PDF."
+  pdf_otwarcie_tytul: Impossible d'ouvrir le PDF
+  pdf_haslo_tresc: "Le fichier {nazwa_pliku} est protégé par mot de passe : le programme ne peut donc pas le lire.\n\nOuvrez-le dans un lecteur PDF, enregistrez-en une copie sans mot de passe, ou exportez son contenu vers un fichier Word ou texte et chargez-le à la place du PDF.\n\nDétails techniques : {szczegol}"
+  pdf_uszkodzony_tresc: "Impossible d'ouvrir le fichier {nazwa_pliku} : il est endommagé ou ce n'est pas un fichier PDF valide.\n\nDétails techniques : {szczegol}"
 main:
   menu:
     narzedzia: "&Outils"
@@ -895,7 +898,7 @@ poliglota:
   per_akapit_nadpisanie_tytul: Écraser les codes définis ?
   per_akapit_nadpisanie_tresc: "Cette action va définir le code dans tous les paragraphes en même temps, et {liczba_zmienionych} d'entre eux ont actuellement un code différent de celui avec lequel la liste s'est ouverte.\n\nCette modification est irréversible. Continuer ?"
   pdf_wczytany_tytul: Texte extrait du PDF
-  pdf_wczytany_tresc: "Texte extrait du fichier {nazwa_pliku} : {liczba_stron} pages, {liczba_akapitow} paragraphes.\n\nLe programme a reconstitué les paragraphes à partir de la mise en page, rejoint les mots coupés en fin de ligne et ignoré les numéros de page. Le résultat sera enregistré au format .html, car le programme n'enregistre pas de PDF."
+  pdf_wczytany_tresc: "Texte extrait du fichier {nazwa_pliku} (pages : {liczba_stron}, paragraphes : {liczba_akapitow}).\n\nLe programme a reconstitué les paragraphes à partir de la mise en page, rejoint les mots coupés en fin de ligne et ignoré les numéros de page. Le résultat sera enregistré au format .html, car le programme n'enregistre pas de PDF."
   pdf_kolontytuly: 'En-têtes et pieds de page répétés ignorés : {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Attention : ces pages ne contiennent pas de texte (probablement des scans) et leur contenu ne figurera pas dans le résultat : {lista_stron}'
 konwerter:

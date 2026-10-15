@@ -338,7 +338,8 @@ class KonwerterPanel(wx.Panel):
                 tekst = "\n".join(p.text for p in doc_in.paragraphs)
             elif file_name.lower().endswith(".pdf"):
                 # 19.13: warstwa tekstu PDF; akapit = linia, jak przy `.docx`.
-                tekst = "\n".join(core_pdf.wyciagnij(file_name).akapity)
+                with wx.BusyCursor():   # 800 stron ≈ 6 s (audyt 19.13)
+                    tekst = "\n".join(core_pdf.wyciagnij(file_name).akapity)
             else:
                 with open(file_name, "r", encoding="utf-8") as fh:
                     tekst = fh.read()
@@ -347,6 +348,15 @@ class KonwerterPanel(wx.Panel):
                 t("common.pdf_bez_tekstu_tresc",
                   nazwa_pliku=os.path.basename(file_name)),
                 t("common.pdf_bez_tekstu_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            return
+        except core_pdf.PdfNieDoOtwarcia as exc:
+            wx.MessageBox(
+                t("common.pdf_haslo_tresc" if exc.haslo else "common.pdf_uszkodzony_tresc",
+                  nazwa_pliku=os.path.basename(file_name), szczegol=exc.szczegol),
+                t("common.pdf_otwarcie_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )

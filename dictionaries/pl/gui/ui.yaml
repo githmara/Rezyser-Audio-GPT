@@ -56,6 +56,17 @@ common:
     Plik {nazwa_pliku} nie zawiera warstwy tekstu – to najpewniej skan albo zdjęcia stron.
 
     Program czyta tylko tekst zapisany w PDF-ie i nie rozpoznaje tekstu z obrazów (OCR). Jeśli masz ten dokument w innej postaci (Word, tekst, HTML), wczytaj ją zamiast PDF-a.
+  pdf_otwarcie_tytul:    "Nie można otworzyć PDF-a"
+  pdf_haslo_tresc: |-
+    Plik {nazwa_pliku} jest chroniony hasłem, więc program nie może go odczytać.
+
+    Otwórz go w przeglądarce PDF, zapisz kopię bez hasła albo wyeksportuj treść do pliku Word lub tekstowego i wczytaj ją zamiast PDF-a.
+
+    Szczegóły techniczne: {szczegol}
+  pdf_uszkodzony_tresc: |-
+    Nie udało się otworzyć pliku {nazwa_pliku} – jest uszkodzony albo nie jest prawidłowym plikiem PDF.
+
+    Szczegóły techniczne: {szczegol}
   llm_nieznany_model: |-
     Dostawca AI nie zna modelu „{model}”.
     Jeśli program przeszedł właśnie na nowy model Claude, OpenRouter mógł jeszcze go nie udostępnić. Wpisz w golden_key.env linię LLM_MODEL= z modelem, który OpenRouter już ma (np. anthropic/claude-sonnet-5.5), i uruchom program ponownie.
@@ -918,7 +929,7 @@ poliglota:
   # v19.13: PDF – odczyt warstwy tekstu
   pdf_wczytany_tytul:    "Odczytano tekst z PDF-a"
   pdf_wczytany_tresc: |-
-    Z pliku {nazwa_pliku} odczytano tekst: {liczba_stron} stron, {liczba_akapitow} akapitów.
+    Z pliku {nazwa_pliku} odczytano tekst (stron: {liczba_stron}, akapitów: {liczba_akapitow}).
 
     Program odbudował akapity z układu stron, połączył wyrazy przeniesione do następnej linii i pominął numery stron. Wynik zapiszemy jako plik .html, bo PDF-a program nie zapisuje.
   pdf_kolontytuly: "Pominięto powtarzające się nagłówki i stopki stron: {lista_kolontytulow}"

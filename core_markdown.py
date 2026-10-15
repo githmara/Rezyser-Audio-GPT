@@ -49,12 +49,38 @@ ROZSZERZENIA = ["nl2br", "sane_lists", "tables", "fenced_code", "footnotes",
                 "def_list", "abbr"]
 
 _RE_TYTUL = re.compile(r"^#{1,2} +(.+)$", re.MULTILINE)
-_RE_FRONT_MATTER = re.compile(r"\A---[ \t]*\r?\n.*?\r?\n---[ \t]*\r?\n", re.S)
+# Reguła pandoca: `---` w PIERWSZEJ linii, bez pustej linii zaraz po nim,
+# zamknięcie `---` albo `...`. Pusta linia po otwarciu to linia pozioma
+# w treści, nie metadane.
+_RE_FRONT_MATTER = re.compile(
+    r"\A---[ \t]*\r?\n(?![ \t]*\r?\n)(.*?)\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|\Z)", re.S)
+_BOM = chr(0xFEFF)
+# Linia mapy YAML: `klucz:` (z wartością albo bez) albo element listy `- …`.
+_RE_KLUCZ_YAML = re.compile(r"^(?:[A-Za-z_][\w.-]*[ \t]*:(?:[ \t]|$)|-[ \t])")
 
 
 def zdejmij_front_matter(tresc_md: str) -> str:
-    """Usuwa blok metadanych YAML z początku pliku (tylko z samego początku)."""
-    return _RE_FRONT_MATTER.sub("", tresc_md, count=1)
+    """Usuwa blok metadanych YAML z samego początku pliku.
+
+    Blok znika wyłącznie wtedy, gdy ma kształt MAPY YAML
+    (`title: …`, `tags: […]`). Audyt 19.13: sam regex zjadał treść — plik
+    zaczynający się linią poziomą `---`, akapitami i drugim `---` zostawał
+    z samym „Koniec.”. BOM na początku (Notatnik) jest zdejmowany, bo inaczej
+    `---` nie stało w pierwszej kolumnie i metadane wracały jako `<h2>`.
+    """
+    tresc_md = tresc_md.lstrip(_BOM)
+    m = _RE_FRONT_MATTER.match(tresc_md)
+    if not m:
+        return tresc_md
+    # Kształt mapy YAML sprawdzany wzorcem, nie parserem: to fragment
+    # dokumentu użytkownika, nie plik konfiguracji, więc „nie wygląda na
+    # klucz: wartość” znaczy po prostu „to treść” (bramka `audyt_ciszy`
+    # słusznie nie przepuściłaby cichego `except` wokół `yaml.safe_load`).
+    linie = [l for l in m.group(1).splitlines() if l.strip()]
+    if linie and all(_RE_KLUCZ_YAML.match(l) or l[:1] in " \t" for l in linie) \
+            and _RE_KLUCZ_YAML.match(linie[0]):
+        return tresc_md[m.end():]
+    return tresc_md
 
 
 def tytul_dokumentu(tresc_md: str) -> str:

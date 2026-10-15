@@ -49,6 +49,9 @@ common:
   llm_nieznany_model: "The AI provider doesn't recognize the model \"{model}\".\nIf the program has just switched to a new Claude model, OpenRouter may not have made it available yet. Add a line LLM_MODEL= to golden_key.env with a model OpenRouter already supports (e.g. anthropic/claude-sonnet-5.5), and restart the program."
   pdf_bez_tekstu_tytul: PDF without text
   pdf_bez_tekstu_tresc: "The file {nazwa_pliku} has no text layer – it is most likely a scan or images of pages.\n\nThe program only reads text stored in the PDF and does not recognize text in images (OCR). If you have this document in another format (Word, text, HTML), load that instead of the PDF."
+  pdf_otwarcie_tytul: Can't open the PDF
+  pdf_haslo_tresc: "The file {nazwa_pliku} is password-protected, so the program can't read it.\n\nOpen it in a PDF viewer and save a copy without a password, or export the content to a Word or text file and load that instead of the PDF.\n\nTechnical details: {szczegol}"
+  pdf_uszkodzony_tresc: "Couldn't open the file {nazwa_pliku} – it's corrupted or isn't a valid PDF file.\n\nTechnical details: {szczegol}"
 diag:
   tytul: "Rule Warnings"
   wstep: |-
@@ -981,7 +984,7 @@ poliglota:
   per_akapit_nadpisanie_tytul: Overwrite the assigned codes?
   per_akapit_nadpisanie_tresc: "This action will set the code for all paragraphs at once, and {liczba_zmienionych} of them currently have a code different from the one the list was opened with.\n\nThis change cannot be undone. Continue?"
   pdf_wczytany_tytul: Text extracted from PDF
-  pdf_wczytany_tresc: "Text was extracted from the file {nazwa_pliku}: {liczba_stron} pages, {liczba_akapitow} paragraphs.\n\nThe program rebuilt the paragraphs from the page layout, rejoined words hyphenated across line breaks, and skipped page numbers. The result will be saved as an .html file, because the program does not save PDFs."
+  pdf_wczytany_tresc: "Text was extracted from the file {nazwa_pliku} (pages: {liczba_stron}, paragraphs: {liczba_akapitow}).\n\nThe program rebuilt the paragraphs from the page layout, rejoined words hyphenated across line breaks, and skipped page numbers. The result will be saved as an .html file, because the program does not save PDFs."
   pdf_kolontytuly: 'Repeated page headers and footers were skipped: {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Note: these pages have no text (they are most likely scans) and their content will not appear in the result: {lista_stron}'
 konwerter:

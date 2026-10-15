@@ -49,6 +49,9 @@ common:
   llm_nieznany_model: "Der KI-Anbieter kennt das Modell „{model}“ nicht.\nFalls das Programm gerade auf ein neues Claude-Modell umgestellt wurde, hat OpenRouter es möglicherweise noch nicht freigeschaltet. Tragen Sie in golden_key.env die Zeile LLM_MODEL= mit einem Modell ein, das OpenRouter bereits anbietet (z. B. anthropic/claude-sonnet-5.5), und starten Sie das Programm neu."
   pdf_bez_tekstu_tytul: PDF ohne Text
   pdf_bez_tekstu_tresc: "Die Datei {nazwa_pliku} enthält keine Textebene – vermutlich handelt es sich um einen Scan oder um Fotos der Seiten.\n\nDas Programm liest nur den im PDF gespeicherten Text und erkennt keinen Text aus Bildern (OCR). Wenn Sie dieses Dokument in einer anderen Form vorliegen haben (Word, Text, HTML), laden Sie stattdessen diese Fassung."
+  pdf_otwarcie_tytul: PDF kann nicht geöffnet werden
+  pdf_haslo_tresc: "Die Datei {nazwa_pliku} ist passwortgeschützt, daher kann das Programm sie nicht lesen.\n\nÖffnen Sie sie in einem PDF-Viewer und speichern Sie eine Kopie ohne Passwort, oder exportieren Sie den Inhalt in eine Word- oder Textdatei und laden Sie diese anstelle der PDF-Datei.\n\nTechnische Details: {szczegol}"
+  pdf_uszkodzony_tresc: "Die Datei {nazwa_pliku} konnte nicht geöffnet werden – sie ist beschädigt oder keine gültige PDF-Datei.\n\nTechnische Details: {szczegol}"
 main:
   menu:
     narzedzia: "&Werkzeuge"
@@ -897,7 +900,7 @@ poliglota:
   per_akapit_nadpisanie_tytul: Festgelegte Codes überschreiben?
   per_akapit_nadpisanie_tresc: "Dieser Vorgang legt für alle Absätze gleichzeitig einen Code fest, und {liczba_zmienionych} von ihnen haben derzeit einen anderen Code als beim Öffnen der Liste.\n\nDie Änderung lässt sich nicht rückgängig machen. Fortfahren?"
   pdf_wczytany_tytul: Text aus dem PDF gelesen
-  pdf_wczytany_tresc: "Aus der Datei {nazwa_pliku} wurde Text gelesen: {liczba_stron} Seiten, {liczba_akapitow} Absätze.\n\nDas Programm hat die Absätze anhand des Seitenlayouts rekonstruiert, in die nächste Zeile umbrochene Wörter wieder zusammengefügt und die Seitenzahlen ausgelassen. Das Ergebnis wird als .html-Datei gespeichert, da das Programm keine PDFs speichert."
+  pdf_wczytany_tresc: "Aus der Datei {nazwa_pliku} wurde Text gelesen (Seiten: {liczba_stron}, Absätze: {liczba_akapitow}).\n\nDas Programm hat die Absätze anhand des Seitenlayouts rekonstruiert, in die nächste Zeile umbrochene Wörter wieder zusammengefügt und die Seitenzahlen ausgelassen. Das Ergebnis wird als .html-Datei gespeichert, da das Programm keine PDFs speichert."
   pdf_kolontytuly: 'Wiederkehrende Kopf- und Fußzeilen der Seiten wurden ausgelassen: {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Hinweis: Diese Seiten enthalten keinen Text (vermutlich handelt es sich um Scans), ihr Inhalt fehlt daher im Ergebnis: {lista_stron}'
 konwerter:

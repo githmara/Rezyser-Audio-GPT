@@ -804,7 +804,9 @@ class PoliglotaPanel(wx.Panel):
                 # 19.13: warstwa tekstu → akapity, dalej ścieżką `.txt` (wynik
                 # `.html` z `<p lang>` per akapit). PDF-a Reżyser nie zapisze,
                 # więc `.pdf` NIE jest rozszerzeniem pipeline'u ani zapisu.
-                wynik_pdf = core_pdf.wyciagnij(file_name)
+                # 800 stron to ok. 6 s w wątku GUI (audyt 19.13) — kursor zajętości.
+                with wx.BusyCursor():
+                    wynik_pdf = core_pdf.wyciagnij(file_name)
                 self._file_content = wynik_pdf.tekst
                 self._file_ext = ".txt"
             elif self._file_ext == ".docx":
@@ -823,6 +825,14 @@ class PoliglotaPanel(wx.Panel):
                 t("common.pdf_bez_tekstu_tresc",
                   nazwa_pliku=os.path.basename(file_name)),
                 t("common.pdf_bez_tekstu_tytul"),
+                wx.OK | wx.ICON_WARNING, self)
+            return
+        except core_pdf.PdfNieDoOtwarcia as exc:
+            self._file_ext = ""
+            wx.MessageBox(
+                t("common.pdf_haslo_tresc" if exc.haslo else "common.pdf_uszkodzony_tresc",
+                  nazwa_pliku=os.path.basename(file_name), szczegol=exc.szczegol),
+                t("common.pdf_otwarcie_tytul"),
                 wx.OK | wx.ICON_WARNING, self)
             return
         except Exception as exc:
