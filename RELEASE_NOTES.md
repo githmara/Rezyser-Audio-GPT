@@ -94,6 +94,75 @@
 
 ---
 
+## 19.13.0 — minor release
+
+### What's new
+
+**The Polyglot and the Converter read PDF files.** Only the text layer is read,
+the text a PDF already contains, so a PDF exported from Word, a browser or a
+typesetting program works, and a scan does not. The program rebuilds
+paragraphs from the page layout: it joins lines of a paragraph, rejoins words
+hyphenated at the end of a line, keeps headings, list items and dialogue lines
+as separate paragraphs, and reads two-column pages column by column. Page
+numbers and headers or footers repeated on many pages are skipped. A line is
+treated as one only when it sits in the top or bottom margin of the page and
+behaves like one: the same text on at least a quarter of the pages, or a
+number that grows with the page. A heading such as "Chapter II" or a single
+word in the margin stays.
+
+In the Polyglot the result is saved as an `.html` file with a language tag on
+every paragraph, like a `.txt` file, because the program does not save PDFs.
+After loading, a message says how many pages and paragraphs were read, which
+headers were skipped, and which pages have no text at all. A PDF made only of
+scanned pages, a password-protected PDF and a damaged file each get their own
+message instead of an empty result. Measured on a 91-page thesis: 0.45 s, page
+numbers removed on every numbered page, footnotes and dictionary entries kept
+as separate paragraphs. The program uses PDFium (`pypdfium2`, about 8 MB
+unpacked), not the larger PDF stack of the companion project
+accessible_text_analyst (about 45 MB).
+
+**Markdown files keep tables, code, footnotes, definitions and
+abbreviations.** Until now a table reached the speech synthesizer as
+"| column | column |", a fenced code block became an ordinary paragraph, and a
+footnote stayed as `[^1]`. These are now real HTML elements: table cells get
+their language tag, footnotes appear at the end. Metadata at the top of a file
+(the `---` block used by Jekyll, Hugo or Obsidian) is no longer turned into a
+heading. A `---` line at the very top followed by ordinary text is a
+horizontal line, not metadata, and stays. The manuals are not affected: their
+pages came out byte for byte the same.
+
+**Scanned PDFs are pointed to accessible_text_analyst.** This program will not
+read text from images (OCR). It would multiply the installer size, and OCR of
+forms and tables reads them line by line across the columns, so labels and
+values get mixed up. Measured on a passport scan: the dates came out wrong. The
+"New issue" page of this repository now links to accessible_text_analyst,
+which reads scanned pages, also inside an otherwise text PDF.
+
+Before closing, the new code was audited with every finding proven by running
+it. Thirteen findings were fixed, each with a test. The two serious ones both
+removed real text without a word: chapter headings repeated with a growing
+number at the top of pages were taken for a page header, and any single word
+shaped like a page number ("II", "MIX", "did") vanished from a page margin.
+The others: characters without a Unicode mapping shifted the following text,
+rotated pages and right-to-left text were mis-read, hyphenated compounds such
+as "e-mail" lost their hyphen, a PDF with nothing but page numbers loaded as an
+empty document, and the paragraph count was not grammatical in Polish.
+
+### Planned or deferred
+
+- Reading scanned pages through the AI model (page by page, with the previous
+  page as context, returning Markdown) is being evaluated. Token counting gives
+  about one to two cents per scanned page; it would always ask first, because
+  scans are often personal documents.
+- Markdown task-list boxes `[ ]` and `~~strikethrough~~` markers stay in the
+  text: python-markdown has no extension for them.
+- A PDF whose content is stored out of reading order keeps that order; most
+  generators, including Word, store it in reading order.
+- `anthropic`, `elevenlabs`, `markdown` and `openai` are still held below their
+  bounds (`anthropic<1.8`, `elevenlabs<2.69`, `markdown<3.11`, `openai<3.17`).
+
+---
+
 ## 19.12.0 — minor release
 
 ### What's new
