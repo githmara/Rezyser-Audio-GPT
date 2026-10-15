@@ -8,7 +8,8 @@ Po refaktorze do wersji 13.0 ten plik pełni WYŁĄCZNIE rolę warstwy widoku
   * ``tlumacz_ai.py``     – tłumacz Anthropic Claude w wątku tła.
 
 GUI:
-  1. Wczytuje plik (.txt / .html / .htm / .docx) do pamięci.
+  1. Wczytuje plik (.txt / .md / .html / .htm / .docx, od 19.13 też warstwę
+     tekstu .pdf przez ``core_pdf``) do pamięci.
   2. Wyświetla listy wariantów (akcenty / szyfry) pobrane z
      ``core_poliglota.lista_wariantow(...)`` – dzięki temu dodanie nowej
      reguły YAML nie wymaga zmian w tym pliku.
@@ -39,6 +40,7 @@ import wx
 import bledy_ai
 import core_llm as cl
 import core_markdown
+import core_pdf
 import core_poliglota
 import core_tokeny as ct
 import gui_diagnostyka as gd
@@ -784,20 +786,28 @@ class PoliglotaPanel(wx.Panel):
         # `UnicodeDecodeError` z bloku niżej.
         _, ext = os.path.splitext(file_name)
         ext = ext.lower()
-        if ext not in core_poliglota.EXT_OBSLUGIWANE:
+        if ext not in core_poliglota.EXT_WEJSCIA:
             odpowiedz = wx.MessageBox(
                 t("poliglota.ext_nieobslugiwane_tresc",
                   rozszerzenie=ext or t("poliglota.ext_brak"),
-                  lista_rozszerzen=", ".join(core_poliglota.EXT_OBSLUGIWANE)),
+                  lista_rozszerzen=", ".join(core_poliglota.EXT_WEJSCIA)),
                 t("poliglota.ext_nieobslugiwane_tytul"),
                 wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self)
             if odpowiedz != wx.YES:
                 self._txt_file.SetFocus()
                 return
 
+        wynik_pdf: core_pdf.WynikPdf | None = None
         try:
             self._file_ext = ext
-            if self._file_ext == ".docx":
+            if self._file_ext == ".pdf":
+                # 19.13: warstwa tekstu → akapity, dalej ścieżką `.txt` (wynik
+                # `.html` z `<p lang>` per akapit). PDF-a Reżyser nie zapisze,
+                # więc `.pdf` NIE jest rozszerzeniem pipeline'u ani zapisu.
+                wynik_pdf = core_pdf.wyciagnij(file_name)
+                self._file_content = wynik_pdf.tekst
+                self._file_ext = ".txt"
+            elif self._file_ext == ".docx":
                 # v19.2: przez `core_poliglota.tekst_docx`, bo `doc.paragraphs`
                 # pomija akapity z komórek tabel — podgląd i licznik znaków
                 # gubiły całą treść tabel (zmierzone: 2 akapity z 8 na
@@ -807,7 +817,16 @@ class PoliglotaPanel(wx.Panel):
             else:
                 with open(file_name, "r", encoding="utf-8") as fh:
                     self._file_content = fh.read()
+        except core_pdf.BrakWarstwyTekstu:
+            self._file_ext = ""
+            wx.MessageBox(
+                t("common.pdf_bez_tekstu_tresc",
+                  nazwa_pliku=os.path.basename(file_name)),
+                t("common.pdf_bez_tekstu_tytul"),
+                wx.OK | wx.ICON_WARNING, self)
+            return
         except Exception as exc:
+            self._file_ext = ""
             wx.MessageBox(
                 t("poliglota.blad_odczytu_tresc", tresc_bledu=str(exc)),
                 t("common.blad_odczytu_tytul"),
@@ -847,6 +866,8 @@ class PoliglotaPanel(wx.Panel):
         # v19.1: Markdown dostaje render do HTML, ale dopiero na wejściu do
         # pipeline'u bez API (patrz `_tresc_pipeline`).
         self._przygotuj_tresc_pipeline(os.path.basename(file_name))
+        if wynik_pdf is not None:
+            self._pokaz_info_pdf(os.path.basename(file_name), wynik_pdf)
 
         znaki = len(self._file_content)
         status_msg = t(
@@ -871,6 +892,24 @@ class PoliglotaPanel(wx.Panel):
             ),
             t("poliglota.plik_wczytany_tytul"),
             wx.OK | wx.ICON_INFORMATION, self)
+
+    def _pokaz_info_pdf(self, nazwa_pliku: str, wynik: "core_pdf.WynikPdf") -> None:
+        """Mówi, co zrobiliśmy z PDF-em — zmienia się format wyniku (zero ciszy).
+
+        Strony bez tekstu (wstawione skany) dostają osobne zdanie: ich treści
+        w wyniku NIE będzie, a użytkownik bez wzroku nie ma jak tego zauważyć.
+        """
+        tresc = t("poliglota.pdf_wczytany_tresc", nazwa_pliku=nazwa_pliku,
+                  liczba_stron=wynik.liczba_stron,
+                  liczba_akapitow=len(wynik.akapity))
+        if wynik.kolontytuly:
+            tresc += "\n\n" + t("poliglota.pdf_kolontytuly",
+                                lista_kolontytulow="; ".join(wynik.kolontytuly[:5]))
+        if wynik.strony_bez_tekstu:
+            tresc += "\n\n" + t("poliglota.pdf_strony_bez_tekstu",
+                                lista_stron=", ".join(map(str, wynik.strony_bez_tekstu)))
+        wx.MessageBox(tresc, t("poliglota.pdf_wczytany_tytul"),
+                      wx.OK | wx.ICON_INFORMATION, self)
 
     def _przygotuj_tresc_pipeline(self, nazwa_pliku: str) -> None:
         """Ustala treść i rozszerzenie dla trybów BEZ API (Reżyser/Szyfrant).

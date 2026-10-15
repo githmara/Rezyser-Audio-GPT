@@ -47,6 +47,8 @@ common:
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
   llm_nieznany_model: "Поставщик ИИ не знает модель «{model}».\nЕсли программа только что перешла на новую модель Claude, OpenRouter мог ещё не добавить её. Впишите в golden_key.env строку LLM_MODEL= с моделью, которая уже есть в OpenRouter (например, anthropic/claude-sonnet-5.5), и перезапустите программу."
+  pdf_bez_tekstu_tytul: PDF без текста
+  pdf_bez_tekstu_tresc: "Файл {nazwa_pliku} не содержит текстового слоя — скорее всего, это скан или фотографии страниц.\n\nПрограмма читает только текст, сохранённый в PDF, и не распознаёт текст на изображениях (OCR). Если у вас есть этот документ в другом формате (Word, текст, HTML), загрузите его вместо PDF."
 main:
   menu:
     narzedzia: "&Инструменты"
@@ -722,7 +724,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Выберите исходный файл"
   file_dlg_wildcard: |-
-    Поддерживаемые файлы (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Текстовые файлы (*.txt)|*.txt|Файлы Markdown (*.md)|*.md|Файлы HTML (*.html;*.htm)|*.html;*.htm|Документы Word (*.docx)|*.docx|Все файлы (*.*)|*.*
+    Поддерживаемые файлы (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Текстовые файлы (*.txt)|*.txt|Файлы Markdown (*.md)|*.md|Файлы HTML (*.html;*.htm)|*.html;*.htm|Документы Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Все файлы (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Укажите имя или путь к файлу перед загрузкой."
   plik_nie_istnieje_tresc: "Файл не найден:\n{sciezka_pliku}"
@@ -894,6 +896,10 @@ poliglota:
   per_akapit_detektor_przerwane_tresc: "Остановлено на абзаце {numer_akapitu} из {liczba_akapitow}.\n\nКоды заполнены в {liczba_wypelnionych} абзацах; остальные сохранили тот код, который уже имели."
   per_akapit_nadpisanie_tytul: Перезаписать установленные коды?
   per_akapit_nadpisanie_tresc: "Это действие установит код сразу во всех абзацах, при этом у {liczba_zmienionych} из них сейчас код отличается от того, с которым был открыт список.\n\nОтменить изменения будет невозможно. Продолжить?"
+  pdf_wczytany_tytul: Текст из PDF прочитан
+  pdf_wczytany_tresc: "Из файла {nazwa_pliku} прочитан текст: страниц — {liczba_stron}, абзацев — {liczba_akapitow}.\n\nПрограмма восстановила абзацы по разметке страниц, объединила слова, перенесённые на следующую строку, и пропустила номера страниц. Результат будет сохранён как файл .html, так как программа не сохраняет PDF."
+  pdf_kolontytuly: 'Пропущены повторяющиеся верхние и нижние колонтитулы страниц: {lista_kolontytulow}'
+  pdf_strony_bez_tekstu: 'Внимание: на этих страницах нет текста (скорее всего, это сканы), и их содержимого в результате не будет: {lista_stron}'
 konwerter:
   panel_name: "Панель Архитектора Аудиокниг"
   # 18.8: локализованная часть имени выходного файла (одно слово, без пробелов)
@@ -905,7 +911,7 @@ konwerter:
     Имя или полный путь к исходному файлу
     (например, файл .txt, .html, .md или документ .docx):
   txt_plik_name: "Поле пути к исходному файлу"
-  txt_plik_hint: "Введите путь к файлу (текстовый, HTML, MD, DOCX)…"
+  txt_plik_hint: "Введите путь к файлу (текстовый, HTML, MD, DOCX, PDF)…"
   btn_przegladaj: "Обзор…"
   btn_przegladaj_tooltip: "Открывает системное окно выбора файла .txt или .docx"
   btn_buduj: "Создать Архитектуру для ElevenLabs"
@@ -925,7 +931,7 @@ konwerter:
   naglowki_scen: ["Сцена"]
   # Dialog wyboru pliku
   file_dlg_title: "Выберите исходный файл"
-  file_dlg_wildcard: "Все поддерживаемые файлы (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Документы Word (*.docx)|*.docx|Все файлы (*.*)|*.*"
+  file_dlg_wildcard: "Все поддерживаемые файлы (*.txt;*.html;*.htm;*.md;*.docx;*.pdf)|*.txt;*.html;*.htm;*.md;*.docx;*.pdf|Документы Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Все файлы (*.*)|*.*"
   # Komunikaty
   brak_pliku_tytul: "Нет файла"
   brak_pliku_tresc: "Укажите имя или путь к исходному файлу."

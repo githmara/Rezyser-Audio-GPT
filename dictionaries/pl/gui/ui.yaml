@@ -50,6 +50,12 @@ common:
   sukces_tytul:          "Sukces"
   informacja_tytul:      "Informacja"
   # v19.11: dostawca (typowo OpenRouter) nie zna modelu — np. tuż po migracji silnika na nowy model Claude
+  # v19.13: PDF bez warstwy tekstu (skan) — Poliglota i Konwerter
+  pdf_bez_tekstu_tytul:  "PDF bez tekstu"
+  pdf_bez_tekstu_tresc: |-
+    Plik {nazwa_pliku} nie zawiera warstwy tekstu – to najpewniej skan albo zdjęcia stron.
+
+    Program czyta tylko tekst zapisany w PDF-ie i nie rozpoznaje tekstu z obrazów (OCR). Jeśli masz ten dokument w innej postaci (Word, tekst, HTML), wczytaj ją zamiast PDF-a.
   llm_nieznany_model: |-
     Dostawca AI nie zna modelu „{model}”.
     Jeśli program przeszedł właśnie na nowy model Claude, OpenRouter mógł jeszcze go nie udostępnić. Wpisz w golden_key.env linię LLM_MODEL= z modelem, który OpenRouter już ma (np. anthropic/claude-sonnet-5.5), i uruchom program ponownie.
@@ -889,7 +895,7 @@ poliglota:
   # Plik dialog
   file_dlg_title:        "Wybierz plik źródłowy"
   file_dlg_wildcard: |-
-    Obsługiwane pliki (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Pliki tekstowe (*.txt)|*.txt|Pliki Markdown (*.md)|*.md|Pliki HTML (*.html;*.htm)|*.html;*.htm|Dokumenty Word (*.docx)|*.docx|Wszystkie pliki (*.*)|*.*
+    Obsługiwane pliki (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Pliki tekstowe (*.txt)|*.txt|Pliki Markdown (*.md)|*.md|Pliki HTML (*.html;*.htm)|*.html;*.htm|Dokumenty Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Wszystkie pliki (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc:      "Podaj nazwę lub ścieżkę pliku przed wczytaniem."
   ext_brak:              "brak rozszerzenia"
@@ -909,6 +915,14 @@ poliglota:
     Dzięki temu nagłówki, listy i cytaty zostaną w wyniku prawdziwymi elementami dokumentu (czytnik ekranu może po nich skakać), a znaki składni — „---", „- ", „> " — nie zostaną przeczytane na głos.
 
     Wynik zapiszemy jako plik .html. Tłumacz AI dostaje treść bez zmian.
+  # v19.13: PDF – odczyt warstwy tekstu
+  pdf_wczytany_tytul:    "Odczytano tekst z PDF-a"
+  pdf_wczytany_tresc: |-
+    Z pliku {nazwa_pliku} odczytano tekst: {liczba_stron} stron, {liczba_akapitow} akapitów.
+
+    Program odbudował akapity z układu stron, połączył wyrazy przeniesione do następnej linii i pominął numery stron. Wynik zapiszemy jako plik .html, bo PDF-a program nie zapisuje.
+  pdf_kolontytuly: "Pominięto powtarzające się nagłówki i stopki stron: {lista_kolontytulow}"
+  pdf_strony_bez_tekstu: "Uwaga: te strony nie mają tekstu (najpewniej są skanami) i ich treści nie będzie w wyniku: {lista_stron}"
   md_render_blad_tytul:  "Nie udało się przetworzyć Markdownu"
   md_render_blad_tresc: |-
     Nie udało się zamienić Markdownu na HTML:
@@ -1136,7 +1150,7 @@ konwerter:
     Nazwa lub pełna ścieżka pliku źródłowego
     (np. plik .txt, .html, .md lub dokument .docx):
   txt_plik_name:         "Pole ścieżki pliku źródłowego"
-  txt_plik_hint:         "Wpisz ścieżkę do pliku (tekstowy, HTML, MD, DOCX)…"
+  txt_plik_hint:         "Wpisz ścieżkę do pliku (tekstowy, HTML, MD, DOCX, PDF)…"
   btn_przegladaj:        "Przeglądaj…"
   btn_przegladaj_tooltip: "Otwiera systemowe okno wyboru pliku .txt lub .docx"
   btn_buduj:             "Buduj Architekturę dla ElevenLabs"
@@ -1157,7 +1171,7 @@ konwerter:
   naglowki_scen:       ["Scena"]
   # Dialog wyboru pliku
   file_dlg_title:        "Wybierz plik źródłowy"
-  file_dlg_wildcard:     "Wszystkie obsługiwane pliki (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Dokumenty Word (*.docx)|*.docx|Wszystkie pliki (*.*)|*.*"
+  file_dlg_wildcard:     "Wszystkie obsługiwane pliki (*.txt;*.html;*.htm;*.md;*.docx;*.pdf)|*.txt;*.html;*.htm;*.md;*.docx;*.pdf|Dokumenty Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Wszystkie pliki (*.*)|*.*"
   # Komunikaty
   brak_pliku_tytul:      "Brak pliku"
   brak_pliku_tresc:      "Podaj nazwę lub ścieżkę pliku źródłowego."

@@ -47,6 +47,8 @@ common:
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
   llm_nieznany_model: "AI-palveluntarjoaja ei tunne mallia „{model}”.\nJos ohjelma siirtyi juuri uuteen Claude-malliin, OpenRouter ei ehkä ole vielä ottanut sitä käyttöön. Kirjoita golden_key.env-tiedostoon rivi LLM_MODEL= sellaisella mallilla, jonka OpenRouter jo tarjoaa (esim. anthropic/claude-sonnet-5.5), ja käynnistä ohjelma uudelleen."
+  pdf_bez_tekstu_tytul: PDF ilman tekstiä
+  pdf_bez_tekstu_tresc: "Tiedostossa {nazwa_pliku} ei ole tekstikerrosta – kyseessä on todennäköisesti skannaus tai kuvia sivuista.\n\nOhjelma lukee vain PDF-tiedostoon tallennetun tekstin eikä tunnista tekstiä kuvista (OCR). Jos sinulla on tämä asiakirja jossakin toisessa muodossa (Word, teksti, HTML), avaa se PDF-tiedoston sijaan."
 main:
   menu:
     narzedzia: "&Työkalut"
@@ -720,7 +722,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Valitse lähdetiedosto"
   file_dlg_wildcard: |-
-    Tuetut tiedostot (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Tekstitiedostot (*.txt)|*.txt|Markdown-tiedostot (*.md)|*.md|HTML-tiedostot (*.html;*.htm)|*.html;*.htm|Word-asiakirjat (*.docx)|*.docx|Kaikki tiedostot (*.*)|*.*
+    Tuetut tiedostot (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Tekstitiedostot (*.txt)|*.txt|Markdown-tiedostot (*.md)|*.md|HTML-tiedostot (*.html;*.htm)|*.html;*.htm|Word-asiakirjat (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Kaikki tiedostot (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Anna tiedoston nimi tai polku ennen lataamista."
   plik_nie_istnieje_tresc: "Tiedostoa ei löytynyt:\n{sciezka_pliku}"
@@ -892,6 +894,10 @@ poliglota:
   per_akapit_detektor_przerwane_tresc: "Keskeytetty kappaleessa {numer_akapitu}/{liczba_akapitow}.\n\nKoodit täytettiin {liczba_wypelnionych} kappaleeseen; lopuissa säilyi niiden aiempi koodi."
   per_akapit_nadpisanie_tytul: Korvataanko asetetut koodit?
   per_akapit_nadpisanie_tresc: "Tämä toiminto asettaa koodin kaikkiin kappaleisiin kerralla, ja {liczba_zmienionych} niistä on nyt eri koodi kuin listaa avattaessa.\n\nMuutosta ei voi peruuttaa. Jatketaanko?"
+  pdf_wczytany_tytul: Teksti luettu PDF-tiedostosta
+  pdf_wczytany_tresc: "Tiedostosta {nazwa_pliku} luettiin teksti: {liczba_stron} sivua, {liczba_akapitow} kappaletta.\n\nOhjelma muodosti kappaleet uudelleen sivujen asettelusta, yhdisti seuraavalle riville siirtyneet sanat ja ohitti sivunumerot. Tulos tallennetaan .html-tiedostona, koska ohjelma ei tallenna PDF-tiedostoja."
+  pdf_kolontytuly: 'Toistuvat sivujen ylä- ja alatunnisteet ohitettiin: {lista_kolontytulow}'
+  pdf_strony_bez_tekstu: 'Huomio: näillä sivuilla ei ole tekstiä (todennäköisesti ne ovat skannauksia), eikä niiden sisältöä tule tulokseen: {lista_stron}'
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)
@@ -903,7 +909,7 @@ konwerter:
     Lähdetiedoston nimi tai koko polku
     (esim. .txt, .html, .md tai .docx-dokumentti):
   txt_plik_name: "Lähdetiedoston polkukenttä"
-  txt_plik_hint: "Kirjoita tiedoston polku (teksti, HTML, MD, DOCX)…"
+  txt_plik_hint: "Kirjoita tiedoston polku (teksti, HTML, MD, DOCX, PDF)…"
   btn_przegladaj: "Selaa…"
   btn_przegladaj_tooltip: "Avaa järjestelmän tiedostonvalintaikkunan .txt- tai .docx-tiedostolle"
   btn_buduj: "Rakenna arkkitehtuuri ElevenLabsille"
@@ -923,7 +929,7 @@ konwerter:
   naglowki_scen: ["Kohtaus"]
   # Dialog wyboru pliku
   file_dlg_title: "Valitse lähdetiedosto"
-  file_dlg_wildcard: "Kaikki tuetut tiedostot (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word-dokumentit (*.docx)|*.docx|Kaikki tiedostot (*.*)|*.*"
+  file_dlg_wildcard: "Kaikki tuetut tiedostot (*.txt;*.html;*.htm;*.md;*.docx;*.pdf)|*.txt;*.html;*.htm;*.md;*.docx;*.pdf|Word-dokumentit (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Kaikki tiedostot (*.*)|*.*"
   # Komunikaty
   brak_pliku_tytul: "Ei tiedostoa"
   brak_pliku_tresc: "Anna lähdetiedoston nimi tai polku."

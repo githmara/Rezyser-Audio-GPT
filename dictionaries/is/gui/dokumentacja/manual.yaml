@@ -384,7 +384,9 @@ tresc:
 
     Markdown-skrár (NÝTT í útgáfu 19.1): .md skrá er breytt í HTML áður en hreimi eða dulkóðun er beitt. Fyrirsagnir, listar og tilvitnanir verða í útkomunni raunveruleg skjalaeiningar sem skjálesari getur stokkið á milli (í NVDA lyklarnir 1-6 og H), og táknin sjálf úr setningafræðinni — „---", „- ", „> " — eru ekki lengur lesin upphátt sem efni. Áður fór .md inn í vinnsluna eins og venjulegur texti, svo þessi tákn lentu í útkomunni og öll uppbygging skjalsins týndist. Þýðandi gervigreindar fær Markdown óbreytt — líkanið skilur það náttúrulega, og breyting í HTML myndi aðeins hækka kostnað þýðingarinnar.
 
-    Skráarendingar utan listans: skráarvalsglugginn sýnir snið sem forritið styður beint (.txt, .md, .html, .htm, .docx). Síuna „allar skrár" má samt nota til að velja hvað sem er annað — þá færðu spurningu með viðvörun um að innihaldið verði meðhöndlað sem hreinn texti, svo merki þessa sniðs lenda í útkomunni og talgervillinn les þau upphátt.
+    PDF-skrár: forritið les textalag PDF-skjalsins og endurbyggir málsgreinarnar út frá því – það tengir saman orð sem eru brotin á milli lína og sleppir blaðsíðutölum ásamt síðuhausum og síðufótum sem endurtaka sig á samliggjandi síðum. Niðurstaðan er vistuð sem .html skrá, því forritið vistar ekki PDF-skjöl. Skönnun eða myndir af síðum (PDF án textalags) getur forritið ekki lesið, því það þekkir ekki texta í myndum (OCR) – þá birtast skilaboð með beiðni um að opna skjalið á öðru sniði.
+
+    Skráarendingar utan listans: skráarvalsglugginn sýnir snið sem forritið styður beint (.txt, .md, .html, .htm, .docx, .pdf). Síuna „allar skrár" má samt nota til að velja hvað sem er annað — þá færðu spurningu með viðvörun um að innihaldið verði meðhöndlað sem hreinn texti, svo merki þessa sniðs lenda í útkomunni og talgervillinn les þau upphátt.
 
     Handritið hreinsar sviga með leikstjóraábendingum — fjarlægir alla textabúta í kringum sviga (t.d. „(með fléttuðum andköfum)", „(hvíslandi)", „(kaldhæðnislega)"). ElevenLabs á aðeins að lesa samræður og frásögn, en ekki leikstjórafyrirmæli fléttuð inn í textann.
 
@@ -523,7 +525,7 @@ tresc:
 
     ### Hvernig virkar þetta?
 
-    1. Sláðu inn slóð að upprunaskránni í textareitinn eða smelltu á hnappinn „{konwerter.btn_przegladaj}" til að velja skrá í kerfisglugga. Skriftin tekur við bæði .txt og .docx, sem og .html og .htm skrám.
+    1. Sláðu inn slóð að upprunaskránni í textareitinn eða smelltu á hnappinn „{konwerter.btn_przegladaj}" til að velja skrá í kerfisglugga. Skriftin tekur við bæði .txt og .docx, sem og .html og .htm skrám. Hún tekur einnig við .pdf skrám með textalagi (skönnun án texta er ekki hægt að lesa).
     2. Smelltu á „{konwerter.btn_buduj}".
     3. Skriftin mun skanna hverja línu texta og breyta lykilorðum (Þáttur, Kafli, Formáli, Eftirskrift, Upphaf) í „Heading 1" fyrirsagnir í Word-skjalinu.
     4. Senur (línur sem byrja á orðinu „Atriði") breytast í feitletraðan texta — sýnilegar í skjalinu en ósýnilegar í efnisyfirliti ElevenLabs.

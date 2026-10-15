@@ -384,7 +384,9 @@ tresc:
 
     Fichiers Markdown (NOUVEAU dans la version 19.1) : un fichier .md est converti en HTML avant l'application d'un accent ou d'un chiffrement. Les titres, listes et citations deviennent alors de véritables éléments du document, entre lesquels le lecteur d'écran peut naviguer (dans NVDA, les touches 1-6 et H), et les caractères de la syntaxe elle-même — « --- », « - », « > » — ne sont plus lus à voix haute comme du contenu. Auparavant, un .md entrait dans le traitement comme un texte ordinaire, de sorte que ces caractères se retrouvaient dans le résultat et toute la structure du document disparaissait. Le Traducteur IA reçoit le Markdown sans modification — le modèle le comprend nativement, et une conversion en HTML ne ferait qu'augmenter le coût de la traduction.
 
-    Extensions hors liste : la fenêtre de sélection de fichier affiche les formats que le programme prend en charge directement (.txt, .md, .html, .htm, .docx). Le filtre « tous les fichiers » permet toujours d'indiquer n'importe quoi d'autre — vous recevrez alors une question d'avertissement indiquant que le contenu sera traité comme du texte brut, de sorte que les balises de ce format se retrouveront dans le résultat et le synthétiseur les lira à voix haute.
+    Fichiers PDF : le programme lit la couche de texte du PDF et en reconstitue les paragraphes — il rejoint les mots coupés en fin de ligne et ignore les numéros de page ainsi que les en-têtes et pieds de page répétés sur les pages successives. Le résultat est enregistré au format .html, car le programme n'enregistre pas de PDF. Un scan ou des photos de pages (un PDF sans couche de texte) ne peuvent pas être lus, car le programme ne reconnaît pas le texte des images (OCR) : vous recevrez alors un message vous invitant à charger le document sous une autre forme.
+
+    Extensions hors liste : la fenêtre de sélection de fichier affiche les formats que le programme prend en charge directement (.txt, .md, .html, .htm, .docx, .pdf). Le filtre « tous les fichiers » permet toujours d'indiquer n'importe quoi d'autre — vous recevrez alors une question d'avertissement indiquant que le contenu sera traité comme du texte brut, de sorte que les balises de ce format se retrouveront dans le résultat et le synthétiseur les lira à voix haute.
 
     Le script nettoie les didascalies de réalisation entre parenthèses — il supprime tous les fragments de texte placés entre parenthèses rondes (par ex. « (avec des respirations entremêlées) », « (chuchoté) », « (ironiquement) »). ElevenLabs doit lire uniquement les dialogues et la narration, pas les instructions de réalisation glissées dans le texte.
 
@@ -523,7 +525,7 @@ tresc:
 
     ### Comment ça fonctionne ?
 
-    1. Saisissez le chemin vers le fichier source dans le champ de texte ou cliquez sur le bouton "{konwerter.btn_przegladaj}" pour sélectionner un fichier dans la boîte de dialogue système. Le script accepte aussi bien les fichiers .txt que .docx, ainsi que les fichiers .html et .htm.
+    1. Saisissez le chemin vers le fichier source dans le champ de texte ou cliquez sur le bouton "{konwerter.btn_przegladaj}" pour sélectionner un fichier dans la boîte de dialogue système. Le script accepte aussi bien les fichiers .txt que .docx, ainsi que les fichiers .html et .htm. Il accepte aussi les fichiers .pdf comportant une couche de texte (un scan sans texte ne peut pas être lu).
     2. Cliquez sur "{konwerter.btn_buduj}".
     3. Le script analysera chaque ligne de texte et remplacera les mots-clés (Acte, Chapitre, Prologue, Épilogue, Introduction) par des titres "Heading 1" dans le document Word.
     4. Les scènes (lignes commençant par le mot "Scena") se transforment en texte en gras — visibles dans le document, mais invisibles dans la table des matières d'ElevenLabs.

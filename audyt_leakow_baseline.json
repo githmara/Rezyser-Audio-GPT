@@ -284,6 +284,9 @@
   "ru/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
   ],
+  "ru/ui.yaml/poliglota.file_dlg_wildcard": [
+    "lingua:PL"
+  ],
   "ru/ui.yaml/rezyser.txt_nazwa_pliku_hint": [
     "lingua:PL"
   ]

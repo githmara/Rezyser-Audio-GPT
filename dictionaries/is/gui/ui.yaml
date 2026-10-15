@@ -47,6 +47,8 @@ common:
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
   llm_nieznany_model: "AI-þjónustuveitandinn þekkir ekki líkanið „{model}“.\nEf forritið var að skipta yfir í nýtt Claude-líkan gæti OpenRouter ekki enn hafa gert það aðgengilegt. Skrifaðu línuna LLM_MODEL= í golden_key.env með líkani sem OpenRouter býður nú þegar (t.d. anthropic/claude-sonnet-5.5) og ræstu forritið aftur."
+  pdf_bez_tekstu_tytul: PDF án texta
+  pdf_bez_tekstu_tresc: "Skráin {nazwa_pliku} inniheldur ekkert textalag – líklega er þetta skönnun eða myndir af síðum.\n\nForritið les aðeins texta sem er vistaður í PDF-skjalinu og þekkir ekki texta í myndum (OCR). Ef þú átt skjalið á öðru sniði (Word, texti, HTML) skaltu opna það í staðinn fyrir PDF-skjalið."
 main:
   menu:
     narzedzia: "&Verkfæri"
@@ -722,7 +724,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Veldu upprunaskrá"
   file_dlg_wildcard: |-
-    Studdir skrár (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Textaskrár (*.txt)|*.txt|Markdown-skrár (*.md)|*.md|HTML-skrár (*.html;*.htm)|*.html;*.htm|Word-skjöl (*.docx)|*.docx|Allar skrár (*.*)|*.*
+    Studdir skrár (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Textaskrár (*.txt)|*.txt|Markdown-skrár (*.md)|*.md|HTML-skrár (*.html;*.htm)|*.html;*.htm|Word-skjöl (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Allar skrár (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Gefðu nafn eða slóð skráar áður en þú hleður inn."
   plik_nie_istnieje_tresc: "Skrá fannst ekki:\n{sciezka_pliku}"
@@ -894,6 +896,10 @@ poliglota:
   per_akapit_detektor_przerwane_tresc: "Hætt við á efnisgrein {numer_akapitu} af {liczba_akapitow}.\n\nKóðar voru fylltir út í {liczba_wypelnionych} efnisgreinum; hinar halda kóðanum sem þær höfðu þegar."
   per_akapit_nadpisanie_tytul: Skrifa yfir stillta kóða?
   per_akapit_nadpisanie_tresc: "Þessi aðgerð stillir kóðann í öllum efnisgreinum í einu og {liczba_zmienionych} þeirra eru núna með annan kóða en þann sem listinn opnaðist með.\n\nEkki er hægt að afturkalla breytinguna. Halda áfram?"
+  pdf_wczytany_tytul: Texti lesinn úr PDF-skjali
+  pdf_wczytany_tresc: "Texti var lesinn úr skránni {nazwa_pliku}: {liczba_stron} síður, {liczba_akapitow} málsgreinar.\n\nForritið endurbyggði málsgreinarnar út frá uppsetningu síðnanna, tengdi saman orð sem voru brotin á milli lína og sleppti blaðsíðutölum. Niðurstaðan verður vistuð sem .html skrá, því forritið vistar ekki PDF-skjöl."
+  pdf_kolontytuly: 'Endurteknum síðuhausum og síðufótum var sleppt: {lista_kolontytulow}'
+  pdf_strony_bez_tekstu: 'Athugið: þessar síður eru án texta (líklega skannaðar) og efni þeirra verður ekki með í niðurstöðunni: {lista_stron}'
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)
@@ -905,7 +911,7 @@ konwerter:
     Nafn eða full slóð upprunaskrár
     (t.d. .txt, .html, .md skrá eða .docx skjal):
   txt_plik_name: "Slóðarsvæði upprunaskrár"
-  txt_plik_hint: "Sláðu inn slóð á skrá (texta, HTML, MD, DOCX)…"
+  txt_plik_hint: "Sláðu inn slóð á skrá (texta, HTML, MD, DOCX, PDF)…"
   btn_przegladaj: "Skoða…"
   btn_przegladaj_tooltip: "Opnar kerfisglugga til að velja .txt eða .docx skrá"
   btn_buduj: "Byggja arkitektúr fyrir ElevenLabs"
@@ -925,7 +931,7 @@ konwerter:
   naglowki_scen: ["Atriði"]
   # Dialog wyboru pliku
   file_dlg_title: "Veldu upprunaskrá"
-  file_dlg_wildcard: "Öll studd skjöl (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word skjöl (*.docx)|*.docx|Öll skjöl (*.*)|*.*"
+  file_dlg_wildcard: "Öll studd skjöl (*.txt;*.html;*.htm;*.md;*.docx;*.pdf)|*.txt;*.html;*.htm;*.md;*.docx;*.pdf|Word skjöl (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Öll skjöl (*.*)|*.*"
   # Komunikaty
   brak_pliku_tytul: "Engin skrá"
   brak_pliku_tresc: "Sláðu inn nafn eða slóð upprunaskrár."

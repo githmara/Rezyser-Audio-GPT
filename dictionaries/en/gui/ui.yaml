@@ -47,6 +47,8 @@ common:
 # DIAG – raport pominiętych reguł (gui_diagnostyka.py, od v18.24.2)
 # -----------------------------------------------------------------------------
   llm_nieznany_model: "The AI provider doesn't recognize the model \"{model}\".\nIf the program has just switched to a new Claude model, OpenRouter may not have made it available yet. Add a line LLM_MODEL= to golden_key.env with a model OpenRouter already supports (e.g. anthropic/claude-sonnet-5.5), and restart the program."
+  pdf_bez_tekstu_tytul: PDF without text
+  pdf_bez_tekstu_tresc: "The file {nazwa_pliku} has no text layer – it is most likely a scan or images of pages.\n\nThe program only reads text stored in the PDF and does not recognize text in images (OCR). If you have this document in another format (Word, text, HTML), load that instead of the PDF."
 diag:
   tytul: "Rule Warnings"
   wstep: |-
@@ -806,7 +808,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Select source file"
   file_dlg_wildcard: |-
-    Supported files (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Text files (*.txt)|*.txt|Markdown files (*.md)|*.md|HTML files (*.html;*.htm)|*.html;*.htm|Word documents (*.docx)|*.docx|All files (*.*)|*.*
+    Supported files (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Text files (*.txt)|*.txt|Markdown files (*.md)|*.md|HTML files (*.html;*.htm)|*.html;*.htm|Word documents (*.docx)|*.docx|PDF (*.pdf)|*.pdf|All files (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Provide the file name or path before loading."
   plik_nie_istnieje_tresc: "File not found:\n{sciezka_pliku}"
@@ -978,6 +980,10 @@ poliglota:
   per_akapit_detektor_przerwane_tresc: "Stopped at paragraph {numer_akapitu} of {liczba_akapitow}.\n\nCodes filled in for {liczba_wypelnionych} paragraphs; the rest kept the code they already had."
   per_akapit_nadpisanie_tytul: Overwrite the assigned codes?
   per_akapit_nadpisanie_tresc: "This action will set the code for all paragraphs at once, and {liczba_zmienionych} of them currently have a code different from the one the list was opened with.\n\nThis change cannot be undone. Continue?"
+  pdf_wczytany_tytul: Text extracted from PDF
+  pdf_wczytany_tresc: "Text was extracted from the file {nazwa_pliku}: {liczba_stron} pages, {liczba_akapitow} paragraphs.\n\nThe program rebuilt the paragraphs from the page layout, rejoined words hyphenated across line breaks, and skipped page numbers. The result will be saved as an .html file, because the program does not save PDFs."
+  pdf_kolontytuly: 'Repeated page headers and footers were skipped: {lista_kolontytulow}'
+  pdf_strony_bez_tekstu: 'Note: these pages have no text (they are most likely scans) and their content will not appear in the result: {lista_stron}'
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)
@@ -989,7 +995,7 @@ konwerter:
     Name or full path of the source file
     (e.g. .txt, .html, .md file or .docx document):
   txt_plik_name: "Source file path field"
-  txt_plik_hint: "Enter the file path (text, HTML, MD, DOCX)…"
+  txt_plik_hint: "Enter the file path (text, HTML, MD, DOCX, PDF)…"
   btn_przegladaj: "Browse…"
   btn_przegladaj_tooltip: "Opens the system file selection window for .txt or .docx files"
   btn_buduj: "Build Architecture for ElevenLabs"
@@ -1009,7 +1015,7 @@ konwerter:
   naglowki_scen: ["Scene"]
   # Dialog wyboru pliku
   file_dlg_title: "Select source file"
-  file_dlg_wildcard: "All supported files (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word Documents (*.docx)|*.docx|All files (*.*)|*.*"
+  file_dlg_wildcard: "All supported files (*.txt;*.html;*.htm;*.md;*.docx;*.pdf)|*.txt;*.html;*.htm;*.md;*.docx;*.pdf|Word Documents (*.docx)|*.docx|PDF (*.pdf)|*.pdf|All files (*.*)|*.*"
   # Komunikaty
   brak_pliku_tytul: "No file"
   brak_pliku_tresc: "Provide the name or path of the source file."

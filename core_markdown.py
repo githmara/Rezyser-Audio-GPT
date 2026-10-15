@@ -24,7 +24,20 @@ Rozszerzenia python-markdown (wspólne dla obu konsumentów):
                  „linia = krok/wiersz" bez pustych linii między nimi, a
                  odpowiedzi modeli (typowe wejście Poligloty) tak samo;
   * sane_lists – listy tylko z konsekwentnych markerów (mniej fałszywych
-                 `<ol>` z liczb w naturalnym tekście).
+                 `<ol>` z liczb w naturalnym tekście);
+  * tables, fenced_code, footnotes, def_list, abbr (od 19.13) – bez nich
+                 syntezator czytał składnię jako treść: wiersze tabeli
+                 „| kolumna | kolumna |", płoty ``` / ~~~ (a blok kodu lądował
+                 w zwykłym akapicie), znaczniki przypisów `[^1]`, `: definicja`
+                 i `*[SKRÓT]: …` (zmierzone na korpusie testowym ze wszystkimi
+                 konstrukcjami). Podręczniki tych konstrukcji nie używają —
+                 `docs/` po zmianie wyszły bajt w bajt identyczne.
+
+Front matter YAML (`---` … `---` na samym początku pliku, Jekyll/Hugo/
+Obsidian) jest zdejmowany przed renderem: bez tego zamykające `---` działało
+jak podkreślenie nagłówka setext i metadane stawały się `<h2>`.
+Nadal NIE są obsługiwane (brak rozszerzeń w python-markdown): listy zadań
+`- [ ]` i przekreślenie `~~tekst~~` — zostają w tekście dosłownie.
 """
 
 from __future__ import annotations
@@ -32,9 +45,16 @@ from __future__ import annotations
 import re
 
 #: Rozszerzenia renderu — jedno źródło prawdy dla obu konsumentów.
-ROZSZERZENIA = ["nl2br", "sane_lists"]
+ROZSZERZENIA = ["nl2br", "sane_lists", "tables", "fenced_code", "footnotes",
+                "def_list", "abbr"]
 
 _RE_TYTUL = re.compile(r"^#{1,2} +(.+)$", re.MULTILINE)
+_RE_FRONT_MATTER = re.compile(r"\A---[ \t]*\r?\n.*?\r?\n---[ \t]*\r?\n", re.S)
+
+
+def zdejmij_front_matter(tresc_md: str) -> str:
+    """Usuwa blok metadanych YAML z początku pliku (tylko z samego początku)."""
+    return _RE_FRONT_MATTER.sub("", tresc_md, count=1)
 
 
 def tytul_dokumentu(tresc_md: str) -> str:
@@ -76,6 +96,7 @@ def renderuj(tresc_md: str, jezyk: str, *, styl: str | None = None,
             "requirements.txt)."
         ) from exc
 
+    tresc_md = zdejmij_front_matter(tresc_md)
     body = markdown.markdown(
         tresc_md, extensions=ROZSZERZENIA, output_format="html5",
     )

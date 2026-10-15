@@ -436,7 +436,9 @@ tresc:
 
     Pliki Markdown (NOWOŚĆ w wersji 19.1): plik .md jest przed nałożeniem akcentu lub szyfru zamieniany na HTML. Nagłówki, listy i cytaty stają się w wyniku prawdziwymi elementami dokumentu, po których czytnik ekranu potrafi skakać (w NVDA klawisze 1-6 i H), a znaki samej składni — „---", „- ", „> " — nie są już czytane na głos jako treść. Wcześniej .md wchodził do przetwarzania jak zwykły tekst, więc te znaki lądowały w wyniku, a cała struktura dokumentu ginęła. Tłumacz AI dostaje Markdown bez zmian — model rozumie go natywnie, a zamiana na HTML tylko podniosłaby koszt tłumaczenia.
 
-    Rozszerzenia spoza listy: okno wyboru pliku pokazuje formaty, które program obsługuje wprost (.txt, .md, .html, .htm, .docx). Filtr „wszystkie pliki" nadal pozwala wskazać cokolwiek innego — dostaniesz wtedy pytanie z ostrzeżeniem, że zawartość zostanie potraktowana jak czysty tekst, więc znaczniki tego formatu trafią do wyniku i syntezator przeczyta je na głos.
+    Pliki PDF: program czyta warstwę tekstu PDF-a i odbudowuje z niej akapity — łączy wyrazy przeniesione do następnej linii, pomija numery stron oraz nagłówki i stopki powtarzające się na kolejnych stronach. Wynik zapisuje jako plik .html, bo PDF-a nie zapisuje. Skanu albo zdjęć stron (PDF bez warstwy tekstu) program nie odczyta, bo nie rozpoznaje tekstu z obrazów (OCR) — dostaniesz wtedy komunikat z prośbą o wczytanie dokumentu w innej postaci.
+
+    Rozszerzenia spoza listy: okno wyboru pliku pokazuje formaty, które program obsługuje wprost (.txt, .md, .html, .htm, .docx, .pdf). Filtr „wszystkie pliki" nadal pozwala wskazać cokolwiek innego — dostaniesz wtedy pytanie z ostrzeżeniem, że zawartość zostanie potraktowana jak czysty tekst, więc znaczniki tego formatu trafią do wyniku i syntezator przeczyta je na głos.
 
     Skrypt czyści nawiasowe didaskalia reżyserskie — usuwa całe fragmenty tekstu ujęte w nawiasy okrągłe (np. "(z wplecionymi wdechami)", "(szeptem)", "(ironicznie)"). ElevenLabs ma czytać wyłącznie dialogi i narrację, a nie instrukcje reżyserskie wplecione w tekst.
 
@@ -576,7 +578,7 @@ tresc:
 
     ### Jak to działa?
 
-    1. Wpisz ścieżkę do pliku źródłowego w polu tekstowym lub kliknij przycisk "{konwerter.btn_przegladaj}", by wybrać plik w systemowym oknie dialogowym. Skrypt przyjmuje zarówno .txt, jak i .docx, a także pliki .html i .htm.
+    1. Wpisz ścieżkę do pliku źródłowego w polu tekstowym lub kliknij przycisk "{konwerter.btn_przegladaj}", by wybrać plik w systemowym oknie dialogowym. Skrypt przyjmuje zarówno .txt, jak i .docx, a także pliki .html i .htm. Przyjmuje też pliki .pdf z warstwą tekstu (skanu bez tekstu nie odczyta).
     2. Kliknij "{konwerter.btn_buduj}".
     3. Skrypt przeskanuje każdą linię tekstu i zamieni słowa kluczowe (Akt, Rozdział, Prolog, Epilog, Czołówka) na nagłówki "Heading 1" w dokumencie Word.
     4. Sceny (linie zaczynające się od słowa "Scena") zamieniają się w pogrubiony tekst — widoczne w dokumencie, ale niewidoczne w spisie treści ElevenLabs.

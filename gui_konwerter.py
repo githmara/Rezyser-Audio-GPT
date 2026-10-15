@@ -18,6 +18,7 @@ import wx
 import yaml
 
 import core_elevenlabs
+import core_pdf
 import core_poliglota
 import sciezki
 from i18n import t
@@ -189,7 +190,8 @@ class KonwerterPanel(wx.Panel):
     Panel narzędzia „Architekt Audiobooków".
 
     Funkcjonalność:
-        - Przyjmuje ścieżkę do pliku .txt lub .docx
+        - Przyjmuje ścieżkę do pliku .txt lub .docx (od 19.13 także warstwę
+          tekstu .pdf przez ``core_pdf``)
         - Przetwarza tekst: czyści HTML/Markdown, wykrywa nagłówki
           (Czołówka, Rozdział, Prolog, Epilog, Akt) i sceny
         - Zapisuje wynik jako architektura_<oryginalna_nazwa>.docx
@@ -334,9 +336,21 @@ class KonwerterPanel(wx.Panel):
             if file_name.lower().endswith(".docx"):
                 doc_in = docx.Document(file_name)
                 tekst = "\n".join(p.text for p in doc_in.paragraphs)
+            elif file_name.lower().endswith(".pdf"):
+                # 19.13: warstwa tekstu PDF; akapit = linia, jak przy `.docx`.
+                tekst = "\n".join(core_pdf.wyciagnij(file_name).akapity)
             else:
                 with open(file_name, "r", encoding="utf-8") as fh:
                     tekst = fh.read()
+        except core_pdf.BrakWarstwyTekstu:
+            wx.MessageBox(
+                t("common.pdf_bez_tekstu_tresc",
+                  nazwa_pliku=os.path.basename(file_name)),
+                t("common.pdf_bez_tekstu_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            return
         except Exception as exc:
             wx.MessageBox(
                 t("konwerter.blad_odczytu_tresc", tresc_bledu=str(exc)),

@@ -22,7 +22,7 @@ Cztery kontrakty, mierzone WYKONANIEM pełnej ścieżki (render → `przetworz` 
   B. Po pełnej ścieżce w widocznym tekście nie ma ANI JEDNEJ linii z surową
      składnią Markdowna, a każdy element blokowy ma `lang` = `iso` wariantu.
   C. Wildcard okna wyboru pliku w KAŻDEJ paczce wymienia każde rozszerzenie
-     z `core_poliglota.EXT_OBSLUGIWANE` — kod i dane nie mogą się rozjechać
+     z `core_poliglota.EXT_WEJSCIA` — kod i dane nie mogą się rozjechać
      (rozszerzenie obsługiwane, ale niewidoczne w oknie, to defekt UI;
      wzorzec `*.md` w przetłumaczonym pliku to literał, nie tekst).
   D. Renderer jest WSPÓLNY z generatorem docs, ale konfiguracja różna:
@@ -148,7 +148,8 @@ def test_c_wildcard_wymienia_kazde_obslugiwane_rozszerzenie() -> None:
         wildcard = sekcja.get("file_dlg_wildcard")
         assert isinstance(wildcard, str) and wildcard.strip(), (
             f"{kod}/gui/ui.yaml: brak `poliglota.file_dlg_wildcard`")
-        braki = [ext for ext in cp.EXT_OBSLUGIWANE if f"*{ext}" not in wildcard]
+        # 19.13: EXT_WEJSCIA (zapisywane + `.pdf`) — okno pokazuje, co GUI WCZYTUJE.
+        braki = [ext for ext in cp.EXT_WEJSCIA if f"*{ext}" not in wildcard]
         assert not braki, (
             f"{kod}/gui/ui.yaml: wildcard nie wymienia {braki} — silnik te "
             f"pliki obsluguje, wiec okno wyboru ma je pokazywac "
@@ -174,6 +175,53 @@ def test_d_wspolny_renderer_dwie_konfiguracje() -> None:
     assert cialo and cialo.group(1) in poliglotowy, (
         "docs i Poliglota rozjechaly sie na SAMYM renderze Markdowna — "
         "`core_markdown.ROZSZERZENIA` ma byc jednym zrodlem prawdy")
+
+
+PROBKA_ROZSZERZONA = """---
+title: Metadane
+tags: [a, b]
+---
+# Tytuł
+
+| Kolumna | Druga |
+|---------|-------|
+| jabłko  | 3     |
+
+```python
+print("kod")
+```
+
+Zdanie z przypisem[^1].
+
+Termin
+: Definicja terminu.
+
+*[HTML]: HyperText Markup Language
+
+Skrót HTML w zdaniu.
+
+[^1]: Treść przypisu.
+"""
+
+
+def test_e_rozszerzona_skladnia_nie_trafia_do_tresci() -> None:
+    """E (19.13): tabela, płot kodu, przypis, definicja, skrót, front matter.
+
+    Bez `tables`/`fenced_code`/`footnotes`/`def_list`/`abbr` każda z tych
+    konstrukcji szła do wyniku jako tekst czytany na głos, a front matter
+    stawał się nagłówkiem `<h2>` (zamykające `---` = setext).
+    """
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(core_markdown.renderuj(PROBKA_ROZSZERZONA, "pl"), "html.parser")
+    tekst = soup.get_text("\n")
+    for etykieta, wzorzec in [("tabela", r"\|"), ("płot", r"```"), ("przypis", r"\[\^"),
+                              ("definicja", r"(?m)^: "), ("skrót", r"\*\["),
+                              ("front matter", r"title:|tags:")]:
+        assert not re.search(wzorzec, tekst), f"składnia „{etykieta}” w treści wyniku"
+    for tag in ("table", "pre", "dl", "abbr", "sup"):
+        assert soup.find(tag) is not None, f"brak elementu <{tag}>"
+    assert soup.title.string == "Tytuł"
+    assert [h.get_text() for h in soup.find_all("h2")] == []
 
 
 # Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno

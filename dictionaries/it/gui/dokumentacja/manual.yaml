@@ -386,7 +386,9 @@ tresc:
 
     File Markdown (NOVITÀ nella versione 19.1): un file .md viene convertito in HTML prima dell'applicazione dell'accento o del cifrario. Intestazioni, elenchi e citazioni diventano nel risultato veri elementi del documento, tra i quali il lettore di schermo può saltare (in NVDA i tasti 1-6 e H), mentre i simboli della sintassi stessa — „---", „- ", „> " — non vengono più letti ad alta voce come contenuto. In precedenza un file .md entrava nell'elaborazione come testo normale, quindi questi simboli finivano nel risultato e l'intera struttura del documento andava perduta. Il Traduttore AI riceve il Markdown senza modifiche — il modello lo comprende in modo nativo, e la conversione in HTML alzerebbe soltanto il costo della traduzione.
 
-    Estensioni non presenti nell'elenco: la finestra di selezione del file mostra i formati che il programma gestisce direttamente (.txt, .md, .html, .htm, .docx). Il filtro "tutti i file" permette comunque di indicare qualsiasi altra cosa — riceverai allora una domanda con un avviso che il contenuto sarà trattato come testo puro, quindi i marcatori di quel formato finiranno nel risultato e il sintetizzatore li leggerà ad alta voce.
+    File PDF: il programma legge il livello di testo del PDF e ne ricostruisce i paragrafi: riunisce le parole divise a fine riga e ignora i numeri di pagina, nonché le intestazioni e i piè di pagina che si ripetono su pagine consecutive. Il risultato viene salvato come file .html, perché il programma non salva in formato PDF. Una scansione o delle foto di pagine (un PDF senza livello di testo) non possono essere lette, perché il programma non riconosce il testo nelle immagini (OCR): in tal caso riceverai un messaggio che ti chiede di caricare il documento in un altro formato.
+
+    Estensioni non presenti nell'elenco: la finestra di selezione del file mostra i formati che il programma gestisce direttamente (.txt, .md, .html, .htm, .docx, .pdf). Il filtro "tutti i file" permette comunque di indicare qualsiasi altra cosa — riceverai allora una domanda con un avviso che il contenuto sarà trattato come testo puro, quindi i marcatori di quel formato finiranno nel risultato e il sintetizzatore li leggerà ad alta voce.
 
     Lo script ripulisce le didascalie registiche tra parentesi — rimuove interi frammenti di testo racchiusi tra parentesi tonde (ad es. "(con respiri intrecciati)", "(sussurrando)", "(ironicamente)"). ElevenLabs deve leggere esclusivamente i dialoghi e la narrazione, non le istruzioni registiche intrecciate nel testo.
 
@@ -525,7 +527,7 @@ tresc:
 
     ### Come funziona?
 
-    1. Inserisci il percorso del file sorgente nel campo di testo oppure clicca il pulsante "{konwerter.btn_przegladaj}" per selezionare il file nella finestra di dialogo di sistema. Lo script accetta sia .txt che .docx, nonché file .html e .htm.
+    1. Inserisci il percorso del file sorgente nel campo di testo oppure clicca il pulsante "{konwerter.btn_przegladaj}" per selezionare il file nella finestra di dialogo di sistema. Lo script accetta sia .txt che .docx, nonché file .html e .htm. Accetta anche file .pdf con livello di testo (una scansione senza testo non può essere letta).
     2. Clicca "{konwerter.btn_buduj}".
     3. Lo script analizzerà ogni riga del testo e convertirà le parole chiave (Atto, Capitolo, Prologo, Epilogo, Introduzione) in intestazioni "Heading 1" nel documento Word.
     4. Le scene (righe che iniziano con la parola "Scena") diventano testo in grassetto — visibili nel documento, ma non visibili nel sommario di ElevenLabs.

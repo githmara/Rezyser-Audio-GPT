@@ -2116,6 +2116,12 @@ def sufiks_nazwy_pliku(
 # prawdy dla silnika, wildcardu w `ui.yaml` i ostrzeżenia w GUI.
 EXT_OBSLUGIWANE: tuple[str, ...] = (".txt", ".md", ".html", ".htm", ".docx")
 
+# Rozszerzenia, które GUI WCZYTUJE bez ostrzeżenia (19.13): zapisywane plus
+# `.pdf`, którego warstwa tekstu (`core_pdf`) wchodzi do pipeline'u jako `.txt`
+# — wynik jest `.html`, bo PDF-a nie zapisujemy. Źródło wildcardu w `ui.yaml`
+# i listy w ostrzeżeniu o nieobsługiwanym rozszerzeniu.
+EXT_WEJSCIA: tuple[str, ...] = EXT_OBSLUGIWANE + (".pdf",)
+
 # Lista tagów blokowych, dla których ma sens lokalny atrybut ``lang``.
 # Wybrane spośród elementów HTML5, które typowo zawierają samodzielną
 # jednostkę tekstu (czytniki ekranu przełączają silnik mowy na granicy

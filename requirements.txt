@@ -72,6 +72,13 @@ anthropic<1.8
 elevenlabs<2.69
 python-dotenv
 python-docx
+# Warstwa tekstu PDF w Poliglocie i Konwerterze (`core_pdf`, od 19.13). Wybrany
+# zamiast `pdfplumber` z ATA: PDFium bez zależności to ~8 MB bundla, pdfplumber
+# ciągnąłby pdfminer + Pillow + cryptography (~45 MB). Wołamy `PdfDocument`,
+# `get_textpage`, `get_text_range` i `get_charbox(loose=True)` — granica na
+# następnym minorze ponad przetestowane 5.14.0, bo kod znaku dywizu dzielenia
+# (U+FFFE w 5.14, zmierzone) to szczegół implementacji PDFium, nie kontrakt API.
+pypdfium2<5.15
 # `jezyki_lingua.KANON` jest LUSTREM enuma `lingua.Language`, a `audyt_podstaw`
 # porównuje je 1:1. Nowy MINOR potrafi dodać język, więc granicą jest tu linia
 # minorowa, nie majorowa: upgrade jest zmianą kanonu, nie tylko biblioteki.

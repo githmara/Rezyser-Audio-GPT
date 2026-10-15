@@ -384,7 +384,9 @@ tresc:
 
     Markdown files (NEW in version 19.1): a .md file is converted to HTML before an accent or cipher is applied. Headings, lists, and quotes become real document elements as a result, which a screen reader can jump between (in NVDA, keys 1-6 and H), and the syntax characters themselves — "---", "- ", "> " — are no longer read aloud as content. Previously, .md was fed into processing like plain text, so these characters ended up in the result and the entire document structure was lost. The AI Translator receives Markdown unchanged — the model understands it natively, and converting it to HTML would only raise the cost of translation.
 
-    Extensions outside the list: the file selection window shows the formats the program handles directly (.txt, .md, .html, .htm, .docx). The "all files" filter still lets you point to anything else — you'll then get a question with a warning that the content will be treated as plain text, so that format's markup will end up in the result and the synthesizer will read it aloud.
+    PDF files: the program reads the PDF's text layer and rebuilds paragraphs from it — it rejoins words hyphenated across lines and skips page numbers as well as headers and footers repeated on consecutive pages. The result is saved as an .html file, because the program does not save PDFs. A scan or photos of pages (a PDF without a text layer) cannot be read, because the program does not recognize text in images (OCR) — you will then get a message asking you to load the document in another form.
+
+    Extensions outside the list: the file selection window shows the formats the program handles directly (.txt, .md, .html, .htm, .docx, .pdf). The "all files" filter still lets you point to anything else — you'll then get a question with a warning that the content will be treated as plain text, so that format's markup will end up in the result and the synthesizer will read it aloud.
 
     The script cleans parenthetical director's stage directions — it removes entire fragments of text enclosed in round brackets (e.g., "(with interspersed breaths)", "(whispering)", "(ironically)"). ElevenLabs is meant to read only dialogue and narration, not director's instructions woven into the text.
 
@@ -523,7 +525,7 @@ tresc:
 
     ### How does it work?
 
-    1. Enter the path to the source file in the text field or click the "{konwerter.btn_przegladaj}" button to select a file in the system dialog. The script accepts both .txt and .docx files, as well as .html and .htm files.
+    1. Enter the path to the source file in the text field or click the "{konwerter.btn_przegladaj}" button to select a file in the system dialog. The script accepts both .txt and .docx files, as well as .html and .htm files. It also accepts .pdf files with a text layer (a scan without text cannot be read).
     2. Click "{konwerter.btn_buduj}".
     3. The script will scan each line of text and convert keywords (Act, Chapter, Prologue, Epilogue, Foreword) into "Heading 1" headings in the Word document.
     4. Scenes (lines beginning with the word "Scena") are converted to bold text — visible in the document, but not visible in the ElevenLabs table of contents.

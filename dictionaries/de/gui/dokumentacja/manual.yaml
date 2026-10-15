@@ -384,7 +384,9 @@ tresc:
 
     Markdown-Dateien (NEU in Version 19.1): Eine .md-Datei wird vor dem Anwenden eines Akzents oder einer Verschlüsselung in HTML umgewandelt. Überschriften, Listen und Zitate werden dadurch zu echten Dokumentelementen, zwischen denen das Bildschirmleseprogramm springen kann (in NVDA die Tasten 1-6 und H), und die reinen Syntaxzeichen — „---", „- ", „> " — werden nicht mehr als Inhalt laut vorgelesen. Zuvor ging .md wie gewöhnlicher Text in die Verarbeitung ein, sodass diese Zeichen im Ergebnis landeten und die gesamte Dokumentstruktur verloren ging. Der KI-Übersetzer erhält Markdown unverändert — das Modell versteht es nativ, und eine Umwandlung in HTML würde nur die Übersetzungskosten erhöhen.
 
-    Erweiterungen außerhalb der Liste: Das Dateiauswahlfenster zeigt die Formate, die das Programm direkt unterstützt (.txt, .md, .html, .htm, .docx). Der Filter „alle Dateien" erlaubt weiterhin, etwas anderes anzugeben — Sie erhalten dann eine Rückfrage mit der Warnung, dass der Inhalt als reiner Text behandelt wird, sodass die Markierungen dieses Formats im Ergebnis landen und der Synthesizer sie laut vorliest.
+    PDF-Dateien: Das Programm liest die Textebene des PDFs und rekonstruiert daraus die Absätze – es fügt am Zeilenende getrennte Wörter wieder zusammen und lässt Seitenzahlen sowie Kopf- und Fußzeilen aus, die sich auf aufeinanderfolgenden Seiten wiederholen. Das Ergebnis wird als .html-Datei gespeichert, da das Programm keine PDFs speichert. Einen Scan oder Fotos von Seiten (ein PDF ohne Textebene) kann das Programm nicht lesen, da es keinen Text in Bildern erkennt (OCR) – Sie erhalten dann eine Meldung mit der Bitte, das Dokument in einer anderen Form zu laden.
+
+    Erweiterungen außerhalb der Liste: Das Dateiauswahlfenster zeigt die Formate, die das Programm direkt unterstützt (.txt, .md, .html, .htm, .docx, .pdf). Der Filter „alle Dateien" erlaubt weiterhin, etwas anderes anzugeben — Sie erhalten dann eine Rückfrage mit der Warnung, dass der Inhalt als reiner Text behandelt wird, sodass die Markierungen dieses Formats im Ergebnis landen und der Synthesizer sie laut vorliest.
 
     Das Skript bereinigt in Klammern gesetzte Regieanweisungen — es entfernt ganze Textabschnitte, die in runde Klammern eingeschlossen sind (z. B. "(mit eingeflochtenen Atemzügen)", "(geflüstert)", "(ironisch)"). ElevenLabs soll ausschließlich Dialoge und Erzählung vorlesen, keine in den Text eingeflochtenen Regieanweisungen.
 
@@ -523,7 +525,7 @@ tresc:
 
     ### Wie funktioniert es?
 
-    1. Geben Sie den Pfad zur Quelldatei in das Textfeld ein oder klicken Sie auf „{konwerter.btn_przegladaj}", um eine Datei im Systemdialog auszuwählen. Das Skript akzeptiert sowohl .txt als auch .docx sowie .html- und .htm-Dateien.
+    1. Geben Sie den Pfad zur Quelldatei in das Textfeld ein oder klicken Sie auf „{konwerter.btn_przegladaj}", um eine Datei im Systemdialog auszuwählen. Das Skript akzeptiert sowohl .txt als auch .docx sowie .html- und .htm-Dateien. Es akzeptiert auch .pdf-Dateien mit Textebene (einen Scan ohne Text kann es nicht lesen).
     2. Klicken Sie auf „{konwerter.btn_buduj}".
     3. Das Skript durchsucht jede Textzeile und wandelt Schlüsselwörter (Akt, Kapitel, Prolog, Epilog, Vorspann) in „Heading 1"-Überschriften im Word-Dokument um.
     4. Szenen (Zeilen, die mit dem Wort „Szene" beginnen) werden in fett formatierten Text umgewandelt — im Dokument sichtbar, aber nicht im ElevenLabs-Inhaltsverzeichnis.

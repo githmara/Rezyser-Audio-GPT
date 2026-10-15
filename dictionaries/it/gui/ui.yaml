@@ -47,6 +47,8 @@ common:
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
   llm_nieznany_model: "Il provider AI non riconosce il modello «{model}».\nSe il programma è passato da poco a un nuovo modello Claude, OpenRouter potrebbe non averlo ancora reso disponibile. Inserisci in golden_key.env una riga LLM_MODEL= con un modello già presente su OpenRouter (ad es. anthropic/claude-sonnet-5.5) e riavvia il programma."
+  pdf_bez_tekstu_tytul: PDF senza testo
+  pdf_bez_tekstu_tresc: "Il file {nazwa_pliku} non contiene un livello di testo: con ogni probabilità è una scansione o un insieme di immagini delle pagine.\n\nIl programma legge soltanto il testo memorizzato nel PDF e non riconosce il testo nelle immagini (OCR). Se hai questo documento in un altro formato (Word, testo, HTML), carica quello al posto del PDF."
 main:
   menu:
     narzedzia: "&Strumenti"
@@ -722,7 +724,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Seleziona file sorgente"
   file_dlg_wildcard: |-
-    File supportati (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|File di testo (*.txt)|*.txt|File Markdown (*.md)|*.md|File HTML (*.html;*.htm)|*.html;*.htm|Documenti Word (*.docx)|*.docx|Tutti i file (*.*)|*.*
+    File supportati (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|File di testo (*.txt)|*.txt|File Markdown (*.md)|*.md|File HTML (*.html;*.htm)|*.html;*.htm|Documenti Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Tutti i file (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Fornisci un nome o un percorso per il file prima di caricarlo."
   plik_nie_istnieje_tresc: "File non trovato:\n{sciezka_pliku}"
@@ -894,6 +896,10 @@ poliglota:
   per_akapit_detektor_przerwane_tresc: "Interrotto al paragrafo {numer_akapitu} di {liczba_akapitow}.\n\nCodici compilati in {liczba_wypelnionych} paragrafi; i restanti hanno mantenuto il codice che avevano già."
   per_akapit_nadpisanie_tytul: Sovrascrivere i codici impostati?
   per_akapit_nadpisanie_tresc: "Questa operazione imposterà il codice in tutti i paragrafi contemporaneamente, e {liczba_zmienionych} di essi ha attualmente un codice diverso da quello con cui l'elenco è stato aperto.\n\nLa modifica non potrà essere annullata. Continuare?"
+  pdf_wczytany_tytul: Testo estratto dal PDF
+  pdf_wczytany_tresc: "Dal file {nazwa_pliku} è stato estratto il testo: {liczba_stron} pagine, {liczba_akapitow} paragrafi.\n\nIl programma ha ricostruito i paragrafi a partire dall'impaginazione, ha riunito le parole divise a fine riga e ha ignorato i numeri di pagina. Il risultato verrà salvato come file .html, perché il programma non salva in formato PDF."
+  pdf_kolontytuly: 'Intestazioni e piè di pagina ripetuti ignorati: {lista_kolontytulow}'
+  pdf_strony_bez_tekstu: 'Attenzione: queste pagine non contengono testo (con ogni probabilità sono scansioni) e il loro contenuto non sarà presente nel risultato: {lista_stron}'
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   # 18.8: segmento localizzato del nome del file di output (una parola, senza spazi)
@@ -905,7 +911,7 @@ konwerter:
     Nome o percorso completo del file sorgente
     (ad es. file .txt, .html, .md o documento .docx):
   txt_plik_name: "Campo percorso file sorgente"
-  txt_plik_hint: "Inserisci il percorso del file (testo, HTML, MD, DOCX)…"
+  txt_plik_hint: "Inserisci il percorso del file (testo, HTML, MD, DOCX, PDF)…"
   btn_przegladaj: "Sfoglia…"
   btn_przegladaj_tooltip: "Apre la finestra di selezione file di sistema per .txt o .docx"
   btn_buduj: "Costruisci Architettura per ElevenLabs"
@@ -925,7 +931,7 @@ konwerter:
   naglowki_scen: ["Scena"]
   # Dialog wyboru pliku
   file_dlg_title: "Seleziona file sorgente"
-  file_dlg_wildcard: "Tutti i file supportati (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Documenti Word (*.docx)|*.docx|Tutti i file (*.*)|*.*"
+  file_dlg_wildcard: "Tutti i file supportati (*.txt;*.html;*.htm;*.md;*.docx;*.pdf)|*.txt;*.html;*.htm;*.md;*.docx;*.pdf|Documenti Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Tutti i file (*.*)|*.*"
   # Komunikaty
   brak_pliku_tytul: "Nessun file"
   brak_pliku_tresc: "Fornisci il nome o il percorso del file sorgente."

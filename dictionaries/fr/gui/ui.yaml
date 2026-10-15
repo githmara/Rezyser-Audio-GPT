@@ -47,6 +47,8 @@ common:
 # MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
 # -----------------------------------------------------------------------------
   llm_nieznany_model: "Le fournisseur d'IA ne reconnaît pas le modèle « {model} ».\nSi le programme vient de passer à un nouveau modèle Claude, OpenRouter ne l'a peut-être pas encore mis à disposition. Ajoutez dans golden_key.env une ligne LLM_MODEL= avec un modèle déjà proposé par OpenRouter (par ex. anthropic/claude-sonnet-5.5), puis relancez le programme."
+  pdf_bez_tekstu_tytul: PDF sans texte
+  pdf_bez_tekstu_tresc: "Le fichier {nazwa_pliku} ne contient pas de couche de texte ; il s'agit très probablement d'un scan ou de photos de pages.\n\nLe programme lit uniquement le texte enregistré dans le PDF et ne reconnaît pas le texte des images (OCR). Si vous disposez de ce document sous une autre forme (Word, texte, HTML), chargez-la à la place du PDF."
 main:
   menu:
     narzedzia: "&Outils"
@@ -720,7 +722,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Sélectionner un fichier source"
   file_dlg_wildcard: |-
-    Fichiers pris en charge (*.txt;*.md;*.html;*.htm;*.docx)|*.txt;*.md;*.html;*.htm;*.docx|Fichiers texte (*.txt)|*.txt|Fichiers Markdown (*.md)|*.md|Fichiers HTML (*.html;*.htm)|*.html;*.htm|Documents Word (*.docx)|*.docx|Tous les fichiers (*.*)|*.*
+    Fichiers pris en charge (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Fichiers texte (*.txt)|*.txt|Fichiers Markdown (*.md)|*.md|Fichiers HTML (*.html;*.htm)|*.html;*.htm|Documents Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Tous les fichiers (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Indiquez un nom ou un chemin pour le fichier avant de le charger."
   plik_nie_istnieje_tresc: "Fichier introuvable :\n{sciezka_pliku}"
@@ -892,6 +894,10 @@ poliglota:
   per_akapit_detektor_przerwane_tresc: "Interrompu au paragraphe {numer_akapitu} sur {liczba_akapitow}.\n\nCodes renseignés dans {liczba_wypelnionych} paragraphes ; les autres ont conservé le code qu'ils avaient déjà."
   per_akapit_nadpisanie_tytul: Écraser les codes définis ?
   per_akapit_nadpisanie_tresc: "Cette action va définir le code dans tous les paragraphes en même temps, et {liczba_zmienionych} d'entre eux ont actuellement un code différent de celui avec lequel la liste s'est ouverte.\n\nCette modification est irréversible. Continuer ?"
+  pdf_wczytany_tytul: Texte extrait du PDF
+  pdf_wczytany_tresc: "Texte extrait du fichier {nazwa_pliku} : {liczba_stron} pages, {liczba_akapitow} paragraphes.\n\nLe programme a reconstitué les paragraphes à partir de la mise en page, rejoint les mots coupés en fin de ligne et ignoré les numéros de page. Le résultat sera enregistré au format .html, car le programme n'enregistre pas de PDF."
+  pdf_kolontytuly: 'En-têtes et pieds de page répétés ignorés : {lista_kolontytulow}'
+  pdf_strony_bez_tekstu: 'Attention : ces pages ne contiennent pas de texte (probablement des scans) et leur contenu ne figurera pas dans le résultat : {lista_stron}'
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)
@@ -903,7 +909,7 @@ konwerter:
     Nom ou chemin complet du fichier source
     (par ex. fichier .txt, .html, .md ou document .docx) :
   txt_plik_name: "Champ chemin du fichier source"
-  txt_plik_hint: "Saisissez le chemin du fichier (texte, HTML, MD, DOCX)…"
+  txt_plik_hint: "Saisissez le chemin du fichier (texte, HTML, MD, DOCX, PDF)…"
   btn_przegladaj: "Parcourir…"
   btn_przegladaj_tooltip: "Ouvre la fenêtre de sélection de fichier du système pour .txt ou .docx"
   btn_buduj: "Construire l'Architecture pour ElevenLabs"
@@ -921,7 +927,7 @@ konwerter:
   naglowki_scen: ["Scène", "Scene"]
   # Dialog wyboru pliku
   file_dlg_title: "Sélectionner un fichier source"
-  file_dlg_wildcard: "Tous les fichiers pris en charge (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Documents Word (*.docx)|*.docx|Tous les fichiers (*.*)|*.*"
+  file_dlg_wildcard: "Tous les fichiers pris en charge (*.txt;*.html;*.htm;*.md;*.docx;*.pdf)|*.txt;*.html;*.htm;*.md;*.docx;*.pdf|Documents Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Tous les fichiers (*.*)|*.*"
   # Komunikaty
   brak_pliku_tytul: "Aucun fichier"
   brak_pliku_tresc: "Indiquez le nom ou le chemin du fichier source."

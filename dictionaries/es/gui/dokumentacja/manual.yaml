@@ -384,7 +384,9 @@ tresc:
 
     Archivos Markdown (NOVEDAD en la versión 19.1): un archivo .md se convierte a HTML antes de aplicar el acento o el cifrado. Los encabezados, listas y citas se convierten como resultado en elementos reales del documento, entre los que el lector de pantalla puede saltar (en NVDA, teclas 1-6 y H), y los caracteres de la sintaxis misma —«---», «- », «> »— ya no se leen en voz alta como contenido. Anteriormente, el .md entraba en el procesamiento como texto normal, de modo que esos caracteres acababan en el resultado y toda la estructura del documento se perdía. El Traductor IA recibe el Markdown sin cambios: el modelo lo entiende de forma nativa, y la conversión a HTML solo elevaría el coste de la traducción.
 
-    Extensiones fuera de la lista: la ventana de selección de archivo muestra los formatos que el programa admite directamente (.txt, .md, .html, .htm, .docx). El filtro "todos los archivos" sigue permitiendo indicar cualquier otra cosa; en ese caso recibirás una pregunta con una advertencia de que el contenido se tratará como texto plano, por lo que las marcas propias de ese formato acabarán en el resultado y el sintetizador las leerá en voz alta.
+    Archivos PDF: el programa lee la capa de texto del PDF y reconstruye a partir de ella los párrafos: une las palabras divididas al final de línea y omite los números de página, así como los encabezados y pies de página que se repiten en páginas consecutivas. El resultado se guarda como archivo .html, porque el programa no guarda PDF. Un escaneo o fotografías de páginas (un PDF sin capa de texto) no se pueden leer, porque el programa no reconoce texto en imágenes (OCR): en ese caso recibirás un mensaje que te pedirá cargar el documento en otro formato.
+
+    Extensiones fuera de la lista: la ventana de selección de archivo muestra los formatos que el programa admite directamente (.txt, .md, .html, .htm, .docx, .pdf). El filtro "todos los archivos" sigue permitiendo indicar cualquier otra cosa; en ese caso recibirás una pregunta con una advertencia de que el contenido se tratará como texto plano, por lo que las marcas propias de ese formato acabarán en el resultado y el sintetizador las leerá en voz alta.
 
     El script limpia las acotaciones escénicas entre paréntesis: elimina fragmentos enteros de texto encerrados entre paréntesis (por ejemplo, "(con respiraciones entrelazadas)", "(susurrando)", "(irónicamente)"). ElevenLabs debe leer únicamente los diálogos y la narración, y no las instrucciones de dirección intercaladas en el texto.
 
@@ -523,7 +525,7 @@ tresc:
 
     ### ¿Cómo funciona?
 
-    1. Escribe la ruta al archivo fuente en el campo de texto o haz clic en el botón "{konwerter.btn_przegladaj}" para seleccionar el archivo en el cuadro de diálogo del sistema. El script acepta tanto .txt como .docx, así como archivos .html y .htm.
+    1. Escribe la ruta al archivo fuente en el campo de texto o haz clic en el botón "{konwerter.btn_przegladaj}" para seleccionar el archivo en el cuadro de diálogo del sistema. El script acepta tanto .txt como .docx, así como archivos .html y .htm. También acepta archivos .pdf con capa de texto (un escaneo sin texto no se puede leer).
     2. Haz clic en "{konwerter.btn_buduj}".
     3. El script escaneará cada línea del texto y convertirá las palabras clave (Acto, Capítulo, Prólogo, Epílogo, Introducción) en encabezados "Heading 1" en el documento Word.
     4. Las escenas (líneas que comienzan con la palabra "Scena") se convierten en texto en negrita — visibles en el documento, pero no visibles en el índice de ElevenLabs.
