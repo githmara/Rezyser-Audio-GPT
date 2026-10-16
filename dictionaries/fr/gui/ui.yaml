@@ -906,7 +906,7 @@ poliglota:
   skan_znacznik_photo: '[photo]'
   skan_znacznik_stamp: '[cachet]'
   skan_znacznik_signature: '[signature]'
-  skan_znacznik_emblem: '[emblème]'
+  skan_znacznik_emblem: '[armoiries]'
   skan_znacznik_no_text: '[page sans texte]'
   skan_pochodzenie: "Page {numer_strony} : texte lu à partir de l'image par un modèle d'IA ; il peut contenir des erreurs de lecture."
   skan_nieodczytana: '[Page {numer_strony} : non lue. Motif : {powod}]'
@@ -914,6 +914,7 @@ poliglota:
   skan_powod_odmowa: le modèle a refusé de lire cette page
   skan_powod_pusta: le modèle a renvoyé une réponse vide
   skan_powod_anulowano: lecture annulée
+  skan_powod_blad: "erreur lors de la lecture de cette page (les détails figuraient dans le récapitulatif après le chargement du fichier)"
   skan_zgoda_tytul: Lire les pages numérisées avec un modèle d'IA ?
   skan_zgoda_tresc: "Dans le fichier {nazwa_pliku}, {liczba_skanow} page(s) sur {liczba_stron} n'ont pas de couche de texte (il s'agit très probablement de scans) : {lista_stron}.\n\nJe peux lire ces pages à partir de l'image avec un modèle d'IA ({model}). Chacune sera envoyée sous forme d'image à un service externe : {usluga}.\nLes documents numérisés contiennent souvent des données personnelles (pièces d'identité, passeports, actes d'état civil). Ne les envoyez que si vous en avez le droit.\n\nCoût estimé : {koszt}. Durée : environ 5 secondes par page.\n\nSi vous choisissez « Ignorer », ces pages seront ignorées et leur contenu n'apparaîtra pas dans le résultat."
   skan_zgoda_koszt: environ {kwota} USD

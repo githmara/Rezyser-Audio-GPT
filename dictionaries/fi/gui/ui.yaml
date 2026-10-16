@@ -914,6 +914,7 @@ poliglota:
   skan_powod_odmowa: malli kieltäytyi lukemasta tätä sivua
   skan_powod_pusta: malli palautti tyhjän vastauksen
   skan_powod_anulowano: lukeminen peruttiin
+  skan_powod_blad: "tämän sivun lukeminen epäonnistui virheen vuoksi (tiedot näytettiin yhteenvedossa tiedoston avaamisen jälkeen)"
   skan_zgoda_tytul: Luetaanko skannatut sivut tekoälymallilla?
   skan_zgoda_tresc: "Tiedostossa {nazwa_pliku} on {liczba_stron} sivua, ja {liczba_skanow} niistä on ilman tekstikerrosta (todennäköisesti skannauksia): {lista_stron}.\n\nVoin lukea nämä sivut kuvasta tekoälymallilla ({model}). Jokainen niistä lähetetään kuvana ulkoiseen palveluun: {usluga}.\nAsiakirjaskannaukset sisältävät usein henkilötietoja (henkilökortit, passit, siviilisäätyasiakirjat). Lähetä ne vain, jos sinulla on siihen oikeus.\n\nArvioitu hinta: {koszt}. Aika: noin 5 sekuntia sivua kohden.\n\nJos valitset ”Ohita”, nämä sivut ohitetaan eikä niiden sisältöä tule tulokseen."
   skan_zgoda_koszt: noin {kwota} USD

@@ -115,12 +115,21 @@ def test_bez_kontekstu_bez_bloku(monkeypatch):
 @pytest.mark.parametrize("odpowiedz, status, powod", [
     (("", cl.STOP_ODRZUCENIE), cs.STATUS_ODMOWA, "poliglota.skan_powod_odmowa"),
     ((" \n ", "end_turn"), cs.STATUS_BLAD, "poliglota.skan_powod_pusta"),
-    (cl.BladTimeoutLLM("timeout"), cs.STATUS_BLAD, "BladTimeoutLLM: timeout"),
+    (cl.BladTimeoutLLM("timeout"), cs.STATUS_BLAD, "poliglota.skan_powod_blad"),
 ])
 def test_strona_nieodczytana_ma_status_i_powod(monkeypatch, odpowiedz, status, powod):
     _model(monkeypatch, [odpowiedz])
     w = cs.odczytaj_strone(KLIENT, b"PDF", 4)
     assert (w.status, w.powod, w.markdown) == (status, powod, "")
+
+
+def test_surowy_wyjatek_tylko_w_szczegole_nie_w_powodzie(monkeypatch):
+    # Angielski JSON błędu SDK z `request_id` trafiał do treści dokumentu,
+    # którą syntezator czyta na głos (audyt 19.14).
+    _model(monkeypatch, [cl.BladTimeoutLLM('{"error": {"request_id": "req_X"}}')])
+    w = cs.odczytaj_strone(KLIENT, b"PDF", 4)
+    assert "req_X" not in w.powod and "req_X" in w.szczegol
+    assert w.szczegol.startswith("BladTimeoutLLM: ")
 
 
 def test_urwana_strona_zachowuje_odczytana_czesc(monkeypatch):
@@ -173,19 +182,78 @@ def test_blad_krytyczny_daje_powod_kazdej_pozostalej_stronie(monkeypatch):
     assert blad is limit
     assert [(w.numer, w.status) for w in wyniki] == [
         (2, cs.STATUS_OK), (3, cs.STATUS_BLAD), (5, cs.STATUS_BLAD)]
-    assert wyniki[2].powod == "brak kredytów"
+    assert wyniki[2].powod == "poliglota.skan_powod_blad"
+    assert wyniki[2].szczegol == "BladLimituLLM: brak kredytów"
 
 
-def test_anulowanie_daje_powod_kazdej_pozostalej_stronie(monkeypatch):
-    _model(monkeypatch, [("SKAN 2", "end_turn")])
-    licznik = iter([False, True])
+def test_anuluj_w_trakcie_strony_nie_wysyla_nastepnej(monkeypatch):
+    # Audyt 19.14 [WYSOKA]: „Anuluj" w trakcie strony 2 przepuszczało stronę 3
+    # do zewnętrznej usługi — płatnie i z danymi osobowymi po cofnięciu zgody.
+    anulowane = []
+    wyslane = []
+
+    def wywolaj(klient, **kw):
+        wyslane.append(kw["pdf"])
+        anulowane.append(True)          # użytkownik klika „Anuluj" w trakcie
+        return "SKAN", "end_turn"
+
+    monkeypatch.setattr(cl, "wywolaj_llm_z_pdf", wywolaj)
+    monkeypatch.setattr(cs, "wytnij_strone", lambda _s, n: f"PDF{n}".encode())
     wyniki, blad = cs.odczytaj_strony(KLIENT, "x.pdf", AKAPITY, [2, 3, 5],
-                                      przerwij=lambda: next(licznik))
+                                      przerwij=lambda: bool(anulowane))
     assert blad is None
     assert [(w.numer, w.status, w.powod) for w in wyniki] == [
         (2, cs.STATUS_OK, ""),
         (3, cs.STATUS_BLAD, "poliglota.skan_powod_anulowano"),
         (5, cs.STATUS_BLAD, "poliglota.skan_powod_anulowano")]
+    assert wyslane == [b"PDF2"]
+
+
+def test_zla_strona_przy_cieciu_nie_kasuje_odczytanych(monkeypatch):
+    # Audyt 19.14: wyjątek `wytnij_strone` w środku serii wywracał cały
+    # (opłacony) odczyt — zostawał sam tekst warstwy.
+    _model(monkeypatch, [("SKAN 2", "end_turn"), ("SKAN 5", "end_turn")])
+
+    def tnij(_s, n):
+        if n == 3:
+            raise OSError("damaged page")
+        return f"PDF{n}".encode()
+
+    monkeypatch.setattr(cs, "wytnij_strone", tnij)
+    wyniki, blad = cs.odczytaj_strony(KLIENT, "x.pdf", AKAPITY, [2, 3, 5])
+    assert blad is None
+    assert [(w.numer, w.status) for w in wyniki] == [
+        (2, cs.STATUS_OK), (3, cs.STATUS_BLAD), (5, cs.STATUS_OK)]
+    assert wyniki[1].szczegol == "OSError: damaged page"
+
+
+def test_kontekst_przez_strone_doklejona_do_wczesniejszej(monkeypatch):
+    # Strona 2 jest pusta, bo jej tekst doklejono do akapitu strony 1 —
+    # skan na stronie 3 ma dostać koniec tego akapitu, nie pustkę.
+    wyslane = _model(monkeypatch, [("SKAN 3", "end_turn")])
+    cs.odczytaj_strony(KLIENT, "x.pdf", [["Zdanie przez dwie strony."], [], []], [3])
+    assert "Zdanie przez dwie strony." in wyslane[0]["tekst_przed"]
+
+
+def test_kontekst_nie_przechodzi_przez_nieodczytany_skan():
+    assert cs._kontekst(3, [["Tekst."], [], []], {2, 3}, {}) == ""
+
+
+def test_tekst_tresci_bez_pochodzenia_i_znacznikow():
+    wyniki = [cs.WynikStrony(2, cs.STATUS_OK, "Name: [[ILLEGIBLE]] Smith"),
+              cs.WynikStrony(3, cs.STATUS_ODMOWA, powod="r")]
+    tekst = cs.tekst_tresci([["Intro."], [], [], ["End."]], wyniki)
+    assert tekst == "Intro.\n\nName:   Smith\n\nEnd."
+
+
+def test_zakresy_stron():
+    assert cs.zakresy([2, 3, 4, 5, 9, 11, 12]) == "2–5, 9, 11–12"
+    assert cs.zakresy([7]) == "7" and cs.zakresy([]) == ""
+
+
+@pytest.mark.parametrize("plot", ["```", "~~~"])
+def test_plot_obu_rodzajow_zdjety(plot):
+    assert cs._zdejmij_plot(f"{plot}markdown\n# A\n{plot}") == "# A"
 
 
 # --------------------------------------------------------------------- D ---
@@ -219,6 +287,28 @@ def test_scal_zdejmuje_markdownowy_escape_modelu():
     wyniki = [cs.WynikStrony(1, cs.STATUS_OK, "\\<script>x\\</script> \\& Co")]
     body = _body(cs.scal([[]], wyniki, "pl", "doc"))
     assert "<p>&lt;script&gt;x&lt;/script&gt; &amp; Co</p>" in body
+
+
+def test_scal_bez_linkow_obrazow_i_podwojnego_escape():
+    # Audyt 19.14: `[x](javascript:…)` dawał działający `<a href>`, `![](…)`
+    # zdalny `<img>`, a kod dostawał `&amp;amp;` (czytane na głos „amp").
+    wyniki = [cs.WynikStrony(1, cs.STATUS_OK,
+                             "[x](javascript:alert(1)) ![o](http://evil/x.png) <http://e>\n\n"
+                             "[r][1]\n\n[1]: javascript:y\n\n"
+                             "Kod `a & <b>` i &amp; encja\n\n    wciety & <i>")]
+    body = _body(cs.scal([[]], wyniki, "pl", "doc"))
+    assert "<a " not in body and "<img" not in body and "href" not in body
+    assert "[x](javascript:alert(1))" in body and "[1]: javascript:y" in body
+    assert "&amp;amp;" not in body and "&amp;lt;" not in body
+    assert "<code>a &amp; &lt;b&gt;</code>" in body
+    assert "wciety &amp; &lt;i&gt;" in body
+
+
+def test_sentinele_w_tekscie_modelu_nie_udaja_znacznika():
+    tekst = chr(0xE000) + "FOO" + chr(0xE001) + " [[ILLEGIBLE]]"
+    body = _body(cs.scal([[]], [cs.WynikStrony(1, cs.STATUS_OK, tekst)], "pl", "doc"))
+    assert "skan_znacznik_foo" not in body
+    assert "FOO poliglota.skan_znacznik_illegible" in body
 
 
 def test_scal_znaczniki_po_renderze_nie_staja_sie_linkami():

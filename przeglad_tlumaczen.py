@@ -486,8 +486,9 @@ _CHECKLIST_UI = """\
   (a state coat of arms, a rubber stamp, a handwritten signature, a blank
   form field), never a software or branding concept. The model translates
   the keys one by one, without the document around them. Measured 2026-10-16:
-  `fi` returned „[tunnus]" (= identifier / logo) for „[godło]"; the other
-  seven packs chose the coat-of-arms word („[vaakuna]" is the fix).
+  `fi` returned „[tunnus]" (= identifier / logo) for „[godło]" and `fr` the
+  generic „[emblème]"; the other six chose the coat-of-arms word (fixes:
+  „[vaakuna]", „[armoiries]" — the second one found by the release audit).
   Mechanically gated only for PRESENCE (`test_core_skany.py`: every token in
   `core_skany.ZNACZNIKI` has its key in every pack); the meaning is this
   bullet.

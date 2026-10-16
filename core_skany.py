@@ -102,15 +102,16 @@ STATUS_ODMOWA = "odmowa"
 STATUS_BLAD = "blad"
 
 _RE_ZNACZNIK = re.compile(r"\[\[([A-Z_]+)\]\]")
-# Cała odpowiedź owinięta w płot (```markdown … ```) mimo zakazu.
-_RE_PLOT = re.compile(r"\A\s*```[^\n]*\n(.*?)\n```\s*\Z", re.S)
+# Cała odpowiedź owinięta w płot (```markdown … ``` albo ~~~) mimo zakazu.
+_RE_PLOT = re.compile(r"\A\s*(```|~~~)[^\n]*\n(.*?)\n\1\s*\Z", re.S)
 # Znaki z obszaru prywatnego Unicode: znacznik przechodzi przez render
 # Markdownu jako NIEZNACZĄCY tekst (podmiana przed renderem dałaby `[…]`,
 # który z `(…)` za nim staje się linkiem).
 _OTW, _ZAM = chr(0xE000), chr(0xE001)
 _RE_SENTINEL = re.compile(_OTW + "([A-Z_]+)" + _ZAM)
 # Model sam escapuje `<` po markdownowemu (`\<script>`, zmierzone 2026-10-16).
-# Po NASZYM escapie zostałoby `\&lt;` i syntezator czytałby ukośnik.
+# Dla Markdowna `<` i `&` nie są znakami ucieczki, więc ukośnik zostawał
+# w wyniku i syntezator go czytał.
 _RE_ESCAPE_MODELU = re.compile(r"\\([<&])")
 
 
@@ -121,8 +122,12 @@ class WynikStrony:
     #: Markdown od modelu (po zdjęciu płotu), z tokenami `[[…]]` — także
     #: kontekst dla następnej strony.
     markdown: str = ""
-    #: Powód dla `odmowa` / `blad` (już przetłumaczony albo treść wyjątku).
+    #: Powód dla `odmowa` / `blad`, przetłumaczony — trafia do DOKUMENTU.
     powod: str = ""
+    #: Techniczny szczegół błędu (typ i treść wyjątku SDK, często angielski
+    #: JSON z `request_id`) — WYŁĄCZNIE do podsumowania, nigdy do dokumentu,
+    #: który syntezator czyta na głos (audyt 19.14).
+    szczegol: str = ""
     #: Liczba wystąpień każdego tokenu z `ZNACZNIKI` (do podsumowania).
     znaczniki: dict[str, int] = field(default_factory=dict)
     #: Metryka wywołania z `core_llm` (tylko Anthropic): tokeny, request_id.
@@ -169,7 +174,25 @@ def wytnij_strone(sciezka: str, numer: int) -> bytes:
 
 def _zdejmij_plot(tekst: str) -> str:
     m = _RE_PLOT.match(tekst)
-    return m.group(1) if m else tekst
+    return m.group(2) if m else tekst
+
+
+def zakresy(strony: list[int]) -> str:
+    """„2–5, 9" zamiast „2, 3, 4, 5, 9" — setki numerów w dialogu nie da się słuchać."""
+    czesci: list[str] = []
+    i = 0
+    while i < len(strony):
+        j = i
+        while j + 1 < len(strony) and strony[j + 1] == strony[j] + 1:
+            j += 1
+        czesci.append(str(strony[i]) if j == i else f"{strony[i]}–{strony[j]}")
+        i = j + 1
+    return ", ".join(czesci)
+
+
+def _blad_strony(numer: int, exc: Exception, slad: list[dict] | None = None) -> WynikStrony:
+    return WynikStrony(numer, STATUS_BLAD, powod=t("poliglota.skan_powod_blad"),
+                       szczegol=f"{type(exc).__name__}: {exc}", slad=slad or [])
 
 
 def policz_znaczniki(markdown: str) -> dict[str, int]:
@@ -204,8 +227,7 @@ def odczytaj_strone(klient: cl.KlientLLM, pdf: bytes, numer: int,
     except Exception as exc:  # noqa: BLE001 — błąd strony to status, krytyczny leci wyżej
         if _czy_krytyczny(exc):
             raise
-        return WynikStrony(numer, STATUS_BLAD, powod=f"{type(exc).__name__}: {exc}",
-                           slad=slad)
+        return _blad_strony(numer, exc, slad)
     if stop == cl.STOP_ODRZUCENIE:
         return WynikStrony(numer, STATUS_ODMOWA,
                            powod=t("poliglota.skan_powod_odmowa"), slad=slad)
@@ -247,32 +269,75 @@ def odczytaj_strony(
     """
     wyniki: list[WynikStrony] = []
     odczytane: dict[int, WynikStrony] = {}
+    skany = set(numery)
+
+    def anulowano(i: int) -> bool:
+        if przerwij is None or not przerwij():
+            return False
+        powod = t("poliglota.skan_powod_anulowano")
+        wyniki.extend(WynikStrony(n, STATUS_BLAD, powod=powod) for n in numery[i:])
+        return True
+
     for i, numer in enumerate(numery):
-        if przerwij is not None and przerwij():
-            powod = t("poliglota.skan_powod_anulowano")
-            wyniki += [WynikStrony(n, STATUS_BLAD, powod=powod) for n in numery[i:]]
+        if anulowano(i):
             return wyniki, None
         if postep is not None:
             postep(i, len(numery), numer)
-        poprzednia = odczytane.get(numer - 1)
-        if poprzednia is not None:
-            kontekst = poprzednia.markdown
-        elif 2 <= numer <= len(akapity_stron) + 1:
-            kontekst = "\n\n".join(akapity_stron[numer - 2])
-        else:
-            kontekst = ""
         try:
-            wynik = odczytaj_strone(klient, wytnij_strone(sciezka, numer), numer, kontekst)
+            pdf = wytnij_strone(sciezka, numer)
+        except Exception as exc:  # noqa: BLE001 — jedna zła strona nie kasuje opłaconych
+            wyniki.append(_blad_strony(numer, exc))
+            continue
+        # Drugi raz tuż przed wysłaniem: „Anuluj" wciśnięte w trakcie
+        # poprzedniej strony nie może przepuścić tej (cofnięta zgoda).
+        if anulowano(i):
+            return wyniki, None
+        try:
+            wynik = odczytaj_strone(klient, pdf, numer,
+                                    _kontekst(numer, akapity_stron, skany, odczytane))
         except Exception as exc:  # noqa: BLE001 — krytyczny: reszta stron z tym powodem
             if not _czy_krytyczny(exc):
                 raise
-            powod = str(exc)
-            wyniki += [WynikStrony(n, STATUS_BLAD, powod=powod) for n in numery[i:]]
+            wyniki.extend(_blad_strony(n, exc) for n in numery[i:])
             return wyniki, exc
         wyniki.append(wynik)
         if wynik.status in (STATUS_OK, STATUS_UCIETA):
             odczytane[numer] = wynik
     return wyniki, None
+
+
+def _kontekst(numer: int, akapity_stron: list[list[str]], skany: set[int],
+              odczytane: dict[int, WynikStrony]) -> str:
+    """Treść tuż przed stroną `numer`: odczytany skan albo ostatnie akapity tekstu.
+
+    Strona tekstu bywa pusta, bo jej początek doklejono do akapitu strony
+    wcześniejszej — wtedy szukamy dalej wstecz, ale NIGDY przez skan (jego
+    treść leży pomiędzy, a nieodczytany nie ma czego dać).
+    """
+    poprzednia = odczytane.get(numer - 1)
+    if poprzednia is not None:
+        return poprzednia.markdown
+    n = numer - 1
+    while n >= 1 and n not in skany and n <= len(akapity_stron):
+        if akapity_stron[n - 1]:
+            return "\n\n".join(akapity_stron[n - 1])
+        n -= 1
+    return ""
+
+
+def tekst_tresci(akapity_stron: list[list[str]], wyniki: list[WynikStrony]) -> str:
+    """Sama treść dokumentu (bez akapitów pochodzenia i powodów) — do detekcji języka.
+
+    Akapity pochodzenia są w języku UI: polskie zdanie przed krótkim
+    angielskim formularzem przestawiało wykryty język na `pl` (audyt 19.14).
+    """
+    per_strona = {w.numer: w for w in wyniki if w.status in (STATUS_OK, STATUS_UCIETA)}
+    czesci: list[str] = []
+    for numer, akapity in enumerate(akapity_stron, start=1):
+        if numer in per_strona:
+            czesci.append(_RE_ZNACZNIK.sub(" ", per_strona[numer].markdown))
+        czesci += akapity
+    return "\n\n".join(czesci)
 
 
 @dataclass
@@ -302,19 +367,21 @@ def _akapit(tekst: str) -> str:
 
 
 def _fragment_strony(markdown: str) -> str:
-    """Markdown od modelu → HTML: najpierw escape, potem render, potem znaczniki.
+    """Markdown od modelu → HTML: render NIEZAUFANY, potem znaczniki.
 
-    Tekst ze skanu to wejście NIEZAUFANE, a python-markdown przepuszcza surowy
-    HTML — `<script>` z obrazu trafiłby do pliku, który użytkownik otwiera
-    w przeglądarce. Escapujemy `&` i `<` (bez `>`, który w Markdownie zaczyna
-    cytat); encje przechodzą przez render nietknięte.
+    Tekst ze skanu to wejście NIEZAUFANE: `<script>` z obrazu albo
+    `[x](javascript:…)` trafiłyby do pliku, który użytkownik otwiera
+    w przeglądarce. `renderuj_fragment(niezaufany=True)` nie zna surowego
+    HTML-a, linków ani obrazów i sam escapuje — także w kodzie, gdzie ręczny
+    escape przed renderem dawał `&amp;amp;` (audyt 19.14). Znaki sentineli
+    w tekście modelu zdejmujemy, żeby nie udawały znacznika.
     """
     bezpieczny = _RE_ESCAPE_MODELU.sub(r"\1", markdown)
-    bezpieczny = bezpieczny.replace("&", "&amp;").replace("<", "&lt;")
+    bezpieczny = bezpieczny.replace(_OTW, "").replace(_ZAM, "")
     bezpieczny = _RE_ZNACZNIK.sub(
         lambda m: _OTW + m.group(1) + _ZAM if m.group(1) in ZNACZNIKI else m.group(0),
         bezpieczny)
-    fragment = core_markdown.renderuj_fragment(bezpieczny)
+    fragment = core_markdown.renderuj_fragment(bezpieczny, niezaufany=True)
     return _RE_SENTINEL.sub(
         lambda m: html.escape(t(f"poliglota.skan_znacznik_{m.group(1).lower()}"),
                               quote=False),

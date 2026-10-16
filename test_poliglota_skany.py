@@ -72,6 +72,9 @@ def srodowisko(monkeypatch):
         def Update(self, *_a):
             return zapis.postep_dalej, False
 
+        def WasCancelled(self):
+            return not zapis.postep_dalej
+
         def Destroy(self):
             pass
 
@@ -209,6 +212,49 @@ def test_drugi_wczytaj_w_trakcie_odczytu_nic_nie_startuje(srodowisko, tmp_path):
     panel._worker_thread = Zywy()
     _wczytaj(panel, _mieszany(tmp_path))
     assert zapis.zgody == [] and zapis.komunikaty == [] and panel._file_content == ""
+
+
+def test_nic_nie_odczytano_to_nie_sukces_tylko_sam_tekst(srodowisko, tmp_path, monkeypatch):
+    # Audyt 19.14: 401 na pierwszej stronie dawało plik z samymi akapitami
+    # błędów „wczytany" komunikatem o sukcesie.
+    panel, zapis = srodowisko
+    monkeypatch.setattr(cs, "odczytaj_strony", lambda _k, _s, _a, strony, **_kw: (
+        [cs.WynikStrony(n, cs.STATUS_BLAD, powod="p", szczegol="AuthenticationError: 401")
+         for n in strony], None))
+    _wczytaj(panel, _mieszany(tmp_path))
+    assert panel._file_ext == ".txt"
+    assert panel._file_content == "Wstep dokumentu.\n\nKoniec dokumentu."
+    assert "Odczytano z obrazu stron: 0 z 1" in zapis.dlugie[0][1]
+    assert "AuthenticationError: 401" in zapis.dlugie[0][1]
+
+
+def test_detekcja_jezyka_z_tresci_bez_akapitow_pochodzenia(srodowisko, tmp_path, monkeypatch):
+    # Audyt 19.14: polskie akapity pochodzenia przestawiały wykryty język
+    # krótkiego angielskiego formularza na `pl`.
+    import core_poliglota
+    panel, zapis = srodowisko
+    widziane = []
+    monkeypatch.setattr(core_poliglota, "wykryj_jezyk_zrodlowy",
+                        lambda tekst, **_kw: widziane.append(tekst) or "pl")
+    panel._combo_jezyk.SetSelection(0)
+    _wczytaj(panel, _mieszany(tmp_path))
+    assert widziane and "odczytany z obrazu" not in widziane[0]
+    assert "strona 2" in widziane[0] and "[[ILLEGIBLE]]" not in widziane[0]
+    panel._on_clear(None)
+    assert panel._tekst_detekcji == ""
+
+
+def test_timer_anulowania_czyta_dialog_w_trakcie_strony(srodowisko):
+    # Audyt 19.14 [WYSOKA]: „Anuluj" czytane tylko w `Update()` na starcie
+    # strony przepuszczało następną stronę. Timer odpytuje `WasCancelled`.
+    panel, zapis = srodowisko
+    panel._postep_skanow = wx.ProgressDialog("t", "m")
+    panel._anuluj_skany.clear()
+    panel._skany_sprawdz_anulowanie(None)
+    assert not panel._anuluj_skany.is_set()
+    zapis.postep_dalej = False
+    panel._skany_sprawdz_anulowanie(None)
+    assert panel._anuluj_skany.is_set()
 
 
 def test_anuluj_w_oknie_postepu_ustawia_przerwanie(srodowisko):

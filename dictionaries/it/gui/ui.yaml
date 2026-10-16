@@ -916,6 +916,7 @@ poliglota:
   skan_powod_odmowa: il modello ha rifiutato di leggere questa pagina
   skan_powod_pusta: il modello ha restituito una risposta vuota
   skan_powod_anulowano: lettura annullata
+  skan_powod_blad: "errore durante la lettura di questa pagina (i dettagli sono stati mostrati nel riepilogo dopo il caricamento del file)"
   skan_zgoda_tytul: Leggere le pagine scansionate con un modello AI?
   skan_zgoda_tresc: "Nel file {nazwa_pliku}, {liczba_skanow} pagine su {liczba_stron} non hanno un livello di testo (probabilmente sono scansioni): {lista_stron}.\n\nPosso leggere queste pagine dall'immagine con un modello AI ({model}). Ciascuna verrà inviata come immagine a un servizio esterno: {usluga}.\nLe scansioni di documenti contengono spesso dati personali (carte d'identità, passaporti, atti di stato civile). Inviale solo se hai il diritto di farlo.\n\nCosto stimato: {koszt}. Tempo: circa 5 secondi per pagina.\n\nSe scegli «Salta», queste pagine verranno saltate e il loro contenuto non sarà presente nel risultato."
   skan_zgoda_koszt: circa {kwota} USD

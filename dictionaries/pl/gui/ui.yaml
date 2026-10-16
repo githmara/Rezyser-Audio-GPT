@@ -949,6 +949,7 @@ poliglota:
   skan_powod_odmowa:    "model odmówił odczytu tej strony"
   skan_powod_pusta:     "model zwrócił pustą odpowiedź"
   skan_powod_anulowano: "odczyt anulowano"
+  skan_powod_blad: "błąd odczytu tej strony (szczegóły pokazano w podsumowaniu po wczytaniu pliku)"
   skan_zgoda_tytul: "Odczytać strony-skany przez model AI?"
   skan_zgoda_tresc: |-
     W pliku {nazwa_pliku} {liczba_skanow} z {liczba_stron} stron nie ma warstwy tekstu (najpewniej to skany): {lista_stron}.

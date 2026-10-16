@@ -415,6 +415,11 @@ class PoliglotaPanel(wx.Panel):
         # `is_alive()` w „Wyczyść"/„Uruchom" obejmują go bez zmian).
         self._postep_skanow: wx.ProgressDialog | None = None
         self._anuluj_skany = threading.Event()
+        self._timer_skanow = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._skany_sprawdz_anulowanie, self._timer_skanow)
+        # Treść do detekcji języka, gdy `_file_content` ma dopiski w języku UI
+        # (akapity pochodzenia stron-skanów). Pusty = detekcja z `_file_content`.
+        self._tekst_detekcji: str = ""
 
         # Aktywny język pipeline'u (akcenty/szyfry/cezar). Bez wczytanego
         # pliku domyślnie idzie z języka UI (gdy ma komplet reguł), żeby
@@ -891,7 +896,7 @@ class PoliglotaPanel(wx.Panel):
         # właśnie się zmieniły.
         if self._combo_jezyk.GetSelection() <= 0:
             wykryty = core_poliglota.wykryj_jezyk_zrodlowy(
-                self._file_content,
+                self._tekst_detekcji or self._file_content,
                 fallback=self._jezyk_aktywny,
             )
             if wykryty != self._jezyk_aktywny:
@@ -964,7 +969,7 @@ class PoliglotaPanel(wx.Panel):
             "poliglota.skan_zgoda_tresc",
             nazwa_pliku=os.path.basename(file_name),
             liczba_skanow=len(strony), liczba_stron=liczba_stron,
-            lista_stron=", ".join(map(str, strony)),
+            lista_stron=core_skany.zakresy(strony),
             model=core_skany.model_odczytu(self._client),
             usluga=core_skany.opis_uslugi(self._client),
             koszt=(t("poliglota.skan_zgoda_koszt", kwota=f"{koszt:.2f}")
@@ -991,6 +996,11 @@ class PoliglotaPanel(wx.Panel):
               numer=1, liczba=len(strony)),
             maximum=len(strony), parent=self,
             style=wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+        # „Anuluj" było czytane tylko w `Update()` na STARCIE strony, więc
+        # kliknięcie w trakcie strony k przepuszczało jeszcze stronę k+1 do
+        # zewnętrznej usługi (audyt 19.14). Timer odpytuje dialog, a wątek
+        # sprawdza flagę tuż przed każdym wysłaniem.
+        self._timer_skanow.Start(200)
         self._worker_thread = threading.Thread(
             target=self._skany_worker,
             # Język i tytuł czytane TU (wątek GUI), nie w workerze.
@@ -1014,13 +1024,20 @@ class PoliglotaPanel(wx.Panel):
                 postep=lambda i, n, nr: wx.CallAfter(self._skany_postep, i, n, nr),
                 przerwij=self._anuluj_skany.is_set)
             dokument = core_skany.scal(akapity_stron, wyniki, jezyk, tytul)
+            tekst_detekcji = core_skany.tekst_tresci(akapity_stron, wyniki)
         except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
             bledy_ai.zapisz_diagnostyke(exc, "poliglota._skany_worker")
             wx.CallAfter(self._skany_blad, file_name, wynik_pdf, str(exc))
             return
-        wx.CallAfter(self._skany_gotowe, file_name, wynik_pdf, wyniki, blad, dokument)
+        wx.CallAfter(self._skany_gotowe, file_name, wynik_pdf, wyniki, blad, dokument,
+                     tekst_detekcji)
+
+    def _skany_sprawdz_anulowanie(self, _event: wx.TimerEvent) -> None:
+        if self._postep_skanow and self._postep_skanow.WasCancelled():
+            self._anuluj_skany.set()
 
     def _zamknij_postep_skanow(self) -> None:
+        self._timer_skanow.Stop()
         dlg, self._postep_skanow = getattr(self, "_postep_skanow", None), None
         if dlg:
             dlg.Destroy()
@@ -1039,15 +1056,27 @@ class PoliglotaPanel(wx.Panel):
             self._anuluj_skany.set()
 
     def _skany_gotowe(self, file_name: str, wynik_pdf: core_pdf.WynikPdf | None,
-                      wyniki: list, blad: Exception | None, dokument: str) -> None:
+                      wyniki: list, blad: Exception | None, dokument: str,
+                      tekst_detekcji: str) -> None:
         if not self:
             return
         self._zamknij_postep_skanow()
+        podsumowanie = self._tekst_podsumowania_skanow(
+            os.path.basename(file_name), wynik_pdf, wyniki, blad)
+        if core_skany.podsumuj(wyniki).odczytane == 0:
+            # Nic nie odczytano (np. 401 na pierwszej stronie): dokument z samymi
+            # akapitami błędów nie może zostać „wczytany" komunikatem o sukcesie
+            # (audyt 19.14). Mówimy, co się stało, i wracamy do ścieżki bez skanów.
+            gd.pokaz_tekst(self, t("poliglota.skan_podsumowanie_tytul"), podsumowanie)
+            if wynik_pdf is not None:
+                self._file_content = wynik_pdf.tekst
+                self._file_ext = ".txt"
+                self._dokoncz_wczytanie(file_name, wynik_pdf)
+            return
         self._file_content = dokument
         self._file_ext = ".html"
-        self._dokoncz_wczytanie(file_name, wynik_pdf,
-                                self._tekst_podsumowania_skanow(
-                                    os.path.basename(file_name), wynik_pdf, wyniki, blad))
+        self._tekst_detekcji = tekst_detekcji
+        self._dokoncz_wczytanie(file_name, wynik_pdf, podsumowanie)
 
     def _skany_blad(self, file_name: str, wynik_pdf: core_pdf.WynikPdf | None,
                     tresc_bledu: str) -> None:
@@ -1080,14 +1109,15 @@ class PoliglotaPanel(wx.Panel):
                         liczba_pustych=p.znaczniki.get("EMPTY", 0)))
         if p.urwane:
             czesci.append(t("poliglota.skan_podsumowanie_urwane",
-                            lista_stron=", ".join(map(str, p.urwane))))
+                            lista_stron=core_skany.zakresy(p.urwane)))
         if blad is not None:
             czesci.append(t("poliglota.skan_podsumowanie_przerwano", powod=str(blad)))
         if p.nieodczytane:
             czesci.append("\n".join(
                 [t("poliglota.skan_podsumowanie_nieodczytane")]
                 + [t("poliglota.skan_podsumowanie_strona", numer_strony=w.numer,
-                     powod=w.powod) for w in p.nieodczytane]))
+                     powod=f"{w.powod} ({w.szczegol})" if w.szczegol else w.powod)
+                   for w in p.nieodczytane]))
         return "\n\n".join(czesci)
 
     def _pokaz_info_pdf(self, nazwa_pliku: str, wynik: "core_pdf.WynikPdf") -> None:
@@ -1104,7 +1134,7 @@ class PoliglotaPanel(wx.Panel):
                                 lista_kolontytulow="; ".join(wynik.kolontytuly[:5]))
         if wynik.strony_bez_tekstu:
             tresc += "\n\n" + t("poliglota.pdf_strony_bez_tekstu",
-                                lista_stron=", ".join(map(str, wynik.strony_bez_tekstu)))
+                                lista_stron=core_skany.zakresy(wynik.strony_bez_tekstu))
             dopisek = self._powod_braku_odczytu()
             if dopisek:
                 tresc += "\n" + dopisek
@@ -1159,6 +1189,7 @@ class PoliglotaPanel(wx.Panel):
 
         self._file_content      = ""
         self._file_ext          = ""
+        self._tekst_detekcji    = ""
         self._tresc_pipeline    = ""
         self._ext_pipeline      = ""
         self._oryginalna_nazwa  = "nieznany"
@@ -1301,7 +1332,7 @@ class PoliglotaPanel(wx.Panel):
         if idx <= 0:
             if self._file_content:
                 nowy = core_poliglota.wykryj_jezyk_zrodlowy(
-                    self._file_content,
+                    self._tekst_detekcji or self._file_content,
                     fallback=_wybierz_domyslny_jezyk_pipeline(),
                 )
             else:
@@ -1681,7 +1712,7 @@ class PoliglotaPanel(wx.Panel):
         # jest miękkie i pojawia się tylko, gdy detekcja widzi inny kompletny
         # język niż aktualnie wybrany w GUI.
         wykryty = core_poliglota.wykryj_jezyk_zrodlowy(
-            self._file_content,
+            self._tekst_detekcji or self._file_content,
             fallback=self._jezyk_aktywny,
         )
         if wykryty != self._jezyk_aktywny:

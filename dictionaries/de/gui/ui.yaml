@@ -916,6 +916,7 @@ poliglota:
   skan_powod_odmowa: Das Modell hat das Lesen dieser Seite verweigert
   skan_powod_pusta: Das Modell hat eine leere Antwort geliefert
   skan_powod_anulowano: Texterkennung abgebrochen
+  skan_powod_blad: "Fehler beim Lesen dieser Seite (Einzelheiten standen in der Zusammenfassung nach dem Laden der Datei)"
   skan_zgoda_tytul: Gescannte Seiten per KI-Modell auslesen?
   skan_zgoda_tresc: "In der Datei {nazwa_pliku} haben {liczba_skanow} von {liczba_stron} Seiten keine Textebene (höchstwahrscheinlich Scans): {lista_stron}.\n\nIch kann diese Seiten mit einem KI-Modell ({model}) aus dem Bild auslesen. Jede davon wird als Bild an einen externen Dienst gesendet: {usluga}.\nGescannte Dokumente enthalten häufig personenbezogene Daten (Ausweise, Reisepässe, Personenstandsurkunden). Senden Sie sie nur, wenn Sie dazu berechtigt sind.\n\nGeschätzte Kosten: {koszt}. Dauer: etwa 5 Sekunden pro Seite.\n\nWenn Sie „Überspringen“ wählen, werden diese Seiten übersprungen und ihr Inhalt fehlt im Ergebnis."
   skan_zgoda_koszt: etwa {kwota} USD

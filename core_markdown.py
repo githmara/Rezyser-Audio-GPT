@@ -108,18 +108,37 @@ def _modul_markdown():
     return markdown
 
 
-def renderuj_fragment(tresc_md: str) -> str:
+#: Wzorce wyłączane dla treści NIEZAUFANEJ (`renderuj_fragment(..., niezaufany=True)`):
+#: surowy HTML oraz wszystko, co daje `<a href>` albo `<img src>` z adresem
+#: podanym w tekście. Bez nich `<script>` i `[x](javascript:…)` zostają
+#: zwykłym tekstem, a escapowanie (także w kodzie) robi sam Markdown — ręczny
+#: escape przed renderem dawał `&amp;amp;` w blokach kodu (audyt 19.14).
+_WZORCE_NIEZAUFANE = ("html", "link", "image_link", "image_reference", "reference",
+                      "short_reference", "short_image_ref", "autolink", "automail")
+
+
+def renderuj_fragment(tresc_md: str, *, niezaufany: bool = False) -> str:
     """Markdown → sam fragment HTML (zawartość `<body>`), tymi samymi `ROZSZERZENIA`.
 
     Bez zdejmowania front matter: fragment to kawałek dokumentu (od 19.14
     odczytana strona-skan PDF-a, `core_skany`), nie plik z metadanymi.
 
+    Args:
+        niezaufany: treść spoza kontroli użytkownika (odpowiedź modelu
+            o tekście ze skanu): bez surowego HTML-a, linków i obrazów — patrz
+            `_WZORCE_NIEZAUFANE`. Definicje odnośników (`[1]: url`) zostają
+            w tekście, zamiast po cichu znikać.
+
     Raises:
         RuntimeError: brak biblioteki `markdown` (patrz `_modul_markdown`).
     """
-    return _modul_markdown().markdown(
-        tresc_md, extensions=ROZSZERZENIA, output_format="html5",
-    )
+    md = _modul_markdown().Markdown(extensions=ROZSZERZENIA, output_format="html5")
+    if niezaufany:
+        md.preprocessors.deregister("html_block")
+        md.parser.blockprocessors.deregister("reference")
+        for wzorzec in _WZORCE_NIEZAUFANE:
+            md.inlinePatterns.deregister(wzorzec)
+    return md.convert(tresc_md)
 
 
 def zloz_dokument(body: str, jezyk: str, tytul: str, *, styl: str | None = None,
