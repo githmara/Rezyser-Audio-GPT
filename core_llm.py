@@ -24,6 +24,7 @@ wciągany do `.exe` (lekki bundla single-provider — patrz CLAUDE.md pkt 7).
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import os
@@ -123,6 +124,19 @@ class BladModeluLLM(BladLLM):
                 "not list it yet — set LLM_MODEL in golden_key.env to a model "
                 "it does list (e.g. anthropic/claude-sonnet-5.5)."
             )
+
+
+class BladFunkcjiNiedostepnej(BladLLM):
+    """Provider nie umie tej funkcji (v19.14: PDF dla ``openai_compat``).
+
+    Strażnik, nie komunikat dla użytkownika: GUI sprawdza providera, ZANIM
+    zaproponuje funkcję, więc ten wyjątek oznacza błąd wołającego.
+    """
+
+    def __init__(self, funkcja: str, provider: str) -> None:
+        self.funkcja = funkcja
+        self.provider = provider
+        super().__init__(f"'{funkcja}' is not available for provider '{provider}'.")
 
 
 # ---------------------------------------------------------------------------
@@ -1364,6 +1378,7 @@ def _openai_chat(
     *,
     bez_temperatury: bool = False,
     klucz_tokenow: str = "max_tokens",
+    extra_body: dict | None = None,
 ) -> tuple[str, str | None]:
     """Pojedyncze wywołanie ``chat.completions`` + normalizacja wyniku/stop_reason.
 
@@ -1387,6 +1402,8 @@ def _openai_chat(
         kwargs["temperature"] = temperature
     if response_format is not None:
         kwargs["response_format"] = response_format
+    if extra_body:
+        kwargs["extra_body"] = extra_body
     resp = klient.sdk.with_options(timeout=timeout).chat.completions.create(**kwargs)
     choice = resp.choices[0]
     tekst = choice.message.content or ""
@@ -1750,6 +1767,37 @@ def _wywolaj_anthropic(
     return tekst, stop
 
 
+def _model_wywolania(klient: KlientLLM, model: str) -> str:
+    """Nazwa modelu, która faktycznie pójdzie do endpointu tego klienta."""
+    if klient.provider == PROVIDER_OPENAI_COMPAT and klient.model_override:
+        return klient.model_override
+    if klient.provider == PROVIDER_OPENROUTER:
+        # Mapowanie także dla `LLM_MODEL` (audyt v19.11): `claude-opus-5-5`
+        # w configu to ten sam Opus; id z `/` przechodzi nietknięte.
+        return model_dla_openroutera(klient.model_override or model)
+    # Anthropic: override ustawia WYŁĄCZNIE zapas autotłumaczy z trybu
+    # OpenRouter (natywny odpowiednik `anthropic/…` z `LLM_MODEL`).
+    return klient.model_override or model
+
+
+def _opakuj_blad(exc: Exception, mdl: str, provider: str) -> BladLLM | None:
+    """Wyjątek SDK → nasz typ (limit, timeout, kontekst, nieznany model).
+
+    ``None`` = nie opakowujemy, wołający robi gołe ``raise``. JEDNA mapa dla
+    :func:`wywolaj_llm` i :func:`wywolaj_llm_z_pdf` — druga kopia tej
+    kolejności rozjechałaby się przy pierwszej nowej klasie błędu.
+    """
+    if _czy_nieznany_model(exc):
+        return BladModeluLLM(mdl, provider)
+    if _czy_rate_limit(exc):
+        return BladLimituLLM(str(exc))
+    if _czy_timeout(exc):
+        return BladTimeoutLLM(str(exc))
+    if _czy_przepelniony_kontekst(exc):
+        return BladKontekstuLLM(str(exc))
+    return None
+
+
 def wywolaj_llm(
     klient: KlientLLM,
     *,
@@ -1825,16 +1873,7 @@ def wywolaj_llm(
     (wszystkie dla dowolnego providera). Pozostałe wyjątki SDK propagują natywnie
     (łapie je szeroki ``except`` wołającego).
     """
-    if klient.provider == PROVIDER_OPENAI_COMPAT and klient.model_override:
-        mdl = klient.model_override
-    elif klient.provider == PROVIDER_OPENROUTER:
-        # Mapowanie także dla `LLM_MODEL` (audyt v19.11): `claude-opus-5-5`
-        # w configu to ten sam Opus; id z `/` przechodzi nietknięte.
-        mdl = model_dla_openroutera(klient.model_override or model)
-    else:
-        # Anthropic: override ustawia WYŁĄCZNIE zapas autotłumaczy z trybu
-        # OpenRouter (natywny odpowiednik `anthropic/…` z `LLM_MODEL`).
-        mdl = klient.model_override or model
+    mdl = _model_wywolania(klient, model)
 
     try:
         if klient.provider in (PROVIDER_OPENAI_COMPAT, PROVIDER_OPENROUTER):
@@ -1867,12 +1906,117 @@ def wywolaj_llm(
                 thinking_budget=thinking_budget, schema_json=schema_json,
                 slad=slad,
             )
-        if _czy_nieznany_model(exc):
-            raise BladModeluLLM(mdl, klient.provider) from exc
-        if _czy_rate_limit(exc):
-            raise BladLimituLLM(str(exc)) from exc
-        if _czy_timeout(exc):
-            raise BladTimeoutLLM(str(exc)) from exc
-        if _czy_przepelniony_kontekst(exc):
-            raise BladKontekstuLLM(str(exc)) from exc
-        raise
+        opakowany = _opakuj_blad(exc, mdl, klient.provider)
+        if opakowany is None:
+            raise
+        raise opakowany from exc
+
+
+# ---------------------------------------------------------------------------
+# PDF jako wejście (v19.14) — strony bez warstwy tekstu czytane modelem z obrazem
+# ---------------------------------------------------------------------------
+#: Silnik parsera PDF w OpenRouterze. `native` = PDF trafia do modelu tak jak
+#: w natywnym API (zmierzone 2026-10-16: 1993 tokeny wejścia po obu stronach).
+#: Bez jawnego silnika OpenRouter wybiera go sam: dla modelu bez natywnego
+#: PDF-a byłby to płatny OCR albo `pdf-text`, który ze skanu oddaje pustkę.
+_OPENROUTER_PDF_PLUGIN: dict = {"id": "file-parser", "pdf": {"engine": "native"}}
+
+#: Myślenie przez OpenRoutera. Wyłączyć się go nie da: `enabled: false`
+#: i `effort: none` kończą się 400 „Reasoning is mandatory for this endpoint”.
+#: Domyślne kosztowało ok. 1100 tokenów wyjścia na stronę skanu, a `low`
+#: 577, czyli tyle, co natywne `between_tools` (zmierzone 2026-10-16).
+_OPENROUTER_REASONING_PDF: dict = {"effort": "low"}
+
+
+def _pdf_openrouter(
+    klient: KlientLLM, mdl: str, system: str, b64: str,
+    tekst_przed: str, tekst_po: str, max_tokens: int, timeout: float,
+) -> tuple[str, str | None]:
+    """PDF jako część ``file`` (data URL) w ``chat.completions`` OpenRoutera."""
+    czesci: list[dict] = []
+    if tekst_przed:
+        czesci.append({"type": "text", "text": tekst_przed})
+    czesci.append({"type": "file", "file": {
+        "filename": "strona.pdf",
+        "file_data": "data:application/pdf;base64," + b64,
+    }})
+    czesci.append({"type": "text", "text": tekst_po})
+    msgs: list[dict] = [{"role": "system", "content": system}] if system else []
+    msgs.append({"role": "user", "content": czesci})
+    extra = {"plugins": [_OPENROUTER_PDF_PLUGIN], "reasoning": _OPENROUTER_REASONING_PDF}
+    # Sampling domyślny: transkrypcja nie ma czego stroić, a rodzina 5.x
+    # i tak odrzuca niedomyślną `temperature`.
+    try:
+        return _openai_chat(klient, mdl, msgs, max_tokens, _TEMPERATURA_DOMYSLNA,
+                            timeout, bez_temperatury=True, extra_body=extra)
+    except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO odrzucone `reasoning`
+        # Model bez myślenia wskazany przez `LLM_MODEL` może odrzucić sam
+        # parametr — wtedy jedno ponowienie bez niego. Każdy inny 400 leci
+        # wyżej, bo żadne ponowienie go nie naprawi.
+        if not (_czy_zla_struktura(exc) and "reasoning" in str(exc).lower()):
+            raise
+        _dev_log(f"openrouter: model '{mdl}' odrzucił 'reasoning' — ponawiam bez niego.")
+        return _openai_chat(klient, mdl, msgs, max_tokens, _TEMPERATURA_DOMYSLNA,
+                            timeout, bez_temperatury=True,
+                            extra_body={"plugins": [_OPENROUTER_PDF_PLUGIN]})
+
+
+def wywolaj_llm_z_pdf(
+    klient: KlientLLM,
+    *,
+    model: str,
+    system: str,
+    pdf: bytes,
+    tekst_po: str,
+    max_tokens: int,
+    timeout: float,
+    tekst_przed: str = "",
+    slad: list[dict] | None = None,
+) -> tuple[str, str | None]:
+    """Wywołanie z PDF-em w treści, ``(tekst, stop_reason)`` jak w :func:`wywolaj_llm`.
+
+    Użycie: odczyt strony bez warstwy tekstu (`core_skany`, v19.14). Treść
+    wiadomości ``user`` = ``tekst_przed`` (opcjonalny kontekst) → PDF →
+    ``tekst_po`` (instrukcja). Tę kolejność zaleca dokumentacja Anthropic:
+    dokument przed pytaniem.
+
+      * **anthropic**: blok ``document`` (base64) przez :func:`_wywolaj_anthropic`,
+        czyli tę samą drabinę ``thinking`` / ``temperature`` (na Sonnet 5.5
+        ``between_tools``: 420–610 tokenów wyjścia na stronę, zmierzone);
+      * **openrouter**: część ``file`` + parser ``native`` + ``reasoning`` low
+        (:func:`_pdf_openrouter`);
+      * **openai_compat**: :class:`BladFunkcjiNiedostepnej`. Obsługa PDF-ów
+        i obrazów na cudzym endpoincie to loteria, której nie umiemy zmierzyć
+        (decyzja D3, 2026-10-16).
+
+    Błędy SDK przechodzą przez :func:`_opakuj_blad`, tę samą mapę co
+    w :func:`wywolaj_llm`. Zapasu autotłumaczy (``klient.zapas``) tu nie ma:
+    ustawia go tylko dev-tooling, a ta funkcja jest runtime'owa.
+    """
+    if klient.provider == PROVIDER_OPENAI_COMPAT:
+        raise BladFunkcjiNiedostepnej("pdf", klient.provider)
+    mdl = _model_wywolania(klient, model)
+    b64 = base64.standard_b64encode(pdf).decode("ascii")
+    try:
+        if klient.provider == PROVIDER_OPENROUTER:
+            wynik = _pdf_openrouter(klient, mdl, system, b64, tekst_przed,
+                                    tekst_po, max_tokens, timeout)
+        else:
+            tresc: list[dict] = []
+            if tekst_przed:
+                tresc.append({"type": "text", "text": tekst_przed})
+            tresc.append({"type": "document", "source": {
+                "type": "base64", "media_type": "application/pdf", "data": b64,
+            }})
+            tresc.append({"type": "text", "text": tekst_po})
+            wynik = _wywolaj_anthropic(
+                klient, mdl, system, [{"role": "user", "content": tresc}],
+                max_tokens, _TEMPERATURA_DOMYSLNA, timeout, slad=slad,
+            )
+        klient.udane = True
+        return wynik
+    except Exception as exc:  # noqa: BLE001 — 429/timeout/kontekst opakowujemy; reszta leci dalej
+        opakowany = _opakuj_blad(exc, mdl, klient.provider)
+        if opakowany is None:
+            raise
+        raise opakowany from exc
