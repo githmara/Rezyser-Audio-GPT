@@ -1,12 +1,14 @@
 # Strona „New issue”: zwykłe zgłoszenia zostają tutaj (Sami przyjmuje je jak
 # dotąd — ten plik nie dodaje szablonów i nie zmienia intake'u), a prośba
-# o czytanie SKANÓW dostaje adres od razu. Reżyser czyta wyłącznie warstwę
-# tekstu PDF-a; OCR świadomie poza zakresem (torch + easyocr + modele to
-# 4–5× instalatora, a OCR form i tabel daje tekst czytany wierszami na przekrój
-# kolumn). accessible_text_analyst ma OCR stron bez tekstu, także w PDF-ie
-# mieszanym. Lustro: ATA odsyła tutaj prośby o patch TiflotecniaVoices.
+# o czytanie SKANÓW dostaje adres od razu. Lokalnego OCR Reżyser nie ma
+# (torch + easyocr + modele to 4–5× instalatora, a OCR form i tabel daje tekst
+# czytany wierszami na przekrój kolumn). Od 19.14 Poliglota czyta strony-skany
+# modelem z obrazem — za zgodą i z kluczem Anthropic albo OpenRouter, płatnie.
+# Bez klucza (albo offline) odczyt zostaje w accessible_text_analyst (easyocr),
+# i to tam kieruje ten link. Lustro: ATA odsyła tutaj prośby o patch
+# TiflotecniaVoices.
 blank_issues_enabled: true
 contact_links:
   - name: Scanned PDFs and images (OCR)
     url: https://github.com/githmara/accessible-text-analyst
-    about: Reżyser Audio GPT reads only the text layer of a PDF and will not add OCR. For scans and photos of pages, use accessible_text_analyst (Python notebook, OCR via easyocr), then load its accessible_text.docx or .html here.
+    about: Since 19.14 the Polyglot reads scanned PDF pages with an AI model (opt-in, Anthropic or OpenRouter key, about 1 US cent per page). Without a key, offline, or for photos of pages, use accessible_text_analyst (local OCR), then load its .docx or .html here.
