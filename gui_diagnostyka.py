@@ -499,6 +499,11 @@ def _dialog_twardy(tytul: str, tresc: str, parent: wx.Window | None) -> None:
     dlg.Destroy()
 
 
+def pokaz_tekst(parent: wx.Window, tytul: str, tresc: str) -> None:
+    """Długi komunikat w ``TextCtrl`` do przeczytania czytnikiem i skopiowania."""
+    _dialog(parent, tytul, tresc)
+
+
 def _dialog(parent: wx.Window, tytul: str, tresc: str) -> None:
     """Dialog z ``TextCtrl`` (TE_READONLY) + „Zamknij" — wzorzec A11y z CLAUDE.md."""
     if not parent:

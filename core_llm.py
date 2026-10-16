@@ -1767,7 +1767,7 @@ def _wywolaj_anthropic(
     return tekst, stop
 
 
-def _model_wywolania(klient: KlientLLM, model: str) -> str:
+def model_wywolania(klient: KlientLLM, model: str) -> str:
     """Nazwa modelu, która faktycznie pójdzie do endpointu tego klienta."""
     if klient.provider == PROVIDER_OPENAI_COMPAT and klient.model_override:
         return klient.model_override
@@ -1873,7 +1873,7 @@ def wywolaj_llm(
     (wszystkie dla dowolnego providera). Pozostałe wyjątki SDK propagują natywnie
     (łapie je szeroki ``except`` wołającego).
     """
-    mdl = _model_wywolania(klient, model)
+    mdl = model_wywolania(klient, model)
 
     try:
         if klient.provider in (PROVIDER_OPENAI_COMPAT, PROVIDER_OPENROUTER):
@@ -1995,7 +1995,7 @@ def wywolaj_llm_z_pdf(
     """
     if klient.provider == PROVIDER_OPENAI_COMPAT:
         raise BladFunkcjiNiedostepnej("pdf", klient.provider)
-    mdl = _model_wywolania(klient, model)
+    mdl = model_wywolania(klient, model)
     b64 = base64.standard_b64encode(pdf).decode("ascii")
     try:
         if klient.provider == PROVIDER_OPENROUTER:

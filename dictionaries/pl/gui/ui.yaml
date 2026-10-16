@@ -949,6 +949,39 @@ poliglota:
   skan_powod_odmowa:    "model odmówił odczytu tej strony"
   skan_powod_pusta:     "model zwrócił pustą odpowiedź"
   skan_powod_anulowano: "odczyt anulowano"
+  skan_zgoda_tytul: "Odczytać strony-skany przez model AI?"
+  skan_zgoda_tresc: |-
+    W pliku {nazwa_pliku} {liczba_skanow} z {liczba_stron} stron nie ma warstwy tekstu (najpewniej to skany): {lista_stron}.
+
+    Mogę odczytać te strony z obrazu modelem AI ({model}). Każda z nich zostanie wysłana jako obraz do zewnętrznej usługi: {usluga}.
+    Skany dokumentów często zawierają dane osobowe (dowody, paszporty, akty stanu cywilnego). Wysyłaj je tylko wtedy, gdy masz do tego prawo.
+
+    Szacowany koszt: {koszt}. Czas: około 5 sekund na stronę.
+
+    Jeśli wybierzesz „Pomiń”, te strony zostaną pominięte i ich treści nie będzie w wyniku.
+  skan_zgoda_koszt: "około {kwota} USD"
+  skan_zgoda_koszt_nieznany: "nieznany dla tego modelu"
+  skan_zgoda_btn_tak: "&Odczytaj strony"
+  skan_zgoda_btn_nie: "&Pomiń"
+  skan_postep_tytul: "Odczyt stron-skanów"
+  skan_postep_tresc: "Odczytuję stronę {numer_strony} ({numer} z {liczba})…"
+  skan_podsumowanie_tytul: "Odczyt stron-skanów: podsumowanie"
+  skan_podsumowanie_tresc: |-
+    Odczytano z obrazu stron: {liczba_odczytanych} z {liczba_skanow}.
+    Miejsc nieczytelnych albo zamazanych: {liczba_nieczytelnych}. Pustych pól formularzy: {liczba_pustych}.
+    Wynik zapiszemy jako plik .html. Przed każdą odczytaną stroną stoi akapit z informacją, że jej tekst pochodzi z odczytu obrazu.
+  skan_podsumowanie_urwane: "Strony odczytane tylko w części (odpowiedź modelu przekroczyła limit długości): {lista_stron}"
+  skan_podsumowanie_nieodczytane: "Strony nieodczytane (w wyniku w ich miejscu stoi akapit z powodem):"
+  skan_podsumowanie_strona: "Strona {numer_strony}: {powod}"
+  skan_podsumowanie_przerwano: "Odczyt przerwano, bo kolejne strony też by się nie udały: {powod}"
+  skan_niedostepny_brak_api: "Odczyt stron-skanów modelem AI wymaga klucza API (Anthropic albo OpenRouter) w pliku golden_key.env."
+  skan_niedostepny_compat: "Odczyt stron-skanów modelem AI nie działa z własnym endpointem zgodnym z OpenAI (LLM_PROVIDER=openai_compat). Działa z Anthropic i z OpenRouterem."
+  skan_blad_tytul: "Odczyt stron-skanów nie powiódł się"
+  skan_blad_tresc: |-
+    Odczyt stron-skanów przerwał nieoczekiwany błąd:
+    {tresc_bledu}
+
+    Wczytano sam tekst z warstwy tekstu PDF-a (jeśli plik go ma). Strony-skany zostały pominięte.
   md_render_blad_tytul:  "Nie udało się przetworzyć Markdownu"
   md_render_blad_tresc: |-
     Nie udało się zamienić Markdownu na HTML:

@@ -78,6 +78,24 @@ SYSTEM_SKANY = (
 #: komentarz „ten dokument ma tylko jedną stronę" (zmierzone).
 INSTRUKCJA = "Transcribe the attached page."
 
+#: Szacunek kosztu JEDNEJ strony (USD) per model natywny, do dialogu zgody.
+#: Lustro cennika Anthropic (2026-10: Sonnet 5.x $2/$10, Opus 5.5 $4/$20,
+#: Opus 5 $5/$25 za MTok) × zmierzone ok. 2100 tokenów wejścia i do 610
+#: wyjścia, z zapasem. Hardkod świadomy — lista = zewnętrzny rejestr, jak
+#: `core_llm._MODELE_BEZ_TEMPERATURY`. Model spoza listy → „koszt nieznany".
+KOSZT_STRONY_USD: dict[str, float] = {
+    "claude-sonnet-5-5": 0.012,
+    "claude-sonnet-5": 0.012,
+    "claude-opus-5-5": 0.024,
+    "claude-opus-5": 0.03,
+}
+
+#: Dokąd jadą strony — nazwa własna usługi i host, do dialogu zgody.
+_USLUGA = {
+    cl.PROVIDER_ANTHROPIC: "Anthropic (api.anthropic.com)",
+    cl.PROVIDER_OPENROUTER: "OpenRouter (openrouter.ai)",
+}
+
 STATUS_OK = "ok"
 STATUS_UCIETA = "ucieta"
 STATUS_ODMOWA = "odmowa"
@@ -109,6 +127,26 @@ class WynikStrony:
     znaczniki: dict[str, int] = field(default_factory=dict)
     #: Metryka wywołania z `core_llm` (tylko Anthropic): tokeny, request_id.
     slad: list[dict] = field(default_factory=list)
+
+
+def odczyt_dostepny(klient: cl.KlientLLM | None) -> bool:
+    """Czy ten klient umie odczyt (D3: `openai_compat` nie, brak klucza nie)."""
+    return klient is not None and klient.provider in _USLUGA
+
+
+def opis_uslugi(klient: cl.KlientLLM) -> str:
+    return _USLUGA[klient.provider]
+
+
+def model_odczytu(klient: cl.KlientLLM) -> str:
+    """Model, który faktycznie dostanie strony (na OpenRouterze `LLM_MODEL` wygrywa)."""
+    return cl.model_wywolania(klient, MODEL_SKANY)
+
+
+def szacuj_koszt(klient: cl.KlientLLM, liczba_stron: int) -> float | None:
+    """Szacowany koszt w USD albo `None`, gdy model jest spoza `KOSZT_STRONY_USD`."""
+    stawka = KOSZT_STRONY_USD.get(cl.model_natywny(model_odczytu(klient)))
+    return None if stawka is None else stawka * liczba_stron
 
 
 def wytnij_strone(sciezka: str, numer: int) -> bytes:
@@ -235,6 +273,28 @@ def odczytaj_strony(
         if wynik.status in (STATUS_OK, STATUS_UCIETA):
             odczytane[numer] = wynik
     return wyniki, None
+
+
+@dataclass
+class Podsumowanie:
+    odczytane: int
+    urwane: list[int]
+    nieodczytane: list[WynikStrony]
+    znaczniki: dict[str, int]
+
+
+def podsumuj(wyniki: list[WynikStrony]) -> Podsumowanie:
+    """Liczby do dialogu podsumowania — każda strona trafia do jednej grupy."""
+    znaczniki: dict[str, int] = {}
+    for w in wyniki:
+        for token, ile in w.znaczniki.items():
+            znaczniki[token] = znaczniki.get(token, 0) + ile
+    return Podsumowanie(
+        odczytane=sum(w.status in (STATUS_OK, STATUS_UCIETA) for w in wyniki),
+        urwane=[w.numer for w in wyniki if w.status == STATUS_UCIETA],
+        nieodczytane=[w for w in wyniki if w.status not in (STATUS_OK, STATUS_UCIETA)],
+        znaczniki=znaczniki,
+    )
 
 
 def _akapit(tekst: str) -> str:
