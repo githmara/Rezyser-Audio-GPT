@@ -934,6 +934,21 @@ poliglota:
     Program odbudował akapity z układu stron, połączył wyrazy przeniesione do następnej linii i pominął numery stron. Wynik zapiszemy jako plik .html, bo PDF-a program nie zapisuje.
   pdf_kolontytuly: "Pominięto powtarzające się nagłówki i stopki stron: {lista_kolontytulow}"
   pdf_strony_bez_tekstu: "Uwaga: te strony nie mają tekstu (najpewniej są skanami) i ich treści nie będzie w wyniku: {lista_stron}"
+  # v19.14: strony-skany PDF odczytane modelem z obrazem (core_skany).
+  # Znaczniki wstawiane w miejsce tokenów, które model pisze zamiast treści.
+  skan_znacznik_illegible: "[nieczytelne]"
+  skan_znacznik_empty:     "[puste pole]"
+  skan_znacznik_photo:     "[zdjęcie]"
+  skan_znacznik_stamp:     "[pieczęć]"
+  skan_znacznik_signature: "[podpis]"
+  skan_znacznik_emblem:    "[godło]"
+  skan_znacznik_no_text:   "[strona bez tekstu]"
+  skan_pochodzenie: "Strona {numer_strony}: tekst odczytany z obrazu przez model AI, mogą w nim być błędy odczytu."
+  skan_nieodczytana: "[Strona {numer_strony}: nie odczytano. Powód: {powod}]"
+  skan_ucieta: "[Strona {numer_strony}: odczyt urwany, bo odpowiedź modelu przekroczyła limit długości. Dalsza część tej strony nie została odczytana.]"
+  skan_powod_odmowa:    "model odmówił odczytu tej strony"
+  skan_powod_pusta:     "model zwrócił pustą odpowiedź"
+  skan_powod_anulowano: "odczyt anulowano"
   md_render_blad_tytul:  "Nie udało się przetworzyć Markdownu"
   md_render_blad_tresc: |-
     Nie udało się zamienić Markdownu na HTML:

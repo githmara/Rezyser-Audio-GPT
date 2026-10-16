@@ -90,27 +90,11 @@ def tytul_dokumentu(tresc_md: str) -> str:
     return tytul.strip().lstrip("#").strip()
 
 
-def renderuj(tresc_md: str, jezyk: str, *, styl: str | None = None,
-             viewport: bool = False) -> str:
-    """Renderuje Markdown do pełnego, samodzielnego dokumentu HTML5.
+def _modul_markdown():
+    """Import `markdown` — celowo GŁOŚNO, gdy go brak.
 
-    Args:
-        tresc_md: Treść w Markdownie.
-        jezyk:    Kod do atrybutu ``<html lang>``. Dla Poligloty to wartość
-                  TYMCZASOWA — `core_poliglota.zapisz_wynik` nadpisze ją
-                  językiem głosu (`iso` wariantu) przy zapisie wyniku.
-        styl:     Treść arkusza do wstawienia w ``<style>``. ``None`` →
-                  bez sekcji ``<style>``. Poliglota NIE podaje stylu celowo:
-                  segmentacja chroni TAGI, ale nie tekst w ich środku, więc
-                  CSS przeszedłby przez reguły fonetyczne akcentu i wyszedłby
-                  z dokumentu połamany.
-        viewport: Czy dodać ``<meta name="viewport">`` (podręczniki: tak).
-
-    Raises:
-        RuntimeError: gdy biblioteki `markdown` nie ma w środowisku —
-            celowo GŁOŚNO. W buildzie/`--waliduj` cicha degradacja
-            zostawiłaby paczkę bez plików, na które wskazuje menu Pomoc;
-            w runtime — wczytany plik bez treści.
+    W buildzie/`--waliduj` cicha degradacja zostawiłaby paczkę bez plików, na
+    które wskazuje menu Pomoc; w runtime — wczytany plik bez treści.
     """
     try:
         import markdown
@@ -121,12 +105,34 @@ def renderuj(tresc_md: str, jezyk: str, *, styl: str | None = None,
             ".venv/Scripts/pip install markdown (it is listed in "
             "requirements.txt)."
         ) from exc
+    return markdown
 
-    tresc_md = zdejmij_front_matter(tresc_md)
-    body = markdown.markdown(
+
+def renderuj_fragment(tresc_md: str) -> str:
+    """Markdown → sam fragment HTML (zawartość `<body>`), tymi samymi `ROZSZERZENIA`.
+
+    Bez zdejmowania front matter: fragment to kawałek dokumentu (od 19.14
+    odczytana strona-skan PDF-a, `core_skany`), nie plik z metadanymi.
+
+    Raises:
+        RuntimeError: brak biblioteki `markdown` (patrz `_modul_markdown`).
+    """
+    return _modul_markdown().markdown(
         tresc_md, extensions=ROZSZERZENIA, output_format="html5",
     )
-    tytul = tytul_dokumentu(tresc_md)
+
+
+def zloz_dokument(body: str, jezyk: str, tytul: str, *, styl: str | None = None,
+                  viewport: bool = False) -> str:
+    """Szkielet samodzielnego dokumentu HTML5 wokół gotowego `body`.
+
+    Args:
+        body:     Fragment HTML (już bezpieczny — nie escapujemy go tu).
+        jezyk:    Kod do atrybutu ``<html lang>`` (patrz `renderuj`).
+        tytul:    Zwykły tekst do ``<title>`` — escapowany tutaj.
+        styl:     Treść arkusza do ``<style>`` albo ``None``.
+        viewport: Czy dodać ``<meta name="viewport">``.
+    """
     tytul_safe = (tytul.replace("&", "&amp;").replace("<", "&lt;")
                        .replace(">", "&gt;"))
     czesci = [
@@ -149,3 +155,28 @@ def renderuj(tresc_md: str, jezyk: str, *, styl: str | None = None,
         "</html>\n",
     ]
     return "".join(czesci)
+
+
+def renderuj(tresc_md: str, jezyk: str, *, styl: str | None = None,
+             viewport: bool = False) -> str:
+    """Renderuje Markdown do pełnego, samodzielnego dokumentu HTML5.
+
+    Args:
+        tresc_md: Treść w Markdownie.
+        jezyk:    Kod do atrybutu ``<html lang>``. Dla Poligloty to wartość
+                  TYMCZASOWA — `core_poliglota.zapisz_wynik` nadpisze ją
+                  językiem głosu (`iso` wariantu) przy zapisie wyniku.
+        styl:     Treść arkusza do wstawienia w ``<style>``. ``None`` →
+                  bez sekcji ``<style>``. Poliglota NIE podaje stylu celowo:
+                  segmentacja chroni TAGI, ale nie tekst w ich środku, więc
+                  CSS przeszedłby przez reguły fonetyczne akcentu i wyszedłby
+                  z dokumentu połamany.
+        viewport: Czy dodać ``<meta name="viewport">`` (podręczniki: tak).
+
+    Raises:
+        RuntimeError: gdy biblioteki `markdown` nie ma w środowisku
+            (patrz `_modul_markdown`).
+    """
+    tresc_md = zdejmij_front_matter(tresc_md)
+    return zloz_dokument(renderuj_fragment(tresc_md), jezyk,
+                         tytul_dokumentu(tresc_md), styl=styl, viewport=viewport)
