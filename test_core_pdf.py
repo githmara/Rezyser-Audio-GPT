@@ -16,7 +16,9 @@ z dzieleniem wyrazów, kolontytułem, numerami stron i dwiema szpaltami):
      ćwierci stron znika, „SCENA 2" w środku strony i tag `[scena 1]`
      w marginesie zostają, goły numer strony w marginesie znika.
   D. PDF bez warstwy tekstu podnosi `BrakWarstwyTekstu` (GUI mówi „skan,
-     brak OCR"), zamiast oddać pusty dokument.
+     brak OCR"), zamiast oddać pusty dokument. Od 19.14 akapity są też per
+     strona (`akapity_stron`), żeby odczytany skan wszedł na swoje miejsce,
+     a zdanie nie skleja się przez stronę-skan.
 
 Uruchom:  .venv/Scripts/python -m pytest test_core_pdf.py -q
 Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_core_pdf.py
@@ -298,6 +300,59 @@ def test_strony_bez_tekstu_sa_raportowane(monkeypatch):
     assert wynik.akapity == ["Tekst."]
     assert wynik.strony_bez_tekstu == [2]
     assert wynik.tekst == "Tekst."
+    assert wynik.akapity_stron == [["Tekst."], []]
+
+
+def test_pdf_bez_warstwy_tekstu_niesie_strony_do_odczytu(monkeypatch):
+    # 19.14: całkowicie zeskanowany PDF dostaje tę samą ofertę odczytu
+    # modelem z obrazem co mieszany — GUI potrzebuje numerów stron.
+    import pypdfium2
+    puste = [_strona(), _strona(), _strona()]
+    monkeypatch.setattr(pypdfium2, "PdfDocument", lambda _p: _AtrapaPdf(puste))
+    with pytest.raises(core_pdf.BrakWarstwyTekstu) as exc:
+        core_pdf.wyciagnij("skan.pdf")
+    assert exc.value.liczba_stron == 3
+    assert exc.value.strony_bez_tekstu == [1, 2, 3]
+    assert str(exc.value) == "skan.pdf"
+
+
+def _zdanie_przez_strone(srodek):
+    """Strona 1 kończy się w pół zdania, strona 3 zaczyna małą literą."""
+    return [_strona(("Zdanie urwane na", 90, 400, 12)), srodek,
+            _strona(("dalszy ciąg.", 90, 700, 12))]
+
+
+def test_akapit_przez_granice_strony_nalezy_do_strony_poczatku(monkeypatch):
+    import pypdfium2
+    strony = [_strona(("Zdanie urwane na", 90, 400, 12)),
+              _strona(("granicy strony.", 90, 700, 12), ("Nowy akapit.", 90, 600, 12))]
+    monkeypatch.setattr(pypdfium2, "PdfDocument", lambda _p: _AtrapaPdf(strony))
+    w = core_pdf.wyciagnij("doc.pdf")
+    assert w.akapity_stron == [["Zdanie urwane na granicy strony."], ["Nowy akapit."]]
+    assert w.akapity == [a for s in w.akapity_stron for a in s]
+
+
+def test_skan_miedzy_stronami_blokuje_sklejanie(monkeypatch):
+    # Treść skanu leży MIĘDZY urwanym zdaniem a małą literą — sklejenie
+    # stworzyłoby zdanie, którego w dokumencie nie ma.
+    import pypdfium2
+    monkeypatch.setattr(pypdfium2, "PdfDocument",
+                        lambda _p: _AtrapaPdf(_zdanie_przez_strone(_strona())))
+    w = core_pdf.wyciagnij("mieszany.pdf")
+    assert w.strony_bez_tekstu == [2]
+    assert w.akapity_stron == [["Zdanie urwane na"], [], ["dalszy ciąg."]]
+
+
+def test_strona_z_samym_numerem_nie_blokuje_sklejania(tmp_path):
+    # Pusta PO czyszczeniu (sam numer strony) to nie skan: warstwa tekstu
+    # jest, zdanie przez nią przechodzi.
+    p = tmp_path / "numer.pdf"
+    _zbuduj_pdf(p, [[("Zdanie urwane na", 72, 400), ("1", 290, 25)],
+                    [("2", 290, 25)],
+                    [("dalszy ciag.", 72, 700), ("3", 290, 25)]])
+    w = core_pdf.wyciagnij(str(p))
+    assert w.strony_bez_tekstu == []
+    assert w.akapity_stron == [["Zdanie urwane na dalszy ciag."], [], []]
 
 
 def test_glif_bez_unicode_nie_przesuwa_ramek(monkeypatch):
@@ -368,8 +423,10 @@ def test_prawdziwy_pdf_obrocony_nie_traci_tresci(tmp_path):
 def test_prawdziwy_pdf_z_samymi_numerami_to_brak_tekstu(tmp_path):
     p = tmp_path / "numery.pdf"
     _zbuduj_pdf(p, [[(str(i), 290, 25)] for i in range(1, 4)])
-    with pytest.raises(core_pdf.BrakWarstwyTekstu):
+    with pytest.raises(core_pdf.BrakWarstwyTekstu) as exc:
         core_pdf.wyciagnij(str(p))
+    # Warstwa tekstu JEST — odczyt obrazu nie ma tu czego ratować.
+    assert exc.value.liczba_stron == 3 and exc.value.strony_bez_tekstu == []
 
 
 # Uruchomienie jako skrypt — deleguje do pytesta (kanon v19.2.1).

@@ -35,7 +35,21 @@ from dataclasses import dataclass, field
 
 
 class BrakWarstwyTekstu(Exception):
-    """PDF bez warstwy tekstu (skan / obraz). Reżyser nie ma OCR — GUI mówi to wprost."""
+    """PDF, z którego warstwy tekstu nie zostaje ani jeden akapit.
+
+    Najczęściej skan / obraz; lokalnego OCR Reżyser nie ma, GUI mówi to wprost.
+    ``strony_bez_tekstu`` wymienia strony BEZ WARSTWY TEKSTU (kandydatki do
+    odczytu modelem z obrazem). Dla PDF-a z samymi numerami stron jest PUSTA:
+    tam warstwa tekstu jest, tylko nic z niej nie zostało, a takiej strony
+    żaden odczyt obrazu nie uratuje.
+    """
+
+    def __init__(self, sciezka: str, liczba_stron: int = 0,
+                 strony_bez_tekstu: list[int] | None = None) -> None:
+        super().__init__(sciezka)
+        self.sciezka = sciezka
+        self.liczba_stron = liczba_stron
+        self.strony_bez_tekstu = list(strony_bez_tekstu or [])
 
 
 class PdfNieDoOtwarcia(Exception):
@@ -54,6 +68,11 @@ class WynikPdf:
     strony_bez_tekstu: list[int] = field(default_factory=list)
     #: Unikalne teksty usuniętych kolontytułów (do komunikatu, bez numerów stron).
     kolontytuly: list[str] = field(default_factory=list)
+    #: Akapity per strona (indeks 0 = strona 1), `liczba_stron` list. Akapit
+    #: sklejony przez granicę strony należy do strony, na której się ZACZĄŁ;
+    #: strona bez warstwy tekstu ma listę pustą. Spłaszczenie daje `akapity`
+    #: — po to, żeby odczytaną treść skanu wstawić we właściwe miejsce.
+    akapity_stron: list[list[str]] = field(default_factory=list)
 
     @property
     def tekst(self) -> str:
@@ -564,19 +583,31 @@ def wyciagnij(sciezka: str) -> WynikPdf:
         pdf.close()
 
     if liczba == 0 or len(bez_tekstu) == liczba:
-        raise BrakWarstwyTekstu(sciezka)
+        raise BrakWarstwyTekstu(sciezka, liczba, bez_tekstu)
 
     dzielenie_auto = any("\u00ad" in l.tekst for s in strony for l in s.linie)
     oczyszczone, kolontytuly = _usun_kolontytuly(strony)
-    akapity: list[str] = []
-    for linie in oczyszczone:
+    akapity_stron: list[list[str]] = []
+    # Strona, do której należy ostatni akapit, i czy od niej minął skan.
+    ostatnia: list[str] | None = None
+    skan_po_drodze = False
+    for nr, linie in enumerate(oczyszczone):
         nowe = _podziel_na_akapity(linie, dzielenie_auto)
         # Akapit przerwany granicą strony: poprzedni nie kończy zdania, a nowy
-        # zaczyna się małą literą — to jedno zdanie, nie dwa akapity.
-        if akapity and nowe and not _RE_KONIEC_ZDANIA.search(akapity[-1]) \
+        # zaczyna się małą literą — to jedno zdanie, nie dwa akapity. NIE przez
+        # stronę bez tekstu: jej treść (skan) leży między nimi, więc sklejenie
+        # tworzyłoby zdanie, którego w dokumencie nie ma, a odczytany skan
+        # nie miałby gdzie wejść.
+        if ostatnia and nowe and not skan_po_drodze \
+                and not _RE_KONIEC_ZDANIA.search(ostatnia[-1]) \
                 and nowe[0][:1].islower():
-            akapity[-1] = _sklej(akapity[-1], nowe.pop(0), dzielenie_auto)
-        akapity.extend(nowe)
+            ostatnia[-1] = _sklej(ostatnia[-1], nowe.pop(0), dzielenie_auto)
+        akapity_stron.append(nowe)
+        if nr + 1 in bez_tekstu:
+            skan_po_drodze = True
+        elif nowe:
+            ostatnia, skan_po_drodze = nowe, False
+    akapity = [a for strona in akapity_stron for a in strona]
     if not akapity:
-        raise BrakWarstwyTekstu(sciezka)
-    return WynikPdf(akapity, liczba, bez_tekstu, kolontytuly)
+        raise BrakWarstwyTekstu(sciezka, liczba, bez_tekstu)
+    return WynikPdf(akapity, liczba, bez_tekstu, kolontytuly, akapity_stron)
