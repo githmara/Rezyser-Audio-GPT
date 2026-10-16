@@ -572,7 +572,7 @@ def test_limit_prob_pobrania_obejmuje_nieudane(ladunek):
     def atrapa(req, timeout=None):
         wywolania.append(req.full_url)
         if ladunek is None:
-            raise urllib.error.URLError("brak sieci")
+            raise urllib.error.URLError("network unreachable")
         dane = _zip({"a.png": b"x"}) if ladunek == "tylko_png" else ladunek
         return _Odp(dane, req.full_url)
 
