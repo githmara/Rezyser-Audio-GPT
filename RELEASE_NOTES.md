@@ -94,6 +94,85 @@
 
 ---
 
+## 19.14.0 — minor release
+
+### What's new
+
+**The Polyglot reads scanned PDF pages with an AI model, if you allow it.**
+When a PDF has pages without a text layer, or is made only of scans, the
+Polyglot now offers to read those pages from the image. It asks every time,
+for every file, and the default answer is "Skip". The question lists the page
+numbers, the model, the service the pages are sent to (Anthropic or
+OpenRouter, with the host name), a warning that scanned documents often hold
+personal data, and the estimated cost. Below one dollar the cost is given in
+US cents, because "0.01 USD" was read aloud as "zero dollars". Measured on
+Claude Sonnet 5.5: about one US cent and four to five seconds per page. The
+feature needs an Anthropic or OpenRouter API key; with your own
+OpenAI-compatible endpoint it is not offered, and the message about pages
+without text says why.
+
+Pages are read one at a time, each sent as a one-page PDF together with the
+end of the previous page, so a sentence or a table carried over a page break
+joins correctly. The text keeps its original language. Forms become one
+"Label: value" line per field and tables stay tables. Blurred, covered or
+illegible places are marked as illegible instead of being guessed, blank form
+fields are marked as blank, and photos, stamps, signatures and coats of arms
+get one short marker each, in the language of the interface. In nine test
+runs on scans with deliberately blurred personal data (a birth certificate
+and a passport), no blurred field was guessed, not even from the
+machine-readable zone of the passport. The progress window has a Cancel
+button that stops before the next page is sent.
+
+In the result, every page read this way starts with a short paragraph saying
+that its text was read from an image by an AI model and may contain reading
+errors. A page that could not be read (a refusal, an error, a cancel) stays in
+the result as a paragraph with the reason, never as a gap. After reading, a
+summary lists the pages read, read only in part and not read, with the
+technical details, and counts the illegible places and blank fields. If no
+page could be read, the file loads with its text layer only, as before. The
+language of the document is detected from its content, not from the notes in
+the language of the interface.
+
+Text from a scan is treated as untrusted. Raw HTML, links and images in the
+model's answer reach the result only as plain text. Measured with a scanned
+page saying "ignore all previous instructions" and containing a script tag:
+the model transcribed both as content, and the script came out as text.
+
+Through OpenRouter, the PDF goes to the model with OpenRouter's native PDF
+parser, so the cost matches the direct API. OpenRouter does not allow
+switching the model's thinking off for this model, and its default doubled
+the output per page, so the program asks for low effort instead (measured:
+1140 → 577 output tokens per page).
+
+The Converter is unchanged: it reads the text layer only. Photos of pages
+(`.jpg`, `.png`) are not accepted by the Polyglot; the "New issue" page still
+points to accessible_text_analyst for reading scans without an API key or
+offline, and its text no longer claims that this program cannot read scans.
+
+Before closing, the new code was audited with every finding proven by running
+it. Ten findings were fixed, each with a test. The serious one: pressing
+Cancel during a page still let the next page go to the service, after you had
+withdrawn your consent. The others: a damaged page discarded every page
+already read and paid for, the notes in the interface language tipped the
+language detection, links and remote images from the model became live in
+the result, code in the answer was escaped twice, raw error text from the API
+reached the document read aloud, a scan after a page glued to the previous
+paragraph got no context, a run where no page was read loaded as a success,
+and two smaller cases in marker and code-fence handling. The French marker
+for a coat of arms was also corrected.
+
+### Planned or deferred
+
+- The Converter could read scanned pages the same way; its `.docx` output
+  would lose the tables, so it needs its own design.
+- A marker the model invents outside the agreed list (for example
+  `[[REDACTED]]`) stays in the text as written.
+- There is still no local OCR: it would multiply the installer size.
+- `anthropic`, `elevenlabs`, `markdown` and `openai` are still held below their
+  bounds (`anthropic<1.8`, `elevenlabs<2.69`, `markdown<3.11`, `openai<3.17`).
+
+---
+
 ## 19.13.0 — minor release
 
 ### What's new
