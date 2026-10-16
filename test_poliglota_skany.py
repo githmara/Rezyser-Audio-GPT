@@ -134,6 +134,8 @@ def test_zgoda_daje_html_ze_skanem_na_swoim_miejscu(srodowisko, tmp_path):
     _wczytaj(panel, _mieszany(tmp_path))
     assert len(zapis.zgody) == 1 and "2" in zapis.zgody[0]
     assert "Anthropic (api.anthropic.com)" in zapis.zgody[0]
+    assert "około 1 (w centach amerykańskich)" in zapis.zgody[0]
+    assert "USD" not in zapis.zgody[0]
     assert [o[2] for o in zapis.odczyty] == [[2]]
     assert panel._file_ext == ".html"
     tresc = panel._file_content

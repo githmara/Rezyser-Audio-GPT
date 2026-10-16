@@ -918,6 +918,8 @@ poliglota:
   skan_zgoda_tytul: Lire les pages numérisées avec un modèle d'IA ?
   skan_zgoda_tresc: "Dans le fichier {nazwa_pliku}, {liczba_skanow} page(s) sur {liczba_stron} n'ont pas de couche de texte (il s'agit très probablement de scans) : {lista_stron}.\n\nJe peux lire ces pages à partir de l'image avec un modèle d'IA ({model}). Chacune sera envoyée sous forme d'image à un service externe : {usluga}.\nLes documents numérisés contiennent souvent des données personnelles (pièces d'identité, passeports, actes d'état civil). Ne les envoyez que si vous en avez le droit.\n\nCoût estimé : {koszt}. Durée : environ 5 secondes par page.\n\nSi vous choisissez « Ignorer », ces pages seront ignorées et leur contenu n'apparaîtra pas dans le résultat."
   skan_zgoda_koszt: environ {kwota} USD
+  skan_zgoda_koszt_centy: "environ {liczba_centow} (en cents de dollar américain)"
+  skan_zgoda_koszt_ponizej_centa: "moins d'un cent de dollar américain"
   skan_zgoda_koszt_nieznany: inconnu pour ce modèle
   skan_zgoda_btn_tak: '&Lire les pages'
   skan_zgoda_btn_nie: '&Ignorer'

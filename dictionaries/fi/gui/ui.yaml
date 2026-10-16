@@ -918,6 +918,8 @@ poliglota:
   skan_zgoda_tytul: Luetaanko skannatut sivut tekoälymallilla?
   skan_zgoda_tresc: "Tiedostossa {nazwa_pliku} on {liczba_stron} sivua, ja {liczba_skanow} niistä on ilman tekstikerrosta (todennäköisesti skannauksia): {lista_stron}.\n\nVoin lukea nämä sivut kuvasta tekoälymallilla ({model}). Jokainen niistä lähetetään kuvana ulkoiseen palveluun: {usluga}.\nAsiakirjaskannaukset sisältävät usein henkilötietoja (henkilökortit, passit, siviilisäätyasiakirjat). Lähetä ne vain, jos sinulla on siihen oikeus.\n\nArvioitu hinta: {koszt}. Aika: noin 5 sekuntia sivua kohden.\n\nJos valitset ”Ohita”, nämä sivut ohitetaan eikä niiden sisältöä tule tulokseen."
   skan_zgoda_koszt: noin {kwota} USD
+  skan_zgoda_koszt_centy: "noin {liczba_centow} (Yhdysvaltain sentteinä)"
+  skan_zgoda_koszt_ponizej_centa: "alle yksi Yhdysvaltain sentti"
   skan_zgoda_koszt_nieznany: tuntematon tälle mallille
   skan_zgoda_btn_tak: '&Lue sivut'
   skan_zgoda_btn_nie: '&Ohita'

@@ -972,8 +972,7 @@ class PoliglotaPanel(wx.Panel):
             lista_stron=core_skany.zakresy(strony),
             model=core_skany.model_odczytu(self._client),
             usluga=core_skany.opis_uslugi(self._client),
-            koszt=(t("poliglota.skan_zgoda_koszt", kwota=f"{koszt:.2f}")
-                   if koszt is not None else t("poliglota.skan_zgoda_koszt_nieznany")),
+            koszt=core_skany.opis_kosztu(koszt),
         )
         dlg = wx.MessageDialog(self, tresc, t("poliglota.skan_zgoda_tytul"),
                                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)

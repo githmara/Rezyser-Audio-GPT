@@ -154,6 +154,25 @@ def szacuj_koszt(klient: cl.KlientLLM, liczba_stron: int) -> float | None:
     return None if stawka is None else stawka * liczba_stron
 
 
+def opis_kosztu(koszt: float | None) -> str:
+    """Szacunek do dialogu zgody: centy poniżej dolara, nigdy „0.01 USD”.
+
+    „około 0.01 USD” czytnik ekranu podaje jak „zero dolarów” (uwaga
+    maintainera, 2026-10-16). Liczba centów stoi PRZED nazwą jednostki
+    w nawiasie, bo forma „1 cent / 2 centy / 21 centów” zależy od końcówki
+    liczby inaczej w każdym języku (ru, is: 21 jak 1), a reguły odmiany
+    wypisane per język w Pythonie byłyby listą języków w kodzie.
+    """
+    if koszt is None:
+        return t("poliglota.skan_zgoda_koszt_nieznany")
+    centy = koszt * 100
+    if centy < 1:
+        return t("poliglota.skan_zgoda_koszt_ponizej_centa")
+    if round(centy) < 100:
+        return t("poliglota.skan_zgoda_koszt_centy", liczba_centow=round(centy))
+    return t("poliglota.skan_zgoda_koszt", kwota=f"{koszt:.2f}")
+
+
 def wytnij_strone(sciezka: str, numer: int) -> bytes:
     """Jednostronicowy PDF ze strony `numer` (od 1) — bez Pillow, samym PDFium."""
     import pypdfium2 as pdfium

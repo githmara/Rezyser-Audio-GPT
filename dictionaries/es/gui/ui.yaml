@@ -920,6 +920,8 @@ poliglota:
   skan_zgoda_tytul: ¿Leer las páginas escaneadas con un modelo de IA?
   skan_zgoda_tresc: "En el archivo {nazwa_pliku}, {liczba_skanow} de {liczba_stron} páginas no tienen capa de texto (lo más probable es que sean escaneos): {lista_stron}.\n\nPuedo leer estas páginas a partir de la imagen con un modelo de IA ({model}). Cada una se enviará como imagen a un servicio externo: {usluga}.\nLos escaneos de documentos suelen contener datos personales (documentos de identidad, pasaportes, actas del registro civil). Envíalos solo si tienes derecho a hacerlo.\n\nCoste estimado: {koszt}. Tiempo: unos 5 segundos por página.\n\nSi eliges «Omitir», esas páginas se omitirán y su contenido no aparecerá en el resultado."
   skan_zgoda_koszt: unos {kwota} USD
+  skan_zgoda_koszt_centy: "unos {liczba_centow} (en centavos de dólar estadounidense)"
+  skan_zgoda_koszt_ponizej_centa: "menos de un centavo de dólar estadounidense"
   skan_zgoda_koszt_nieznany: desconocido para este modelo
   skan_zgoda_btn_tak: '&Leer las páginas'
   skan_zgoda_btn_nie: '&Omitir'

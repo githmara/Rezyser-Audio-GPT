@@ -1004,6 +1004,8 @@ poliglota:
   skan_zgoda_tytul: Read scanned pages with an AI model?
   skan_zgoda_tresc: "In the file {nazwa_pliku}, {liczba_skanow} of {liczba_stron} pages have no text layer (most likely they are scans): {lista_stron}.\n\nI can read these pages from the image using an AI model ({model}). Each of them will be sent as an image to an external service: {usluga}.\nScanned documents often contain personal data (ID cards, passports, civil status records). Send them only if you have the right to do so.\n\nEstimated cost: {koszt}. Time: about 5 seconds per page.\n\nIf you choose \"Skip\", these pages will be skipped and their content will not appear in the result."
   skan_zgoda_koszt: about {kwota} USD
+  skan_zgoda_koszt_centy: "about {liczba_centow} (in US cents)"
+  skan_zgoda_koszt_ponizej_centa: "less than one US cent"
   skan_zgoda_koszt_nieznany: unknown for this model
   skan_zgoda_btn_tak: '&Read pages'
   skan_zgoda_btn_nie: '&Skip'

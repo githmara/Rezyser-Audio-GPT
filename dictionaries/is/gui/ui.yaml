@@ -920,6 +920,8 @@ poliglota:
   skan_zgoda_tytul: Lesa skannaðar síður með gervigreindarlíkani?
   skan_zgoda_tresc: "Í skránni {nazwa_pliku} eru {liczba_skanow} af {liczba_stron} síðum án textalags (að öllum líkindum skannaðar síður): {lista_stron}.\n\nÉg get lesið þessar síður úr mynd með gervigreindarlíkani ({model}). Hver þeirra verður send sem mynd til ytri þjónustu: {usluga}.\nSkannuð skjöl innihalda oft persónuupplýsingar (skilríki, vegabréf, fæðingar- og hjúskaparvottorð). Sendu þau aðeins ef þú hefur heimild til þess.\n\nÁætlaður kostnaður: {koszt}. Tími: um 5 sekúndur á síðu.\n\nVeljirðu „Sleppa“ verða þessar síður ekki lesnar og efni þeirra kemur ekki fram í niðurstöðunni."
   skan_zgoda_koszt: um {kwota} USD
+  skan_zgoda_koszt_centy: "um {liczba_centow} (í bandarískum sentum)"
+  skan_zgoda_koszt_ponizej_centa: "minna en eitt bandarískt sent"
   skan_zgoda_koszt_nieznany: óþekkt fyrir þetta líkan
   skan_zgoda_btn_tak: '&Lesa síður'
   skan_zgoda_btn_nie: '&Sleppa'

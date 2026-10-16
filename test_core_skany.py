@@ -364,6 +364,35 @@ def test_szacunek_kosztu_po_modelu_natywnym():
     assert cs.szacuj_koszt(obcy, 10) is None
 
 
+@pytest.mark.parametrize("koszt, wynik", [
+    (None, "poliglota.skan_zgoda_koszt_nieznany"),
+    (0.004, "poliglota.skan_zgoda_koszt_ponizej_centa"),
+    (0.012, "poliglota.skan_zgoda_koszt_centy|liczba_centow=1"),
+    (0.24, "poliglota.skan_zgoda_koszt_centy|liczba_centow=24"),
+    (0.995, "poliglota.skan_zgoda_koszt|kwota=0.99"),     # nie „100 centów"
+    (1.2, "poliglota.skan_zgoda_koszt|kwota=1.20"),
+])
+def test_opis_kosztu_w_centach_ponizej_dolara(koszt, wynik):
+    # „około 0.01 USD" czytnik podawał jak „zero dolarów" (uwaga maintainera).
+    assert cs.opis_kosztu(koszt) == wynik
+
+
+def test_kazdy_klucz_skan_uzyty_w_kodzie_jest_w_kazdej_paczce():
+    # Brak klucza nie wywraca niczego: `t()` oddaje `[klucz]`, który trafia
+    # do dialogu albo do dokumentu czytanego na głos.
+    import re
+    korzen = Path(__file__).parent
+    kod = "".join((korzen / f).read_text(encoding="utf-8")
+                  for f in ("core_skany.py", "gui_poliglota.py"))
+    uzyte = set(re.findall(r'"poliglota\.(skan_[a-z_]+)"', kod))
+    uzyte |= {f"skan_znacznik_{z.lower()}" for z in cs.ZNACZNIKI}
+    assert len(uzyte) > 20
+    for kod_paczki in PACZKI:
+        ui = yaml.safe_load((korzen / "dictionaries" / kod_paczki / "gui" / "ui.yaml")
+                            .read_text(encoding="utf-8"))["poliglota"]
+        assert sorted(uzyte - set(ui)) == [], kod_paczki
+
+
 def test_podsumowanie_kazda_strona_w_jednej_grupie():
     p = cs.podsumuj([
         cs.WynikStrony(1, cs.STATUS_OK, "x", znaczniki={"ILLEGIBLE": 2, "EMPTY": 1}),

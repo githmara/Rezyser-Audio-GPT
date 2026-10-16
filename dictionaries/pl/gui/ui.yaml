@@ -961,6 +961,8 @@ poliglota:
 
     Jeśli wybierzesz „Pomiń”, te strony zostaną pominięte i ich treści nie będzie w wyniku.
   skan_zgoda_koszt: "około {kwota} USD"
+  skan_zgoda_koszt_centy: "około {liczba_centow} (w centach amerykańskich)"
+  skan_zgoda_koszt_ponizej_centa: "mniej niż jeden cent amerykański"
   skan_zgoda_koszt_nieznany: "nieznany dla tego modelu"
   skan_zgoda_btn_tak: "&Odczytaj strony"
   skan_zgoda_btn_nie: "&Pomiń"
