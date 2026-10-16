@@ -901,6 +901,37 @@ poliglota:
   pdf_wczytany_tresc: "Tiedostosta {nazwa_pliku} luettiin teksti (sivuja: {liczba_stron}, kappaleita: {liczba_akapitow}).\n\nOhjelma muodosti kappaleet uudelleen sivujen asettelusta, yhdisti seuraavalle riville siirtyneet sanat ja ohitti sivunumerot. Tulos tallennetaan .html-tiedostona, koska ohjelma ei tallenna PDF-tiedostoja."
   pdf_kolontytuly: 'Toistuvat sivujen ylä- ja alatunnisteet ohitettiin: {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Huomio: näillä sivuilla ei ole tekstiä (todennäköisesti ne ovat skannauksia), eikä niiden sisältöä tule tulokseen: {lista_stron}'
+  skan_znacznik_illegible: '[epäselvä]'
+  skan_znacznik_empty: '[tyhjä kenttä]'
+  skan_znacznik_photo: '[valokuva]'
+  skan_znacznik_stamp: '[leima]'
+  skan_znacznik_signature: '[allekirjoitus]'
+  skan_znacznik_emblem: '[vaakuna]'
+  skan_znacznik_no_text: '[sivulla ei ole tekstiä]'
+  skan_pochodzenie: 'Sivu {numer_strony}: tekoälymalli on lukenut tekstin kuvasta, ja siinä voi olla lukuvirheitä.'
+  skan_nieodczytana: '[Sivu {numer_strony}: ei luettu. Syy: {powod}]'
+  skan_ucieta: '[Sivu {numer_strony}: lukeminen katkesi, koska mallin vastaus ylitti pituusrajan. Sivun loppuosaa ei luettu.]'
+  skan_powod_odmowa: malli kieltäytyi lukemasta tätä sivua
+  skan_powod_pusta: malli palautti tyhjän vastauksen
+  skan_powod_anulowano: lukeminen peruttiin
+  skan_zgoda_tytul: Luetaanko skannatut sivut tekoälymallilla?
+  skan_zgoda_tresc: "Tiedostossa {nazwa_pliku} on {liczba_stron} sivua, ja {liczba_skanow} niistä on ilman tekstikerrosta (todennäköisesti skannauksia): {lista_stron}.\n\nVoin lukea nämä sivut kuvasta tekoälymallilla ({model}). Jokainen niistä lähetetään kuvana ulkoiseen palveluun: {usluga}.\nAsiakirjaskannaukset sisältävät usein henkilötietoja (henkilökortit, passit, siviilisäätyasiakirjat). Lähetä ne vain, jos sinulla on siihen oikeus.\n\nArvioitu hinta: {koszt}. Aika: noin 5 sekuntia sivua kohden.\n\nJos valitset ”Ohita”, nämä sivut ohitetaan eikä niiden sisältöä tule tulokseen."
+  skan_zgoda_koszt: noin {kwota} USD
+  skan_zgoda_koszt_nieznany: tuntematon tälle mallille
+  skan_zgoda_btn_tak: '&Lue sivut'
+  skan_zgoda_btn_nie: '&Ohita'
+  skan_postep_tytul: Skannattujen sivujen lukeminen
+  skan_postep_tresc: Luetaan sivua {numer_strony} ({numer}/{liczba})…
+  skan_podsumowanie_tytul: 'Skannattujen sivujen lukeminen: yhteenveto'
+  skan_podsumowanie_tresc: "Kuvasta luettiin sivuja: {liczba_odczytanych}/{liczba_skanow}.\nEpäselviä tai tahriintuneita kohtia: {liczba_nieczytelnych}. Lomakkeiden tyhjiä kenttiä: {liczba_pustych}.\nTulos tallennetaan .html-tiedostona. Jokaisen luetun sivun edessä on kappale, jossa kerrotaan, että sivun teksti on luettu kuvasta."
+  skan_podsumowanie_urwane: 'Vain osittain luetut sivut (mallin vastaus ylitti pituusrajan): {lista_stron}'
+  skan_podsumowanie_nieodczytane: 'Lukemattomat sivut (tuloksessa niiden kohdalla on syyn kertova kappale):'
+  skan_podsumowanie_strona: 'Sivu {numer_strony}: {powod}'
+  skan_podsumowanie_przerwano: 'Lukeminen keskeytettiin, koska seuraavatkaan sivut eivät olisi onnistuneet: {powod}'
+  skan_niedostepny_brak_api: Skannattujen sivujen lukeminen tekoälymallilla vaatii API-avaimen (Anthropic tai OpenRouter) golden_key.env-tiedostossa.
+  skan_niedostepny_compat: Skannattujen sivujen lukeminen tekoälymallilla ei toimi oman OpenAI-yhteensopivan päätepisteen kanssa (LLM_PROVIDER=openai_compat). Se toimii Anthropicin ja OpenRouterin kanssa.
+  skan_blad_tytul: Skannattujen sivujen lukeminen epäonnistui
+  skan_blad_tresc: "Skannattujen sivujen lukemisen keskeytti odottamaton virhe:\n{tresc_bledu}\n\nLadattiin vain PDF-tiedoston tekstikerroksen teksti (jos tiedostossa sellainen on). Skannatut sivut ohitettiin."
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)

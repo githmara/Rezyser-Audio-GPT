@@ -903,6 +903,37 @@ poliglota:
   pdf_wczytany_tresc: "Texti var lesinn úr skránni {nazwa_pliku} (síður: {liczba_stron}, málsgreinar: {liczba_akapitow}).\n\nForritið endurbyggði málsgreinarnar út frá uppsetningu síðnanna, tengdi saman orð sem voru brotin á milli lína og sleppti blaðsíðutölum. Niðurstaðan verður vistuð sem .html skrá, því forritið vistar ekki PDF-skjöl."
   pdf_kolontytuly: 'Endurteknum síðuhausum og síðufótum var sleppt: {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Athugið: þessar síður eru án texta (líklega skannaðar) og efni þeirra verður ekki með í niðurstöðunni: {lista_stron}'
+  skan_znacznik_illegible: '[ólæsilegt]'
+  skan_znacznik_empty: '[autt reitur]'
+  skan_znacznik_photo: '[ljósmynd]'
+  skan_znacznik_stamp: '[stimpill]'
+  skan_znacznik_signature: '[undirskrift]'
+  skan_znacznik_emblem: '[skjaldarmerki]'
+  skan_znacznik_no_text: '[síða án texta]'
+  skan_pochodzenie: 'Síða {numer_strony}: gervigreindarlíkan las textann úr mynd og í honum geta verið lestrarvillur.'
+  skan_nieodczytana: '[Síða {numer_strony}: ekki lesin. Ástæða: {powod}]'
+  skan_ucieta: '[Síða {numer_strony}: lestur var stöðvaður þar sem svar líkansins fór yfir lengdarmörk. Afgangur síðunnar var ekki lesinn.]'
+  skan_powod_odmowa: líkanið neitaði að lesa þessa síðu
+  skan_powod_pusta: líkanið skilaði tómu svari
+  skan_powod_anulowano: hætt var við lestur
+  skan_zgoda_tytul: Lesa skannaðar síður með gervigreindarlíkani?
+  skan_zgoda_tresc: "Í skránni {nazwa_pliku} eru {liczba_skanow} af {liczba_stron} síðum án textalags (að öllum líkindum skannaðar síður): {lista_stron}.\n\nÉg get lesið þessar síður úr mynd með gervigreindarlíkani ({model}). Hver þeirra verður send sem mynd til ytri þjónustu: {usluga}.\nSkannuð skjöl innihalda oft persónuupplýsingar (skilríki, vegabréf, fæðingar- og hjúskaparvottorð). Sendu þau aðeins ef þú hefur heimild til þess.\n\nÁætlaður kostnaður: {koszt}. Tími: um 5 sekúndur á síðu.\n\nVeljirðu „Sleppa“ verða þessar síður ekki lesnar og efni þeirra kemur ekki fram í niðurstöðunni."
+  skan_zgoda_koszt: um {kwota} USD
+  skan_zgoda_koszt_nieznany: óþekkt fyrir þetta líkan
+  skan_zgoda_btn_tak: '&Lesa síður'
+  skan_zgoda_btn_nie: '&Sleppa'
+  skan_postep_tytul: Lestur skannaðra síðna
+  skan_postep_tresc: Les síðu {numer_strony} ({numer} af {liczba})…
+  skan_podsumowanie_tytul: 'Lestur skannaðra síðna: samantekt'
+  skan_podsumowanie_tresc: "Lesnar úr mynd: {liczba_odczytanych} af {liczba_skanow} síðum.\nÓlæsilegir eða máðir staðir: {liczba_nieczytelnych}. Auðir reitir í eyðublöðum: {liczba_pustych}.\nNiðurstaðan verður vistuð sem .html skrá. Á undan hverri lesinni síðu kemur málsgrein sem segir að texti hennar sé fenginn úr lestri myndar."
+  skan_podsumowanie_urwane: 'Síður sem voru aðeins lesnar að hluta (svar líkansins fór yfir lengdarmörk): {lista_stron}'
+  skan_podsumowanie_nieodczytane: 'Síður sem voru ekki lesnar (í niðurstöðunni kemur málsgrein með ástæðu í stað þeirra):'
+  skan_podsumowanie_strona: 'Síða {numer_strony}: {powod}'
+  skan_podsumowanie_przerwano: 'Lestur var stöðvaður þar sem næstu síður hefðu heldur ekki tekist: {powod}'
+  skan_niedostepny_brak_api: Lestur skannaðra síðna með gervigreindarlíkani krefst API-lykils (Anthropic eða OpenRouter) í skránni golden_key.env.
+  skan_niedostepny_compat: Lestur skannaðra síðna með gervigreindarlíkani virkar ekki með eigin endapunkti sem er samhæfður OpenAI (LLM_PROVIDER=openai_compat). Hann virkar með Anthropic og OpenRouter.
+  skan_blad_tytul: Lestur skannaðra síðna mistókst
+  skan_blad_tresc: "Óvænt villa stöðvaði lestur skannaðra síðna:\n{tresc_bledu}\n\nAðeins textinn úr textalagi PDF-skjalsins var lesinn inn (ef skráin er með slíkt). Skönnuðum síðum var sleppt."
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)

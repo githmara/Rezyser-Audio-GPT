@@ -903,6 +903,37 @@ poliglota:
   pdf_wczytany_tresc: "Aus der Datei {nazwa_pliku} wurde Text gelesen (Seiten: {liczba_stron}, Absätze: {liczba_akapitow}).\n\nDas Programm hat die Absätze anhand des Seitenlayouts rekonstruiert, in die nächste Zeile umbrochene Wörter wieder zusammengefügt und die Seitenzahlen ausgelassen. Das Ergebnis wird als .html-Datei gespeichert, da das Programm keine PDFs speichert."
   pdf_kolontytuly: 'Wiederkehrende Kopf- und Fußzeilen der Seiten wurden ausgelassen: {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Hinweis: Diese Seiten enthalten keinen Text (vermutlich handelt es sich um Scans), ihr Inhalt fehlt daher im Ergebnis: {lista_stron}'
+  skan_znacznik_illegible: '[unleserlich]'
+  skan_znacznik_empty: '[leeres Feld]'
+  skan_znacznik_photo: '[Foto]'
+  skan_znacznik_stamp: '[Stempel]'
+  skan_znacznik_signature: '[Unterschrift]'
+  skan_znacznik_emblem: '[Wappen]'
+  skan_znacznik_no_text: '[Seite ohne Text]'
+  skan_pochodzenie: 'Seite {numer_strony}: Text, den ein KI-Modell aus dem Bild gelesen hat; er kann Lesefehler enthalten.'
+  skan_nieodczytana: '[Seite {numer_strony}: nicht gelesen. Grund: {powod}]'
+  skan_ucieta: '[Seite {numer_strony}: Texterkennung abgebrochen, weil die Antwort des Modells das Längenlimit überschritten hat. Der restliche Teil dieser Seite wurde nicht gelesen.]'
+  skan_powod_odmowa: Das Modell hat das Lesen dieser Seite verweigert
+  skan_powod_pusta: Das Modell hat eine leere Antwort geliefert
+  skan_powod_anulowano: Texterkennung abgebrochen
+  skan_zgoda_tytul: Gescannte Seiten per KI-Modell auslesen?
+  skan_zgoda_tresc: "In der Datei {nazwa_pliku} haben {liczba_skanow} von {liczba_stron} Seiten keine Textebene (höchstwahrscheinlich Scans): {lista_stron}.\n\nIch kann diese Seiten mit einem KI-Modell ({model}) aus dem Bild auslesen. Jede davon wird als Bild an einen externen Dienst gesendet: {usluga}.\nGescannte Dokumente enthalten häufig personenbezogene Daten (Ausweise, Reisepässe, Personenstandsurkunden). Senden Sie sie nur, wenn Sie dazu berechtigt sind.\n\nGeschätzte Kosten: {koszt}. Dauer: etwa 5 Sekunden pro Seite.\n\nWenn Sie „Überspringen“ wählen, werden diese Seiten übersprungen und ihr Inhalt fehlt im Ergebnis."
+  skan_zgoda_koszt: etwa {kwota} USD
+  skan_zgoda_koszt_nieznany: für dieses Modell unbekannt
+  skan_zgoda_btn_tak: Seiten &auslesen
+  skan_zgoda_btn_nie: '&Überspringen'
+  skan_postep_tytul: Gescannte Seiten auslesen
+  skan_postep_tresc: Lese Seite {numer_strony} ({numer} von {liczba}) …
+  skan_podsumowanie_tytul: 'Gescannte Seiten auslesen: Zusammenfassung'
+  skan_podsumowanie_tresc: "Aus dem Bild gelesene Seiten: {liczba_odczytanych} von {liczba_skanow}.\nUnleserliche oder verwischte Stellen: {liczba_nieczytelnych}. Leere Formularfelder: {liczba_pustych}.\nDas Ergebnis wird als .html-Datei gespeichert. Vor jeder ausgelesenen Seite steht ein Absatz mit dem Hinweis, dass ihr Text aus einer Bilderkennung stammt."
+  skan_podsumowanie_urwane: 'Nur teilweise gelesene Seiten (die Antwort des Modells hat das Längenlimit überschritten): {lista_stron}'
+  skan_podsumowanie_nieodczytane: 'Nicht gelesene Seiten (im Ergebnis steht an ihrer Stelle ein Absatz mit dem Grund):'
+  skan_podsumowanie_strona: 'Seite {numer_strony}: {powod}'
+  skan_podsumowanie_przerwano: 'Das Auslesen wurde abgebrochen, weil auch die folgenden Seiten fehlgeschlagen wären: {powod}'
+  skan_niedostepny_brak_api: Zum Auslesen gescannter Seiten per KI-Modell ist ein API-Schlüssel (Anthropic oder OpenRouter) in der Datei golden_key.env erforderlich.
+  skan_niedostepny_compat: Das Auslesen gescannter Seiten per KI-Modell funktioniert nicht mit einem eigenen OpenAI-kompatiblen Endpunkt (LLM_PROVIDER=openai_compat). Es funktioniert mit Anthropic und mit OpenRouter.
+  skan_blad_tytul: Das Auslesen gescannter Seiten ist fehlgeschlagen
+  skan_blad_tresc: "Das Auslesen gescannter Seiten wurde durch einen unerwarteten Fehler unterbrochen:\n{tresc_bledu}\n\nEs wurde nur der Text aus der Textebene des PDFs geladen (sofern die Datei eine hat). Gescannte Seiten wurden übersprungen."
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)

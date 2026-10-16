@@ -901,6 +901,37 @@ poliglota:
   pdf_wczytany_tresc: "Texte extrait du fichier {nazwa_pliku} (pages : {liczba_stron}, paragraphes : {liczba_akapitow}).\n\nLe programme a reconstitué les paragraphes à partir de la mise en page, rejoint les mots coupés en fin de ligne et ignoré les numéros de page. Le résultat sera enregistré au format .html, car le programme n'enregistre pas de PDF."
   pdf_kolontytuly: 'En-têtes et pieds de page répétés ignorés : {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Attention : ces pages ne contiennent pas de texte (probablement des scans) et leur contenu ne figurera pas dans le résultat : {lista_stron}'
+  skan_znacznik_illegible: '[illisible]'
+  skan_znacznik_empty: '[champ vide]'
+  skan_znacznik_photo: '[photo]'
+  skan_znacznik_stamp: '[cachet]'
+  skan_znacznik_signature: '[signature]'
+  skan_znacznik_emblem: '[emblème]'
+  skan_znacznik_no_text: '[page sans texte]'
+  skan_pochodzenie: "Page {numer_strony} : texte lu à partir de l'image par un modèle d'IA ; il peut contenir des erreurs de lecture."
+  skan_nieodczytana: '[Page {numer_strony} : non lue. Motif : {powod}]'
+  skan_ucieta: "[Page {numer_strony} : lecture interrompue, car la réponse du modèle a dépassé la limite de longueur. Le reste de cette page n'a pas été lu.]"
+  skan_powod_odmowa: le modèle a refusé de lire cette page
+  skan_powod_pusta: le modèle a renvoyé une réponse vide
+  skan_powod_anulowano: lecture annulée
+  skan_zgoda_tytul: Lire les pages numérisées avec un modèle d'IA ?
+  skan_zgoda_tresc: "Dans le fichier {nazwa_pliku}, {liczba_skanow} page(s) sur {liczba_stron} n'ont pas de couche de texte (il s'agit très probablement de scans) : {lista_stron}.\n\nJe peux lire ces pages à partir de l'image avec un modèle d'IA ({model}). Chacune sera envoyée sous forme d'image à un service externe : {usluga}.\nLes documents numérisés contiennent souvent des données personnelles (pièces d'identité, passeports, actes d'état civil). Ne les envoyez que si vous en avez le droit.\n\nCoût estimé : {koszt}. Durée : environ 5 secondes par page.\n\nSi vous choisissez « Ignorer », ces pages seront ignorées et leur contenu n'apparaîtra pas dans le résultat."
+  skan_zgoda_koszt: environ {kwota} USD
+  skan_zgoda_koszt_nieznany: inconnu pour ce modèle
+  skan_zgoda_btn_tak: '&Lire les pages'
+  skan_zgoda_btn_nie: '&Ignorer'
+  skan_postep_tytul: Lecture des pages numérisées
+  skan_postep_tresc: Lecture de la page {numer_strony} ({numer} sur {liczba})…
+  skan_podsumowanie_tytul: 'Lecture des pages numérisées : récapitulatif'
+  skan_podsumowanie_tresc: "Pages lues à partir de l'image : {liczba_odczytanych} sur {liczba_skanow}.\nPassages illisibles ou floutés : {liczba_nieczytelnych}. Champs de formulaire vides : {liczba_pustych}.\nLe résultat sera enregistré sous forme de fichier .html. Avant chaque page lue figure un paragraphe indiquant que son texte provient d'une lecture d'image."
+  skan_podsumowanie_urwane: 'Pages lues en partie seulement (la réponse du modèle a dépassé la limite de longueur) : {lista_stron}'
+  skan_podsumowanie_nieodczytane: 'Pages non lues (dans le résultat, un paragraphe indiquant le motif les remplace) :'
+  skan_podsumowanie_strona: 'Page {numer_strony} : {powod}'
+  skan_podsumowanie_przerwano: 'Lecture interrompue, car les pages suivantes auraient également échoué : {powod}'
+  skan_niedostepny_brak_api: La lecture des pages numérisées par un modèle d'IA nécessite une clé API (Anthropic ou OpenRouter) dans le fichier golden_key.env.
+  skan_niedostepny_compat: La lecture des pages numérisées par un modèle d'IA ne fonctionne pas avec un endpoint personnalisé compatible OpenAI (LLM_PROVIDER=openai_compat). Elle fonctionne avec Anthropic et OpenRouter.
+  skan_blad_tytul: Échec de la lecture des pages numérisées
+  skan_blad_tresc: "La lecture des pages numérisées a été interrompue par une erreur inattendue :\n{tresc_bledu}\n\nSeul le texte de la couche de texte du PDF a été chargé (si le fichier en contient une). Les pages numérisées ont été ignorées."
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)

@@ -903,6 +903,37 @@ poliglota:
   pdf_wczytany_tresc: "Se ha extraído el texto del archivo {nazwa_pliku} (páginas: {liczba_stron}, párrafos: {liczba_akapitow}).\n\nEl programa reconstruyó los párrafos a partir del diseño de las páginas, unió las palabras divididas al final de línea y omitió los números de página. El resultado se guardará como archivo .html, porque el programa no guarda PDF."
   pdf_kolontytuly: 'Se omitieron los encabezados y pies de página repetidos: {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Atención: estas páginas no tienen texto (lo más probable es que sean escaneos) y su contenido no aparecerá en el resultado: {lista_stron}'
+  skan_znacznik_illegible: '[ilegible]'
+  skan_znacznik_empty: '[campo vacío]'
+  skan_znacznik_photo: '[fotografía]'
+  skan_znacznik_stamp: '[sello]'
+  skan_znacznik_signature: '[firma]'
+  skan_znacznik_emblem: '[escudo]'
+  skan_znacznik_no_text: '[página sin texto]'
+  skan_pochodzenie: 'Página {numer_strony}: texto leído de la imagen por un modelo de IA; puede contener errores de lectura.'
+  skan_nieodczytana: '[Página {numer_strony}: no se pudo leer. Motivo: {powod}]'
+  skan_ucieta: '[Página {numer_strony}: lectura interrumpida porque la respuesta del modelo superó el límite de longitud. El resto de esta página no se ha leído.]'
+  skan_powod_odmowa: el modelo se negó a leer esta página
+  skan_powod_pusta: el modelo devolvió una respuesta vacía
+  skan_powod_anulowano: lectura cancelada
+  skan_zgoda_tytul: ¿Leer las páginas escaneadas con un modelo de IA?
+  skan_zgoda_tresc: "En el archivo {nazwa_pliku}, {liczba_skanow} de {liczba_stron} páginas no tienen capa de texto (lo más probable es que sean escaneos): {lista_stron}.\n\nPuedo leer estas páginas a partir de la imagen con un modelo de IA ({model}). Cada una se enviará como imagen a un servicio externo: {usluga}.\nLos escaneos de documentos suelen contener datos personales (documentos de identidad, pasaportes, actas del registro civil). Envíalos solo si tienes derecho a hacerlo.\n\nCoste estimado: {koszt}. Tiempo: unos 5 segundos por página.\n\nSi eliges «Omitir», esas páginas se omitirán y su contenido no aparecerá en el resultado."
+  skan_zgoda_koszt: unos {kwota} USD
+  skan_zgoda_koszt_nieznany: desconocido para este modelo
+  skan_zgoda_btn_tak: '&Leer las páginas'
+  skan_zgoda_btn_nie: '&Omitir'
+  skan_postep_tytul: Lectura de páginas escaneadas
+  skan_postep_tresc: Leyendo la página {numer_strony} ({numer} de {liczba})…
+  skan_podsumowanie_tytul: 'Lectura de páginas escaneadas: resumen'
+  skan_podsumowanie_tresc: "Páginas leídas a partir de la imagen: {liczba_odczytanych} de {liczba_skanow}.\nPasajes ilegibles o borrosos: {liczba_nieczytelnych}. Campos de formulario vacíos: {liczba_pustych}.\nGuardaremos el resultado como archivo .html. Antes de cada página leída habrá un párrafo que indica que su texto procede de la lectura de una imagen."
+  skan_podsumowanie_urwane: 'Páginas leídas solo en parte (la respuesta del modelo superó el límite de longitud): {lista_stron}'
+  skan_podsumowanie_nieodczytane: 'Páginas no leídas (en el resultado, en su lugar aparece un párrafo con el motivo):'
+  skan_podsumowanie_strona: 'Página {numer_strony}: {powod}'
+  skan_podsumowanie_przerwano: 'La lectura se interrumpió porque las páginas siguientes tampoco se habrían podido leer: {powod}'
+  skan_niedostepny_brak_api: La lectura de páginas escaneadas con un modelo de IA requiere una clave de API (Anthropic u OpenRouter) en el archivo golden_key.env.
+  skan_niedostepny_compat: La lectura de páginas escaneadas con un modelo de IA no funciona con un endpoint propio compatible con OpenAI (LLM_PROVIDER=openai_compat). Funciona con Anthropic y con OpenRouter.
+  skan_blad_tytul: No se pudo completar la lectura de las páginas escaneadas
+  skan_blad_tresc: "Un error inesperado interrumpió la lectura de las páginas escaneadas:\n{tresc_bledu}\n\nSe ha cargado únicamente el texto de la capa de texto del PDF (si el archivo la tiene). Las páginas escaneadas se han omitido."
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)

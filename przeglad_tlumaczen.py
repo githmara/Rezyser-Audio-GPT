@@ -480,6 +480,17 @@ _CHECKLIST_UI = """\
   one level up: the `_pl` suffix of `co_nowego_online_pl` described the
   content, aged with the canon, and the key is now
   `co_nowego_online_uwaga`.
+- SCAN MARKERS (`poliglota.skan_znacznik_*`, v19.14) are READ ALOUD in the
+  middle of a transcribed paper document, in place of what the page shows:
+  each must be a short noun for the PHYSICAL thing on an official document
+  (a state coat of arms, a rubber stamp, a handwritten signature, a blank
+  form field), never a software or branding concept. The model translates
+  the keys one by one, without the document around them. Measured 2026-10-16:
+  `fi` returned „[tunnus]" (= identifier / logo) for „[godło]"; the other
+  seven packs chose the coat-of-arms word („[vaakuna]" is the fix).
+  Mechanically gated only for PRESENCE (`test_core_skany.py`: every token in
+  `core_skany.ZNACZNIKI` has its key in every pack); the meaning is this
+  bullet.
 - POLISH IDIOMS ARE TRAPS — reword the SOURCE, do not patch the eight outputs.
   Measured 2026-09-12 (v19.2): „brak zdania" means „no opinion" in Polish, and
   came back as „aucune phrase" (`fr`) and „nessuna frase" (`it`) — „no

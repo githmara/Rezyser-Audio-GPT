@@ -241,13 +241,49 @@ def test_scal_strona_nieodczytana_i_urwana_sa_jawne():
 
 # --------------------------------------------------------------------- E ---
 
-def test_kazdy_znacznik_ma_klucz_w_ui_pl():
-    # Paczki obce dostaje brat `_ui` (etap 5 wydania 19.14) — wtedy ten test
-    # rozszerza się na wszystkie paczki.
-    ui = yaml.safe_load((Path(__file__).parent / "dictionaries/pl/gui/ui.yaml")
+PACZKI = sorted(p.name for p in (Path(__file__).parent / "dictionaries").iterdir()
+                if (p / "gui" / "ui.yaml").is_file())
+
+
+@pytest.mark.parametrize("kod", PACZKI)
+def test_kazdy_znacznik_ma_klucz_w_ui_kazdej_paczki(kod):
+    # Brak klucza nie wywraca odczytu, tylko wstawia `[poliglota.skan_…]`
+    # w wynik czytany na głos — tego nie złapie żadna inna bramka.
+    ui = yaml.safe_load((Path(__file__).parent / "dictionaries" / kod / "gui" / "ui.yaml")
                         .read_text(encoding="utf-8"))["poliglota"]
     brak = [z for z in cs.ZNACZNIKI if f"skan_znacznik_{z.lower()}" not in ui]
     assert brak == []
+
+
+@pytest.mark.parametrize("provider, dostepny", [
+    (cl.PROVIDER_ANTHROPIC, True), (cl.PROVIDER_OPENROUTER, True),
+    (cl.PROVIDER_OPENAI_COMPAT, False)])
+def test_odczyt_dostepny_per_provider(provider, dostepny):
+    assert cs.odczyt_dostepny(cl.KlientLLM(provider, None)) is dostepny
+    assert cs.odczyt_dostepny(None) is False
+
+
+def test_szacunek_kosztu_po_modelu_natywnym():
+    anthropic = cl.KlientLLM(cl.PROVIDER_ANTHROPIC, None)
+    assert cs.szacuj_koszt(anthropic, 10) == pytest.approx(0.12)
+    # OpenRouter: id `anthropic/claude-sonnet-5.5` mapowane z powrotem na natywne.
+    assert cs.szacuj_koszt(cl.KlientLLM(cl.PROVIDER_OPENROUTER, None), 10) \
+        == pytest.approx(0.12)
+    # `LLM_MODEL` spoza cennika → koszt nieznany, nie zero.
+    obcy = cl.KlientLLM(cl.PROVIDER_OPENROUTER, None, model_override="google/gemini-x")
+    assert cs.szacuj_koszt(obcy, 10) is None
+
+
+def test_podsumowanie_kazda_strona_w_jednej_grupie():
+    p = cs.podsumuj([
+        cs.WynikStrony(1, cs.STATUS_OK, "x", znaczniki={"ILLEGIBLE": 2, "EMPTY": 1}),
+        cs.WynikStrony(2, cs.STATUS_UCIETA, "y", znaczniki={"ILLEGIBLE": 1}),
+        cs.WynikStrony(3, cs.STATUS_ODMOWA, powod="r"),
+        cs.WynikStrony(4, cs.STATUS_BLAD, powod="b"),
+    ])
+    assert p.odczytane == 2 and p.urwane == [2]
+    assert [w.numer for w in p.nieodczytane] == [3, 4]
+    assert p.znaczniki == {"ILLEGIBLE": 3, "EMPTY": 1}
 
 
 def test_kazdy_znacznik_jest_w_prompcie():

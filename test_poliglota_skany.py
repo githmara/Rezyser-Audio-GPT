@@ -189,13 +189,13 @@ def test_blad_watku_mowi_i_wczytuje_sam_tekst(srodowisko, tmp_path, monkeypatch)
     panel, zapis = srodowisko
 
     def pada(*_a, **_k):
-        raise RuntimeError("awaria testowa")
+        raise RuntimeError("simulated failure")
 
     monkeypatch.setattr(cs, "odczytaj_strony", pada)
     monkeypatch.setattr("bledy_ai.zapisz_diagnostyke", lambda *_a: None)
     _wczytaj(panel, _mieszany(tmp_path))
     assert zapis.dlugie[0][0] == "Odczyt stron-skanów nie powiódł się"
-    assert "awaria testowa" in zapis.dlugie[0][1]
+    assert "simulated failure" in zapis.dlugie[0][1]
     assert panel._file_ext == ".txt" and "Koniec dokumentu." in panel._file_content
 
 

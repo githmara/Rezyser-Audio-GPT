@@ -987,6 +987,37 @@ poliglota:
   pdf_wczytany_tresc: "Text was extracted from the file {nazwa_pliku} (pages: {liczba_stron}, paragraphs: {liczba_akapitow}).\n\nThe program rebuilt the paragraphs from the page layout, rejoined words hyphenated across line breaks, and skipped page numbers. The result will be saved as an .html file, because the program does not save PDFs."
   pdf_kolontytuly: 'Repeated page headers and footers were skipped: {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Note: these pages have no text (they are most likely scans) and their content will not appear in the result: {lista_stron}'
+  skan_znacznik_illegible: '[illegible]'
+  skan_znacznik_empty: '[blank field]'
+  skan_znacznik_photo: '[photo]'
+  skan_znacznik_stamp: '[stamp]'
+  skan_znacznik_signature: '[signature]'
+  skan_znacznik_emblem: '[coat of arms]'
+  skan_znacznik_no_text: '[page without text]'
+  skan_pochodzenie: 'Page {numer_strony}: text read from the image by an AI model; it may contain recognition errors.'
+  skan_nieodczytana: '[Page {numer_strony}: not read. Reason: {powod}]'
+  skan_ucieta: "[Page {numer_strony}: reading was cut off because the model's response exceeded the length limit. The rest of this page was not read.]"
+  skan_powod_odmowa: the model refused to read this page
+  skan_powod_pusta: the model returned an empty response
+  skan_powod_anulowano: reading was canceled
+  skan_zgoda_tytul: Read scanned pages with an AI model?
+  skan_zgoda_tresc: "In the file {nazwa_pliku}, {liczba_skanow} of {liczba_stron} pages have no text layer (most likely they are scans): {lista_stron}.\n\nI can read these pages from the image using an AI model ({model}). Each of them will be sent as an image to an external service: {usluga}.\nScanned documents often contain personal data (ID cards, passports, civil status records). Send them only if you have the right to do so.\n\nEstimated cost: {koszt}. Time: about 5 seconds per page.\n\nIf you choose \"Skip\", these pages will be skipped and their content will not appear in the result."
+  skan_zgoda_koszt: about {kwota} USD
+  skan_zgoda_koszt_nieznany: unknown for this model
+  skan_zgoda_btn_tak: '&Read pages'
+  skan_zgoda_btn_nie: '&Skip'
+  skan_postep_tytul: Reading scanned pages
+  skan_postep_tresc: Reading page {numer_strony} ({numer} of {liczba})…
+  skan_podsumowanie_tytul: 'Reading scanned pages: summary'
+  skan_podsumowanie_tresc: "Pages read from the image: {liczba_odczytanych} of {liczba_skanow}.\nIllegible or blurred spots: {liczba_nieczytelnych}. Blank form fields: {liczba_pustych}.\nThe result will be saved as an .html file. Before each page that was read, there is a paragraph noting that its text comes from reading the image."
+  skan_podsumowanie_urwane: "Pages that were only partially read (the model's response exceeded the length limit): {lista_stron}"
+  skan_podsumowanie_nieodczytane: 'Pages that were not read (in the result, a paragraph with the reason appears in their place):'
+  skan_podsumowanie_strona: 'Page {numer_strony}: {powod}'
+  skan_podsumowanie_przerwano: 'Reading was stopped because the remaining pages would have failed too: {powod}'
+  skan_niedostepny_brak_api: Reading scanned pages with an AI model requires an API key (Anthropic or OpenRouter) in the golden_key.env file.
+  skan_niedostepny_compat: Reading scanned pages with an AI model does not work with a custom OpenAI-compatible endpoint (LLM_PROVIDER=openai_compat). It works with Anthropic and OpenRouter.
+  skan_blad_tytul: Reading scanned pages failed
+  skan_blad_tresc: "Reading scanned pages was interrupted by an unexpected error:\n{tresc_bledu}\n\nOnly the text from the PDF's text layer was loaded (if the file has one). The scanned pages were skipped."
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)

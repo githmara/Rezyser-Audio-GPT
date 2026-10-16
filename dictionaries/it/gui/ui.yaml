@@ -903,6 +903,37 @@ poliglota:
   pdf_wczytany_tresc: "Dal file {nazwa_pliku} è stato estratto il testo (pagine: {liczba_stron}, paragrafi: {liczba_akapitow}).\n\nIl programma ha ricostruito i paragrafi a partire dall'impaginazione, ha riunito le parole divise a fine riga e ha ignorato i numeri di pagina. Il risultato verrà salvato come file .html, perché il programma non salva in formato PDF."
   pdf_kolontytuly: 'Intestazioni e piè di pagina ripetuti ignorati: {lista_kolontytulow}'
   pdf_strony_bez_tekstu: 'Attenzione: queste pagine non contengono testo (con ogni probabilità sono scansioni) e il loro contenuto non sarà presente nel risultato: {lista_stron}'
+  skan_znacznik_illegible: '[illeggibile]'
+  skan_znacznik_empty: '[campo vuoto]'
+  skan_znacznik_photo: '[foto]'
+  skan_znacznik_stamp: '[timbro]'
+  skan_znacznik_signature: '[firma]'
+  skan_znacznik_emblem: '[stemma]'
+  skan_znacznik_no_text: '[pagina senza testo]'
+  skan_pochodzenie: "Pagina {numer_strony}: testo letto dall'immagine da un modello AI, potrebbe contenere errori di lettura."
+  skan_nieodczytana: '[Pagina {numer_strony}: non letta. Motivo: {powod}]'
+  skan_ucieta: '[Pagina {numer_strony}: lettura interrotta perché la risposta del modello ha superato il limite di lunghezza. La parte restante di questa pagina non è stata letta.]'
+  skan_powod_odmowa: il modello ha rifiutato di leggere questa pagina
+  skan_powod_pusta: il modello ha restituito una risposta vuota
+  skan_powod_anulowano: lettura annullata
+  skan_zgoda_tytul: Leggere le pagine scansionate con un modello AI?
+  skan_zgoda_tresc: "Nel file {nazwa_pliku}, {liczba_skanow} pagine su {liczba_stron} non hanno un livello di testo (probabilmente sono scansioni): {lista_stron}.\n\nPosso leggere queste pagine dall'immagine con un modello AI ({model}). Ciascuna verrà inviata come immagine a un servizio esterno: {usluga}.\nLe scansioni di documenti contengono spesso dati personali (carte d'identità, passaporti, atti di stato civile). Inviale solo se hai il diritto di farlo.\n\nCosto stimato: {koszt}. Tempo: circa 5 secondi per pagina.\n\nSe scegli «Salta», queste pagine verranno saltate e il loro contenuto non sarà presente nel risultato."
+  skan_zgoda_koszt: circa {kwota} USD
+  skan_zgoda_koszt_nieznany: sconosciuto per questo modello
+  skan_zgoda_btn_tak: '&Leggi le pagine'
+  skan_zgoda_btn_nie: '&Salta'
+  skan_postep_tytul: Lettura delle pagine scansionate
+  skan_postep_tresc: Lettura della pagina {numer_strony} ({numer} di {liczba})…
+  skan_podsumowanie_tytul: 'Lettura delle pagine scansionate: riepilogo'
+  skan_podsumowanie_tresc: "Pagine lette dall'immagine: {liczba_odczytanych} su {liczba_skanow}.\nPunti illeggibili o sbiaditi: {liczba_nieczytelnych}. Campi vuoti dei moduli: {liczba_pustych}.\nIl risultato verrà salvato come file .html. Prima di ogni pagina letta c'è un paragrafo che indica che il suo testo deriva dalla lettura di un'immagine."
+  skan_podsumowanie_urwane: 'Pagine lette solo in parte (la risposta del modello ha superato il limite di lunghezza): {lista_stron}'
+  skan_podsumowanie_nieodczytane: "Pagine non lette (nel risultato, al loro posto, c'è un paragrafo con il motivo):"
+  skan_podsumowanie_strona: 'Pagina {numer_strony}: {powod}'
+  skan_podsumowanie_przerwano: 'Lettura interrotta perché anche le pagine successive non sarebbero riuscite: {powod}'
+  skan_niedostepny_brak_api: La lettura delle pagine scansionate con un modello AI richiede una chiave API (Anthropic oppure OpenRouter) nel file golden_key.env.
+  skan_niedostepny_compat: La lettura delle pagine scansionate con un modello AI non funziona con un endpoint personalizzato compatibile con OpenAI (LLM_PROVIDER=openai_compat). Funziona con Anthropic e con OpenRouter.
+  skan_blad_tytul: Lettura delle pagine scansionate non riuscita
+  skan_blad_tresc: "La lettura delle pagine scansionate è stata interrotta da un errore imprevisto:\n{tresc_bledu}\n\nÈ stato caricato solo il testo del livello di testo del PDF (se il file ne ha uno). Le pagine scansionate sono state saltate."
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   # 18.8: segmento localizzato del nome del file di output (una parola, senza spazi)
