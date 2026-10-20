@@ -54,6 +54,8 @@ common:
   pdf_uszkodzony_tresc: "Ekki tókst að opna skrána {nazwa_pliku} – hún er skemmd eða er ekki gild PDF-skrá.\n\nTæknilegar upplýsingar: {szczegol}"
   docx_oczyszczony_tytul: Texti skjalsins lagfærður
   docx_oczyszczony_tresc: 'Við innlestur lagfærði forritið texta sem varð eftir við umbreytingu úr PDF: það sameinaði {liczba_przeniesien} orð sem höfðu verið brotin yfir á næstu línu, tengdi saman {liczba_rozstrzelonych} orð sem voru rituð með gisnum stöfum, breytti {liczba_spacji} óvenjulegum bilum og umkóðaði {liczba_przekodowanych} málsgreinar með rangri stafakóðun.'
+  pdf_wczytywanie_tytul: Hleð inn PDF-skjali
+  pdf_wczytywanie_tresc: 'Les inn skrána {nazwa_pliku}: blaðsíða {numer_strony} af {liczba_stron}…'
 main:
   menu:
     narzedzia: "&Verkfæri"

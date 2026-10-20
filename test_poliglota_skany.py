@@ -96,6 +96,8 @@ def srodowisko(monkeypatch):
     monkeypatch.setattr(wx, "ProgressDialog", Postep)
     monkeypatch.setattr(wx, "CallAfter", lambda f, *a, **k: f(*a, **k))
     monkeypatch.setattr(gp.threading, "Thread", WatekSynchroniczny)
+    import gui_wczytanie_pdf as gwp      # 19.15: wczytanie PDF-a też w wątku
+    monkeypatch.setattr(gwp.threading, "Thread", WatekSynchroniczny)
     monkeypatch.setattr(gd, "pokaz_tekst", lambda _r, tytul, tresc: zapis.dlugie.append((tytul, tresc)))
     monkeypatch.setattr(gd, "pokaz_raport_raz", lambda _r: None)
 
@@ -213,7 +215,9 @@ def test_drugi_wczytaj_w_trakcie_odczytu_nic_nie_startuje(srodowisko, tmp_path):
 
     panel._worker_thread = Zywy()
     _wczytaj(panel, _mieszany(tmp_path))
-    assert zapis.zgody == [] and zapis.komunikaty == [] and panel._file_content == ""
+    # 19.15: odmowa z komunikatem („Przetwarzanie jest już w toku”), nie cisza.
+    assert zapis.zgody == [] and panel._file_content == ""
+    assert zapis.komunikaty == ["Przetwarzanie jest już w toku. Poczekaj na zakończenie."]
 
 
 def test_nic_nie_odczytano_to_nie_sukces_tylko_sam_tekst(srodowisko, tmp_path, monkeypatch):
@@ -364,6 +368,9 @@ def test_konwerter_pyta_przed_zapisem_smieci(tmp_path, monkeypatch):
         panel = gk.KonwerterPanel(ramka)
         panel._txt_file.SetValue(str(_ze_znieksztalcona(tmp_path)))
         panel._on_build(None)
+        # 19.15: PDF czytany w wątku — czekamy na niego i oddajemy CallAfter.
+        panel._worker_thread.join(30)
+        app.ProcessPendingEvents()
     finally:
         ramka.Destroy()
         app.Destroy()

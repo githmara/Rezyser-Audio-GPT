@@ -54,6 +54,8 @@ common:
   pdf_uszkodzony_tresc: "Die Datei {nazwa_pliku} konnte nicht geöffnet werden – sie ist beschädigt oder keine gültige PDF-Datei.\n\nTechnische Details: {szczegol}"
   docx_oczyszczony_tytul: Dokumenttext korrigiert
   docx_oczyszczony_tresc: 'Beim Laden hat das Programm den Text bereinigt, den die PDF-Konvertierung hinterlassen hat: {liczba_przeniesien} am Zeilenende getrennte Wörter wurden zusammengeführt, {liczba_rozstrzelonych} gesperrt geschriebene Wörter wurden zusammengesetzt, {liczba_spacji} ungewöhnliche Leerzeichen wurden ersetzt und {liczba_przekodowanych} Absätze mit falscher Zeichenkodierung wurden neu kodiert.'
+  pdf_wczytywanie_tytul: PDF wird geladen
+  pdf_wczytywanie_tresc: 'Datei {nazwa_pliku} wird geladen: Seite {numer_strony} von {liczba_stron} …'
 main:
   menu:
     narzedzia: "&Werkzeuge"

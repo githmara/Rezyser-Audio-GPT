@@ -54,6 +54,8 @@ common:
   pdf_uszkodzony_tresc: "Couldn't open the file {nazwa_pliku} – it's corrupted or isn't a valid PDF file.\n\nTechnical details: {szczegol}"
   docx_oczyszczony_tytul: Document text corrected
   docx_oczyszczony_tresc: 'On loading, the program cleaned up the text left behind by the PDF conversion: it merged {liczba_przeniesien} words hyphenated across line breaks, joined {liczba_rozstrzelonych} words written with letter-spacing, replaced {liczba_spacji} unusual spaces, and re-encoded {liczba_przekodowanych} paragraphs with incorrect character encoding.'
+  pdf_wczytywanie_tytul: Loading PDF
+  pdf_wczytywanie_tresc: 'Loading file {nazwa_pliku}: page {numer_strony} of {liczba_stron}…'
 diag:
   tytul: "Rule Warnings"
   wstep: |-

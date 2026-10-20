@@ -54,6 +54,8 @@ common:
   pdf_uszkodzony_tresc: "Tiedoston {nazwa_pliku} avaaminen epäonnistui – se on vioittunut tai ei ole kelvollinen PDF-tiedosto.\n\nTekniset tiedot: {szczegol}"
   docx_oczyszczony_tytul: Asiakirjan teksti korjattu
   docx_oczyszczony_tresc: 'Avattaessa ohjelma korjasi PDF-muunnoksen jälkeensä jättämää tekstiä: yhdisti {liczba_przeniesien} seuraavalle riville siirrettyä sanaa, liitti yhteen {liczba_rozstrzelonych} harvennetuin kirjaimin kirjoitettua sanaa, korvasi {liczba_spacji} epätavallista välilyöntiä ja muunsi {liczba_przekodowanych} kappaleen, joissa oli virheellinen merkistökoodaus.'
+  pdf_wczytywanie_tytul: PDF-tiedoston lataus
+  pdf_wczytywanie_tresc: 'Ladataan tiedostoa {nazwa_pliku}: sivu {numer_strony}/{liczba_stron}…'
 main:
   menu:
     narzedzia: "&Työkalut"

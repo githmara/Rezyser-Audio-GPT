@@ -1225,12 +1225,15 @@ def _podziel_na_akapity(linie: list[_Linia], dzielenie_auto: bool = False) -> li
     return wynik
 
 
-def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> WynikPdf:
+def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None,
+              postep=None) -> WynikPdf:
     """Czyta warstwę tekstu PDF i zwraca akapity.
 
     Args:
         znane_litery: litery wiarygodne mimo flagi błędu mapowania PDFium
             (domyślnie `litery_paczek()` z paczek; testy podają własne).
+        postep: `postep(numer_strony, liczba_stron)` przed każdą stroną —
+            GUI czyta PDF w wątku i pokazuje postęp (19.15: słownik ≈ 10 s).
 
     Raises:
         BrakWarstwyTekstu: żadna strona nie daje tekstu — skan / obraz, ale też
@@ -1268,6 +1271,8 @@ def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> Wynik
         strony: list[_Strona] = []
         bez_tekstu: list[int] = []
         for nr in range(len(pdf)):
+            if postep is not None:
+                postep(nr + 1, len(pdf))
             strona = pdf[nr]
             try:
                 # Pas marginesu z cropboxu w układzie NIEOBRÓCONYM — w tym

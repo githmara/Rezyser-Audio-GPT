@@ -56,6 +56,9 @@ common:
     Plik {nazwa_pliku} nie zawiera warstwy tekstu – to najpewniej skan albo zdjęcia stron.
 
     Program czyta tylko tekst zapisany w PDF-ie i nie rozpoznaje tekstu z obrazów (OCR). Jeśli masz ten dokument w innej postaci (Word, tekst, HTML), wczytaj ją zamiast PDF-a.
+  # v19.15: wczytanie PDF-a w wątku tła — okno postępu (Poliglota i Konwerter)
+  pdf_wczytywanie_tytul: "Wczytywanie PDF-a"
+  pdf_wczytywanie_tresc: "Wczytuję plik {nazwa_pliku}: strona {numer_strony} z {liczba_stron}…"
   # v19.15: dokument Word z konwersji PDF→Word poprawiony przy wczytaniu (zero ciszy) — Poliglota i Konwerter
   docx_oczyszczony_tytul: "Tekst dokumentu poprawiony"
   docx_oczyszczony_tresc: "Przy wczytaniu program poprawił tekst, który zostawiła konwersja z PDF-a: scalił {liczba_przeniesien} wyrazów przeniesionych do następnej linii, skleił {liczba_rozstrzelonych} wyrazów pisanych rozstrzelonymi literami, zamienił {liczba_spacji} nietypowych spacji i przekodował {liczba_przekodowanych} akapitów z niewłaściwym kodowaniem znaków."

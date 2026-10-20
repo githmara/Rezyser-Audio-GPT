@@ -180,7 +180,7 @@ reach X on the paths this project uses.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are 44 regression test files (859 tests, **about a minute for all of them**) and
+There are 45 regression test files (865 tests, **about a minute for all of them**) and
 nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
 (`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
 Running every one of them after every small edit is not thoroughness — a green
@@ -213,6 +213,7 @@ Two facts decide what that means, and both are easy to get backwards:
 | `core_poliglota.py` | `pytest test_akcent_wersaliki.py test_lang_wyniku.py test_markdown_poliglota.py test_oczyszczanie_tts.py test_cisza_yaml.py test_przeniesienia_docx.py` |
 | `core_pdf.py`, `core_skany.py` | `pytest test_core_pdf.py test_core_skany.py test_poliglota_skany.py` |
 | `czyszczenie_tekstu.py` (shared byte-for-byte with accessible_text_analyst — edit only in pairs) | `python czyszczenie_tekstu_wektory.py` (stdlib runner over `czyszczenie_tekstu_wektory.json`, identical in both repos) + `pytest test_przeniesienia_docx.py test_core_pdf.py` |
+| `gui_wczytanie_pdf.py`, or PDF loading in `gui_poliglota.py` / `gui_konwerter.py` (worker thread, progress, guards) | `pytest test_wczytanie_pdf_watek.py test_poliglota_skany.py` |
 | `core_llm.py` | `pytest test_json_structured.py test_cache_powtorki.py test_sprzatanie_bundla.py` |
 | `core_updater.py` | `pytest test_core_updater.py test_patch_dev.py` |
 | `core_markdown.py` | `pytest test_markdown_poliglota.py` |

@@ -54,6 +54,8 @@ common:
   pdf_uszkodzony_tresc: "Impossibile aprire il file {nazwa_pliku}: è danneggiato oppure non è un file PDF valido.\n\nDettagli tecnici: {szczegol}"
   docx_oczyszczony_tytul: Testo del documento corretto
   docx_oczyszczony_tresc: 'Al caricamento, il programma ha corretto il testo lasciato dalla conversione da PDF: ha riunito {liczba_przeniesien} parole spezzate a fine riga, ha ricomposto {liczba_rozstrzelonych} parole scritte con le lettere spaziate, ha sostituito {liczba_spacji} spazi non standard e ha ricodificato {liczba_przekodowanych} paragrafi con una codifica dei caratteri errata.'
+  pdf_wczytywanie_tytul: Caricamento del PDF
+  pdf_wczytywanie_tresc: 'Caricamento del file {nazwa_pliku}: pagina {numer_strony} di {liczba_stron}…'
 main:
   menu:
     narzedzia: "&Strumenti"

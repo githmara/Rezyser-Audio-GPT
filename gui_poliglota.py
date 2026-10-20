@@ -43,6 +43,7 @@ import core_markdown
 import core_pdf
 import core_poliglota
 import core_skany
+import gui_wczytanie_pdf
 import core_tokeny as ct
 import gui_diagnostyka as gd
 import i18n
@@ -760,6 +761,12 @@ class PoliglotaPanel(wx.Panel):
     # OBSŁUGA PLIKU ŹRÓDŁOWEGO
     # ==================================================================
     def _on_browse(self, _event: wx.Event) -> None:
+        # 19.15: zmiana pliku w trakcie pracy wątku (wczytanie PDF-a, skany,
+        # tłumaczenie) podmieniałaby ścieżkę, którą czyta callback końca.
+        if self._worker_thread and self._worker_thread.is_alive():
+            wx.MessageBox(t("poliglota.zajety_tresc"), t("poliglota.zajety_tytul"),
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
         with wx.FileDialog(
             self,
             message=t("poliglota.file_dlg_title"),
@@ -774,7 +781,12 @@ class PoliglotaPanel(wx.Panel):
         # 19.14: odczyt stron-skanów biegnie w wątku, a `_file_content` jest
         # wtedy jeszcze pusty — bez tego guardu drugi „Wczytaj" startował
         # drugi, płatny odczyt.
-        if self._file_content or (self._worker_thread and self._worker_thread.is_alive()):
+        if self._worker_thread and self._worker_thread.is_alive():
+            # 19.15: także wczytanie PDF-a w wątku — odmowa z komunikatem, nie cisza.
+            wx.MessageBox(t("poliglota.zajety_tresc"), t("poliglota.zajety_tytul"),
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
+        if self._file_content:
             return
 
         file_name = self._txt_file.GetValue().strip()
@@ -812,19 +824,20 @@ class PoliglotaPanel(wx.Panel):
                 self._txt_file.SetFocus()
                 return
 
-        wynik_pdf: core_pdf.WynikPdf | None = None
+        self._file_ext = ext
+        if ext == ".pdf":
+            # 19.15: `wyciagnij` w wątku tła z postępem — słownik z naprawą
+            # z fontu to ok. 10 s, a pod `wx.BusyCursor` w wątku GUI NVDA
+            # milczała. Wątek trzyma `_worker_thread`, więc guardy
+            # „Wczytaj"/„Wyczyść"/„Uruchom" obejmują też wczytanie PDF-a.
+            # Reszta (bramka, oferta odczytu skanów, info) — w `_pdf_wczytany`,
+            # w tej samej kolejności co dotąd.
+            self._wczytanie_pdf = gui_wczytanie_pdf.WczytaniePdf(
+                self, file_name, lambda wynik, exc: self._pdf_wczytany(file_name, wynik, exc))
+            self._worker_thread = self._wczytanie_pdf.start()
+            return
         try:
-            self._file_ext = ext
-            if self._file_ext == ".pdf":
-                # 19.13: warstwa tekstu → akapity, dalej ścieżką `.txt` (wynik
-                # `.html` z `<p lang>` per akapit). PDF-a Reżyser nie zapisze,
-                # więc `.pdf` NIE jest rozszerzeniem pipeline'u ani zapisu.
-                # 800 stron to ok. 6 s w wątku GUI (audyt 19.13) — kursor zajętości.
-                with wx.BusyCursor():
-                    wynik_pdf = core_pdf.wyciagnij(file_name)
-                self._file_content = wynik_pdf.tekst
-                self._file_ext = ".txt"
-            elif self._file_ext == ".docx":
+            if self._file_ext == ".docx":
                 # v19.2: przez `core_poliglota.tekst_docx`, bo `doc.paragraphs`
                 # pomija akapity z komórek tabel — podgląd i licznik znaków
                 # gubiły całą treść tabel (zmierzone: 2 akapity z 8 na
@@ -840,8 +853,38 @@ class PoliglotaPanel(wx.Panel):
             else:
                 with open(file_name, "r", encoding="utf-8") as fh:
                     self._file_content = fh.read()
-        except core_pdf.BrakWarstwyTekstu as exc:
+        except Exception as exc:
+            self._blad_wczytania(file_name, exc)
+            return
+        self._dokoncz_wczytanie(file_name, None)
+
+    def _pdf_wczytany(self, file_name: str, wynik_pdf: core_pdf.WynikPdf | None,
+                      exc: Exception | None) -> None:
+        """Koniec wątku wczytania PDF-a (wątek GUI): to, co dotąd szło po `wyciagnij`."""
+        if exc is not None:
+            self._blad_wczytania(file_name, exc)
+            return
+        self._file_content = wynik_pdf.tekst
+        self._file_ext = ".txt"
+        # 19.15: strony ze zniekształconą warstwą tekstu idą tą samą drogą
+        # co skany — ich akapity to śmieci, które zastąpi odczyt obrazu.
+        if wynik_pdf.strony_do_odczytu and \
+                self._zgoda_na_odczyt_skanow(
+                    file_name, wynik_pdf.strony_bez_tekstu, wynik_pdf.liczba_stron,
+                    wynik_pdf.strony_znieksztalcone, wynik_pdf.znaki_stron):
+            # Treść ustawi dopiero koniec wątku — do tego czasu panel jest
+            # „bez pliku", a guardy `is_alive()` trzymają resztę akcji.
+            self._file_content = ""
             self._file_ext = ""
+            self._start_odczytu_skanow(file_name, wynik_pdf, wynik_pdf.akapity_stron,
+                                       wynik_pdf.strony_do_odczytu)
+            return
+        self._dokoncz_wczytanie(file_name, wynik_pdf)
+
+    def _blad_wczytania(self, file_name: str, exc: Exception) -> None:
+        """Błąd odczytu pliku — te same komunikaty co przy odczycie synchronicznym."""
+        self._file_ext = ""
+        if isinstance(exc, core_pdf.BrakWarstwyTekstu):
             # 19.14: PDF w całości zeskanowany dostaje tę samą ofertę odczytu
             # modelem z obrazem co mieszany.
             if exc.strony_bez_tekstu and self._zgoda_na_odczyt_skanow(
@@ -857,37 +900,17 @@ class PoliglotaPanel(wx.Panel):
                 tresc += "\n\n" + dopisek
             wx.MessageBox(tresc, t("common.pdf_bez_tekstu_tytul"),
                           wx.OK | wx.ICON_WARNING, self)
-            return
-        except core_pdf.PdfNieDoOtwarcia as exc:
-            self._file_ext = ""
+        elif isinstance(exc, core_pdf.PdfNieDoOtwarcia):
             wx.MessageBox(
                 t("common.pdf_haslo_tresc" if exc.haslo else "common.pdf_uszkodzony_tresc",
                   nazwa_pliku=os.path.basename(file_name), szczegol=exc.szczegol),
                 t("common.pdf_otwarcie_tytul"),
                 wx.OK | wx.ICON_WARNING, self)
-            return
-        except Exception as exc:
-            self._file_ext = ""
+        else:
             wx.MessageBox(
                 t("poliglota.blad_odczytu_tresc", tresc_bledu=str(exc)),
                 t("common.blad_odczytu_tytul"),
                 wx.OK | wx.ICON_ERROR, self)
-            return
-
-        # 19.15: strony ze zniekształconą warstwą tekstu idą tą samą drogą
-        # co skany — ich akapity to śmieci, które zastąpi odczyt obrazu.
-        if wynik_pdf is not None and wynik_pdf.strony_do_odczytu and \
-                self._zgoda_na_odczyt_skanow(
-                    file_name, wynik_pdf.strony_bez_tekstu, wynik_pdf.liczba_stron,
-                    wynik_pdf.strony_znieksztalcone, wynik_pdf.znaki_stron):
-            # Treść ustawi dopiero koniec wątku — do tego czasu panel jest
-            # „bez pliku", a guardy `is_alive()` trzymają resztę akcji.
-            self._file_content = ""
-            self._file_ext = ""
-            self._start_odczytu_skanow(file_name, wynik_pdf, wynik_pdf.akapity_stron,
-                                       wynik_pdf.strony_do_odczytu)
-            return
-        self._dokoncz_wczytanie(file_name, wynik_pdf)
 
     def _dokoncz_wczytanie(self, file_name: str, wynik_pdf: core_pdf.WynikPdf | None,
                            podsumowanie_skanow: str | None = None) -> None:

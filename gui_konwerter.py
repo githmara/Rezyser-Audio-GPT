@@ -21,6 +21,7 @@ import core_elevenlabs
 import core_pdf
 import core_poliglota
 import core_skany
+import gui_wczytanie_pdf
 import sciezki
 from i18n import t
 from przepisy_rezysera import (
@@ -202,6 +203,8 @@ class KonwerterPanel(wx.Panel):
 
     def __init__(self, parent: wx.Window) -> None:
         super().__init__(parent, style=wx.TAB_TRAVERSAL)
+        # 19.15: wątek wczytania PDF-a (`gui_wczytanie_pdf`) — guardy `is_alive()`.
+        self._worker_thread = None
         self.SetName(t("konwerter.panel_name"))
 
         self._build_ui()
@@ -294,6 +297,8 @@ class KonwerterPanel(wx.Panel):
     # ------------------------------------------------------------------
     def _on_browse(self, _event: wx.Event) -> None:
         """Otwiera systemowy dialog wyboru pliku i wstawia ścieżkę do pola."""
+        if self._zajety():
+            return
         with wx.FileDialog(
             self,
             message=t("konwerter.file_dlg_title"),
@@ -307,8 +312,19 @@ class KonwerterPanel(wx.Panel):
     # ------------------------------------------------------------------
     # Logika przetwarzania (przeniesiona z 3_Konwerter.py)
     # ------------------------------------------------------------------
+    def _zajety(self) -> bool:
+        """19.15: wczytanie PDF-a biegnie w wątku — drugi start w tym czasie
+        jest odrzucany komunikatem (guard na WEJŚCIU handlera)."""
+        if self._worker_thread and self._worker_thread.is_alive():
+            wx.MessageBox(t("poliglota.zajety_tresc"), t("poliglota.zajety_tytul"),
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return True
+        return False
+
     def _on_build(self, _event: wx.Event) -> None:
         """Obsługuje kliknięcie przycisku „Buduj Architekturę"."""
+        if self._zajety():
+            return
         file_name = self._txt_file.GetValue().strip()
 
         # --- Walidacja wejścia ---
@@ -349,27 +365,47 @@ class KonwerterPanel(wx.Panel):
                     zdania_przetworzenia.append(zdanie)
             elif file_name.lower().endswith(".pdf"):
                 # 19.13: warstwa tekstu PDF; akapit = linia, jak przy `.docx`.
-                with wx.BusyCursor():   # 800 stron ≈ 6 s (audyt 19.13)
-                    wynik_pdf = core_pdf.wyciagnij(file_name)
-                tekst = "\n".join(wynik_pdf.akapity)
-                zdania_przetworzenia += core_skany.zdania_naprawy_pdf(wynik_pdf)
-                # 19.15: zniekształcona warstwa tekstu (czcionka bez pełnej
-                # mapy znaków) dawała .docx z literami IPA zamiast cyrylicy
-                # i dialog „Sukces”. Odczytu obrazu Konwerter nie ma, więc
-                # mówimy to i pytamy — domyślnie NIE.
-                if wynik_pdf.strony_znieksztalcone and wx.MessageBox(
-                        t("konwerter.pdf_znieksztalcone_tresc",
-                          nazwa_pliku=os.path.basename(file_name),
-                          liczba_znieksztalconych=len(wynik_pdf.strony_znieksztalcone),
-                          liczba_stron=wynik_pdf.liczba_stron,
-                          lista_stron=core_skany.zakresy(wynik_pdf.strony_znieksztalcone)),
-                        t("konwerter.pdf_znieksztalcone_tytul"),
-                        wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
-                    return
+                # 19.15: w wątku tła z postępem (słownik ≈ 10 s; pod
+                # `wx.BusyCursor` w wątku GUI NVDA milczała) — dalej
+                # w `_pdf_wczytany`.
+                self._wczytanie_pdf = gui_wczytanie_pdf.WczytaniePdf(
+                    self, file_name, lambda wynik, exc: self._pdf_wczytany(file_name, wynik, exc))
+                self._worker_thread = self._wczytanie_pdf.start()
+                return
             else:
                 with open(file_name, "r", encoding="utf-8") as fh:
                     tekst = fh.read()
-        except core_pdf.BrakWarstwyTekstu:
+        except Exception as exc:
+            self._blad_odczytu(file_name, exc)
+            return
+        self._zbuduj(file_name, tekst, zdania_przetworzenia)
+
+    def _pdf_wczytany(self, file_name: str, wynik_pdf: core_pdf.WynikPdf | None,
+                      exc: Exception | None) -> None:
+        """Koniec wątku wczytania PDF-a (wątek GUI): to, co dotąd szło po `wyciagnij`."""
+        if exc is not None:
+            self._blad_odczytu(file_name, exc)
+            return
+        tekst = "\n".join(wynik_pdf.akapity)
+        zdania_przetworzenia = core_skany.zdania_naprawy_pdf(wynik_pdf)
+        # 19.15: zniekształcona warstwa tekstu (czcionka bez pełnej
+        # mapy znaków) dawała .docx z literami IPA zamiast cyrylicy
+        # i dialog „Sukces”. Odczytu obrazu Konwerter nie ma, więc
+        # mówimy to i pytamy — domyślnie NIE.
+        if wynik_pdf.strony_znieksztalcone and wx.MessageBox(
+                t("konwerter.pdf_znieksztalcone_tresc",
+                  nazwa_pliku=os.path.basename(file_name),
+                  liczba_znieksztalconych=len(wynik_pdf.strony_znieksztalcone),
+                  liczba_stron=wynik_pdf.liczba_stron,
+                  lista_stron=core_skany.zakresy(wynik_pdf.strony_znieksztalcone)),
+                t("konwerter.pdf_znieksztalcone_tytul"),
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+            return
+        self._zbuduj(file_name, tekst, zdania_przetworzenia)
+
+    def _blad_odczytu(self, file_name: str, exc: Exception) -> None:
+        """Błąd odczytu pliku źródłowego — te same komunikaty co dotąd."""
+        if isinstance(exc, core_pdf.BrakWarstwyTekstu):
             wx.MessageBox(
                 t("common.pdf_bez_tekstu_tresc",
                   nazwa_pliku=os.path.basename(file_name)),
@@ -377,8 +413,7 @@ class KonwerterPanel(wx.Panel):
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
-            return
-        except core_pdf.PdfNieDoOtwarcia as exc:
+        elif isinstance(exc, core_pdf.PdfNieDoOtwarcia):
             wx.MessageBox(
                 t("common.pdf_haslo_tresc" if exc.haslo else "common.pdf_uszkodzony_tresc",
                   nazwa_pliku=os.path.basename(file_name), szczegol=exc.szczegol),
@@ -386,16 +421,16 @@ class KonwerterPanel(wx.Panel):
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
-            return
-        except Exception as exc:
+        else:
             wx.MessageBox(
                 t("konwerter.blad_odczytu_tresc", tresc_bledu=str(exc)),
                 t("konwerter.blad_odczytu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
-            return
 
+    def _zbuduj(self, file_name: str, tekst: str, zdania_przetworzenia: list[str]) -> None:
+        """Przetwarzanie treści, zapis `.docx` i dialog „Sukces”."""
         # --- Przetwarzanie treści ---
         # Pole `author` .docx jest widoczne dla NVDA w dymkach podpowiedzi
         # Eksploratora – bierzemy je z i18n, żeby nie pokazywać polskiego

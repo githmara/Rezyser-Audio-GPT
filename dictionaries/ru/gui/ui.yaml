@@ -54,6 +54,8 @@ common:
   pdf_uszkodzony_tresc: "Не удалось открыть файл {nazwa_pliku}: он повреждён или не является корректным PDF-файлом.\n\nТехнические подробности: {szczegol}"
   docx_oczyszczony_tytul: Текст документа исправлен
   docx_oczyszczony_tresc: 'При загрузке программа исправила текст, оставшийся после конвертации из PDF: объединила {liczba_przeniesien} слов, перенесённых на следующую строку, склеила {liczba_rozstrzelonych} слов, набранных с разрядкой, заменила {liczba_spacji} нестандартных пробелов и перекодировала {liczba_przekodowanych} абзацев с неверной кодировкой символов.'
+  pdf_wczytywanie_tytul: Загрузка PDF-файла
+  pdf_wczytywanie_tresc: 'Загружаю файл {nazwa_pliku}: страница {numer_strony} из {liczba_stron}…'
 main:
   menu:
     narzedzia: "&Инструменты"

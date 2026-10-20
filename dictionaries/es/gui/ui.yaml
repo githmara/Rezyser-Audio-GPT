@@ -54,6 +54,8 @@ common:
   pdf_uszkodzony_tresc: "No se pudo abrir el archivo {nazwa_pliku}: está dañado o no es un PDF válido.\n\nDetalles técnicos: {szczegol}"
   docx_oczyszczony_tytul: Texto del documento corregido
   docx_oczyszczony_tresc: 'Al cargar el documento, el programa corrigió el texto que dejó la conversión desde PDF: unió {liczba_przeniesien} palabras divididas por un salto de línea, juntó {liczba_rozstrzelonych} palabras escritas con letras espaciadas, reemplazó {liczba_spacji} espacios atípicos y recodificó {liczba_przekodowanych} párrafos con una codificación de caracteres incorrecta.'
+  pdf_wczytywanie_tytul: Cargando el PDF
+  pdf_wczytywanie_tresc: 'Cargando el archivo {nazwa_pliku}: página {numer_strony} de {liczba_stron}…'
 main:
   menu:
     narzedzia: "&Herramientas"
