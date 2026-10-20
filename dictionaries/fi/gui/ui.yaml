@@ -935,6 +935,13 @@ poliglota:
   skan_niedostepny_compat: Skannattujen sivujen lukeminen tekoälymallilla ei toimi oman OpenAI-yhteensopivan päätepisteen kanssa (LLM_PROVIDER=openai_compat). Se toimii Anthropicin ja OpenRouterin kanssa.
   skan_blad_tytul: Skannattujen sivujen lukeminen epäonnistui
   skan_blad_tresc: "Skannattujen sivujen lukemisen keskeytti odottamaton virhe:\n{tresc_bledu}\n\nLadattiin vain PDF-tiedoston tekstikerroksen teksti (jos tiedostossa sellainen on). Skannatut sivut ohitettiin."
+  pdf_strony_znieksztalcone: 'Huom.: näillä sivuilla PDF:ään tallennettu teksti on vääristynyttä ja jää tuloksessa lukukelvottomaksi: {lista_stron}. Tiedostoon upotettu fontti ei kerro, mitkä kirjaimet sen merkkien takana ovat, joten ohjelma saa kirjainten sijaan satunnaisia merkkejä. Näytöllä sivut näyttävät oikeilta – vika on PDF-tiedostossa.'
+  jezyk_niewykryty_tytul: Asiakirjan kieltä ei tunnistettu
+  jezyk_niewykryty_znieksztalcone: "Asiakirjan kieltä ei tunnistettu: tämän PDF:n koko teksti on vääristynyttä, ja kielentunnistus antaa sellaisesta tekstistä satunnaisen tuloksen.\n\nOhjelma jättää kieleksi ”{jezyk}”. Jos asiakirja on jollakin toisella kielellä, valitse se Käsittelykieli-kentästä."
+  skan_zgoda_tytul_znieksztalcone: Luetaanko nämä sivut tekoälymallilla?
+  skan_zgoda_tresc_znieksztalcone: "Tiedostossa {nazwa_pliku} on {liczba_stron} sivua, ja {liczba_do_odczytu} niistä ei voi lukea tekstiä:\n{opis_stron}\n\nVoin lukea nämä sivut kuvasta tekoälymallilla ({model}). Jokainen niistä lähetetään kuvana ulkoiseen palveluun: {usluga}.\nAsiakirjat sisältävät usein henkilötietoja. Lähetä ne vain, jos sinulla on siihen oikeus.\n\nArvioitu hinta: {koszt}. Tiheää tekstiä sisältävä sivu maksaa enemmän kuin lomakkeen skannaus, joten arvio perustuu kunkin sivun merkkimäärään. Aika: noin {liczba_minut} (minuuteissa).\n\nJos valitset ”Ohita”, sivut ilman tekstiä ohitetaan ja vääristynyt teksti päätyy tulokseen sellaisenaan – lukukelvottomana."
+  skan_zgoda_linia_skany: '– ilman tekstikerrosta (todennäköisesti skannauksia): {lista_stron}'
+  skan_zgoda_linia_znieksztalcone: '– vääristynyt teksti (tiedoston fontti ei kerro, mitä kirjaimia ne ovat): {lista_stron}'
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)
@@ -986,6 +993,8 @@ konwerter:
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
+  pdf_znieksztalcone_tytul: Vääristynyt teksti PDF:ssä
+  pdf_znieksztalcone_tresc: "Tiedostossa {nazwa_pliku} {liczba_znieksztalconych} sivun teksti {liczba_stron} sivusta on vääristynyttä: {lista_stron}.\n\nTiedostoon upotettu fontti ei kerro, mitkä kirjaimet sen merkkien takana ovat, joten kirjainten sijaan ohjelma saa satunnaisia merkkejä. Näytöllä sivut näyttävät oikeilta, mutta Word-asiakirjassa ne jäävät lukukelvottomiksi.\n\nMuunnin ei lue sivuja kuvasta. Polyglootti osaa tehdä sen tekoälymallilla (maksullisesti ja vain suostumuksellasi). Jos sinulla on tämä asiakirja toisessa muodossa (Word, teksti), lataa se PDF:n sijaan.\n\nMuunnetaanko tiedosto silti?"
 manager:
   panel_name: "Sääntöjen hallintapaneeli – sanakirjojen tutkija"
   desc: |-

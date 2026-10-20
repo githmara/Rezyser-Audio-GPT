@@ -20,6 +20,7 @@ import yaml
 import core_elevenlabs
 import core_pdf
 import core_poliglota
+import core_skany
 import sciezki
 from i18n import t
 from przepisy_rezysera import (
@@ -339,7 +340,21 @@ class KonwerterPanel(wx.Panel):
             elif file_name.lower().endswith(".pdf"):
                 # 19.13: warstwa tekstu PDF; akapit = linia, jak przy `.docx`.
                 with wx.BusyCursor():   # 800 stron ≈ 6 s (audyt 19.13)
-                    tekst = "\n".join(core_pdf.wyciagnij(file_name).akapity)
+                    wynik_pdf = core_pdf.wyciagnij(file_name)
+                tekst = "\n".join(wynik_pdf.akapity)
+                # 19.15: zniekształcona warstwa tekstu (czcionka bez pełnej
+                # mapy znaków) dawała .docx z literami IPA zamiast cyrylicy
+                # i dialog „Sukces”. Odczytu obrazu Konwerter nie ma, więc
+                # mówimy to i pytamy — domyślnie NIE.
+                if wynik_pdf.strony_znieksztalcone and wx.MessageBox(
+                        t("konwerter.pdf_znieksztalcone_tresc",
+                          nazwa_pliku=os.path.basename(file_name),
+                          liczba_znieksztalconych=len(wynik_pdf.strony_znieksztalcone),
+                          liczba_stron=wynik_pdf.liczba_stron,
+                          lista_stron=core_skany.zakresy(wynik_pdf.strony_znieksztalcone)),
+                        t("konwerter.pdf_znieksztalcone_tytul"),
+                        wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+                    return
             else:
                 with open(file_name, "r", encoding="utf-8") as fh:
                     tekst = fh.read()

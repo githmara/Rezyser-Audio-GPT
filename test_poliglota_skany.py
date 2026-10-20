@@ -246,6 +246,101 @@ def test_detekcja_jezyka_z_tresci_bez_akapitow_pochodzenia(srodowisko, tmp_path,
     assert panel._tekst_detekcji == ""
 
 
+# --- 19.15: strony ze zniekształconą warstwą tekstu (urwana mapa ToUnicode) ---
+
+def _ze_znieksztalcona(tmp_path, *, dobre=True):
+    """Strona dobra – zniekształcona – dobra (albo sama zniekształcona)."""
+    from test_core_pdf import _pdf_cid, _scal_pdf
+    zla, dobra, cala = tmp_path / "zla.pdf", tmp_path / "dobra.pdf", tmp_path / "slownik.pdf"
+    _pdf_cid(zla, [("Утверждено к печати Ученым советом", 700)])
+    if not dobre:
+        return zla
+    _zbuduj_pdf(dobra, [[("Wstep dokumentu.", 72, 700)]])
+    _scal_pdf(cala, dobra, zla, dobra)
+    return cala
+
+
+def test_strona_znieksztalcona_dostaje_oferte_odczytu(srodowisko, tmp_path):
+    panel, zapis = srodowisko
+    _wczytaj(panel, _ze_znieksztalcona(tmp_path))
+    assert len(zapis.zgody) == 1
+    zgoda = zapis.zgody[0]
+    assert "ze zniekształconym tekstem" in zgoda and ": 2" in zgoda
+    assert "bez warstwy tekstu" not in zgoda          # skanów tu nie ma
+    assert "około 1 (w centach amerykańskich)" in zgoda
+    assert [o[2] for o in zapis.odczyty] == [[2]]
+    # Odczyt ZASTĘPUJE śmieci strony 2, a nie dokleja się obok nich.
+    assert panel._file_ext == ".html"
+    assert "ɍɬɜɟɪɠɞɟɧɨ" not in panel._file_content and "strona 2" in panel._file_content
+
+
+def test_pomin_ostrzega_a_lingua_nie_widzi_smieci(srodowisko, tmp_path, monkeypatch):
+    import core_poliglota
+    panel, zapis = srodowisko
+    zapis.odpowiedz_zgody = wx.ID_NO
+    widziane = []
+    monkeypatch.setattr(core_poliglota, "wykryj_jezyk_zrodlowy",
+                        lambda tekst, **_kw: widziane.append(tekst) or "pl")
+    panel._combo_jezyk.SetSelection(0)
+    _wczytaj(panel, _ze_znieksztalcona(tmp_path))
+    assert zapis.odczyty == []
+    assert "ɍɬɜɟɪɠɞɟɧɨ" in panel._file_content         # zostaje — ale nie po cichu
+    assert any("tekst zapisany w PDF-ie jest zniekształcony" in k and ": 2." in k
+               for k in zapis.komunikaty), zapis.komunikaty
+    assert widziane and all("ɍ" not in w for w in widziane)
+
+
+def test_caly_pdf_znieksztalcony_bez_detekcji_z_komunikatem(srodowisko, tmp_path, monkeypatch):
+    # Słownik rosyjski: lingua na literach IPA zgadywała `de`. Bez dobrego
+    # tekstu detekcji NIE MA — i to mówimy, zamiast przełączyć język po cichu.
+    import core_poliglota
+    panel, zapis = srodowisko
+    zapis.odpowiedz_zgody = wx.ID_NO
+    wywolania = []
+    monkeypatch.setattr(core_poliglota, "wykryj_jezyk_zrodlowy",
+                        lambda tekst, **_kw: wywolania.append(tekst) or "de")
+    panel._combo_jezyk.SetSelection(0)
+    jezyk_przed = panel._jezyk_aktywny
+    _wczytaj(panel, _ze_znieksztalcona(tmp_path, dobre=False))
+    assert wywolania == []
+    assert panel._jezyk_aktywny == jezyk_przed
+    assert any("Języka dokumentu nie wykryto" in k for k in zapis.komunikaty)
+    # Powrót combo na „Wykryj automatycznie" też nie pyta lingua o śmieci.
+    panel._on_jezyk_pipeline_change(None)
+    panel._maybe_ostrzez_o_jezyku_zrodla()
+    assert wywolania == []
+    panel._on_clear(None)
+    assert panel._bez_detekcji is False
+
+
+def test_konwerter_pyta_przed_zapisem_smieci(tmp_path, monkeypatch):
+    # Konwerter nie ma odczytu obrazu: mówi, które strony są zniekształcone,
+    # i domyślnie NIE konwertuje (dotąd: .docx z IPA i dialog „Sukces”).
+    import gui_konwerter as gk
+    app = wx.App(False)
+    jezyk_przed = i18n.aktualny_jezyk()
+    i18n.ustaw_jezyk("pl")
+    pytania = []
+    monkeypatch.setattr(wx, "MessageBox",
+                        lambda tresc, _t="", styl=0, *_a, **_k: pytania.append((tresc, styl)) or wx.NO)
+    zapisy = []
+    monkeypatch.setattr(gk.docx.document.Document, "save", lambda self, p: zapisy.append(p))
+    ramka = wx.Frame(None)
+    try:
+        panel = gk.KonwerterPanel(ramka)
+        panel._txt_file.SetValue(str(_ze_znieksztalcona(tmp_path)))
+        panel._on_build(None)
+    finally:
+        ramka.Destroy()
+        app.Destroy()
+        i18n.ustaw_jezyk(jezyk_przed)
+    assert len(pytania) == 1
+    tresc, styl = pytania[0]
+    assert "tekst 1 z 3 stron jest zniekształcony: 2." in tresc
+    assert styl & wx.YES_NO and styl & wx.NO_DEFAULT
+    assert zapisy == []
+
+
 def test_timer_anulowania_czyta_dialog_w_trakcie_strony(srodowisko):
     # Audyt 19.14 [WYSOKA]: „Anuluj" czytane tylko w `Update()` na starcie
     # strony przepuszczało następną stronę. Timer odpytuje `WasCancelled`.

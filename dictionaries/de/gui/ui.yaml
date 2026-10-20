@@ -937,6 +937,13 @@ poliglota:
   skan_niedostepny_compat: Das Auslesen gescannter Seiten per KI-Modell funktioniert nicht mit einem eigenen OpenAI-kompatiblen Endpunkt (LLM_PROVIDER=openai_compat). Es funktioniert mit Anthropic und mit OpenRouter.
   skan_blad_tytul: Das Auslesen gescannter Seiten ist fehlgeschlagen
   skan_blad_tresc: "Das Auslesen gescannter Seiten wurde durch einen unerwarteten Fehler unterbrochen:\n{tresc_bledu}\n\nEs wurde nur der Text aus der Textebene des PDFs geladen (sofern die Datei eine hat). Gescannte Seiten wurden übersprungen."
+  pdf_strony_znieksztalcone: 'Achtung: Auf diesen Seiten ist der im PDF gespeicherte Text verzerrt und wird im Ergebnis unleserlich sein: {lista_stron}. Die in die Datei eingebettete Schriftart verrät nicht, welche Buchstaben sich hinter ihren Zeichen verbergen, sodass das Programm statt Buchstaben zufällige Zeichen erhält. Auf dem Bildschirm sehen die Seiten korrekt aus – der Fehler liegt in der PDF-Datei.'
+  jezyk_niewykryty_tytul: Dokumentsprache nicht erkannt
+  jezyk_niewykryty_znieksztalcone: "Die Dokumentsprache wurde nicht erkannt: Der gesamte Text dieser PDF-Datei ist verzerrt, und die Spracherkennung liefert bei einem solchen Text ein zufälliges Ergebnis.\n\nDas Programm bleibt bei der Sprache „{jezyk}“. Wenn das Dokument in einer anderen Sprache vorliegt, wählen Sie diese im Feld „Verarbeitungssprache“ aus."
+  skan_zgoda_tytul_znieksztalcone: Diese Seiten mit einem KI-Modell auslesen?
+  skan_zgoda_tresc_znieksztalcone: "In der Datei {nazwa_pliku} lässt sich der Text auf {liczba_do_odczytu} von {liczba_stron} Seiten nicht auslesen:\n{opis_stron}\n\nIch kann diese Seiten anhand des Bildes mit einem KI-Modell ({model}) auslesen. Jede davon wird als Bild an einen externen Dienst gesendet: {usluga}.\nDokumente enthalten häufig personenbezogene Daten. Senden Sie sie nur, wenn Sie dazu berechtigt sind.\n\nGeschätzte Kosten: {koszt}. Eine Seite mit dichtem Text kostet mehr als der Scan eines Formulars, daher zählt die Schätzung die Zeichen jeder Seite. Dauer: etwa {liczba_minut} (in Minuten).\n\nWenn Sie „Überspringen“ wählen, werden Seiten ohne Text übersprungen, und der verzerrte Text gelangt unverändert – und damit unleserlich – ins Ergebnis."
+  skan_zgoda_linia_skany: '– ohne Textebene (höchstwahrscheinlich Scans): {lista_stron}'
+  skan_zgoda_linia_znieksztalcone: '– mit verzerrtem Text (die Schriftart der Datei verrät nicht, um welche Buchstaben es sich handelt): {lista_stron}'
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)
@@ -988,6 +995,8 @@ konwerter:
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
+  pdf_znieksztalcone_tytul: Verzerrter Text im PDF
+  pdf_znieksztalcone_tresc: "In der Datei {nazwa_pliku} ist der Text auf {liczba_znieksztalconych} von {liczba_stron} Seiten verzerrt: {lista_stron}.\n\nDie in die Datei eingebettete Schriftart verrät nicht, welche Buchstaben sich hinter ihren Zeichen verbergen, sodass das Programm statt Buchstaben zufällige Zeichen erhält. Auf dem Bildschirm sehen die Seiten korrekt aus, im Word-Dokument sind sie jedoch unleserlich.\n\nDer Konverter liest Seiten nicht anhand des Bildes aus. Polyglott kann das mit einem KI-Modell tun (kostenpflichtig und nur mit Ihrer Zustimmung). Wenn Sie dieses Dokument in einer anderen Form vorliegen haben (Word, Text), laden Sie diese statt der PDF-Datei.\n\nSoll die Datei trotzdem konvertiert werden?"
 manager:
   panel_name: "Panel des Regelmanagers – Wörterbuch-Explorer"
   desc: |-

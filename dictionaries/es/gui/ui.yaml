@@ -937,6 +937,13 @@ poliglota:
   skan_niedostepny_compat: La lectura de páginas escaneadas con un modelo de IA no funciona con un endpoint propio compatible con OpenAI (LLM_PROVIDER=openai_compat). Funciona con Anthropic y con OpenRouter.
   skan_blad_tytul: No se pudo completar la lectura de las páginas escaneadas
   skan_blad_tresc: "Un error inesperado interrumpió la lectura de las páginas escaneadas:\n{tresc_bledu}\n\nSe ha cargado únicamente el texto de la capa de texto del PDF (si el archivo la tiene). Las páginas escaneadas se han omitido."
+  pdf_strony_znieksztalcone: 'Atención: en estas páginas el texto guardado en el PDF está distorsionado y quedará ilegible en el resultado: {lista_stron}. La fuente incrustada en el archivo no indica qué letras corresponden a sus caracteres, por lo que el programa recibe caracteres aleatorios en lugar de letras. En pantalla las páginas se ven bien: el defecto está en el archivo PDF.'
+  jezyk_niewykryty_tytul: No se detectó el idioma del documento
+  jezyk_niewykryty_znieksztalcone: "No se detectó el idioma del documento: todo el texto de este PDF está distorsionado y la detección de idioma sobre un texto así da un resultado aleatorio.\n\nEl programa mantiene el idioma «{jezyk}». Si el documento está en otro idioma, selecciónalo en el campo «Idioma de procesamiento»."
+  skan_zgoda_tytul_znieksztalcone: ¿Leer estas páginas con el modelo de IA?
+  skan_zgoda_tresc_znieksztalcone: "En el archivo {nazwa_pliku} no se puede leer el texto de {liczba_do_odczytu} de {liczba_stron} páginas:\n{opis_stron}\n\nPuedo leer esas páginas a partir de la imagen con un modelo de IA ({model}). Cada una se enviará como imagen a un servicio externo: {usluga}.\nLos documentos suelen contener datos personales. Envíalos solo si tienes derecho a hacerlo.\n\nCoste estimado: {koszt}. Una página de texto denso cuesta más que el escaneo de un formulario, por lo que la estimación cuenta los caracteres de cada página. Tiempo: unos {liczba_minut} (en minutos).\n\nSi eliges «Omitir», las páginas sin texto se omitirán y el texto distorsionado pasará al resultado tal cual: ilegible."
+  skan_zgoda_linia_skany: '– sin capa de texto (probablemente escaneos): {lista_stron}'
+  skan_zgoda_linia_znieksztalcone: '– con texto distorsionado (la fuente del archivo no indica qué letras son): {lista_stron}'
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)
@@ -988,6 +995,8 @@ konwerter:
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
+  pdf_znieksztalcone_tytul: Texto distorsionado en el PDF
+  pdf_znieksztalcone_tresc: "En el archivo {nazwa_pliku} el texto de {liczba_znieksztalconych} de {liczba_stron} páginas está distorsionado: {lista_stron}.\n\nLa fuente incrustada en el archivo no indica qué letras corresponden a sus caracteres, por lo que en lugar de letras el programa recibe caracteres aleatorios. En pantalla las páginas se ven bien, pero en el documento de Word serán ilegibles.\n\nEl Convertidor no lee las páginas a partir de la imagen. Políglota sabe hacerlo con un modelo de IA (de pago y solo con tu consentimiento). Si tienes este documento en otro formato (Word, texto), cárgalo en lugar del PDF.\n\n¿Quieres convertir el archivo de todos modos?"
 manager:
   panel_name: "Panel del Gestor de Reglas – explorador de diccionarios"
   desc: |-

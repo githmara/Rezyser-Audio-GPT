@@ -22,11 +22,26 @@ numeru — albo z numerem rosnącym razem ze stroną) w tym samym pasie wysokoś
 w górnym lub dolnym marginesie, na co najmniej ćwierci stron. ATA chroni nagłówki scen listą słów w sześciu językach;
 tu ochrona wynika z geometrii — „SCENA 2" w środku strony nie jest w marginesie,
 a lista słów w Pythonie byłaby wzorcem §6.7b (języki wypisane ręcznie w kodzie).
+
+Strony ze ZNIEKSZTAŁCONĄ warstwą tekstu (od 19.15): czcionka osadzona bez
+pełnej mapy ToUnicode, więc PDFium oddaje numery glifów jako znaki. Zmierzone
+na słowniku z macOS Quartz (551 stron): mapa kończy się na „М”, reszta
+cyrylicy wychodzi jako litery IPA („ɍɬɜɟɪɠɞɟɧɨ” = „Утверждено”), a lingua
+zgaduje `de`. Miara to DWA warunki naraz, oba z danych, nie z listy pism:
+  * PDFium sam zgłasza błąd mapowania znaku (`FPDFText_HasUnicodeMapError`)
+    — sama flaga nie wystarcza, bo przy polskim PDF-ie z Worda oznacza też
+    poprawnie odgadnięte „ą”, „ś”, „ł” (zmierzone: 3,3% liter strony);
+  * litery nie ma w ŻADNEJ paczce (`podstawy.yaml::alfabet` + litery
+    `gui/ui.yaml`, patrz `litery_paczek`) — dziesiąta paczka rozszerza
+    miarę bez zmiany kodu.
+Zmierzone na 100 PDF-ach z dysku maintainera (pl, ru, en, pt): 0 podejrzanych
+liter poza słownikiem; słownik: 550 z 551 stron (pierwsza to obraz okładki).
 """
 
 from __future__ import annotations
 
 import math
+import os
 import re
 import statistics
 import unicodedata
@@ -73,11 +88,33 @@ class WynikPdf:
     #: strona bez warstwy tekstu ma listę pustą. Spłaszczenie daje `akapity`
     #: — po to, żeby odczytaną treść skanu wstawić we właściwe miejsce.
     akapity_stron: list[list[str]] = field(default_factory=list)
+    #: Numery stron (od 1), których warstwa tekstu jest ZNIEKSZTAŁCONA
+    #: (`czy_znieksztalcona`) — ich akapity są w wyniku, ale to śmieci.
+    strony_znieksztalcone: list[int] = field(default_factory=list)
+    #: Liczba znaków warstwy tekstu per strona (indeks 0 = strona 1), przed
+    #: czyszczeniem — do szacunku kosztu odczytu strony modelem z obrazem.
+    znaki_stron: list[int] = field(default_factory=list)
 
     @property
     def tekst(self) -> str:
         """Akapity rozdzielone PUSTĄ LINIĄ — granica akapitu ścieżki `.txt`."""
         return "\n\n".join(self.akapity)
+
+    @property
+    def tekst_wiarygodny(self) -> str:
+        """Akapity BEZ stron zniekształconych — jedyne wejście dla detekcji języka.
+
+        Lingua na literach IPA ze słownika rosyjskiego zgadywała `de`; pusty
+        wynik znaczy „języka nie da się wykryć”, a GUI mówi to wprost.
+        """
+        zle = set(self.strony_znieksztalcone)
+        return "\n\n".join(a for nr, akapity in enumerate(self.akapity_stron, start=1)
+                           if nr not in zle for a in akapity)
+
+    @property
+    def strony_do_odczytu(self) -> list[int]:
+        """Skany i strony zniekształcone razem — kandydatki do odczytu obrazu."""
+        return sorted(set(self.strony_bez_tekstu) | set(self.strony_znieksztalcone))
 
 
 @dataclass
@@ -143,6 +180,92 @@ UDZIAL_STRON = 0.25
 ZGODNOSC_NUMERU = 0.8
 
 _RZYMSKIE = {"i": 1, "v": 5, "x": 10, "l": 50, "c": 100, "d": 500, "m": 1000}
+
+#: Strona jest zniekształcona, gdy podejrzanych liter jest co najmniej tyle
+#: i co najmniej taki ułamek wszystkich liter strony. Próg jest niski, bo
+#: czyste PDF-y mają podejrzanych liter ZERO (zmierzone na 100 plikach),
+#: a strona tytułowa słownika („СЛОВАРȄ РУССКОГО ȇЗȃКА”) ma ich 4 na ok. 100:
+#: wielkie А–М mapa obejmuje, zniekształcone są tylko Ь, Я, Ы, Э.
+PROG_PODEJRZANYCH = 3
+UDZIAL_PODEJRZANYCH = 0.02
+
+
+def czy_znieksztalcona(litery: int, podejrzane: int) -> bool:
+    return podejrzane >= PROG_PODEJRZANYCH and podejrzane >= UDZIAL_PODEJRZANYCH * litery
+
+
+def litery_paczek() -> frozenset[str]:
+    """Litery, którymi piszą paczki językowe — miara wiarygodności liter.
+
+    Z danych, nie z listy pism w kodzie: `podstawy.yaml::alfabet` każdej
+    kompletnej paczki plus litery jej `gui/ui.yaml` (tekst natywny), w obu
+    wielkościach. Sam alfabet nie wystarcza, bo to alfabet SZYFRÓW (fr: A–Z
+    bez „é”), a rozkład NFD był za luźny: „Ȅ” ze strony tytułowej słownika
+    to „E” z dwoma akcentami i przechodził jako znana litera (zmierzone).
+    `podstawy.yaml` w całości odpada: jego opisy fonetyki mają IPA („ɛ”, „ɲ”
+    — ok. 16 tys. zniekształconych liter słownika przeszłoby jako znane).
+    Brak paczek = zbiór pusty: podejrzana jest wtedy każda litera z flagą
+    błędu mapowania PDFium (miara słabsza, ale nie cisza).
+    """
+    import core_poliglota
+    zrodla: list[str] = []
+    klucz: list[tuple] = []
+    for kod in core_poliglota.dostepne_jezyki_bazowe():
+        alfabet = str(core_poliglota._zaladuj_podstawy(kod).get("alfabet") or "")
+        sciezka = os.path.join(core_poliglota.DICTIONARIES_DIR, kod, "gui", "ui.yaml")
+        try:
+            klucz.append((kod, alfabet, os.path.getmtime(sciezka)))
+        except OSError:
+            klucz.append((kod, alfabet, None))
+    # Ok. 0,2 s na każde wczytanie PDF-a (zmierzone) — liczymy raz, dopóki
+    # paczki się nie zmienią (Menedżer Reguł edytuje je w trakcie działania).
+    if _CACHE_LITER and _CACHE_LITER[0] == klucz:
+        return _CACHE_LITER[1]
+    for kod, alfabet, mtime in klucz:
+        zrodla.append(alfabet)
+        if mtime is None:
+            continue
+        sciezka = os.path.join(core_poliglota.DICTIONARIES_DIR, kod, "gui", "ui.yaml")
+        try:
+            with open(sciezka, encoding="utf-8") as fh:
+                zrodla.append(fh.read())
+        except OSError:
+            continue
+    litery: set[str] = set()
+    for z in set("".join(zrodla)):
+        if z.isalpha():
+            litery.add(z)
+            litery.update(z.upper())
+            litery.update(z.lower())
+    _CACHE_LITER[:] = [klucz, frozenset(litery)]
+    return _CACHE_LITER[1]
+
+
+_CACHE_LITER: list = []
+
+
+def _blad_mapowania(tp, i: int) -> bool:
+    """PDFium: znak `i` nie ma mapowania Unicode w czcionce (wartość zgadnięta)."""
+    if getattr(tp, "raw", None) is None:          # atrapa w testach
+        return False
+    import pypdfium2.raw as pdfium_c
+    return pdfium_c.FPDFText_HasUnicodeMapError(tp.raw, i) == 1
+
+
+def _policz_litery(tp, znaki: list[tuple[int, str]],
+                   znane: frozenset[str] | None) -> tuple[int, int]:
+    """(liter, podejrzanych) strony. Flagę PDFium pytamy tylko o litery spoza
+    `litery_paczek()`, więc czysty dokument nie płaci za nią prawie nic."""
+    if znane is None:
+        return 0, 0
+    litery = podejrzane = 0
+    for i, z in znaki:
+        if not z.isalpha():
+            continue
+        litery += 1
+        if z not in znane and _blad_mapowania(tp, i):
+            podejrzane += 1
+    return litery, podejrzane
 
 
 def _czysc(tekst: str) -> str:
@@ -213,7 +336,11 @@ def _znaki_strony(tp) -> list[tuple[int, str]]:
 
 
 def _linie_strony(strona) -> list[_Linia]:
-    """Linie WIZUALNE strony w kolejności strumienia treści.
+    return _czytaj_strone(strona, None)[0]
+
+
+def _czytaj_strone(strona, znane: frozenset[str] | None) -> tuple[list[_Linia], int, int, int]:
+    """(linie, liter, podejrzanych, znaków) — linie WIZUALNE w kolejności strumienia treści.
 
     Tekst bierzemy z `_znaki_strony`, a linie budujemy z ramki KAŻDEGO znaku
     (`loose=True` = wysokość czcionki, nie obrys glifu; 152 tys. znaków
@@ -247,7 +374,8 @@ def _linie_strony(strona) -> list[_Linia]:
             ramka.clear()
             wysokosci.clear()
 
-        for i, z in _znaki_strony(tp):
+        wszystkie = _znaki_strony(tp)
+        for i, z in wszystkie:
             if z.isspace():
                 if znaki and znaki[-1] != " ":
                     znaki.append(" ")
@@ -275,12 +403,17 @@ def _linie_strony(strona) -> list[_Linia]:
             znaki.append(z)
             wysokosci.append(g - d)
         zamknij()
-        return linie
+        return (linie, *_policz_litery(tp, wszystkie, znane), len(wszystkie))
     finally:
         tp.close()
 
 
 def _linie_bez_geometrii(strona) -> list[_Linia]:
+    return _czytaj_strone_bez_geometrii(strona, None)[0]
+
+
+def _czytaj_strone_bez_geometrii(strona, znane: frozenset[str] | None
+                                 ) -> tuple[list[_Linia], int, int, int]:
     """Strona obrócona o 90°/270°: linie z kolejności tekstu, bez geometrii.
 
     Ramki znaków PDFium są w układzie NIEOBRÓCONYM, więc na takiej stronie
@@ -291,7 +424,9 @@ def _linie_bez_geometrii(strona) -> list[_Linia]:
     """
     tp = strona.get_textpage()
     try:
-        tekst = "".join(z for _, z in _znaki_strony(tp))
+        wszystkie = _znaki_strony(tp)
+        tekst = "".join(z for _, z in wszystkie)
+        litery, podejrzane = _policz_litery(tp, wszystkie, znane)
     finally:
         tp.close()
     linie = []
@@ -299,7 +434,7 @@ def _linie_bez_geometrii(strona) -> list[_Linia]:
         czysty = _RE_BIALE.sub(" ", _czysc(kawalek)).strip()
         if czysty:
             linie.append(_Linia(czysty, 0.0, -12.0 * nr, 1000.0, -12.0 * nr + 10, czcionka=10.0))
-    return linie
+    return linie, litery, podejrzane, len(wszystkie)
 
 
 @dataclass
@@ -309,6 +444,14 @@ class _Strona:
     gora: float
     #: False dla stron obróconych o 90°/270° — margines nie jest wtedy znany.
     geometria: bool = True
+    litery: int = 0
+    #: Litery z błędem mapowania PDFium spoza `litery_paczek()`.
+    podejrzane: int = 0
+    znaki: int = 0
+
+    @property
+    def znieksztalcona(self) -> bool:
+        return czy_znieksztalcona(self.litery, self.podejrzane)
 
     def w_marginesie(self, linia: _Linia) -> bool:
         if not self.geometria:
@@ -529,8 +672,12 @@ def _podziel_na_akapity(linie: list[_Linia], dzielenie_auto: bool = False) -> li
     return wynik
 
 
-def wyciagnij(sciezka: str) -> WynikPdf:
+def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> WynikPdf:
     """Czyta warstwę tekstu PDF i zwraca akapity.
+
+    Args:
+        znane_litery: litery wiarygodne mimo flagi błędu mapowania PDFium
+            (domyślnie `litery_paczek()` z paczek; testy podają własne).
 
     Raises:
         BrakWarstwyTekstu: żadna strona nie daje tekstu — skan / obraz, ale też
@@ -558,6 +705,8 @@ def wyciagnij(sciezka: str) -> WynikPdf:
         # „(PDFium: Success)”. GUI pokazuje przetłumaczony komunikat, techniczny
         # szczegół zostaje w osobnej linii.
         raise PdfNieDoOtwarcia(sciezka, "password" in str(exc).lower(), str(exc)) from exc
+    if znane_litery is None:
+        znane_litery = litery_paczek()
     try:
         strony: list[_Strona] = []
         bez_tekstu: list[int] = []
@@ -570,9 +719,12 @@ def wyciagnij(sciezka: str) -> WynikPdf:
                 # więc „margines” trafiał w środek strony (audyt 19.13).
                 _l, dol, _p, gora = strona.get_cropbox()
                 if strona.get_rotation() in (90, 270):
-                    s = _Strona(_linie_bez_geometrii(strona), dol, gora, geometria=False)
+                    linie, litery, podejrzane, znaki = _czytaj_strone_bez_geometrii(
+                        strona, znane_litery)
+                    s = _Strona(linie, dol, gora, False, litery, podejrzane, znaki)
                 else:
-                    s = _Strona(_linie_strony(strona), dol, gora)
+                    linie, litery, podejrzane, znaki = _czytaj_strone(strona, znane_litery)
+                    s = _Strona(linie, dol, gora, True, litery, podejrzane, znaki)
             finally:
                 strona.close()
             strony.append(s)
@@ -585,6 +737,7 @@ def wyciagnij(sciezka: str) -> WynikPdf:
     if liczba == 0 or len(bez_tekstu) == liczba:
         raise BrakWarstwyTekstu(sciezka, liczba, bez_tekstu)
 
+    znieksztalcone = [nr for nr, s in enumerate(strony, start=1) if s.znieksztalcona]
     dzielenie_auto = any("\u00ad" in l.tekst for s in strony for l in s.linie)
     oczyszczone, kolontytuly = _usun_kolontytuly(strony)
     akapity_stron: list[list[str]] = []
@@ -597,17 +750,20 @@ def wyciagnij(sciezka: str) -> WynikPdf:
         # zaczyna się małą literą — to jedno zdanie, nie dwa akapity. NIE przez
         # stronę bez tekstu: jej treść (skan) leży między nimi, więc sklejenie
         # tworzyłoby zdanie, którego w dokumencie nie ma, a odczytany skan
-        # nie miałby gdzie wejść.
-        if ostatnia and nowe and not skan_po_drodze \
+        # nie miałby gdzie wejść. Strona zniekształcona tak samo (19.15): jej
+        # akapity zastąpi odczyt obrazu, więc nie mogą wchłonąć sąsiada.
+        zla = nr + 1 in znieksztalcone
+        if ostatnia and nowe and not skan_po_drodze and not zla \
                 and not _RE_KONIEC_ZDANIA.search(ostatnia[-1]) \
                 and nowe[0][:1].islower():
             ostatnia[-1] = _sklej(ostatnia[-1], nowe.pop(0), dzielenie_auto)
         akapity_stron.append(nowe)
-        if nr + 1 in bez_tekstu:
+        if nr + 1 in bez_tekstu or zla:
             skan_po_drodze = True
         elif nowe:
             ostatnia, skan_po_drodze = nowe, False
     akapity = [a for strona in akapity_stron for a in strona]
     if not akapity:
         raise BrakWarstwyTekstu(sciezka, liczba, bez_tekstu)
-    return WynikPdf(akapity, liczba, bez_tekstu, kolontytuly, akapity_stron)
+    return WynikPdf(akapity, liczba, bez_tekstu, kolontytuly, akapity_stron,
+                    znieksztalcone, [s.znaki for s in strony])

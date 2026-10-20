@@ -1021,6 +1021,13 @@ poliglota:
   skan_niedostepny_compat: Reading scanned pages with an AI model does not work with a custom OpenAI-compatible endpoint (LLM_PROVIDER=openai_compat). It works with Anthropic and OpenRouter.
   skan_blad_tytul: Reading scanned pages failed
   skan_blad_tresc: "Reading scanned pages was interrupted by an unexpected error:\n{tresc_bledu}\n\nOnly the text from the PDF's text layer was loaded (if the file has one). The scanned pages were skipped."
+  pdf_strony_znieksztalcone: 'Note: on these pages the text stored in the PDF is garbled and will be unreadable in the result: {lista_stron}. The font embedded in the file does not say which letters lie behind its characters, so the program gets random characters instead of letters. The pages look fine on screen – this is a defect of the PDF file.'
+  jezyk_niewykryty_tytul: Document language not detected
+  jezyk_niewykryty_znieksztalcone: "The document language was not detected: all the text of this PDF is garbled, and language detection on such text gives a random result.\n\nThe program keeps the language \"{jezyk}\". If the document is in a different language, select it in the \"Processing language\" field."
+  skan_zgoda_tytul_znieksztalcone: Read these pages with an AI model?
+  skan_zgoda_tresc_znieksztalcone: "In the file {nazwa_pliku}, the text cannot be read on {liczba_do_odczytu} of {liczba_stron} pages:\n{opis_stron}\n\nI can read these pages from the image using an AI model ({model}). Each of them will be sent as an image to an external service: {usluga}.\nDocuments often contain personal data. Send them only if you have the right to do so.\n\nEstimated cost: {koszt}. A page of dense text costs more than a scanned form, so the estimate counts the characters on each page. Time: about {liczba_minut} (in minutes).\n\nIf you choose \"Skip\", pages without text will be skipped, and the garbled text will go into the result as it is – unreadable."
+  skan_zgoda_linia_skany: '– no text layer (most likely scans): {lista_stron}'
+  skan_zgoda_linia_znieksztalcone: "– with garbled text (the file's font does not say which letters they are): {lista_stron}"
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)
@@ -1072,6 +1079,8 @@ konwerter:
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
+  pdf_znieksztalcone_tytul: Garbled text in the PDF
+  pdf_znieksztalcone_tresc: "In the file {nazwa_pliku}, the text on {liczba_znieksztalconych} of {liczba_stron} pages is garbled: {lista_stron}.\n\nThe font embedded in the file does not say which letters lie behind its characters, so instead of letters the program gets random characters. The pages look fine on screen, but in the Word document they will be unreadable.\n\nThe converter does not read pages from an image. Polyglot can do it with an AI model (for a fee and only with your consent). If you have this document in another form (Word, text), load it instead of the PDF.\n\nDo you want to convert the file anyway?"
 manager:
   panel_name: "Rule Manager Panel – dictionary explorer"
   desc: |-

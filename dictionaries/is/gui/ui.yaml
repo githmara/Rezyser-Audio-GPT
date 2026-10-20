@@ -937,6 +937,13 @@ poliglota:
   skan_niedostepny_compat: Lestur skannaðra síðna með gervigreindarlíkani virkar ekki með eigin endapunkti sem er samhæfður OpenAI (LLM_PROVIDER=openai_compat). Hann virkar með Anthropic og OpenRouter.
   skan_blad_tytul: Lestur skannaðra síðna mistókst
   skan_blad_tresc: "Óvænt villa stöðvaði lestur skannaðra síðna:\n{tresc_bledu}\n\nAðeins textinn úr textalagi PDF-skjalsins var lesinn inn (ef skráin er með slíkt). Skönnuðum síðum var sleppt."
+  pdf_strony_znieksztalcone: 'Athugið: Á þessum síðum er texti PDF-skjalsins brenglaður og verður ólæsilegur í niðurstöðunni: {lista_stron}. Letrið sem er fellt inn í skrána gefur ekki upp hvaða stafir liggja að baki táknum þess, þannig að forritið fær tilviljanakennd tákn í stað bókstafa. Á skjánum líta síðurnar rétt út – gallinn er í PDF-skránni sjálfri.'
+  jezyk_niewykryty_tytul: Tungumál skjalsins fannst ekki
+  jezyk_niewykryty_znieksztalcone: "Tungumál skjalsins fannst ekki: allur texti þessa PDF-skjals er brenglaður og tungumálagreining á slíkum texta gefur tilviljanakennda niðurstöðu.\n\nForritið heldur sig við tungumálið „{jezyk}“. Ef skjalið er á öðru tungumáli skaltu velja það í reitnum „Vinnslumál“."
+  skan_zgoda_tytul_znieksztalcone: Lesa þessar síður með gervigreindarlíkani?
+  skan_zgoda_tresc_znieksztalcone: "Í skránni {nazwa_pliku} er ekki hægt að lesa texta á {liczba_do_odczytu} af {liczba_stron} síðum:\n{opis_stron}\n\nÉg get lesið þessar síður af myndinni með gervigreindarlíkani ({model}). Hver þeirra verður send sem mynd til utanaðkomandi þjónustu: {usluga}.\nSkjöl innihalda oft persónuupplýsingar. Sendu þau aðeins ef þú hefur heimild til þess.\n\nÁætlaður kostnaður: {koszt}. Síða með þéttum texta kostar meira en skönnuð eyðublaðssíða, svo áætlunin telur stafi á hverri síðu. Tími: um það bil {liczba_minut} (í mínútum).\n\nEf þú velur „Sleppa“ verða síður án texta slepptar og brenglaði textinn lendir í niðurstöðunni eins og hann er – ólæsilegur."
+  skan_zgoda_linia_skany: '– án textalags (líklega skannaðar síður): {lista_stron}'
+  skan_zgoda_linia_znieksztalcone: '– með brengluðum texta (letur skráarinnar gefur ekki upp hvaða stafir þetta eru): {lista_stron}'
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)
@@ -988,6 +995,8 @@ konwerter:
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
+  pdf_znieksztalcone_tytul: Brenglaður texti í PDF-skjali
+  pdf_znieksztalcone_tresc: "Í skránni {nazwa_pliku} er texti á {liczba_znieksztalconych} af {liczba_stron} síðum brenglaður: {lista_stron}.\n\nLetrið sem er fellt inn í skrána gefur ekki upp hvaða stafir liggja að baki táknum þess, þannig að forritið fær tilviljanakennd tákn í stað bókstafa. Á skjánum líta síðurnar rétt út en í Word-skjalinu verða þær ólæsilegar.\n\nBreytingartækið les ekki síður af mynd. Tungumálamaður getur gert það með gervigreindarlíkani (gegn gjaldi og aðeins með þínu samþykki). Ef þú átt þetta skjal á öðru formi (Word, texti) skaltu hlaða því inn í stað PDF-skjalsins.\n\nViltu samt umbreyta skránni?"
 manager:
   panel_name: "Reglustjóra spjaldið – orðabóka könnuður"
   desc: |-

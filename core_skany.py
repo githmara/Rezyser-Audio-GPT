@@ -22,6 +22,12 @@ uciętym do jednej strony dawała wstęp „nie ma strony 2", czytany potem na
 głos; pionowy numer seryjny lądował w bloku kodu; puste pole formularza
 dostawało znacznik nieczytelności, czyli fałszywą informację, że coś tam jest.
 
+Od 19.15 tą samą drogą idą strony ze ZNIEKSZTAŁCONĄ warstwą tekstu
+(`WynikPdf.strony_znieksztalcone`: czcionka bez pełnej mapy ToUnicode).
+Wynik odczytu zastępuje wtedy akapity warstwy tekstu tej strony w `scal`
+i w `tekst_tresci`; koszt takiej strony liczy `szacuj_koszt` z liczby jej
+znaków, bo gęsty tekst to ok. 2× stawki skanu formularza (zmierzone).
+
 Zero ciszy: strona, której nie odczytano (odmowa, błąd, anulowanie), zostaje
 w wyniku jako jawny akapit z powodem — nigdy jako pusta dziura.
 """
@@ -90,6 +96,31 @@ KOSZT_STRONY_USD: dict[str, float] = {
     "claude-opus-5": 0.03,
 }
 
+#: Strona ze ZNIEKSZTAŁCONĄ warstwą tekstu (19.15, `core_pdf`) kosztuje
+#: więcej niż skan formularza: model dostaje obraz RAZEM z warstwą tekstu
+#: (Anthropic dokleja ją do bloku `document`) i przepisuje gęsty tekst.
+#: Zmierzone 2026-10-20 bezpłatnym `count_tokens` (bez generowania) na
+#: stronach 50/200/400 słownika z macOS Quartz: wejście 5913–6167 tokenów
+#: przy medianie 2579 znaków warstwy, czyli obraz + prompt ok. 2100 (jak
+#: przy skanie) i ok. 1,5 tokenu na znak śmieci IPA; wyjście ≈ poprawny
+#: tekst strony, 2,2–2,6 znaku na token (ru, z `.docx` tego słownika).
+#: Cena za MTok (wejście, wyjście) — lustro tego samego cennika co wyżej.
+CENNIK_USD_MTOK: dict[str, tuple[float, float]] = {
+    "claude-sonnet-5-5": (2.0, 10.0),
+    "claude-sonnet-5": (2.0, 10.0),
+    "claude-opus-5-5": (4.0, 20.0),
+    "claude-opus-5": (5.0, 25.0),
+}
+TOKENY_OBRAZU = 2100
+TOKENY_WEJSCIA_NA_ZNAK = 1.5
+#: 2,0 zamiast zmierzonych 2,2: zapas na Markdown i język gęstszy w tokenach.
+ZNAKI_NA_TOKEN_WYJSCIA = 2.0
+#: Sekundy na stronę: skan zmierzony (4–5 s), strona tekstu = to samo plus
+#: tokeny wyjścia w tempie NIEZMIERZONYM dla tej ścieżki — 50 tokenów/s to
+#: ostrożne założenie, żeby dialog nie obiecywał za mało.
+SEKUNDY_STRONY = 5.0
+TOKENY_NA_SEKUNDE = 50.0
+
 #: Dokąd jadą strony — nazwa własna usługi i host, do dialogu zgody.
 _USLUGA = {
     cl.PROVIDER_ANTHROPIC: "Anthropic (api.anthropic.com)",
@@ -148,10 +179,32 @@ def model_odczytu(klient: cl.KlientLLM) -> str:
     return cl.model_wywolania(klient, MODEL_SKANY)
 
 
-def szacuj_koszt(klient: cl.KlientLLM, liczba_stron: int) -> float | None:
-    """Szacowany koszt w USD albo `None`, gdy model jest spoza `KOSZT_STRONY_USD`."""
-    stawka = KOSZT_STRONY_USD.get(cl.model_natywny(model_odczytu(klient)))
-    return None if stawka is None else stawka * liczba_stron
+def szacuj_koszt(klient: cl.KlientLLM, liczba_stron: int,
+                 znaki_stron_tekstu: list[int] | tuple[int, ...] = ()) -> float | None:
+    """Szacowany koszt w USD albo `None`, gdy model jest spoza `KOSZT_STRONY_USD`.
+
+    Args:
+        liczba_stron: strony-skany (bez warstwy tekstu), stawka zmierzona.
+        znaki_stron_tekstu: liczba znaków warstwy tekstu KAŻDEJ strony
+            zniekształconej — taka strona kosztuje co najmniej tyle co skan.
+    """
+    model = cl.model_natywny(model_odczytu(klient))
+    stawka = KOSZT_STRONY_USD.get(model)
+    if stawka is None:
+        return None
+    wejscie, wyjscie = CENNIK_USD_MTOK[model]
+    tekst = sum(max(stawka, (wejscie * (TOKENY_OBRAZU + TOKENY_WEJSCIA_NA_ZNAK * z)
+                             + wyjscie * z / ZNAKI_NA_TOKEN_WYJSCIA) / 1e6)
+                for z in znaki_stron_tekstu)
+    return stawka * liczba_stron + tekst
+
+
+def szacuj_minuty(liczba_stron: int,
+                  znaki_stron_tekstu: list[int] | tuple[int, ...] = ()) -> int:
+    """Szacowany czas odczytu w pełnych minutach (co najmniej 1)."""
+    sekundy = SEKUNDY_STRONY * (liczba_stron + len(znaki_stron_tekstu)) + sum(
+        z / ZNAKI_NA_TOKEN_WYJSCIA / TOKENY_NA_SEKUNDE for z in znaki_stron_tekstu)
+    return max(1, round(sekundy / 60))
 
 
 def opis_kosztu(koszt: float | None) -> str:
@@ -349,13 +402,18 @@ def tekst_tresci(akapity_stron: list[list[str]], wyniki: list[WynikStrony]) -> s
 
     Akapity pochodzenia są w języku UI: polskie zdanie przed krótkim
     angielskim formularzem przestawiało wykryty język na `pl` (audyt 19.14).
+    Strona z wynikiem nie oddaje SWOICH akapitów warstwy tekstu: u skanu
+    ich nie ma, a u strony zniekształconej (19.15) to śmieci, na których
+    lingua zgadywała `de` — także wtedy, gdy odczyt tej strony się nie udał.
     """
-    per_strona = {w.numer: w for w in wyniki if w.status in (STATUS_OK, STATUS_UCIETA)}
+    per_strona = {w.numer: w for w in wyniki}
     czesci: list[str] = []
     for numer, akapity in enumerate(akapity_stron, start=1):
-        if numer in per_strona:
-            czesci.append(_RE_ZNACZNIK.sub(" ", per_strona[numer].markdown))
-        czesci += akapity
+        wynik = per_strona.get(numer)
+        if wynik is None:
+            czesci += akapity
+        elif wynik.status in (STATUS_OK, STATUS_UCIETA):
+            czesci.append(_RE_ZNACZNIK.sub(" ", wynik.markdown))
     return "\n\n".join(czesci)
 
 

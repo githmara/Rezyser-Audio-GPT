@@ -935,6 +935,13 @@ poliglota:
   skan_niedostepny_compat: La lecture des pages numérisées par un modèle d'IA ne fonctionne pas avec un endpoint personnalisé compatible OpenAI (LLM_PROVIDER=openai_compat). Elle fonctionne avec Anthropic et OpenRouter.
   skan_blad_tytul: Échec de la lecture des pages numérisées
   skan_blad_tresc: "La lecture des pages numérisées a été interrompue par une erreur inattendue :\n{tresc_bledu}\n\nSeul le texte de la couche de texte du PDF a été chargé (si le fichier en contient une). Les pages numérisées ont été ignorées."
+  pdf_strony_znieksztalcone: "Attention : sur ces pages, le texte enregistré dans le PDF est déformé et sera illisible dans le résultat : {lista_stron}. La police intégrée au fichier n'indique pas à quelles lettres correspondent ses caractères ; le programme reçoit donc des caractères aléatoires au lieu de lettres. À l'écran, les pages s'affichent correctement – c'est un défaut du fichier PDF."
+  jezyk_niewykryty_tytul: Langue du document non détectée
+  jezyk_niewykryty_znieksztalcone: "La langue du document n'a pas été détectée : tout le texte de ce PDF est déformé, et la détection de la langue sur un tel texte donne un résultat aléatoire.\n\nLe programme conserve la langue « {jezyk} ». Si le document est dans une autre langue, sélectionnez-la dans le champ « Langue de traitement »."
+  skan_zgoda_tytul_znieksztalcone: Lire ces pages avec un modèle d'IA ?
+  skan_zgoda_tresc_znieksztalcone: "Dans le fichier {nazwa_pliku}, le texte de {liczba_do_odczytu} pages sur {liczba_stron} est illisible :\n{opis_stron}\n\nJe peux lire ces pages à partir de l'image avec un modèle d'IA ({model}). Chacune d'elles sera envoyée sous forme d'image à un service externe : {usluga}.\nLes documents contiennent souvent des données personnelles. Ne les envoyez que si vous en avez le droit.\n\nCoût estimé : {koszt}. Une page de texte dense coûte plus cher qu'un formulaire numérisé ; l'estimation tient donc compte du nombre de caractères de chaque page. Durée : environ {liczba_minut} (en minutes).\n\nSi vous choisissez « Ignorer », les pages sans texte seront ignorées et le texte déformé figurera tel quel dans le résultat – illisible."
+  skan_zgoda_linia_skany: '– sans couche de texte (très probablement des scans) : {lista_stron}'
+  skan_zgoda_linia_znieksztalcone: "– avec un texte déformé (la police du fichier n'indique pas de quelles lettres il s'agit) : {lista_stron}"
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)
@@ -984,6 +991,8 @@ konwerter:
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
+  pdf_znieksztalcone_tytul: Texte déformé dans le PDF
+  pdf_znieksztalcone_tresc: "Dans le fichier {nazwa_pliku}, le texte de {liczba_znieksztalconych} pages sur {liczba_stron} est déformé : {lista_stron}.\n\nLa police intégrée au fichier n'indique pas à quelles lettres correspondent ses caractères ; au lieu de lettres, le programme reçoit donc des caractères aléatoires. À l'écran, les pages s'affichent correctement, mais elles seront illisibles dans le document Word.\n\nLe convertisseur ne lit pas les pages à partir de l'image. Polyglotte sait le faire avec un modèle d'IA (service payant, et uniquement avec votre accord). Si vous disposez de ce document sous une autre forme (Word, texte), chargez-la à la place du PDF.\n\nConvertir le fichier malgré tout ?"
 manager:
   panel_name: "Panneau Gestionnaire de Règles — explorateur de dictionnaires"
   desc: |-

@@ -336,6 +336,24 @@ PACZKI = sorted(p.name for p in (Path(__file__).parent / "dictionaries").iterdir
 
 
 @pytest.mark.parametrize("kod", PACZKI)
+def test_komunikaty_19_15_cytuja_prawdziwe_etykiety_paczki(kod):
+    # Przegląd 19.15 złapał to w 8 paczkach naraz: brat zostawił polską
+    # nazwę modułu „Poliglota” (en ma „Polyglot”), a `is` znów napisał pole
+    # „Vinnslutungumál”, choć etykieta to „Vinnslumál” (ta sama pomyłka co
+    # w 19.1). Cytat kontrolki ma pochodzić z klucza tej kontrolki w TEJ paczce.
+    import re
+    ui = yaml.safe_load((Path(__file__).parent / "dictionaries" / kod / "gui" / "ui.yaml")
+                        .read_text(encoding="utf-8"))
+    p, k = ui["poliglota"], ui["konwerter"]
+    przycisk = p["skan_zgoda_btn_nie"].replace("&", "")
+    pole = re.split(r"[(:]", p["lbl_jezyk_pipeline"])[0].strip()
+    modul = ui["main"]["menu"]["poliglota"].split("\t")[0].replace("&", "")
+    assert przycisk in p["skan_zgoda_tresc_znieksztalcone"], przycisk
+    assert pole in p["jezyk_niewykryty_znieksztalcone"], pole
+    assert modul in k["pdf_znieksztalcone_tresc"], modul
+
+
+@pytest.mark.parametrize("kod", PACZKI)
 def test_kazdy_znacznik_ma_klucz_w_ui_kazdej_paczki(kod):
     # Brak klucza nie wywraca odczytu, tylko wstawia `[poliglota.skan_…]`
     # w wynik czytany na głos — tego nie złapie żadna inna bramka.
@@ -362,6 +380,42 @@ def test_szacunek_kosztu_po_modelu_natywnym():
     # `LLM_MODEL` spoza cennika → koszt nieznany, nie zero.
     obcy = cl.KlientLLM(cl.PROVIDER_OPENROUTER, None, model_override="google/gemini-x")
     assert cs.szacuj_koszt(obcy, 10) is None
+
+
+def test_szacunek_stron_znieksztalconych_liczy_znaki():
+    # 19.15, zmierzone `count_tokens` na słowniku: strona 2579 znaków to
+    # ok. 6000 tokenów wejścia i 1200 wyjścia — 2× stawki skanu formularza.
+    anthropic = cl.KlientLLM(cl.PROVIDER_ANTHROPIC, None)
+    strona = cs.szacuj_koszt(anthropic, 0, [2579])
+    assert 0.022 < strona < 0.027
+    # Pusta strona tekstu nie jest tańsza od skanu, a skany liczą się osobno.
+    assert cs.szacuj_koszt(anthropic, 0, [0]) == pytest.approx(0.012)
+    assert cs.szacuj_koszt(anthropic, 2, [2579]) == pytest.approx(0.024 + strona)
+    obcy = cl.KlientLLM(cl.PROVIDER_OPENROUTER, None, model_override="google/gemini-x")
+    assert cs.szacuj_koszt(obcy, 0, [2579]) is None
+
+
+def test_cennik_tokenow_pokrywa_cennik_stron():
+    # Dwa lustra jednego cennika: model w jednym, a nie w drugim = KeyError
+    # w dialogu zgody zamiast „koszt nieznany".
+    assert set(cs.CENNIK_USD_MTOK) == set(cs.KOSZT_STRONY_USD)
+
+
+def test_szacunek_czasu_w_minutach():
+    assert cs.szacuj_minuty(1) == 1                       # nigdy „0 minut"
+    assert cs.szacuj_minuty(12) == 1                      # 12 skanów × 5 s
+    # 549 stron słownika: ok. 4,5 h, a nie 46 min ze stawki skanu.
+    assert 250 <= cs.szacuj_minuty(1, [2579] * 549) <= 300
+
+
+def test_tekst_tresci_pomija_akapity_strony_z_wynikiem():
+    # Strona zniekształcona ma akapity-śmieci; po odczycie (także NIEUDANYM)
+    # nie mogą trafić do lingua.
+    akapity = [["Pierwsza strona."], ["ɍɬɜɟɪɠɞɟɧɨ"], ["ɤ ɩɟɱɚɬɢ"], ["Ostatnia."]]
+    wyniki = [cs.WynikStrony(2, cs.STATUS_OK, "Утверждено"),
+              cs.WynikStrony(3, cs.STATUS_BLAD, powod="x")]
+    assert cs.tekst_tresci(akapity, wyniki) == \
+        "Pierwsza strona.\n\nУтверждено\n\nOstatnia."
 
 
 @pytest.mark.parametrize("koszt, wynik", [

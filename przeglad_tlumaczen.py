@@ -390,6 +390,11 @@ _CHECKLIST_UI = """\
   the field is labelled „Vinnslumál" — a plausible synonym that sends the user
   hunting for a control that does not exist. Same class as the docs
   GUI-LABEL gate, but no gate covers ui.yaml quoting ui.yaml yet.
+  It recurred in v19.15: `is` wrote „Vinnslutungumál" again, and all eight
+  packs kept the Polish module name "Poliglota" in a Converter message. A
+  NARROW gate now checks only the 19.15 keys
+  (`test_core_skany.py::test_komunikaty_19_15_cytuja_prawdziwe_etykiety_paczki`);
+  a new message that quotes a control deserves a line in that test too.
 - ONE CONCEPT, ONE WORD, PER DIALOG: a term repeated inside one message (or
   across the title/body/short-form keys of one dialog) must use the SAME
   target word. Measured 2026-09-11 (`fi`, v19.1): one dialog about a file

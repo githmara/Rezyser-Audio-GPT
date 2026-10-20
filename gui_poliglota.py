@@ -420,6 +420,8 @@ class PoliglotaPanel(wx.Panel):
         # Treść do detekcji języka, gdy `_file_content` ma dopiski w języku UI
         # (akapity pochodzenia stron-skanów). Pusty = detekcja z `_file_content`.
         self._tekst_detekcji: str = ""
+        # 19.15: cały tekst PDF-a zniekształcony — detekcji nie ma z czego robić.
+        self._bez_detekcji: bool = False
 
         # Aktywny język pipeline'u (akcenty/szyfry/cezar). Bez wczytanego
         # pliku domyślnie idzie z języka UI (gdy ma komplet reguł), żeby
@@ -866,15 +868,18 @@ class PoliglotaPanel(wx.Panel):
                 wx.OK | wx.ICON_ERROR, self)
             return
 
-        if wynik_pdf is not None and wynik_pdf.strony_bez_tekstu and \
-                self._zgoda_na_odczyt_skanow(file_name, wynik_pdf.strony_bez_tekstu,
-                                             wynik_pdf.liczba_stron):
+        # 19.15: strony ze zniekształconą warstwą tekstu idą tą samą drogą
+        # co skany — ich akapity to śmieci, które zastąpi odczyt obrazu.
+        if wynik_pdf is not None and wynik_pdf.strony_do_odczytu and \
+                self._zgoda_na_odczyt_skanow(
+                    file_name, wynik_pdf.strony_bez_tekstu, wynik_pdf.liczba_stron,
+                    wynik_pdf.strony_znieksztalcone, wynik_pdf.znaki_stron):
             # Treść ustawi dopiero koniec wątku — do tego czasu panel jest
             # „bez pliku", a guardy `is_alive()` trzymają resztę akcji.
             self._file_content = ""
             self._file_ext = ""
             self._start_odczytu_skanow(file_name, wynik_pdf, wynik_pdf.akapity_stron,
-                                       wynik_pdf.strony_bez_tekstu)
+                                       wynik_pdf.strony_do_odczytu)
             return
         self._dokoncz_wczytanie(file_name, wynik_pdf)
 
@@ -894,9 +899,23 @@ class PoliglotaPanel(wx.Panel):
         # teraz własne combo, więc pytanie dublowałoby kontrolkę, a dialog
         # INFO nadal jest jawnym sygnałem A11y, że etykiety akcentów/szyfrów
         # właśnie się zmieniły.
-        if self._combo_jezyk.GetSelection() <= 0:
+        # 19.15: lingua na zniekształconej warstwie tekstu zgadywała `de` dla
+        # słownika rosyjskiego. Takie strony nie wchodzą do detekcji, a gdy
+        # nic poza nimi nie ma, mówimy wprost, że języka nie wykryto.
+        if not self._tekst_detekcji and wynik_pdf is not None \
+                and wynik_pdf.strony_znieksztalcone:
+            self._tekst_detekcji = wynik_pdf.tekst_wiarygodny
+            self._bez_detekcji = not self._tekst_detekcji.strip()
+        tekst_detekcji = self._tekst_do_detekcji()
+        if self._combo_jezyk.GetSelection() <= 0 and tekst_detekcji is None:
+            wx.MessageBox(
+                t("poliglota.jezyk_niewykryty_znieksztalcone",
+                  jezyk=core_poliglota.natywna_nazwa(self._jezyk_aktywny)),
+                t("poliglota.jezyk_niewykryty_tytul"),
+                wx.OK | wx.ICON_WARNING, self)
+        elif self._combo_jezyk.GetSelection() <= 0:
             wykryty = core_poliglota.wykryj_jezyk_zrodlowy(
-                self._tekst_detekcji or self._file_content,
+                tekst_detekcji,
                 fallback=self._jezyk_aktywny,
             )
             if wykryty != self._jezyk_aktywny:
@@ -944,6 +963,12 @@ class PoliglotaPanel(wx.Panel):
             t("poliglota.plik_wczytany_tytul"),
             wx.OK | wx.ICON_INFORMATION, self)
 
+    def _tekst_do_detekcji(self) -> str | None:
+        """Tekst dla lingua; `None` = cały PDF zniekształcony, detekcji nie ma."""
+        if self._bez_detekcji:
+            return None
+        return self._tekst_detekcji or self._file_content
+
     # ------------------------------------------------------------------
     # 19.14: strony-skany PDF odczytywane modelem z obrazem (core_skany)
     # ------------------------------------------------------------------
@@ -956,25 +981,45 @@ class PoliglotaPanel(wx.Panel):
         return t("poliglota.skan_niedostepny_brak_api")
 
     def _zgoda_na_odczyt_skanow(self, file_name: str, strony: list[int],
-                                liczba_stron: int) -> bool:
+                                liczba_stron: int, znieksztalcone: list[int] | None = None,
+                                znaki_stron: list[int] | None = None) -> bool:
         """Jawna zgoda PER PLIK, domyślnie NIE — strony jadą do zewnętrznej usługi.
 
         Skany to często dokumenty z danymi osobowymi, a odczyt kosztuje, więc
-        nigdy nie startuje sam i nigdy nie jest zapamiętywany.
+        nigdy nie startuje sam i nigdy nie jest zapamiętywany. Strony
+        zniekształcone (19.15) dostają własny wiersz w dialogu i koszt liczony
+        z ich znaków — gęsta strona tekstu to ok. 2× stawki skanu formularza.
         """
         if not core_skany.odczyt_dostepny(self._client):
             return False
-        koszt = core_skany.szacuj_koszt(self._client, len(strony))
-        tresc = t(
-            "poliglota.skan_zgoda_tresc",
-            nazwa_pliku=os.path.basename(file_name),
-            liczba_skanow=len(strony), liczba_stron=liczba_stron,
-            lista_stron=core_skany.zakresy(strony),
+        znieksztalcone = znieksztalcone or []
+        znaki_zlych = [znaki_stron[n - 1] for n in znieksztalcone] if znaki_stron else \
+            [0] * len(znieksztalcone)
+        koszt = core_skany.szacuj_koszt(self._client, len(strony), znaki_zlych)
+        wspolne = dict(
+            nazwa_pliku=os.path.basename(file_name), liczba_stron=liczba_stron,
             model=core_skany.model_odczytu(self._client),
             usluga=core_skany.opis_uslugi(self._client),
             koszt=core_skany.opis_kosztu(koszt),
         )
-        dlg = wx.MessageDialog(self, tresc, t("poliglota.skan_zgoda_tytul"),
+        if not znieksztalcone:
+            tytul = t("poliglota.skan_zgoda_tytul")
+            tresc = t("poliglota.skan_zgoda_tresc", liczba_skanow=len(strony),
+                      lista_stron=core_skany.zakresy(strony), **wspolne)
+        else:
+            linie = []
+            if strony:
+                linie.append(t("poliglota.skan_zgoda_linia_skany",
+                               lista_stron=core_skany.zakresy(strony)))
+            linie.append(t("poliglota.skan_zgoda_linia_znieksztalcone",
+                           lista_stron=core_skany.zakresy(znieksztalcone)))
+            tytul = t("poliglota.skan_zgoda_tytul_znieksztalcone")
+            tresc = t("poliglota.skan_zgoda_tresc_znieksztalcone",
+                      liczba_do_odczytu=len(strony) + len(znieksztalcone),
+                      opis_stron="\n".join(linie),
+                      liczba_minut=core_skany.szacuj_minuty(len(strony), znaki_zlych),
+                      **wspolne)
+        dlg = wx.MessageDialog(self, tresc, tytul,
                                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
         dlg.SetYesNoLabels(t("poliglota.skan_zgoda_btn_tak"),
                            t("poliglota.skan_zgoda_btn_nie"))
@@ -1134,6 +1179,10 @@ class PoliglotaPanel(wx.Panel):
         if wynik.strony_bez_tekstu:
             tresc += "\n\n" + t("poliglota.pdf_strony_bez_tekstu",
                                 lista_stron=core_skany.zakresy(wynik.strony_bez_tekstu))
+        if wynik.strony_znieksztalcone:
+            tresc += "\n\n" + t("poliglota.pdf_strony_znieksztalcone",
+                                lista_stron=core_skany.zakresy(wynik.strony_znieksztalcone))
+        if wynik.strony_do_odczytu:
             dopisek = self._powod_braku_odczytu()
             if dopisek:
                 tresc += "\n" + dopisek
@@ -1189,6 +1238,7 @@ class PoliglotaPanel(wx.Panel):
         self._file_content      = ""
         self._file_ext          = ""
         self._tekst_detekcji    = ""
+        self._bez_detekcji      = False
         self._tresc_pipeline    = ""
         self._ext_pipeline      = ""
         self._oryginalna_nazwa  = "nieznany"
@@ -1329,9 +1379,9 @@ class PoliglotaPanel(wx.Panel):
         """
         idx = self._combo_jezyk.GetSelection()
         if idx <= 0:
-            if self._file_content:
+            if self._file_content and self._tekst_do_detekcji() is not None:
                 nowy = core_poliglota.wykryj_jezyk_zrodlowy(
-                    self._tekst_detekcji or self._file_content,
+                    self._tekst_do_detekcji(),
                     fallback=_wybierz_domyslny_jezyk_pipeline(),
                 )
             else:
@@ -1710,8 +1760,10 @@ class PoliglotaPanel(wx.Panel):
         # (przełączanym w _odswiez_warianty po wczytaniu pliku) — ostrzeżenie
         # jest miękkie i pojawia się tylko, gdy detekcja widzi inny kompletny
         # język niż aktualnie wybrany w GUI.
+        if self._tekst_do_detekcji() is None:
+            return
         wykryty = core_poliglota.wykryj_jezyk_zrodlowy(
-            self._tekst_detekcji or self._file_content,
+            self._tekst_do_detekcji(),
             fallback=self._jezyk_aktywny,
         )
         if wykryty != self._jezyk_aktywny:

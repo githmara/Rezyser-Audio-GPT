@@ -937,6 +937,13 @@ poliglota:
   skan_niedostepny_compat: La lettura delle pagine scansionate con un modello AI non funziona con un endpoint personalizzato compatibile con OpenAI (LLM_PROVIDER=openai_compat). Funziona con Anthropic e con OpenRouter.
   skan_blad_tytul: Lettura delle pagine scansionate non riuscita
   skan_blad_tresc: "La lettura delle pagine scansionate è stata interrotta da un errore imprevisto:\n{tresc_bledu}\n\nÈ stato caricato solo il testo del livello di testo del PDF (se il file ne ha uno). Le pagine scansionate sono state saltate."
+  pdf_strony_znieksztalcone: 'Attenzione: in queste pagine il testo salvato nel PDF è alterato e nel risultato sarà illeggibile: {lista_stron}. Il font incorporato nel file non indica quali lettere si nascondano dietro i suoi caratteri, quindi il programma riceve caratteri casuali al posto delle lettere. Sullo schermo le pagine appaiono corrette: il difetto è del file PDF.'
+  jezyk_niewykryty_tytul: Lingua del documento non rilevata
+  jezyk_niewykryty_znieksztalcone: "Lingua del documento non rilevata: tutto il testo di questo PDF è alterato e il rilevamento della lingua su un testo simile produce un risultato casuale.\n\nIl programma mantiene la lingua «{jezyk}». Se il documento è in un'altra lingua, selezionala nel campo «Lingua di elaborazione»."
+  skan_zgoda_tytul_znieksztalcone: Leggere queste pagine con un modello IA?
+  skan_zgoda_tresc_znieksztalcone: "Nel file {nazwa_pliku} il testo non è leggibile in {liczba_do_odczytu} pagine su {liczba_stron}:\n{opis_stron}\n\nPosso leggere queste pagine dall'immagine con un modello IA ({model}). Ciascuna verrà inviata come immagine a un servizio esterno: {usluga}.\nI documenti contengono spesso dati personali. Inviali solo se ne hai il diritto.\n\nCosto stimato: {koszt}. Una pagina di testo fitto costa più della scansione di un modulo, perciò la stima conta i caratteri di ogni pagina. Tempo: circa {liczba_minut} (in minuti).\n\nSe scegli «Salta», le pagine senza testo verranno saltate e il testo alterato finirà nel risultato così com'è, illeggibile."
+  skan_zgoda_linia_skany: '– senza livello di testo (con ogni probabilità scansioni): {lista_stron}'
+  skan_zgoda_linia_znieksztalcone: '– con testo alterato (il font del file non indica di quali lettere si tratti): {lista_stron}'
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   # 18.8: segmento localizzato del nome del file di output (una parola, senza spazi)
@@ -988,6 +995,8 @@ konwerter:
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
+  pdf_znieksztalcone_tytul: Testo alterato nel PDF
+  pdf_znieksztalcone_tresc: "Nel file {nazwa_pliku} il testo di {liczba_znieksztalconych} pagine su {liczba_stron} è alterato: {lista_stron}.\n\nIl font incorporato nel file non indica quali lettere si nascondano dietro i suoi caratteri, quindi al posto delle lettere il programma riceve caratteri casuali. Sullo schermo le pagine appaiono corrette, ma nel documento Word saranno illeggibili.\n\nIl convertitore non legge le pagine dall'immagine. Poliglotta sa farlo con un modello IA (a pagamento e solo con il tuo consenso). Se hai questo documento in un'altra forma (Word, testo), caricala al posto del PDF.\n\nConvertire comunque il file?"
 manager:
   panel_name: "Pannello Gestore Regole – esploratore dizionari"
   desc: |-
