@@ -994,11 +994,11 @@ konwerter:
     Skrá vistuð sem:
     {sciezka_pliku}
 
+  pdf_znieksztalcone_tytul: Brenglaður texti í PDF-skjali
+  pdf_znieksztalcone_tresc: "Í skránni {nazwa_pliku} er texti á {liczba_znieksztalconych} af {liczba_stron} síðum brenglaður: {lista_stron}.\n\nLetrið sem er fellt inn í skrána gefur ekki upp hvaða stafir liggja að baki táknum þess, þannig að forritið fær tilviljanakennd tákn í stað bókstafa. Á skjánum líta síðurnar rétt út en í Word-skjalinu verða þær ólæsilegar.\n\nBreytingartækið les ekki síður af mynd. Tungumálamaður getur gert það með gervigreindarlíkani (gegn gjaldi og aðeins með þínu samþykki). Ef þú átt þetta skjal á öðru formi (Word, texti) skaltu hlaða því inn í stað PDF-skjalsins.\n\nViltu samt umbreyta skránni?"
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
-  pdf_znieksztalcone_tytul: Brenglaður texti í PDF-skjali
-  pdf_znieksztalcone_tresc: "Í skránni {nazwa_pliku} er texti á {liczba_znieksztalconych} af {liczba_stron} síðum brenglaður: {lista_stron}.\n\nLetrið sem er fellt inn í skrána gefur ekki upp hvaða stafir liggja að baki táknum þess, þannig að forritið fær tilviljanakennd tákn í stað bókstafa. Á skjánum líta síðurnar rétt út en í Word-skjalinu verða þær ólæsilegar.\n\nBreytingartækið les ekki síður af mynd. Tungumálamaður getur gert það með gervigreindarlíkani (gegn gjaldi og aðeins með þínu samþykki). Ef þú átt þetta skjal á öðru formi (Word, texti) skaltu hlaða því inn í stað PDF-skjalsins.\n\nViltu samt umbreyta skránni?"
 manager:
   panel_name: "Reglustjóra spjaldið – orðabóka könnuður"
   desc: |-

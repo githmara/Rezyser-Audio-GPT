@@ -990,11 +990,11 @@ konwerter:
     Fichier sauvegardé sous :
     {sciezka_pliku}
 
+  pdf_znieksztalcone_tytul: Texte déformé dans le PDF
+  pdf_znieksztalcone_tresc: "Dans le fichier {nazwa_pliku}, le texte de {liczba_znieksztalconych} pages sur {liczba_stron} est déformé : {lista_stron}.\n\nLa police intégrée au fichier n'indique pas à quelles lettres correspondent ses caractères ; au lieu de lettres, le programme reçoit donc des caractères aléatoires. À l'écran, les pages s'affichent correctement, mais elles seront illisibles dans le document Word.\n\nLe convertisseur ne lit pas les pages à partir de l'image. Polyglotte sait le faire avec un modèle d'IA (service payant, et uniquement avec votre accord). Si vous disposez de ce document sous une autre forme (Word, texte), chargez-la à la place du PDF.\n\nConvertir le fichier malgré tout ?"
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
-  pdf_znieksztalcone_tytul: Texte déformé dans le PDF
-  pdf_znieksztalcone_tresc: "Dans le fichier {nazwa_pliku}, le texte de {liczba_znieksztalconych} pages sur {liczba_stron} est déformé : {lista_stron}.\n\nLa police intégrée au fichier n'indique pas à quelles lettres correspondent ses caractères ; au lieu de lettres, le programme reçoit donc des caractères aléatoires. À l'écran, les pages s'affichent correctement, mais elles seront illisibles dans le document Word.\n\nLe convertisseur ne lit pas les pages à partir de l'image. Polyglotte sait le faire avec un modèle d'IA (service payant, et uniquement avec votre accord). Si vous disposez de ce document sous une autre forme (Word, texte), chargez-la à la place du PDF.\n\nConvertir le fichier malgré tout ?"
 manager:
   panel_name: "Panneau Gestionnaire de Règles — explorateur de dictionnaires"
   desc: |-

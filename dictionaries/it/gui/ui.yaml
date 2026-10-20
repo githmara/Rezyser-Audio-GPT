@@ -994,11 +994,11 @@ konwerter:
     File salvato come:
     {sciezka_pliku}
 
+  pdf_znieksztalcone_tytul: Testo alterato nel PDF
+  pdf_znieksztalcone_tresc: "Nel file {nazwa_pliku} il testo di {liczba_znieksztalconych} pagine su {liczba_stron} è alterato: {lista_stron}.\n\nIl font incorporato nel file non indica quali lettere si nascondano dietro i suoi caratteri, quindi al posto delle lettere il programma riceve caratteri casuali. Sullo schermo le pagine appaiono corrette, ma nel documento Word saranno illeggibili.\n\nIl convertitore non legge le pagine dall'immagine. Poliglotta sa farlo con un modello IA (a pagamento e solo con il tuo consenso). Se hai questo documento in un'altra forma (Word, testo), caricala al posto del PDF.\n\nConvertire comunque il file?"
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
-  pdf_znieksztalcone_tytul: Testo alterato nel PDF
-  pdf_znieksztalcone_tresc: "Nel file {nazwa_pliku} il testo di {liczba_znieksztalconych} pagine su {liczba_stron} è alterato: {lista_stron}.\n\nIl font incorporato nel file non indica quali lettere si nascondano dietro i suoi caratteri, quindi al posto delle lettere il programma riceve caratteri casuali. Sullo schermo le pagine appaiono corrette, ma nel documento Word saranno illeggibili.\n\nIl convertitore non legge le pagine dall'immagine. Poliglotta sa farlo con un modello IA (a pagamento e solo con il tuo consenso). Se hai questo documento in un'altra forma (Word, testo), caricala al posto del PDF.\n\nConvertire comunque il file?"
 manager:
   panel_name: "Pannello Gestore Regole – esploratore dizionari"
   desc: |-

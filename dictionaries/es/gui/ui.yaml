@@ -994,11 +994,11 @@ konwerter:
     Archivo guardado como:
     {sciezka_pliku}
 
+  pdf_znieksztalcone_tytul: Texto distorsionado en el PDF
+  pdf_znieksztalcone_tresc: "En el archivo {nazwa_pliku} el texto de {liczba_znieksztalconych} de {liczba_stron} páginas está distorsionado: {lista_stron}.\n\nLa fuente incrustada en el archivo no indica qué letras corresponden a sus caracteres, por lo que en lugar de letras el programa recibe caracteres aleatorios. En pantalla las páginas se ven bien, pero en el documento de Word serán ilegibles.\n\nEl Convertidor no lee las páginas a partir de la imagen. Políglota sabe hacerlo con un modelo de IA (de pago y solo con tu consentimiento). Si tienes este documento en otro formato (Word, texto), cárgalo en lugar del PDF.\n\n¿Quieres convertir el archivo de todos modos?"
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
-  pdf_znieksztalcone_tytul: Texto distorsionado en el PDF
-  pdf_znieksztalcone_tresc: "En el archivo {nazwa_pliku} el texto de {liczba_znieksztalconych} de {liczba_stron} páginas está distorsionado: {lista_stron}.\n\nLa fuente incrustada en el archivo no indica qué letras corresponden a sus caracteres, por lo que en lugar de letras el programa recibe caracteres aleatorios. En pantalla las páginas se ven bien, pero en el documento de Word serán ilegibles.\n\nEl Convertidor no lee las páginas a partir de la imagen. Políglota sabe hacerlo con un modelo de IA (de pago y solo con tu consentimiento). Si tienes este documento en otro formato (Word, texto), cárgalo en lugar del PDF.\n\n¿Quieres convertir el archivo de todos modos?"
 manager:
   panel_name: "Panel del Gestor de Reglas – explorador de diccionarios"
   desc: |-

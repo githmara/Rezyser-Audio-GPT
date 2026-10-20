@@ -1078,11 +1078,11 @@ konwerter:
     File saved as:
     {sciezka_pliku}
 
+  pdf_znieksztalcone_tytul: Garbled text in the PDF
+  pdf_znieksztalcone_tresc: "In the file {nazwa_pliku}, the text on {liczba_znieksztalconych} of {liczba_stron} pages is garbled: {lista_stron}.\n\nThe font embedded in the file does not say which letters lie behind its characters, so instead of letters the program gets random characters. The pages look fine on screen, but in the Word document they will be unreadable.\n\nThe converter does not read pages from an image. Polyglot can do it with an AI model (for a fee and only with your consent). If you have this document in another form (Word, text), load it instead of the PDF.\n\nDo you want to convert the file anyway?"
 # -----------------------------------------------------------------------------
 # MANAGER – panel Managera Reguł (gui_manager_regul.py)
 # -----------------------------------------------------------------------------
-  pdf_znieksztalcone_tytul: Garbled text in the PDF
-  pdf_znieksztalcone_tresc: "In the file {nazwa_pliku}, the text on {liczba_znieksztalconych} of {liczba_stron} pages is garbled: {lista_stron}.\n\nThe font embedded in the file does not say which letters lie behind its characters, so instead of letters the program gets random characters. The pages look fine on screen, but in the Word document they will be unreadable.\n\nThe converter does not read pages from an image. Polyglot can do it with an AI model (for a fee and only with your consent). If you have this document in another form (Word, text), load it instead of the PDF.\n\nDo you want to convert the file anyway?"
 manager:
   panel_name: "Rule Manager Panel – dictionary explorer"
   desc: |-
