@@ -42,20 +42,33 @@ def pliki_testowe() -> list[Path]:
     return sorted(KORZEN.glob("test_*.py"))
 
 
-def zebrane_testy() -> int:
-    """Liczba testów zebranych przez pytesta (bez uruchamiania)."""
+def zebrane_testy() -> tuple[int | None, list[str]]:
+    """(liczba testów zebranych przez pytesta, moduły pominięte przy zbieraniu).
+
+    Moduł z `pytest.importorskip` na poziomie modułu (np. bez wx) wypada ze
+    zbierania PO CICHU — liczba spada i wyglądało to na rozjazd CONTRIBUTING.md
+    (audyt 19.15, L3). Wtedy liczba jest `None`: w tym środowisku nie da się
+    jej sprawdzić, a pominięte moduły idą do raportu. Tak samo moduł, który się
+    nie zbiera (twardy `import wx`): błąd zbierania pokaże i tak pełny pytest.
+    """
     wynik = subprocess.run(
-        [sys.executable, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider",
+        [sys.executable, "-m", "pytest", "--collect-only", "-q", "-rs", "-p", "no:cacheprovider",
          *[p.name for p in pliki_testowe()]],
         cwd=KORZEN, capture_output=True, text=True, encoding="utf-8", errors="replace")
     trafienie = re.search(r"(\d+) tests? collected", wynik.stdout)
-    if wynik.returncode != 0 or not trafienie:
+    if not trafienie:
         raise RuntimeError("pytest --collect-only failed:\n" + wynik.stdout[-2000:] + wynik.stderr[-2000:])
-    return int(trafienie.group(1))
+    pominiete = [f"{plik} ({powod})" for plik, powod in
+                 re.findall(r"^SKIPPED \[\d+\] (\S+?):\d+: (.*)$", wynik.stdout, re.M)]
+    pominiete += [f"{plik} (collection error)" for plik in
+                  re.findall(r"^_+ ERROR collecting (\S+) _+$", wynik.stdout, re.M)]
+    if pominiete or wynik.returncode != 0:
+        return None, pominiete or ["pytest --collect-only exit code %d" % wynik.returncode]
+    return int(trafienie.group(1)), []
 
 
-def sprawdz(tekst: str, pliki: int, testy: int) -> list[str]:
-    """Lista rozjazdów (pusta = zgodnie)."""
+def sprawdz(tekst: str, pliki: int, testy: int | None) -> list[str]:
+    """Lista rozjazdów (pusta = zgodnie); `testy=None` = liczby testów nie porównujemy."""
     bledy = []
     trafienia = ZDANIE.findall(tekst)
     if len(trafienia) != 1:
@@ -65,7 +78,7 @@ def sprawdz(tekst: str, pliki: int, testy: int) -> list[str]:
         n, m = map(int, trafienia[0])
         if n != pliki:
             bledy.append(f"CONTRIBUTING.md says {n} test files, the repo has {pliki}")
-        if m != testy:
+        if testy is not None and m != testy:
             bledy.append(f"CONTRIBUTING.md says {m} tests, pytest collects {testy}")
     istniejace = {p.name for p in pliki_testowe()}
     # Tylko wiersze tabel: proza ma przykłady w rodzaju `test_something.py`.
@@ -89,9 +102,14 @@ def main(argv: list[str] | None = None) -> int:
     tryb.add_argument("--zapisz", action="store_true", help="write the current numbers into CONTRIBUTING.md")
     args = parser.parse_args(argv)
 
-    pliki, testy = len(pliki_testowe()), zebrane_testy()
+    pliki, (testy, pominiete) = len(pliki_testowe()), zebrane_testy()
     surowy = CONTRIBUTING.read_bytes().decode("utf-8")
-    print(f"Test files: {pliki}, collected tests: {testy}")
+    print(f"Test files: {pliki}, collected tests: {'unknown' if testy is None else testy}")
+    for modul in pominiete:
+        print(f"⚠ not collected here, so the test count cannot be verified: {modul}")
+    if args.zapisz and testy is None:
+        print("❌ Not writing: a test module was not collected and the count would be too low.")
+        return 1
     if args.zapisz:
         CONTRIBUTING.write_bytes(zapisz(surowy, pliki, testy).encode("utf-8"))
         print("✅ CONTRIBUTING.md updated.")

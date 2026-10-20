@@ -170,8 +170,13 @@ def test_liczby_testow_w_contributing():
     Zbiera testy bez uruchamiania (`--collect-only`), bez sieci."""
     import przelicznik_testow as pt
     tekst = (KORZEN / "CONTRIBUTING.md").read_text(encoding="utf-8")
-    bledy = pt.sprawdz(tekst, len(pt.pliki_testowe()), pt.zebrane_testy())
+    testy, pominiete = pt.zebrane_testy()
+    bledy = pt.sprawdz(tekst, len(pt.pliki_testowe()), testy)
     assert not bledy, "\n".join(bledy) + "\nFix: .venv/Scripts/python przelicznik_testow.py --zapisz"
+    if pominiete:
+        # Bez wx (L3) moduł wypada ze zbierania: liczby testów nie da się tu
+        # sprawdzić — widoczny skip, nie fałszywy rozjazd.
+        pytest.skip("test count unverifiable here, modules not collected: " + "; ".join(pominiete))
 
 
 def test_przelicznik_lapie_rozjazd():
