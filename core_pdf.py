@@ -55,6 +55,7 @@ dalej jest zgłaszana.
 from __future__ import annotations
 
 import functools
+import hashlib
 import math
 import os
 import re
@@ -272,11 +273,14 @@ def _policz_litery(tp, znaki: list[tuple[int, str]],
     flaga = flaga or _blad_mapowania
     litery = podejrzane = 0
     for i, z in znaki:
-        if not z.isalpha():
+        # `z` bywa kilkuznakowy: ligatura z fontu („f_f_i” → „ffi”), para
+        # surogatów — liczymy jego litery, nie jego samego.
+        ile = sum(c.isalpha() for c in z)
+        if not ile:
             continue
-        litery += 1
-        if z not in znane and flaga(tp, i):
-            podejrzane += 1
+        litery += ile
+        if any(c.isalpha() and c not in znane for c in z) and flaga(tp, i):
+            podejrzane += ile
     return litery, podejrzane
 
 
@@ -362,17 +366,20 @@ def _napraw_z_fontu(tp, znaki: list[tuple[int, str]], znane: frozenset[str],
                     fonty: dict, flaga=None) -> list[tuple[int, str]] | None:
     """Znaki strony po podmianie kodów glifów na znaki z fontu; `None` = nic do zrobienia.
 
-    `fonty` to pamięć podręczna całego dokumentu: nazwa fontu → mapa glifów
-    (nazwa podzbioru „WNVQEB+TimesNewRomanPSMT” jest unikalna w pliku).
+    `fonty` to pamięć podręczna całego dokumentu: klucz fontu → mapa glifów.
+    Klucz to nazwa + długość + skrót DANYCH fontu, nie sama nazwa: w PDF-ach
+    sklejonych z kilku plików, ze stałym prefiksem „AAAAAA+” albo bez nazwy
+    dwa różne podzbiory noszą tę samą nazwę i drugi dostawał mapę pierwszego
+    (audyt 19.15, M1: strona 2 „стуфх” wychodziła jako „абвгд”).
     """
     if getattr(tp, "raw", None) is None:
         return None
     import ctypes
     import pypdfium2.raw as pdfium_c
     zflagowane: dict[str, list[int]] = {}
-    # Wskaźnik fontu → nazwa, w obrębie strony: nazwa per znak to połowa
-    # czasu całej naprawy (zmierzone na 880 tys. znaków słownika).
-    nazwy: dict[int | None, str] = {}
+    # Wskaźnik fontu → klucz, w obrębie strony: dane i nazwa fontu raz na
+    # font strony, nie raz na znak (zmierzone na 880 tys. znaków słownika).
+    nazwy: dict[int | None, tuple] = {}
     flaga = flaga or _blad_mapowania
     for poz, (i, z) in enumerate(znaki):
         if z.isspace() or not flaga(tp, i):
@@ -383,14 +390,16 @@ def _napraw_z_fontu(tp, znaki: list[tuple[int, str]], znane: frozenset[str],
             continue
         adres = ctypes.cast(font, ctypes.c_void_p).value
         if adres not in nazwy:
-            nazwy[adres] = _nazwa_fontu(font)
-        nazwa = nazwy[adres]
-        if nazwa not in fonty:
             # Tylko font OSADZONY: dla nieosadzonego PDFium oddaje dane fontu
             # systemowego, którego numeracja glifów nie musi mieć nic wspólnego
             # z kodami w PDF-ie (zmierzone: Times z Windows „pasował” przypadkiem).
-            fonty[nazwa] = mapa_glifow(_bajty_c(pdfium_c.FPDFFont_GetFontData, font)) \
-                if pdfium_c.FPDFFont_GetIsEmbedded(font) == 1 else {}
+            osadzony = pdfium_c.FPDFFont_GetIsEmbedded(font) == 1
+            dane = _bajty_c(pdfium_c.FPDFFont_GetFontData, font) if osadzony else b""
+            klucz = (_nazwa_fontu(font), len(dane), hashlib.sha1(dane).digest())
+            nazwy[adres] = klucz
+            if klucz not in fonty:
+                fonty[klucz] = mapa_glifow(dane) if osadzony else {}
+        nazwa = nazwy[adres]
         zflagowane.setdefault(nazwa, []).append(poz)
     wynik = list(znaki)
     zmiana = False
@@ -751,7 +760,8 @@ def _czytaj_strone(strona, znane: frozenset[str] | None, fonty: dict | None = No
                 # w indeksie górnym („…Шанский и А¹ | . Однако…").
                 pokrycie = min(gora, g) - max(dol, d)
                 inna_wysokosc = pokrycie < min(gora - dol, g - d, wys) * 0.5
-                rtl = unicodedata.bidirectional(z) in ("R", "AL")
+                # z[0]: ligatura z fontu („ffi”) i znak spoza BMP mają >1 znak.
+                rtl = unicodedata.bidirectional(z[0]) in ("R", "AL")
                 cofniecie = not rtl and l < prawo - wys
                 if inna_wysokosc or cofniecie:
                     zamknij()
@@ -1141,7 +1151,7 @@ def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> Wynik
     if znane_litery is None:
         znane_litery = litery_paczek()
     # Mapy glifów osadzonych fontów — raz na dokument (19.15, etap 2).
-    fonty: dict[str, dict[int, str]] = {}
+    fonty: dict[tuple, dict[int, str]] = {}
     try:
         strony: list[_Strona] = []
         bez_tekstu: list[int] = []

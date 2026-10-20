@@ -588,7 +588,7 @@ def test_strona_znieksztalcona_blokuje_sklejanie(monkeypatch):
 _TEKST_G = "Утверждено к печати"
 
 
-def _font_ttf(*, cmap=True, nazwy=True, polowa=False):
+def _font_ttf(*, cmap=True, nazwy=True, polowa=False, ligatura=False):
     import io
     from fontTools.fontBuilder import FontBuilder
     from fontTools.pens.ttGlyphPen import TTGlyphPen
@@ -600,6 +600,9 @@ def _font_ttf(*, cmap=True, nazwy=True, polowa=False):
         kolejnosc.append(f"uni{ord(z):04X}")
     gid["akcent"] = len(kolejnosc)
     kolejnosc.append("uni0301")
+    if ligatura:                       # jak w fontach łacińskich: tylko `post`, nie `cmap`
+        gid["ffi"] = len(kolejnosc)
+        kolejnosc.append("f_f_i")
     w_cmap = litery[: len(litery) // 2] if polowa else litery
     fb = FontBuilder(1000, isTTF=True)
     fb.setupGlyphOrder(kolejnosc)
@@ -621,9 +624,10 @@ def _font_ttf(*, cmap=True, nazwy=True, polowa=False):
     return bufor.getvalue(), gid
 
 
-def _pdf_osadzony(sciezka, **opcje_fontu):
-    """Słowa jako osobne biegi (PDFium generuje spacje), akcent po „Утве”."""
-    ttf, gid = _font_ttf(**opcje_fontu)
+def _pdf_osadzony(sciezka, ligatura=False, **opcje_fontu):
+    """Słowa jako osobne biegi (PDFium generuje spacje), akcent po „Утве”;
+    `ligatura` dokleja glif „f_f_i” do ostatniego słowa."""
+    ttf, gid = _font_ttf(ligatura=ligatura, **opcje_fontu)
     x, tresc = 72, b""
     for nr, slowo in enumerate(_TEKST_G.split()):
         kody = []
@@ -631,6 +635,8 @@ def _pdf_osadzony(sciezka, **opcje_fontu):
             kody.append(f"{gid[z]:04x}")
             if nr == 0 and len(kody) == 4:
                 kody.append(f"{gid['akcent']:04x}")
+        if ligatura and nr == len(_TEKST_G.split()) - 1:
+            kody.append(f"{gid['ffi']:04x}")
         tresc += f"BT /F1 12 Tf {x} 700 Td <{''.join(kody)}> Tj ET ".encode()
         x += len(kody) * 6 + 4          # `/DW 500` daje szerokość także akcentowi
     cmap = _CMAP_UCIETA.encode()
@@ -676,6 +682,38 @@ def test_naprawa_z_osadzonego_fontu_cmap_i_post(tmp_path):
     assert unicodedata.normalize("NFC", w.akapity[0]) == w.akapity[0]
     assert w.strony_naprawione == [1] and w.strony_znieksztalcone == []
     assert w.tekst_wiarygodny == w.tekst
+
+
+def test_naprawa_z_ligatura_spoza_cmap(tmp_path):
+    # Audyt 19.15 (H1): nazwa `post` „f_f_i” daje TRZY znaki; `bidirectional`
+    # na takim „znaku” rzucał TypeError i cały PDF się nie wczytywał.
+    # Ligatura to naprawdę te litery — zostają, liczone jako trzy.
+    p = tmp_path / "ligatura.pdf"
+    _pdf_osadzony(p, ligatura=True)
+    w = core_pdf.wyciagnij(str(p), ZNANE | frozenset("fi"))
+    assert w.akapity == [f"Утве{chr(0x301)}рждено к печатиffi"]
+    assert w.strony_naprawione == [1] and w.strony_znieksztalcone == []
+
+
+def test_dwa_fonty_o_tej_samej_nazwie_maja_osobne_mapy(tmp_path, monkeypatch):
+    # Audyt 19.15 (M1): pamięć map po samej nazwie fontu — PDF sklejony z dwóch
+    # plików ma dwa podzbiory „ABCDEF+Proba” o tej samej numeracji glifów, ale
+    # innych literach; strona 2 dostawała mapę strony 1.
+    import pypdfium2 as pdfium
+    tekst_b = "Счастье"
+    a, b = tmp_path / "a.pdf", tmp_path / "b.pdf"
+    _pdf_osadzony(a)
+    monkeypatch.setattr(sys.modules[__name__], "_TEKST_G", tekst_b)
+    _pdf_osadzony(b)
+    razem = pdfium.PdfDocument.new()
+    for czesc in (a, b):
+        razem.import_pages(pdfium.PdfDocument(str(czesc)))
+    p = tmp_path / "razem.pdf"
+    razem.save(str(p))
+    razem.close()
+    w = core_pdf.wyciagnij(str(p), ZNANE)
+    assert [s for s in w.akapity_stron] == [[f"Утве{chr(0x301)}рждено к печати"], [f"Счас{chr(0x301)}тье"]]
+    assert w.strony_naprawione == [1, 2]
 
 
 def test_naprawa_czesciowa_zostaje_zgloszona(tmp_path):
