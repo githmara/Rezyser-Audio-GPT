@@ -333,18 +333,26 @@ class KonwerterPanel(wx.Panel):
             return
 
         # --- Odczyt pliku źródłowego ---
+        # 19.15 (audyt M2): poprawki tekstu przy odczycie trafiają do dialogu
+        # „Sukces” — Konwerter przepisywał tekst po cichu.
+        zdania_przetworzenia: list[str] = []
         try:
             if file_name.lower().endswith(".docx"):
                 doc_in = docx.Document(file_name)
                 # 19.15: U+F020, rozstrzelenia i przeniesienia z konwersji
                 # PDF→Word — to samo czyszczenie co w Poliglocie (`tekst_docx`).
-                tekst = "\n".join(core_poliglota.oczysc_akapity_docx(
-                    [p.text for p in doc_in.paragraphs])[0])
+                akapity_docx, liczniki_docx = core_poliglota.oczysc_akapity_docx(
+                    [p.text for p in doc_in.paragraphs])
+                tekst = "\n".join(akapity_docx)
+                zdanie = core_skany.zdanie_czyszczenia_docx(liczniki_docx)
+                if zdanie:
+                    zdania_przetworzenia.append(zdanie)
             elif file_name.lower().endswith(".pdf"):
                 # 19.13: warstwa tekstu PDF; akapit = linia, jak przy `.docx`.
                 with wx.BusyCursor():   # 800 stron ≈ 6 s (audyt 19.13)
                     wynik_pdf = core_pdf.wyciagnij(file_name)
                 tekst = "\n".join(wynik_pdf.akapity)
+                zdania_przetworzenia += core_skany.zdania_naprawy_pdf(wynik_pdf)
                 # 19.15: zniekształcona warstwa tekstu (czcionka bez pełnej
                 # mapy znaków) dawała .docx z literami IPA zamiast cyrylicy
                 # i dialog „Sukces”. Odczytu obrazu Konwerter nie ma, więc
@@ -487,7 +495,8 @@ class KonwerterPanel(wx.Panel):
             return
 
         wx.MessageBox(
-            t("konwerter.sukces_tresc", sciezka_pliku=out_name),
+            "\n\n".join([t("konwerter.sukces_tresc", sciezka_pliku=out_name)]
+                        + zdania_przetworzenia),
             t("konwerter.sukces_tytul"),
             wx.OK | wx.ICON_INFORMATION,
             self,

@@ -52,6 +52,8 @@ common:
   pdf_otwarcie_tytul: PDF-tiedostoa ei voi avata
   pdf_haslo_tresc: "Tiedosto {nazwa_pliku} on salasanasuojattu, joten ohjelma ei voi lukea sitä.\n\nAvaa se PDF-katseluohjelmassa ja tallenna salasanaton kopio tai vie sisältö Word- tai tekstitiedostoon ja lataa se PDF-tiedoston sijaan.\n\nTekniset tiedot: {szczegol}"
   pdf_uszkodzony_tresc: "Tiedoston {nazwa_pliku} avaaminen epäonnistui – se on vioittunut tai ei ole kelvollinen PDF-tiedosto.\n\nTekniset tiedot: {szczegol}"
+  docx_oczyszczony_tytul: Asiakirjan teksti korjattu
+  docx_oczyszczony_tresc: 'Avattaessa ohjelma korjasi PDF-muunnoksen jälkeensä jättämää tekstiä: yhdisti {liczba_przeniesien} seuraavalle riville siirrettyä sanaa, liitti yhteen {liczba_rozstrzelonych} harvennetuin kirjaimin kirjoitettua sanaa, korvasi {liczba_spacji} epätavallista välilyöntiä ja muunsi {liczba_przekodowanych} kappaleen, joissa oli virheellinen merkistökoodaus.'
 main:
   menu:
     narzedzia: "&Työkalut"

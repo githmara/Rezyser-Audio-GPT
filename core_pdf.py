@@ -327,6 +327,26 @@ def _bajty_c(funkcja, *argumenty) -> bytes:
     return bytes(bufor[:n.value])
 
 
+_RE_CID_DO_GID_STRUMIEN = re.compile(rb"/CIDToGIDMap\s*\d+\s+\d+\s+R")
+
+
+def _mapa_cid_strumieniem(sciezka: str) -> bool:
+    """Plik ma `CIDToGIDMap` jako strumień (kod znaku ≠ numer glifu).
+
+    Naprawa z fontu bierze kod znaku Type0/Identity-H za numer glifu; przy
+    takiej mapie dawała „ɗрадчпевдкн” zamiast „Утверждено” i zgłaszała to jako
+    naprawione (audyt 19.15, zmierzone na PDF-ie z przesuniętą mapą). PDFium
+    mapy nie udostępnia, więc taki dokument nie jest naprawiany — strony
+    zostają zgłoszone jako zniekształcone. Ograniczenie: słownik fontu
+    w skompresowanym strumieniu obiektów (`/ObjStm`) jest tu niewidoczny.
+    """
+    try:
+        with open(sciezka, "rb") as fh:
+            return _RE_CID_DO_GID_STRUMIEN.search(fh.read()) is not None
+    except OSError:
+        return False
+
+
 def _dlugosc_danych(font) -> int:
     """Długość danych fontu — tylko zapytanie o rozmiar, bez kopiowania."""
     import ctypes
@@ -377,7 +397,8 @@ def mapa_glifow(dane: bytes) -> dict[int, str]:
 
 
 def _napraw_z_fontu(tp, znaki: list[tuple[int, str]], znane: frozenset[str],
-                    fonty: dict, flaga=None) -> list[tuple[int, str]] | None:
+                    fonty: dict, flaga=None, potwierdzone: set[int] | None = None
+                    ) -> list[tuple[int, str]] | None:
     """Znaki strony po podmianie kodów glifów na znaki z fontu; `None` = nic do zrobienia.
 
     `fonty` to pamięć podręczna całego dokumentu: klucz fontu → mapa glifów.
@@ -430,6 +451,15 @@ def _napraw_z_fontu(tp, znaki: list[tuple[int, str]], znane: frozenset[str],
     zmiana = False
     for nazwa, pozycje in zflagowane.items():
         mapa = fonty[nazwa]
+        if mapa and potwierdzone is not None:
+            # Font sam mówi, że glif rysuje dokładnie ten znak, który zgadł
+            # PDFium: litera jest poprawna, choć flagowana. Bez tego poprawny
+            # czeski („Příliš žluťoučký”) i grecki — języki bez paczki — szły
+            # do bramki jako zniekształcone (audyt 19.15, zmierzone).
+            potwierdzone.update(znaki[p][0] for p in pozycje
+                                if len(znaki[p][1]) == 1 and znaki[p][1].isalpha()
+                                and znaki[p][1] not in znane
+                                and mapa.get(ord(znaki[p][1])) == znaki[p][1])
         litery = [znaki[p][1] for p in pozycje if znaki[p][1].isalpha()]
         if not mapa or not litery or \
                 sum(z not in znane for z in litery) < UDZIAL_GLIFOW_FONTU * len(litery):
@@ -523,7 +553,14 @@ def _znaki_po_naprawie(tp, znane: frozenset[str] | None, fonty: dict | None
     litery, podejrzane = _policz_litery(tp, wszystkie, znane, flaga)
     if znane is None or fonty is None or not czy_znieksztalcona(litery, podejrzane):
         return wszystkie, litery, podejrzane, False
-    nowe = _napraw_z_fontu(tp, wszystkie, znane, fonty, flaga)
+    potwierdzone: set[int] = set()
+    nowe = _napraw_z_fontu(tp, wszystkie, znane, fonty, flaga, potwierdzone)
+    if potwierdzone:
+        flaga_strony = flaga
+        flaga = lambda tp_, i: i not in potwierdzone and flaga_strony(tp_, i)  # noqa: E731
+        litery, podejrzane = _policz_litery(tp, wszystkie, znane, flaga)
+        if not czy_znieksztalcona(litery, podejrzane):
+            return wszystkie, litery, podejrzane, False
     if nowe is None:
         return wszystkie, litery, podejrzane, False
     litery2, podejrzane2 = _policz_litery(tp, nowe, znane, flaga)
@@ -1224,7 +1261,9 @@ def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> Wynik
     if znane_litery is None:
         znane_litery = litery_paczek()
     # Mapy glifów osadzonych fontów — raz na dokument (19.15, etap 2).
-    fonty: dict[tuple, dict[int, str]] = {}
+    # `None` = bez naprawy: przy `CIDToGIDMap` jako strumieniu kod znaku nie
+    # jest numerem glifu, a PDFium tej mapy nie oddaje (audyt 19.15).
+    fonty: dict[tuple, dict[int, str]] | None = None if _mapa_cid_strumieniem(sciezka) else {}
     try:
         strony: list[_Strona] = []
         bez_tekstu: list[int] = []

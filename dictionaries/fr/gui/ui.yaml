@@ -52,6 +52,8 @@ common:
   pdf_otwarcie_tytul: Impossible d'ouvrir le PDF
   pdf_haslo_tresc: "Le fichier {nazwa_pliku} est protégé par mot de passe : le programme ne peut donc pas le lire.\n\nOuvrez-le dans un lecteur PDF, enregistrez-en une copie sans mot de passe, ou exportez son contenu vers un fichier Word ou texte et chargez-le à la place du PDF.\n\nDétails techniques : {szczegol}"
   pdf_uszkodzony_tresc: "Impossible d'ouvrir le fichier {nazwa_pliku} : il est endommagé ou ce n'est pas un fichier PDF valide.\n\nDétails techniques : {szczegol}"
+  docx_oczyszczony_tytul: Texte du document corrigé
+  docx_oczyszczony_tresc: "Lors du chargement, le programme a corrigé le texte issu de la conversion du PDF : il a fusionné {liczba_przeniesien} mots coupés en fin de ligne, rassemblé {liczba_rozstrzelonych} mots écrits avec des lettres espacées, remplacé {liczba_spacji} espaces inhabituelles et réencodé {liczba_przekodowanych} paragraphes dont l'encodage des caractères était incorrect."
 main:
   menu:
     narzedzia: "&Outils"

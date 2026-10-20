@@ -262,6 +262,36 @@ def zakresy(strony: list[int]) -> str:
     return ", ".join(czesci)
 
 
+def zdanie_czyszczenia_docx(liczniki: dict[str, int]) -> str | None:
+    """Zdanie o poprawkach `.docx` (19.15, audyt M2: zero ciszy); `None`, gdy nic.
+
+    `liczniki` to wynik `core_poliglota.oczysc_akapity_docx` — słownik z
+    konwersji PDF→Word miał 3 746 + 142 + 942 scaleń przeniesień, a GUI
+    milczało.
+    """
+    przeniesienia = sum(liczniki.get(f"przeniesienia_{r}", 0) for r in ("1", "2", "3"))
+    liczby = {"liczba_przeniesien": przeniesienia,
+              "liczba_rozstrzelonych": liczniki.get("rozstrzelone_sklejone", 0),
+              "liczba_spacji": liczniki.get("spacja_symbol", 0),
+              "liczba_przekodowanych": liczniki.get("mojibake_akapity", 0)}
+    if not any(liczby.values()):
+        return None
+    return t("common.docx_oczyszczony_tresc", **liczby)
+
+
+def zdania_naprawy_pdf(wynik) -> list[str]:
+    """Zdania o stronach PDF odtworzonych z fontu i przekodowanych (Konwerter, M2)."""
+    zdania = []
+    if wynik.strony_naprawione:
+        zdania.append(t("poliglota.pdf_strony_naprawione",
+                        lista_stron=zakresy(wynik.strony_naprawione)))
+    if wynik.strony_przekodowane:
+        zdania.append(t("poliglota.pdf_strony_przekodowane",
+                        kodowanie=", ".join(wynik.kodowania),
+                        lista_stron=zakresy(wynik.strony_przekodowane)))
+    return zdania
+
+
 def _blad_strony(numer: int, exc: Exception, slad: list[dict] | None = None) -> WynikStrony:
     return WynikStrony(numer, STATUS_BLAD, powod=t("poliglota.skan_powod_blad"),
                        szczegol=f"{type(exc).__name__}: {exc}", slad=slad or [])

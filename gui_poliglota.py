@@ -830,7 +830,13 @@ class PoliglotaPanel(wx.Panel):
                 # gubiły całą treść tabel (zmierzone: 2 akapity z 8 na
                 # dokumencie z jedną tabelą). Ten sam iterator, którym
                 # stempluje `zapisz_wynik`.
-                self._file_content = core_poliglota.tekst_docx(file_name)
+                self._file_content, liczniki_docx = core_poliglota.tekst_docx_z_licznikami(file_name)
+                # 19.15 (audyt M2): przepisany tekst to przetworzenie, o którym
+                # użytkownik ma wiedzieć — zero ciszy.
+                zdanie = core_skany.zdanie_czyszczenia_docx(liczniki_docx)
+                if zdanie:
+                    wx.MessageBox(zdanie, t("common.docx_oczyszczony_tytul"),
+                                  wx.OK | wx.ICON_INFORMATION, self)
             else:
                 with open(file_name, "r", encoding="utf-8") as fh:
                     self._file_content = fh.read()

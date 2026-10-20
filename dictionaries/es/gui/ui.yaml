@@ -52,6 +52,8 @@ common:
   pdf_otwarcie_tytul: No se puede abrir el PDF
   pdf_haslo_tresc: "El archivo {nazwa_pliku} está protegido con contraseña, por lo que el programa no puede leerlo.\n\nÁbrelo en un visor de PDF y guarda una copia sin contraseña, o exporta el contenido a un archivo de Word o de texto y cárgalo en lugar del PDF.\n\nDetalles técnicos: {szczegol}"
   pdf_uszkodzony_tresc: "No se pudo abrir el archivo {nazwa_pliku}: está dañado o no es un PDF válido.\n\nDetalles técnicos: {szczegol}"
+  docx_oczyszczony_tytul: Texto del documento corregido
+  docx_oczyszczony_tresc: 'Al cargar el documento, el programa corrigió el texto que dejó la conversión desde PDF: unió {liczba_przeniesien} palabras divididas por un salto de línea, juntó {liczba_rozstrzelonych} palabras escritas con letras espaciadas, reemplazó {liczba_spacji} espacios atípicos y recodificó {liczba_przekodowanych} párrafos con una codificación de caracteres incorrecta.'
 main:
   menu:
     narzedzia: "&Herramientas"

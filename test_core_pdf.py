@@ -716,6 +716,77 @@ def test_dwa_fonty_o_tej_samej_nazwie_maja_osobne_mapy(tmp_path, monkeypatch):
     assert w.strony_naprawione == [1, 2]
 
 
+def test_cid_do_gid_strumieniem_bez_naprawy(tmp_path):
+    # Audyt 19.15: `CIDToGIDMap` jako strumień — kod znaku ≠ numer glifu, a
+    # naprawa brała kod za glif i zgłaszała śmieci („ɗрадчпевдкн”) jako
+    # naprawione. Taki dokument nie jest naprawiany; strona jest zgłoszona.
+    import re
+    p = tmp_path / "identity.pdf"
+    _pdf_osadzony(p)
+    dane = p.read_bytes()
+    tresc = re.search(rb"stream\n(BT .*?)\nendstream", dane, re.S).group(1)
+    nowa = re.sub(rb"<([0-9a-f]+)>", lambda m: b"<" + b"".join(
+        b"%04x" % (int(m.group(1)[i:i + 4], 16) - 1) for i in range(0, len(m.group(1)), 4)) + b">",
+        tresc)
+    mapa = b"".join((cid + 1).to_bytes(2, "big") for cid in range(700))
+    dane = dane.replace(b"<< /Length %d >>\nstream\nBT" % len(tresc),
+                        b"<< /Length %d >>\nstream\nBT" % len(nowa)).replace(tresc, nowa)
+    dane = dane.replace(b"/CIDToGIDMap /Identity", b"/CIDToGIDMap 10 0 R")
+    xref = dane.index(b"xref")
+    dane = (dane[:xref] + b"10 0 obj\n<< /Length %d >>\nstream\n" % len(mapa) + mapa
+            + b"\nendstream\nendobj\ntrailer\n<< /Size 11 /Root 1 0 R >>\n%%EOF\n")
+    p2 = tmp_path / "cid_do_gid.pdf"
+    p2.write_bytes(dane)
+    w = core_pdf.wyciagnij(str(p2), ZNANE)
+    assert w.strony_naprawione == [] and w.strony_znieksztalcone == [1]
+
+
+def test_poprawny_tekst_bez_paczki_potwierdzony_fontem(tmp_path, monkeypatch):
+    # Audyt 19.15: czeski bez paczki — font CID bez ToUnicode, numer glifu =
+    # kod Unicode, więc PDFium zgaduje POPRAWNIE, ale flaguje. Bramka brała
+    # to za zniekształcenie (Poliglota proponowała płatny odczyt obrazu).
+    # Własny `cmap` fontu potwierdza literę → strona nie jest zgłaszana.
+    import io
+    import re
+    from fontTools.fontBuilder import FontBuilder
+    from fontTools.pens.ttGlyphPen import TTGlyphPen
+    tekst = "Příliš žluťoučký kůň úpěl ďábelské ódy"
+    litery = sorted(set(tekst.replace(" ", "")))
+    kolejnosc = [".notdef"] + [f"g{i}" for i in range(1, max(map(ord, litery)) + 1)]
+    for z in litery:
+        kolejnosc[ord(z)] = f"uni{ord(z):04X}"
+    fb = FontBuilder(1000, isTTF=True)
+    fb.setupGlyphOrder(kolejnosc)
+    fb.setupCharacterMap({ord(z): f"uni{ord(z):04X}" for z in litery})
+    pen = TTGlyphPen(None)
+    pen.moveTo((0, 0))
+    pen.lineTo((0, 500))
+    pen.lineTo((400, 500))
+    pen.closePath()
+    fb.setupGlyf({n: pen.glyph() for n in kolejnosc})
+    fb.setupHorizontalMetrics({n: (500, 0) for n in kolejnosc})
+    fb.setupHorizontalHeader(ascent=800, descent=-200)
+    fb.setupNameTable({"familyName": "Proba", "styleName": "Regular"})
+    fb.setupOS2()
+    fb.setupPost()
+    bufor = io.BytesIO()
+    fb.save(bufor)
+    monkeypatch.setattr(sys.modules[__name__], "_font_ttf", lambda **_k: (
+        bufor.getvalue(), dict.fromkeys(set(_TEKST_G) | {"akcent"}, 1)))
+    p = tmp_path / "cs.pdf"
+    _pdf_osadzony(p)
+    x, tresc = 72, b""
+    for slowo in tekst.split():
+        tresc += f"BT /F1 12 Tf {x} 700 Td <{''.join(f'{ord(z):04x}' for z in slowo)}> Tj ET ".encode()
+        x += len(slowo) * 6 + 4
+    dane = p.read_bytes()
+    stara = re.search(rb"stream\n(BT .*?)\nendstream", dane, re.S).group(1)
+    p.write_bytes(dane.replace(b"<< /Length %d >>\nstream\n" % len(stara) + stara,
+                               b"<< /Length %d >>\nstream\n" % len(tresc) + tresc))
+    w = core_pdf.wyciagnij(str(p), ZNANE)
+    assert w.strony_znieksztalcone == [] and w.akapity == [tekst]
+
+
 def test_naprawa_czesciowa_zostaje_zgloszona(tmp_path):
     # `cmap` zna połowę liter, `post` bez nazw: strona lepsza, ale wciąż
     # zniekształcona — bramka ją zgłasza, a GUI oferuje odczyt obrazu.

@@ -119,7 +119,8 @@ def test_konwerter_czysci_tak_samo(tmp_path, monkeypatch):
     zapisane = []
     monkeypatch.setattr(docx.document.Document, "save",
                         lambda self, _p: zapisane.append([x.text for x in self.paragraphs]))
-    monkeypatch.setattr(wx, "MessageBox", lambda *_a, **_k: wx.OK)
+    komunikaty = []
+    monkeypatch.setattr(wx, "MessageBox", lambda tresc, *_a, **_k: komunikaty.append(tresc) or wx.OK)
     app = wx.App(False)
     jezyk_przed = i18n.aktualny_jezyk()
     i18n.ustaw_jezyk("pl")
@@ -135,6 +136,26 @@ def test_konwerter_czysci_tak_samo(tmp_path, monkeypatch):
     assert zapisane, "Konwerter nic nie zapisał"
     tekst = "\n".join(zapisane[-1])
     assert "посвященного" in tekst and "по- священного" not in tekst
+    # Audyt 19.15 (M2): przepisany tekst nie przechodzi po cichu — zdanie
+    # o poprawkach stoi w dialogu „Sukces”.
+    assert any("scalił 2 wyrazów" in k for k in komunikaty), komunikaty
+
+
+def test_liczniki_czyszczenia_docx_dla_gui(tmp_path):
+    import core_skany
+    import i18n
+    p = tmp_path / "slownik.docx"
+    _docx(p, TLO, REGULA_1, "Издание, по- священного теме.")
+    tekst, liczniki = cp.tekst_docx_z_licznikami(str(p))
+    assert tekst == cp.tekst_docx(str(p))
+    assert liczniki["przeniesienia_1"] + liczniki["przeniesienia_3"] == 2
+    jezyk_przed = i18n.aktualny_jezyk()
+    i18n.ustaw_jezyk("pl")
+    try:
+        assert "scalił 2 wyrazów" in core_skany.zdanie_czyszczenia_docx(liczniki)
+        assert core_skany.zdanie_czyszczenia_docx({"przeniesienia_1": 0}) is None
+    finally:
+        i18n.ustaw_jezyk(jezyk_przed)
 
 
 # Uruchomienie jako skrypt — deleguje do pytesta (kanon v19.2.1).

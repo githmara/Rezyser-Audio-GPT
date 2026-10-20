@@ -2441,9 +2441,16 @@ def tekst_docx(sciezka: str) -> str:
     z tabelą pokazywał ułamek treści, a użytkownik nie miał sygnału, że
     czegoś nie widzi.
     """
+    return tekst_docx_z_licznikami(sciezka)[0]
+
+
+def tekst_docx_z_licznikami(sciezka: str) -> tuple[str, dict[str, int]]:
+    """`tekst_docx` + liczniki czyszczenia (`oczysc_akapity_docx`) dla GUI:
+    przepisany tekst to przetworzenie, o którym użytkownik ma wiedzieć (M2)."""
     doc = docx.Document(sciezka)
     akapity = [para.text for para in _iteruj_akapity_docx(doc)]
-    return "\n".join(oczysc_akapity_docx(akapity)[0])
+    wynik, liczniki = oczysc_akapity_docx(akapity)
+    return "\n".join(wynik), liczniki
 
 
 # ---------------------------------------------------------------------------

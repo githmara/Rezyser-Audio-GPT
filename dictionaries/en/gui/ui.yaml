@@ -52,6 +52,8 @@ common:
   pdf_otwarcie_tytul: Can't open the PDF
   pdf_haslo_tresc: "The file {nazwa_pliku} is password-protected, so the program can't read it.\n\nOpen it in a PDF viewer and save a copy without a password, or export the content to a Word or text file and load that instead of the PDF.\n\nTechnical details: {szczegol}"
   pdf_uszkodzony_tresc: "Couldn't open the file {nazwa_pliku} – it's corrupted or isn't a valid PDF file.\n\nTechnical details: {szczegol}"
+  docx_oczyszczony_tytul: Document text corrected
+  docx_oczyszczony_tresc: 'On loading, the program cleaned up the text left behind by the PDF conversion: it merged {liczba_przeniesien} words hyphenated across line breaks, joined {liczba_rozstrzelonych} words written with letter-spacing, replaced {liczba_spacji} unusual spaces, and re-encoded {liczba_przekodowanych} paragraphs with incorrect character encoding.'
 diag:
   tytul: "Rule Warnings"
   wstep: |-

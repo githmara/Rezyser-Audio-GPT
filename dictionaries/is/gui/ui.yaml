@@ -52,6 +52,8 @@ common:
   pdf_otwarcie_tytul: Ekki er hægt að opna PDF-skrána
   pdf_haslo_tresc: "Skráin {nazwa_pliku} er varin með lykilorði og forritið getur því ekki lesið hana.\n\nOpnaðu hana í PDF-skoðara, vistaðu afrit án lykilorðs eða fluttu efnið út í Word-skjal eða textaskrá og hladdu henni inn í staðinn fyrir PDF-skrána.\n\nTæknilegar upplýsingar: {szczegol}"
   pdf_uszkodzony_tresc: "Ekki tókst að opna skrána {nazwa_pliku} – hún er skemmd eða er ekki gild PDF-skrá.\n\nTæknilegar upplýsingar: {szczegol}"
+  docx_oczyszczony_tytul: Texti skjalsins lagfærður
+  docx_oczyszczony_tresc: 'Við innlestur lagfærði forritið texta sem varð eftir við umbreytingu úr PDF: það sameinaði {liczba_przeniesien} orð sem höfðu verið brotin yfir á næstu línu, tengdi saman {liczba_rozstrzelonych} orð sem voru rituð með gisnum stöfum, breytti {liczba_spacji} óvenjulegum bilum og umkóðaði {liczba_przekodowanych} málsgreinar með rangri stafakóðun.'
 main:
   menu:
     narzedzia: "&Verkfæri"
