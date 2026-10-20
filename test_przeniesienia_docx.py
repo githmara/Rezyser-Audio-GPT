@@ -55,6 +55,36 @@ def test_alfabety_paczek_per_jezyk():
     assert not any(set("Áèáëèîòåêà") <= a for a in alfabety.values())
 
 
+POVEST = ("À ñå ðîäè ïîøëè ñëàáû, 1äîáðó áîæëèâè1, à íà áåçóìèå îáðàòèëèñÿ è ó÷åëè æèòü "
+          "â ñóåòh èâ íåïðàâäh,* â ïåðå÷èíå2* â")
+
+
+@pytest.mark.parametrize("paczki", [None, ("pl", "en", "fi", "is", "it", "ru")])
+def test_mojibake_jedno_kodowanie_na_prawdziwych_alfabetach(paczki):
+    # Etap 5, „Повесть о Горе-Злочастии”: przy alfabetach paczek Reżysera ten
+    # akapit samodzielnie wygrywał przez mac-cyrillic („обратилис€”). Jednostka
+    # ma jedno kodowanie — tu też sytuacja ATA (sześć paczek, bez fr/de/es).
+    import czyszczenie_tekstu as ct
+    alfabety = [a for k, a in cp.alfabety_paczek().items() if paczki is None or k in paczki]
+    wstep = "Ïîâåñòü î Ãîðå-Çëî÷àñòèè. Áèáëèîòåêà ëèòåðàòóðû Äðåâíåé Ðóñè."
+    wynik, info = ct.napraw_mojibake_akapitow([wstep, POVEST], alfabety)
+    assert wynik == [wstep.encode("latin-1").decode("cp1251"),
+                     POVEST.encode("latin-1").decode("cp1251")]
+    assert info["kodowania"] == {"latin-1>cp1251": 2}
+
+
+@pytest.mark.parametrize("paczki", [None, ("pl", "en", "fi", "is", "it", "ru")])
+def test_mojibake_teksty_paczek_nietkniete(paczki):
+    # Sytuacja ATA: bez paczek fr/de/es ich teksty nie mogą zostać „przekodowane”
+    # (cp866 robiło „Hauptmen№leiste”, cp1251 „partоmes”).
+    import czyszczenie_tekstu as ct
+    alfabety = [a for k, a in cp.alfabety_paczek().items() if paczki is None or k in paczki]
+    for kod in ("fr", "de", "es", "is", "fi", "pl"):
+        linie = (Path(__file__).parent / "dictionaries" / kod / "gui" / "ui.yaml") \
+            .read_text(encoding="utf-8").split("\n")
+        assert ct.napraw_mojibake_akapitow(linie, alfabety)[1]["przekodowane"] == 0, kod
+
+
 def _docx(sciezka, *akapity):
     import docx
     d = docx.Document()
