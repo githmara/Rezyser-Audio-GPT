@@ -785,6 +785,61 @@ def test_rowne_przerwy_bez_granic_i_prog_po_akcencie():
     assert znaki[po_akcencie + 1] == core_pdf._GRANICA       # +1: granica brzegu linii
 
 
+def test_ciag_nie_zaczyna_sie_w_srodku_slowa():
+    # Земская (etap 5b): „межд|у  с л о в о” — ciąg startował od „у”, był
+    # przyklejony do „д” i nie dostawał granicy z lewej.
+    znaki, luki = _znaki_rozstrzelone(["слово"])
+    znaki[:0] = list("между") + [" "]
+    luki = {i + 6: v for i, v in luki.items()} | {5: 13.0}
+    core_pdf._oznacz_granice_rozstrzelenia(znaki, luki)
+    assert "".join(znaki) == "между" + core_pdf._GRANICA + "с л о в о" + core_pdf._GRANICA
+
+
+def test_prawy_brzeg_po_ogonie_interpunkcji():
+    # Земская (etap 5b): „н и я.  Слова” — granica stała tylko przy spacji tuż
+    # po literze, więc ciąg z kropką był przyklejony do następnego słowa.
+    znaki, luki = _znaki_rozstrzelone(["слово"])
+    znaki += [".", " "] + list("Слова")
+    luki[len(znaki) - 6] = 4.0
+    core_pdf._oznacz_granice_rozstrzelenia(znaki, luki)
+    g = core_pdf._GRANICA
+    assert "".join(znaki).strip(g) == "с л о в о." + g + "Слова"
+
+
+def _pdf_tc(sciezka, linie):
+    """Minimalny PDF (Courier 11) z odstępem liter `Tc` w JEDNYM napisie:
+    PDFium nie generuje wtedy spacji w przerwach, jak w Земской."""
+    tresc = b"".join(b"BT /F1 11 Tf %.2f Tc %d %d Td (%s) Tj ET\n" % (tc, x, y, t.encode("latin-1"))
+                     for t, x, y, tc in linie)
+    obiekty = [b"<< /Type /Catalog /Pages 2 0 R >>",
+               b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+               b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R"
+               b" /Resources << /Font << /F1 5 0 R >> >> >>",
+               b"<< /Length %d >>\nstream\n" % len(tresc) + tresc + b"endstream",
+               b"<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>"]
+    wyj, pozycje = bytearray(b"%PDF-1.4\n"), []
+    for i, o in enumerate(obiekty, 1):
+        pozycje.append(len(wyj))
+        wyj += b"%d 0 obj\n" % i + o + b"\nendobj\n"
+    xref = len(wyj)
+    wyj += b"xref\n0 %d\n0000000000 65535 f \n" % (len(obiekty) + 1)
+    wyj += b"".join(b"%010d 00000 n \n" % x for x in pozycje)
+    wyj += b"trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (len(obiekty) + 1, xref)
+    sciezka.write_bytes(bytes(wyj))
+
+
+def test_prawdziwy_pdf_rozstrzelenie_z_dziurami_w_spacjach(tmp_path, monkeypatch):
+    # Земская (etap 5b): jawne spacje tylko między częścią liter („ме х а н из м”),
+    # reszta odstępu to `Tc` bez znaku spacji w warstwie tekstu.
+    p = tmp_path / "dziury.pdf"
+    _pdf_tc(p, [("Termin: socjalny dystans.", 72, 700, 0),
+                ("so c ja l ny  d ys t an s", 72, 650, 4.5)])
+    assert core_pdf.wyciagnij(str(p)).akapity == ["Termin: socjalny dystans.", "socjalny dystans"]
+    # Kontrola: bez wirtualnej spacji zostają zrosty, ciąg nie powstaje.
+    monkeypatch.setattr(core_pdf, "PRZERWA_ROZSTRZELENIA", 99.0)
+    assert core_pdf.wyciagnij(str(p)).akapity[1] == "so c ja l ny d ys t an s"
+
+
 def _rozstrzel(slowa, x0, y, krok=11, przerwa=22):
     linie, x = [], x0
     for slowo in slowa:

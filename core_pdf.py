@@ -514,6 +514,11 @@ GRANICA_ROZSTRZELENIA = 1.5
 #: a granica słowa po akcencie to ~4× („В о й н а́  в а к ц и́ н”, 17,4 vs
 #: 4,1 pt). Bezwzględny zakaz granicy po akcencie (do 4b) sklejał „Война́вакци́н”.
 GRANICA_PO_AKCENCIE = 2.5
+#: Brakująca spacja w rozstrzeleniu (ułamek wysokości ramki): Земская ma
+#: 3,6–4,2 pt przy wysokości 10 pt tam, gdzie litery słowa dzielą 0,1–0,2 pt;
+#: słownik ma ≥0,3 tylko 13 razy na 643 tys. par liter, „Повесть” 7 (brakujące
+#: spacje między słowami: „ив неправдh” → „и в”), reszta 99 PDF-ów 0.
+PRZERWA_ROZSTRZELENIA = 0.3
 
 
 def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> None:
@@ -524,7 +529,7 @@ def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> N
     tu niczego — o sklejeniu decyduje słownik dokumentu (`_scal_rozstrzelone_pdf`),
     jak w `.docx`. Ciąg o równych przerwach (np. „а и в к”) nie dostaje granic.
     """
-    from czyszczenie_tekstu import MIN_ROZSTRZELENIE
+    from czyszczenie_tekstu import MIN_ROZSTRZELENIE, ZAMYKAJACE
 
     def prog(s: int) -> float:
         # Po literze z akcentem przerwa rośnie (rozstrzelenie dodaje odstęp
@@ -543,6 +548,12 @@ def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> N
     na_poczatku = na_koncu = False
     k, n = 0, len(znaki)
     while k < n:
+        # Ciąg nie zaczyna się w ŚRODKU słowa: „межд|у  с л о в о” startował od
+        # ostatniej litery „между”, był przyklejony do „д” i nie dostawał
+        # żadnej granicy (Земская: 255 → 503 ciągi, etap 5b).
+        if k > 0 and (znaki[k - 1][:1].isalpha() or unicodedata.combining(znaki[k - 1][0])):
+            k += 1
+            continue
         # Jednostka = jedna litera + jej znaki łączące; ciąg = jednostki
         # rozdzielone pojedynczą spacją, nieprzyklejone do liter z boku.
         poczatek, spacje, j = k, [], k
@@ -570,12 +581,18 @@ def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> N
             # przerwa jest słowna; „м а́ с к а.” zostaje dla ograniczenia modułu.
             if poczatek > 0 and znaki[poczatek - 1] == " ":
                 znaki[poczatek - 1] = _GRANICA
-            if j < n and znaki[j] == " " and (
-                    _sasiad_jest_slowem(znaki, j + 1, 1)
-                    or (j in luki and luki[j] > prog(j) * mediana)):
-                znaki[j] = _GRANICA
+            # Ogon interpunkcji („н и я.  Слова”) należy do ciągu (moduł przyjmuje
+            # go od etapu 5), więc brzeg to spacja PO nim — bez tego ciąg
+            # przed kolejnym słowem zostawał przyklejony (Земская, etap 5b).
+            ogon = j
+            while ogon < n and znaki[ogon] in ZAMYKAJACE:
+                ogon += 1
+            if ogon < n and znaki[ogon] == " " and (
+                    _sasiad_jest_slowem(znaki, ogon + 1, 1)
+                    or (ogon in luki and luki[ogon] > prog(ogon) * mediana)):
+                znaki[ogon] = _GRANICA
             na_poczatku = na_poczatku or poczatek == 0
-            na_koncu = na_koncu or j >= n
+            na_koncu = na_koncu or ogon >= n
         k = max(j, k + 1)
     if na_koncu:
         znaki.append(_GRANICA)
@@ -745,6 +762,15 @@ def _czytaj_strone(strona, znane: frozenset[str] | None, fonty: dict | None = No
                     znaki.pop()
                 ramka[:] = [min(ramka[0], l), min(ramka[1], d),
                             max(ramka[2], p), max(ramka[3], g)]
+            # Rozstrzelenie z DZIURAMI w warstwie tekstu: Земская ma jawne
+            # spacje tylko między częścią liter („ме х а н из м”, „д и ах р о…”:
+            # między „а” a „х” 4,2 pt i brak spacji, tyle co odstępy liter
+            # obok). Litery słowa dzieli tam 0,1–0,2 pt; zmierzone wystąpienia
+            # w 99 czystych PDF-ach → `PRZERWA_ROZSTRZELENIA` (etap 5b).
+            if (prawy_ostatni is not None and z.isalpha() and znaki
+                    and len(znaki[-1]) == 1 and znaki[-1].isalpha()
+                    and l - prawy_ostatni >= (g - d) * PRZERWA_ROZSTRZELENIA):
+                znaki.append(" ")
             if znaki and znaki[-1] == " " and prawy_ostatni is not None:
                 luki[len(znaki) - 1] = l - prawy_ostatni
             znaki.append(z)
