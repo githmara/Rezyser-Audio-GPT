@@ -844,6 +844,28 @@ def test_prawy_brzeg_po_ogonie_interpunkcji():
     assert "".join(znaki).strip(g) == "с л о в о." + g + "Слова"
 
 
+def test_wirtualna_spacja_znika_w_ciagu_nie_do_sklejenia():
+    # Audyt 19.15 (M3): „Гл а в а I I I”, „о д н а”, „р а з б о р)” — spacja
+    # wstawiona z geometrii zostaje tylko w ciągu, który moduł skleił.
+    V = core_pdf._WIRTUALNA
+    wynik, _ = core_pdf._scal_rozstrzelone_pdf(
+        ["Разбор и анализ.", f"Гл{V}а{V}в{V}а I I. о{V}д{V}н{V}а  (р{V}а{V}з б о р)."])
+    assert wynik == ["Разбор и анализ.", "Глава I I. одна (разбор)."]
+    # Detektor: same wersaliki rzymskie to numer — wirtualne spacje znikają.
+    znaki, luki = _znaki_rozstrzelone(["VIII"], krok=4.0)   # 4 litery: sama reguła rzymska
+    core_pdf._oznacz_granice_rozstrzelenia(znaki, luki, set(luki))
+    assert "".join(znaki).strip(core_pdf._GRANICA) == "VIII"
+
+
+def test_lewy_brzeg_przed_nawiasem_otwierajacym():
+    # „слова  (р а з б о р)”: brzeg ciągu to spacja PRZED nawiasem (etap 6).
+    znaki, luki = _znaki_rozstrzelone(["разбор"])
+    znaki[:0] = list("слова") + [" ", "("]
+    luki = {i + 7: v for i, v in luki.items()} | {5: 6.0}
+    core_pdf._oznacz_granice_rozstrzelenia(znaki, luki)
+    assert "".join(znaki).startswith("слова" + core_pdf._GRANICA + "(р а з")
+
+
 def _pdf_tc(sciezka, linie):
     """Minimalny PDF (Courier 11) z odstępem liter `Tc` w JEDNYM napisie:
     PDFium nie generuje wtedy spacji w przerwach, jak w Земской."""

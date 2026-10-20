@@ -273,6 +273,12 @@ def _policz_litery(tp, znaki: list[tuple[int, str]],
     flaga = flaga or _blad_mapowania
     litery = podejrzane = 0
     for i, z in znaki:
+        if len(z) == 1:                       # szybka ścieżka: 99,9% znaków
+            if z.isalpha():
+                litery += 1
+                if z not in znane and flaga(tp, i):
+                    podejrzane += 1
+            continue
         # `z` bywa kilkuznakowy: ligatura z fontu („f_f_i” → „ffi”), para
         # surogatów — liczymy jego litery, nie jego samego.
         ile = sum(c.isalpha() for c in z)
@@ -319,6 +325,14 @@ def _bajty_c(funkcja, *argumenty) -> bytes:
     if not funkcja(*argumenty, bufor, n.value, ctypes.byref(n)):
         return b""
     return bytes(bufor[:n.value])
+
+
+def _dlugosc_danych(font) -> int:
+    """Długość danych fontu — tylko zapytanie o rozmiar, bez kopiowania."""
+    import ctypes
+    import pypdfium2.raw as pdfium_c
+    n = ctypes.c_size_t(0)
+    return n.value if pdfium_c.FPDFFont_GetFontData(font, None, 0, ctypes.byref(n)) else 0
 
 
 def _nazwa_fontu(font) -> str:
@@ -380,6 +394,7 @@ def _napraw_z_fontu(tp, znaki: list[tuple[int, str]], znane: frozenset[str],
     # Wskaźnik fontu → klucz, w obrębie strony: dane i nazwa fontu raz na
     # font strony, nie raz na znak (zmierzone na 880 tys. znaków słownika).
     nazwy: dict[int | None, tuple] = {}
+    adresy: dict = fonty.setdefault("_adresy", {})
     flaga = flaga or _blad_mapowania
     for poz, (i, z) in enumerate(znaki):
         if z.isspace() or not flaga(tp, i):
@@ -388,17 +403,27 @@ def _napraw_z_fontu(tp, znaki: list[tuple[int, str]], znane: frozenset[str],
         font = pdfium_c.FPDFTextObj_GetFont(obiekt) if obiekt else None
         if not font:
             continue
-        adres = ctypes.cast(font, ctypes.c_void_p).value
+        adres = ctypes.addressof(font.contents)   # 5× szybciej niż ctypes.cast
         if adres not in nazwy:
             # Tylko font OSADZONY: dla nieosadzonego PDFium oddaje dane fontu
             # systemowego, którego numeracja glifów nie musi mieć nic wspólnego
             # z kodami w PDF-ie (zmierzone: Times z Windows „pasował” przypadkiem).
             osadzony = pdfium_c.FPDFFont_GetIsEmbedded(font) == 1
-            dane = _bajty_c(pdfium_c.FPDFFont_GetFontData, font) if osadzony else b""
-            klucz = (_nazwa_fontu(font), len(dane), hashlib.sha1(dane).digest())
+            szybki = (_nazwa_fontu(font), _dlugosc_danych(font) if osadzony else 0)
+            # Adres fontu → klucz na CAŁY dokument (PDFium trzyma font dokumentu
+            # pod tym samym adresem): dane i skrót raz na font, nie raz na
+            # stronę — słownik 11 → 28 s przy skrócie per strona (L2). Nazwa
+            # i długość pilnują, czy pod adresem nie stoi już inny font.
+            znany = adresy.get(adres)
+            if znany is not None and znany[0] == szybki:
+                klucz = znany[1]
+            else:
+                dane = _bajty_c(pdfium_c.FPDFFont_GetFontData, font) if osadzony else b""
+                klucz = szybki + (hashlib.sha1(dane).digest(),)
+                adresy[adres] = (szybki, klucz)
+                if klucz not in fonty:
+                    fonty[klucz] = mapa_glifow(dane) if osadzony else {}
             nazwy[adres] = klucz
-            if klucz not in fonty:
-                fonty[klucz] = mapa_glifow(dane) if osadzony else {}
         nazwa = nazwy[adres]
         zflagowane.setdefault(nazwa, []).append(poz)
     wynik = list(znaki)
@@ -512,6 +537,11 @@ def _znaki_po_naprawie(tp, znane: frozenset[str] | None, fonty: dict | None
 #: obszaru prywatnego fontów Wingdings; przeżywa `_czysc` i zwijanie spacji).
 #: `_scal_rozstrzelone_pdf` zamienia go na dwie spacje, potem znika.
 _GRANICA = chr(0xFDD0)
+#: Spacja WIRTUALNA (wstawiona z geometrii, `PRZERWA_ROZSTRZELENIA`) w tekście
+#: linii — też nieznak. Moduł widzi ją jako zwykłą spację; w ciągu, którego
+#: NIE skleił, `_scal_rozstrzelone_pdf` ją zdejmuje: tekst wraca do stanu
+#: sprzed wirtualnych spacji zamiast „р а з б о р)”, „о д н а” (audyt M3).
+_WIRTUALNA = chr(0xFDD1)
 #: Odstęp większy od mediany odstępów ciągu o tyle razy to granica słowa.
 #: Wspólne z ATA (etap 4b, pomiar PDFium 2026-10-20): Земская ma przerwy
 #: międzyliterowe 0,8–1,3× mediany i granice słów 1,5–2,0× (większość
@@ -530,15 +560,22 @@ GRANICA_PO_AKCENCIE = 2.5
 PRZERWA_ROZSTRZELENIA = 0.3
 
 
-def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> None:
+def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float],
+                                  wirtualne: frozenset[int] | set[int] = frozenset()) -> None:
     """W ciągu ≥4 pojedynczych liter zamienia spacje-granice słów na `_GRANICA`.
+
+    `wirtualne` — indeksy spacji wstawionych z geometrii (`PRZERWA_ROZSTRZELENIA`).
+    Zostaje tylko taka, która leży WEWNĄTRZ przyjętego ciągu; inna nie da się
+    skleić z powrotem i psuła tekst (audyt 19.15, M3: „Гл а в а I I I”,
+    „о д н а”), więc znika — linia wraca do stanu sprzed wirtualnych spacji.
 
     W PDF-ie między literami rozstrzelenia i między jego słowami stoi tak
     samo JEDNA spacja (generowana), a różni je tylko przerwa. Nie sklejamy
     tu niczego — o sklejeniu decyduje słownik dokumentu (`_scal_rozstrzelone_pdf`),
     jak w `.docx`. Ciąg o równych przerwach (np. „а и в к”) nie dostaje granic.
     """
-    from czyszczenie_tekstu import MIN_ROZSTRZELENIE, ZAMYKAJACE
+    from czyszczenie_tekstu import MIN_ROZSTRZELENIE, OTWIERAJACE, ZAMYKAJACE
+    zostaja: set[int] = set()
 
     def prog(s: int) -> float:
         # Po literze z akcentem przerwa rośnie (rozstrzelenie dodaje odstęp
@@ -578,7 +615,11 @@ def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> N
             break
         przyklejony = (poczatek > 0 and znaki[poczatek - 1].isalpha()) or \
             (j < n and znaki[j][:1].isalpha())
-        if len(spacje) + 1 >= MIN_ROZSTRZELENIE and not przyklejony:
+        # Same wersaliki rzymskie („I I I” w „Г л а в а  I I I”) to numer, nie
+        # słowo do sklejenia — wirtualne spacje w nim nie zostają.
+        rzymska = all(znaki[s - 1] in "IVXLCDM" for s in spacje + [j]) if spacje else False
+        if len(spacje) + 1 >= MIN_ROZSTRZELENIE and not przyklejony and not rzymska:
+            zostaja.update(spacje)
             mediana = max(statistics.median(luki[s] for s in spacje), 0.1)
             for s in spacje:
                 if luki[s] > prog(s) * mediana:
@@ -590,6 +631,10 @@ def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> N
             # przerwa jest słowna; „м а́ с к а.” zostaje dla ograniczenia modułu.
             if poczatek > 0 and znaki[poczatek - 1] == " ":
                 znaki[poczatek - 1] = _GRANICA
+            elif poczatek > 1 and znaki[poczatek - 1] in OTWIERAJACE and znaki[poczatek - 2] == " ":
+                # „(р а з б о р)”: nawias otwierający należy do ciągu (moduł,
+                # etap 6), brzeg to spacja PRZED nim.
+                znaki[poczatek - 2] = _GRANICA
             # Ogon interpunkcji („н и я.  Слова”) należy do ciągu (moduł przyjmuje
             # go od etapu 5), więc brzeg to spacja PO nim — bez tego ciąg
             # przed kolejnym słowem zostawał przyklejony (Земская, etap 5b).
@@ -603,6 +648,9 @@ def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> N
             na_poczatku = na_poczatku or poczatek == 0
             na_koncu = na_koncu or ogon >= n
         k = max(j, k + 1)
+    for s in wirtualne:
+        if znaki[s] == " ":
+            znaki[s] = _WIRTUALNA if s in zostaja else ""
     if na_koncu:
         znaki.append(_GRANICA)
     if na_poczatku:
@@ -643,8 +691,30 @@ def _scal_rozstrzelone_pdf(akapity: list[str]) -> tuple[list[str], dict[str, int
     to jedyne podwójne spacje w tekście, więc po decyzji zwijamy je do jednej.
     """
     import czyszczenie_tekstu
-    wynik, liczniki = czyszczenie_tekstu.scal_rozstrzelone(akapity)
+    wejscie = [a.replace(_WIRTUALNA, " ") for a in akapity]
+    wynik, liczniki = czyszczenie_tekstu.scal_rozstrzelone(wejscie)
+    wynik = [_bez_wirtualnych(a, w) if _WIRTUALNA in a else w for a, w in zip(akapity, wynik)]
     return [re.sub(" {2,}", " ", a) for a in wynik], liczniki
+
+
+def _bez_wirtualnych(przed: str, po: str) -> str:
+    """Akapit po decyzji modułu bez spacji wirtualnych w ciągach NIESKLEJONYCH.
+
+    Moduł nie rusza tokenów ciągu, którego nie skleił, więc w blokach równych
+    tokenów (przed → po) separator, który był spacją wirtualną, znika.
+    """
+    import difflib
+    czesci_a = re.split(f"([ {_WIRTUALNA}]+)", przed)
+    czesci_b = re.split("( +)", po)
+    tokeny_a, tokeny_b = czesci_a[0::2], czesci_b[0::2]
+    for tag, i1, i2, j1, _ in difflib.SequenceMatcher(
+            None, tokeny_a, tokeny_b, autojunk=False).get_opcodes():
+        if tag != "equal":
+            continue
+        for k in range(i2 - i1 - 1):
+            if czesci_a[2 * (i1 + k) + 1] == _WIRTUALNA:
+                czesci_b[2 * (j1 + k) + 1] = ""
+    return "".join(czesci_b)
 
 
 def _napraw_mojibake_stron(akapity_stron: list[list[str]]
@@ -702,7 +772,8 @@ def _czytaj_strone(strona, znane: frozenset[str] | None, fonty: dict | None = No
         wysokosci: list[float] = []
 
         def zamknij() -> None:
-            _oznacz_granice_rozstrzelenia(znaki, luki)
+            _oznacz_granice_rozstrzelenia(znaki, luki, wirtualne)
+            wirtualne.clear()
             tekst = _RE_BIALE.sub(" ", _czysc("".join(znaki))).strip()
             luki.clear()
             # Granica na brzegu linii nie zostaje w jej tekście (podział na
@@ -728,6 +799,7 @@ def _czytaj_strone(strona, znane: frozenset[str] | None, fonty: dict | None = No
         # Indeks spacji w `znaki` → przerwa (pt) między sąsiednimi znakami;
         # prawa krawędź ostatniego znaku niebędącego spacją.
         luki: dict[int, float] = {}
+        wirtualne: set[int] = set()
         prawy_ostatni: float | None = None
         for i, z in wszystkie:
             if z.isspace():
@@ -780,6 +852,7 @@ def _czytaj_strone(strona, znane: frozenset[str] | None, fonty: dict | None = No
             if (prawy_ostatni is not None and z.isalpha() and znaki
                     and len(znaki[-1]) == 1 and znaki[-1].isalpha()
                     and l - prawy_ostatni >= (g - d) * PRZERWA_ROZSTRZELENIA):
+                wirtualne.add(len(znaki))
                 znaki.append(" ")
             if znaki and znaki[-1] == " " and prawy_ostatni is not None:
                 luki[len(znaki) - 1] = l - prawy_ostatni
