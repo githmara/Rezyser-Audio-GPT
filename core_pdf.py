@@ -151,6 +151,10 @@ class _Linia:
     #: myli: pogrubione hasło słownikowe ma wyższą ramkę (13,4 wobec 11 pt)
     #: i reguła „zmiana czcionki" cięła każde hasło po pierwszym wierszu.
     czcionka: float = 0.0
+    #: Linia zaczyna się / kończy tekstem rozstrzelonym (19.15, etap 4b):
+    #: przy sklejaniu linii w akapit stoi tam granica słowa, nie zwykła spacja.
+    rozstrzelona_lewa: bool = False
+    rozstrzelona_prawa: bool = False
 
     @property
     def wysokosc(self) -> float:
@@ -499,9 +503,17 @@ def _znaki_po_naprawie(tp, znane: frozenset[str] | None, fonty: dict | None
 #: obszaru prywatnego fontów Wingdings; przeżywa `_czysc` i zwijanie spacji).
 #: `_scal_rozstrzelone_pdf` zamienia go na dwie spacje, potem znika.
 _GRANICA = chr(0xFDD0)
-#: Odstęp większy od mediany odstępów ciągu o tyle razy to granica słowa
-#: (słownik: 4,1 pt między literami, 13,2 pt między słowami).
-GRANICA_ROZSTRZELENIA = 1.8
+#: Odstęp większy od mediany odstępów ciągu o tyle razy to granica słowa.
+#: Wspólne z ATA (etap 4b, pomiar PDFium 2026-10-20): Земская ma przerwy
+#: międzyliterowe 0,8–1,3× mediany i granice słów 1,5–2,0× (większość
+#: 1,8–1,9×) — przy 1,8 połowa granic ginęła („существительныхнеод…”);
+#: słownik: litery ≈1,0×, granice 2,5–5,5×.
+GRANICA_ROZSTRZELENIA = 1.5
+#: Po literze z akcentem przerwa w słowie rośnie do 2,0× mediany (334 razy
+#: w słowniku: rozstrzelenie dodaje odstęp także znakowi akcentu, „ф о р м а́ т”),
+#: a granica słowa po akcencie to ~4× („В о й н а́  в а к ц и́ н”, 17,4 vs
+#: 4,1 pt). Bezwzględny zakaz granicy po akcencie (do 4b) sklejał „Война́вакци́н”.
+GRANICA_PO_AKCENCIE = 2.5
 
 
 def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> None:
@@ -513,6 +525,22 @@ def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> N
     jak w `.docx`. Ciąg o równych przerwach (np. „а и в к”) nie dostaje granic.
     """
     from czyszczenie_tekstu import MIN_ROZSTRZELENIE
+
+    def prog(s: int) -> float:
+        # Po literze z akcentem przerwa rośnie (rozstrzelenie dodaje odstęp
+        # także znakowi akcentu): przy progu ogólnym „ф о р м а́ т” dzieliło
+        # się na „форма́” + „т”, więc tam próg jest wyższy.
+        return GRANICA_PO_AKCENCIE if s > 0 and unicodedata.combining(znaki[s - 1][0]) \
+            else GRANICA_ROZSTRZELENIA
+
+    # Brzeg ciągu to też granica słowa, gdy sąsiad jest SŁOWEM: rozstrzelenie
+    # wpisane w zdanie („…изучения - о п и с а т ь”, „Е.А. З е м с к а я”) było
+    # dla modułu przyklejone pojedynczą spacją i nie sklejało się nigdy
+    # (Земская: 509 ciągów, etap 4b). Przerwa tu nie rozstrzyga — zwykła
+    # spacja (~3 pt) bywa węższa od odstępu liter rozstrzelenia (~4,9 pt).
+    # Ciąg na brzegu LINII dostaje granicę zawsze: linie skleja potem
+    # pojedyncza spacja.
+    na_poczatku = na_koncu = False
     k, n = 0, len(znaki)
     while k < n:
         # Jednostka = jedna litera + jej znaki łączące; ciąg = jednostki
@@ -523,7 +551,7 @@ def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> N
             while j < n and unicodedata.combining(znaki[j][0]):
                 j += 1
             if j + 1 < n and znaki[j] == " " and j in luki and len(znaki[j + 1]) == 1 \
-                    and znaki[j + 1].isalpha():
+                    and znaki[j + 1].isalpha() and _jednoliterowa(znaki, j + 1):
                 spacje.append(j)
                 j += 1
                 continue
@@ -531,22 +559,66 @@ def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> N
         przyklejony = (poczatek > 0 and znaki[poczatek - 1].isalpha()) or \
             (j < n and znaki[j][:1].isalpha())
         if len(spacje) + 1 >= MIN_ROZSTRZELENIE and not przyklejony:
-            mediana = statistics.median(luki[s] for s in spacje)
+            mediana = max(statistics.median(luki[s] for s in spacje), 0.1)
             for s in spacje:
-                # Po literze z akcentem przerwa rośnie (rozstrzelenie dodaje
-                # odstęp także znakowi akcentu): „ф о р м а́ т” dzieliło się
-                # na „форма́” + „т”. Tam granicy nie stawiamy nigdy.
-                if unicodedata.combining(znaki[s - 1][0]):
-                    continue
-                if luki[s] > GRANICA_ROZSTRZELENIA * max(mediana, 0.1):
+                if luki[s] > prog(s) * mediana:
                     znaki[s] = _GRANICA
+            # Lewy brzeg: zawsze granica — ciąg jest maksymalny, więc sąsiad po
+            # lewej nie jest samotną literą, a urywek „litera + interpunkcja”
+            # może być tylko KOŃCEM słowa („ж.  В о л н а́” to skrót przed
+            # słowem). Prawy brzeg: granica, gdy sąsiad jest słowem albo
+            # przerwa jest słowna; „м а́ с к а.” zostaje dla ograniczenia modułu.
+            if poczatek > 0 and znaki[poczatek - 1] == " ":
+                znaki[poczatek - 1] = _GRANICA
+            if j < n and znaki[j] == " " and (
+                    _sasiad_jest_slowem(znaki, j + 1, 1)
+                    or (j in luki and luki[j] > prog(j) * mediana)):
+                znaki[j] = _GRANICA
+            na_poczatku = na_poczatku or poczatek == 0
+            na_koncu = na_koncu or j >= n
         k = max(j, k + 1)
+    if na_koncu:
+        znaki.append(_GRANICA)
+    if na_poczatku:
+        znaki.insert(0, _GRANICA)
+
+
+def _jednoliterowa(znaki: list[str], k: int) -> bool:
+    """Litera `znaki[k]` (z ewentualnymi znakami łączącymi) stoi SAMA: po niej
+    nie ma kolejnej litery. Bez tego ciąg zjadał pierwszą literę następnego,
+    zwykłego słowa („… е  к|онец”) i cały wychodził jako przyklejony (do 4b)."""
+    k += 1
+    while k < len(znaki) and unicodedata.combining(znaki[k][0]):
+        k += 1
+    return k >= len(znaki) or not znaki[k][:1].isalpha()
+
+
+def _sasiad_jest_slowem(znaki: list[str], od: int, krok: int) -> bool:
+    """Token zaczynający się w `znaki[od]` (w kierunku `krok`) to słowo, nie urywek.
+
+    Urywek = jedna litera (z akcentem) i sama interpunkcja: „а.”, „а,”, „(я”.
+    """
+    token = []
+    k = od
+    while 0 <= k < len(znaki) and znaki[k] != " " and znaki[k] != _GRANICA:
+        token.append(znaki[k])
+        k += krok
+    if krok < 0:
+        token.reverse()
+    tekst = "".join(token)
+    litery = [z for z in tekst if z.isalpha()]
+    return len(litery) != 1
 
 
 def _scal_rozstrzelone_pdf(akapity: list[str]) -> tuple[list[str], dict[str, int]]:
-    """Decyzja wspólnego modułu na tekście PDF z granicami słów z geometrii."""
+    """Decyzja wspólnego modułu na tekście PDF z granicami słów z geometrii.
+
+    Granice przychodzą jako dwie spacje (`_czytaj_strone`) — po `_RE_BIALE`
+    to jedyne podwójne spacje w tekście, więc po decyzji zwijamy je do jednej.
+    """
     import czyszczenie_tekstu
-    return czyszczenie_tekstu.scal_rozstrzelone(akapity, granica=_GRANICA)
+    wynik, liczniki = czyszczenie_tekstu.scal_rozstrzelone(akapity)
+    return [re.sub(" {2,}", " ", a) for a in wynik], liczniki
 
 
 def _napraw_mojibake_stron(akapity_stron: list[list[str]]
@@ -607,11 +679,19 @@ def _czytaj_strone(strona, znane: frozenset[str] | None, fonty: dict | None = No
             _oznacz_granice_rozstrzelenia(znaki, luki)
             tekst = _RE_BIALE.sub(" ", _czysc("".join(znaki))).strip()
             luki.clear()
+            # Granica na brzegu linii nie zostaje w jej tekście (podział na
+            # akapity patrzy na pierwszy i ostatni znak), tylko we flagach.
+            lewa, prawa = tekst.startswith(_GRANICA), tekst.endswith(_GRANICA)
+            # W środku linii granica to DWIE spacje — jak w `.docx`; regexy
+            # podziału na akapity widzą wtedy zwykły biały znak („4)  у с е…”
+            # ze znakiem granicy nie był już punktem listy, etap 4b).
+            tekst = tekst.strip(_GRANICA + " ").replace(_GRANICA, "  ")
             if naprawiona:
                 tekst = unicodedata.normalize("NFC", tekst)
             if tekst:
                 linie.append(_Linia(tekst, *ramka,
-                                    czcionka=statistics.median(wysokosci)))
+                                    czcionka=statistics.median(wysokosci),
+                                    rozstrzelona_lewa=lewa, rozstrzelona_prawa=prawa))
             znaki.clear()
             ramka.clear()
             wysokosci.clear()
@@ -975,6 +1055,13 @@ def _podziel_na_akapity(linie: list[_Linia], dzielenie_auto: bool = False) -> li
         if granica:
             akapity.append(biezacy)
             biezacy = nast.tekst
+            continue
+        # Brzeg linii przy rozstrzeleniu to granica słowa — chyba że poprzednia
+        # linia kończy się przeniesieniem: „уве- | л и ч и в а е т” to jedno
+        # słowo i skleja je `_sklej` (dictionary_language-1.pdf, etap 4b).
+        przeniesienie = poprz.tekst.endswith(chr(0xAD)) or _RE_PRZENIESIENIE.search(poprz.tekst)
+        if (poprz.rozstrzelona_prawa or nast.rozstrzelona_lewa) and not przeniesienie:
+            biezacy = biezacy + "  " + nast.tekst
             continue
         biezacy = _sklej(biezacy, nast.tekst, dzielenie_auto)
     akapity.append(biezacy)

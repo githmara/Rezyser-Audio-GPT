@@ -384,12 +384,12 @@ def test_glif_bez_unicode_nie_przesuwa_ramek(monkeypatch):
 # Prawdziwe PDF-y z surowego API PDFium (builder z audytu 19.13) — reszta
 # testów idzie na atrapach, więc to jest jedyny dowód na prawdziwym pliku.
 
-def _zbuduj_pdf(sciezka, strony, rotacja=0):
+def _zbuduj_pdf(sciezka, strony, rotacja=0, font_nazwa=b"Helvetica"):
     import ctypes
     import pypdfium2 as pdfium
     import pypdfium2.raw as c
     pdf = pdfium.PdfDocument.new()
-    font = c.FPDFText_LoadStandardFont(pdf.raw, b"Helvetica")
+    font = c.FPDFText_LoadStandardFont(pdf.raw, font_nazwa)
     bufory = []
     for linie in strony:
         page = pdf.new_page(595, 842)
@@ -759,21 +759,30 @@ def _znaki_rozstrzelone(slowa, krok=4.0, przerwa=13.0):
 def test_granice_rozstrzelenia_z_geometrii():
     znaki, luki = _znaki_rozstrzelone(["социальное", "дистанция"])
     core_pdf._oznacz_granice_rozstrzelenia(znaki, luki)
-    assert "".join(znaki).split(core_pdf._GRANICA) == [
-        "с о ц и а л ь н о е", "д и с т а н ц и я"]
+    # Ciąg zajmuje całą linię, więc brzegi linii też dostają granicę.
+    g = core_pdf._GRANICA
+    assert "".join(znaki).strip(g).split(g) == ["с о ц и а л ь н о е", "д и с т а н ц и я"]
+    assert znaki[0] == znaki[-1] == g
 
 
-def test_rowne_przerwy_bez_granic_i_bez_granicy_po_akcencie():
+def test_rowne_przerwy_bez_granic_i_prog_po_akcencie():
     znaki, luki = _znaki_rozstrzelone(["а", "и", "в", "к"], przerwa=4.0)
     core_pdf._oznacz_granice_rozstrzelenia(znaki, luki)
-    assert core_pdf._GRANICA not in znaki
-    # „ф о р м а́ т”: po akcencie przerwa rośnie, ale to nie granica słowa.
+    assert core_pdf._GRANICA not in "".join(znaki).strip(core_pdf._GRANICA)
+    # „ф о р м а́ т”: po akcencie przerwa rośnie do ~2× (słownik), ale to nie
+    # granica słowa — próg po akcencie to 2,5× (wspólny z ATA, etap 4b).
     znaki, luki = _znaki_rozstrzelone(["формат"])
     znaki.insert(znaki.index("а") + 1, chr(0x301))
     luki = {i + (1 if i > znaki.index("а") else 0): v for i, v in luki.items()}
-    luki[znaki.index("т") - 1] = 13.0
+    po_akcencie = znaki.index("т") - 1
+    luki[po_akcencie] = 8.3
+    kopia = list(znaki)
+    core_pdf._oznacz_granice_rozstrzelenia(kopia, dict(luki))
+    assert core_pdf._GRANICA not in "".join(kopia).strip(core_pdf._GRANICA)
+    # „В о й н а́  в а к ц и́ н”: 17,4 pt po akcencie przy medianie 4,1 to granica.
+    luki[po_akcencie] = 17.4
     core_pdf._oznacz_granice_rozstrzelenia(znaki, luki)
-    assert core_pdf._GRANICA not in znaki
+    assert znaki[po_akcencie + 1] == core_pdf._GRANICA       # +1: granica brzegu linii
 
 
 def _rozstrzel(slowa, x0, y, krok=11, przerwa=22):
@@ -790,14 +799,40 @@ def test_prawdziwy_pdf_rozstrzelony_sklejony_wg_slownika(tmp_path, monkeypatch):
     p = tmp_path / "rozstrzelony.pdf"
     _zbuduj_pdf(p, [[("Termin: socjalny dystans.", 72, 700)]
                     + _rozstrzel(["socjalny", "dystans"], 72, 650)
-                    + _rozstrzel(["xqzw"], 72, 400)])
+                    + _rozstrzel(["xqzw"], 72, 400)],
+                font_nazwa=b"Courier")   # stała szerokość = stały odstęp liter
     assert core_pdf.wyciagnij(str(p)).akapity == [
         "Termin: socjalny dystans.", "socjalny dystans", "x q z w"]
     # Kontrola: bez reguły słownikowej ten sam PDF zostaje rozstrzelony.
     import czyszczenie_tekstu
     monkeypatch.setattr(czyszczenie_tekstu, "scal_rozstrzelone",
-                        lambda a, granica=None: ([x.replace(granica or "", " ") for x in a], {}))
+                        lambda a, granica=None: (list(a), {}))
     assert core_pdf.wyciagnij(str(p)).akapity[1] == "s o c j a l n y d y s t a n s"
+
+
+def test_prawdziwy_pdf_rozstrzelenie_w_zdaniu_i_punkt_listy(tmp_path):
+    # Земская (etap 4b): rozstrzelenie wpisane w zdanie było przyklejone do
+    # sąsiadów pojedynczą spacją i nie sklejało się nigdy; znak granicy
+    # w tekście linii psuł z kolei rozpoznanie punktu „4) …”.
+    p = tmp_path / "zdanie.pdf"
+    _zbuduj_pdf(p, [[("Termin ucinanie jest znany.", 72, 700),
+                     ("3) pierwszy punkt listy.", 72, 650),
+                     ("4)", 72, 634)] + _rozstrzel(["ucinanie"], 102, 634)
+                    + [("koniec punktu.", 205, 634)]], font_nazwa=b"Courier")
+    assert core_pdf.wyciagnij(str(p)).akapity == [
+        "Termin ucinanie jest znany.", "3) pierwszy punkt listy.", "4) ucinanie koniec punktu."]
+
+
+def test_brzeg_linii_rozstrzelonej_po_przeniesieniu_to_jedno_slowo():
+    # dictionary_language-1.pdf: „…лишь уве­” | „л и ч и в а е т дистанцию” —
+    # granica brzegu linii rozcinała to na „уве л и ч и в а е т”.
+    gorna = L("лишь уве" + chr(0xAD), 90, 700, 500)
+    dolna = L("л и ч и в а е т  дистанцию.", 90, 684, 300)
+    dolna.rozstrzelona_lewa = True
+    assert core_pdf._podziel_na_akapity([gorna, dolna]) == ["лишь увел и ч и в а е т  дистанцию."]
+    # Bez przeniesienia brzeg linii to granica słowa (dwie spacje dla modułu).
+    gorna = L("Termin:", 90, 700, 500)
+    assert core_pdf._podziel_na_akapity([gorna, dolna]) == ["Termin:  л и ч и в а е т  дистанцию."]
 
 
 def test_prawdziwy_pdf_mojibake_przekodowany(tmp_path):
