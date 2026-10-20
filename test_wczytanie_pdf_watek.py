@@ -125,7 +125,9 @@ def test_poliglota_drugie_wczytanie_odrzucone_wynik_raz(srodowisko, monkeypatch,
 def test_poliglota_wyjatek_w_watku_zgloszony(srodowisko, monkeypatch, tmp_path):
     app, ramka, komunikaty, puszczaj, _, zachowanie = srodowisko
     zapisane = []
-    monkeypatch.setattr("bledy_ai.zapisz_diagnostyke", lambda exc, panel: zapisane.append(panel))
+    slady = []
+    monkeypatch.setattr("bledy_ai.zapisz_diagnostyke",
+                        lambda exc, panel, slad=None: zapisane.append(panel) or slady.append(slad))
     panel, zakonczone = _poliglota(ramka, monkeypatch, tmp_path)
     zachowanie["wyjatek"] = RuntimeError("simulated failure")
     panel._on_load(None)
@@ -133,6 +135,8 @@ def test_poliglota_wyjatek_w_watku_zgloszony(srodowisko, monkeypatch, tmp_path):
     _dokoncz(app, panel._worker_thread)
     assert any("simulated failure" in k for k in komunikaty), komunikaty
     assert zapisane == ["wczytanie_pdf._worker"]           # error_log.txt
+    # Audyt: wpis ze śladem wywołań (plik i linia), nie samo `str(exc)`.
+    assert "Traceback" in slady[0] and "powolny_wyciagnij" in slady[0]
     assert zakonczone == [] and panel._file_content == "" and panel._file_ext == ""
     assert _Postep.instancje[0].zniszczony
 
@@ -140,7 +144,8 @@ def test_poliglota_wyjatek_w_watku_zgloszony(srodowisko, monkeypatch, tmp_path):
 def test_poliglota_oczekiwany_blad_pdf_bez_logu(srodowisko, monkeypatch, tmp_path):
     app, ramka, komunikaty, puszczaj, _, zachowanie = srodowisko
     zapisane = []
-    monkeypatch.setattr("bledy_ai.zapisz_diagnostyke", lambda exc, panel: zapisane.append(panel))
+    monkeypatch.setattr("bledy_ai.zapisz_diagnostyke",
+                        lambda exc, panel, slad=None: zapisane.append(panel))
     panel, _ = _poliglota(ramka, monkeypatch, tmp_path)
     zachowanie["wyjatek"] = core_pdf.PdfNieDoOtwarcia("x.pdf", True, "Incorrect password")
     panel._on_load(None)
@@ -159,6 +164,49 @@ def test_zamkniecie_okna_w_trakcie_wczytania(srodowisko, monkeypatch, tmp_path):
     puszczaj.set()
     _dokoncz(app, watek)                     # wątek kończy się po Destroy — bez wyjątku
     assert zakonczone == [] and komunikaty == []
+
+
+def test_watek_ktory_nie_wystartowal_nie_blokuje_okna(srodowisko, monkeypatch, tmp_path):
+    # Audyt: `Thread.start` rzucający po utworzeniu modalnego dialogu zostawiał
+    # dialog i zablokowane okno na zawsze, a Poliglota — `_file_ext` „.pdf”.
+    import gui_wczytanie_pdf as gwp
+    app, ramka, komunikaty, *_ = srodowisko
+
+    def nie_startuje(self):
+        raise RuntimeError("can't start new thread")
+
+    monkeypatch.setattr(gwp.threading.Thread, "start", nie_startuje)
+    panel, zakonczone = _poliglota(ramka, monkeypatch, tmp_path)
+    panel._on_load(None)
+    assert _Postep.instancje[0].zniszczony
+    assert any("can't start new thread" in k for k in komunikaty)
+    assert panel._file_ext == "" and zakonczone == []
+    assert not panel._worker_thread.is_alive()
+
+
+def test_konwerter_blad_po_wyniku_przyjaznym_komunikatem(srodowisko, monkeypatch, tmp_path):
+    # Audyt: krok po wyniku (zdania o naprawie) stał dawniej w `try` odczytu.
+    import core_skany
+    import gui_konwerter as gk
+    app, ramka, komunikaty, puszczaj, _, _ = srodowisko
+    monkeypatch.setattr(core_skany, "zdania_naprawy_pdf",
+                        lambda _w: (_ for _ in ()).throw(ValueError("boom")))
+    panel = gk.KonwerterPanel(ramka)
+    p = tmp_path / "dokument.pdf"
+    p.write_bytes(b"%PDF-1.4")
+    panel._txt_file.SetValue(str(p))
+    panel._on_build(None)
+    puszczaj.set()
+    _dokoncz(app, panel._worker_thread)
+    assert len(komunikaty) == 1 and "boom" in komunikaty[0]
+
+
+def test_zapowiedz_po_zamknieciu_aplikacji_milczy(monkeypatch):
+    # Audyt: `wx.CallAfter` bez `wx.App` rzucał „No wx.App created yet” →
+    # fałszywa diagnostyka i raport crasha z `threading.excepthook`.
+    import gui_wczytanie_pdf as gwp
+    monkeypatch.setattr(wx, "GetApp", lambda: None)
+    gwp._zapowiedz(lambda: None)                     # bez wyjątku
 
 
 def test_wynik_stosowany_dokladnie_raz():

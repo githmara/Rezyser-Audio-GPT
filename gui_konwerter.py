@@ -386,8 +386,14 @@ class KonwerterPanel(wx.Panel):
         if exc is not None:
             self._blad_odczytu(file_name, exc)
             return
-        tekst = "\n".join(wynik_pdf.akapity)
-        zdania_przetworzenia = core_skany.zdania_naprawy_pdf(wynik_pdf)
+        # Audyt: przed wątkiem ten krok stał w `try` odczytu — błąd dawał
+        # przyjazny „blad_odczytu”, nie raport crasha.
+        try:
+            tekst = "\n".join(wynik_pdf.akapity)
+            zdania_przetworzenia = core_skany.zdania_naprawy_pdf(wynik_pdf)
+        except Exception as blad:
+            self._blad_odczytu(file_name, blad)
+            return
         # 19.15: zniekształcona warstwa tekstu (czcionka bez pełnej
         # mapy znaków) dawała .docx z literami IPA zamiast cyrylicy
         # i dialog „Sukces”. Odczytu obrazu Konwerter nie ma, więc

@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import os
 import threading
+import traceback
 from collections.abc import Callable
 
 import wx
@@ -29,6 +30,21 @@ import wx
 import bledy_ai
 import core_pdf
 from i18n import t
+
+
+def _zapowiedz(funkcja, *argumenty) -> None:
+    """`wx.CallAfter`, który po zamknięciu aplikacji (brak `wx.App`) milczy.
+
+    Audyt: aplikacja zniszczona w trakcie wczytania — `CallAfter` z wątku
+    rzucał „No wx.App created yet”, co dawało fałszywy wpis diagnostyki
+    i raport crasha z `threading.excepthook`.
+    """
+    if wx.GetApp() is None:
+        return
+    try:
+        wx.CallAfter(funkcja, *argumenty)
+    except (AssertionError, RuntimeError):       # aplikacja kończy się właśnie teraz
+        pass
 
 
 class WczytaniePdf:
@@ -59,14 +75,25 @@ class WczytaniePdf:
         self._okno_zamkniete = False
 
     def start(self) -> threading.Thread:
-        self._dlg = wx.ProgressDialog(
-            t("common.pdf_wczytywanie_tytul"),
-            self._tresc(1, 0),
-            maximum=100, parent=self._okno,
-            style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
-        if self._tlw:
-            self._tlw.Bind(wx.EVT_CLOSE, self._przy_zamknieciu)
-        self.watek.start()
+        try:
+            self._dlg = wx.ProgressDialog(
+                t("common.pdf_wczytywanie_tytul"),
+                self._tresc(1, 0),
+                maximum=100, parent=self._okno,
+                style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
+            if self._tlw:
+                self._tlw.Bind(wx.EVT_CLOSE, self._przy_zamknieciu)
+            self.watek.start()
+        except Exception as blad:  # noqa: BLE001 — panel dostaje wyjątek jak z wątku
+            # Audyt: wątek, który nie wystartował, zostawiał modalny dialog
+            # i zablokowane okno na zawsze — sprzątamy, panel dostaje wyjątek.
+            self._zakonczone = True
+            dlg, self._dlg = self._dlg, None
+            if dlg:
+                dlg.Destroy()
+            if self._tlw:
+                self._tlw.Unbind(wx.EVT_CLOSE, handler=self._przy_zamknieciu)
+            self._gotowe(None, blad)
         return self.watek
 
     def _przy_zamknieciu(self, event: wx.CloseEvent) -> None:
@@ -82,14 +109,15 @@ class WczytaniePdf:
         """Wątek tła – żaden bezpośredni wx.* (tylko przez wx.CallAfter!)."""
         try:
             wynik = self._wyciagnij(
-                self._sciezka, postep=lambda i, n: wx.CallAfter(self._postep, i, n))
+                self._sciezka, postep=lambda i, n: _zapowiedz(self._postep, i, n))
         except (core_pdf.BrakWarstwyTekstu, core_pdf.PdfNieDoOtwarcia) as exc:
-            wx.CallAfter(self._koniec, None, exc)        # oczekiwane — panel ma komunikat
+            _zapowiedz(self._koniec, None, exc)          # oczekiwane — panel ma komunikat
         except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
-            bledy_ai.zapisz_diagnostyke(exc, "wczytanie_pdf._worker")
-            wx.CallAfter(self._koniec, None, exc)
+            bledy_ai.zapisz_diagnostyke(exc, "wczytanie_pdf._worker",
+                                        slad=traceback.format_exc())
+            _zapowiedz(self._koniec, None, exc)
         else:
-            wx.CallAfter(self._koniec, wynik, None)
+            _zapowiedz(self._koniec, wynik, None)
 
     def _postep(self, numer: int, liczba: int) -> None:
         if not self._dlg or self._zakonczone:

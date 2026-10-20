@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import os
 import threading
+import traceback
 
 from dotenv import load_dotenv
 
@@ -1099,7 +1100,8 @@ class PoliglotaPanel(wx.Panel):
             dokument = core_skany.scal(akapity_stron, wyniki, jezyk, tytul)
             tekst_detekcji = core_skany.tekst_tresci(akapity_stron, wyniki)
         except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
-            bledy_ai.zapisz_diagnostyke(exc, "poliglota._skany_worker")
+            bledy_ai.zapisz_diagnostyke(exc, "poliglota._skany_worker",
+                                        slad=traceback.format_exc())
             wx.CallAfter(self._skany_blad, file_name, wynik_pdf, str(exc))
             return
         wx.CallAfter(self._skany_gotowe, file_name, wynik_pdf, wyniki, blad, dokument,

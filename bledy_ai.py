@@ -39,7 +39,7 @@ AI_DIAG_MARKER = "=== REŻYSER AUDIO GPT — AI DIAGNOSTIC LOG ==="
 _PLIK_LOGU_BLEDOW = "error_log.txt"
 
 
-def zapisz_diagnostyke(exc: "BladGeneracjiAI", panel: str) -> None:
+def zapisz_diagnostyke(exc: "BladGeneracjiAI", panel: str, slad: str | None = None) -> None:
     """Dopisuje techniczną treść wyjątku (EN, pełny kontekst) do ``error_log.txt``.
 
     Bug znaleziony 2026-07-01: `_komunikat_bledu_ai`/`_obsluz_blad` w GUI
@@ -81,7 +81,11 @@ def zapisz_diagnostyke(exc: "BladGeneracjiAI", panel: str) -> None:
             f"Srodowisko / Environment: {srodowisko}\n"
             f"{'-' * 60}\n"
             f"{exc}\n"
-            f"{'=' * 60}\n\n"
+            # 19.15 (audyt wątku PDF): nieoczekiwany wyjątek wątku tła bez
+            # śladu wywołań nie wskazywał pliku ani linii — `slad` to sam
+            # traceback (nazwy plików i funkcji), bez treści dokumentu.
+            + (f"{'-' * 60}\n{slad}\n" if slad else "")
+            + f"{'=' * 60}\n\n"
         )
         with open(sciezka, "a", encoding="utf-8") as fh:
             fh.write(wpis)
