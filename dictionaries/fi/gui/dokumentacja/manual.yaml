@@ -394,6 +394,16 @@ tresc:
 
     - Suojakilpi: Skripti suojaa kaikkia HTML-tageja. Se turmelee vain dialogia ja kerrontaa.
     - Toimii paikallisesti eikä maksa mitään!
+  krok_5_naprawa_zrodel: |
+    ## Vioittunut teksti PDF-tiedostoissa ja muunnetuissa asiakirjoissa (UUTTA versiossa 19.15)
+
+    Joidenkin PDF-tiedostojen tekstikerros vain tekeytyy tekstiksi: ruudulla sivu näyttää oikealta, mutta kopioitaessa kirjainten tilalle tulee satunnaisia merkkejä. Näin käy esimerkiksi macOS:n esikatselulla tallennetuissa tiedostoissa, joissa fontin kirjainkartta on katkaistu. Polyglootti ja Muunnin tarkistavat nyt jokaisen PDF-sivun ja tunnistavat tällaisen kerroksen sen sijaan, että päästäisivät sen eteenpäin tavallisena tekstinä. Jos tiedostoon upotetulla fontilla on oma täydellinen kirjainkarttansa, ohjelma rakentaa tekstin sen pohjalta uudelleen — paikallisesti ja ilmaiseksi, aksenttimerkkeineen, jos asiakirjassa on niitä. Sivut, joita ei voida rakentaa uudelleen, ohjelma luettelee numeroineen: Polyglootti ehdottaa niille samaa maksullista kuvasta lukemista kuin skannauksille (suostumuksellasi, kustannusarvion kera), ja Muunnin kysyy, tallennetaanko tulos siitä huolimatta. Asiakirjan kielen ohjelma tunnistaa yksinomaan luettavasta tekstistä.
+
+    Ohjelma korjaa myös väärällä koodauksella tallennetun tekstin, esimerkiksi kyrillisen tekstin, joka näyttää muodolta „Áèáëèîòåêà" eikä muodolta „Библиотека". Se koodaa tekstin uudelleen vain, jos tulos on selvästi luettavampi kuin alkuperäinen, ja kertoo, mitä sivuja asia koski.
+
+    PDF:stä Wordiksi muunnetuissa asiakirjoissa on usein jälkiä sivunvaihdoista. Kun luet .docx-tiedoston (ja PDF-tiedostojen kohdalla), ohjelma yhdistää seuraavalle riville siirtyneet sanat, mutta vain jos sillä on siihen näyttö itse asiakirjasta: yhdistetty muoto esiintyy siinä muualla tai toinen osa ei ole itsenäinen sana. Käsin kirjoitetuissa muistiinpanoissa, joissa „- " voi olla ajatusviiva, se ei yhdistä mitään. Korostukseksi harvennetut sanat („S o c j a l n e") se liittää takaisin yhteen, kun sama sana esiintyy asiakirjassa, ja Symbol-fontin välilyönnit se muuttaa tavallisiksi. Lukemisen jälkeen ohjelma ilmoittaa, montako tällaista korjausta se teki. Tagikorjaaja ei käytä näitä korjauksia, koska se kopioi alkuperäisen .docx-tiedoston.
+
+    Pitkä PDF ladataan taustalla: edistymisikkuna näyttää tiedoston nimen ja sivunumeron, ja ruudunlukija ilmoittaa sen ilmestymisestä. Toista tiedostoa ei voi ladata, kun ensimmäisen lataus on kesken.
   krok_5_naprawiacz_per_akapit: |
     ## Tunnistekorjain: kielikoodi erikseen jokaiselle kappaleelle (UUTTA versiossa 19.2)
 

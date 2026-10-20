@@ -394,6 +394,16 @@ tresc:
 
     - Protective shield: The script protects all HTML tags. It only breaks dialogue and narration.
     - Works locally and costs nothing!
+  krok_5_naprawa_zrodel: |
+    ## Corrupted text in PDFs and conversion documents (NEW in version 19.15)
+
+    Some PDFs have a text layer that only pretends to be text: on screen the page looks fine, but when you copy it you get random characters instead of letters. This happens, for example, with files saved by macOS Preview, in which the font's letter map has been truncated. Polyglot and Converter now check every PDF page and recognize such a layer instead of passing it on as ordinary text. If the font embedded in the file has its own complete letter map, the program rebuilds the text from it — locally and for free, along with accent marks if the document contains them. Pages that cannot be rebuilt are listed by the program with their numbers: Polyglot offers the same paid image-based reading for them as for scans (with your consent, with a cost estimate), while Converter asks whether to save the result anyway. The program recognizes the document's language solely from legible text.
+
+    The program also repairs text saved in the wrong encoding, for example Cyrillic that looks like "Áèáëèîòåêà" instead of "Библиотека". It re-encodes only when the result is clearly more legible than the original, and it tells you which pages were affected.
+
+    Documents produced by converting PDF to Word often carry traces of page breaking. When loading a .docx file (and with PDFs), the program joins words that were carried over to the next line, but only when it has evidence for this within the document itself: the joined form appears elsewhere in it, or the second part is not a standalone word. In handwritten notes, where "- " is sometimes a dash, it joins nothing. Words letter-spaced for emphasis ("S o c i a l") it joins back together when the same word occurs in the document, and it replaces spaces from the Symbol font with ordinary ones. After loading, the program reports how many such corrections it made. Tag Fixer does not apply these corrections, because it copies the original .docx file.
+
+    A long PDF loads in the background: the progress window shows the file name and the page number, and a screen reader announces its appearance. A second file cannot be loaded while the first one is still loading.
   krok_5_naprawiacz_per_akapit: |
     ## Tag Repair: separate language code for each paragraph (NEW in version 19.2)
 

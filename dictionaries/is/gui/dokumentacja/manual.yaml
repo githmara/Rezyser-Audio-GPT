@@ -394,6 +394,16 @@ tresc:
 
     - Verndarskjöldur: Handritið verndar öll HTML-tög. Það skemmir aðeins samræður og frásögn.
     - Virkar staðbundið og kostar ekkert!
+  krok_5_naprawa_zrodel: |
+    ## Skemmdur texti í PDF-skjölum og skjölum úr umbreytingu (NÝTT í útgáfu 19.15)
+
+    Sum PDF-skjöl eru með textalag sem aðeins þykist vera texti: á skjánum lítur síðan rétt út, en þegar þú afritar hana færðu tilviljanakennda stafi í stað bókstafa. Þetta gerist til dæmis með skrár sem vistaðar eru með forskoðun í macOS, þar sem stafakort letursins hefur verið stytt. Tungumálamaður og Breytingartæki athuga nú hverja PDF-síðu og þekkja slíkt lag í stað þess að láta það áfram sem venjulegan texta. Ef letrið sem er fellt inn í skrána hefur sitt eigið, fullkomið stafakort, endurbyggir forritið textann út frá því — staðbundið og ókeypis, ásamt áherslumerkjum ef skjalið inniheldur þau. Síður sem ekki er hægt að endurbyggja telur forritið upp með númerum: Tungumálamaður leggur til sama gjaldskylda lestur úr mynd og fyrir skönnuð skjöl (með þínu samþykki, með kostnaðaráætlun), en Breytingartæki spyr hvort vista eigi niðurstöðuna engu að síður. Tungumál skjalsins greinir forritið eingöngu út frá læsilegum texta.
+
+    Forritið lagar einnig texta sem er vistaður með rangri kóðun, til dæmis kýrillískt letur sem lítur út eins og „Áèáëèîòåêà“ í stað „Библиотека“. Það endurkóðar aðeins þegar niðurstaðan er greinilega læsilegri en frumtextinn, og segir til um hvaða síður þetta átti við.
+
+    Skjöl sem verða til við umbreytingu úr PDF í Word bera oft merki síðuskiptingar. Þegar .docx-skrá er lesin inn (og við PDF-skjöl) límir forritið saman orð sem skipt var yfir í næstu línu, en aðeins þegar það hefur sönnun fyrir því í skjalinu sjálfu: samansetta myndin kemur fyrir annars staðar í því eða síðari hlutinn er ekki sjálfstætt orð. Í handskrifuðum minnisblöðum, þar sem „- “ getur verið hugsunarstrik, límir það ekkert saman. Orð sem eru gisin til áherslu („S o c j a l n e“) tengir það aftur saman þegar sama orð kemur fyrir í skjalinu, og bil úr Symbol-letrinu breytir það í venjuleg bil. Eftir innlestur gefur forritið upp hversu margar slíkar lagfæringar það gerði. Merkjaviðgerð beitir þessum lagfæringum ekki, því hún afritar upprunalegu .docx-skrána.
+
+    Langt PDF-skjal er lesið inn í bakgrunni: framvindugluggi sýnir skráarnafnið og síðunúmerið, og skjálesari tilkynnir að hann birtist. Ekki er hægt að lesa inn aðra skrá á meðan fyrri innlestur stendur yfir.
   krok_5_naprawiacz_per_akapit: |
     ## Merkjaviðgerð: tungumálakóði fyrir hverja efnisgrein sér (NÝTT í útgáfu 19.2)
 

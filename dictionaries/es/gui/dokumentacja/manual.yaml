@@ -394,6 +394,16 @@ tresc:
 
     - Escudo protector: El script protege todas las etiquetas HTML. Solo estropea los diálogos y la narración.
     - ¡Funciona localmente y no cuesta nada!
+  krok_5_naprawa_zrodel: |
+    ## Texto corrupto en PDFs y documentos de conversión (NOVEDAD en la versión 19.15)
+
+    Algunos PDFs tienen una capa de texto que solo finge ser texto: en pantalla la página se ve correcta, pero al copiarla, en lugar de letras obtienes caracteres aleatorios. Esto ocurre, por ejemplo, con archivos guardados mediante la vista previa de macOS, en los que el mapa de letras de la fuente quedó truncado. Políglota y Convertidor comprueban ahora cada página del PDF y reconocen esa capa, en lugar de dejarla pasar como texto normal. Si la fuente incrustada en el archivo tiene su propio mapa de letras completo, el programa reconstruye el texto a partir de él, de forma local y gratuita, junto con los signos de acento si el documento los contiene. Las páginas que no se pueden reconstruir, el programa las enumera con sus números: Políglota propone para ellas la misma lectura de pago a partir de imagen que para los escaneos (con tu consentimiento y con una estimación del coste), y Convertidor pregunta si, aun así, se debe guardar el resultado. El idioma del documento lo reconoce el programa exclusivamente a partir del texto legible.
+
+    El programa también corrige el texto guardado con una codificación incorrecta, por ejemplo cirílico que se ve como «Áèáëèîòåêà» en lugar de «Библиотека». Recodifica solo cuando el resultado es claramente más legible que el original, e indica a qué páginas afectó.
+
+    Los documentos resultantes de convertir un PDF a Word suelen llevar huellas de la maquetación en páginas. Al cargar un archivo .docx (y al cargar PDFs), el programa une las palabras divididas al final de línea, pero solo cuando tiene una prueba en el propio documento: la forma unida aparece en él en otro lugar, o la segunda parte no es una palabra independiente. En notas escritas a mano, donde «- » puede ser un guion largo, no une nada. Las palabras espaciadas para destacarlas («S o c i a l e s») las vuelve a unir cuando la misma palabra aparece en el documento, y los espacios de la fuente Symbol los convierte en espacios normales. Tras la carga, el programa indica cuántas correcciones de este tipo ha hecho. El Reparador de Etiquetas no aplica estas correcciones, porque copia el archivo .docx original.
+
+    Un PDF largo se carga en segundo plano: la ventana de progreso muestra el nombre del archivo y el número de página, y el lector de pantalla anuncia su aparición. No es posible cargar un segundo archivo mientras dure la primera carga.
   krok_5_naprawiacz_per_akapit: |
     ## Reparador de etiquetas: código de idioma independiente para cada párrafo (NOVEDAD en la versión 19.2)
 

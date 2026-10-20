@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.14.0 – Wersja Wydawnicza)</title>
+<title>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.15.0 – Wersja Wydawnicza)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.14.0 – Wersja Wydawnicza)</h1>
+<h1>Reżyser Audio GPT — Kompletny Przewodnik (Wersja 19.15.0 – Wersja Wydawnicza)</h1>
 <p>Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).</p>
 <p>Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota), narzędzia do budowania struktury pliku (Architekt Audiobooków), Managera Reguł (od wersji 13.0 — bez Pythona dodasz nowy akcent, szyfr lub tryb twórczy, patrz KROK 7b poniżej) oraz — od wersji 15.0 — modułu Opowieści (interaktywna fikcja drugoosobowa generowana przez AI, czytana przez TTS lub czytnik ekranu, opisana osobnym manualem tales.pl.html). Wszystkie pięć narzędzi dostępnych jest w jednym oknie programu, przełączanym przyciskami na pasku lub skrótami klawiaturowymi Ctrl+1..Ctrl+5.</p>
 <h2>KROK 1: Pierwsze uruchomienie (Cross-Platform)</h2>
@@ -258,6 +258,11 @@ Zapytacie pewnie, czy syntezator będzie umiał odmieniać tak znormalizowane li
 <li>Tarcza ochronna: Skrypt chroni wszystkie tagi HTML. Psuje tylko dialogi i narrację.</li>
 <li>Działa lokalnie i nic nie kosztuje!</li>
 </ul>
+<h2>Zepsuty tekst w PDF-ach i dokumentach z konwersji (NOWOŚĆ w wersji 19.15)</h2>
+<p>Niektóre PDF-y mają warstwę tekstu, która tylko udaje tekst: na ekranie strona wygląda poprawnie, ale po skopiowaniu zamiast liter dostajesz przypadkowe znaki. Tak bywa na przykład z plikami zapisanymi przez podgląd w macOS, w których mapa liter fontu została ucięta. Poliglota i Konwerter sprawdzają teraz każdą stronę PDF-a i rozpoznają taką warstwę, zamiast przepuszczać ją dalej jako zwykły tekst. Jeśli font osadzony w pliku ma własną, pełną mapę liter, program odbudowuje z niej tekst — lokalnie i za darmo, razem ze znakami akcentu, jeśli dokument je zawiera. Strony, których nie da się odbudować, program wymienia z numerami: Poliglota proponuje dla nich ten sam płatny odczyt z obrazu co dla skanów (za Twoją zgodą, z szacunkiem kosztu), a Konwerter pyta, czy mimo to zapisać wynik. Język dokumentu program rozpoznaje wyłącznie z czytelnego tekstu.</p>
+<p>Program naprawia też tekst zapisany w złym kodowaniu, na przykład cyrylicę, która wygląda jak „Áèáëèîòåêà” zamiast „Библиотека”. Przekodowuje tylko wtedy, gdy wynik jest wyraźnie czytelniejszy od oryginału, i mówi, których stron to dotyczyło.</p>
+<p>Dokumenty powstałe z konwersji PDF na Worda często noszą ślady łamania stron. Przy wczytaniu pliku .docx (i przy PDF-ach) program skleja wyrazy przeniesione do następnej linii, ale tylko wtedy, gdy ma na to dowód w samym dokumencie: sklejona forma pojawia się w nim gdzie indziej albo druga część nie jest samodzielnym słowem. W notatkach pisanych ręcznie, gdzie „- ” bywa myślnikiem, niczego nie skleja. Wyrazy rozstrzelone dla wyróżnienia („S o c j a l n e”) łączy z powrotem, gdy to samo słowo występuje w dokumencie, a spacje z czcionki Symbol zamienia na zwykłe. Po wczytaniu program podaje, ile takich poprawek zrobił. Naprawiacz Tagów tych poprawek nie stosuje, bo kopiuje oryginalny plik .docx.</p>
+<p>Długi PDF wczytuje się w tle: okno postępu pokazuje nazwę pliku i numer strony, a czytnik ekranu ogłasza jego pojawienie się. Drugiego pliku nie da się wczytać, dopóki trwa pierwsze wczytanie.</p>
 <h2>Naprawiacz Tagów: kod języka osobno dla każdego akapitu (NOWOŚĆ w wersji 19.2)</h2>
 <p>Pod polem kodu ISO znajdziesz pole wyboru „Ustaw kod ISO osobno dla każdego akapitu". Odznaczone — wszystko zostaje po staremu: jeden kod idzie na cały plik i nie pojawia się żadne dodatkowe okno. Zaznaczone — po naciśnięciu „Uruchom Przetwarzanie" otwiera się lista akapitów Twojego pliku.</p>
 <p>Każda pozycja listy mówi od razu trzy rzeczy: numer akapitu, początek jego treści i kod, który ten akapit dostanie. Nie musisz więc wchodzić w żadne pole, żeby usłyszeć, co gdzie trafi. Pod listą są trzy rzeczy dla wybranego akapitu: jego pełna treść, wynik wykrywania języka i pole, w którym kod zmieniasz. Wszystkie akapity startują z kodem, który wpisałeś w pole „Kod ISO" — do pliku nie trafia żaden kod, którego nie zatwierdziłeś.</p>

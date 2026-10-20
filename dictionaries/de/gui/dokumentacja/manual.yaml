@@ -394,6 +394,16 @@ tresc:
 
     - Schutzschild: Das Skript schützt alle HTML-Tags. Es verdirbt nur Dialoge und Erzählung.
     - Funktioniert lokal und kostet nichts!
+  krok_5_naprawa_zrodel: |
+    ## Beschädigter Text in PDFs und Konvertierungsdokumenten (NEU in Version 19.15)
+
+    Manche PDFs haben eine Textebene, die nur vorgibt, Text zu sein: Auf dem Bildschirm sieht die Seite korrekt aus, aber beim Kopieren erhältst du statt Buchstaben zufällige Zeichen. So ist es zum Beispiel bei Dateien, die über die Vorschau in macOS gespeichert wurden und in denen die Buchstabenzuordnung der Schrift abgeschnitten wurde. Der Polyglott und der Konverter prüfen jetzt jede PDF-Seite und erkennen eine solche Ebene, statt sie als gewöhnlichen Text weiterzureichen. Wenn die in der Datei eingebettete Schrift eine eigene, vollständige Buchstabenzuordnung hat, baut das Programm den Text daraus wieder auf – lokal und kostenlos, samt Akzentzeichen, falls das Dokument welche enthält. Seiten, die sich nicht wiederherstellen lassen, nennt das Programm mit ihren Nummern: Der Polyglott schlägt für sie dieselbe kostenpflichtige Bilderkennung vor wie für Scans (mit deiner Zustimmung und einer Kostenschätzung), und der Konverter fragt, ob das Ergebnis trotzdem gespeichert werden soll. Die Sprache des Dokuments erkennt das Programm ausschließlich anhand von lesbarem Text.
+
+    Das Programm repariert auch Text, der in der falschen Kodierung gespeichert wurde, zum Beispiel Kyrillisch, das wie „Áèáëèîòåêà“ statt „Библиотека“ aussieht. Es kodiert nur dann um, wenn das Ergebnis deutlich lesbarer ist als das Original, und teilt mit, welche Seiten davon betroffen waren.
+
+    Dokumente, die durch die Konvertierung von PDF in Word entstanden sind, tragen häufig Spuren des Seitenumbruchs. Beim Laden einer .docx-Datei (und bei PDFs) fügt das Programm Wörter zusammen, die in die nächste Zeile umgebrochen wurden, aber nur dann, wenn es dafür einen Beleg im Dokument selbst hat: Die zusammengefügte Form kommt darin an anderer Stelle vor, oder der zweite Teil ist kein eigenständiges Wort. In handgeschriebenen Notizen, in denen „- “ auch ein Gedankenstrich sein kann, fügt es nichts zusammen. Zur Hervorhebung gesperrte Wörter („S o c j a l n e“) setzt es wieder zusammen, wenn dasselbe Wort im Dokument vorkommt, und Leerzeichen aus der Symbol-Schrift ersetzt es durch normale. Nach dem Laden gibt das Programm an, wie viele solcher Korrekturen es vorgenommen hat. Der Tag-Reparierer wendet diese Korrekturen nicht an, da er die ursprüngliche .docx-Datei kopiert.
+
+    Ein langes PDF wird im Hintergrund geladen: Das Fortschrittsfenster zeigt den Dateinamen und die Seitennummer, und ein Screenreader kündigt sein Erscheinen an. Eine zweite Datei lässt sich nicht laden, solange der erste Ladevorgang läuft.
   krok_5_naprawiacz_per_akapit: |
     ## Tag-Reparateur: Sprachcode separat für jeden Absatz (NEU in Version 19.2)
 

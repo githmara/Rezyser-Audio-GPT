@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Komplettanleitung (Version 19.14.0 – Release-Version)</title>
+<title>Reżyser Audio GPT — Komplettanleitung (Version 19.15.0 – Release-Version)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Komplettanleitung (Version 19.14.0 – Release-Version)</h1>
+<h1>Reżyser Audio GPT — Komplettanleitung (Version 19.15.0 – Release-Version)</h1>
 <p>Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.</p>
 <p>Das Set besteht aus dem Hauptstudio (Regie), einem Übersetzungs- und Akzentwerkzeug (Polyglott), einem Werkzeug zum Erstellen der Dateistruktur (Hörbucharchitekt), einem Regelmanager (ab Version 13.0 — ohne Python kannst du einen neuen Akzent, ein Chiffre oder einen kreativen Modus hinzufügen, siehe SCHRITT 7b unten) und — ab Version 15.0 — einem Geschichtenmodul (interaktive, zweite Person AI-generierte Fiktion, gelesen von TTS oder Screenreader, beschrieben in einem separaten Handbuch tales.de.html). Alle fünf Werkzeuge sind in einem Programmfenster verfügbar, das über Schaltflächen in der Leiste oder Tastenkombinationen Ctrl+1..Ctrl+5 umgeschaltet werden kann.</p>
 <h2>SCHRITT 1: Erste Ausführung (Cross-Platform)</h2>
@@ -260,6 +260,11 @@ Sie fragen sich sicher, ob der Synthesizer solche normalisierten Zahlen je nach 
 <li>Schutzschild: Das Skript schützt alle HTML-Tags. Es verdirbt nur Dialoge und Erzählung.</li>
 <li>Funktioniert lokal und kostet nichts!</li>
 </ul>
+<h2>Beschädigter Text in PDFs und Konvertierungsdokumenten (NEU in Version 19.15)</h2>
+<p>Manche PDFs haben eine Textebene, die nur vorgibt, Text zu sein: Auf dem Bildschirm sieht die Seite korrekt aus, aber beim Kopieren erhältst du statt Buchstaben zufällige Zeichen. So ist es zum Beispiel bei Dateien, die über die Vorschau in macOS gespeichert wurden und in denen die Buchstabenzuordnung der Schrift abgeschnitten wurde. Der Polyglott und der Konverter prüfen jetzt jede PDF-Seite und erkennen eine solche Ebene, statt sie als gewöhnlichen Text weiterzureichen. Wenn die in der Datei eingebettete Schrift eine eigene, vollständige Buchstabenzuordnung hat, baut das Programm den Text daraus wieder auf – lokal und kostenlos, samt Akzentzeichen, falls das Dokument welche enthält. Seiten, die sich nicht wiederherstellen lassen, nennt das Programm mit ihren Nummern: Der Polyglott schlägt für sie dieselbe kostenpflichtige Bilderkennung vor wie für Scans (mit deiner Zustimmung und einer Kostenschätzung), und der Konverter fragt, ob das Ergebnis trotzdem gespeichert werden soll. Die Sprache des Dokuments erkennt das Programm ausschließlich anhand von lesbarem Text.</p>
+<p>Das Programm repariert auch Text, der in der falschen Kodierung gespeichert wurde, zum Beispiel Kyrillisch, das wie „Áèáëèîòåêà“ statt „Библиотека“ aussieht. Es kodiert nur dann um, wenn das Ergebnis deutlich lesbarer ist als das Original, und teilt mit, welche Seiten davon betroffen waren.</p>
+<p>Dokumente, die durch die Konvertierung von PDF in Word entstanden sind, tragen häufig Spuren des Seitenumbruchs. Beim Laden einer .docx-Datei (und bei PDFs) fügt das Programm Wörter zusammen, die in die nächste Zeile umgebrochen wurden, aber nur dann, wenn es dafür einen Beleg im Dokument selbst hat: Die zusammengefügte Form kommt darin an anderer Stelle vor, oder der zweite Teil ist kein eigenständiges Wort. In handgeschriebenen Notizen, in denen „- “ auch ein Gedankenstrich sein kann, fügt es nichts zusammen. Zur Hervorhebung gesperrte Wörter („S o c j a l n e“) setzt es wieder zusammen, wenn dasselbe Wort im Dokument vorkommt, und Leerzeichen aus der Symbol-Schrift ersetzt es durch normale. Nach dem Laden gibt das Programm an, wie viele solcher Korrekturen es vorgenommen hat. Der Tag-Reparierer wendet diese Korrekturen nicht an, da er die ursprüngliche .docx-Datei kopiert.</p>
+<p>Ein langes PDF wird im Hintergrund geladen: Das Fortschrittsfenster zeigt den Dateinamen und die Seitennummer, und ein Screenreader kündigt sein Erscheinen an. Eine zweite Datei lässt sich nicht laden, solange der erste Ladevorgang läuft.</p>
 <h2>Tag-Reparateur: Sprachcode separat für jeden Absatz (NEU in Version 19.2)</h2>
 <p>Unter dem Feld für den ISO-Code findest du das Auswahlfeld „ISO-Code separat für jeden Absatz festlegen". Nicht angehakt — es bleibt alles beim Alten: ein Code gilt für die ganze Datei, und es öffnet sich kein zusätzliches Fenster. Angehakt — nach Betätigung von „Verarbeitung starten" öffnet sich eine Liste der Absätze deiner Datei.</p>
 <p>Jeder Listeneintrag zeigt sofort drei Dinge: die Nummer des Absatzes, den Anfang seines Inhalts und den Code, den dieser Absatz erhalten wird. Du musst also in kein Feld hineingehen, um zu erfahren, was wohin gelangt. Unter der Liste stehen drei Angaben zum ausgewählten Absatz: sein vollständiger Inhalt, das Ergebnis der Spracherkennung und das Feld, in dem du den Code änderst. Alle Absätze starten mit dem Code, den du in das Feld „ISO-Code" eingetragen hast — in die Datei gelangt kein Code, den du nicht bestätigt hast.</p>

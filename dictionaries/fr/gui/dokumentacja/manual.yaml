@@ -394,6 +394,16 @@ tresc:
 
     - Bouclier protecteur : Le script protège toutes les balises HTML. Il n'abîme que les dialogues et la narration.
     - Fonctionne localement et ne coûte rien !
+  krok_5_naprawa_zrodel: |
+    ## Texte corrompu dans les PDF et les documents issus d'une conversion (NOUVEAUTÉ de la version 19.15)
+
+    Certains PDF ont une couche de texte qui ne fait que faire semblant d'être du texte : à l'écran, la page a l'air correcte, mais lorsque vous la copiez, vous obtenez des caractères aléatoires au lieu de lettres. C'est le cas, par exemple, des fichiers enregistrés par l'Aperçu de macOS, dans lesquels la table de correspondance des lettres de la police a été tronquée. Le Polyglotte et le Convertisseur vérifient désormais chaque page d'un PDF et reconnaissent une telle couche, au lieu de la laisser passer comme du texte ordinaire. Si la police incorporée au fichier possède sa propre table de lettres complète, le programme reconstruit le texte à partir de celle-ci — localement et gratuitement, accents compris si le document en contient. Les pages qui ne peuvent pas être reconstruites sont énumérées par le programme avec leur numéro : le Polyglotte leur propose la même lecture payante à partir de l'image que pour les scans (avec votre accord, et avec une estimation du coût), tandis que le Convertisseur demande si vous souhaitez malgré tout enregistrer le résultat. La langue du document n'est reconnue qu'à partir du texte lisible.
+
+    Le programme répare aussi le texte enregistré dans un mauvais encodage, par exemple du cyrillique qui ressemble à « Áèáëèîòåêà » au lieu de « Библиотека ». Il ne réencode que lorsque le résultat est nettement plus lisible que l'original, et il indique quelles pages sont concernées.
+
+    Les documents issus de la conversion d'un PDF en Word portent souvent des traces de la mise en page. Lors du chargement d'un fichier .docx (et pour les PDF), le programme recolle les mots coupés en fin de ligne, mais uniquement s'il en a la preuve dans le document lui-même : la forme recollée y apparaît ailleurs, ou la seconde partie n'est pas un mot autonome. Dans les notes écrites à la main, où « - » peut être un tiret, il ne recolle rien. Les mots espacés pour l'emphase (« S o c j a l n e ») sont réunis de nouveau lorsque le même mot apparaît dans le document, et les espaces de la police Symbol sont remplacées par des espaces ordinaires. Après le chargement, le programme indique combien de corrections de ce type il a effectuées. Le Réparateur de balises n'applique pas ces corrections, car il copie le fichier .docx d'origine.
+
+    Un long PDF se charge en arrière-plan : la fenêtre de progression affiche le nom du fichier et le numéro de page, et le lecteur d'écran annonce son apparition. Il est impossible de charger un second fichier tant que le premier chargement est en cours.
   krok_5_naprawiacz_per_akapit: |
     ## Réparateur de balises : code de langue séparé pour chaque paragraphe (NOUVEAUTÉ dans la version 19.2)
 

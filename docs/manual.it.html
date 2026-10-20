@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Guida completa (Versione 19.14.0 – Versione di Rilascio)</title>
+<title>Reżyser Audio GPT — Guida completa (Versione 19.15.0 – Versione di Rilascio)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Guida completa (Versione 19.14.0 – Versione di Rilascio)</h1>
+<h1>Reżyser Audio GPT — Guida completa (Versione 19.15.0 – Versione di Rilascio)</h1>
 <p>Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).</p>
 <p>Il set è composto dallo studio principale (Regia), dallo strumento per traduzioni e accenti (Poliglotta), dallo strumento per la costruzione della struttura del file (Architetto Audiolibri), dal Gestore Regole (dalla versione 13.0 — senza Python puoi aggiungere un nuovo accento, cifra o modalità creativa, vedi PASSO 7b sotto) e — dalla versione 15.0 — dal modulo Racconti (finzione interattiva in seconda persona generata da AI, letta da TTS o lettore dello schermo, descritta nel manuale separato tales.it.html). Tutti e cinque gli strumenti sono disponibili in un'unica finestra del programma, commutabile tramite pulsanti sulla barra o scorciatoie da tastiera Ctrl+1..Ctrl+5.</p>
 <h2>PASSO 1: Primo avvio (Cross-Platform)</h2>
@@ -260,6 +260,11 @@ Vi chiederete probabilmente se il sintetizzatore saprà declinare tali numeri no
 <li>Scudo protettivo: Lo script protegge tutti i tag HTML. Rovina solo i dialoghi e la narrazione.</li>
 <li>Funziona localmente e non costa nulla!</li>
 </ul>
+<h2>Testo corrotto nei PDF e nei documenti convertiti (NOVITÀ nella versione 19.15)</h2>
+<p>Alcuni PDF hanno un livello di testo che finge soltanto di essere testo: sullo schermo la pagina sembra corretta, ma copiandola, invece delle lettere si ottengono caratteri casuali. Capita, per esempio, con i file salvati dall'anteprima di macOS, nei quali la mappa delle lettere del font è stata troncata. Poliglotta e Convertitore ora controllano ogni pagina del PDF e riconoscono un livello di questo tipo, invece di farlo passare come normale testo. Se il font incorporato nel file ha una propria mappa completa delle lettere, il programma ricostruisce da essa il testo — in locale e gratis, compresi i segni diacritici, se il documento li contiene. Le pagine che non è possibile ricostruire vengono elencate dal programma con i numeri: Poliglotta propone per esse la stessa lettura a pagamento dall'immagine prevista per le scansioni (con il tuo consenso, con una stima dei costi), mentre il Convertitore chiede se salvare comunque il risultato. La lingua del documento viene riconosciuta esclusivamente dal testo leggibile.</p>
+<p>Il programma ripara anche il testo salvato con una codifica sbagliata, per esempio il cirillico che appare come «Áèáëèîòåêà» invece di «Библиотека». Ricodifica solo quando il risultato è nettamente più leggibile dell'originale, e indica a quali pagine si è applicato.</p>
+<p>I documenti nati dalla conversione di PDF in Word portano spesso le tracce dell'interruzione di pagina. Al caricamento di un file .docx (e dei PDF) il programma riunisce le parole andate a capo nella riga successiva, ma solo quando ha una prova nel documento stesso: la forma unita compare altrove nel testo, oppure la seconda parte non è una parola autonoma. Nelle note scritte a mano, dove «- » a volte è un trattino, non unisce nulla. Le parole spaziate per enfasi («S o c i a l i») vengono ricomposte quando la stessa parola compare nel documento, e gli spazi del font Symbol vengono sostituiti con spazi normali. Dopo il caricamento il programma comunica quante correzioni di questo tipo ha eseguito. Il Riparatore di Tag non applica queste correzioni, perché copia il file .docx originale.</p>
+<p>Un PDF lungo viene caricato in background: la finestra di avanzamento mostra il nome del file e il numero di pagina, e il lettore di schermo ne annuncia la comparsa. Finché è in corso il primo caricamento, non è possibile caricare un secondo file.</p>
 <h2>Riparatore di Tag: codice lingua separato per ogni paragrafo (NOVITÀ nella versione 19.2)</h2>
 <p>Sotto il campo del codice ISO trovi una casella di selezione „Imposta il codice ISO separatamente per ogni paragrafo". Deselezionata — tutto rimane come prima: un unico codice vale per l'intero file e non compare nessuna finestra aggiuntiva. Selezionata — dopo aver premuto „Avvia Elaborazione" si apre l'elenco dei paragrafi del tuo file.</p>
 <p>Ogni voce dell'elenco indica subito tre cose: il numero del paragrafo, l'inizio del suo contenuto e il codice che quel paragrafo riceverà. Non devi quindi entrare in nessun campo per sapere cosa finirà dove. Sotto l'elenco ci sono tre elementi relativi al paragrafo selezionato: il suo contenuto completo, il risultato del rilevamento della lingua e il campo in cui modifichi il codice. Tutti i paragrafi partono con il codice che hai inserito nel campo „Codice ISO" — nel file non finisce nessun codice che non hai approvato.</p>

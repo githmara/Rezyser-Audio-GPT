@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Guide complet (Version 19.14.0 – Version de Lancement)</title>
+<title>Reżyser Audio GPT — Guide complet (Version 19.15.0 – Version de Lancement)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Guide complet (Version 19.14.0 – Version de Lancement)</h1>
+<h1>Reżyser Audio GPT — Guide complet (Version 19.15.0 – Version de Lancement)</h1>
 <p>Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).</p>
 <p>L'ensemble se compose du studio principal (Réalisation), de l'outil de traduction et d'accents (Polyglotte), de l'outil de construction de structure de fichier (Architecte de Livres Audio), du Gestionnaire de Règles (à partir de la version 13.0 — sans Python, vous pouvez ajouter un nouvel accent, un chiffre ou un mode créatif, voir ÉTAPE 7b ci-dessous) et — à partir de la version 15.0 — du module Histoires (fiction interactive à la deuxième personne générée par IA, lue par TTS ou lecteur d'écran, décrite dans le manuel séparé tales.fr.html). Les cinq outils sont disponibles dans une seule fenêtre de programme, commutable par des boutons sur la barre ou par des raccourcis clavier Ctrl+1..Ctrl+5.</p>
 <h2>ÉTAPE 1 : Première exécution (Cross-Platform)</h2>
@@ -260,6 +260,11 @@ Vous demanderez sans doute si le synthétiseur saura décliner ces nombres norma
 <li>Bouclier protecteur : Le script protège toutes les balises HTML. Il n'abîme que les dialogues et la narration.</li>
 <li>Fonctionne localement et ne coûte rien !</li>
 </ul>
+<h2>Texte corrompu dans les PDF et les documents issus d'une conversion (NOUVEAUTÉ de la version 19.15)</h2>
+<p>Certains PDF ont une couche de texte qui ne fait que faire semblant d'être du texte : à l'écran, la page a l'air correcte, mais lorsque vous la copiez, vous obtenez des caractères aléatoires au lieu de lettres. C'est le cas, par exemple, des fichiers enregistrés par l'Aperçu de macOS, dans lesquels la table de correspondance des lettres de la police a été tronquée. Le Polyglotte et le Convertisseur vérifient désormais chaque page d'un PDF et reconnaissent une telle couche, au lieu de la laisser passer comme du texte ordinaire. Si la police incorporée au fichier possède sa propre table de lettres complète, le programme reconstruit le texte à partir de celle-ci — localement et gratuitement, accents compris si le document en contient. Les pages qui ne peuvent pas être reconstruites sont énumérées par le programme avec leur numéro : le Polyglotte leur propose la même lecture payante à partir de l'image que pour les scans (avec votre accord, et avec une estimation du coût), tandis que le Convertisseur demande si vous souhaitez malgré tout enregistrer le résultat. La langue du document n'est reconnue qu'à partir du texte lisible.</p>
+<p>Le programme répare aussi le texte enregistré dans un mauvais encodage, par exemple du cyrillique qui ressemble à « Áèáëèîòåêà » au lieu de « Библиотека ». Il ne réencode que lorsque le résultat est nettement plus lisible que l'original, et il indique quelles pages sont concernées.</p>
+<p>Les documents issus de la conversion d'un PDF en Word portent souvent des traces de la mise en page. Lors du chargement d'un fichier .docx (et pour les PDF), le programme recolle les mots coupés en fin de ligne, mais uniquement s'il en a la preuve dans le document lui-même : la forme recollée y apparaît ailleurs, ou la seconde partie n'est pas un mot autonome. Dans les notes écrites à la main, où « - » peut être un tiret, il ne recolle rien. Les mots espacés pour l'emphase (« S o c j a l n e ») sont réunis de nouveau lorsque le même mot apparaît dans le document, et les espaces de la police Symbol sont remplacées par des espaces ordinaires. Après le chargement, le programme indique combien de corrections de ce type il a effectuées. Le Réparateur de balises n'applique pas ces corrections, car il copie le fichier .docx d'origine.</p>
+<p>Un long PDF se charge en arrière-plan : la fenêtre de progression affiche le nom du fichier et le numéro de page, et le lecteur d'écran annonce son apparition. Il est impossible de charger un second fichier tant que le premier chargement est en cours.</p>
 <h2>Réparateur de balises : code de langue séparé pour chaque paragraphe (NOUVEAUTÉ dans la version 19.2)</h2>
 <p>Sous le champ du code ISO, vous trouverez une case à cocher « Définir le code ISO séparément pour chaque paragraphe ». Décochée — tout reste comme avant : un seul code s'applique à tout le fichier et aucune fenêtre supplémentaire n'apparaît. Cochée — après avoir appuyé sur « Lancer le Traitement », la liste des paragraphes de votre fichier s'ouvre.</p>
 <p>Chaque élément de la liste indique d'emblée trois choses : le numéro du paragraphe, le début de son contenu et le code que ce paragraphe recevra. Vous n'avez donc besoin d'ouvrir aucun champ pour savoir ce qui ira où. Sous la liste se trouvent trois éléments concernant le paragraphe sélectionné : son contenu complet, le résultat de la détection de langue et le champ où vous modifiez le code. Tous les paragraphes démarrent avec le code que vous avez saisi dans le champ « Code ISO » — aucun code que vous n'avez pas validé n'est inséré dans le fichier.</p>

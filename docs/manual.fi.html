@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Täydellinen opas (Versio 19.14.0 – Julkaisuversio)</title>
+<title>Reżyser Audio GPT — Täydellinen opas (Versio 19.15.0 – Julkaisuversio)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Täydellinen opas (Versio 19.14.0 – Julkaisuversio)</h1>
+<h1>Reżyser Audio GPT — Täydellinen opas (Versio 19.15.0 – Julkaisuversio)</h1>
 <p>Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.</p>
 <p>Paketti koostuu päästudiosta (Ohjaus), käännös- ja aksenttityökalusta (Polyglootti), tiedostorakenteen rakennustyökalusta (Äänikirja-arkkitehti), Sääntöjen Hallinnasta (versiosta 13.0 alkaen — ilman Pythonia voit lisätä uuden aksentin, salauksen tai luovan tilan, katso KOHTA 7b alla) sekä — versiosta 15.0 alkaen — Tarinamoduulista (interaktiivinen toisen persoonan fiktio, jonka AI tuottaa ja TTS tai ruudunlukija lukee, kuvattu erillisessä oppaassa tales.fi.html). Kaikki viisi työkalua ovat saatavilla yhdessä ohjelmaikkunassa, ja niitä voi vaihtaa painikkeilla tai pikanäppäimillä Ctrl+1..Ctrl+5.</p>
 <h2>VAIHE 1: Ensimmäinen käynnistys (Cross-Platform)</h2>
@@ -260,6 +260,11 @@ Kysyttekö varmasti, osaako syntetisaattori taivuttaa näin normalisoituja lukuj
 <li>Suojakilpi: Skripti suojaa kaikkia HTML-tageja. Se turmelee vain dialogia ja kerrontaa.</li>
 <li>Toimii paikallisesti eikä maksa mitään!</li>
 </ul>
+<h2>Vioittunut teksti PDF-tiedostoissa ja muunnetuissa asiakirjoissa (UUTTA versiossa 19.15)</h2>
+<p>Joidenkin PDF-tiedostojen tekstikerros vain tekeytyy tekstiksi: ruudulla sivu näyttää oikealta, mutta kopioitaessa kirjainten tilalle tulee satunnaisia merkkejä. Näin käy esimerkiksi macOS:n esikatselulla tallennetuissa tiedostoissa, joissa fontin kirjainkartta on katkaistu. Polyglootti ja Muunnin tarkistavat nyt jokaisen PDF-sivun ja tunnistavat tällaisen kerroksen sen sijaan, että päästäisivät sen eteenpäin tavallisena tekstinä. Jos tiedostoon upotetulla fontilla on oma täydellinen kirjainkarttansa, ohjelma rakentaa tekstin sen pohjalta uudelleen — paikallisesti ja ilmaiseksi, aksenttimerkkeineen, jos asiakirjassa on niitä. Sivut, joita ei voida rakentaa uudelleen, ohjelma luettelee numeroineen: Polyglootti ehdottaa niille samaa maksullista kuvasta lukemista kuin skannauksille (suostumuksellasi, kustannusarvion kera), ja Muunnin kysyy, tallennetaanko tulos siitä huolimatta. Asiakirjan kielen ohjelma tunnistaa yksinomaan luettavasta tekstistä.</p>
+<p>Ohjelma korjaa myös väärällä koodauksella tallennetun tekstin, esimerkiksi kyrillisen tekstin, joka näyttää muodolta „Áèáëèîòåêà" eikä muodolta „Библиотека". Se koodaa tekstin uudelleen vain, jos tulos on selvästi luettavampi kuin alkuperäinen, ja kertoo, mitä sivuja asia koski.</p>
+<p>PDF:stä Wordiksi muunnetuissa asiakirjoissa on usein jälkiä sivunvaihdoista. Kun luet .docx-tiedoston (ja PDF-tiedostojen kohdalla), ohjelma yhdistää seuraavalle riville siirtyneet sanat, mutta vain jos sillä on siihen näyttö itse asiakirjasta: yhdistetty muoto esiintyy siinä muualla tai toinen osa ei ole itsenäinen sana. Käsin kirjoitetuissa muistiinpanoissa, joissa „- " voi olla ajatusviiva, se ei yhdistä mitään. Korostukseksi harvennetut sanat („S o c j a l n e") se liittää takaisin yhteen, kun sama sana esiintyy asiakirjassa, ja Symbol-fontin välilyönnit se muuttaa tavallisiksi. Lukemisen jälkeen ohjelma ilmoittaa, montako tällaista korjausta se teki. Tagikorjaaja ei käytä näitä korjauksia, koska se kopioi alkuperäisen .docx-tiedoston.</p>
+<p>Pitkä PDF ladataan taustalla: edistymisikkuna näyttää tiedoston nimen ja sivunumeron, ja ruudunlukija ilmoittaa sen ilmestymisestä. Toista tiedostoa ei voi ladata, kun ensimmäisen lataus on kesken.</p>
 <h2>Tunnistekorjain: kielikoodi erikseen jokaiselle kappaleelle (UUTTA versiossa 19.2)</h2>
 <p>ISO-koodikentän alapuolella löydät valintaruudun „Aseta ISO-koodi erikseen jokaiselle kappaleelle". Kun se on tyhjä — kaikki toimii kuten ennen: yksi koodi menee koko tiedostolle, eikä mitään ylimääräistä ikkunaa avaudu. Kun se on valittuna — painikkeen „Käynnistä käsittely" painamisen jälkeen avautuu tiedostosi kappaleiden luettelo.</p>
 <p>Jokainen luettelon kohta kertoo heti kolme asiaa: kappaleen numeron, sen sisällön alun ja koodin, jonka tämä kappale saa. Sinun ei siis tarvitse avata mitään kenttää kuullaksesi, mikä menee minnekin. Luettelon alla on kolme asiaa valittua kappaletta varten: sen koko sisältö, kielentunnistuksen tulos ja kenttä, jossa vaihdat koodin. Kaikki kappaleet lähtevät liikkeelle koodilla, jonka kirjoitit kenttään „Kod ISO" — tiedostoon ei päädy yhtään koodia, jota et ole hyväksynyt.</p>

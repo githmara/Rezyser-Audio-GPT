@@ -396,6 +396,16 @@ tresc:
 
     - Scudo protettivo: Lo script protegge tutti i tag HTML. Rovina solo i dialoghi e la narrazione.
     - Funziona localmente e non costa nulla!
+  krok_5_naprawa_zrodel: |
+    ## Testo corrotto nei PDF e nei documenti convertiti (NOVITÀ nella versione 19.15)
+
+    Alcuni PDF hanno un livello di testo che finge soltanto di essere testo: sullo schermo la pagina sembra corretta, ma copiandola, invece delle lettere si ottengono caratteri casuali. Capita, per esempio, con i file salvati dall'anteprima di macOS, nei quali la mappa delle lettere del font è stata troncata. Poliglotta e Convertitore ora controllano ogni pagina del PDF e riconoscono un livello di questo tipo, invece di farlo passare come normale testo. Se il font incorporato nel file ha una propria mappa completa delle lettere, il programma ricostruisce da essa il testo — in locale e gratis, compresi i segni diacritici, se il documento li contiene. Le pagine che non è possibile ricostruire vengono elencate dal programma con i numeri: Poliglotta propone per esse la stessa lettura a pagamento dall'immagine prevista per le scansioni (con il tuo consenso, con una stima dei costi), mentre il Convertitore chiede se salvare comunque il risultato. La lingua del documento viene riconosciuta esclusivamente dal testo leggibile.
+
+    Il programma ripara anche il testo salvato con una codifica sbagliata, per esempio il cirillico che appare come «Áèáëèîòåêà» invece di «Библиотека». Ricodifica solo quando il risultato è nettamente più leggibile dell'originale, e indica a quali pagine si è applicato.
+
+    I documenti nati dalla conversione di PDF in Word portano spesso le tracce dell'interruzione di pagina. Al caricamento di un file .docx (e dei PDF) il programma riunisce le parole andate a capo nella riga successiva, ma solo quando ha una prova nel documento stesso: la forma unita compare altrove nel testo, oppure la seconda parte non è una parola autonoma. Nelle note scritte a mano, dove «- » a volte è un trattino, non unisce nulla. Le parole spaziate per enfasi («S o c i a l i») vengono ricomposte quando la stessa parola compare nel documento, e gli spazi del font Symbol vengono sostituiti con spazi normali. Dopo il caricamento il programma comunica quante correzioni di questo tipo ha eseguito. Il Riparatore di Tag non applica queste correzioni, perché copia il file .docx originale.
+
+    Un PDF lungo viene caricato in background: la finestra di avanzamento mostra il nome del file e il numero di pagina, e il lettore di schermo ne annuncia la comparsa. Finché è in corso il primo caricamento, non è possibile caricare un secondo file.
   krok_5_naprawiacz_per_akapit: |
     ## Riparatore di Tag: codice lingua separato per ogni paragrafo (NOVITÀ nella versione 19.2)
 
