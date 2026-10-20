@@ -336,9 +336,9 @@ class KonwerterPanel(wx.Panel):
         try:
             if file_name.lower().endswith(".docx"):
                 doc_in = docx.Document(file_name)
-                # 19.15: przeniesienia „по- священного” z konwersji PDF→Word
-                # — ta sama naprawa co w Poliglocie (`tekst_docx`).
-                tekst = "\n".join(core_poliglota.napraw_przeniesienia(
+                # 19.15: U+F020, rozstrzelenia i przeniesienia z konwersji
+                # PDF→Word — to samo czyszczenie co w Poliglocie (`tekst_docx`).
+                tekst = "\n".join(core_poliglota.oczysc_akapity_docx(
                     [p.text for p in doc_in.paragraphs])[0])
             elif file_name.lower().endswith(".pdf"):
                 # 19.13: warstwa tekstu PDF; akapit = linia, jak przy `.docx`.

@@ -19,7 +19,13 @@ produktu. Podział z geometrii linii (`_podziel_na_akapity`).
 
 Kolontytuły rozpoznajemy po POZYCJI, nie po słowach: ten sam tekst (po zdjęciu
 numeru — albo z numerem rosnącym razem ze stroną) w tym samym pasie wysokości,
-w górnym lub dolnym marginesie, na co najmniej ćwierci stron. ATA chroni nagłówki scen listą słów w sześciu językach;
+w górnym lub dolnym marginesie, na co najmniej ćwierci stron (od 19.15 także
+ćwierci stron JEDNEJ parzystości — kolontytuł lewej i prawej strony — oraz
+w skrajnej linii strony tuż poza pasem 7%, gdy odsunięta od treści; numer
+strony w skrajnej linii zawsze, bo pilnuje go przyrost razem ze stroną).
+Tekst rozstrzelony: granice słów z geometrii (`_oznacz_granice_rozstrzelenia`),
+sklejenie według słownika dokumentu (`core_poliglota.scal_rozstrzelone`).
+ATA chroni nagłówki scen listą słów w sześciu językach;
 tu ochrona wynika z geometrii — „SCENA 2" w środku strony nie jest w marginesie,
 a lista słów w Pythonie byłaby wzorcem §6.7b (języki wypisane ręcznie w kodzie).
 
@@ -48,6 +54,7 @@ dalej jest zgłaszana.
 
 from __future__ import annotations
 
+import functools
 import math
 import os
 import re
@@ -188,6 +195,9 @@ _DOKLEJANE = frozenset(",.;:!?)]»”…")
 PAS_MARGINESU = 0.07
 #: Minimalny ułamek stron z tym samym kolontytułem / numerem.
 UDZIAL_STRON = 0.25
+#: Skrajna linia strony poza pasem marginesu jest kandydatem na kolontytuł,
+#: gdy odstaje od reszty o tyle wysokości swojej linii (19.15, słownik).
+ODSUNIECIE_SKRAJNEJ = 0.8
 #: Ułamek wystąpień rdzenia, którego numer musi rosnąć razem ze stroną.
 ZGODNOSC_NUMERU = 0.8
 
@@ -511,6 +521,65 @@ def _znaki_po_naprawie(tp, znane: frozenset[str] | None, fonty: dict | None
     return nowe, litery2, podejrzane2, True
 
 
+#: Granica słowa wewnątrz tekstu rozstrzelonego, wyznaczona geometrią linii
+#: (nieznak Unicode — nie występuje w żadnym tekście, w przeciwieństwie do
+#: obszaru prywatnego fontów Wingdings; przeżywa `_czysc` i zwijanie spacji).
+#: `_scal_rozstrzelone_pdf` zamienia go na dwie spacje, potem znika.
+_GRANICA = chr(0xFDD0)
+#: Odstęp większy od mediany odstępów ciągu o tyle razy to granica słowa
+#: (słownik: 4,1 pt między literami, 13,2 pt między słowami).
+GRANICA_ROZSTRZELENIA = 1.8
+
+
+def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> None:
+    """W ciągu ≥4 pojedynczych liter zamienia spacje-granice słów na `_GRANICA`.
+
+    W PDF-ie między literami rozstrzelenia i między jego słowami stoi tak
+    samo JEDNA spacja (generowana), a różni je tylko przerwa. Nie sklejamy
+    tu niczego — o sklejeniu decyduje słownik dokumentu (`_scal_rozstrzelone_pdf`),
+    jak w `.docx`. Ciąg o równych przerwach (np. „а и в к”) nie dostaje granic.
+    """
+    from core_poliglota import MIN_ROZSTRZELENIE
+    k, n = 0, len(znaki)
+    while k < n:
+        # Jednostka = jedna litera + jej znaki łączące; ciąg = jednostki
+        # rozdzielone pojedynczą spacją, nieprzyklejone do liter z boku.
+        poczatek, spacje, j = k, [], k
+        while j < n and len(znaki[j]) == 1 and znaki[j].isalpha():
+            j += 1
+            while j < n and unicodedata.combining(znaki[j][0]):
+                j += 1
+            if j + 1 < n and znaki[j] == " " and j in luki and len(znaki[j + 1]) == 1 \
+                    and znaki[j + 1].isalpha():
+                spacje.append(j)
+                j += 1
+                continue
+            break
+        przyklejony = (poczatek > 0 and znaki[poczatek - 1].isalpha()) or \
+            (j < n and znaki[j][:1].isalpha())
+        if len(spacje) + 1 >= MIN_ROZSTRZELENIE and not przyklejony:
+            mediana = statistics.median(luki[s] for s in spacje)
+            for s in spacje:
+                # Po literze z akcentem przerwa rośnie (rozstrzelenie dodaje
+                # odstęp także znakowi akcentu): „ф о р м а́ т” dzieliło się
+                # na „форма́” + „т”. Tam granicy nie stawiamy nigdy.
+                if unicodedata.combining(znaki[s - 1][0]):
+                    continue
+                if luki[s] > GRANICA_ROZSTRZELENIA * max(mediana, 0.1):
+                    znaki[s] = _GRANICA
+        k = max(j, k + 1)
+
+
+def _scal_rozstrzelone_pdf(akapity: list[str]) -> tuple[list[str], dict[str, int]]:
+    """Reguła słownikowa z `.docx` na tekście PDF z granicami z geometrii."""
+    import core_poliglota
+    # Po `_RE_BIALE` jedyne podwójne spacje to te z granic, więc po regule
+    # zwijamy je z powrotem do jednej.
+    wynik, liczniki = core_poliglota.scal_rozstrzelone(
+        [a.replace(_GRANICA, "  ") for a in akapity])
+    return [a.replace("  ", " ") for a in wynik], liczniki
+
+
 def _linie_strony(strona) -> list[_Linia]:
     return _czytaj_strone(strona, None)[0]
 
@@ -543,7 +612,9 @@ def _czytaj_strone(strona, znane: frozenset[str] | None, fonty: dict | None = No
         wysokosci: list[float] = []
 
         def zamknij() -> None:
+            _oznacz_granice_rozstrzelenia(znaki, luki)
             tekst = _RE_BIALE.sub(" ", _czysc("".join(znaki))).strip()
+            luki.clear()
             if naprawiona:
                 tekst = unicodedata.normalize("NFC", tekst)
             if tekst:
@@ -556,6 +627,10 @@ def _czytaj_strone(strona, znane: frozenset[str] | None, fonty: dict | None = No
         wszystkie, litery, podejrzane, naprawiona = _znaki_po_naprawie(tp, znane, fonty)
         # Odstęp tuż po znaku łączącym czeka na geometrię następnej litery.
         odstep_po_laczacym = False
+        # Indeks spacji w `znaki` → przerwa (pt) między sąsiednimi znakami;
+        # prawa krawędź ostatniego znaku niebędącego spacją.
+        luki: dict[int, float] = {}
+        prawy_ostatni: float | None = None
         for i, z in wszystkie:
             if z.isspace():
                 if znaki and unicodedata.combining(znaki[-1][-1]) and naprawiona:
@@ -598,8 +673,11 @@ def _czytaj_strone(strona, znane: frozenset[str] | None, fonty: dict | None = No
                     znaki.pop()
                 ramka[:] = [min(ramka[0], l), min(ramka[1], d),
                             max(ramka[2], p), max(ramka[3], g)]
+            if znaki and znaki[-1] == " " and prawy_ostatni is not None:
+                luki[len(znaki) - 1] = l - prawy_ostatni
             znaki.append(z)
             wysokosci.append(g - d)
+            prawy_ostatni = p
         zamknij()
         return linie, litery, podejrzane, len(wszystkie), naprawiona
     finally:
@@ -656,10 +734,47 @@ class _Strona:
         return czy_znieksztalcona(self.litery, self.podejrzane)
 
     def w_marginesie(self, linia: _Linia) -> bool:
+        """Linia w pasie marginesu ALBO skrajna górna / dolna linia strony.
+
+        Sam pas 7% gubił kolontytuł słownika z macOS Quartz („Часть I” górą
+        na 7,7%, numer strony dołem na 7,4%; 412 stron). Szerszy pas łapał
+        pierwszą i ostatnią linię treści (audyt 19.13), a skrajna linia to
+        tylko JEDNA linia z każdej strony — o tym, czy to kolontytuł, dalej
+        decyduje powtórzenie na ćwierci stron albo numer rosnący ze stroną.
+        """
         if not self.geometria:
             return False
         pas = (self.gora - self.dol) * PAS_MARGINESU
-        return linia.gora >= self.gora - pas or linia.dol <= self.dol + pas
+        if linia.gora >= self.gora - pas or linia.dol <= self.dol + pas:
+            return True
+        return any(linia is x for x in self._skrajne_odsuniete)
+
+    def skrajna(self, linia: _Linia) -> bool:
+        """Najwyższa albo najniższa linia strony (bez warunku odsunięcia)."""
+        return self.geometria and len(self.linie) >= 3 and any(
+            linia is x for x in (max(self.linie, key=lambda x: x.gora),
+                                 min(self.linie, key=lambda x: x.dol)))
+
+    @functools.cached_property
+    def _skrajne_odsuniete(self) -> list[_Linia]:
+        """Skrajna górna i dolna linia, o ile ODSUNIĘTA od reszty strony.
+
+        Odstęp do najbliższej linii ≥ `ODSUNIECIE_SKRAJNEJ` × wysokość tej
+        linii (słownik: 1,2–1,4) i co najmniej 3 linie na stronie — przy
+        dwóch liniach nie ma bloku treści, od którego kolontytuł się odcina.
+        """
+        if len(self.linie) < 3:
+            return []
+        wynik = []
+        po_gorze = sorted(self.linie, key=lambda x: -x.gora)
+        gorna, druga = po_gorze[0], po_gorze[1]
+        if gorna.dol - druga.gora >= ODSUNIECIE_SKRAJNEJ * gorna.wysokosc:
+            wynik.append(gorna)
+        po_dole = sorted(self.linie, key=lambda x: x.dol)
+        dolna, przedostatnia = po_dole[0], po_dole[1]
+        if przedostatnia.dol - dolna.gora >= ODSUNIECIE_SKRAJNEJ * dolna.wysokosc:
+            wynik.append(dolna)
+        return wynik
 
 
 def _numery_stron_do_usuniecia(strony: list[_Strona]) -> set[tuple[int, int]]:
@@ -675,7 +790,10 @@ def _numery_stron_do_usuniecia(strony: list[_Strona]) -> set[tuple[int, int]]:
     kandydaci: dict[tuple[str, int], list[tuple[int, int]]] = {}
     for s_nr, strona in enumerate(strony):
         for l_nr, linia in enumerate(strona.linie):
-            if not strona.w_marginesie(linia):
+            # Numer ma własną bramkę (rośnie razem ze stroną), więc skrajna
+            # linia wystarcza bez odsunięcia: na pełnej stronie słownika numer
+            # stoi 0,14–0,64 wysokości linii pod tekstem (19.15).
+            if not (strona.w_marginesie(linia) or strona.skrajna(linia)):
                 continue
             wartosc = _wartosc_numeru(linia.tekst)
             if wartosc is None:
@@ -717,6 +835,11 @@ def _usun_kolontytuly(strony: list[_Strona]) -> tuple[list[list[_Linia]], list[s
         return re.sub(r"\s+", " ", t).lower().strip()
 
     dokladne: Counter = Counter()
+    # Ten sam licznik osobno dla stron parzystych i nieparzystych (19.15):
+    # książka ma inny kolontytuł na lewej i prawej stronie, a słownik na
+    # lewych przełącza go jeszcze w połowie („Часть I” 126, „Часть II” 88
+    # z 275 stron parzystych) — żaden nie dochodził do ćwierci WSZYSTKICH.
+    dokladne_par: Counter = Counter()
     rdzenie: dict[tuple[str, int], list[int]] = {}
     oryginal: dict[tuple, str] = {}
     for s_nr, strona in enumerate(strony):
@@ -728,6 +851,7 @@ def _usun_kolontytuly(strony: list[_Strona]) -> tuple[list[list[_Linia]], list[s
             klucz = (norm(linia.tekst), y)
             if len(klucz[0]) >= 3 and klucz not in widziane:
                 dokladne[klucz] += 1
+                dokladne_par[(klucz, s_nr % 2)] += 1
                 widziane.add(klucz)
                 oryginal.setdefault(klucz, linia.tekst)
             m = _RE_NUMER_NA_BRZEGU.match(linia.tekst)
@@ -738,7 +862,9 @@ def _usun_kolontytuly(strony: list[_Strona]) -> tuple[list[list[_Linia]], list[s
                     rdzenie.setdefault((rdzen, y), []).append(numer - s_nr)
                     widziane.add((rdzen, y))
                     oryginal.setdefault((rdzen, y), linia.tekst)
+    prog_par = [max(3, math.ceil(len(strony[p::2]) * UDZIAL_STRON)) for p in (0, 1)]
     naglowki = {k for k, c in dokladne.items() if c >= prog}
+    naglowki |= {k for (k, p), c in dokladne_par.items() if c >= prog_par[p]}
     numerowane = {k for k, off in rdzenie.items()
                   if len(off) >= prog
                   and Counter(off).most_common(1)[0][1] >= ZGODNOSC_NUMERU * len(off)}
@@ -969,6 +1095,13 @@ def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> Wynik
             skan_po_drodze = True
         elif nowe:
             ostatnia, skan_po_drodze = nowe, False
+    # Tekst rozstrzelony (19.15): granice słów z geometrii, sklejenie wg
+    # słownika dokumentu — ta sama reguła co w `.docx`.
+    plaskie, rozstrzelone = _scal_rozstrzelone_pdf(
+        [a for strona in akapity_stron for a in strona])
+    it = iter(plaskie)
+    akapity_stron = [[next(it) for _ in strona] for strona in akapity_stron]
+    kolontytuly = [k.replace(_GRANICA, " ") for k in kolontytuly]
     akapity = [a for strona in akapity_stron for a in strona]
     if not akapity:
         raise BrakWarstwyTekstu(sciezka, liczba, bez_tekstu)

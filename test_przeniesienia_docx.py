@@ -1,14 +1,15 @@
 """
-test_przeniesienia_docx.py — przeniesienia wyrazów w `.docx` z konwersji PDF→Word (19.15).
+test_przeniesienia_docx.py — czyszczenie `.docx` z konwersji PDF→Word (19.15).
 
-Zmierzone na `.docx` słownika koronawirusowego (2026-10-20): 5 890 miejsc
-„по- священного” w środku akapitu. `core_poliglota.napraw_przeniesienia`
-rozstrzyga WYŁĄCZNIE słownikiem tego samego dokumentu:
-  1. forma sklejona występuje w dokumencie → sklejamy;
-  2. forma z łącznikiem występuje częściej → łącznik zostaje, spacja znika;
-  3. brak dowodu albo remis → bez zmian: dywizy wiszące („аудио- и
-     видеоконференций”), slugi adresów, przeniesienie przez granicę akapitu.
-Obie ścieżki `.docx` (Poliglota `tekst_docx`, Konwerter) idą tą funkcją.
+Semantyka WSPÓLNA z ATA (kanon synchronizacji, klasa `formaty_zrodel`), więc
+wektory testowe przeniesień są przepisane 1:1 ze wspólnej specyfikacji:
+  A. przeniesienie w akapicie — reguły 1–4 (`napraw_przeniesienia`);
+  B. spacja z fontu Symbol U+F020 → zwykła spacja;
+  C. tekst rozstrzelony — sklejany tylko, gdy dokument zna słowo
+     (`scal_rozstrzelone`), plus ograniczenie: ciąg przyklejony pojedynczą
+     spacją do innego tokenu to urwany kawałek i zostaje.
+Obie ścieżki `.docx` (Poliglota `tekst_docx`, Konwerter) idą przez
+`oczysc_akapity_docx`.
 
 Uruchom:  .venv/Scripts/python -m pytest test_przeniesienia_docx.py -q
 Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_przeniesienia_docx.py
@@ -23,47 +24,89 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import core_poliglota as cp  # noqa: E402
 
-# Słownik dokumentu: słowa, które występują gdzie indziej BEZ przeniesienia.
-SLOWNIK = ("Ковид и посвященного. Ковид-диссидентов много, по-прежнему. "
-           "Видеоконференций тоже.")
+# Tło dokumentu dla wektorów: słowa, które występują GDZIE INDZIEJ.
+TLO = "Ковид-диссидентов много. Голубых домов. Двух домов и трёхкомнатный."
 
 
-def _napraw(*akapity):
-    return cp.napraw_przeniesienia([SLOWNIK, *akapity])
+# Wektory wspólnej specyfikacji (ATA ma te same, co do znaku).
+@pytest.mark.parametrize("wejscie, wynik, regula", [
+    ("по- священного", "посвященного", "3"),             # R nie jest słowem dokumentu
+    ("государст- венный", "государственный", "3"),
+    ("бело- голубых", "бело- голубых", "4"),             # „голубых” jest słowem
+    ("двух- и трёхкомнатный", "двух- и трёхкомнатный", "4"),   # „и” jest słowem
+    ("ковид- диссидентов", "ковид-диссидентов", "2"),    # „ковид-диссидентов” jest słowem
+    ("по-английски", "по-английски", None),             # łącznik bez spacji: nie kandydat
+    ("obozrenie- birulevo.ru", "obozrenie- birulevo.ru", "wykluczone"),
+    ("ПО- СВЯЩЕННОГО", "ПО- СВЯЩЕННОГО", "wykluczone"),  # wielka litera R
+])
+def test_wektory_wspolnej_specyfikacji(wejscie, wynik, regula):
+    akapity, liczniki = cp.napraw_przeniesienia([TLO, wejscie])
+    assert akapity == [TLO, wynik]
+    trafione = {k for k, v in liczniki.items() if v}
+    assert trafione == ({regula} if regula else set())
 
 
-def test_sklejone_gdy_forma_sklejona_jest_w_dokumencie():
-    wynik, sklejone, laczniki = _napraw("Издание, по- священного теме.")
-    assert wynik[1] == "Издание, посвященного теме."
-    assert (sklejone, laczniki) == (1, 0)
-
-
-def test_lacznik_gdy_zlozenie_zlamane_na_swoim_laczniku():
-    wynik, sklejone, laczniki = _napraw("Мнение ковид- диссидентов и по- прежнему.")
-    assert wynik[1] == "Мнение ковид-диссидентов и по-прежнему."
-    assert (sklejone, laczniki) == (0, 2)
+def test_regula_1_przed_regula_2():
+    akapity, liczniki = cp.napraw_przeniesienia(["Онлайн и он-лайн.", "Урок он- лайн."])
+    assert akapity[1] == "Урок онлайн." and liczniki["1"] == 1
 
 
 @pytest.mark.parametrize("akapit", [
-    "Сеансы аудио- и видеоконференций.",           # dywiz wiszący
-    "Пред- и постпандемийный период.",              # dywiz wiszący, wielka litera
-    "Источник: obozrenie- birulevo, 2020.",         # slug adresu
-    "Кое-что и по-английски.",                      # łącznik bez spacji
-    "Слово - слово – слово — слово.",               # myślniki
-    "Вирус COVID- 19 и Ковид- Москва.",             # prawa część nie od małej
-    "Нет доказательства: встре- чаются.",           # brak słowa w dokumencie
+    "Вирус COVID- выплаты.",          # różne pisma
+    "Сайт www.ru- новости.",          # kropka w słowie L
+    "Код ab_c- def.",                 # podkreślnik w słowie L
+    "Вирус ко2вид- ные.",             # cyfra w słowie L
+    "Адрес site- ru2.",               # cyfra w słowie R
 ])
-def test_bez_dowodu_bez_zmian(akapit):
-    wynik, sklejone, laczniki = _napraw(akapit)
-    assert wynik[1] == akapit and (sklejone, laczniki) == (0, 0)
+def test_wykluczenia(akapit):
+    akapity, liczniki = cp.napraw_przeniesienia([akapit])
+    assert akapity == [akapit] and liczniki["wykluczone"] == 1
+
+
+def test_interpunkcja_na_brzegu_nie_wyklucza():
+    akapity, liczniki = cp.napraw_przeniesienia(["Издание («по- священного», 2020)."])
+    assert akapity == ["Издание («посвященного», 2020)."] and liczniki["3"] == 1
 
 
 def test_liczba_akapitow_i_granica_akapitu_bez_zmian():
-    # Naprawiacz tagów nakłada kody PO INDEKSIE akapitu oryginału, a
-    # przeniesienie przez granicę akapitu zmieniałoby podział.
-    akapity = [SLOWNIK, "Конец строки по-", "священного начало.", ""]
-    wynik, sklejone, _ = cp.napraw_przeniesienia(akapity)
-    assert wynik == akapity and sklejone == 0
+    # Naprawiacz tagów nakłada kody PO INDEKSIE akapitu oryginału.
+    akapity = ["Конец строки по-", "священного начало.", ""]
+    assert cp.napraw_przeniesienia(akapity)[0] == akapity
+
+
+def test_spacja_z_fontu_symbol():
+    spacja = chr(0xF020)
+    akapity, liczniki = cp.oczysc_akapity_docx([f"{spacja} {spacja}\t— пункт"])
+    assert akapity == ["   \t— пункт"] and liczniki["spacja_symbol"] == 2
+
+
+def test_rozstrzelone_sklejone_gdy_slowo_jest_w_dokumencie():
+    akapity, liczniki = cp.scal_rozstrzelone(
+        ["Социальное дистанцирование — термин.",
+         "С о ц и а л ь н о е   д и с т а н ц и р о в а н и е"])
+    assert akapity[1] == "Социальное   дистанцирование"
+    assert liczniki["sklejone"] == 2
+
+
+def test_rozstrzelone_bez_slowa_i_jednoliterowe_slowa_zostaja():
+    # „а и в к” to cztery jednoliterowe słowa; „аивк” nie jest słowem.
+    akapity, liczniki = cp.scal_rozstrzelone(["Слова а и в к стоят рядом."])
+    assert akapity == ["Слова а и в к стоят рядом."] and liczniki["sklejone"] == 0
+
+
+@pytest.mark.parametrize("akapit", [
+    "Маск сказал. Защитная м а с к а.",            # „а.” urywa ciąg: nie „маск а.”
+    "Асоциальный. А с о ц и а ' л ь н а я",       # akcent apostrofem w środku
+])
+def test_rozstrzelone_przyklejone_zostaja(akapit):
+    akapity, liczniki = cp.scal_rozstrzelone([akapit])
+    assert akapity == [akapit] and liczniki["przyklejone"] >= 1
+
+
+def test_slownik_bez_urywkow_przy_apostrofie():
+    # „КОВИ'ДНЫЙ” nie zatwierdza sklejenia rozstrzelonego „К о в и”.
+    akapity, _ = cp.scal_rozstrzelone(["КОВИ'ДНЫЙ хвост.", "К о в и"])
+    assert akapity[1] == "К о в и"
 
 
 def _docx(sciezka, *akapity):
@@ -74,20 +117,20 @@ def _docx(sciezka, *akapity):
     d.save(str(sciezka))
 
 
-def test_tekst_docx_poligloty_skleja(tmp_path):
+def test_tekst_docx_poligloty(tmp_path):
     p = tmp_path / "slownik.docx"
-    _docx(p, SLOWNIK, "Издание, по- священного теме.", "Сеансы аудио- и видеоконференций.")
-    linie = cp.tekst_docx(str(p)).split("\n")
-    assert linie[1:] == ["Издание, посвященного теме.", "Сеансы аудио- и видеоконференций."]
+    _docx(p, TLO, "Издание, по- священного теме.", "Квартиры двух- и трёхкомнатный.")
+    assert cp.tekst_docx(str(p)).split("\n")[1:] == [
+        "Издание, посвященного теме.", "Квартиры двух- и трёхкомнатный."]
 
 
-def test_konwerter_skleja_tak_samo(tmp_path, monkeypatch):
+def test_konwerter_czysci_tak_samo(tmp_path, monkeypatch):
     wx = pytest.importorskip("wx")
     import docx
     import gui_konwerter as gk
     import i18n
     p = tmp_path / "slownik.docx"
-    _docx(p, SLOWNIK, "Издание, по- священного теме.")
+    _docx(p, TLO, "Издание, по- священного теме.")
     zapisane = []
     monkeypatch.setattr(docx.document.Document, "save",
                         lambda self, _p: zapisane.append([x.text for x in self.paragraphs]))

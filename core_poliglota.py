@@ -52,6 +52,7 @@ import difflib
 import os
 import random
 import re
+import unicodedata
 import sys
 from typing import Any, Callable
 
@@ -2442,65 +2443,221 @@ def tekst_docx(sciezka: str) -> str:
     """
     doc = docx.Document(sciezka)
     akapity = [para.text for para in _iteruj_akapity_docx(doc)]
-    return "\n".join(napraw_przeniesienia(akapity)[0])
+    return "\n".join(oczysc_akapity_docx(akapity)[0])
 
 
-# Przeniesienie z łamania wiersza zostawione w tekście: „по- священного”.
-# Litera, dywiz, SPACJA, mała litera — łącznik bez spacji („кое-что”) i myślnik
-# („слово – слово”) tego kształtu nie mają.
-_RE_PRZENIESIENIE_DOCX = re.compile(r"(\w+)-[ ]+(\w+)")
-_RE_SLOWO_SAMODZIELNE = re.compile(r"(?<![\w-])(\w+)(?![\w-])")
-_RE_ZLOZENIE = re.compile(r"(?<![\w-])(\w+(?:-\w+)+)(?![\w-])")
+# ---------------------------------------------------------------------------
+# Czyszczenie `.docx` z konwersji PDF→Word (19.15) — semantyka WSPÓLNA z ATA
+# (kanon synchronizacji, klasa `formaty_zrodel`): te same reguły, ta sama
+# kolejność, te same wektory testowe po obu stronach. Rozstrzyga wyłącznie
+# słownik tego samego dokumentu — bez list języków, spójników i pism.
+# ---------------------------------------------------------------------------
+
+#: Spacja z fontu Symbol (prywatny obszar Unicode), którą Word wstawia przy
+#: wypunktowaniach konwersji PDF→Word: 253× w słowniku koronawirusowym.
+SPACJA_SYMBOL = chr(0xF020)
+# Słowo dokumentu: litery z łącznikami w środku („ковид-диссидентов”).
+_RE_SLOWO = re.compile(r"[^\W\d_]+(?:-[^\W\d_]+)*")
+# Interpunkcja dopuszczalna NA BRZEGU fragmentu (zdanie, cytat, nawias);
+# wszystko inne przy słowie — kropka w środku, „/”, „@”, „:”, „_”, cyfra —
+# robi z niego adres albo identyfikator i wyklucza kandydata.
+_OTWIERAJACE = "«„“\"'([{"
+_ZAMYKAJACE = ".,;:!?…»”\"')]}"
 
 
-def napraw_przeniesienia(akapity: list[str]) -> tuple[list[str], int, int]:
-    """Zdejmuje przeniesienia wyrazów W ŚRODKU akapitu; (akapity, sklejone, łączniki).
+def _pismo(z: str) -> str:
+    return unicodedata.name(z, "?").split(" ")[0]
 
-    Zmierzone na `.docx` z konwersji PDF→Word (słownik koronawirusowy, 2026-10-20):
-    5 890 takich miejsc. Rozstrzyga WYŁĄCZNIE słownik tego samego dokumentu
-    (bez list języków i bez list spójników):
-      * forma z łącznikiem („ковид-диссидентов”, „по-прежнему”) występuje
-        w dokumencie częściej niż sklejona → zostaje łącznik, znika spacja
-        (167 miejsc: złożenie złamane akurat na swoim łączniku);
-      * forma sklejona („посвященного”) występuje częściej → sklejamy (3 861);
-      * żadna nie występuje albo remis → BEZ ZMIAN (1 862). Tu trafiają
-        dywizy wiszące („аудио- и видеоконференций”, „пред- и постпандемийный”:
-        ani „аудиои”, ani „аудио-и” nie są słowami dokumentu) i slugi adresów
-        („obozrenie- birulevo”), których dywiz jest prawdziwy.
-    Reguła „prawa część nie jest słowem” odpadła w pomiarze: łączyła slugi
-    adresów. Liczba akapitów się nie zmienia (Naprawiacz tagów liczy jednostki
-    po indeksie z oryginału), a przeniesienia PRZEZ granicę akapitu (308
-    w słowniku) zostają — sklejenie zmieniałoby podział na akapity.
+
+def _klucz_slowa(tekst: str) -> str:
+    return tekst.casefold()
+
+
+#: Apostrof-akcent z konwersji PDF→Word („КОВИ'ДНЫЙ”): słowo przy nim jest
+#: urwane, a nie całe.
+_APOSTROFY = "'" + chr(0x2019)
+
+
+def _slownik_dokumentu(akapity: list[str], bez_urwanych: bool = False) -> dict[str, int]:
+    """Słowa dokumentu po casefold z liczbą wystąpień.
+
+    `bez_urwanych`: pomija słowa przyklejone do apostrofu — w `.docx`
+    słownika akcent zapisany apostrofem dzieli „КОВИ'ДНЫЙ” na „КОВИ”
+    i „ДНЫЙ”, a te urywki zatwierdzały sklejenie rozstrzelonego „К о в и”.
+    Słownik tylko maleje, więc reguła rozstrzeleń robi się ostrożniejsza.
     """
     slowa: dict[str, int] = {}
-    zlozenia: dict[str, int] = {}
     for akapit in akapity:
-        if not akapit:
-            continue
-        for m in _RE_SLOWO_SAMODZIELNE.finditer(akapit):
-            k = m.group(1).lower()
+        for m in _RE_SLOWO.finditer(akapit):
+            if bez_urwanych and (akapit[m.start() - 1:m.start()] in tuple(_APOSTROFY)
+                                 or akapit[m.end():m.end() + 1] in tuple(_APOSTROFY)):
+                continue
+            k = _klucz_slowa(m.group(0))
             slowa[k] = slowa.get(k, 0) + 1
-        for m in _RE_ZLOZENIE.finditer(akapit):
-            k = m.group(1).lower()
-            zlozenia[k] = zlozenia.get(k, 0) + 1
-    liczniki = [0, 0]
+    return slowa
 
-    def zamien(m: re.Match) -> str:
-        lewy, prawy = m.group(1), m.group(2)
-        if not prawy[:1].islower():
-            return m.group(0)
-        z_lacznikiem = zlozenia.get(f"{lewy}-{prawy}".lower(), 0)
-        sklejone = slowa.get(f"{lewy}{prawy}".lower(), 0)
-        if sklejone > z_lacznikiem:
-            liczniki[0] += 1
-            return lewy + prawy
-        if z_lacznikiem > sklejone:
-            liczniki[1] += 1
-            return f"{lewy}-{prawy}"
-        return m.group(0)
 
-    wynik = [_RE_PRZENIESIENIE_DOCX.sub(zamien, a) if "-" in a else a for a in akapity]
-    return wynik, liczniki[0], liczniki[1]
+def _rdzen_lewy(fragment: str) -> str | None:
+    """Słowo przed „-” (z łącznikami w środku); `None` = kandydat wykluczony."""
+    m = re.search(r"[^\W\d_]+(?:-[^\W\d_]+)*$", fragment)
+    if m is None:
+        return None
+    przed = fragment[:m.start()].lstrip(_OTWIERAJACE)
+    return None if przed else m.group(0)
+
+
+def _rdzen_prawy(fragment: str) -> str | None:
+    m = re.match(r"[^\W\d_]+", fragment)
+    if m is None:
+        return None
+    po = fragment[m.end():].rstrip(_ZAMYKAJACE)
+    return None if po else m.group(0)
+
+
+def napraw_przeniesienia(akapity: list[str]) -> tuple[list[str], dict[str, int]]:
+    """Zdejmuje przeniesienia wyrazów W ŚRODKU akapitu (semantyka wspólna z ATA).
+
+    Kandydat: w jednym akapicie słowo L kończące się literą, „-”, co najmniej
+    jedna spacja, słowo R od małej litery, oba w tym samym piśmie. Wykluczone:
+    cyfra, „.”, „/”, „@”, „:”, „_” przy którymkolwiek słowie (poza zwykłą
+    interpunkcją na brzegu: „священного,”), wielka litera na początku R.
+    Rozstrzyga słownik CAŁEGO dokumentu bez samego kandydata, po casefold:
+      1. „L+R” jest słowem dokumentu → sklejamy bez dywizu;
+      2. inaczej „L-R” jest słowem → sklejamy z łącznikiem („ковид-диссидентов”);
+      3. inaczej R NIE jest samodzielnym słowem → sklejamy bez dywizu
+         (urywek sylaby: „по- священного”, „государст- венный”);
+      4. inaczej bez zmian („бело- голубых” przy słowie „голубых”, wiszące
+         „двух- и …”, bo „и” jest słowem).
+    Przeniesienia PRZEZ granicę akapitu zostają: Naprawiacz tagów liczy
+    jednostki po indeksie akapitu oryginału.
+
+    Returns:
+        (akapity, liczniki) — liczniki: `"1"`–`"4"` per reguła i `"wykluczone"`.
+    """
+    slowa = _slownik_dokumentu(akapity)
+    liczniki = {"1": 0, "2": 0, "3": 0, "4": 0, "wykluczone": 0}
+    wynik: list[str] = []
+    for akapit in akapity:
+        if "- " not in akapit:
+            wynik.append(akapit)
+            continue
+        czesci = re.split(r"(\s+)", akapit)
+        i = 0
+        while i + 2 < len(czesci):
+            lewy_fragment, odstep, prawy_fragment = czesci[i], czesci[i + 1], czesci[i + 2]
+            if not (lewy_fragment.endswith("-") and len(lewy_fragment) > 1
+                    and odstep and set(odstep) == {" "} and prawy_fragment):
+                i += 2
+                continue
+            if not (lewy_fragment[-2:-1].isalpha() and prawy_fragment[:1].isalpha()):
+                i += 2
+                continue
+            lewy = _rdzen_lewy(lewy_fragment[:-1])
+            prawy = _rdzen_prawy(prawy_fragment)
+            if lewy is None or prawy is None or not prawy[0].islower() \
+                    or len({_pismo(z) for z in lewy + prawy if z.isalpha()}) != 1:
+                liczniki["wykluczone"] += 1
+                i += 2
+                continue
+            # Słownik bez kandydata: jego L i R policzył `_slownik_dokumentu`.
+            wlasne_r = 1 + (lewy.casefold() == prawy.casefold())
+            if slowa.get(_klucz_slowa(lewy + prawy), 0):
+                regula, nowy = "1", lewy_fragment[:-1] + prawy_fragment
+            elif slowa.get(_klucz_slowa(f"{lewy}-{prawy}"), 0):
+                regula, nowy = "2", lewy_fragment + prawy_fragment
+            elif slowa.get(_klucz_slowa(prawy), 0) - wlasne_r <= 0:
+                regula, nowy = "3", lewy_fragment[:-1] + prawy_fragment
+            else:
+                liczniki["4"] += 1
+                i += 2
+                continue
+            liczniki[regula] += 1
+            czesci[i:i + 3] = [nowy]
+        wynik.append("".join(czesci))
+    return wynik, liczniki
+
+
+def _litera_pojedyncza(token: str) -> bool:
+    """Token z JEDNEJ litery plus ewentualne znaki łączące (akcent)."""
+    return bool(token) and token[0].isalpha() and all(
+        unicodedata.combining(z) for z in token[1:])
+
+
+#: Najkrótszy ciąg pojedynczych liter, który bierzemy za rozstrzelenie.
+MIN_ROZSTRZELENIE = 4
+
+
+def scal_rozstrzelone(akapity: list[str]) -> tuple[list[str], dict[str, int]]:
+    """„С о ц и а л ь н о е” → „Социальное”, tylko gdy dokument zna to słowo.
+
+    Ciąg ≥ `MIN_ROZSTRZELENIE` tokenów z jednej litery (plus znaki łączące)
+    rozdzielonych POJEDYNCZĄ spacją; więcej spacji to granica słów. Sklejamy
+    tylko, gdy sklejona forma (casefold, bez znaków łączących) występuje
+    w dokumencie jako słowo — jednoliterowe słowa (в, к, с, о, и, а, у, я)
+    sklejone przypadkiem nie dają słowa, więc zostają.
+
+    Returns:
+        (akapity, liczniki) — `"sklejone"`, `"bez_zmian"` (słowa nie ma
+        w dokumencie) i `"przyklejone"` (ciąg urwany, patrz wyżej) — liczba ciągów.
+    """
+    slowa = _slownik_dokumentu([_bez_laczacych(a) for a in akapity], bez_urwanych=True)
+    liczniki = {"sklejone": 0, "bez_zmian": 0, "przyklejone": 0}
+    wynik: list[str] = []
+    for akapit in akapity:
+        czesci = re.split(r"( +)", akapit)      # parzyste: tekst, nieparzyste: spacje
+        nowe: list[str] = []
+        i = 0
+        while i < len(czesci):
+            if i % 2 or not _litera_pojedyncza(czesci[i]):
+                nowe.append(czesci[i])
+                i += 1
+                continue
+            j = i
+            while j + 2 < len(czesci) and czesci[j + 1] == " " \
+                    and _litera_pojedyncza(czesci[j + 2]):
+                j += 2
+            # Ciąg przyklejony POJEDYNCZĄ spacją do innego tokenu to urwany
+            # kawałek słowa, nie całe słowo: „м а́ с к а.” (ostatnia litera
+            # z kropką nie jest tokenem jednoliterowym) dawało „ма́ск а.”,
+            # bo „Маск” jest słowem słownika; „А с о ц и а ' л ь н а я”
+            # (akcent apostrofem) dawało „Асоциа ' л ь н а я”. Taki ciąg
+            # zostaje — ograniczenie, nie nowa reguła sklejania (19.15).
+            przyklejony = (i >= 2 and czesci[i - 1] == " " and czesci[i - 2]) or \
+                (j + 2 < len(czesci) and czesci[j + 1] == " " and czesci[j + 2])
+            if (j - i) // 2 + 1 >= MIN_ROZSTRZELENIE and przyklejony:
+                nowe.extend(czesci[i:j + 1])
+                liczniki["przyklejone"] += 1
+            elif (j - i) // 2 + 1 >= MIN_ROZSTRZELENIE:
+                sklejone = "".join(czesci[i:j + 1:2])
+                if slowa.get(_klucz_slowa(_bez_laczacych(sklejone)), 0):
+                    nowe.append(sklejone)
+                    liczniki["sklejone"] += 1
+                else:
+                    nowe.extend(czesci[i:j + 1])
+                    liczniki["bez_zmian"] += 1
+            else:
+                nowe.extend(czesci[i:j + 1])
+            i = j + 1
+        wynik.append("".join(nowe))
+    return wynik, liczniki
+
+
+def _bez_laczacych(tekst: str) -> str:
+    return "".join(z for z in tekst if not unicodedata.combining(z))
+
+
+def oczysc_akapity_docx(akapity: list[str]) -> tuple[list[str], dict[str, int]]:
+    """Kolejność wspólna z ATA: U+F020 → spacja, rozstrzelenia, przeniesienia.
+
+    Liczba akapitów się nie zmienia (Naprawiacz tagów nakłada kody po indeksie).
+    """
+    spacje = sum(a.count(SPACJA_SYMBOL) for a in akapity)
+    akapity = [a.replace(SPACJA_SYMBOL, " ") for a in akapity]
+    akapity, rozstrzelone = scal_rozstrzelone(akapity)
+    akapity, przeniesienia = napraw_przeniesienia(akapity)
+    return akapity, {"spacja_symbol": spacje,
+                     **{f"rozstrzelone_{k}": v for k, v in rozstrzelone.items()},
+                     **{f"przeniesienia_{k}": v for k, v in przeniesienia.items()}}
 
 
 def _iso_per_linia(tresc: str, segmenty: list[Segment] | None,

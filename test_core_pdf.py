@@ -710,6 +710,96 @@ def test_mapa_glifow_nieczytelny_font_to_brak_naprawy():
     assert core_pdf.mapa_glifow(b"to nie jest font" * 10) == {}
 
 
+# --------------------------------------------------------------------- H ---
+# 19.15, etap 3: kolontytuł poza pasem 7% i tekst rozstrzelony w PDF-ie.
+
+def _strona_slownika(naglowek, numer, tresc=("Treść strony pierwsza.", "Treść dalej.")):
+    """Jak w słowniku z macOS Quartz: nagłówek górą na 7,7%, numer dołem
+    na 7,4% wysokości — oba tuż POZA pasem marginesu 7%."""
+    linie = [L(naglowek, 90, 762, 300, wys=15)]
+    linie += [L(t, 90, 726 - 16 * i, 500, wys=15) for i, t in enumerate(tresc)]
+    linie += [L("Ostatnia linia treści.", 90, 80, 500, wys=15), L(str(numer), 290, 62, 300, wys=15)]
+    return S(*linie)
+
+
+def test_kolontytul_poza_pasem_i_przemienny_na_parzystych():
+    # Strony nieparzyste (indeks parzysty): tytuł książki; parzyste: „Часть I”,
+    # w połowie przełączone na „Часть II” — żaden nie ma ćwierci WSZYSTKICH stron.
+    strony = []
+    for i in range(20):                # „Część I”: 4 z 20 stron (20%), 4 z 10 parzystych
+        nagl = "Słownik języka" if i % 2 == 0 else ("Część I" if i < 9 else "Część II")
+        strony.append(_strona_slownika(nagl, i + 1))
+    wynik, kolontytuly = core_pdf._usun_kolontytuly(strony)
+    assert sorted(kolontytuly) == ["Część I", "Część II", "Słownik języka"]
+    assert all([x.tekst for x in s] == ["Treść strony pierwsza.", "Treść dalej.",
+                                        "Ostatnia linia treści."] for s in wynik)
+
+
+def test_skrajna_linia_przy_tresci_nie_jest_kolontytulem():
+    # Ta sama pierwsza linia na każdej stronie, ale przyklejona do treści
+    # (odstęp 1 pt) i poza pasem: to treść, nie nagłówek.
+    strony = [S(L("Wstęp do rozdziału", 90, 726, 300, wys=15),
+                L("Treść.", 90, 710, 300, wys=15), L("Dalej.", 90, 694, 300, wys=15))
+              for _ in range(6)]
+    wynik, kolontytuly = core_pdf._usun_kolontytuly(strony)
+    assert kolontytuly == [] and all(len(s) == 3 for s in wynik)
+
+
+def _znaki_rozstrzelone(slowa, krok=4.0, przerwa=13.0):
+    znaki, luki = [], {}
+    for n, slowo in enumerate(slowa):
+        for k, z in enumerate(slowo):
+            if znaki:
+                luki[len(znaki)] = przerwa if k == 0 else krok
+                znaki.append(" ")
+            znaki.append(z)
+    return znaki, luki
+
+
+def test_granice_rozstrzelenia_z_geometrii():
+    znaki, luki = _znaki_rozstrzelone(["социальное", "дистанция"])
+    core_pdf._oznacz_granice_rozstrzelenia(znaki, luki)
+    assert "".join(znaki).split(core_pdf._GRANICA) == [
+        "с о ц и а л ь н о е", "д и с т а н ц и я"]
+
+
+def test_rowne_przerwy_bez_granic_i_bez_granicy_po_akcencie():
+    znaki, luki = _znaki_rozstrzelone(["а", "и", "в", "к"], przerwa=4.0)
+    core_pdf._oznacz_granice_rozstrzelenia(znaki, luki)
+    assert core_pdf._GRANICA not in znaki
+    # „ф о р м а́ т”: po akcencie przerwa rośnie, ale to nie granica słowa.
+    znaki, luki = _znaki_rozstrzelone(["формат"])
+    znaki.insert(znaki.index("а") + 1, chr(0x301))
+    luki = {i + (1 if i > znaki.index("а") else 0): v for i, v in luki.items()}
+    luki[znaki.index("т") - 1] = 13.0
+    core_pdf._oznacz_granice_rozstrzelenia(znaki, luki)
+    assert core_pdf._GRANICA not in znaki
+
+
+def _rozstrzel(slowa, x0, y, krok=11, przerwa=22):
+    linie, x = [], x0
+    for slowo in slowa:
+        for z in slowo:
+            linie.append((z, x, y))
+            x += krok
+        x += przerwa - krok
+    return linie
+
+
+def test_prawdziwy_pdf_rozstrzelony_sklejony_wg_slownika(tmp_path, monkeypatch):
+    p = tmp_path / "rozstrzelony.pdf"
+    _zbuduj_pdf(p, [[("Termin: socjalny dystans.", 72, 700)]
+                    + _rozstrzel(["socjalny", "dystans"], 72, 650)
+                    + _rozstrzel(["xqzw"], 72, 400)])
+    assert core_pdf.wyciagnij(str(p)).akapity == [
+        "Termin: socjalny dystans.", "socjalny dystans", "x q z w"]
+    # Kontrola: bez reguły słownikowej ten sam PDF zostaje rozstrzelony.
+    import core_poliglota
+    monkeypatch.setattr(core_poliglota, "scal_rozstrzelone",
+                        lambda a: (list(a), {"sklejone": 0}))
+    assert core_pdf.wyciagnij(str(p)).akapity[1] == "s o c j a l n y d y s t a n s"
+
+
 # Uruchomienie jako skrypt — deleguje do pytesta (kanon v19.2.1).
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))
