@@ -1029,6 +1029,7 @@ poliglota:
   skan_zgoda_linia_skany: '– no text layer (most likely scans): {lista_stron}'
   skan_zgoda_linia_znieksztalcone: "– with garbled text (the file's font does not say which letters they are): {lista_stron}"
   pdf_strony_naprawione: 'On these pages the text stored in the PDF was garbled, so the program reconstructed the letters from the font embedded in the file: {lista_stron}. Individual characters may differ from the printed version.'
+  pdf_strony_przekodowane: 'On these pages, the text stored in the PDF had the wrong character encoding (random accented characters appeared instead of letters), so the program re-encoded it ({kodowanie}): {lista_stron}.'
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)

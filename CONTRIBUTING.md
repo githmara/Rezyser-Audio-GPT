@@ -209,6 +209,7 @@ Two facts decide what that means, and both are easy to get backwards:
 | `core_rezyser.py` | `pytest test_puste_linie_rezysera.py test_json_structured.py test_sprzatanie_bundla.py` |
 | `core_poliglota.py` | `pytest test_akcent_wersaliki.py test_lang_wyniku.py test_markdown_poliglota.py test_oczyszczanie_tts.py test_cisza_yaml.py test_przeniesienia_docx.py` |
 | `core_pdf.py`, `core_skany.py` | `pytest test_core_pdf.py test_core_skany.py test_poliglota_skany.py` |
+| `czyszczenie_tekstu.py` (shared byte-for-byte with accessible_text_analyst — edit only in pairs) | `python czyszczenie_tekstu_wektory.py` (stdlib runner over `czyszczenie_tekstu_wektory.json`, identical in both repos) + `pytest test_przeniesienia_docx.py test_core_pdf.py` |
 | `core_llm.py` | `pytest test_json_structured.py test_cache_powtorki.py test_sprzatanie_bundla.py` |
 | `core_updater.py` | `pytest test_core_updater.py test_patch_dev.py` |
 | `core_markdown.py` | `pytest test_markdown_poliglota.py` |

@@ -794,10 +794,26 @@ def test_prawdziwy_pdf_rozstrzelony_sklejony_wg_slownika(tmp_path, monkeypatch):
     assert core_pdf.wyciagnij(str(p)).akapity == [
         "Termin: socjalny dystans.", "socjalny dystans", "x q z w"]
     # Kontrola: bez reguły słownikowej ten sam PDF zostaje rozstrzelony.
-    import core_poliglota
-    monkeypatch.setattr(core_poliglota, "scal_rozstrzelone",
-                        lambda a: (list(a), {"sklejone": 0}))
+    import czyszczenie_tekstu
+    monkeypatch.setattr(czyszczenie_tekstu, "scal_rozstrzelone",
+                        lambda a, granica=None: ([x.replace(granica or "", " ") for x in a], {}))
     assert core_pdf.wyciagnij(str(p)).akapity[1] == "s o c j a l n y d y s t a n s"
+
+
+def test_prawdziwy_pdf_mojibake_przekodowany(tmp_path):
+    # „Повесть о Горе-Злочастии” (zmierzone 2026-10-20): bajty cp1251 w foncie
+    # z kodowaniem WinAnsi, czyli litery Latin-1 w warstwie tekstu.
+    p = tmp_path / "mojibake.pdf"
+    mojibake = "Ïîâåñòü î Ãîðå-Çëî÷àñòèè. Áèáëèîòåêà ëèòåðàòóðû Äðåâíåé Ðóñè."
+    _zbuduj_pdf(p, [[(mojibake, 72, 700), ("Le garçon a mangé une crème brûlée.", 72, 400)],
+                    [("Le garçon a mangé une crème brûlée à côté de la fenêtre.", 72, 700)]])
+    w = core_pdf.wyciagnij(str(p))
+    assert w.akapity_stron[0][0] == ("Повесть о Горе-Злочастии. "
+                                     "Библиотека литературы Древней Руси.")
+    # Strona po francusku — także ta z akapitem francuskim na stronie 1 —
+    # zostaje francuska: decyzja jest per strona, przekodowanie też.
+    assert w.strony_przekodowane == [1] and w.kodowania == ["latin-1>cp1251"]
+    assert w.akapity_stron[1] == ["Le garçon a mangé une crème brûlée à côté de la fenêtre."]
 
 
 # Uruchomienie jako skrypt — deleguje do pytesta (kanon v19.2.1).

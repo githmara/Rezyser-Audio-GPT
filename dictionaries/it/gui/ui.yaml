@@ -945,6 +945,7 @@ poliglota:
   skan_zgoda_linia_skany: '– senza livello di testo (con ogni probabilità scansioni): {lista_stron}'
   skan_zgoda_linia_znieksztalcone: '– con testo alterato (il font del file non indica di quali lettere si tratti): {lista_stron}'
   pdf_strony_naprawione: 'In queste pagine il testo salvato nel PDF era alterato, quindi il programma ha ricostruito le lettere dal font incorporato nel file: {lista_stron}. Alcuni singoli caratteri potrebbero differire dalla versione stampata.'
+  pdf_strony_przekodowane: 'In queste pagine il testo salvato nel PDF aveva una codifica dei caratteri errata (al posto delle lettere comparivano caratteri casuali con accenti), quindi il programma lo ha ricodificato ({kodowanie}): {lista_stron}.'
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   # 18.8: segmento localizzato del nome del file di output (una parola, senza spazi)

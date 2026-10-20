@@ -1,21 +1,22 @@
 """
-test_przeniesienia_docx.py — czyszczenie `.docx` z konwersji PDF→Word (19.15).
+test_przeniesienia_docx.py — czyszczenie `.docx` w Reżyserze (19.15, etap 4).
 
-Semantyka WSPÓLNA z ATA (kanon synchronizacji, klasa `formaty_zrodel`), więc
-wektory testowe przeniesień są przepisane 1:1 ze wspólnej specyfikacji:
-  A. przeniesienie w akapicie — reguły 1–4 (`napraw_przeniesienia`);
-  B. spacja z fontu Symbol U+F020 → zwykła spacja;
-  C. tekst rozstrzelony — sklejany tylko, gdy dokument zna słowo
-     (`scal_rozstrzelone`), plus ograniczenie: ciąg przyklejony pojedynczą
-     spacją do innego tokenu to urwany kawałek i zostaje.
-Obie ścieżki `.docx` (Poliglota `tekst_docx`, Konwerter) idą przez
-`oczysc_akapity_docx`.
+Logika czyszczenia żyje we wspólnym module `czyszczenie_tekstu.py` (bliźniak
+bajt w bajt z ATA); jego zachowanie pilnują wektory
+`czyszczenie_tekstu_wektory.json` uruchamiane tu przez runner unittest
+`czyszczenie_tekstu_wektory.py` — ten sam, który ATA uruchamia bez zmian.
+Ten plik sprawdza to, czego wektory nie widzą — wpięcie w Reżysera:
+  1. runner wektorów przechodzi w całości;
+  2. alfabety paczek (`core_poliglota.alfabety_paczek`) — dane, z których
+     moduł ocenia mojibake;
+  3. obie ścieżki `.docx` (Poliglota `tekst_docx`, Konwerter) czyszczą tak samo.
 
 Uruchom:  .venv/Scripts/python -m pytest test_przeniesienia_docx.py -q
 Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_przeniesienia_docx.py
 """
 
 import sys
+import unittest
 from pathlib import Path
 
 import pytest
@@ -24,89 +25,34 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import core_poliglota as cp  # noqa: E402
 
-# Tło dokumentu dla wektorów: słowa, które występują GDZIE INDZIEJ.
-TLO = "Ковид-диссидентов много. Голубых домов. Двух домов и трёхкомнатный."
+TLO = "Ковид-диссидентов много. Онлайн."
+REGULA_1 = "Урок он- лайн."             # reguła 1 trafia — bramka reguły 3 otwarta
 
 
-# Wektory wspólnej specyfikacji (ATA ma te same, co do znaku).
-@pytest.mark.parametrize("wejscie, wynik, regula", [
-    ("по- священного", "посвященного", "3"),             # R nie jest słowem dokumentu
-    ("государст- венный", "государственный", "3"),
-    ("бело- голубых", "бело- голубых", "4"),             # „голубых” jest słowem
-    ("двух- и трёхкомнатный", "двух- и трёхкомнатный", "4"),   # „и” jest słowem
-    ("ковид- диссидентов", "ковид-диссидентов", "2"),    # „ковид-диссидентов” jest słowem
-    ("по-английски", "по-английски", None),             # łącznik bez spacji: nie kandydat
-    ("obozrenie- birulevo.ru", "obozrenie- birulevo.ru", "wykluczone"),
-    ("ПО- СВЯЩЕННОГО", "ПО- СВЯЩЕННОГО", "wykluczone"),  # wielka litera R
-])
-def test_wektory_wspolnej_specyfikacji(wejscie, wynik, regula):
-    akapity, liczniki = cp.napraw_przeniesienia([TLO, wejscie])
-    assert akapity == [TLO, wynik]
-    trafione = {k for k, v in liczniki.items() if v}
-    assert trafione == ({regula} if regula else set())
+def test_runner_wektorow_wspolnych():
+    import io
+    import czyszczenie_tekstu_wektory as runner
+    wynik = unittest.TextTestRunner(verbosity=0, stream=io.StringIO()).run(
+        unittest.defaultTestLoader.loadTestsFromModule(runner))
+    assert wynik.wasSuccessful(), [str(x[1]) for x in wynik.failures + wynik.errors]
 
 
-def test_regula_1_przed_regula_2():
-    akapity, liczniki = cp.napraw_przeniesienia(["Онлайн и он-лайн.", "Урок он- лайн."])
-    assert akapity[1] == "Урок онлайн." and liczniki["1"] == 1
+def test_modul_nie_importuje_projektu():
+    # Bliźniak bajt w bajt: żadnego importu z Reżysera ani ATA.
+    import ast
+    drzewo = ast.parse(Path(__file__).with_name("czyszczenie_tekstu.py").read_text(encoding="utf-8"))
+    moduly = {n.names[0].name.split(".")[0] if isinstance(n, ast.Import) else (n.module or "")
+              for n in ast.walk(drzewo) if isinstance(n, (ast.Import, ast.ImportFrom))}
+    assert moduly <= {"__future__", "re", "unicodedata"}, moduly
 
 
-@pytest.mark.parametrize("akapit", [
-    "Вирус COVID- выплаты.",          # różne pisma
-    "Сайт www.ru- новости.",          # kropka w słowie L
-    "Код ab_c- def.",                 # podkreślnik w słowie L
-    "Вирус ко2вид- ные.",             # cyfra w słowie L
-    "Адрес site- ru2.",               # cyfra w słowie R
-])
-def test_wykluczenia(akapit):
-    akapity, liczniki = cp.napraw_przeniesienia([akapit])
-    assert akapity == [akapit] and liczniki["wykluczone"] == 1
-
-
-def test_interpunkcja_na_brzegu_nie_wyklucza():
-    akapity, liczniki = cp.napraw_przeniesienia(["Издание («по- священного», 2020)."])
-    assert akapity == ["Издание («посвященного», 2020)."] and liczniki["3"] == 1
-
-
-def test_liczba_akapitow_i_granica_akapitu_bez_zmian():
-    # Naprawiacz tagów nakłada kody PO INDEKSIE akapitu oryginału.
-    akapity = ["Конец строки по-", "священного начало.", ""]
-    assert cp.napraw_przeniesienia(akapity)[0] == akapity
-
-
-def test_spacja_z_fontu_symbol():
-    spacja = chr(0xF020)
-    akapity, liczniki = cp.oczysc_akapity_docx([f"{spacja} {spacja}\t— пункт"])
-    assert akapity == ["   \t— пункт"] and liczniki["spacja_symbol"] == 2
-
-
-def test_rozstrzelone_sklejone_gdy_slowo_jest_w_dokumencie():
-    akapity, liczniki = cp.scal_rozstrzelone(
-        ["Социальное дистанцирование — термин.",
-         "С о ц и а л ь н о е   д и с т а н ц и р о в а н и е"])
-    assert akapity[1] == "Социальное   дистанцирование"
-    assert liczniki["sklejone"] == 2
-
-
-def test_rozstrzelone_bez_slowa_i_jednoliterowe_slowa_zostaja():
-    # „а и в к” to cztery jednoliterowe słowa; „аивк” nie jest słowem.
-    akapity, liczniki = cp.scal_rozstrzelone(["Слова а и в к стоят рядом."])
-    assert akapity == ["Слова а и в к стоят рядом."] and liczniki["sklejone"] == 0
-
-
-@pytest.mark.parametrize("akapit", [
-    "Маск сказал. Защитная м а с к а.",            # „а.” urywa ciąg: nie „маск а.”
-    "Асоциальный. А с о ц и а ' л ь н а я",       # akcent apostrofem w środku
-])
-def test_rozstrzelone_przyklejone_zostaja(akapit):
-    akapity, liczniki = cp.scal_rozstrzelone([akapit])
-    assert akapity == [akapit] and liczniki["przyklejone"] >= 1
-
-
-def test_slownik_bez_urywkow_przy_apostrofie():
-    # „КОВИ'ДНЫЙ” nie zatwierdza sklejenia rozstrzelonego „К о в и”.
-    akapity, _ = cp.scal_rozstrzelone(["КОВИ'ДНЫЙ хвост.", "К о в и"])
-    assert akapity[1] == "К о в и"
+def test_alfabety_paczek_per_jezyk():
+    alfabety = cp.alfabety_paczek()
+    assert {"pl", "ru", "fr", "is"} <= set(alfabety)
+    assert "ą" in alfabety["pl"] and "Я" in alfabety["ru"] and "é" in alfabety["fr"]
+    # „Áèáëèîòåêà”: każda litera znana jakiejś paczce, żadna paczka nie ma
+    # wszystkich — na tym stoi ocena mojibake.
+    assert not any(set("Áèáëèîòåêà") <= a for a in alfabety.values())
 
 
 def _docx(sciezka, *akapity):
@@ -119,9 +65,18 @@ def _docx(sciezka, *akapity):
 
 def test_tekst_docx_poligloty(tmp_path):
     p = tmp_path / "slownik.docx"
-    _docx(p, TLO, "Издание, по- священного теме.", "Квартиры двух- и трёхкомнатный.")
+    _docx(p, TLO, REGULA_1, "Издание, по- священного теме.",
+          "Áèáëèîòåêà ëèòåðàòóðû Äðåâíåé Ðóñè. XVII âåê. Ïîâåñòü î Ãîðå-Çëî÷àñòèè")
     assert cp.tekst_docx(str(p)).split("\n")[1:] == [
-        "Издание, посвященного теме.", "Квартиры двух- и трёхкомнатный."]
+        "Урок онлайн.", "Издание, посвященного теме.",
+        "Библиотека литературы Древней Руси. XVII век. Повесть о Горе-Злочастии"]
+
+
+def test_notatki_bez_reguly_1_nietkniete(tmp_path):
+    p = tmp_path / "notatki.docx"
+    _docx(p, "Плохой- хуже всех, худший.", "Ostatnia strofa- życzenia do E.")
+    assert cp.tekst_docx(str(p)).split("\n") == [
+        "Плохой- хуже всех, худший.", "Ostatnia strofa- życzenia do E."]
 
 
 def test_konwerter_czysci_tak_samo(tmp_path, monkeypatch):
@@ -130,7 +85,7 @@ def test_konwerter_czysci_tak_samo(tmp_path, monkeypatch):
     import gui_konwerter as gk
     import i18n
     p = tmp_path / "slownik.docx"
-    _docx(p, TLO, "Издание, по- священного теме.")
+    _docx(p, TLO, REGULA_1, "Издание, по- священного теме.")
     zapisane = []
     monkeypatch.setattr(docx.document.Document, "save",
                         lambda self, _p: zapisane.append([x.text for x in self.paragraphs]))

@@ -1,0 +1,5 @@
+# Wspólny moduł z accessible_text_analyst jest bliźniakiem BAJT W BAJT —
+# także w katalogu roboczym, więc LF niezależnie od core.autocrlf.
+czyszczenie_tekstu.py text eol=lf
+czyszczenie_tekstu_wektory.py text eol=lf
+czyszczenie_tekstu_wektory.json text eol=lf

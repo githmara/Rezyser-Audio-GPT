@@ -113,6 +113,10 @@ class WynikPdf:
     #: naprawie przechodzą bramkę (19.15, etap 2). Naprawa częściowa nie
     #: trafia tu — taka strona zostaje w `strony_znieksztalcone`.
     strony_naprawione: list[int] = field(default_factory=list)
+    #: Strony w złej stronie kodowej (mojibake), przekodowane (19.15, etap 4)
+    #: — i użyte pary kodowań („latin-1>cp1251”), do komunikatu.
+    strony_przekodowane: list[int] = field(default_factory=list)
+    kodowania: list[str] = field(default_factory=list)
 
     @property
     def tekst(self) -> str:
@@ -230,40 +234,9 @@ def litery_paczek() -> frozenset[str]:
     błędu mapowania PDFium (miara słabsza, ale nie cisza).
     """
     import core_poliglota
-    zrodla: list[str] = []
-    klucz: list[tuple] = []
-    for kod in core_poliglota.dostepne_jezyki_bazowe():
-        alfabet = str(core_poliglota._zaladuj_podstawy(kod).get("alfabet") or "")
-        sciezka = os.path.join(core_poliglota.DICTIONARIES_DIR, kod, "gui", "ui.yaml")
-        try:
-            klucz.append((kod, alfabet, os.path.getmtime(sciezka)))
-        except OSError:
-            klucz.append((kod, alfabet, None))
-    # Ok. 0,2 s na każde wczytanie PDF-a (zmierzone) — liczymy raz, dopóki
-    # paczki się nie zmienią (Menedżer Reguł edytuje je w trakcie działania).
-    if _CACHE_LITER and _CACHE_LITER[0] == klucz:
-        return _CACHE_LITER[1]
-    for kod, alfabet, mtime in klucz:
-        zrodla.append(alfabet)
-        if mtime is None:
-            continue
-        sciezka = os.path.join(core_poliglota.DICTIONARIES_DIR, kod, "gui", "ui.yaml")
-        try:
-            with open(sciezka, encoding="utf-8") as fh:
-                zrodla.append(fh.read())
-        except OSError:
-            continue
-    litery: set[str] = set()
-    for z in set("".join(zrodla)):
-        if z.isalpha():
-            litery.add(z)
-            litery.update(z.upper())
-            litery.update(z.lower())
-    _CACHE_LITER[:] = [klucz, frozenset(litery)]
-    return _CACHE_LITER[1]
-
-
-_CACHE_LITER: list = []
+    # Suma alfabetów per paczka (`core_poliglota.alfabety_paczek`, z cache
+    # po czasach modyfikacji) — ta sama, którą mojibake ocenia słowa.
+    return frozenset().union(*core_poliglota.alfabety_paczek().values())
 
 
 def _blad_mapowania(tp, i: int) -> bool:
@@ -539,7 +512,7 @@ def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> N
     tu niczego — o sklejeniu decyduje słownik dokumentu (`_scal_rozstrzelone_pdf`),
     jak w `.docx`. Ciąg o równych przerwach (np. „а и в к”) nie dostaje granic.
     """
-    from core_poliglota import MIN_ROZSTRZELENIE
+    from czyszczenie_tekstu import MIN_ROZSTRZELENIE
     k, n = 0, len(znaki)
     while k < n:
         # Jednostka = jedna litera + jej znaki łączące; ciąg = jednostki
@@ -571,13 +544,32 @@ def _oznacz_granice_rozstrzelenia(znaki: list[str], luki: dict[int, float]) -> N
 
 
 def _scal_rozstrzelone_pdf(akapity: list[str]) -> tuple[list[str], dict[str, int]]:
-    """Reguła słownikowa z `.docx` na tekście PDF z granicami z geometrii."""
+    """Decyzja wspólnego modułu na tekście PDF z granicami słów z geometrii."""
+    import czyszczenie_tekstu
+    return czyszczenie_tekstu.scal_rozstrzelone(akapity, granica=_GRANICA)
+
+
+def _napraw_mojibake_stron(akapity_stron: list[list[str]]
+                           ) -> tuple[list[list[str]], dict[int, str]]:
+    """Strony zapisane w złej stronie kodowej („Áèáëèîòåêà”) → przekodowane.
+
+    Decyzja per akapit strony (`czyszczenie_tekstu.napraw_mojibake_akapitow`, alfabety
+    paczek per język); krótkie akapity dostają kodowanie, które wygrało
+    na stronie. Strona, której nie umiemy przekodować, NIE jest zgłaszana — niska
+    wiarygodność bez kandydata to zwykle język bez paczki (portugalski), nie
+    mojibake. Zwraca też {numer strony: „latin-1>cp1251”}.
+    """
     import core_poliglota
-    # Po `_RE_BIALE` jedyne podwójne spacje to te z granic, więc po regule
-    # zwijamy je z powrotem do jednej.
-    wynik, liczniki = core_poliglota.scal_rozstrzelone(
-        [a.replace(_GRANICA, "  ") for a in akapity])
-    return [a.replace("  ", " ") for a in wynik], liczniki
+    import czyszczenie_tekstu as ct
+    alfabety = list(core_poliglota.alfabety_paczek().values())
+    przekodowane: dict[int, str] = {}
+    wynik: list[list[str]] = []
+    for nr, akapity in enumerate(akapity_stron, start=1):
+        nowe, info = ct.napraw_mojibake_akapitow(akapity, alfabety)
+        wynik.append(nowe)
+        if info["kodowania"]:
+            przekodowane[nr] = max(info["kodowania"], key=lambda k: info["kodowania"][k])
+    return wynik, przekodowane
 
 
 def _linie_strony(strona) -> list[_Linia]:
@@ -1095,6 +1087,13 @@ def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> Wynik
             skan_po_drodze = True
         elif nowe:
             ostatnia, skan_po_drodze = nowe, False
+    # Mojibake (19.15): strona w złej stronie kodowej, ocena na całej stronie.
+    akapity_stron, przekodowane = _napraw_mojibake_stron(akapity_stron)
+    if len(set(przekodowane.values())) == 1:
+        # Kolontytuły idą do komunikatu dla słuchacza — tą samą parą kodowań.
+        import czyszczenie_tekstu
+        zrodlo, cel = next(iter(przekodowane.values())).split(">")
+        kolontytuly = [czyszczenie_tekstu.przekoduj(k, zrodlo, cel) for k in kolontytuly]
     # Tekst rozstrzelony (19.15): granice słów z geometrii, sklejenie wg
     # słownika dokumentu — ta sama reguła co w `.docx`.
     plaskie, rozstrzelone = _scal_rozstrzelone_pdf(
@@ -1106,4 +1105,5 @@ def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> Wynik
     if not akapity:
         raise BrakWarstwyTekstu(sciezka, liczba, bez_tekstu)
     return WynikPdf(akapity, liczba, bez_tekstu, kolontytuly, akapity_stron,
-                    znieksztalcone, [s.znaki for s in strony], naprawione)
+                    znieksztalcone, [s.znaki for s in strony], naprawione,
+                    sorted(przekodowane), sorted(set(przekodowane.values())))

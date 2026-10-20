@@ -1150,6 +1150,8 @@ class PoliglotaPanel(wx.Panel):
             if wynik_pdf.strony_naprawione:
                 czesci.append(t("poliglota.pdf_strony_naprawione",
                                 lista_stron=core_skany.zakresy(wynik_pdf.strony_naprawione)))
+            if wynik_pdf.strony_przekodowane:
+                czesci.append(PoliglotaPanel._zdanie_przekodowane(wynik_pdf))
         czesci.append(t("poliglota.skan_podsumowanie_tresc",
                         liczba_odczytanych=p.odczytane, liczba_skanow=len(wyniki),
                         liczba_nieczytelnych=p.znaczniki.get("ILLEGIBLE", 0),
@@ -1166,6 +1168,13 @@ class PoliglotaPanel(wx.Panel):
                      powod=f"{w.powod} ({w.szczegol})" if w.szczegol else w.powod)
                    for w in p.nieodczytane]))
         return "\n\n".join(czesci)
+
+    @staticmethod
+    def _zdanie_przekodowane(wynik: "core_pdf.WynikPdf") -> str:
+        """Mojibake przekodowany (19.15, etap 4) — przetworzenie, o którym słuchacz wie."""
+        return t("poliglota.pdf_strony_przekodowane",
+                 kodowanie=", ".join(wynik.kodowania),
+                 lista_stron=core_skany.zakresy(wynik.strony_przekodowane))
 
     def _pokaz_info_pdf(self, nazwa_pliku: str, wynik: "core_pdf.WynikPdf") -> None:
         """Mówi, co zrobiliśmy z PDF-em — zmienia się format wyniku (zero ciszy).
@@ -1184,6 +1193,8 @@ class PoliglotaPanel(wx.Panel):
         if wynik.strony_naprawione:
             tresc += "\n\n" + t("poliglota.pdf_strony_naprawione",
                                 lista_stron=core_skany.zakresy(wynik.strony_naprawione))
+        if wynik.strony_przekodowane:
+            tresc += "\n\n" + self._zdanie_przekodowane(wynik)
         if wynik.strony_bez_tekstu:
             tresc += "\n\n" + t("poliglota.pdf_strony_bez_tekstu",
                                 lista_stron=core_skany.zakresy(wynik.strony_bez_tekstu))

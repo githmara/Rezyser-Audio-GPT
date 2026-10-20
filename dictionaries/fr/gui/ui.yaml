@@ -943,6 +943,7 @@ poliglota:
   skan_zgoda_linia_skany: '– sans couche de texte (très probablement des scans) : {lista_stron}'
   skan_zgoda_linia_znieksztalcone: "– avec un texte déformé (la police du fichier n'indique pas de quelles lettres il s'agit) : {lista_stron}"
   pdf_strony_naprawione: 'Sur ces pages, le texte enregistré dans le PDF était déformé ; le programme a donc reconstitué les lettres à partir de la police intégrée au fichier : {lista_stron}. Certains caractères peuvent différer de la version imprimée.'
+  pdf_strony_przekodowane: "Sur ces pages, le texte enregistré dans le PDF avait un encodage de caractères incorrect (à la place des lettres, on voyait des caractères accentués aléatoires), c'est pourquoi le programme l'a réencodé ({kodowanie}) : {lista_stron}."
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)

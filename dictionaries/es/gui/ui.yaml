@@ -945,6 +945,7 @@ poliglota:
   skan_zgoda_linia_skany: '– sin capa de texto (probablemente escaneos): {lista_stron}'
   skan_zgoda_linia_znieksztalcone: '– con texto distorsionado (la fuente del archivo no indica qué letras son): {lista_stron}'
   pdf_strony_naprawione: 'En estas páginas el texto guardado en el PDF estaba distorsionado, por lo que el programa reconstruyó las letras a partir de la fuente incrustada en el archivo: {lista_stron}. Algunos caracteres sueltos pueden diferir de la versión impresa.'
+  pdf_strony_przekodowane: 'En estas páginas, el texto guardado en el PDF tenía una codificación de caracteres incorrecta (en lugar de letras aparecían caracteres aleatorios con acentos), por lo que el programa lo recodificó ({kodowanie}): {lista_stron}.'
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)

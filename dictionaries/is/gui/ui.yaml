@@ -945,6 +945,7 @@ poliglota:
   skan_zgoda_linia_skany: '– án textalags (líklega skannaðar síður): {lista_stron}'
   skan_zgoda_linia_znieksztalcone: '– með brengluðum texta (letur skráarinnar gefur ekki upp hvaða stafir þetta eru): {lista_stron}'
   pdf_strony_naprawione: 'Á þessum síðum var texti PDF-skjalsins brenglaður, því forritið endurgerði stafina út frá letrinu sem er fellt inn í skrána: {lista_stron}. Einstakir stafir geta verið frábrugðnir útprentuninni.'
+  pdf_strony_przekodowane: 'Á þessum síðum var textinn í PDF-skjalinu með rangri stafakóðun (í stað bókstafa birtust tilviljanakenndir stafir með áherslumerkjum), þannig að forritið umkóðaði hann ({kodowanie}): {lista_stron}.'
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)

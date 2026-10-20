@@ -945,6 +945,7 @@ poliglota:
   skan_zgoda_linia_skany: '– ohne Textebene (höchstwahrscheinlich Scans): {lista_stron}'
   skan_zgoda_linia_znieksztalcone: '– mit verzerrtem Text (die Schriftart der Datei verrät nicht, um welche Buchstaben es sich handelt): {lista_stron}'
   pdf_strony_naprawione: 'Auf diesen Seiten war der im PDF gespeicherte Text verzerrt, daher hat das Programm die Buchstaben anhand der in der Datei eingebetteten Schriftart rekonstruiert: {lista_stron}. Einzelne Zeichen können vom Ausdruck abweichen.'
+  pdf_strony_przekodowane: 'Auf diesen Seiten war der im PDF gespeicherte Text falsch kodiert (statt Buchstaben erschienen zufällige Zeichen mit Akzenten), daher hat das Programm ihn neu kodiert ({kodowanie}): {lista_stron}.'
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)

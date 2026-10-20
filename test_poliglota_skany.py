@@ -334,6 +334,19 @@ def test_strona_naprawiona_z_fontu_bez_oferty_ale_z_informacja(srodowisko, tmp_p
     assert widziane and "Утве" in widziane[0]
 
 
+def test_mojibake_przekodowany_z_informacja(srodowisko, tmp_path):
+    # Etap 4: strona w złej stronie kodowej wraca jako cyrylica, bez oferty
+    # odczytu obrazu, a słuchacz dostaje zdanie, co program zrobił.
+    panel, zapis = srodowisko
+    p = tmp_path / "mojibake.pdf"
+    _zbuduj_pdf(p, [[("Ïîâåñòü î Ãîðå-Çëî÷àñòèè. Áèáëèîòåêà ëèòåðàòóðû Äðåâíåé Ðóñè.",
+                      72, 700)]])
+    _wczytaj(panel, p)
+    assert zapis.zgody == [] and "Повесть о Горе-Злочастии" in panel._file_content
+    assert any("przekodował (latin-1>cp1251): 1." in k for k in zapis.komunikaty), \
+        zapis.komunikaty
+
+
 def test_konwerter_pyta_przed_zapisem_smieci(tmp_path, monkeypatch):
     # Konwerter nie ma odczytu obrazu: mówi, które strony są zniekształcone,
     # i domyślnie NIE konwertuje (dotąd: .docx z IPA i dialog „Sukces”).

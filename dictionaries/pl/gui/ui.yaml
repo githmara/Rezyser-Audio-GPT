@@ -937,6 +937,7 @@ poliglota:
   # v19.15: zniekształcona warstwa tekstu – czcionka bez pełnej mapy znaków (core_pdf)
   pdf_strony_znieksztalcone: "Uwaga: na tych stronach tekst zapisany w PDF-ie jest zniekształcony i w wyniku będzie nieczytelny: {lista_stron}. Czcionka osadzona w pliku nie mówi, jakie litery kryją się pod jej znakami, więc program dostaje przypadkowe znaki zamiast liter. Na ekranie strony wyglądają poprawnie – to wada pliku PDF."
   pdf_strony_naprawione: "Na tych stronach tekst zapisany w PDF-ie był zniekształcony, więc program odtworzył litery z czcionki osadzonej w pliku: {lista_stron}. Pojedyncze znaki mogą się różnić od wydruku."
+  pdf_strony_przekodowane: "Na tych stronach tekst zapisany w PDF-ie miał niewłaściwe kodowanie znaków (zamiast liter były przypadkowe znaki z akcentami), więc program go przekodował ({kodowanie}): {lista_stron}."
   jezyk_niewykryty_tytul: "Nie wykryto języka dokumentu"
   jezyk_niewykryty_znieksztalcone: |-
     Języka dokumentu nie wykryto: cały tekst tego PDF-a jest zniekształcony, a wykrywanie języka na takim tekście daje przypadkowy wynik.

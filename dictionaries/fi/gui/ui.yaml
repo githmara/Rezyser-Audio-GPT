@@ -943,6 +943,7 @@ poliglota:
   skan_zgoda_linia_skany: '– ilman tekstikerrosta (todennäköisesti skannauksia): {lista_stron}'
   skan_zgoda_linia_znieksztalcone: '– vääristynyt teksti (tiedoston fontti ei kerro, mitä kirjaimia ne ovat): {lista_stron}'
   pdf_strony_naprawione: 'Näillä sivuilla PDF-tiedostoon tallennettu teksti oli vääristynyt, joten ohjelma palautti kirjaimet tiedostoon upotetun fontin avulla: {lista_stron}. Yksittäiset merkit voivat poiketa tulosteesta.'
+  pdf_strony_przekodowane: 'Näillä sivuilla PDF-tiedostoon tallennetun tekstin merkistökoodaus oli virheellinen (kirjainten tilalla oli satunnaisia aksenttimerkkejä), joten ohjelma koodasi sen uudelleen ({kodowanie}): {lista_stron}.'
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)
