@@ -4,6 +4,92 @@ Release entries in reverse-chronological order. The section of a version is copi
 
 ---
 
+## 19.15.0 — minor release
+
+### What's new
+
+**A PDF whose text layer only pretends to be text is no longer passed on as
+text.** Some PDFs look right on screen, but copying them gives random signs
+instead of letters. The test case was a 551-page Russian dictionary saved by
+macOS Preview: the letter map of its fonts was cut off after the letter "М", so
+the Polyglot read the body as Latin-looking symbols and the language detector
+took the book for German. Both the Polyglot and the Converter now check every
+PDF page. When the font embedded in the file carries its own complete letter
+map, the text is rebuilt from it, locally and for free: on the dictionary all
+550 text pages were rebuilt, about 10 460 stress marks came back (the
+publisher's own Word version has none), and the rebuilt letters agree with
+that Word version on 99.6–99.9 % of each sampled page. Pages that cannot be
+rebuilt are listed by number. The Polyglot offers them the paid reading from
+the image that 19.14 introduced for scans, with the same consent question and
+cost estimate; the Converter asks whether to save the result anyway, and the
+default answer is No. The language of the document is detected from legible
+text only. Correct text in a language without a language pack (Czech and Greek
+were tested) is not reported as broken, because a letter confirmed by the
+font's own map counts as genuine. A font whose glyph numbering is remapped
+inside the file is not rebuilt; its pages are reported instead.
+
+**Text saved in the wrong encoding is re-encoded.** Cyrillic that looks like
+"Áèáëèîòåêà" instead of "Библиотека" is read back correctly; the program
+re-encodes only when the result is clearly more legible than the original and
+says which pages it touched. A recode within the same alphabet is accepted
+only when it turns a symbol that ordinary text does not use into a letter, so
+correct Spanish is left alone. Measured: all 13 pages of a 17th-century text in
+this state came back as Cyrillic, with no false re-encoding in 380 Word files,
+99 PDFs and the nine language packs' own texts.
+
+**Documents converted from PDF to Word lose the marks of the page layout.**
+When a `.docx` file is loaded (and for PDFs), words split at the end of a line
+are joined, but only with evidence from the same document: the joined form
+occurs elsewhere in it, or the second part is not a word of its own. In a
+document where no such evidence turns up at all, nothing is joined, so
+handwritten notes that use "- " as a dash keep it. Words letter-spaced for
+emphasis are joined when the same word occurs in the document, and spaces from
+the Symbol font become ordinary spaces. After loading, the program says how
+many corrections it made; on the dictionary's Word version that was 4 830
+joined words, 55 letter-spaced words and 253 spaces. The Tag Fixer does not
+apply these corrections, because it copies the original file.
+
+**Running headers further from the margin are recognised.** Headers and page
+numbers set a little away from the edge of the page stayed in the text as
+paragraphs; on the dictionary, bare page numbers dropped from 412 pages to 1
+(the year on the title page, which stays).
+
+**A long PDF loads in the background.** A progress window names the file and
+the page and is announced by the screen reader; a second file cannot be loaded
+until the first one has finished; closing the window during a load is safe. The
+dictionary takes about 10 s (4.7 s in 19.14, without any of the checks above),
+which is why the load no longer blocks the window.
+
+**For contributors.** The clean-up rules live in `czyszczenie_tekstu.py`, a
+standard-library module shared byte for byte with accessible_text_analyst,
+together with its test vectors and runner (`python czyszczenie_tekstu_wektory.py`);
+edit it only in pairs. The font repair adds the `fonttools` dependency (about
+1.8 MiB in the installed program). `przelicznik_testow.py` keeps the test
+counts quoted in `CONTRIBUTING.md` true and runs inside `test_kanon_testow.py`.
+This file no longer has the Polish summaries at the top.
+
+Before closing, the code was audited twice by fresh reviewers (once more for the background loading alone), with every
+finding proven by running it, and every finding was fixed with a test. The
+serious one: a ligature glyph (such as "ffi") in a font with a cut-off letter
+map stopped the whole PDF from loading. The others: two different fonts with
+the same name in a merged PDF shared one letter map; the Converter did not
+report rebuilt or re-encoded pages and the Word path did not report its
+corrections; some letter-spaced words came out worse than in 19.14; an
+exception in the loading thread was logged without its traceback; and three
+smaller cases in the background loading.
+
+### Planned or deferred
+
+- A letter-spaced word broken across two lines without a hyphen stays in two
+  parts (about 200 cases in one Russian textbook).
+- A letter-spaced run ending with a spaced hyphen is not joined.
+- Fonts in the CFF format inside a PDF are not rebuilt; their pages are
+  reported and can be read from the image.
+- `anthropic`, `elevenlabs`, `markdown` and `openai` are still held below their
+  bounds (`anthropic<1.8`, `elevenlabs<2.69`, `markdown<3.11`, `openai<3.17`).
+
+---
+
 ## 19.14.0 — minor release
 
 ### What's new
