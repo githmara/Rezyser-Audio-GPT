@@ -36,6 +36,14 @@ zgaduje `de`. Miara to DWA warunki naraz, oba z danych, nie z listy pism:
     miarę bez zmiany kodu.
 Zmierzone na 100 PDF-ach z dysku maintainera (pl, ru, en, pt): 0 podejrzanych
 liter poza słownikiem; słownik: 550 z 551 stron (pierwsza to obraz okładki).
+
+Naprawa (etap 2, `_napraw_z_fontu`): strona zniekształcona dostaje próbę
+odtworzenia liter z OSADZONEGO programu fontu (fontTools: odwrócony `cmap`,
+potem nazwy `post`). Słownik: 550 z 550 stron naprawionych, zgodność liter
+z `.docx` uczelni 99,6–99,8% na typowej stronie, akcenty U+0301 wracają przy
+literach. 99 innych PDF-ów z dysku: tekst bajt w bajt taki sam jak przed
+naprawą. Bramka zostaje siatką bezpieczeństwa — strona naprawiona częściowo
+dalej jest zgłaszana.
 """
 
 from __future__ import annotations
@@ -94,6 +102,10 @@ class WynikPdf:
     #: Liczba znaków warstwy tekstu per strona (indeks 0 = strona 1), przed
     #: czyszczeniem — do szacunku kosztu odczytu strony modelem z obrazem.
     znaki_stron: list[int] = field(default_factory=list)
+    #: Strony, których tekst odtworzono z osadzonego fontu i które po
+    #: naprawie przechodzą bramkę (19.15, etap 2). Naprawa częściowa nie
+    #: trafia tu — taka strona zostaje w `strony_znieksztalcone`.
+    strony_naprawione: list[int] = field(default_factory=list)
 
     @property
     def tekst(self) -> str:
@@ -252,20 +264,162 @@ def _blad_mapowania(tp, i: int) -> bool:
     return pdfium_c.FPDFText_HasUnicodeMapError(tp.raw, i) == 1
 
 
+def _flagi_strony(tp):
+    """`_blad_mapowania` z pamięcią na jedną stronę: naprawa pyta o tę samą
+    flagę trzy razy (przed, w trakcie, po) — 2 mln wywołań na słowniku."""
+    pamiec: dict[int, bool] = {}
+
+    def flaga(_tp, i: int) -> bool:
+        if i not in pamiec:
+            pamiec[i] = _blad_mapowania(tp, i)
+        return pamiec[i]
+    return flaga
+
+
 def _policz_litery(tp, znaki: list[tuple[int, str]],
-                   znane: frozenset[str] | None) -> tuple[int, int]:
+                   znane: frozenset[str] | None, flaga=None) -> tuple[int, int]:
     """(liter, podejrzanych) strony. Flagę PDFium pytamy tylko o litery spoza
     `litery_paczek()`, więc czysty dokument nie płaci za nią prawie nic."""
     if znane is None:
         return 0, 0
+    flaga = flaga or _blad_mapowania
     litery = podejrzane = 0
     for i, z in znaki:
         if not z.isalpha():
             continue
         litery += 1
-        if z not in znane and _blad_mapowania(tp, i):
+        if z not in znane and flaga(tp, i):
             podejrzane += 1
     return litery, podejrzane
+
+
+# ---------------------------------------------------------------------------
+# Naprawa z osadzonego fontu (19.15, etap 2)
+#
+# Strona zniekształcona ma znaki, dla których PDFium nie znalazł Unicode
+# w ToUnicode i oddał SAM KOD ZNAKU (zmierzone: „У” = U+0423 przychodzi jako
+# U+024D, czyli kod 0x24D). W fontach Type0/Identity-H kod znaku to numer
+# glifu, a sam program fontu (TrueType z PDF-a) zwykle wie, jaki znak rysuje
+# ten glif: tablica `cmap` (Unicode → glif) odwrócona, a dla glifów spoza niej
+# nazwa z tablicy `post` (`uni0430`, AGL). Bez przesunięć i bez list pism —
+# słownik z macOS Quartz ma po prostu urwaną ToUnicode przy pełnym `cmap`.
+# Naprawa jest PRÓBĄ: przyjmujemy ją tylko wtedy, gdy zmniejsza liczbę
+# podejrzanych liter strony, a o tym, czy strona przestaje być zniekształcona,
+# decyduje ta sama bramka co przed naprawą.
+# ---------------------------------------------------------------------------
+
+#: Font, którego znaki z flagą błędu mapowania są na stronie w co najmniej
+#: takim ułamku podejrzane, uznajemy za oddający numery glifów. Niżej to font,
+#: w którym PDFium zgadł dobrze (polski PDF z Worda: flaga na poprawnych
+#: „ą”, „ł”) — jego znaków nie ruszamy, bo kod znaku nie musi tam być glifem.
+UDZIAL_GLIFOW_FONTU = 0.5
+#: Przerwa między literami (ułamek wysokości ramki), od której to odstęp
+#: między słowami — tylko dla odstępu tuż po znaku łączącym z naprawy.
+PRZERWA_SLOWA = 0.1
+
+
+def _bajty_c(funkcja, *argumenty) -> bytes:
+    """Dwuprzebiegowe API PDFium: pierwszy raz po długość, drugi po dane."""
+    import ctypes
+    n = ctypes.c_size_t(0)
+    if not funkcja(*argumenty, None, 0, ctypes.byref(n)) or not n.value:
+        return b""
+    bufor = (ctypes.c_uint8 * n.value)()
+    if not funkcja(*argumenty, bufor, n.value, ctypes.byref(n)):
+        return b""
+    return bytes(bufor[:n.value])
+
+
+def _nazwa_fontu(font) -> str:
+    import ctypes
+    import pypdfium2.raw as pdfium_c
+    n = pdfium_c.FPDFFont_GetBaseFontName(font, None, 0)
+    if not n:
+        return ""
+    bufor = ctypes.create_string_buffer(n)
+    pdfium_c.FPDFFont_GetBaseFontName(font, bufor, n)
+    return bufor.value.decode("latin-1", "replace")
+
+
+def mapa_glifow(dane: bytes) -> dict[int, str]:
+    """Numer glifu → znak(i) wg programu fontu; `{}`, gdy fontu nie da się czytać.
+
+    Odwrócony `cmap` ma pierwszeństwo (przy kilku punktach kodowych na glif
+    bierzemy najniższy — spacja przed NBSP), nazwy `post` uzupełniają glify,
+    których `cmap` nie zna (zmierzone: BoldItalic słownika, 40/51 z `cmap`).
+    """
+    if not dane:
+        return {}
+    try:
+        import io
+        from fontTools import agl
+        from fontTools.ttLib import TTFont
+        font = TTFont(io.BytesIO(dane), lazy=True)
+        kolejnosc = font.getGlyphOrder()
+        numery = {nazwa: nr for nr, nazwa in enumerate(kolejnosc)}
+        mapa: dict[int, str] = {}
+        for kod, nazwa in sorted((font.getBestCmap() or {}).items()):
+            if nazwa in numery:
+                mapa.setdefault(numery[nazwa], chr(kod))
+        for nr, nazwa in enumerate(kolejnosc):
+            if nr not in mapa:
+                znak = agl.toUnicode(nazwa)
+                if znak and not znak.isspace():
+                    mapa[nr] = znak
+        return mapa
+    except Exception:  # noqa: BLE001 — font nieczytelny = brak naprawy, bramka zostaje
+        return {}
+
+
+def _napraw_z_fontu(tp, znaki: list[tuple[int, str]], znane: frozenset[str],
+                    fonty: dict, flaga=None) -> list[tuple[int, str]] | None:
+    """Znaki strony po podmianie kodów glifów na znaki z fontu; `None` = nic do zrobienia.
+
+    `fonty` to pamięć podręczna całego dokumentu: nazwa fontu → mapa glifów
+    (nazwa podzbioru „WNVQEB+TimesNewRomanPSMT” jest unikalna w pliku).
+    """
+    if getattr(tp, "raw", None) is None:
+        return None
+    import ctypes
+    import pypdfium2.raw as pdfium_c
+    zflagowane: dict[str, list[int]] = {}
+    # Wskaźnik fontu → nazwa, w obrębie strony: nazwa per znak to połowa
+    # czasu całej naprawy (zmierzone na 880 tys. znaków słownika).
+    nazwy: dict[int | None, str] = {}
+    flaga = flaga or _blad_mapowania
+    for poz, (i, z) in enumerate(znaki):
+        if z.isspace() or not flaga(tp, i):
+            continue
+        obiekt = pdfium_c.FPDFText_GetTextObject(tp.raw, i)
+        font = pdfium_c.FPDFTextObj_GetFont(obiekt) if obiekt else None
+        if not font:
+            continue
+        adres = ctypes.cast(font, ctypes.c_void_p).value
+        if adres not in nazwy:
+            nazwy[adres] = _nazwa_fontu(font)
+        nazwa = nazwy[adres]
+        if nazwa not in fonty:
+            # Tylko font OSADZONY: dla nieosadzonego PDFium oddaje dane fontu
+            # systemowego, którego numeracja glifów nie musi mieć nic wspólnego
+            # z kodami w PDF-ie (zmierzone: Times z Windows „pasował” przypadkiem).
+            fonty[nazwa] = mapa_glifow(_bajty_c(pdfium_c.FPDFFont_GetFontData, font)) \
+                if pdfium_c.FPDFFont_GetIsEmbedded(font) == 1 else {}
+        zflagowane.setdefault(nazwa, []).append(poz)
+    wynik = list(znaki)
+    zmiana = False
+    for nazwa, pozycje in zflagowane.items():
+        mapa = fonty[nazwa]
+        litery = [znaki[p][1] for p in pozycje if znaki[p][1].isalpha()]
+        if not mapa or not litery or \
+                sum(z not in znane for z in litery) < UDZIAL_GLIFOW_FONTU * len(litery):
+            continue
+        for p in pozycje:
+            i, z = znaki[p]
+            nowy = mapa.get(ord(z)) if len(z) == 1 else None
+            if nowy is not None and nowy != z:
+                wynik[p] = (i, nowy)
+                zmiana = True
+    return wynik if zmiana else None
 
 
 def _czysc(tekst: str) -> str:
@@ -335,12 +489,35 @@ def _znaki_strony(tp) -> list[tuple[int, str]]:
     return wynik
 
 
+def _znaki_po_naprawie(tp, znane: frozenset[str] | None, fonty: dict | None
+                       ) -> tuple[list[tuple[int, str]], int, int, bool]:
+    """(znaki, liter, podejrzanych, naprawiona) strony, po próbie naprawy z fontu.
+
+    Naprawę próbujemy tylko na stronie zniekształconej i przyjmujemy tylko
+    wtedy, gdy zmniejsza liczbę podejrzanych liter — czysta strona zostaje
+    co do bajta taka jak przed etapem 2.
+    """
+    wszystkie = _znaki_strony(tp)
+    flaga = _flagi_strony(tp)
+    litery, podejrzane = _policz_litery(tp, wszystkie, znane, flaga)
+    if znane is None or fonty is None or not czy_znieksztalcona(litery, podejrzane):
+        return wszystkie, litery, podejrzane, False
+    nowe = _napraw_z_fontu(tp, wszystkie, znane, fonty, flaga)
+    if nowe is None:
+        return wszystkie, litery, podejrzane, False
+    litery2, podejrzane2 = _policz_litery(tp, nowe, znane, flaga)
+    if podejrzane2 >= podejrzane:
+        return wszystkie, litery, podejrzane, False
+    return nowe, litery2, podejrzane2, True
+
+
 def _linie_strony(strona) -> list[_Linia]:
     return _czytaj_strone(strona, None)[0]
 
 
-def _czytaj_strone(strona, znane: frozenset[str] | None) -> tuple[list[_Linia], int, int, int]:
-    """(linie, liter, podejrzanych, znaków) — linie WIZUALNE w kolejności strumienia treści.
+def _czytaj_strone(strona, znane: frozenset[str] | None, fonty: dict | None = None
+                   ) -> tuple[list[_Linia], int, int, int, bool]:
+    """(linie, liter, podejrzanych, znaków, naprawiona) — linie WIZUALNE w kolejności strumienia treści.
 
     Tekst bierzemy z `_znaki_strony`, a linie budujemy z ramki KAŻDEGO znaku
     (`loose=True` = wysokość czcionki, nie obrys glifu; 152 tys. znaków
@@ -367,6 +544,8 @@ def _czytaj_strone(strona, znane: frozenset[str] | None) -> tuple[list[_Linia], 
 
         def zamknij() -> None:
             tekst = _RE_BIALE.sub(" ", _czysc("".join(znaki))).strip()
+            if naprawiona:
+                tekst = unicodedata.normalize("NFC", tekst)
             if tekst:
                 linie.append(_Linia(tekst, *ramka,
                                     czcionka=statistics.median(wysokosci)))
@@ -374,13 +553,32 @@ def _czytaj_strone(strona, znane: frozenset[str] | None) -> tuple[list[_Linia], 
             ramka.clear()
             wysokosci.clear()
 
-        wszystkie = _znaki_strony(tp)
+        wszystkie, litery, podejrzane, naprawiona = _znaki_po_naprawie(tp, znane, fonty)
+        # Odstęp tuż po znaku łączącym czeka na geometrię następnej litery.
+        odstep_po_laczacym = False
         for i, z in wszystkie:
             if z.isspace():
-                if znaki and znaki[-1] != " ":
+                if znaki and unicodedata.combining(znaki[-1][-1]) and naprawiona:
+                    odstep_po_laczacym = True
+                elif znaki and znaki[-1] != " ":
                     znaki.append(" ")
                 continue
+            # Znak łączący z naprawy (akcent U+0301 w słowniku) siedzi nad
+            # literą: jego ramka rozcinałaby linię, a odstęp przed nim
+            # dawał „ЛЯ ́ЦИЯ”. Dokleja się do poprzedniego znaku.
+            if naprawiona and unicodedata.combining(z[0]):
+                if znaki and znaki[-1] == " ":
+                    znaki.pop()
+                znaki.append(z)
+                continue
             l, d, p, g = tp.get_charbox(i, loose=True)
+            if odstep_po_laczacym:
+                # PDFium łamie wiersz za akcentem (jego ramka cofa pozycję), więc
+                # „бо́ льшая”. Spacja zostaje tylko przy realnej przerwie od
+                # litery pod akcentem — tej samej, jaką mają słowa w linii.
+                odstep_po_laczacym = False
+                if ramka and l - ramka[2] > (g - d) * PRZERWA_SLOWA:
+                    znaki.append(" ")
             if ramka:
                 lewo, dol, prawo, gora = ramka
                 wys = max(gora - dol, g - d, 1.0)
@@ -403,7 +601,7 @@ def _czytaj_strone(strona, znane: frozenset[str] | None) -> tuple[list[_Linia], 
             znaki.append(z)
             wysokosci.append(g - d)
         zamknij()
-        return (linie, *_policz_litery(tp, wszystkie, znane), len(wszystkie))
+        return linie, litery, podejrzane, len(wszystkie), naprawiona
     finally:
         tp.close()
 
@@ -412,8 +610,9 @@ def _linie_bez_geometrii(strona) -> list[_Linia]:
     return _czytaj_strone_bez_geometrii(strona, None)[0]
 
 
-def _czytaj_strone_bez_geometrii(strona, znane: frozenset[str] | None
-                                 ) -> tuple[list[_Linia], int, int, int]:
+def _czytaj_strone_bez_geometrii(strona, znane: frozenset[str] | None,
+                                 fonty: dict | None = None
+                                 ) -> tuple[list[_Linia], int, int, int, bool]:
     """Strona obrócona o 90°/270°: linie z kolejności tekstu, bez geometrii.
 
     Ramki znaków PDFium są w układzie NIEOBRÓCONYM, więc na takiej stronie
@@ -424,9 +623,10 @@ def _czytaj_strone_bez_geometrii(strona, znane: frozenset[str] | None
     """
     tp = strona.get_textpage()
     try:
-        wszystkie = _znaki_strony(tp)
+        wszystkie, litery, podejrzane, naprawiona = _znaki_po_naprawie(tp, znane, fonty)
         tekst = "".join(z for _, z in wszystkie)
-        litery, podejrzane = _policz_litery(tp, wszystkie, znane)
+        if naprawiona:
+            tekst = unicodedata.normalize("NFC", tekst)
     finally:
         tp.close()
     linie = []
@@ -434,7 +634,7 @@ def _czytaj_strone_bez_geometrii(strona, znane: frozenset[str] | None
         czysty = _RE_BIALE.sub(" ", _czysc(kawalek)).strip()
         if czysty:
             linie.append(_Linia(czysty, 0.0, -12.0 * nr, 1000.0, -12.0 * nr + 10, czcionka=10.0))
-    return linie, litery, podejrzane, len(wszystkie)
+    return linie, litery, podejrzane, len(wszystkie), naprawiona
 
 
 @dataclass
@@ -448,6 +648,8 @@ class _Strona:
     #: Litery z błędem mapowania PDFium spoza `litery_paczek()`.
     podejrzane: int = 0
     znaki: int = 0
+    #: Znaki odtworzone z osadzonego fontu (`_napraw_z_fontu`).
+    naprawiona: bool = False
 
     @property
     def znieksztalcona(self) -> bool:
@@ -707,6 +909,8 @@ def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> Wynik
         raise PdfNieDoOtwarcia(sciezka, "password" in str(exc).lower(), str(exc)) from exc
     if znane_litery is None:
         znane_litery = litery_paczek()
+    # Mapy glifów osadzonych fontów — raz na dokument (19.15, etap 2).
+    fonty: dict[str, dict[int, str]] = {}
     try:
         strony: list[_Strona] = []
         bez_tekstu: list[int] = []
@@ -719,12 +923,13 @@ def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> Wynik
                 # więc „margines” trafiał w środek strony (audyt 19.13).
                 _l, dol, _p, gora = strona.get_cropbox()
                 if strona.get_rotation() in (90, 270):
-                    linie, litery, podejrzane, znaki = _czytaj_strone_bez_geometrii(
-                        strona, znane_litery)
-                    s = _Strona(linie, dol, gora, False, litery, podejrzane, znaki)
+                    linie, litery, podejrzane, znaki, naprawiona = (
+                        _czytaj_strone_bez_geometrii(strona, znane_litery, fonty))
+                    s = _Strona(linie, dol, gora, False, litery, podejrzane, znaki, naprawiona)
                 else:
-                    linie, litery, podejrzane, znaki = _czytaj_strone(strona, znane_litery)
-                    s = _Strona(linie, dol, gora, True, litery, podejrzane, znaki)
+                    linie, litery, podejrzane, znaki, naprawiona = _czytaj_strone(
+                        strona, znane_litery, fonty)
+                    s = _Strona(linie, dol, gora, True, litery, podejrzane, znaki, naprawiona)
             finally:
                 strona.close()
             strony.append(s)
@@ -738,6 +943,8 @@ def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> Wynik
         raise BrakWarstwyTekstu(sciezka, liczba, bez_tekstu)
 
     znieksztalcone = [nr for nr, s in enumerate(strony, start=1) if s.znieksztalcona]
+    naprawione = [nr for nr, s in enumerate(strony, start=1)
+                  if s.naprawiona and not s.znieksztalcona]
     dzielenie_auto = any("\u00ad" in l.tekst for s in strony for l in s.linie)
     oczyszczone, kolontytuly = _usun_kolontytuly(strony)
     akapity_stron: list[list[str]] = []
@@ -766,4 +973,4 @@ def wyciagnij(sciezka: str, znane_litery: frozenset[str] | None = None) -> Wynik
     if not akapity:
         raise BrakWarstwyTekstu(sciezka, liczba, bez_tekstu)
     return WynikPdf(akapity, liczba, bez_tekstu, kolontytuly, akapity_stron,
-                    znieksztalcone, [s.znaki for s in strony])
+                    znieksztalcone, [s.znaki for s in strony], naprawione)

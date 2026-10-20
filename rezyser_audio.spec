@@ -64,6 +64,13 @@ hiddenimports += collect_submodules("tiktoken_ext")
 # (lżejsze od collect_all). openai analizuje się statycznie i collect nie wymaga.
 hiddenimports += collect_submodules("elevenlabs")
 
+# fontTools (od 19.15, `core_pdf.mapa_glifow`): `TTFont` ładuje moduł KAŻDEJ
+# tablicy fontu po nazwie (`ttLib.tables._c_m_a_p` dla `cmap`, `_p_o_s_t`…),
+# czyli importem dynamicznym, którego analiza statyczna nie widzi. Bez tego
+# frozen build czytałby font bez `cmap`, a `mapa_glifow` połyka wyjątek —
+# naprawa tekstu ze słownika znikałaby po cichu tylko w `.exe`.
+hiddenimports += collect_submodules("fontTools.ttLib.tables")
+
 block_cipher = None
 
 a = Analysis(

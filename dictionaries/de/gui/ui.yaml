@@ -944,6 +944,7 @@ poliglota:
   skan_zgoda_tresc_znieksztalcone: "In der Datei {nazwa_pliku} lässt sich der Text auf {liczba_do_odczytu} von {liczba_stron} Seiten nicht auslesen:\n{opis_stron}\n\nIch kann diese Seiten anhand des Bildes mit einem KI-Modell ({model}) auslesen. Jede davon wird als Bild an einen externen Dienst gesendet: {usluga}.\nDokumente enthalten häufig personenbezogene Daten. Senden Sie sie nur, wenn Sie dazu berechtigt sind.\n\nGeschätzte Kosten: {koszt}. Eine Seite mit dichtem Text kostet mehr als der Scan eines Formulars, daher zählt die Schätzung die Zeichen jeder Seite. Dauer: etwa {liczba_minut} (in Minuten).\n\nWenn Sie „Überspringen“ wählen, werden Seiten ohne Text übersprungen, und der verzerrte Text gelangt unverändert – und damit unleserlich – ins Ergebnis."
   skan_zgoda_linia_skany: '– ohne Textebene (höchstwahrscheinlich Scans): {lista_stron}'
   skan_zgoda_linia_znieksztalcone: '– mit verzerrtem Text (die Schriftart der Datei verrät nicht, um welche Buchstaben es sich handelt): {lista_stron}'
+  pdf_strony_naprawione: 'Auf diesen Seiten war der im PDF gespeicherte Text verzerrt, daher hat das Programm die Buchstaben anhand der in der Datei eingebetteten Schriftart rekonstruiert: {lista_stron}. Einzelne Zeichen können vom Ausdruck abweichen.'
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)

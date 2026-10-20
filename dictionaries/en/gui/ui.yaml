@@ -1028,6 +1028,7 @@ poliglota:
   skan_zgoda_tresc_znieksztalcone: "In the file {nazwa_pliku}, the text cannot be read on {liczba_do_odczytu} of {liczba_stron} pages:\n{opis_stron}\n\nI can read these pages from the image using an AI model ({model}). Each of them will be sent as an image to an external service: {usluga}.\nDocuments often contain personal data. Send them only if you have the right to do so.\n\nEstimated cost: {koszt}. A page of dense text costs more than a scanned form, so the estimate counts the characters on each page. Time: about {liczba_minut} (in minutes).\n\nIf you choose \"Skip\", pages without text will be skipped, and the garbled text will go into the result as it is – unreadable."
   skan_zgoda_linia_skany: '– no text layer (most likely scans): {lista_stron}'
   skan_zgoda_linia_znieksztalcone: "– with garbled text (the file's font does not say which letters they are): {lista_stron}"
+  pdf_strony_naprawione: 'On these pages the text stored in the PDF was garbled, so the program reconstructed the letters from the font embedded in the file: {lista_stron}. Individual characters may differ from the printed version.'
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)

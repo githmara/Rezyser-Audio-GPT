@@ -942,6 +942,7 @@ poliglota:
   skan_zgoda_tresc_znieksztalcone: "Tiedostossa {nazwa_pliku} on {liczba_stron} sivua, ja {liczba_do_odczytu} niistä ei voi lukea tekstiä:\n{opis_stron}\n\nVoin lukea nämä sivut kuvasta tekoälymallilla ({model}). Jokainen niistä lähetetään kuvana ulkoiseen palveluun: {usluga}.\nAsiakirjat sisältävät usein henkilötietoja. Lähetä ne vain, jos sinulla on siihen oikeus.\n\nArvioitu hinta: {koszt}. Tiheää tekstiä sisältävä sivu maksaa enemmän kuin lomakkeen skannaus, joten arvio perustuu kunkin sivun merkkimäärään. Aika: noin {liczba_minut} (minuuteissa).\n\nJos valitset ”Ohita”, sivut ilman tekstiä ohitetaan ja vääristynyt teksti päätyy tulokseen sellaisenaan – lukukelvottomana."
   skan_zgoda_linia_skany: '– ilman tekstikerrosta (todennäköisesti skannauksia): {lista_stron}'
   skan_zgoda_linia_znieksztalcone: '– vääristynyt teksti (tiedoston fontti ei kerro, mitä kirjaimia ne ovat): {lista_stron}'
+  pdf_strony_naprawione: 'Näillä sivuilla PDF-tiedostoon tallennettu teksti oli vääristynyt, joten ohjelma palautti kirjaimet tiedostoon upotetun fontin avulla: {lista_stron}. Yksittäiset merkit voivat poiketa tulosteesta.'
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)

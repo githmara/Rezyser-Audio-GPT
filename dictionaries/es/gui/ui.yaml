@@ -944,6 +944,7 @@ poliglota:
   skan_zgoda_tresc_znieksztalcone: "En el archivo {nazwa_pliku} no se puede leer el texto de {liczba_do_odczytu} de {liczba_stron} páginas:\n{opis_stron}\n\nPuedo leer esas páginas a partir de la imagen con un modelo de IA ({model}). Cada una se enviará como imagen a un servicio externo: {usluga}.\nLos documentos suelen contener datos personales. Envíalos solo si tienes derecho a hacerlo.\n\nCoste estimado: {koszt}. Una página de texto denso cuesta más que el escaneo de un formulario, por lo que la estimación cuenta los caracteres de cada página. Tiempo: unos {liczba_minut} (en minutos).\n\nSi eliges «Omitir», las páginas sin texto se omitirán y el texto distorsionado pasará al resultado tal cual: ilegible."
   skan_zgoda_linia_skany: '– sin capa de texto (probablemente escaneos): {lista_stron}'
   skan_zgoda_linia_znieksztalcone: '– con texto distorsionado (la fuente del archivo no indica qué letras son): {lista_stron}'
+  pdf_strony_naprawione: 'En estas páginas el texto guardado en el PDF estaba distorsionado, por lo que el programa reconstruyó las letras a partir de la fuente incrustada en el archivo: {lista_stron}. Algunos caracteres sueltos pueden diferir de la versión impresa.'
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)

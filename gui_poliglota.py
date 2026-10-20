@@ -1147,6 +1147,9 @@ class PoliglotaPanel(wx.Panel):
             if wynik_pdf.kolontytuly:
                 czesci.append(t("poliglota.pdf_kolontytuly",
                                 lista_kolontytulow="; ".join(wynik_pdf.kolontytuly[:5])))
+            if wynik_pdf.strony_naprawione:
+                czesci.append(t("poliglota.pdf_strony_naprawione",
+                                lista_stron=core_skany.zakresy(wynik_pdf.strony_naprawione)))
         czesci.append(t("poliglota.skan_podsumowanie_tresc",
                         liczba_odczytanych=p.odczytane, liczba_skanow=len(wyniki),
                         liczba_nieczytelnych=p.znaczniki.get("ILLEGIBLE", 0),
@@ -1176,6 +1179,11 @@ class PoliglotaPanel(wx.Panel):
         if wynik.kolontytuly:
             tresc += "\n\n" + t("poliglota.pdf_kolontytuly",
                                 lista_kolontytulow="; ".join(wynik.kolontytuly[:5]))
+        # 19.15, etap 2: tekst odtworzony z osadzonego fontu to przetworzenie,
+        # o którym słuchacz ma wiedzieć (zero ciszy), nawet gdy wyszło dobrze.
+        if wynik.strony_naprawione:
+            tresc += "\n\n" + t("poliglota.pdf_strony_naprawione",
+                                lista_stron=core_skany.zakresy(wynik.strony_naprawione))
         if wynik.strony_bez_tekstu:
             tresc += "\n\n" + t("poliglota.pdf_strony_bez_tekstu",
                                 lista_stron=core_skany.zakresy(wynik.strony_bez_tekstu))

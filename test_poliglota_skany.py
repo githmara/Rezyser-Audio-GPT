@@ -313,6 +313,27 @@ def test_caly_pdf_znieksztalcony_bez_detekcji_z_komunikatem(srodowisko, tmp_path
     assert panel._bez_detekcji is False
 
 
+def test_strona_naprawiona_z_fontu_bez_oferty_ale_z_informacja(srodowisko, tmp_path,
+                                                                monkeypatch):
+    # Etap 2: font osadzony zna swoje glify — tekst wraca bez płatnego
+    # odczytu, a słuchacz dostaje zdanie, że litery odtworzono.
+    import core_poliglota
+    from test_core_pdf import _pdf_osadzony
+    panel, zapis = srodowisko
+    widziane = []
+    monkeypatch.setattr(core_poliglota, "wykryj_jezyk_zrodlowy",
+                        lambda tekst, **_kw: widziane.append(tekst) or "ru")
+    panel._combo_jezyk.SetSelection(0)
+    p = tmp_path / "osadzony.pdf"
+    _pdf_osadzony(p)
+    _wczytaj(panel, p)
+    assert zapis.zgody == [] and zapis.odczyty == []
+    assert panel._file_ext == ".txt" and "Утве" in panel._file_content
+    assert any("odtworzył litery z czcionki osadzonej w pliku: 1." in k
+               for k in zapis.komunikaty), zapis.komunikaty
+    assert widziane and "Утве" in widziane[0]
+
+
 def test_konwerter_pyta_przed_zapisem_smieci(tmp_path, monkeypatch):
     # Konwerter nie ma odczytu obrazu: mówi, które strony są zniekształcone,
     # i domyślnie NIE konwertuje (dotąd: .docx z IPA i dialog „Sukces”).

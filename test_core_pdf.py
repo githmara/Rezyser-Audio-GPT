@@ -22,6 +22,9 @@ z dzieleniem wyrazów, kolontytułem, numerami stron i dwiema szpaltami):
   F. (19.15) Zniekształcona warstwa tekstu: flaga błędu mapowania PDFium
      i litera spoza paczek RAZEM; prawdziwy PDF z uciętą mapą ToUnicode
      odtwarza słownik z macOS Quartz, a lingua dostaje tylko strony dobre.
+  G. (19.15, etap 2) Naprawa z osadzonego fontu zbudowanego w teście:
+     `cmap` + `post`, akcent przy literze, naprawa częściowa zgłaszana,
+     font nieosadzony i bez map nienaprawiany.
 
 Uruchom:  .venv/Scripts/python -m pytest test_core_pdf.py -q
 Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_core_pdf.py
@@ -574,6 +577,137 @@ def test_strona_znieksztalcona_blokuje_sklejanie(monkeypatch):
     assert w.strony_znieksztalcone == [2]
     assert w.akapity_stron == [["Zdanie urwane na"], ["ɢ ɞɚɥɶɲɟ ɬɟɤɫɬ"], ["dalszy ciąg."]]
     assert w.tekst_wiarygodny == "Zdanie urwane na\n\ndalszy ciąg."
+
+
+# --------------------------------------------------------------------- G ---
+# 19.15, etap 2: naprawa z osadzonego fontu. Font budujemy w teście
+# (fontTools `FontBuilder`), więc fixtura nie wozi cudzego fontu: glify
+# cyrylicy mają numery od 600 (kody wypadają w IPA jak w słowniku), akcent
+# U+0301 jest TYLKO w `post` (`uni0301`) i ma zerową szerokość.
+
+_TEKST_G = "Утверждено к печати"
+
+
+def _font_ttf(*, cmap=True, nazwy=True, polowa=False):
+    import io
+    from fontTools.fontBuilder import FontBuilder
+    from fontTools.pens.ttGlyphPen import TTGlyphPen
+    litery = sorted(set(_TEKST_G.replace(" ", "")))
+    kolejnosc = [".notdef"] + [f"pusty{i}" for i in range(1, 600)]
+    gid = {}
+    for z in litery:
+        gid[z] = len(kolejnosc)
+        kolejnosc.append(f"uni{ord(z):04X}")
+    gid["akcent"] = len(kolejnosc)
+    kolejnosc.append("uni0301")
+    w_cmap = litery[: len(litery) // 2] if polowa else litery
+    fb = FontBuilder(1000, isTTF=True)
+    fb.setupGlyphOrder(kolejnosc)
+    fb.setupCharacterMap({ord(z): f"uni{ord(z):04X}" for z in w_cmap} if cmap else {})
+    pen = TTGlyphPen(None)
+    pen.moveTo((0, 0))
+    pen.lineTo((0, 500))
+    pen.lineTo((400, 500))
+    pen.closePath()
+    glif = pen.glyph()
+    fb.setupGlyf({n: glif for n in kolejnosc})
+    fb.setupHorizontalMetrics({n: (0 if n == "uni0301" else 500, 0) for n in kolejnosc})
+    fb.setupHorizontalHeader(ascent=800, descent=-200)
+    fb.setupNameTable({"familyName": "Proba", "styleName": "Regular"})
+    fb.setupOS2()
+    fb.setupPost(keepGlyphNames=nazwy and not polowa)
+    bufor = io.BytesIO()
+    fb.save(bufor)
+    return bufor.getvalue(), gid
+
+
+def _pdf_osadzony(sciezka, **opcje_fontu):
+    """Słowa jako osobne biegi (PDFium generuje spacje), akcent po „Утве”."""
+    ttf, gid = _font_ttf(**opcje_fontu)
+    x, tresc = 72, b""
+    for nr, slowo in enumerate(_TEKST_G.split()):
+        kody = []
+        for z in slowo:
+            kody.append(f"{gid[z]:04x}")
+            if nr == 0 and len(kody) == 4:
+                kody.append(f"{gid['akcent']:04x}")
+        tresc += f"BT /F1 12 Tf {x} 700 Td <{''.join(kody)}> Tj ET ".encode()
+        x += len(kody) * 6 + 4          # `/DW 500` daje szerokość także akcentowi
+    cmap = _CMAP_UCIETA.encode()
+    obiekty = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] "
+        b"/Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        b"<< /Type /Font /Subtype /Type0 /BaseFont /ABCDEF+Proba /Encoding /Identity-H "
+        b"/DescendantFonts [6 0 R] /ToUnicode 8 0 R >>",
+        b"<< /Length %d >>\nstream\n" % len(tresc) + tresc + b"\nendstream",
+        b"<< /Type /Font /Subtype /CIDFontType2 /BaseFont /ABCDEF+Proba "
+        b"/CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> "
+        b"/FontDescriptor 7 0 R /DW 500 /CIDToGIDMap /Identity >>",
+        b"<< /Type /FontDescriptor /FontName /ABCDEF+Proba /Flags 32 "
+        b"/FontBBox [0 -200 1000 800] /ItalicAngle 0 /Ascent 800 /Descent -200 "
+        b"/CapHeight 700 /StemV 80 /FontFile2 9 0 R >>",
+        b"<< /Length %d >>\nstream\n" % len(cmap) + cmap + b"\nendstream",
+        b"<< /Length %d /Length1 %d >>\nstream\n" % (len(ttf), len(ttf)) + ttf + b"\nendstream",
+    ]
+    out = bytearray(b"%PDF-1.7\n")
+    offsety = []
+    for i, obj in enumerate(obiekty, 1):
+        offsety.append(len(out))
+        out += b"%d 0 obj\n" % i + obj + b"\nendobj\n"
+    xref = len(out)
+    out += b"xref\n0 %d\n0000000000 65535 f \n" % (len(obiekty) + 1)
+    out += b"".join(b"%010d 00000 n \n" % o for o in offsety)
+    out += b"trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (
+        len(obiekty) + 1, xref)
+    sciezka.write_bytes(bytes(out))
+
+
+def test_naprawa_z_osadzonego_fontu_cmap_i_post(tmp_path):
+    import unicodedata
+    p = tmp_path / "osadzony.pdf"
+    _pdf_osadzony(p)
+    w = core_pdf.wyciagnij(str(p), ZNANE)
+    # Akcent z nazwy `post` siedzi PRZY literze — bez spacji („Утве ́рждено”)
+    # i bez rozcięcia słowa („Утве́ рждено”).
+    akcent = chr(0x301)
+    assert w.akapity == [f"Утве{akcent}рждено к печати"]
+    assert unicodedata.normalize("NFC", w.akapity[0]) == w.akapity[0]
+    assert w.strony_naprawione == [1] and w.strony_znieksztalcone == []
+    assert w.tekst_wiarygodny == w.tekst
+
+
+def test_naprawa_czesciowa_zostaje_zgloszona(tmp_path):
+    # `cmap` zna połowę liter, `post` bez nazw: strona lepsza, ale wciąż
+    # zniekształcona — bramka ją zgłasza, a GUI oferuje odczyt obrazu.
+    p = tmp_path / "polowa.pdf"
+    _pdf_osadzony(p, polowa=True)
+    w = core_pdf.wyciagnij(str(p), ZNANE)
+    assert w.strony_znieksztalcone == [1] and w.strony_naprawione == []
+
+
+def test_font_bez_cmap_i_nazw_nie_naprawia(tmp_path):
+    p = tmp_path / "pusty.pdf"
+    _pdf_osadzony(p, cmap=False, nazwy=False)
+    w = core_pdf.wyciagnij(str(p), ZNANE)
+    assert w.strony_znieksztalcone == [1] and w.strony_naprawione == []
+    assert "ɍ" not in w.tekst_wiarygodny
+
+
+def test_font_nieosadzony_nie_jest_naprawiany(tmp_path):
+    # PDFium oddaje wtedy dane fontu SYSTEMOWEGO; Times z Windows ma tę samą
+    # numerację co podzbiór ze słownika i „naprawiał” przypadkiem — przypadek
+    # to nie kontrakt (fixtura `_pdf_cid` nie osadza programu fontu).
+    p = tmp_path / "nieosadzony.pdf"
+    _pdf_cid(p, [("Утверждено к печати", 700)])
+    w = core_pdf.wyciagnij(str(p), ZNANE)
+    assert w.strony_znieksztalcone == [1] and w.strony_naprawione == []
+
+
+def test_mapa_glifow_nieczytelny_font_to_brak_naprawy():
+    assert core_pdf.mapa_glifow(b"") == {}
+    assert core_pdf.mapa_glifow(b"to nie jest font" * 10) == {}
 
 
 # Uruchomienie jako skrypt — deleguje do pytesta (kanon v19.2.1).

@@ -2441,7 +2441,66 @@ def tekst_docx(sciezka: str) -> str:
     czegoś nie widzi.
     """
     doc = docx.Document(sciezka)
-    return "\n".join(para.text for para in _iteruj_akapity_docx(doc))
+    akapity = [para.text for para in _iteruj_akapity_docx(doc)]
+    return "\n".join(napraw_przeniesienia(akapity)[0])
+
+
+# Przeniesienie z łamania wiersza zostawione w tekście: „по- священного”.
+# Litera, dywiz, SPACJA, mała litera — łącznik bez spacji („кое-что”) i myślnik
+# („слово – слово”) tego kształtu nie mają.
+_RE_PRZENIESIENIE_DOCX = re.compile(r"(\w+)-[ ]+(\w+)")
+_RE_SLOWO_SAMODZIELNE = re.compile(r"(?<![\w-])(\w+)(?![\w-])")
+_RE_ZLOZENIE = re.compile(r"(?<![\w-])(\w+(?:-\w+)+)(?![\w-])")
+
+
+def napraw_przeniesienia(akapity: list[str]) -> tuple[list[str], int, int]:
+    """Zdejmuje przeniesienia wyrazów W ŚRODKU akapitu; (akapity, sklejone, łączniki).
+
+    Zmierzone na `.docx` z konwersji PDF→Word (słownik koronawirusowy, 2026-10-20):
+    5 890 takich miejsc. Rozstrzyga WYŁĄCZNIE słownik tego samego dokumentu
+    (bez list języków i bez list spójników):
+      * forma z łącznikiem („ковид-диссидентов”, „по-прежнему”) występuje
+        w dokumencie częściej niż sklejona → zostaje łącznik, znika spacja
+        (167 miejsc: złożenie złamane akurat na swoim łączniku);
+      * forma sklejona („посвященного”) występuje częściej → sklejamy (3 861);
+      * żadna nie występuje albo remis → BEZ ZMIAN (1 862). Tu trafiają
+        dywizy wiszące („аудио- и видеоконференций”, „пред- и постпандемийный”:
+        ani „аудиои”, ani „аудио-и” nie są słowami dokumentu) i slugi adresów
+        („obozrenie- birulevo”), których dywiz jest prawdziwy.
+    Reguła „prawa część nie jest słowem” odpadła w pomiarze: łączyła slugi
+    adresów. Liczba akapitów się nie zmienia (Naprawiacz tagów liczy jednostki
+    po indeksie z oryginału), a przeniesienia PRZEZ granicę akapitu (308
+    w słowniku) zostają — sklejenie zmieniałoby podział na akapity.
+    """
+    slowa: dict[str, int] = {}
+    zlozenia: dict[str, int] = {}
+    for akapit in akapity:
+        if not akapit:
+            continue
+        for m in _RE_SLOWO_SAMODZIELNE.finditer(akapit):
+            k = m.group(1).lower()
+            slowa[k] = slowa.get(k, 0) + 1
+        for m in _RE_ZLOZENIE.finditer(akapit):
+            k = m.group(1).lower()
+            zlozenia[k] = zlozenia.get(k, 0) + 1
+    liczniki = [0, 0]
+
+    def zamien(m: re.Match) -> str:
+        lewy, prawy = m.group(1), m.group(2)
+        if not prawy[:1].islower():
+            return m.group(0)
+        z_lacznikiem = zlozenia.get(f"{lewy}-{prawy}".lower(), 0)
+        sklejone = slowa.get(f"{lewy}{prawy}".lower(), 0)
+        if sklejone > z_lacznikiem:
+            liczniki[0] += 1
+            return lewy + prawy
+        if z_lacznikiem > sklejone:
+            liczniki[1] += 1
+            return f"{lewy}-{prawy}"
+        return m.group(0)
+
+    wynik = [_RE_PRZENIESIENIE_DOCX.sub(zamien, a) if "-" in a else a for a in akapity]
+    return wynik, liczniki[0], liczniki[1]
 
 
 def _iso_per_linia(tresc: str, segmenty: list[Segment] | None,

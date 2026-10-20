@@ -944,6 +944,7 @@ poliglota:
   skan_zgoda_tresc_znieksztalcone: "Í skránni {nazwa_pliku} er ekki hægt að lesa texta á {liczba_do_odczytu} af {liczba_stron} síðum:\n{opis_stron}\n\nÉg get lesið þessar síður af myndinni með gervigreindarlíkani ({model}). Hver þeirra verður send sem mynd til utanaðkomandi þjónustu: {usluga}.\nSkjöl innihalda oft persónuupplýsingar. Sendu þau aðeins ef þú hefur heimild til þess.\n\nÁætlaður kostnaður: {koszt}. Síða með þéttum texta kostar meira en skönnuð eyðublaðssíða, svo áætlunin telur stafi á hverri síðu. Tími: um það bil {liczba_minut} (í mínútum).\n\nEf þú velur „Sleppa“ verða síður án texta slepptar og brenglaði textinn lendir í niðurstöðunni eins og hann er – ólæsilegur."
   skan_zgoda_linia_skany: '– án textalags (líklega skannaðar síður): {lista_stron}'
   skan_zgoda_linia_znieksztalcone: '– með brengluðum texta (letur skráarinnar gefur ekki upp hvaða stafir þetta eru): {lista_stron}'
+  pdf_strony_naprawione: 'Á þessum síðum var texti PDF-skjalsins brenglaður, því forritið endurgerði stafina út frá letrinu sem er fellt inn í skrána: {lista_stron}. Einstakir stafir geta verið frábrugðnir útprentuninni.'
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)

@@ -79,6 +79,12 @@ python-docx
 # następnym minorze ponad przetestowane 5.14.0, bo kod znaku dywizu dzielenia
 # (U+FFFE w 5.14, zmierzone) to szczegół implementacji PDFium, nie kontrakt API.
 pypdfium2<5.15
+# Naprawa zniekształconej warstwy tekstu PDF z osadzonego fontu (`core_pdf`,
+# od 19.15): czytamy program fontu TrueType z PDF-a i odwracamy jego `cmap`
+# / nazwy `post`. Wołamy `TTFont(lazy=True)`, `getBestCmap`, `getGlyphOrder`
+# i `fontTools.agl.toUnicode` — granica na następnym majorze ponad
+# przetestowane 4.67.0 (4.x trzyma tę powierzchnię od lat; 5.0 to decyzja).
+fonttools<5
 # `jezyki_lingua.KANON` jest LUSTREM enuma `lingua.Language`, a `audyt_podstaw`
 # porównuje je 1:1. Nowy MINOR potrafi dodać język, więc granicą jest tu linia
 # minorowa, nie majorowa: upgrade jest zmianą kanonu, nie tylko biblioteki.
