@@ -137,6 +137,9 @@
     "POSSIBLE|lingua:PL|zaczatki.{…}: etykieta",
     "POSSIBLE|znak-PL:ę|Odkorkuj fiolkę"
   ],
+  "przelicznik_testow.py": [
+    "POSSIBLE|slowo-PL:zapisz|--zapisz"
+  ],
   "przepisy_rezysera.py": [
     "POSSIBLE|lingua:PL|id, etykieta, kategoria",
     "POSSIBLE|lingua:PL|regex_podzial_rozdzialow={…} | {…}",

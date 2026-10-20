@@ -139,6 +139,7 @@ Pass `--help` for full usage (help text is in English).
 | `dev_yaml.py` | The loader implementing that standard for the dev tools: `wczytaj_lub_padnij` (a missing file is fatal too) and `wczytaj_jesli_jest` (a missing file returns `None`, anything else is fatal). Only the CALLER knows what a missing file of its own means, but nobody may treat a file that IS there, only broken, as absent. The YAML parser is injected (`parser=`), because two live here — `pyyaml` in the engine and the audit tools, `ruamel` in safe mode across the translator family — and they differ in YAML 1.1 vs 1.2 details. |
 | `audyt_zaleznosci.py` | Release **gate** over `requirements.txt`: for every declared package it compares the version installed here with the latest on PyPI, and tells the two cases apart — a newer release our manifest **excludes** by a bound (a decision already made) versus one it still **allows** (nobody decided; you would get it from pip). The second case is a gate hit. Needs network; without it — or without `packaging` — it degrades loudly instead of reporting "clean". `--strict` exits 1 and is the check to run before choosing the shortened release procedure, because a dependency upgrade is not dev-tools-only. **Since v19.4.0 `build_release.py` applies that same strict verdict by default and refuses to build on a hit** — deliberately without the `FATAL` wording the other gates use, because an upstream release says nothing about our code being wrong; it only says nobody has decided. `build_release.py --no-strict` skips the audit entirely and exists for a critical hotfix you want out without touching dependencies. When accepting the new release would mean moving a bound to the next minor or major, the conservative canon applies: ship the release as it stands, note the upgrade under "what did not make it", freeze the environment (`pip freeze`), and migrate in a release of its own afterwards. Upper bounds exist only on the five packages whose API we call directly (`wxpython`, `anthropic`, `openai`, `elevenlabs`, `lingua-language-detector`) — see the comments at the top of `requirements.txt`. |
 | `audyt_kreatora.py` | Release **gate** over the Rule Manager's own texts. The creator's templates and prompts DESCRIBE the engine, but nothing executes them: a change in the code does not break them in any visible way, the description simply starts lying and keeps lying until the next human reads it — and an AI agent handed such a prompt carries the false sentence out literally, so the falsehood becomes a finished file rather than a question. The gate renders every creator type and checks each thing the result names by name against the engine: module, symbol, pack file, path, written field, enumerated value, plus the render itself. **No baseline** — a lying description has no acceptable form. Needs neither `lingua` nor network; `build_release.py` runs it before the dependency gate. |
+| `przelicznik_testow.py [--sprawdz \| --zapisz]` | Recounts the `test_*.py` files and the tests pytest collects (`--collect-only`, nothing is executed, no network) and compares them with the sentence "There are N regression test files (M tests" in this file; also fails when this file names a `test_*.py` that does not exist. `--zapisz` writes the current numbers. Runs as a check inside `test_kanon_testow.py`. |
 | `refresh_languages.py` | Syncs the target-language registry (`jezyki_docelowe.yaml`) with the `dictionaries/<code>/` folders. Run after adding/removing a language. `--strict` for a CI guard. An entry may also be a mapping `{nazwa, prog_rozdmuchania}` — an explicit, accepted length-ratio threshold for the manuals of that language; refresh preserves it. |
 | `build_release.py` | Builds the PyInstaller release and the Inno Setup installer. |
 
@@ -179,8 +180,10 @@ reach X on the paths this project uses.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are thirteen regression test files (179 assertions, **~13 s for all of them**) and
-nine gates. Running every one of them after every small edit is not thoroughness — a green
+There are 44 regression test files (852 tests, **about a minute for all of them**) and
+nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
+(`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
+Running every one of them after every small edit is not thoroughness — a green
 result on a gate whose input you never touched carries no information, and a wall of such
 results trains you to skim the one line that mattered. So the rule is not "run more" or
 "run less", it is **run what has an object**.
@@ -220,14 +223,14 @@ Two facts decide what that means, and both are easy to get backwards:
 | any other `dictionaries/**` (engine data: accents, ciphers, modes, tales) | `audyt_podstaw.py --bramka` + `audyt_ciszy.py --bramka` |
 | a new or renamed `.py` in the repo root | `audyt_leakow.py --bramka-py` (the build is otherwise the first place this fires) |
 | `manager_regul_szablony.py` (creator templates and prompts) | `audyt_kreatora.py --bramka` — the texts must not describe an engine that does not exist |
-| a new `test_*.py` | `pytest test_kanon_testow.py` (checks how every test file runs, not what it tests) |
+| a new `test_*.py` | `pytest test_kanon_testow.py` (checks how every test file runs, not what it tests — and that the counts above still match, via `przelicznik_testow.py`) |
 | `requirements.txt`, or before any freeze | `audyt_zaleznosci.py` (the build runs it too, and stops on a hit unless you pass `--no-strict`) |
 
 The mapping comes from the test files' own imports (`grep -oE '^(import\|from) [a-z_]+'`),
 so it is checkable rather than remembered — and it is worth re-deriving when you add a
 test, because a test nobody knows to run is the same thing as no test.
 
-**The tests are the cheap half; do not over-optimise them.** Thirteen seconds for the whole
+**The tests are the cheap half; do not over-optimise them.** About a minute for the whole
 suite means "just run `pytest test_*.py`" is a perfectly good default, and the table above
 matters most when you are iterating in a tight loop. What genuinely deserves scoping is
 everything that costs money or minutes: the build, and above all the auto-translators —

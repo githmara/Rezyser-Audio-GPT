@@ -164,6 +164,26 @@ def test_zrodlo_kanonu_przechodzi_mimo_wlasnego_printu():
     assert deleguje_do_pytesta(tekst)
 
 
+def test_liczby_testow_w_contributing():
+    """Bramka (v19.15): CONTRIBUTING.md cytuje liczbę plików i testów — tu, bo
+    to plik, który CONTRIBUTING każe uruchomić po dodaniu nowego `test_*.py`.
+    Zbiera testy bez uruchamiania (`--collect-only`), bez sieci."""
+    import przelicznik_testow as pt
+    tekst = (KORZEN / "CONTRIBUTING.md").read_text(encoding="utf-8")
+    bledy = pt.sprawdz(tekst, len(pt.pliki_testowe()), pt.zebrane_testy())
+    assert not bledy, "\n".join(bledy) + "\nFix: .venv/Scripts/python przelicznik_testow.py --zapisz"
+
+
+def test_przelicznik_lapie_rozjazd():
+    import przelicznik_testow as pt
+    pliki = len(pt.pliki_testowe())
+    tekst = "There are 13 regression test files (179 tests, about a minute).\n| x | `pytest test_nie_ma.py` |"
+    bledy = pt.sprawdz(tekst, pliki, 850)
+    assert len(bledy) == 3 and "test_nie_ma.py" in bledy[2]
+    assert pt.sprawdz(pt.zapisz(tekst, pliki, 850).split("\n")[0], pliki, 850) == []
+    assert pt.sprawdz("thirteen regression test files", pliki, 850)   # liczba słowem = błąd
+
+
 # Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
 # raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
 # więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
