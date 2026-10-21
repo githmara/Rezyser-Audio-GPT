@@ -180,7 +180,7 @@ reach X on the paths this project uses.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are 45 regression test files (868 tests, **about a minute for all of them**) and
+There are 46 regression test files (871 tests, **about a minute for all of them**) and
 nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
 (`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
 Running every one of them after every small edit is not thoroughness — a green
@@ -219,6 +219,7 @@ Two facts decide what that means, and both are easy to get backwards:
 | `core_markdown.py` | `pytest test_markdown_poliglota.py` |
 | `build_release.py`, `patch_dev.json`, `installer.iss` | `pytest test_patch_dev.py test_sprzatanie_bundla.py` |
 | `.github/scripts/issue_intake_sami.py` | `pytest test_intake_zalaczniki.py` |
+| any `.github/workflows/*.yml` with `python-version:`, or `audyt_zaleznosci.PYTHON_PRZETESTOWANY` | `pytest test_python_ci.py` — every workflow pins EXACTLY the tested patch (a bare `'3.14'` installs the newest one); bump the constant and the workflows in one commit |
 | a `buduj_wielojezyczne_*.py` / `tlumacz_*.py` | `pytest test_cache_powtorki.py test_zrodlo_pl_raz.py` |
 | any `dictionaries/**/gui/dokumentacja/*.yaml` or `gui/ui.yaml` | `generuj_dokumentacje.py --waliduj` **and** `audyt_leakow.py --bramka` |
 | any other `dictionaries/**` (engine data: accents, ciphers, modes, tales) | `audyt_podstaw.py --bramka` + `audyt_ciszy.py --bramka` |

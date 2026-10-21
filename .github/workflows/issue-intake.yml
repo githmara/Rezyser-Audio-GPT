@@ -41,7 +41,7 @@ jobs:
       - name: Konfiguracja srodowiska Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.14'
+          python-version: '3.14.3'  # = audyt_zaleznosci.PYTHON_PRZETESTOWANY (test_python_ci.py)
 
       - name: Instalacja zaleznosci (openai + lingua + pyyaml)
         run: |

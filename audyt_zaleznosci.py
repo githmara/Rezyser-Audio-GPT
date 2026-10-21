@@ -97,6 +97,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import re
 import sys
 import urllib.request
@@ -113,6 +114,13 @@ ROOT = Path(__file__).resolve().parent
 SCIEZKA_MANIFESTU = ROOT / "requirements.txt"
 URL_PYPI = "https://pypi.org/pypi/{}/json"
 TIMEOUT = 15
+
+#: Python, na którym zestaw z manifestu był ostatnio przetestowany — jedno miejsce,
+#: lustro `PYTHON_PRZETESTOWANY` z ATA (klasa bliźniaków `zaleznosci`). Workflowy
+#: muszą instalować DOKŁADNIE tę wersję (`test_python_ci.py`): gołe '3.14' daje
+#: najnowszy patch (2026-10-21: runner ATA 3.14.8 przy lokalnym 3.14.3). Build
+#: zamraża LOKALNY interpreter, więc rozjazd tutaj = bundel na niesprawdzonym Pythonie.
+PYTHON_PRZETESTOWANY = "3.14.3"
 
 #: Nazwa narzędzia w komunikatach fatalnych (standard „zero ciszy").
 NARZEDZIE = "audyt_zaleznosci"
@@ -339,6 +347,12 @@ def raport(wynik: WynikBramki) -> None:
               + (f" ({s.powod})" if s.status == "nieznane" and s.powod else ""))
 
     print("\n========== DEPENDENCY GATE ==========")
+    teraz = platform.python_version()
+    if teraz != PYTHON_PRZETESTOWANY:
+        print(f"⚠️  Running on Python {teraz}, the manifest was last tested on "
+              f"{PYTHON_PRZETESTOWANY} (PYTHON_PRZETESTOWANY). A build freezes THIS "
+              "interpreter into the bundle — test on it, then update the constant "
+              "and every workflow's python-version in one commit.")
     if wynik.degradacja:
         print(f"⚠️  Ran with REDUCED coverage: {wynik.degradacja}.")
     trafienia = [s for s in wynik.stany if s.trafienie]

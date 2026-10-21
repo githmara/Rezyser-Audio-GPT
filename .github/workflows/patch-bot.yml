@@ -19,7 +19,7 @@ jobs:
       - name: Konfiguracja środowiska Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.14'
+          python-version: '3.14.3'  # = audyt_zaleznosci.PYTHON_PRZETESTOWANY (test_python_ci.py)
 
       # Lingua (detekcja języka) + PyYAML (i18n czyta ui.yaml przez bot_i18n).
       - name: Instalacja zależności
