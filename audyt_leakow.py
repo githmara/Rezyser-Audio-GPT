@@ -1061,6 +1061,9 @@ DEV_TOOLE = {
     # wchodzi do bundla (woła ją tylko `build_release` i CLI ze źródła),
     # a „Manager Reguł" w jej nagłówku to nazwa własna narzędzia.
     "audyt_kreatora.py",
+    # v19.16: bramka słów mieszanego pisma w paczkach. Ta sama klasa co
+    # `audyt_ciszy.py` — wołana wyłącznie ze źródła i z `build_release`.
+    "audyt_pism.py",
 }
 
 # `jezyki_lingua.py` CELOWO NIE JEST na liście wyżej i to jest decyzja, nie
@@ -1442,8 +1445,12 @@ def zbierz_leaki_py(root: Path = ROOT) -> dict[str, list[str]]:
 # polski chatter — bramka, która by je zrównała, produkowałaby fałszywe alarmy
 # w liczbie, po której nikt by jej nie czytał. Werdykty pilnuje przegląd, nie skan.
 #
-# Bramka jest OSTRZEGAJĄCA (exit 0 nawet przy nadwyżce). Nowy polski help to
-# usterka kosmetyczna, nie zepsuta paczka — blokowanie builda byłoby nieproporcjonalne.
+# Bramka jest BLOKUJĄCA od v19.16 (exit 1 przy nadwyżce, FATAL w `build_release`
+# krok 3c). Do 19.15 tylko ostrzegała („polski help to usterka kosmetyczna"), ale
+# to czyniło ją jedyną bramką, której czerwień dało się przemilczeć: realne
+# złamanie kontraktu przechodziło jako „tylko ostrzeżenie", fałszywy alarm nigdy
+# nie lądował w baseline, a kontrybutor po klonie dostawał żółtą linię zamiast
+# kompletu zielonych.
 _KWARGI_CLI = {"help", "description", "epilog", "metavar"}
 
 # Próg liter dla kategorii `fatal` (zamiast `_MIN_LITER_LINGUA` = 16). Zmierzony,
@@ -1758,12 +1765,13 @@ def main() -> int:
                        help="Regenerate the `.py` baseline from the current source scan. "
                             f"Overwrites {BASELINE_PY_PATH.name} — review the diff before committing.")
     grupa.add_argument("--bramka-kontrakt", dest="bramka_kontrakt", action="store_true",
-                       help="WARNING-ONLY gate on the CONTRIBUTING language contract in the "
+                       help="GATE on the CONTRIBUTING language contract in the "
                             "dev tools (argparse help/description/epilog/metavar, ❌/⚠️ lines, "
                             "`====` banners and the message of an aborting `raise`) "
                             f"against {BASELINE_KONTRAKT_PATH.name}. "
-                            "Always exits 0 — a Polish help text is cosmetic, not a broken "
-                            "pack. Polish progress chatter is allowed and NOT checked.")
+                            "Exit 1 on hits above the baseline (blocking since v19.16, "
+                            "in the release build too). Polish progress chatter is "
+                            "allowed and NOT checked.")
     grupa.add_argument("--zapisz-baseline-kontrakt", dest="zapisz_baseline_kontrakt",
                        action="store_true",
                        help="Regenerate the contract baseline from the current scan (use it "
@@ -1817,7 +1825,7 @@ def main() -> int:
             print("============================================================")
             return 0
         ile = sum(len(v) for v in wynik.nowe.values())
-        print(f"⚠️  {ile} contract violation(s) ABOVE the baseline in "
+        print(f"❌ {ile} contract violation(s) ABOVE the baseline in "
               f"{len(wynik.nowe)} file(s):")
         for klucz, powody in sorted(wynik.nowe.items()):
             for p in powody:
@@ -1827,7 +1835,10 @@ def main() -> int:
               "a CODE IDENTIFIER quoted inside the message — regenerate the baseline: "
               f"`python {Path(__file__).name} --zapisz-baseline-kontrakt`.")
         print("============================================================")
-        return 0   # OSTRZEŻENIE, nie bramka blokująca — patrz komentarz sekcji
+        # Od v19.16 bramka BLOKUJĄCA, jak pozostałe — także w `build_release`
+        # (krok 3c). Do 19.15 zwracała 0: jedyna bramka, której czerwony wynik
+        # dało się zlekceważyć, a fałszywy alarm nigdy nie trafiał do baseline'u.
+        return 1
 
     if args.zapisz_baseline_py:
         aktualne = zbierz_leaki_py()

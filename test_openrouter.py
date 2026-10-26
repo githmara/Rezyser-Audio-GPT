@@ -583,6 +583,41 @@ def test_rdzen_dwa_razy_mojibake_to_blad_chunku():
                        max_tokens=1000)
 
 
+def test_rdzen_zamawia_ponownie_slowo_z_dwoch_pism():
+    """v19.16: „donастроить" (łacińskie „don" w rosyjskim słowie) = powtórka."""
+    zepsuta = ('{"translations": [{"id": 1, "target": "может donастроить"}, '
+               '{"id": 2, "target": "ok"}]}')
+    dobra = '{"translations": [{"id": 1, "target": "может донастроить"}]}'
+    sdk = _Sdk([(zepsuta, "stop"), (dobra, "stop")])
+    klient = cl.KlientLLM(cl.PROVIDER_OPENROUTER, sdk)
+    mapa = tr.wywolaj_llm(klient, model="claude-sonnet-5-5", system="T.",
+                          nazwa_celu="Русский", kod="ru",
+                          pozycje=[(1, "pole", "może dostroić"), (2, "pole", "ok")],
+                          max_tokens=1000)
+    assert mapa == {1: "может донастроить", 2: "ok"}
+
+
+def test_rdzen_slowo_z_dwoch_pism_przepisane_ze_zrodla_nie_jest_usterka():
+    """Słowo mieszanego pisma obecne w ŹRÓDLE (cytat) przechodzi bez powtórki."""
+    odpowiedz = '{"translations": [{"id": 1, "target": "пример «Шkoda»"}]}'
+    sdk = _Sdk([(odpowiedz, "stop")])
+    klient = cl.KlientLLM(cl.PROVIDER_OPENROUTER, sdk)
+    mapa = tr.wywolaj_llm(klient, model="claude-sonnet-5-5", system="T.",
+                          nazwa_celu="Русский", kod="ru",
+                          pozycje=[(1, "pole", "przykład «Шkoda»")], max_tokens=1000)
+    assert mapa == {1: "пример «Шkoda»"}
+    assert len(sdk.chat.completions.wyslane) == 1
+
+
+def test_rdzen_dwa_razy_slowo_z_dwoch_pism_to_blad_chunku():
+    zepsuta = '{"translations": [{"id": 1, "target": "Hän sanoi kiitоs"}]}'
+    klient = cl.KlientLLM(cl.PROVIDER_OPENROUTER, _Sdk([(zepsuta, "stop")] * 2))
+    with pytest.raises(RuntimeError, match="mixed-script words twice"):
+        tr.wywolaj_llm(klient, model="claude-sonnet-5-5", system="T.",
+                       nazwa_celu="Suomi", kod="fi", pozycje=[(1, "pole", "x")],
+                       max_tokens=1000)
+
+
 # ---------------------------------------------------------------------------
 # 7. Regresje z audytu subagenta v19.11 (każda miała dowód przez wykonanie)
 # ---------------------------------------------------------------------------

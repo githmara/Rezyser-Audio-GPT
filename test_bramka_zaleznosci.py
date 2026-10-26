@@ -1,6 +1,6 @@
 """
-test_bramka_zaleznosci.py - Krok 6b4 builda: blokada domyslna, --no-strict cisza
-(v19.4).
+test_bramka_zaleznosci.py - Krok 3h builda (do 19.15: 6b4): blokada domyslna,
+--no-strict cisza (v19.4).
 
 Do v19.3.1 bramka zaleznosci TYLKO OSTRZEGALA. Rozumowanie za tym bylo poprawne
 (nowe wydanie upstreamu nie mowi nic o poprawnosci NASZEGO kodu), ale wniosek
@@ -71,7 +71,7 @@ def _stan(nazwa: str, status: str, zainstalowana="1.0.0", najnowsza="1.1.0",
 
 def _uruchom(wynik: az.WynikBramki | None, *, no_strict: bool = False,
              wysadz_audyt: bool = False) -> tuple[str, int | None]:
-    """Odpala krok 6b4 na PODSTAWIONYM audycie. Zwraca (log, kod wyjscia)."""
+    """Odpala krok 3h na PODSTAWIONYM audycie. Zwraca (log, kod wyjscia)."""
     oryginalna = az.bramka
 
     def _podstawiona(*_a, **_kw):

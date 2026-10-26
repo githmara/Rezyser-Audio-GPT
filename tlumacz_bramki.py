@@ -26,7 +26,11 @@ Zawartość:
   * :func:`ostrzez_o_kontrakcie_providera` — kontrakt `LLM_PROVIDER` w rodzinie
     (v18.24), od v18.25 z potwierdzeniem na ścieżce honorującej przełącznik.
 
-Moduł jest DEV-ONLY i celowo **bez zależności** (sam `os` i `re`) — dokładnie jak
+  * :func:`slowa_mieszanego_pisma` / :func:`nowe_slowa_mieszanego_pisma` — słowo
+    z liter dwóch pism naraz (v19.16; wspólne dla rdzenia i bramki `audyt_pism`).
+
+Moduł jest DEV-ONLY i celowo **bez zależności** (sama biblioteka standardowa:
+`os`, `re`, `unicodedata`) — dokładnie jak
 `przeglad_tlumaczen.py`. Nie importuj tu silnika ani `lingua`: bramki muszą działać
 także u kontrybutora po `git clone`, bez zainstalowanych extras.
 """
@@ -34,6 +38,7 @@ from __future__ import annotations
 
 import os
 import re
+import unicodedata
 
 
 # ---------------------------------------------------------------------------
@@ -199,6 +204,65 @@ def mojibake(tekst: str) -> list[str]:
         ):
             wynik.append(fragment)
     return wynik
+
+
+# Słowo z dwóch alfabetów (v19.16): model co jakiś czas wstawia fragment słowa
+# w NIE TYM piśmie — `ru` dostał „donастроить" (PL „dostroić", łacińskie „don"
+# zamiast „до"), paczka Manaboomu cyrylicę w fińskim słowie. Tekst jest
+# poprawnym Unicode, parzystość markerów się zgadza, a oko czytelnika (i
+# syntezator) widzi w obu pismach to samo „a"/„o"/„e". Bramka NIE pyta „czy
+# w paczce jest obce pismo" — legalnej cyrylicy jest poza `ru` sporo (akcent
+# rosyjski w każdej paczce, „Русский" w przełączniku języków, przykład
+# naprawy kodowania w podręczniku), a greka to litery IPA (/θ/, /β/). Pyta
+# o JEDNO słowo, w którym stoją litery dwóch pism naraz; w treści paczek nie
+# ma ani jednego legalnego takiego słowa (zmierzone na całym drzewie).
+_PISMA = ("LATIN", "CYRILLIC", "GREEK")
+# Sekwencje regexa (`\b`, `\s`, `\d`) — po sparsowaniu YAML-a w polu `wzor:`
+# backslash stoi tuż przed literą słowa (`\bв.`), co bez tego wyglądałoby jak
+# łacińskie „b" sklejone z cyrylicą.
+_RE_ESKEJP_REGEXA = re.compile(r"\\[A-Za-z]")
+
+
+def _pismo_litery(znak: str) -> str | None:
+    """Pismo litery z `_PISMA` albo None (cyfra, modyfikator IPA, znak łączący)."""
+    nazwa = unicodedata.name(znak, "")
+    for pismo in _PISMA:
+        if nazwa.startswith(pismo):
+            return pismo
+    return None
+
+
+def slowa_mieszanego_pisma(tekst: str) -> list[str]:
+    """Słowa z literami co najmniej dwóch pism (łacinka/cyrylica/greka).
+
+    Słowo = ciąg liter i znaków łączących (akcent wyrazowy U+0301 nie rozcina
+    rosyjskiego słowa). Modyfikatory IPA (`ʲ`, `ː`, `ˈ`) pisma nie mają, więc
+    „/ˈzøːnə/" nie jest trafieniem. Wynik bez powtórzeń, w kolejności tekstu.
+    """
+    wynik: list[str] = []
+    slowo: list[str] = []
+    for znak in _RE_ESKEJP_REGEXA.sub(" ", tekst) + " ":
+        if znak.isalpha() or unicodedata.category(znak).startswith("M"):
+            slowo.append(znak)
+            continue
+        if slowo:
+            pisma = {_pismo_litery(z) for z in slowo} - {None}
+            calosc = "".join(slowo)
+            if len(pisma) > 1 and calosc not in wynik:
+                wynik.append(calosc)
+            slowo = []
+    return wynik
+
+
+def nowe_slowa_mieszanego_pisma(src: str, tgt: str) -> list[str]:
+    """Słowa mieszanego pisma w tłumaczeniu, których NIE MA w źródle.
+
+    Słowo przepisane ze źródła (cytat, nazwa własna, ciąg alfabetu) nie jest
+    usterką tłumaczenia — jeśli w ogóle jest usterką, to źródła, i łapie ją
+    bramka repo `audyt_pism.py`.
+    """
+    ze_zrodla = set(slowa_mieszanego_pisma(src))
+    return [s for s in slowa_mieszanego_pisma(tgt) if s not in ze_zrodla]
 
 
 def stosunek_dlugosci(src: str, tgt: str, *, prog: int = 200) -> float:

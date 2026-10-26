@@ -1,6 +1,7 @@
 import argparse
 import contextlib
 import hashlib
+import importlib.util
 import io
 import json
 import os
@@ -143,7 +144,7 @@ def zbierz_jezyki_z_manualem(kody: list[str]) -> list[str]:
     elegancko. Lepiej: jeśli plik manual nie istnieje fizycznie, pomiń ten
     język w mapie Inno (instalator wystartuje w fallbacku en).
 
-    Wywoływane PO `generuj_dokumentacje.generuj()` (krok 6 w main),
+    Wywoływane PO `generuj_dokumentacje.generuj()` (krok 5 w main),
     żeby sprawdzenie istnienia odbywało się na świeżo wygenerowanych
     plikach, nie na potencjalnie nieaktualnych z poprzedniego buildu.
     """
@@ -728,6 +729,37 @@ NAZWA_DIST = "Rezyser Audio GPT"
 SPEC_PLIK = "rezyser_audio.spec"
 
 
+def _sprawdz_narzedzia() -> str:
+    """Krok 4: spec, PyInstaller i ISCC są na miejscu. Zwraca ścieżkę do ``iscc``.
+
+    Wszystkie trzy sprawdzenia kosztują milisekundy, a do v19.16 każde
+    wychodziło na jaw dopiero w trakcie budowania: brak ISCC — po
+    kilkuminutowym zamrożeniu PyInstallerem, brak PyInstallera — jako błąd
+    subprocessu. Oba już PO potwierdzeniu, które obiecywało „ostatnią szansę".
+    `buduj_pyinstaller` zachowuje własne sprawdzenie speca, bo bywa wołana
+    osobno.
+    """
+    print("🔍 Toolchain: PyInstaller spec, PyInstaller, Inno Setup compiler...")
+    spec = Path(__file__).parent / SPEC_PLIK
+    if not spec.exists():
+        print(f"❌ FATAL: '{SPEC_PLIK}' not found at {spec}.")
+        print("It defines the PyInstaller onedir/windowed build. Restore it from the repo.")
+        sys.exit(1)
+    if importlib.util.find_spec("PyInstaller") is None:
+        print(f"❌ FATAL: PyInstaller is not installed in this environment "
+              f"({sys.executable}).")
+        print(f"   {sys.executable} -m pip install -r requirements.txt")
+        sys.exit(1)
+    iscc_exe = shutil.which("iscc")
+    if iscc_exe is None:
+        print("❌ FATAL: 'iscc' not found in PATH.")
+        print("Install Inno Setup (https://jrsoftware.org/isinfo.php) and make sure")
+        print("its folder (e.g. C:\\Program Files (x86)\\Inno Setup 6) is in your PATH.")
+        sys.exit(1)
+    print(f"✅ Toolchain ready (ISCC: {iscc_exe}).\n")
+    return iscc_exe
+
+
 def buduj_pyinstaller() -> Path:
     """Buduje paczkę onedir PyInstallerem z ``rezyser_audio.spec``.
 
@@ -845,10 +877,11 @@ def _parsuj_argumenty() -> argparse.Namespace:
     """Parsuje argumenty CLI build_release.py.
 
     Pojedyncza flaga ``-y/--yes`` — pomija interaktywny prompt potwierdzający
-    przed kompilacją Inno Setupa. Reszta gardów (VERSION czytany z pliku,
-    sprawdzenie ISCC w PATH, refuse-overwrite istniejącego EXE o tej samej
-    wersji, bramki treściowe 6a–6d) zostaje aktywna — `-y` pomija TYLKO ostatni
-    human-in-the-loop, nie wyłącza walidacji.
+    (krok 7), który stoi PO wszystkim, co da się sprawdzić bez budowania:
+    VERSION, refuse-overwrite istniejącego EXE o tej samej wersji, bramki 3a–3j,
+    narzędzia (spec, PyInstaller, ISCC w PATH) i regeneracja docs. Wszystko to
+    zostaje aktywne — `-y` pomija TYLKO ostatni human-in-the-loop, nie wyłącza
+    walidacji.
 
     Use case: skrypt wywoływany przez CI/CD albo przez agenta automatyzacji
     (np. nowy workflow w GitHub Actions po draft-release, albo lokalny
@@ -867,17 +900,17 @@ def _parsuj_argumenty() -> argparse.Namespace:
         "-y", "--yes",
         action="store_true",
         help="Skip the interactive 'Build X? (y/n):' prompt and proceed "
-             "directly to compilation. A deliberate choice — every other "
-             "validation (VERSION, ISCC on PATH, refuse-overwrite, content "
-             "gates) "
-             "stays active; only the last human-in-the-loop step is skipped. "
-             "Use case: CI/CD or automation by an agent.",
+             "directly to the freeze and compilation. The prompt comes AFTER "
+             "every check that can run without building (VERSION, "
+             "refuse-overwrite, content gates, toolchain, docs regeneration), "
+             "and all of them stay active; only the last human-in-the-loop "
+             "step is skipped. Use case: CI/CD or automation by an agent.",
     )
     parser.add_argument(
         "--no-strict",
         dest="no_strict",
         action="store_true",
-        help="Do NOT run the dependency audit at all (step 6b4). By default "
+        help="Do NOT run the dependency audit at all (step 3h). By default "
              "the build applies the STRICT verdict of `audyt_zaleznosci.py` "
              "and REFUSES to build while any dependency has a newer release "
              "our manifest allows — that is a decision nobody has made yet, "
@@ -1057,16 +1090,14 @@ def _regeneruj_dokumentacje_lub_przerwij() -> None:
 
 
 def _bramka_zaleznosci_lub_przerwij(args: argparse.Namespace) -> None:
-    """Krok 6b4: manifest × zainstalowane × PyPI, albo świadome pominięcie.
+    """Krok 3h: manifest × zainstalowane × PyPI, albo świadome pominięcie.
 
     Wyodrębnione z `main()` w v19.4.0 razem z przepięciem na blokadę —
     krok ma odtąd DWIE gałęzie decyzyjne, a gałęzi nie da się sprawdzić
     wykonaniem, dopóki siedzi w środku funkcji, która na końcu woła
     PyInstallera i ISCC. Test: `test_bramka_zaleznosci.py`.
     """
-    # Bramka zależności (v18.32; BLOKUJĄCA DOMYŚLNIE od v19.4.0). Piąta
-    # w bloku 6b, stąd powrót do cyfr w numeracji: łańcuch primów
-    # (6b', 6b'', 6b''') przestał być czytelny. Pytanie: czy któraś
+    # Bramka zależności (v18.32; BLOKUJĄCA DOMYŚLNIE od v19.4.0). Pytanie: czy któraś
     # zależność ma nowsze wydanie, które nasz manifest DOPUSZCZA — czyli
     # takie, o którym nikt nie zdecydował?
     #
@@ -1171,12 +1202,13 @@ def main(args: argparse.Namespace | None = None) -> None:
     # i jego parser manifestu USUNIĘTE 2026-09-13 jako martwy kod: wywołanie
     # zniknęło w v17.0, a przez cztery majory nikt tych funkcji nie wołał.
     # Tę rolę pełnią dziś DWA żywe mechanizmy, oba na ŚRODOWISKU AKTYWNYM:
-    #   * `audyt_zaleznosci.py` (krok 6b4 niżej) — manifest × zainstalowane ×
+    #   * `audyt_zaleznosci.py` (krok 3h niżej) — manifest × zainstalowane ×
     #     PyPI, z rozdzieleniem DECYZJI (`granica`) od zaniedbania (`nowsza`);
     #   * sam PyInstaller — brak pakietu w `.venv` wywala build na analizie
     #     importów, więc „pip uważa, że jest zainstalowane" nie jest już
     #     pytaniem, na które trzeba odpowiadać osobnym subprocessem.
-    # Zostaje jedno: czy bieżący Python ma PyInstaller — `buduj_pyinstaller()`.
+    # Zostaje jedno: czy bieżący Python ma PyInstaller — `_sprawdz_narzedzia()`
+    # (krok 4), zanim ktokolwiek potwierdzi build.
 
     # 1. Read the release version (single source of truth: VERSION in repo root).
     print(f"🔍 Detecting release version ({SCIEZKA_VERSION})...")
@@ -1189,12 +1221,12 @@ def main(args: argparse.Namespace | None = None) -> None:
 
     nazwa_installer = f"Rezyser_Audio_v{wersja}_Installer.exe"
 
-    # 4a. Pre-build cleanup of locally cached installers already on GitHub
+    # 2a. Pre-build cleanup of locally cached installers already on GitHub
     # (od v18.11 razem z sidecarami `.exe.sha256` — inaczej po każdym wydaniu
     # zostawał osierocony plik sumy kontrolnej sprzątniętego exe).
     # Każdy installer waży ~145 MB; bez tego eksplorator zarasta podobnymi
     # nazwami po kilku patchach. Cleanup leci PRZED `sprawdz_czy_installer_juz_istnieje`
-    # (krok 4b niżej), ale dostaje `wersja_chroniona=wersja` — instalator BIEŻĄCEJ
+    # (krok 2b niżej), ale dostaje `wersja_chroniona=wersja` — instalator BIEŻĄCEJ
     # wersji NIE jest kasowany, więc guard refuse-overwrite zawsze ma co bronić.
     # (Wcześniej cleanup kasował go także gdy był opublikowany → guard przechodził
     # → build bez bumpa cicho przebudowywał OPUBLIKOWANĄ wersję, dając binarny
@@ -1203,7 +1235,7 @@ def main(args: argparse.Namespace | None = None) -> None:
     if not getattr(args, "no_cleanup", False):
         sprzataj_opublikowane_instalatory(wersja_chroniona=wersja)
 
-    # 4b. Refuse to overwrite a previous installer of the same version.
+    # 2b. Refuse to overwrite a previous installer of the same version.
     # Od v15.2.5: ZIP Portable został wycięty z release flow (single deployment
     # path — patrz RELEASE_NOTES.md::15.2.5). Pozostaje tylko Installer EXE,
     # który i tak instaluje do per-user %LocalAppData%\Programs (PrivilegesRequired=
@@ -1212,35 +1244,16 @@ def main(args: argparse.Namespace | None = None) -> None:
     # nieznaną lokalizację.
     sprawdz_czy_installer_juz_istnieje(nazwa_installer)
 
-    # 5. Last-chance developer confirmation before we actually compile.
-    # Flaga -y/--yes pomija ten prompt całkowicie (CI/CD lub automatyzacja
-    # agentowa) — pierwszym widocznym sygnałem startu buildu jest komunikat
-    # „Regenerating documentation…" z kroku 6. Bez -y developer manualny musi
-    # potwierdzić y/n/t (tak/nie habit pl).
-    if not args.yes:
-        try:
-            odp = input(f"Build {nazwa_installer}? (y/n): ").strip().lower()
-        except EOFError:
-            # Sesja nieinteraktywna (agent, CI) to NIE odmowa, tylko brak
-            # kogokolwiek, kto mógłby odpowiedzieć — więc mówimy wprost, czym
-            # się potwierdza, zamiast wywracać się `EOFError` z tracebackiem,
-            # w którym build wygląda na ZEPSUTY, a nie na czekający na zgodę.
-            # Wzorzec powstał TU (krok 5), został ulepszony w rodzinie
-            # autotłumaczy (`tlumacz_bramki._potwierdz_endpoint_obcy`, v18.25)
-            # i wraca stamtąd w 19.2.2: kopia ulepszona tylko w jedną stronę
-            # jest defektem sama w sobie, bo oba miejsca pytają o zgodę tym
-            # samym `input()` i oba bywają wołane przez agenta lub CI.
-            print(f"❌ FATAL: non-interactive session — nobody can confirm the "
-                  f"build of {nazwa_installer}.")
-            print("   Pass -y/--yes to accept the build up front.")
-            sys.exit(1)
-        if odp not in ("y", "t"):   # `t` kept as alias — historical tak/nie habit
-            print("Build aborted.")
-            sys.exit(0)
+    # 3. GATES — everything that can refuse the build by reading the tree, all of
+    # it BEFORE the confirmation (step 7). Until v19.16 the prompt stood here, in
+    # front of the gates, and promised a "last chance before we compile": in
+    # practice a "y" was followed by ten gates that could still refuse the build,
+    # so the confirmation decided nothing. The sub-letters below are one step's
+    # parts; a new gate takes the next letter, not a prime or a third digit.
 
-    # 6a. Leak gate (od v18.5.3): scan the docs templates for untranslated Polish
-    # text against the accepted baseline. The finalization-header guard — now run
-    # LATER (step 6d, right before the freeze) — only proves a file was *finalized*,
+    # 3a. Leak gate (od v18.5.3): scan the docs templates for untranslated Polish
+    # text against the accepted baseline. The finalization-header guard — run
+    # LATER (step 5, documentation) — only proves a file was *finalized*,
     # not that its content is leak-free, so this closes
     # that gap (a "finalized" pack could still ship Polish; see RELEASE_NOTES v18.5.2
     # "Co nie weszło"). A new or shifted leak beyond audyt_leakow_baseline.json is a
@@ -1281,7 +1294,7 @@ def main(args: argparse.Namespace | None = None) -> None:
         else:
             print(f"✅ No leaks beyond the baseline ({audyt_leakow.BASELINE_PATH.name}).\n")
 
-        # 6b. Source `.py` hard-code gate (od v18.5.4): scan application modules for
+        # 3b. Source `.py` hard-code gate (od v18.5.4): scan application modules for
         # user/LLM-facing Polish string literals that bypass i18n/recipe YAML, against
         # a separate accepted baseline (audyt_leakow_py_baseline.json). Same baseline
         # pattern as the docs gate: a new hard-code beyond the baseline (especially any
@@ -1306,13 +1319,15 @@ def main(args: argparse.Namespace | None = None) -> None:
         else:
             print(f"✅ No hard-codes beyond the baseline ({audyt_leakow.BASELINE_PY_PATH.name}).\n")
 
-        # 6b'. CONTRIBUTING language contract in the dev tools (v18.24) — argparse
-        # texts and ❌/⚠️ lines that a non-Polish contributor has to read. This one
-        # is deliberately NON-FATAL: it guards the barrier to entry, not the
-        # correctness of the package, and a Polish help text ships nothing broken
-        # to the end user (dev tools are not in the bundle at all). Printed as a
-        # reminder so the regression is noticed at release time rather than by a
-        # contributor months later — which is exactly how the 60 helps accumulated.
+        # 3c. CONTRIBUTING language contract in the dev tools (v18.24) — argparse
+        # texts and ❌/⚠️ lines that a non-Polish contributor has to read. FATAL
+        # since v19.16, like every other gate in step 3. Until then it only warned
+        # ("it guards the barrier to entry, not the package"), and that made it the
+        # one gate whose red result a release could ship past: a real violation
+        # could be waved through as "just a warning", a false alarm (e.g. a test
+        # file) was never resolved, and a contributor cloning a release tree got
+        # one yellow line among green ones instead of a clean run. A hit is fixed
+        # in the dev tool or, when deliberate, accepted into the baseline.
         print("🔍 Contract gate: scanning dev tools for Polish CLI text, ❌/⚠️ lines "
               "and abort messages...")
         wynik_kontrakt = audyt_leakow.bramka_kontraktu()
@@ -1324,14 +1339,23 @@ def main(args: argparse.Namespace | None = None) -> None:
                   f"on it.")
         if not wynik_kontrakt.czysto:
             ile = sum(len(v) for v in wynik_kontrakt.nowe.values())
-            print(f"⚠️  {ile} contract violation(s) ABOVE the baseline in "
-                  f"{len(wynik_kontrakt.nowe)} file(s) — NOT blocking the build.")
-            print("   Run `python audyt_leakow.py --bramka-kontrakt` for the list.\n")
+            print(f"❌ FATAL: {ile} dev-tool contract violation(s) ABOVE the "
+                  f"baseline in {len(wynik_kontrakt.nowe)} file(s) — refusing to "
+                  f"build.")
+            print("Translate the CLI text / ❌⚠️ line into English (CONTRIBUTING "
+                  "contract), or — if the hit is deliberate or a false alarm — "
+                  "regenerate the baseline with "
+                  "`python audyt_leakow.py --zapisz-baseline-kontrakt` and commit "
+                  "the diff.")
+            for nazwa, powody in sorted(wynik_kontrakt.nowe.items()):
+                for p in powody:
+                    print(f"      • {nazwa}: {p}")
+            sys.exit(1)
         else:
             print(f"✅ Dev-tool contract clean "
                   f"({audyt_leakow.BASELINE_KONTRAKT_PATH.name}).\n")
 
-    # 6b''. YAML silence gate (v18.28.0) — a file the code could not parse (or
+    # 3d. YAML silence gate (v18.28.0) — a file the code could not parse (or
     # parsed into a bare scalar / list / null) must never disappear without a
     # word: in a dev tool that means a FATAL, in the runtime an entry in the
     # skipped-rules registry. This gate is OUTSIDE the `audyt_leakow` block on
@@ -1361,7 +1385,35 @@ def main(args: argparse.Namespace | None = None) -> None:
                     print(f"      • {nazwa}: {p}")
             sys.exit(1)
 
-    # 6b'''. FOUNDATIONS gate (v18.29.0) — two things nobody was checking. First,
+    # 3e. MIXED-SCRIPT word gate (v19.16) — an auto-translator now and then
+    # writes part of a word in the wrong alphabet ("donастроить" shipped in the
+    # Russian manual from 18.24.2 to 19.15). Legitimate Cyrillic and Greek exist
+    # in every pack (Russian accent, IPA), so the gate asks about ONE word holding
+    # letters of two scripts. Like the silence gate: no `lingua`, no network,
+    # empty baseline.
+    print("🔍 Mixed-script gate: scanning dictionaries/** for words in two alphabets...")
+    try:
+        import audyt_pism
+    except ImportError as exc:
+        print(f"⚠️  audyt_pism not available ({exc}) — mixed-script gate SKIPPED.\n")
+    else:
+        wynik_pisma = audyt_pism.bramka()
+        if wynik_pisma.czysto:
+            print(f"✅ No mixed-script word beyond the baseline "
+                  f"({audyt_pism.BASELINE_PATH.name}).\n")
+        else:
+            ile = sum(len(v) for v in wynik_pisma.nowe.values())
+            print(f"❌ FATAL: {ile} mixed-script word(s) ABOVE the baseline in "
+                  f"{len(wynik_pisma.nowe)} file(s) — refusing to build.")
+            print("Retype each word in ONE script. If a word is genuinely "
+                  "legitimate, regenerate the baseline with "
+                  "`python audyt_pism.py --zapisz-baseline` and commit the diff.")
+            for nazwa, powody in sorted(wynik_pisma.nowe.items()):
+                for p in powody:
+                    print(f"      • {nazwa}: {p}")
+            sys.exit(1)
+
+    # 3f. FOUNDATIONS gate (v18.29.0) — two things nobody was checking. First,
     # `jezyki_lingua.KANON` is a MIRROR of the `lingua.Language` enum, and a mirror
     # nobody checks goes stale in silence: a `pip install -U
     # lingua-language-detector` that adds a language makes the canon answer "this
@@ -1404,7 +1456,7 @@ def main(args: argparse.Namespace | None = None) -> None:
                     print(f"      • {zakres} [{klasa}]: {szczegol}")
             sys.exit(1)
 
-    # 6b3b. Creator-text sync gate (v19.7). Szablony i prompty Managera Reguł
+    # 3g. Creator-text sync gate (v19.7). Szablony i prompty Managera Reguł
     # OPISUJĄ silnik, ale nic ich nie wykonuje — zmiana w kodzie nie łamie ich
     # w żaden widoczny sposób, opis po prostu zaczyna kłamać. Adresat nie ma
     # jak tego sprawdzić: użytkownik zainstalowanej paczki nie widzi źródeł,
@@ -1450,13 +1502,13 @@ def main(args: argparse.Namespace | None = None) -> None:
                     print(f"      • {zakres} [{klasa}]: {szczegol}")
             sys.exit(1)
 
-    # 6b4. Dependency gate — pytanie brzmi „czy zamrażam aplikację", nie „czy
+    # 3h. Dependency gate — pytanie brzmi „czy zamrażam aplikację", nie „czy
     # zmieniałem manifest": wejściem audytu jest PyPI, które rusza się bez nas.
     # Cała treść kroku (oraz uzasadnienie blokady i flagi `--no-strict`) stoi
     # w `_bramka_zaleznosci_lub_przerwij`.
     _bramka_zaleznosci_lub_przerwij(args)
 
-    # 6b5. Dev-patch counter gate: a FULL release resets it to zero.
+    # 3i. Dev-patch counter gate: a FULL release resets it to zero.
     # `patch_dev.json` counts the shortened (dev-tools-only) releases published on
     # top of THIS version's tag — it is how someone working from source learns that
     # the tag moved without a version bump. A full release makes the whole count
@@ -1474,34 +1526,25 @@ def main(args: argparse.Namespace | None = None) -> None:
         sys.exit(1)
     print(f"✅ {PLIK_PATCH_DEV.name}: version {wersja}, dev patch 0.\n")
 
-    # 6c. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
+    # 3j. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
     _weryfikuj_flagi_debug()
 
-    # 6d. Regenerate end-user documentation (docs/<id>.<kod>.html) — DELIBERATELY the
-    # LAST gate before the freeze (reordered v18.x). Doc regeneration MUTATES
-    # docs/*.html and bakes in the (possibly bumped) VERSION, so running it only AFTER
-    # the cheap, read-only gates above (leak/py/debug) means a failing gate aborts the
-    # build WITHOUT leaving a regenerated-but-unbuilt docs/ diff behind. All those gates
-    # scan YAML/`.py` source (independent of regenerated docs); the only consumer of
-    # fresh docs/manual.<iso>.html is the Inno step (8 below), still after us.
+    # 4. Toolchain: the spec, PyInstaller and ISCC. Until v19.16 a missing ISCC
+    # surfaced only AFTER the multi-minute freeze — and after the confirmation.
+    iscc_exe = _sprawdz_narzedzia()
+
+    # 5. Regenerate end-user documentation (docs/<id>.<kod>.html) — the FIRST step
+    # that writes, deliberately after every read-only check above. It MUTATES
+    # docs/*.html and bakes in the (possibly bumped) VERSION, so a failing gate
+    # aborts the build WITHOUT leaving a regenerated docs/ diff behind; all those
+    # gates scan YAML/`.py` source and do not depend on regenerated docs. It stays
+    # BEFORE the confirmation because it can still refuse the build (draft header,
+    # unresolved placeholder, raw HTML tag) — and its output is not a side effect
+    # of building: the release procedure commits these very files before the
+    # build, so on a release tree it changes nothing.
     _regeneruj_dokumentacje_lub_przerwij()
 
-    # 7. Freeze the app with PyInstaller (onedir, windowed) → dist/<app>/,
-    # następnie skompletuj paczkę (dictionaries/ + docs/ OBOK exe), żeby dist/
-    # był samowystarczalny. installer.iss pakuje potem cały dist/<app>/* jednym
-    # wpisem, więc PyInstaller + skompletowanie MUSZĄ zakończyć się przed ISCC.
-    dist_dir = buduj_pyinstaller()
-    skompletuj_dist(dist_dir)
-
-    # 8. Build the Installer EXE.
-    iscc_exe = shutil.which("iscc")
-    if iscc_exe is None:
-        print("❌ FATAL: 'iscc' not found in PATH.")
-        print("Install Inno Setup (https://jrsoftware.org/isinfo.php) and make sure")
-        print("its folder (e.g. C:\\Program Files (x86)\\Inno Setup 6) is in your PATH.")
-        sys.exit(1)
-
-    # Collect base language codes and map them to Inno Setup .isl entries.
+    # 6. Installer script. Collect base language codes and map them to Inno Setup .isl entries.
     # `katalog_inno` derives from iscc_exe (it sits in the Inno Setup install
     # root) — we use it to verify each .isl file is actually present before
     # handing the path to the compiler.
@@ -1509,7 +1552,7 @@ def main(args: argparse.Namespace | None = None) -> None:
     kody = zbierz_jezyki_bazowe()
     # Krzyżowa walidacja: język musi mieć NIE TYLKO `dictionaries/<kod>/
     # podstawy.yaml`, ale też `docs/manual.<iso>.html` w paczce (regenerowany
-    # w kroku 6d wyżej). Bez manuala instalator nie ma czego otworzyć po
+    # w kroku 5 wyżej). Bez manuala instalator nie ma czego otworzyć po
     # kliknięciu Finish — pomiń ten język z mapy Inno.
     kody_z_manualem = zbierz_jezyki_z_manualem(kody)
     wpisy = buduj_wpisy_inno(kody_z_manualem, katalog_inno)
@@ -1575,6 +1618,44 @@ def main(args: argparse.Namespace | None = None) -> None:
 
     nowy_iss = iss_etap_2
 
+    # 7. Developer confirmation — the real last chance: everything that can be
+    # checked without building has passed, and what follows is the build itself.
+    # Flaga -y/--yes pomija ten prompt całkowicie (CI/CD lub automatyzacja
+    # agentowa). Bez -y developer manualny musi potwierdzić y/n/t (tak/nie habit pl).
+    if not args.yes:
+        print(f"✅ All checks passed. Next: freeze with PyInstaller (minutes), "
+              f"then compile {nazwa_installer} with ISCC.")
+        try:
+            odp = input(f"Build {nazwa_installer}? (y/n): ").strip().lower()
+        except EOFError:
+            # Sesja nieinteraktywna (agent, CI) to NIE odmowa, tylko brak
+            # kogokolwiek, kto mógłby odpowiedzieć — więc mówimy wprost, czym
+            # się potwierdza, zamiast wywracać się `EOFError` z tracebackiem,
+            # w którym build wygląda na ZEPSUTY, a nie na czekający na zgodę.
+            # Wzorzec powstał TU, został ulepszony w rodzinie autotłumaczy
+            # (`tlumacz_bramki._potwierdz_endpoint_obcy`, v18.25) i wraca
+            # stamtąd w 19.2.2: kopia ulepszona tylko w jedną stronę jest
+            # defektem sama w sobie, bo oba miejsca pytają o zgodę tym samym
+            # `input()` i oba bywają wołane przez agenta lub CI.
+            print(f"❌ FATAL: non-interactive session — nobody can confirm the "
+                  f"build of {nazwa_installer}.")
+            print("   Pass -y/--yes to accept the build up front.")
+            sys.exit(1)
+        if odp not in ("y", "t"):   # `t` kept as alias — historical tak/nie habit
+            # Step 5 already ran: say what it left, so a declined build does not
+            # look like it touched nothing.
+            print("Build aborted. docs/ stays regenerated (step 5) — on a tree "
+                  "whose docs were committed, that is no change at all.")
+            sys.exit(0)
+
+    # 8. Freeze the app with PyInstaller (onedir, windowed) → dist/<app>/,
+    # następnie skompletuj paczkę (dictionaries/ + docs/ OBOK exe), żeby dist/
+    # był samowystarczalny. installer.iss pakuje potem cały dist/<app>/* jednym
+    # wpisem, więc PyInstaller + skompletowanie MUSZĄ zakończyć się przed ISCC.
+    dist_dir = buduj_pyinstaller()
+    skompletuj_dist(dist_dir)
+
+    # 9. Compile the Installer EXE (+ its SHA256 sidecar).
     print("\nCreating the installer...")
     tmp_created = False
     try:

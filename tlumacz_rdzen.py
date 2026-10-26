@@ -462,7 +462,7 @@ def wywolaj_llm(
     pola_payloadu: dict[str, Any] | None = None,
     myslenie: bool = False,
     uciecie_mozna_pominac: bool = False,
-    _powtorka_mojibake: bool = False,
+    _powtorka_usterek: bool = False,
 ) -> dict[int, str]:
     """Wysyła jeden chunk `(id, kind, source)`. Zwraca mapę id → target.
 
@@ -676,33 +676,51 @@ def wywolaj_llm(
     # markerów i odcisk struktury tego nie widzą (tekst jest poprawnym
     # Unicode), a ręczny przegląd ma tylko szczęście. Pozycje z mojibake
     # zamawiamy RAZ jeszcze, same; drugi raz = błąd chunku, nie zapis.
-    zepsute = {i for i, t in mapa.items() if tlumacz_bramki.mojibake(t)}
+    #
+    # Ta sama ścieżka od v19.16 łapie SŁOWO Z DWÓCH PISM („donастроить" w `ru`,
+    # cyrylica w fińskim słowie u brata Manabooma) — z jedną różnicą: liczy się
+    # tylko słowo, którego nie ma w ŹRÓDLE pozycji (cytat alfabetu szyfru albo
+    # nazwa własna przepisana 1:1 nie jest usterką tłumaczenia).
+    zrodla = {p[0]: p[2] for p in pozycje}
+
+    def _usterka(i: int) -> str:
+        mb = tlumacz_bramki.mojibake(mapa[i])
+        if mb:
+            return f"mojibake {mb[0]!r} (UTF-8 read as cp1252)"
+        mieszane = tlumacz_bramki.nowe_slowa_mieszanego_pisma(
+            zrodla.get(i, ""), mapa[i])
+        return f"mixed-script word {mieszane[0]!r}" if mieszane else ""
+
+    usterki = {i: u for i in mapa if (u := _usterka(i))}
+    zepsute = set(usterki)
     if zepsute:
-        if _powtorka_mojibake:
+        rodzaje = {u.split(" ")[0] for u in usterki.values()}
+        etykieta = ("mojibake" if rodzaje == {"mojibake"}
+                    else "mixed-script words" if rodzaje == {"mixed-script"}
+                    else "mojibake or mixed-script words")
+        przyklad = usterki[min(zepsute)]
+        if _powtorka_usterek:
             raise RuntimeError(
-                f"{kod}: {len(zepsute)} item(s) came back as mojibake twice "
-                f"(UTF-8 read as cp1252, e.g. "
-                f"{tlumacz_bramki.mojibake(mapa[min(zepsute)])[0]!r}): "
-                f"ids {sorted(zepsute)[:10]}."
+                f"{kod}: {len(zepsute)} item(s) came back as {etykieta} twice "
+                f"(e.g. {przyklad}): ids {sorted(zepsute)[:10]}."
             )
-        print(f"⚠️  {kod}: {len(zepsute)} item(s) came back as mojibake "
-              f"(e.g. {tlumacz_bramki.mojibake(mapa[min(zepsute)])[0]!r}) — "
-              "requesting them once more.")
+        print(f"⚠️  {kod}: {len(zepsute)} item(s) came back as {etykieta} "
+              f"(e.g. {przyklad}) — requesting them once more.")
         poprawki = wywolaj_llm(
             klient, model=model, system=system, nazwa_celu=nazwa_celu, kod=kod,
             pozycje=[p for p in pozycje if p[0] in zepsute],
             max_tokens=max_tokens, wskazowka_limitu=wskazowka_limitu,
             kontekst_paczki=kontekst_paczki, pola_payloadu=pola_payloadu,
             myslenie=myslenie, uciecie_mozna_pominac=uciecie_mozna_pominac,
-            _powtorka_mojibake=True,
+            _powtorka_usterek=True,
         )
         mapa.update({i: v for i, v in poprawki.items() if i in zepsute})
         # Audyt v19.11: powtórka, która ZGUBI id, zostawiała w mapie zepsutą
         # wartość z pierwszej odpowiedzi — a bramki obecności id jej nie widzą.
-        nadal = sorted(i for i in zepsute if tlumacz_bramki.mojibake(mapa[i]))
+        nadal = sorted(i for i in zepsute if _usterka(i))
         if nadal:
             raise RuntimeError(
-                f"{kod}: {len(nadal)} item(s) still mojibake after the retry "
+                f"{kod}: {len(nadal)} item(s) still {etykieta} after the retry "
                 f"(missing from or broken in the second response): ids {nadal[:10]}."
             )
     return mapa
