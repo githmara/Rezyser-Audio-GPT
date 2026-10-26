@@ -4,6 +4,49 @@ Release entries in reverse-chronological order. The section of a version is copi
 
 ---
 
+## 19.16.0 — minor release
+
+### What's new
+
+**No more words written in two alphabets at once.** Now and then an automatic
+translation writes part of a word in the wrong alphabet: the Russian manual
+said "donастроить" (a Latin "don" glued to a Russian word) from version
+18.24.2 until now. On screen and to a speech synthesizer such a word looks
+right, because many Latin and Cyrillic letters are drawn the same. The word is
+fixed, together with one cipher description in the Russian pack where two
+alphabets were written as one word. The AI translation in the Polyglot now
+notices such a word in its own output and asks for that passage once more,
+the same way it already did for garbled characters ("mojibake"). A word that
+is spelled this way in your original text is left alone.
+
+**For contributors.** A new release gate, `audyt_pism.py`, refuses a word
+holding letters of two scripts (Latin, Cyrillic, Greek) anywhere in the
+language packs. It does not flag foreign script as such: Cyrillic appears
+legitimately in every pack (the Russian accent, "Русский" in the language
+switcher) and Greek letters are phonetic symbols such as /θ/. The same check
+runs inside the shared translation core used by all the `buduj_wielojezyczne_*`
+tools, so a mixed word is caught while translating, not only before a build.
+
+`build_release.py` now asks "Build …? (y/n)" only after every check that can
+run without building: all content gates, the toolchain (the PyInstaller spec,
+PyInstaller, and Inno Setup's `iscc` on PATH) and the documentation
+regeneration. Until now the question came first, so a "y" could still be
+followed by a refused build, and a missing `iscc` showed up only after the
+multi-minute freeze. The build steps are renumbered 1–9, with the gates as
+3a–3j. The dev-tool language contract (`audyt_leakow.py --bramka-kontrakt`,
+step 3c) now blocks the build and exits 1 like every other gate, instead of
+printing a warning. The GitHub Actions workflows are pinned to the exact
+tested Python patch (3.14.3), checked by `test_python_ci.py`.
+
+### Planned or deferred
+
+- A transcription in phonetic symbols that mixes a Greek letter with Latin
+  ones inside one word (for example /ˈθɪŋk/) would be flagged by the new gate.
+  The language packs contain none today; if one is ever needed, it goes into
+  the gate's baseline as a deliberate decision.
+
+---
+
 ## 19.15.0 — minor release
 
 ### What's new
