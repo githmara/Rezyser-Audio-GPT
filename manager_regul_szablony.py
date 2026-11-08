@@ -277,7 +277,45 @@ _LACINKA_MALE: dict[str, str] = {
     "ũ": "u", "ū": "u", "ŭ": "u", "ů": "u", "ű": "u", "ų": "u",
     "ŵ": "w", "ŷ": "y",
     "ź": "z", "ż": "z", "ž": "z",
+    # -- POGRANICZE poza zakresem (v19.17) -------------------------------------
+    # Litery pisowni ŻYWYCH języków, które leżą w Latin Extended-B, więc
+    # `ZAKRES_LACINKI` ich nie widzi: rumuńskie ș ț z PRZECINKIEM (poprawna
+    # forma od Unicode 3.0 — cedylla ş ţ to jej dawna podróbka, oba warianty
+    # spotyka się w tekstach) i saamskie inari/skolt (mniejszość w Finlandii).
+    # Lista jest jawna, nie zakresowa: Extended-B to w większości znaki
+    # historyczne i afrykańskie, a ʒ (U+0292) jest zarazem symbolem IPA,
+    # więc nie trafia tu celowo. Mierzy ją `audyt_podstaw` (`lacinka-dziura`).
+    "ș": "s", "ț": "t",
+    "ǥ": "g", "ǧ": "g", "ǩ": "k", "ǯ": "dz",
 }
+
+# Litery pogranicza łacinki spoza `ZAKRES_LACINKI` (małe; wersaliki derywuje
+# bramka). Źródło: wpis „POGRANICZE" w `_LACINKA_MALE` wyżej — ta krotka jest
+# jego wyliczeniem dla `audyt_podstaw`, żeby bramka nie musiała zgadywać,
+# które klucze tabeli leżą poza zakresem.
+ZNAKI_POGRANICZA_LACINKI: tuple[str, ...] = ("ș", "ț", "ǥ", "ǧ", "ǩ", "ǯ")
+
+# Cyrylica POGRANICZA (v19.17): litery sąsiednich alfabetów cyrylickich,
+# których nie ma w rosyjskim. Detektor języków zna tylko języki paczek, więc
+# akapit ukraiński, białoruski, serbski czy kazachski trafia do paczki
+# cyrylickiej (dziś `ru`) i jej akcentów — a do v19.17 te litery przechodziły
+# przez pre-pass nietknięte („Kiїw є stolicieiu Ukraїni" w akcencie polskim).
+# Wymagane od KAŻDEJ paczki, której `alfabet` zawiera cyrylicę, z wyjątkiem
+# liter, które ta paczka deklaruje jako własne (przyszła paczka `uk` ma
+# і ї є ґ w alfabecie i ich NIE spłaszcza). Celu nie podajemy: zależy od
+# pisma paczki, a szablon kreatora jest łaciński. Kolejność = grupy z
+# `ru/podstawy.yaml`: uk/be/bg, sr/mk, języki tureckie i ugrofińskie
+# Rosji oraz Azji Środkowej.
+#
+# CZEGO TA LISTA NIE ZAŁATWIA: homografów — ta sama litera, inne czytanie
+# (ukraińskie и = rosyjskie ы, е = э, г = /ɦ/; bułgarskie ъ, щ). To decyzja
+# na poziomie słowa albo akapitu, nie znaku → `przeglad_tlumaczen.py`.
+ZNAKI_POGRANICZA_CYRYLICY: tuple[str, ...] = (
+    "і", "ї", "є", "ґ", "ў", "ѝ",
+    "ђ", "ћ", "ј", "љ", "њ", "џ", "ѓ", "ќ", "ѕ",
+    "ә", "ө", "ү", "ұ", "ң", "ғ", "қ", "һ", "җ", "ӣ", "ӯ", "ҳ", "ҷ",
+    "ҡ", "ҙ", "ҫ", "ӑ", "ӗ", "ӳ", "ҕ", "ҥ", "ӕ",
+)
 
 # Wersaliki, których derywacja z małej litery nie wyprodukuje.
 #   * `ẞ` — `ß`.upper() to dwuznak „SS", więc pętla ją pomija; cel wielkimi,
@@ -2021,7 +2059,12 @@ polskie_znaki:
   #
   # PRE-FILLED with the WHOLE Latin script (U+00C0–U+017F: Scandinavian,
   # Polish, Czech, Turkish, Baltic, Esperanto, Maltese, the macrons of
-  # romanised Japanese…), so your job here is SUBTRACTION, not invention:
+  # romanised Japanese…) plus the border letters above that range (Romanian
+  # ș ț with a comma, Sámi ǥ ǧ ǩ ǯ), so your job here is SUBTRACTION, not
+  # invention. If {natywna} is written in CYRILLIC, also add the letters of
+  # the neighbouring Cyrillic alphabets your alphabet lacks (list:
+  # `ZNAKI_POGRANICZA_CYRYLICY`, worked example: `ru/podstawy.yaml`) — the
+  # language detector files Ukrainian or Kazakh text under your pack:
   #
   #   * DELETE every pair whose `wzor` is a NATIVE letter of {natywna}. Such
   #     a letter belongs in `alfabet` below and the target voice reads it
@@ -2255,8 +2298,12 @@ presence/absence of diacritics such as ä/ö/ç/ß).
    it answers one question: which characters must be gone BEFORE the rules
    of this pack start working?
    **The template already carries the WHOLE Latin script** (U+00C0–U+017F,
-   rendered from `manager_regul_szablony.TABELA_LACINKI`), so your work here
-   is SUBTRACTION, not invention:
+   rendered from `manager_regul_szablony.TABELA_LACINKI`, plus the border
+   letters ș ț ǥ ǧ ǩ ǯ that lie above that range), so your work here
+   is SUBTRACTION, not invention. A CYRILLIC-script language additionally
+   needs the letters of neighbouring Cyrillic alphabets it lacks
+   (`ZNAKI_POGRANICZA_CYRYLICY`; `ru/podstawy.yaml` is the worked example),
+   because the language detector files Ukrainian or Kazakh text under it:
    * DELETE every pair whose `wzor` is a native letter of {natywna}. Such
      a letter is a real letter of `alfabet` and the target voice reads it
      (de keeps ä/ö/ü, fi keeps ä/å/ö, is keeps á/ð/þ, es keeps ñ); leaving

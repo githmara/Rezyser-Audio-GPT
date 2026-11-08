@@ -195,13 +195,19 @@ polskie_znaki:
   - { wzor: "ě", zamiana: "e" }
   - { wzor: "Ě", zamiana: "E" }
   - { wzor: "ĝ", zamiana: "dż" }
+  - { wzor: "ǯ", zamiana: "dż" }
   - { wzor: "Ĝ", zamiana: "Dż" }
+  - { wzor: "Ǯ", zamiana: "Dż" }
   - { wzor: "ğ", zamiana: "g" }
+  - { wzor: "ǥ", zamiana: "g" }
   - { wzor: "Ğ", zamiana: "G" }
+  - { wzor: "Ǥ", zamiana: "G" }
   - { wzor: "ġ", zamiana: "dż" }
   - { wzor: "Ġ", zamiana: "Dż" }
   - { wzor: "ģ", zamiana: "g" }
+  - { wzor: "ǧ", zamiana: "g" }
   - { wzor: "Ģ", zamiana: "G" }
+  - { wzor: "Ǧ", zamiana: "G" }
   - { wzor: "ĥ", zamiana: "h" }
   - { wzor: "Ĥ", zamiana: "H" }
   - { wzor: "ħ", zamiana: "h" }
@@ -218,7 +224,9 @@ polskie_znaki:
   - { wzor: "ĵ", zamiana: "ż" }
   - { wzor: "Ĵ", zamiana: "Ż" }
   - { wzor: "ķ", zamiana: "k" }
+  - { wzor: "ǩ", zamiana: "k" }
   - { wzor: "Ķ", zamiana: "K" }
+  - { wzor: "Ǩ", zamiana: "K" }
   - { wzor: "ĸ", zamiana: "k" }
   - { wzor: "ĺ", zamiana: "l" }
   - { wzor: "Ĺ", zamiana: "L" }
@@ -248,12 +256,16 @@ polskie_znaki:
   - { wzor: "ŝ", zamiana: "sz" }
   - { wzor: "Ŝ", zamiana: "Sz" }
   - { wzor: "ş", zamiana: "sz" }
+  - { wzor: "ș", zamiana: "sz" }
   - { wzor: "Ş", zamiana: "Sz" }
+  - { wzor: "Ș", zamiana: "Sz" }
   - { wzor: "š", zamiana: "sz" }
   - { wzor: "Š", zamiana: "Sz" }
   - { wzor: "ſ", zamiana: "s" }
   - { wzor: "ţ", zamiana: "c" }
+  - { wzor: "ț", zamiana: "c" }
   - { wzor: "Ţ", zamiana: "C" }
+  - { wzor: "Ț", zamiana: "C" }
   - { wzor: "ť", zamiana: "t" }
   - { wzor: "Ť", zamiana: "T" }
   - { wzor: "ŧ", zamiana: "t" }

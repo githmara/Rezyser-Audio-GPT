@@ -13,7 +13,9 @@ CZĘŚĆ 2 — treść `dictionaries/<kod>/podstawy.yaml` w każdej paczce na dy
 pole `lingua` skonfrontowane z kanonem i kodem ISO FOLDERA, `alfabet` (wejście
 szyfru Cezara), `polskie_znaki` (pre-pass KAŻDEGO akcentu paczki),
 `slowo_akcent` przeliczone REALNYM parserem Księgi Świata i endonim
-w `etykieta`. Szesnaście klas, każda z konsekwencją w działaniu — komentarz
+w `etykieta`, a od v19.17 także cyrylica pogranicza w paczkach cyrylickich.
+Każda klasa ma konsekwencję w działaniu (liczby tu nie podajemy — zestarzała
+się już raz, wyliczenie daje `grep 'dodaj("'`) — komentarz
 nad sekcją „CZĘŚĆ 2" tłumaczy, dlaczego to KONTROLA, a nie siódmy generator
 rodziny `buduj_wielojezyczne_*` (decyzja maintainera 2026-09-08).
 CZĘŚĆ 3 (v19.4) — żaden plik paczki nie nosi już markerów `<FILL …>` z kreatora
@@ -434,8 +436,12 @@ def _sprawdz_pokrycie_lacinki(kod: str, dane: dict, dodaj) -> None:
     alfabet = str(dane.get("alfabet") or "")
     litery_paczki = set(alfabet) | set(alfabet.lower())
     lo, hi = mrs.ZAKRES_LACINKI
+    # v19.17: zakres + jawna lista pogranicza (rumuńskie ș ț z przecinkiem,
+    # saamskie ǥ ǧ ǩ ǯ), która leży w Extended-B, więc zakres jej nie widzi.
+    kandydaci = [chr(c) for c in range(lo, hi + 1)]
+    kandydaci += _z_wersalikami(mrs.ZNAKI_POGRANICZA_LACINKI)
     przepuszczone = [
-        znak for znak in (chr(c) for c in range(lo, hi + 1))
+        znak for znak in kandydaci
         if znak.isalpha()
         and znak not in litery_paczki
         and cp._usun_polskie_znaki(znak, dane) == znak
@@ -463,11 +469,68 @@ def _sprawdz_pokrycie_lacinki(kod: str, dane: dict, dodaj) -> None:
     if przepuszczone:
         dodaj("lacinka-dziura",
               f"the pre-pass lets {len(przepuszczone)} character(s) of "
-              f"U+00C0–U+017F through unchanged, and none of them is a letter of "
+              f"U+00C0–U+017F (plus the border letters in "
+              f"`manager_regul_szablony.ZNAKI_POGRANICZA_LACINKI`) through "
+              f"unchanged, and none of them is a letter of "
               f"this pack's `alfabet`: {''.join(przepuszczone)} — every accent "
               f"and every cipher of this pack hands them to "
               f"the synthesizer as they are (default pairs: "
               f"`manager_regul_szablony.TABELA_LACINKI`)")
+
+
+def _z_wersalikami(male: tuple[str, ...]) -> list[str]:
+    """Małe litery listy + ich jednoznakowe wersaliki (pre-pass to `str.replace`)."""
+    wynik: list[str] = []
+    for mala in male:
+        wynik.append(mala)
+        duza = mala.upper()
+        if len(duza) == 1 and duza != mala:
+            wynik.append(duza)
+    return wynik
+
+
+# Blok Unicode „Cyrillic" — granice budowane z kodu, nie wpisane literą.
+_CYRYLICA_OD, _CYRYLICA_DO = chr(0x0400), chr(0x04FF)
+
+
+def _czy_pismo_cyrylickie(alfabet: str) -> bool:
+    """Czy `alfabet` paczki zawiera choć jedną literę cyrylicy (U+0400–U+04FF)."""
+    return any(_CYRYLICA_OD <= z <= _CYRYLICA_DO for z in alfabet)
+
+
+def _sprawdz_pokrycie_cyrylicy(kod: str, dane: dict, dodaj) -> None:
+    """Paczka CYRYLICKA: czy pre-pass domyka litery sąsiednich alfabetów (v19.17)?
+
+    Ta sama umowa co `_sprawdz_pokrycie_lacinki`, mierzona tym samym REALNYM
+    `core_poliglota._usun_polskie_znaki`, ale dla listy
+    `manager_regul_szablony.ZNAKI_POGRANICZA_CYRYLICY`. Detektor języków zna
+    wyłącznie języki paczek, więc akapit ukraiński czy kazachski trafia do
+    paczki cyrylickiej i przez jej akcenty do głosu obcego — zmierzone przed
+    v19.17 na `ru/polski`: „Kiїw є stolicieiu Ukraїni", cyrylica w środku
+    łacinki. Paczka łacińska tej kontroli nie przechodzi: cyrylica w jej
+    tekście to transliteracja CAŁEGO pisma, nie pojedynczej litery.
+    Litera z `alfabet` paczki jest jej własna (przyszła paczka `uk` i `і`)
+    i spłaszczana NIE BYWA — tu jak w łacince.
+    """
+    alfabet = str(dane.get("alfabet") or "")
+    if not _czy_pismo_cyrylickie(alfabet):
+        return
+    litery_paczki = set(alfabet) | set(alfabet.lower())
+    przepuszczone = [
+        znak for znak in _z_wersalikami(mrs.ZNAKI_POGRANICZA_CYRYLICY)
+        if znak not in litery_paczki
+        and cp._usun_polskie_znaki(znak, dane) == znak
+    ]
+    if przepuszczone:
+        dodaj("cyrylica-dziura",
+              f"the pre-pass lets {len(przepuszczone)} Cyrillic letter(s) of "
+              f"neighbouring alphabets through unchanged, and none of them is a "
+              f"letter of this pack's `alfabet`: {''.join(przepuszczone)} — the "
+              f"language detector only knows the packs' languages, so Ukrainian, "
+              f"Belarusian, Serbian or Kazakh text lands in this pack and every "
+              f"accent hands these letters to a foreign voice as they are (list: "
+              f"`manager_regul_szablony.ZNAKI_POGRANICZA_CYRYLICY`; the `ru` pack "
+              f"shows one way to map them)")
 
 
 def _sprawdz_slowo_akcent(kod: str, dane: dict, pary: dict, dodaj) -> None:
@@ -608,6 +671,7 @@ def sprawdz_paczki() -> list[Znalezisko]:
         _sprawdz_alfabet(kod, dane, dodaj)
         _sprawdz_znaki(kod, dane, dodaj)
         _sprawdz_pokrycie_lacinki(kod, dane, dodaj)
+        _sprawdz_pokrycie_cyrylicy(kod, dane, dodaj)
         _sprawdz_slowo_akcent(kod, dane, pary, dodaj)
         _sprawdz_etykieta(kod, dane, dodaj)
     return znaleziska

@@ -786,6 +786,24 @@ disjoint, because one rewrites German spelling and the other Polish. Never
   „Đoković → Giokovici", four syllables for three. The `it` pack therefore
   keeps `č ć` as `c` and says why in the file — and the SAME rule sends `đ` the
   other way, to `gi`, because that letter only ever opens a word).
+- YOUR PACK RECEIVES ITS NEIGHBOURS' TEXT. The language detector only knows
+  the languages that have a pack, so a Ukrainian, Belarusian or Kazakh
+  paragraph is filed under `ru`, and a Romanian or Sámi one under whichever
+  Latin pack it resembles — and goes through YOUR accents. `audyt_podstaw`
+  makes sure the LETTERS of neighbouring alphabets leave the pre-pass
+  (`lacinka-dziura`, `cyrylica-dziura`; lists in `manager_regul_szablony`:
+  `ZNAKI_POGRANICZA_LACINKI`, `ZNAKI_POGRANICZA_CYRYLICY`). What no gate can
+  see are HOMOGRAPHS: the same character read differently by the neighbour.
+  Ukrainian `и` is Russian `ы`, its `е` is `э` and its `г` is /ɦ/; Bulgarian
+  `ъ` and `щ` are not the Russian sounds either. A character table cannot fix
+  these — mapping Ukrainian `и` would break every Russian word — so they stay
+  as a known limitation unless the engine decides per word or per paragraph.
+  If your new pack's script has a neighbour like that, (1) add the
+  neighbour's extra letters to the matching list (or start a list for a
+  script that has none yet), and (2) name the homographs in a comment of
+  your `podstawy.yaml`, so the next reviewer does not take the silence for
+  coverage. If your language IS that neighbour (a future `uk` pack), its own
+  letters go into `alfabet`, and the gate stops asking for them.
 - LOOK THE SPELLING UP BEFORE YOU INVENT IT. A language that meets foreign
   names has already decided how to write the sounds it does not own, and that
   decision beats anything you would derive: Finnish has an official one (Kotus
