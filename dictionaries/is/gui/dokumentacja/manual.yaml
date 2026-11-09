@@ -440,7 +440,7 @@ tresc:
 
     - Sterkt Stam / Skemmdur Vélmenni — bætir við stami í upphafi orða: „st-st-stelpa", „þr-þr-þrjótur". Fyrir stutt orð (minna en 3 stafir) sleppir reikniritið þeim. Ef annar stafur orðsins er samhljóði, endurtekur það fyrstu tvo stafina (náttúrulegri áhrif); ef sérhljóði — endurtekur aðeins fyrsta.
 
-    - Cæsar Dulrit (færslu íslenska stafrófsins) — klassískt staðgengils dulrit: hver stafur er færður um N stöður í íslenska stafrófinu (AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ, 32 stafir). Færslugildið slærðu inn í reitinn „Færsla Cæsar dulrits (0 = tilviljun, bil -31…31)". Ef þú slærð inn 0 — forritið velur tilviljanakennda færslu á bilinu 1-31 og sýnir hana í skilaboðum eftir að ljúka (svo þú getir síðan afkóðað). Stafir utan stafrófsins (tölur, greinarmerki, bil) eru óbreyttir.
+    - Cæsar Dulrit (færslu íslenska stafrófsins) — klassískt staðgengils dulrit: hver stafur er færður um N stöður í útvíkkuðu íslensku stafrófi (AÁBCDÐEÉFGHIÍJKLMNOÓPQRSTUÚVWXYÝZÞÆÖ, 36 stafir — 32 íslenskir auk C, Q, W og Z, sem annars stæðu ódulkóðaðir). Færslugildið slærðu inn í reitinn „Færsla Cæsar dulrits (0 = tilviljun, bil -35…35)". Ef þú slærð inn 0 — forritið velur tilviljanakennda færslu á bilinu 1-35 og sýnir hana í skilaboðum eftir að ljúka (svo þú getir síðan afkóðað). Stafir utan stafrófsins (tölur, greinarmerki, bil) eru óbreyttir.
 
     Hagnýt notkun: dulritin vista niðurstöðuna á sama formi og Leikstjórnarhamur (.html með lang tagi eða .docx með XML merkjum), þannig að NVDA les þau með rödd viðeigandi tungumáls. Sérstaklega Afturköllun og Sérhljóðari hljóma í talgervli mun áhugaverðari en þegar þú lest þau með augunum — því heilinn reynir sjálfkrafa að „afkóða" textann við sjónlestur, en TTS les hann nákvæmlega eins og hann er skráður.
 
@@ -511,6 +511,20 @@ tresc:
     Lagfæring í útgáfu 19.1 — málmerkið lýsir RÖDDINNI, ekki upprunanum. Við hreim er merkið núna alls staðar það sama og vísar til málgervilsins sem á að lesa útkomuna: fyrir finnskan hreim er það lang="fi" bæði í haus skjalsins OG í hverri efnisgrein. Áður fékk hausinn markmálið, en einstakar efnisgreinar fengu málið sem skráin var skrifuð á fyrir vinnslu. Afleiðingin var þveröfug við það sem stefnt var að: NVDA skipti aftur yfir í upprunaröddina þegar komið var inn í efnisgreinina og las hljóðritunina eins og hún væri venjulegur pólskur texti, þannig að hreimurinn heyrðist ekki. Í skrám sem þú hlóðst inn sem heilt HTML gat þetta orðið enn verra — málið fyrir hverja efnisgrein var giskað út frá texta sem HAFÐI ÞEGAR farið í gegnum hljóðfræðilegar reglur, þannig að eitt skjal gat fengið nokkra ólíka kóða og enginn þeirra var sá rétti. Ef þú átt gamlar útkomuskrár þar sem hreimurinn „virkaði ekki", nægir að keyra frumtextann aftur í gegnum Tungumálamanninn.
 
     Hamir sem breyta ekki málinu — bæði hreinsunarhamirnir og dulmálin — hegða sér eins og áður: efnisgrein á rússnesku er áfram merkt sem rússneska, því eftir hreinsun er hún enn á rússnesku.
+  krok_5_obce_pisma: |
+    ## Stafir sem röddin les ekki (NÝTT í útgáfu 19.17)
+
+    Mælingar á skjálesurum sýndu reglu án undantekninga: hágæða rödd les stafi eigin tungumáls og í mesta lagi hluta af þeim ensku. Hitt er flatt út („Müller" hljómar eins og „Muller") eða þagað í hel — í orðinu og oft jafnvel við lestur staf fyrir staf. Grískur stafur án grískrar raddar þegir, en með grískri rödd hljómar hann eins og „2 míkró pí", með hléi vegna raddskiptanna.
+
+    Þess vegna undirbúa allar stillingar Leikstjórans, nema Merkjaviðgerðarinn, texta fyrir röddina frá og með þessari útgáfu á jafn fyrirsjáanlegan hátt. Báðar hreinsanirnar og efnisgrein sem er þegar á tungumáli raddarinnar (hún fór hingað til í gegn óhreyfð) fá stafatöflu tungumálapakkans — rétt eins og áherslur og dulmál hafa alltaf fengið. Stafir úr stafrófi pakkans eru aldrei snertir: finnska heldur ä, ö og å. Rússneski pakkinn lætur orð skrifuð með latínustöfum haldast eins og í heimildinni, svo að ekki verði til orð úr tveimur stafrófum.
+
+    Gríska nær nú inn í hvern pakka. Stafur sem stendur einn og sér verður að eigin nafni („2π" hljómar „tvö pí", „β-blokkar" — „beta-blokkar"), en stafur inni í orði er umritaður („λόγος" → „logos"). Dulmál skrifa nöfnin ekki út: eftir afkóðun kemur stafurinn aftur, ekki orð sem var ekki í textanum.
+
+    Efnisgrein skrifuð með kýrillísku letri fær tungumál úr stafrófum uppsettra pakka áður en venjulegur greinir er spurður — þannig að jafnvel stutt lína á borð við „Мы ждём вас." er merkt sem rússnesk, en ekki pólsk.
+
+    Merkjaviðgerðarinn breytir ekki innihaldinu, en frá og með þessari útgáfu fær orð í öðru letri eigið tungumálamerki inni í miðri efnisgrein: gríska sem el, kýrillíska eftir stafrófum pakkanna. Skjálesarinn skiptir um rödd nákvæmlega á þeim stað. Í Word-skrám er textabrotið klofið með varðveislu sniðsins, og ný notkun Merkjaviðgerðarans á eigin úttak bætir engu við.
+
+    Ef þér er annt um eðlilegan framburð erlendra orða skaltu grípa til lesara sem byggir á gervigreind og skilur samhengi — til dæmis ElevenLabs (ókeypis með ströngum takmörkunum eða í áskrift með inneignum) eða ElevenReader (ókeypis 10 klukkustundir af lestri á mánuði, og Ultra-áskriftin, sem einnig er greidd árlega, gefur ótakmarkaðan lestur). Skjálesari les í rauntíma og mun samkvæmt eðli sínu aldrei vita úr hvaða tungumáli stakt orð er komið.
   krok_5_auto_jezyk_nvda: |
     ## Sjálfvirk tungumálaskipting í NVDA — það sem þú þarft að vita
 

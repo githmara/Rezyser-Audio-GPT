@@ -321,6 +321,89 @@ polskie_znaki:
   - { wzor: "ẞ", zamiana: "SS" }
   - { wzor: "İ", zamiana: "I" }
 
+  # -- Greco (v19.17): lettera dentro una parola → la sua traslitterazione (λόγος → logos).
+  #    Il motore riconduce prima tonos, politonico, ϕ ϑ ϵ e il segno micro a queste 24. --
+  - { wzor: "α", zamiana: "a" }
+  - { wzor: "Α", zamiana: "A" }
+  - { wzor: "β", zamiana: "b" }
+  - { wzor: "Β", zamiana: "B" }
+  - { wzor: "γ", zamiana: "g" }
+  - { wzor: "Γ", zamiana: "G" }
+  - { wzor: "δ", zamiana: "d" }
+  - { wzor: "Δ", zamiana: "D" }
+  - { wzor: "ε", zamiana: "e" }
+  - { wzor: "Ε", zamiana: "E" }
+  - { wzor: "ζ", zamiana: "z" }
+  - { wzor: "Ζ", zamiana: "Z" }
+  - { wzor: "η", zamiana: "e" }
+  - { wzor: "Η", zamiana: "E" }
+  - { wzor: "θ", zamiana: "t" }
+  - { wzor: "Θ", zamiana: "T" }
+  - { wzor: "ι", zamiana: "i" }
+  - { wzor: "Ι", zamiana: "I" }
+  - { wzor: "κ", zamiana: "k" }
+  - { wzor: "Κ", zamiana: "K" }
+  - { wzor: "λ", zamiana: "l" }
+  - { wzor: "Λ", zamiana: "L" }
+  - { wzor: "μ", zamiana: "m" }
+  - { wzor: "Μ", zamiana: "M" }
+  - { wzor: "ν", zamiana: "n" }
+  - { wzor: "Ν", zamiana: "N" }
+  - { wzor: "ξ", zamiana: "x" }
+  - { wzor: "Ξ", zamiana: "X" }
+  - { wzor: "ο", zamiana: "o" }
+  - { wzor: "Ο", zamiana: "O" }
+  - { wzor: "π", zamiana: "p" }
+  - { wzor: "Π", zamiana: "P" }
+  - { wzor: "ρ", zamiana: "r" }
+  - { wzor: "Ρ", zamiana: "R" }
+  - { wzor: "σ", zamiana: "s" }
+  - { wzor: "Σ", zamiana: "S" }
+  - { wzor: "τ", zamiana: "t" }
+  - { wzor: "Τ", zamiana: "T" }
+  - { wzor: "υ", zamiana: "i" }
+  - { wzor: "Υ", zamiana: "I" }
+  - { wzor: "φ", zamiana: "f" }
+  - { wzor: "Φ", zamiana: "F" }
+  - { wzor: "χ", zamiana: "k" }
+  - { wzor: "Χ", zamiana: "K" }
+  - { wzor: "ψ", zamiana: "ps" }
+  - { wzor: "Ψ", zamiana: "Ps" }
+  - { wzor: "ω", zamiana: "o" }
+  - { wzor: "Ω", zamiana: "O" }
+
+# -----------------------------------------------------------------------------
+# NOMI DELLE LETTERE (v19.17): una lettera greca che è l’UNICA lettera della parola
+# (π, 2π, β-bloccanti) diventa il suo nome in un accento.
+# I cifrari non espandono mai: lì vale solo la tabella `polskie_znaki`.
+# Chiavi in minuscolo; la maiuscola riceve lo stesso nome.
+# -----------------------------------------------------------------------------
+nazwy_liter:
+  - { wzor: "α", nazwa: "alfa" }
+  - { wzor: "β", nazwa: "beta" }
+  - { wzor: "γ", nazwa: "gamma" }
+  - { wzor: "δ", nazwa: "delta" }
+  - { wzor: "ε", nazwa: "epsilon" }
+  - { wzor: "ζ", nazwa: "zeta" }
+  - { wzor: "η", nazwa: "eta" }
+  - { wzor: "θ", nazwa: "theta" }
+  - { wzor: "ι", nazwa: "iota" }
+  - { wzor: "κ", nazwa: "kappa" }
+  - { wzor: "λ", nazwa: "lambda" }
+  - { wzor: "μ", nazwa: "mi" }
+  - { wzor: "ν", nazwa: "ni" }
+  - { wzor: "ξ", nazwa: "csi" }
+  - { wzor: "ο", nazwa: "omicron" }
+  - { wzor: "π", nazwa: "pi" }
+  - { wzor: "ρ", nazwa: "ro" }
+  - { wzor: "σ", nazwa: "sigma" }
+  - { wzor: "τ", nazwa: "tau" }
+  - { wzor: "υ", nazwa: "ipsilon" }
+  - { wzor: "φ", nazwa: "fi" }
+  - { wzor: "χ", nazwa: "chi" }
+  - { wzor: "ψ", nazwa: "psi" }
+  - { wzor: "ω", nazwa: "omega" }
+
 # -----------------------------------------------------------------------------
 # Alfabeto italiano – 21 lettere maiuscole nell'ordine nativo
 # (senza J, K, W, X, Y), senza spazi bianchi. Utilizzato dal cifrario di Cesare.

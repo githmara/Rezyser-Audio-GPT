@@ -511,6 +511,20 @@ tresc:
     Corrección en la versión 19.1 — la etiqueta de idioma describe la VOZ, no la fuente. En el modo de acento, la etiqueta es ahora la misma en todas partes e indica el sintetizador que debe leer el resultado: para el acento finés es lang="fi" tanto en el encabezado del archivo COMO en cada párrafo. Antes, el encabezado recibía el idioma de destino, pero los párrafos individuales recibían el idioma en el que estaba escrito el archivo antes de ser procesado. El efecto era exactamente el contrario del deseado: al entrar en un párrafo, NVDA volvía a la voz de origen y leía la transcripción fonética como si fuera un texto polaco normal, por lo que el acento no se oía. En los archivos que cargabas como HTML completo, a veces era aún peor — el idioma de cada párrafo se adivinaba a partir del texto YA procesado por las reglas fonéticas, de modo que un mismo documento podía recibir varios códigos distintos y ninguno de ellos era el correcto. Si tienes archivos de resultado antiguos en los que el acento "no funcionaba", basta con volver a pasar el original por el Políglota una vez más.
 
     Los modos que no cambian el idioma —ambas limpiezas y los cifrados— se comportan como hasta ahora: un párrafo en ruso queda etiquetado como ruso, porque tras la limpieza sigue estando en ruso.
+  krok_5_obce_pisma: |
+    ## Letras que la voz no leerá (NOVEDAD en la versión 19.17)
+
+    Las mediciones con lectores de pantalla han mostrado una regla sin excepciones: una voz de alta calidad lee las letras de su propio idioma y, como mucho, una parte de las inglesas. El resto lo aplana («Müller» suena como «Muller») o lo pasa por alto, dentro de la palabra y a menudo incluso al leer carácter por carácter. Una letra griega sin una voz griega se queda muda, y con una voz griega suena como «2 micro pi», con una pausa para el cambio de voz.
+
+    Por eso, desde esta versión todos los modos del Director, salvo el Reparador de Etiquetas, preparan el texto para la voz de forma igual de predecible. Ambas limpiezas y el párrafo que ya está en el idioma de la voz (hasta ahora pasaba intacto) reciben la tabla de caracteres del paquete de idioma, igual que los acentos y los cifrados desde siempre. Las letras del alfabeto del paquete nunca se tocan: el finés conserva ä, ö y å. El paquete ruso deja las palabras escritas en alfabeto latino tal como están en el original, para que no surja una palabra formada por dos alfabetos.
+
+    El griego llega ahora a todos los paquetes. Una letra que aparece sola pasa a ser su propio nombre («2π» suena «dos pi», «β-bloqueantes» — «beta-bloqueantes») y una letra en medio de una palabra se translitera («λόγος» → «logos»). Los cifrados no expanden nombres: tras descifrar vuelve la letra, no una palabra que no estaba en el texto.
+
+    Un párrafo escrito en cirílico recibe su idioma a partir de los alfabetos de los paquetes instalados antes de consultar al detector habitual, de modo que incluso una línea corta como «Мы ждём вас.» queda marcada como rusa y no como polaca.
+
+    El Reparador de Etiquetas no cambia el contenido, pero desde esta versión una palabra en otra escritura recibe en mitad del párrafo su propia etiqueta de idioma: el griego como el, el cirílico según los alfabetos de los paquetes. El lector de pantalla cambiará de voz exactamente en ese punto. En los archivos de Word el fragmento de texto se corta conservando el formato, y volver a usar el Reparador sobre su propio resultado no añade nada.
+
+    Si te importa que las palabras extranjeras suenen naturales, recurre a un lector basado en inteligencia artificial que entienda el contexto, por ejemplo ElevenLabs (gratuito con límites estrictos o con suscripción por créditos) o ElevenReader (10 horas de lectura gratuitas al mes, y el plan Ultra, también con pago anual, da lectura sin límite). El lector de pantalla lee en tiempo real y, por su propio diseño, nunca sabrá de qué idioma procede una palabra suelta.
   krok_5_auto_jezyk_nvda: |
     ## Automatización del cambio de idioma en NVDA — lo que necesitas saber
 

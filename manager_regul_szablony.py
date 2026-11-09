@@ -344,6 +344,27 @@ def _zbuduj_tabele_lacinki() -> list[tuple[str, str]]:
 
 TABELA_LACINKI: list[tuple[str, str]] = _zbuduj_tabele_lacinki()
 
+# Greka (v19.17): domyślne pary dla szablonu nowej paczki i nazwy liter.
+# Litery budowane z kodów (α–ω bez końcowej ς, Α–Ω bez pustego U+03A2), cele
+# NEUTRALNE — klasyczna łacińska romanizacja (th, ph, ch, ps), którą wykonawca
+# przestraja na pisownię swojego języka jak każdą parę łacinki. Warianty
+# (tonos, politonik, ϕ, znak mikro) sprowadza wcześniej silnik:
+# `core_poliglota.MAPA_WARIANTOW_GREKI`, więc tabela ma tylko 48 liter.
+_GRECKIE_MALE = "".join(chr(c) for c in range(0x03B1, 0x03CA) if c != 0x03C2)
+_GRECKA_ROMANIZACJA = ("a b g d e z e th i k l m n x o p r s t y ph ch ps o").split()
+TABELA_GREKI: list[tuple[str, str]] = [
+    para
+    for mala, cel in zip(_GRECKIE_MALE, _GRECKA_ROMANIZACJA)
+    for para in ((mala, cel), (mala.upper(), cel.capitalize()))
+]
+# Nazwy liter w pisowni międzynarodowej — PUNKT WYJŚCIA szablonu, który
+# wykonawca przepisuje na pisownię swojego języka (pl „mi", it „csi",
+# fi „myy", ru „мю"). Samotna litera w akcencie staje się tą nazwą.
+NAZWY_LITER_GRECKICH: list[tuple[str, str]] = list(zip(
+    _GRECKIE_MALE,
+    ("alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi "
+     "omicron pi rho sigma tau upsilon phi chi psi omega").split()))
+
 
 # =============================================================================
 # Natywne dane językowe — ODCZYT DYNAMICZNY z dictionaries/ (od v18.5)
@@ -2000,13 +2021,20 @@ def _pre_pass_domyslny(wciecie: str = "  ") -> str:
     dokładnie tak wyglądało dziewięć wdrożonych paczek do v19.4.2.
     """
     return "\n".join(f'{wciecie}- {{ wzor: "{w}", zamiana: "{z}" }}'
-                     for w, z in TABELA_LACINKI)
+                     for w, z in TABELA_LACINKI + TABELA_GREKI)
+
+
+def _nazwy_liter_domyslne(wciecie: str = "  ") -> str:
+    """Renderuje `NAZWY_LITER_GRECKICH` jako wpisy `nazwy_liter` (v19.17)."""
+    return "\n".join(f'{wciecie}- {{ wzor: "{w}", nazwa: "{n}" }}'
+                     for w, n in NAZWY_LITER_GRECKICH)
 
 
 def szablon_podstawy(kod_jezyka: str, etykieta_jezyka: str) -> str:
     natywna = _natywna_nazwa_jezyka(kod_jezyka)
     blok_lingua = _blok_lingua(kod_jezyka)
     pre_pass = _pre_pass_domyslny()
+    nazwy_liter = _nazwy_liter_domyslne()
     return f"""# =============================================================================
 #  <FILL NATIVELY: file header in {natywna}, e.g. for DE:
 #  „GRUNDLAGEN DER DEUTSCHEN SPRACHE"; for IT: „FONDAMENTI DELLA LINGUA ITALIANA">
@@ -2148,9 +2176,30 @@ polskie_znaki:
   # Expect to think hard here: settling these pairs for a new language is
   # a series of compromises, not a lookup.
   #
-  # The defaults below come from `manager_regul_szablony.TABELA_LACINKI`,
-  # the same table the release gate measures pack coverage with.
+  #   * GREEK closes the list (since v19.17): formulas, medicine and classical
+  #     quotations reach EVERY pack. The 48 letters α–ω/Α–Ω carry a neutral
+  #     classical romanization (th, ph, ch, ps); retune it like any other
+  #     pair (pl writes `θ → t`, `χ → ch`; is writes `θ → þ`; ru maps into
+  #     Cyrillic). Tonos, polytonic marks, `ϕ ϑ ϵ` and the micro sign are
+  #     reduced to these 48 by the engine, so they need no pairs.
+  #
+  # The defaults below come from `manager_regul_szablony.TABELA_LACINKI` and
+  # `TABELA_GREKI`, the same tables the release gate measures coverage with.
 {pre_pass}
+
+# -----------------------------------------------------------------------------
+# LETTER NAMES (since v19.17). A Greek letter that is the ONLY letter of its
+# word (`π`, `2π`, `β-blockers`) is replaced by its name in every accent of
+# this pack, so the voice reads the formula. Ciphers never use these names:
+# there the letter goes through the `polskie_znaki` table above, one letter.
+# Keys are lowercase; the capital letter gets the same name. The name passes
+# through the pre-pass afterwards, so write it in full {natywna} spelling.
+# <FILL NATIVELY in {natywna}: rewrite the 24 international names below in the
+#  spelling {natywna} uses (pl „mi, ni, ksi", it „mi, ni, csi", fi „myy, nyy,
+#  ksii", ru „мю, ню, кси"), then delete this line>
+# -----------------------------------------------------------------------------
+nazwy_liter:
+{nazwy_liter}
 
 # Full uppercase alphabet, no whitespace — the string the Caesar cipher
 # shifts along. PRE-FILLED with the 26 letters of the basic Latin script,
@@ -2378,6 +2427,24 @@ presence/absence of diacritics such as ä/ö/ç/ß).
    Loanwords, quotations and foreign names arrive in real text, and every
    character missing from this list reaches the synthesizer untouched —
    including through the Caesar cipher, which leaves it unencrypted.
+   **Greek closes the list** (since v19.17; `TABELA_GREKI`): the 48 letters
+   α–ω/Α–Ω with a neutral classical romanization (th, ph, ch, ps). Formulas,
+   medicine and quotations put Greek into every language's text. Retune the
+   targets to {natywna} spelling exactly like the Latin pairs (pl `θ → t`,
+   `χ → ch`; is `θ → þ`; ru into Cyrillic). Tonos, polytonic marks,
+   `ϕ ϑ ϵ` and the micro sign need no pairs: the engine reduces them to the
+   48 base letters first.
+   **`nazwy_liter:`** (since v19.17) — 24 `{{ wzor, nazwa }}` pairs, one per
+   lowercase Greek letter. In every accent of the pack, a Greek letter that
+   is the ONLY letter of its word (`π`, `2π`, `β-blockers`) becomes this name,
+   so the voice reads the formula; inside a word (`λόγος`, `μg`) it stays one
+   transliterated letter. Ciphers never use the names: after decryption the
+   reader gets the transliteration back, never a name the cipher would have
+   scattered over several letters. The template ships international names;
+   rewrite them as {natywna} spells them (pl „mi, ni, ksi", it „mi, ni, csi",
+   fi „myy, nyy, ksii", ru „мю, ню, кси"). Write the full native spelling —
+   the name goes through the pre-pass afterwards, and the gate
+   (`nazwy-cel-obcy`) measures what comes out.
 4. **`alfabet:`** — a string of UPPERCASE letters with no spaces: the string
    the Caesar cipher shifts along. The template pre-fills the 26 letters of
    the basic Latin script, which is a STARTING POINT, not an answer.

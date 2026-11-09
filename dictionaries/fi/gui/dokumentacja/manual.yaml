@@ -511,6 +511,20 @@ tresc:
     Korjaus versiossa 19.1 — kielimerkintä kuvaa ÄÄNTÄ, ei lähdettä. Aksentin kohdalla tagi on nyt kaikkialla sama ja osoittaa syntetisaattorin, jonka tulee lukea tulos: suomalaisen aksentin kohdalla tämä on lang="fi" sekä tiedoston otsikossa ETTÄ jokaisessa kappaleessa. Aiemmin otsikko sai kohdekielen, mutta yksittäiset kappaleet saivat sen kielen, jolla tiedosto oli kirjoitettu ennen käsittelyä. Lopputulos oli täysin päinvastainen kuin oli tarkoitus: NVDA palasi kappaleeseen siirryttäessä lähdekielen ääneen ja luki foneettisen kirjoitusasun ikään kuin se olisi tavallista puolan kielistä tekstiä, joten aksentti ei kuulunut. Tiedostoissa, jotka latasit täytenä HTML:nä, saattoi olla vielä huonompaakin — jokaisen kappaleen kieli arvattiin tekstistä, joka oli JO käynyt läpi foneettiset säännöt, joten yksi asiakirja saattoi saada useita eri koodeja eikä yksikään niistä ollut oikea. Jos sinulla on vanhoja tulostiedostoja, joissa aksentti "ei toiminut", riittää kun ajat alkuperäisen tekstin uudelleen Poliglotan läpi.
 
     Tilat, jotka eivät muuta kieltä — molemmat puhdistukset ja salaukset — toimivat kuten ennenkin: venäjänkielinen kappale merkitään venäjäksi, koska puhdistuksen jälkeenkin se on edelleen venäjää.
+  krok_5_obce_pisma: |
+    ## Kirjaimet, joita ääni ei lue (UUTTA versiossa 19.17)
+
+    Ruudunlukijoilla tehdyt mittaukset osoittivat poikkeuksettoman säännön: laadukas ääni lukee oman kielensä kirjaimet ja korkeintaan osan englannin kirjaimista. Loput se joko litistää („Müller" kuulostaa „Muller"-sanalta) tai vaikenee niistä — sanan sisällä ja usein jopa merkki kerrallaan luettaessa. Kreikkalainen kirjain ilman kreikkalaista ääntä vaikenee, ja kreikkalaisen äänen kanssa se kuulostaa „2 mikro pi", kun ääni vaihtuu hetkeksi.
+
+    Siksi tästä versiosta lähtien kaikki Ohjaajan tilat Tagikorjaajaa lukuun ottamatta valmistelevat tekstin äänelle yhtä ennustettavasti. Molemmat puhdistukset ja kappale, joka on jo äänen kielellä (tähän asti se kulki läpi koskemattomana), saavat kielipaketin merkkitaulukon — samoin kuin aksentit ja salaukset ovat aina saaneet. Paketin aakkosiin kuuluvia kirjaimia ei koskaan muuteta: suomi säilyttää kirjaimet ä, ö ja å. Venäjän paketti jättää latinalaisilla kirjaimilla kirjoitetut sanat lähteen mukaiseen muotoon, jotta ei synny kahden aakkoston sekoittamaa sanaa.
+
+    Kreikka kuuluu nyt jokaiseen pakettiin. Yksinäinen kirjain muuttuu omaksi nimekseen („2π" kuulostaa „kaksi pii", „β-salpaajat" — „beeta-salpaajat"), ja sanan keskellä oleva kirjain translitteroidaan („λόγος" → „logos"). Salaukset eivät avaa nimiä: purun jälkeen palaa kirjain, ei sanaa, jota tekstissä ei ollut.
+
+    Kyrillisin kirjaimin kirjoitettu kappale saa kielensä asennettujen pakettien aakkosista ennen kuin kysytään tavalliselta tunnistimelta — joten jopa lyhyt rivi, kuten „Мы ждём вас.", merkitään venäjäksi eikä puolaksi.
+
+    Tagikorjaaja ei muuta sisältöä, mutta tästä versiosta lähtien toisella kirjoitusjärjestelmällä kirjoitettu sana saa kappaleen keskellä oman kielimerkintänsä: kreikka el-merkinnän, kyrillinen kirjoitus pakettien aakkosten mukaan. Ruudunlukija vaihtaa äänen täsmälleen siinä kohdassa. Word-tiedostoissa tekstinpätkä pilkotaan muotoilun säilyttäen, eikä Tagikorjaajan käyttäminen uudelleen sen omaan tulokseen lisää mitään.
+
+    Jos haluat vieraiden sanojen kuulostavan luonnollisilta, käytä tekoälyyn perustuvaa lukijaa, joka ymmärtää asiayhteyden — esimerkiksi ElevenLabs (ilmainen tiukoin rajoituksin tai tilauksena krediiteillä) tai ElevenReader (ilmaiseksi 10 tuntia lukemista kuukaudessa, ja Ultra-paketti, jonka voi maksaa myös vuosittain, tarjoaa rajoittamattoman lukemisen). Ruudunlukija lukee reaaliajassa, eikä se periaatteessa koskaan tule tietämään, mistä kielestä yksittäinen sana on peräisin.
   krok_5_auto_jezyk_nvda: |
     ## Automaattinen kielen vaihtaminen NVDA:ssa — mitä sinun tulee tietää
 

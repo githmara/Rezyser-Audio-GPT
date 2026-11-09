@@ -293,6 +293,89 @@ polskie_znaki:
   - { wzor: "Ž", zamiana: "Sj" }
   - { wzor: "ẞ", zamiana: "SS" }
   - { wzor: "İ", zamiana: "I" }
+
+  # -- Gríska (v19.17): bókstafur inni í orði → umritun hans (λόγος → logos).
+  #    Vélin færir tónos, fjöltónamerki, ϕ ϑ ϵ og míkrótáknið fyrst að þessum 24. --
+  - { wzor: "α", zamiana: "a" }
+  - { wzor: "Α", zamiana: "A" }
+  - { wzor: "β", zamiana: "b" }
+  - { wzor: "Β", zamiana: "B" }
+  - { wzor: "γ", zamiana: "g" }
+  - { wzor: "Γ", zamiana: "G" }
+  - { wzor: "δ", zamiana: "d" }
+  - { wzor: "Δ", zamiana: "D" }
+  - { wzor: "ε", zamiana: "e" }
+  - { wzor: "Ε", zamiana: "E" }
+  - { wzor: "ζ", zamiana: "z" }
+  - { wzor: "Ζ", zamiana: "Z" }
+  - { wzor: "η", zamiana: "e" }
+  - { wzor: "Η", zamiana: "E" }
+  - { wzor: "θ", zamiana: "þ" }
+  - { wzor: "Θ", zamiana: "Þ" }
+  - { wzor: "ι", zamiana: "i" }
+  - { wzor: "Ι", zamiana: "I" }
+  - { wzor: "κ", zamiana: "k" }
+  - { wzor: "Κ", zamiana: "K" }
+  - { wzor: "λ", zamiana: "l" }
+  - { wzor: "Λ", zamiana: "L" }
+  - { wzor: "μ", zamiana: "m" }
+  - { wzor: "Μ", zamiana: "M" }
+  - { wzor: "ν", zamiana: "n" }
+  - { wzor: "Ν", zamiana: "N" }
+  - { wzor: "ξ", zamiana: "x" }
+  - { wzor: "Ξ", zamiana: "X" }
+  - { wzor: "ο", zamiana: "o" }
+  - { wzor: "Ο", zamiana: "O" }
+  - { wzor: "π", zamiana: "p" }
+  - { wzor: "Π", zamiana: "P" }
+  - { wzor: "ρ", zamiana: "r" }
+  - { wzor: "Ρ", zamiana: "R" }
+  - { wzor: "σ", zamiana: "s" }
+  - { wzor: "Σ", zamiana: "S" }
+  - { wzor: "τ", zamiana: "t" }
+  - { wzor: "Τ", zamiana: "T" }
+  - { wzor: "υ", zamiana: "y" }
+  - { wzor: "Υ", zamiana: "Y" }
+  - { wzor: "φ", zamiana: "f" }
+  - { wzor: "Φ", zamiana: "F" }
+  - { wzor: "χ", zamiana: "k" }
+  - { wzor: "Χ", zamiana: "K" }
+  - { wzor: "ψ", zamiana: "ps" }
+  - { wzor: "Ψ", zamiana: "Ps" }
+  - { wzor: "ω", zamiana: "o" }
+  - { wzor: "Ω", zamiana: "O" }
+
+# -----------------------------------------------------------------------------
+# HEITI BÓKSTAFA (v19.17): grískur bókstafur sem er EINI bókstafur orðsins
+# (π, 2π, β-blokkar) verður að heiti sínu í hreim.
+# Dulmál víkka aldrei út: þar gildir aðeins taflan í `polskie_znaki`.
+# Lyklar með litlum staf; hástafurinn fær sama heiti.
+# -----------------------------------------------------------------------------
+nazwy_liter:
+  - { wzor: "α", nazwa: "alfa" }
+  - { wzor: "β", nazwa: "beta" }
+  - { wzor: "γ", nazwa: "gamma" }
+  - { wzor: "δ", nazwa: "delta" }
+  - { wzor: "ε", nazwa: "epsílon" }
+  - { wzor: "ζ", nazwa: "zeta" }
+  - { wzor: "η", nazwa: "eta" }
+  - { wzor: "θ", nazwa: "þeta" }
+  - { wzor: "ι", nazwa: "jóta" }
+  - { wzor: "κ", nazwa: "kappa" }
+  - { wzor: "λ", nazwa: "lambda" }
+  - { wzor: "μ", nazwa: "mý" }
+  - { wzor: "ν", nazwa: "ný" }
+  - { wzor: "ξ", nazwa: "xí" }
+  - { wzor: "ο", nazwa: "ómíkron" }
+  - { wzor: "π", nazwa: "pí" }
+  - { wzor: "ρ", nazwa: "hró" }
+  - { wzor: "σ", nazwa: "sigma" }
+  - { wzor: "τ", nazwa: "tá" }
+  - { wzor: "υ", nazwa: "ýpsílon" }
+  - { wzor: "φ", nazwa: "fí" }
+  - { wzor: "χ", nazwa: "kí" }
+  - { wzor: "ψ", nazwa: "psí" }
+  - { wzor: "ω", nazwa: "ómega" }
   # NOTE: æ/Æ, þ/Þ, ð/Ð are NATIVE Icelandic letters — NOT mapped here.
   # The Caesar cipher encrypts them through the native alphabet directly.
 

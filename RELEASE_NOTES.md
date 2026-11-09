@@ -4,6 +4,86 @@ Release entries in reverse-chronological order. The section of a version is copi
 
 ---
 
+## 19.17.0 — minor release
+
+### What's new
+
+**Letters a voice cannot read no longer reach it.** Measured on screen
+readers: a high-quality voice reads the letters of its own language and some
+English ones; it flattens other letters ("Müller" becomes "Muller") or skips
+them in silence, and a Greek letter is either silent or spelled with a voice
+switch ("2 micro pi"). So every Director mode except the Tag Fixer now
+prepares the text for the voice in the same predictable way: both cleaning
+tools and a paragraph that is already in the voice's language (it used to go
+through untouched) get the language pack's character table, just like the
+accents and ciphers always did. A letter of the pack's own alphabet is never
+touched, so Finnish keeps its ä, ö and å, and the Russian pack leaves a word
+written in Latin letters as it is rather than produce a word in two alphabets.
+For natural-sounding foreign words,
+use an AI reader that understands context (ElevenLabs, ElevenReader or
+similar): a screen reader speaks in real time and can never know which
+language a single word comes from.
+
+**Greek in every pack.** A Greek letter standing alone becomes its name
+("2π" is read "two pi", "β-blockers" "beta-blockers"); inside a word it is
+transliterated ("λόγος" becomes "logos"). Accented, polytonic and
+mathematical variants are reduced to the 24 base letters first. Ciphers never
+use the name, so after decryption you get the letter back, not a word the text
+never had.
+
+**Letters of neighbouring alphabets.** The Russian pack now brings Ukrainian,
+Belarusian, Bulgarian, Serbian, Macedonian and other Cyrillic letters to
+Russian spelling ("Київ є" no longer leaks і, ї, є into a foreign accent), and
+every pack handles Romanian ș and ț and the Sami letters ǥ ǧ ǩ ǯ.
+
+**Cyrillic paragraphs get the right language, even when short.** A
+paragraph written in Cyrillic takes its language from the alphabets of the
+installed packs before the statistical detector is asked, so a short line such
+as "Мы ждём вас." is tagged Russian instead of Polish. Today that always means
+Russian; the mechanism is ready for a Ukrainian pack. Such a short line does
+not change the language of the short lines after it, so "Да." quoted in a
+Polish text leaves the next "Tak." Polish.
+
+**Tag Fixer: a word in another script gets its own language tag.** Inside a
+paragraph, a run of Greek or Cyrillic text is wrapped with its own `lang`
+(Greek as `el`, Cyrillic by the alphabets above), in HTML, Markdown, plain
+text and Word files, so the screen reader switches voices exactly there. In
+Word the run is split, formatting kept. Running the Tag Fixer again on its own
+output adds nothing. Latin text inside a paragraph in another script keeps the
+paragraph's code. Script, style and form-field content (`textarea`, `option`)
+is never wrapped, and a Ukrainian apostrophe (ʼ) no longer splits a word.
+
+**Caesar cipher: no letter left in plain text.** The Italian and Icelandic
+alphabets lack some Latin letters (Italian J K W X Y, Icelandic C Q W Z), and
+those letters came out of the cipher unchanged ("weekend", "pizza"). Their
+cipher rings now include them at their Latin places: Italian 26 letters (shift
+−25…25), Icelandic 36 (shift −35…35). Text encrypted with an older version
+under these two packs decrypts only with that version's ring.
+
+**Issue reports: no e-mail address goes to the AI.** The bot that turns
+reports into a technical summary now masks e-mail addresses before calling the
+model, and ignores issues on hold.
+
+**For contributors.** New gates: `test_cezar_szczelnosc.py` (no letter a–z
+leaves Caesar in plain text, the native alphabet keeps its order inside the
+ring), `test_intake_prywatnosc.py`, Greek and neighbour-alphabet classes in
+`audyt_podstaw.py`. `detektor_pism.py` is a new module shared byte for byte
+with accessible_text_analyst. A pull request whose only effect is to restore a
+purely native Caesar ring will be declined (see `CONTRIBUTING.md`).
+
+### Planned or deferred
+
+- Polytonic Greek reaches a Greek voice but stays silent on Cerence voices,
+  which read only the modern monotonic spelling.
+- A letter your voice can read although your alphabet lacks it (Finnish š, ž)
+  is still flattened; it needs a voice-only list, not a change of the alphabet,
+  which is also the Caesar ring.
+- fonttools 4.68.0 and pytest 9.2.0 came out while this release was being
+  frozen. Both are minor steps, so they are held back (`fonttools<4.68`,
+  `pytest<9.2`) and will be adopted in a later release.
+
+---
+
 ## 19.16.0 — minor release
 
 ### What's new

@@ -48,6 +48,7 @@ nowych plików w kodzie – wystarczy wrzucić YAML i uruchomić aplikację.
 
 from __future__ import annotations
 
+import copy
 import difflib
 import os
 import random
@@ -66,6 +67,7 @@ from docx.oxml.shared import OxmlElement
 from num2words import num2words
 
 import czyszczenie_tekstu
+import detektor_pism
 import jezyki_lingua
 import sciezki
 # v18.24.2: wspólny rejestr powodów pominięcia pliku reguł (patrz
@@ -403,12 +405,174 @@ def _ostrzez_o_lancuchu_zamian(zamiany: list[dict], kontekst: str) -> None:
 
 
 def _usun_polskie_znaki(tekst: str, podstawy: dict) -> str:
-    """Transliteruje polskie diakrytyki wg listy z ``podstawy.yaml``.
+    """Pre-pass paczki: obce znaki → pismo paczki wg ``podstawy.yaml``.
 
     Funkcja NIE normalizuje liczb samodzielnie – to robi pipeline akcentu
     (flaga ``normalizuj_liczby`` w YAML-u akcentu).
+
+    v19.17 — greka: warianty litery greckiej (tonos, politonik, symbole
+    matematyczne ``ϕ ϑ ϵ``, znak mikro, znak omu) najpierw sprowadzone do 24
+    liter bazowych — przez Unicode, nie tablicę, bo wariantów jest kilkaset —
+    a potem zwykła tablica ``polskie_znaki`` (litera → jej transliteracja:
+    ``λόγος`` → ``logos``). Nazwę samotnej litery (``π`` → ``pi``) rozwija
+    osobny krok, :func:`_rozwin_nazwy_liter`, wołany przez akcent, oczyszczenie
+    i przepust natywny (:func:`_prepass_dla_glosu`) — nigdy przez szyfr.
     """
+    tekst = _sprowadz_greke(tekst, podstawy)
     return _zastosuj_zamiany(tekst, podstawy.get("polskie_znaki", []))
+
+
+# -----------------------------------------------------------------------------
+# Greka (v19.17)
+# -----------------------------------------------------------------------------
+# Litery bazowe budowane z kodów, nie wpisane literą (pułapka escape'ów
+# narzędzi agenta). 24 małe α–ω bez końcowej ς (U+03C2) i 24 wielkie Α–Ω bez
+# nieprzydzielonego U+03A2.
+GRECKIE_MALE: str = "".join(chr(c) for c in range(0x03B1, 0x03CA) if c != 0x03C2)
+GRECKIE_WIELKIE: str = "".join(chr(c) for c in range(0x0391, 0x03AA) if c != 0x03A2)
+_SIGMA = chr(0x03C3)
+_SIGMA_KONCOWA = chr(0x03C2)
+
+
+def _zbuduj_mape_greki() -> dict[str, str]:
+    """Wariant litery greckiej → jej litera bazowa (NFKD bez znaków łączących).
+
+    Zakresy: Greek and Coptic, Greek Extended (politonik), Mathematical
+    Alphanumeric Symbols (pogrubiona/kursywna greka), plus ``µ`` (U+00B5,
+    znak mikro z klawiatury) i ``Ω`` (U+2126, znak omu). Bierzemy tylko to,
+    co rozkłada się DOKŁADNIE do jednej z 48 liter bazowych — koptyjskie
+    litery i nabla zostają poza mapą, bo nie są greką czytaną w tekście.
+    """
+    import unicodedata
+    baza = set(GRECKIE_MALE + GRECKIE_WIELKIE)
+    mapa = {_SIGMA_KONCOWA: _SIGMA}
+    kody = [*range(0x0370, 0x0400), *range(0x1F00, 0x2000),
+            *range(0x1D6A8, 0x1D7CC), 0x00B5, 0x2126]
+    for kod in kody:
+        znak = chr(kod)
+        if znak in baza:
+            continue
+        rdzen = "".join(c for c in unicodedata.normalize("NFKD", znak)
+                        if not unicodedata.combining(c))
+        if rdzen == _SIGMA_KONCOWA:
+            rdzen = _SIGMA
+        if len(rdzen) == 1 and rdzen in baza:
+            mapa[znak] = rdzen
+    return mapa
+
+
+MAPA_WARIANTOW_GREKI: dict[str, str] = _zbuduj_mape_greki()
+_TABLICE_GREKI: dict[str, dict[int, str]] = {}
+_REGEXY_NAZW: dict[tuple, tuple[re.Pattern, dict[str, str]]] = {}
+
+
+def _sprowadz_greke(tekst: str, podstawy: dict) -> str:
+    """Krok 1 pre-passu: wariant greckiej litery → litera bazowa.
+
+    Litera stojąca w ``alfabet`` paczki jest jej własna i zostaje — przyszła
+    paczka ``el`` nie straci akcentu graficznego we własnym tekście.
+    """
+    alfabet = str(podstawy.get("alfabet") or "")
+    tablica = _TABLICE_GREKI.get(alfabet)
+    if tablica is None:
+        wlasne = set(alfabet) | set(alfabet.lower())
+        tablica = {ord(z): b for z, b in MAPA_WARIANTOW_GREKI.items()
+                   if z not in wlasne}
+        _TABLICE_GREKI[alfabet] = tablica
+    return tekst.translate(tablica)
+
+
+def _rozwin_nazwy_liter(tekst: str, podstawy: dict) -> str:
+    """Akcent, PIERWSZY krok: samotna litera z ``nazwy_liter`` → jej nazwa.
+
+    „Samotna" = żaden sąsiad nie jest literą: cyfra, łącznik, spacja, nawias
+    i apostrof granicą są, litera innego pisma — nie (``μg`` zostaje do
+    transliteracji jako ``mg``). Klucze ``nazwy_liter`` są małe; wielka litera
+    dostaje tę samą nazwę.
+
+    Musi iść PRZED normalizacją liczb (zmierzone przy wdrożeniu: „2π" po
+    `normalizuj_liczby` to „dwaπ", litera traci samotność i wychodzi „dwap").
+    Szyfr tego kroku NIGDY nie robi (decyzja maintainera 2026-11-08): „π" po
+    szyfrze i odszyfrowaniu ma wrócić jako „p", nie jako dwuliterowe „pi",
+    które Cezar przesunąłby w dwie niezwiązane litery szyfrogramu.
+    """
+    tekst = _sprowadz_greke(tekst, podstawy)
+    # Tylko wpisy jednoznakowe (audyt S2): klasa `[...]` z wieloznakowego
+    # `wzor` trafiała pojedynczą literę spoza słownika → KeyError ubijał cały
+    # dokument w paczce edytowanej ręcznie / Managerem (bramka audyt_podstaw
+    # widzi tylko paczki repo). Wpis o złym kształcie jest pomijany.
+    wpisy = tuple((str(w.get("wzor", "")), str(w.get("nazwa", "")))
+                  for w in (podstawy.get("nazwy_liter") or [])
+                  if isinstance(w, dict) and w.get("wzor") and w.get("nazwa")
+                  and len(str(w["wzor"])) == 1)
+    if not wpisy:
+        return tekst
+    zbudowany = _REGEXY_NAZW.get(wpisy)
+    if zbudowany is None:
+        nazwy: dict[str, str] = {}
+        for wzor, nazwa in wpisy:
+            nazwy[wzor] = nazwa
+            if len(wzor.upper()) == 1:
+                nazwy.setdefault(wzor.upper(), nazwa)
+        klasa = "".join(re.escape(z) for z in sorted(nazwy))
+        wzorzec = re.compile(f"(?<![^\\W\\d_])[{klasa}](?![^\\W\\d_])")
+        zbudowany = (wzorzec, nazwy)
+        _REGEXY_NAZW[wpisy] = zbudowany
+    wzorzec, nazwy = zbudowany
+
+    def _nazwa(m: re.Match) -> str:
+        # Cyfra tuż obok dostaje spację: liczba zamienia się potem w słowo,
+        # a „2π" bez niej dawało jedno sklejone „dwapi" (zmierzone).
+        przed = " " if m.start() > 0 and tekst[m.start() - 1].isdigit() else ""
+        po = " " if m.end() < len(tekst) and tekst[m.end()].isdigit() else ""
+        return przed + nazwy.get(m.group(0), m.group(0)) + po
+
+    return wzorzec.sub(_nazwa, tekst)
+
+
+def _prepass_dla_glosu(tekst: str, podstawy: dict) -> str:
+    """Pełny pre-pass paczki w tekście, który NIE przechodzi przez akcent (v19.17).
+
+    Dotyczy narzędzia ``oczyszczenie`` i przepustu natywnego (akapit już
+    w języku głosu) — czyli każdej ścieżki Reżysera poza Naprawiaczem Tagów,
+    który treści nie zmienia. Kolejność jak w akcencie: samotna litera →
+    nazwa (PRZED liczbami), potem tablica ``polskie_znaki``. Litery własnego
+    alfabetu paczki tablica nie zawiera (sprawdzone na 9 paczkach), więc
+    fińskie ``ä``/``å`` zostają nietknięte.
+
+    Dlaczego pełny, a nie tylko greka (decyzja maintainera 2026-11-09, teoria
+    „przepustu natywnego" obalona pomiarem na Cerence): głos wysokiej jakości
+    czyta litery własnego języka i najwyżej część angielskiego — polski głos
+    spłaszcza ``Müller`` do „muler", a większość obcej łacinki PRZEMILCZA (w
+    słowie albo całkiem, nawet przy czytaniu znakami). Grecka litera bez
+    greckiego głosu milknie, z greckim głosem idzie jako „2 mikro pi".
+    Pre-pass daje to samo spłaszczenie co głos — różnica tylko graficzna — ale
+    deterministycznie i bez ciszy. Lepsze brzmienie obcych słów to zadanie
+    narzędzi AI świadomych kontekstu, nie czytnika ekranu czytającego w locie.
+
+    Paczka DWUPISMOWA (``ru``: cyrylica + łacinka w ``alfabet``, bo pierścień
+    Cezara szyfruje też łacińskie nazwy): jej tablica mapuje łacińskie
+    diakrytyki na cyrylicę, co w słowie łacińskim dawało słowo z dwóch pism
+    („Wałęsa" → „Waлэнsa", audyt S1) — klasę, którą v19.16 uznało za defekt.
+    Tu łacińskie litery słowa pisanego łacinką zostają jak w źródle (jak do
+    v19.16); tablica dostaje tylko pozostałe znaki tego słowa.
+    """
+    tekst = _rozwin_nazwy_liter(tekst, podstawy)
+    alfabet = str(podstawy.get("alfabet") or "")
+    pisma = {detektor_pism.pismo_znaku(z) for z in alfabet} - {None}
+    if detektor_pism.LACINKA not in pisma or len(pisma) < 2:
+        return _usun_polskie_znaki(tekst, podstawy)
+
+    def _slowo(m: re.Match) -> str:
+        slowo = m.group(0)
+        if detektor_pism.dominujace_pismo(slowo) != detektor_pism.LACINKA:
+            return _usun_polskie_znaki(slowo, podstawy)
+        return "".join(
+            z if detektor_pism.pismo_znaku(z) == detektor_pism.LACINKA
+            else _usun_polskie_znaki(z, podstawy)
+            for z in slowo)
+
+    return re.sub(r"\w+", _slowo, tekst)
 
 
 # =============================================================================
@@ -490,6 +654,12 @@ def wyczysc_cache() -> None:
     _LINGUA_MAPOWANIE_CACHE = None
     _LINGUA_DETEKTOR = None
     _LINGUA_DETEKTOR_BLD_FAILED = False
+    _CACHE_ALFABETOW_PACZEK.clear()
+
+
+# {tuple(kody) | None: {kod: alfabet}} — audyt N5: listdir + isfile przy każdym
+# akapicie cyrylicy i węźle Naprawiacza kosztowały 3× czas dokumentu.
+_CACHE_ALFABETOW_PACZEK: dict[tuple[str, ...] | None, dict[str, str]] = {}
 
 
 def _zaladuj_podstawy(jezyk: str) -> dict:
@@ -1103,6 +1273,40 @@ def _zbuduj_detektor_lingua() -> Any:
     return _LINGUA_DETEKTOR
 
 
+def _alfabety_wdrozone(kody: list[str] | None = None) -> dict[str, str]:
+    """``{kod: alfabet}`` paczek z ``podstawy.yaml`` (albo tylko ``kody``).
+
+    Cache czyszczony w :func:`wyczysc_cache` (Odśwież w Managerze Reguł).
+    """
+    klucz = None if kody is None else tuple(kody)
+    if klucz not in _CACHE_ALFABETOW_PACZEK:
+        lista = _jezyki_obecne_w_dictionaries() if kody is None else kody
+        _CACHE_ALFABETOW_PACZEK[klucz] = {
+            kod: str(_zaladuj_podstawy(kod).get("alfabet") or "") for kod in lista}
+    return _CACHE_ALFABETOW_PACZEK[klucz]
+
+
+def _jezyk_cyrylicy_wdrozony(tekst: str,
+                             kody: list[str] | None = None) -> str | None:
+    """Akapit pisany cyrylicą → język z alfabetów paczek; inaczej ``None`` (v19.17).
+
+    Pierwszeństwo przed lingua i BEZ progu długości: pismo widać po jednej
+    literze (moduł :mod:`detektor_pism`, bliźniak ATA). Zmierzone 2026-11-09:
+    „Мы ждём вас завтра." (19 znaków) spadało pod próg i dostawało język
+    dokumentu, więc oczyszczenie stemplowało je ``pl``, a szyfr przepuszczał
+    je jawnym tekstem przez polski alfabet. ``None`` także wtedy, gdy żadna
+    paczka nie pisze cyrylicą — wtedy decyduje dotychczasowa ścieżka.
+    """
+    if not isinstance(tekst, str):
+        return None
+    if detektor_pism.dominujace_pismo(tekst) != detektor_pism.CYRYLICA:
+        return None
+    alfabety = _alfabety_wdrozone(kody)
+    if not detektor_pism.jezyki_cyrylickie(alfabety):
+        return None
+    return detektor_pism.jezyk_cyrylicy(tekst, alfabety)
+
+
 def _wykryj_jezyk_fragmentu(tekst: str, fallback: str) -> str:
     """Wykrywa kod ISO języka pojedynczego fragmentu (akapitu).
 
@@ -1117,6 +1321,9 @@ def _wykryj_jezyk_fragmentu(tekst: str, fallback: str) -> str:
          ``Language.name`` nie ma odpowiednika w ``dictionaries/`` (teoretycznie
          nie powinno się zdarzyć — ten sam zestaw karmił builder) → ``fallback``.
     """
+    cyrylica = _jezyk_cyrylicy_wdrozony(tekst)
+    if cyrylica:
+        return cyrylica
     if not isinstance(tekst, str) or len(tekst.strip()) < _MIN_TEKST_DLA_DETEKCJI:
         return fallback
 
@@ -1380,7 +1587,16 @@ def _segmentuj_z_ochrona_tagow(
             jez = wymus_jezyk or _wykryj_jezyk_fragmentu(
                 akapit, fallback=poprzedni_jezyk)
             wynik.append((jez, akapit, True))
-            poprzedni_jezyk = jez
+            # v19.17 (audyt W1): krótki akapit cyrylicy dostaje język z alfabetu
+            # paczki BEZ progu długości, ale NIE przestawia języka „lepkiego" —
+            # inaczej krótkie polskie akapity po cytacie „Да." dziedziczyły `ru`
+            # (pre-pass, akcent i pierścień Cezara paczki ru na polskim tekście).
+            # Do v19.16 krótki akapit cyrylicy sam dziedziczył i niczego nie
+            # przestawiał; długi przestawia jak dawniej (wtedy robiła to lingua).
+            if wymus_jezyk or not (
+                    len(akapit.strip()) < _MIN_TEKST_DLA_DETEKCJI
+                    and detektor_pism.dominujace_pismo(akapit) == detektor_pism.CYRYLICA):
+                poprzedni_jezyk = jez
 
     return wynik
 
@@ -1429,6 +1645,12 @@ def wykryj_jezyk_zrodlowy(
         ...                       dostepne=["pl"])  # zawężone do PL
         'pl'
     """
+    if dostepne is None:
+        dostepne = dostepne_jezyki_bazowe()
+    # v19.17: cyrylica rozstrzygana po alfabetach paczek, przed lingua.
+    cyrylica = _jezyk_cyrylicy_wdrozony(tekst, list(dostepne))
+    if cyrylica:
+        return cyrylica if cyrylica in dostepne else fallback
     # Szybka ścieżka: za krótki tekst → fallback (bez budowania detektora).
     if not isinstance(tekst, str) or len(tekst.strip()) < _MIN_TEKST_DLA_DETEKCJI:
         return fallback
@@ -1460,6 +1682,7 @@ def _aplikuj_akcent_z_yaml(tekst: str, cfg: dict, podstawy: dict,
     """Uruchamia pięcioetapowy pipeline akcentu wg flag w ``cfg``.
 
     Etapy (wykonywane w stałej kolejności):
+        0. nazwy samotnych liter greckich — BEZWARUNKOWO (v19.17)
         1. ``czysc_tekst_tts``
         2. ``normalizuj_liczby``      (gdy nie użyto pełnego czyszczenia)
         3. pre-pass diakrytyków — BEZWARUNKOWY (v19.6)
@@ -1470,6 +1693,7 @@ def _aplikuj_akcent_z_yaml(tekst: str, cfg: dict, podstawy: dict,
     dla backward-compat, ale wywołujący (``_przetworz_rezyser``) przekazuje
     rzeczywisty język tekstu źródłowego.
     """
+    tekst = _rozwin_nazwy_liter(tekst, podstawy)
     if cfg.get("czysc_tekst_tts"):
         tekst = oczysc_tekst_tts(
             tekst,
@@ -1529,6 +1753,8 @@ def zastosuj_reguly_fonetyczne(tekst: str, wariant: str,
     # i Poliglocie. Jedyna zamierzona różnica ścieżek to brak etapu
     # `czysc_tekst_tts` (Reżyser zachowuje didaskalia). Pre-pass jest od
     # v19.6 bezwarunkowy w obu — patrz `_aplikuj_akcent_z_yaml`.
+    # v19.17: nazwy samotnych liter PRZED liczbami — patrz `_rozwin_nazwy_liter`.
+    tekst = _rozwin_nazwy_liter(tekst, podstawy)
     if cfg.get("normalizuj_liczby"):
         tekst = normalizuj_liczby(tekst, jezyk)
     tekst = _usun_polskie_znaki(tekst, podstawy)
@@ -1576,6 +1802,9 @@ def _przetworz_rezyser(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
                 wyniki.append(fragment)
                 zapisane.append((jez_seg, fragment, False))
                 continue
+            # v19.17: pełny pre-pass paczki PRZED liczbami (jak w akcencie:
+            # „2π" → „2 pi") — patrz `_prepass_dla_glosu`.
+            fragment = _prepass_dla_glosu(fragment, _zaladuj_podstawy(jez_seg))
             wynik_fr = oczysc_tekst_tts(
                 fragment,
                 z_normalizacja=cfg.get("normalizuj_liczby", True),
@@ -1613,7 +1842,13 @@ def _przetworz_rezyser(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
             # fiński akapit pre-passem paczki pl i zjadało mu ä/å — czyli
             # zmieniało słowa. Podręcznik do nauki języka i angielski cytat
             # w polskim tekście to nie egzotyka, tylko typowe wejście Poligloty.
+            # v19.17: „nic" znaczy „żadnych reguł akcentu", ale pre-pass paczki
+            # TAK — głos nie czyta obcych liter także we własnym tekście
+            # (pomiar maintainera 2026-11-09), patrz `_prepass_dla_glosu`.
+            # Pre-pass paczki tego samego języka nie rusza jej alfabetu, więc
+            # błąd z v19.4.1 (pre-pass pl zjadający fińskie ä/å) nie wraca.
             iso_sticky = jez_seg
+            fragment = _prepass_dla_glosu(fragment, _zaladuj_podstawy(jez_seg))
             wyniki.append(fragment)
             zapisane.append((iso_sticky, fragment, True))
             continue
@@ -2251,7 +2486,8 @@ def _bloki_jednostki(soup: Any) -> list[Any]:
 
 def _wstrzyknij_lang_w_pelnym_html(html_text: str, iso_fallback: str,
                                    *, mapa_iso: dict[str, str] | None = None,
-                                   kody: _KodyPerJednostka | None = None) -> str:
+                                   kody: _KodyPerJednostka | None = None,
+                                   pisma: bool = False) -> str:
     """Parsuje pełnoprawny HTML i ustawia atrybut ``lang`` per element blokowy.
 
     13.4.3: zastępuje wcześniejszy regex (działający tylko na ``<html>``).
@@ -2323,6 +2559,9 @@ def _wstrzyknij_lang_w_pelnym_html(html_text: str, iso_fallback: str,
         for el in jednostki:
             el["lang"] = kody.nastepny()
 
+    if pisma:
+        # v19.17: Naprawiacz — obce pismo w jednostce dostaje własny `lang`.
+        _owin_obce_pisma_w_soup(soup)
     return str(soup)
 
 
@@ -2373,6 +2612,187 @@ def _ustaw_lang_akapitu(para: Any, iso: str) -> None:
     """
     for r_el in para._p.iter(qn("w:r")):
         _ustaw_lang_runa_xml(r_el, iso)
+
+
+# ---------------------------------------------------------------------------
+# Naprawiacz Tagów: obce pismo w jednostce = własny segment `lang` (v19.17)
+# ---------------------------------------------------------------------------
+# Decyzja maintainera 2026-11-09. Naprawiacz nie zmienia treści, więc greka
+# i cyrylica w akapicie innego pisma nie mogą zostać przetransliterowane jak
+# w akcencie — dostają więc własny kod, po którym czytnik przełączy głos:
+# greka zawsze ``el`` (jedno pismo, jeden język), cyrylica z alfabetów paczek
+# (``detektor_pism.jezyk_cyrylicy``, dziś ``ru``). Łacinka w akapicie innego
+# pisma zostaje pod kodem akapitu: łacinką pisze tuzin języków i żaden alfabet
+# ich nie rozróżni na kilku literach — to byłoby zgadywanie.
+
+def _pismo_bazowe(kod: str | None, tekst: str) -> str | None:
+    """Pismo, którym pisze ``kod`` jednostki; nieznane → pismo większości liter.
+
+    Znane = paczka z ``podstawy.yaml`` (pismo jej alfabetu) albo ``el``.
+    Bez tego akapit w całości cyrylicki, któremu użytkownik dał ``pl``,
+    zostawał ``pl`` — przecież cała jego treść jest „obcym pismem".
+    """
+    if kod == detektor_pism.KOD_GREKI:
+        return detektor_pism.GREKA
+    alfabety = _alfabety_wdrozone()
+    if kod and kod in alfabety:
+        pismo = detektor_pism.dominujace_pismo(alfabety[kod])
+        if pismo:
+            return pismo
+    return detektor_pism.dominujace_pismo(tekst)
+
+
+def _odcinki_obcego_pisma(tekst: str, baza: str | None) -> list[tuple[int, int, str]]:
+    """Odcinki ``(start, koniec, kod)`` greki i cyrylicy, gdy pismo ≠ ``baza``."""
+    wynik: list[tuple[int, int, str]] = []
+    alfabety: dict[str, str] | None = None
+    for start, koniec, pismo in detektor_pism.odcinki_pism(tekst):
+        if pismo == baza:
+            continue
+        if pismo == detektor_pism.GREKA:
+            kod = detektor_pism.KOD_GREKI
+        elif pismo == detektor_pism.CYRYLICA:
+            if alfabety is None:
+                alfabety = _alfabety_wdrozone()
+            kod = detektor_pism.jezyk_cyrylicy(tekst[start:koniec], alfabety)
+        else:
+            continue
+        wynik.append((start, koniec, kod))
+    return wynik
+
+
+def _kawalki_pism(tekst: str, baza: str | None) -> list[tuple[str, str | None]]:
+    """Tekst jako ``(kawałek, kod | None)``; ``None`` = kod jednostki."""
+    kawalki: list[tuple[str, str | None]] = []
+    pozycja = 0
+    for start, koniec, kod in _odcinki_obcego_pisma(tekst, baza):
+        if start > pozycja:
+            kawalki.append((tekst[pozycja:start], None))
+        kawalki.append((tekst[start:koniec], kod))
+        pozycja = koniec
+    if pozycja < len(tekst):
+        kawalki.append((tekst[pozycja:], None))
+    return kawalki
+
+
+def _podziel_biegi_po_pismach(para: Any, kod_akapitu: str | None = None) -> None:
+    """DOCX: bieg z obcym pismem rozcięty na biegi z własnym ``w:lang``.
+
+    Woła się PO :func:`_ustaw_lang_akapitu`, więc kopia biegu dziedziczy kod
+    akapitu, a kawałek obcego pisma dostaje swój. Rozcinamy wyłącznie biegi
+    z jednym ``w:t`` (plus ``w:rPr``): bieg z tabulatorem, łamaniem albo polem
+    zostaje cały pod kodem akapitu, bo kopiowanie tych elementów
+    zduplikowałoby je w treści. Wyjątek: ``w:lastRenderedPageBreak`` (Word
+    wstawia go do pierwszego biegu każdej strony, audyt N4) to znacznik bez
+    treści — zostaje tylko w pierwszej kopii.
+    """
+    znacznik_strony = qn("w:lastRenderedPageBreak")
+    baza = _pismo_bazowe(kod_akapitu, para.text)
+    for r_el in list(para._p.iter(qn("w:r"))):
+        dzieci = [c for c in r_el if c.tag not in (qn("w:rPr"), znacznik_strony)]
+        if len(dzieci) != 1 or dzieci[0].tag != qn("w:t"):
+            continue
+        kawalki = _kawalki_pism(dzieci[0].text or "", baza)
+        if not any(kod for _, kod in kawalki):
+            continue
+        rodzic = r_el.getparent()
+        indeks = rodzic.index(r_el)
+        for n, (kawalek, kod) in enumerate(kawalki):
+            nowy = copy.deepcopy(r_el)
+            if n > 0:
+                for zn in [c for c in nowy if c.tag == znacznik_strony]:
+                    nowy.remove(zn)
+            t_el = next(c for c in nowy if c.tag == qn("w:t"))
+            t_el.text = kawalek
+            t_el.set(qn("xml:space"), "preserve")
+            if kod:
+                _ustaw_lang_runa_xml(nowy, kod)
+            rodzic.insert(indeks + n, nowy)
+        rodzic.remove(r_el)
+
+
+def _owin_obce_pisma_w_soup(soup: Any) -> None:
+    """HTML z DOM-em: kawałek obcego pisma w ``<span lang>``.
+
+    Pismo bazowe z ``lang`` najbliższego przodka (:func:`_pismo_bazowe`) —
+    dlatego drugi przebieg Naprawiacza po własnym wyniku nic nie dokłada
+    (w ``<span lang="el">`` bazą jest już greka).
+    """
+    from bs4 import Comment, NavigableString
+
+    bazy: dict[int, str | None] = {}
+    for napis in list(soup.find_all(string=True)):
+        if isinstance(napis, Comment) or napis.parent is None:
+            continue
+        # textarea/option/noscript/template/iframe (audyt N3): treść surowa,
+        # span pokazałby się jako widoczny tekst albo złamał kod.
+        if napis.parent.name in ("script", "style", "title", "head", "textarea",
+                                 "option", "noscript", "template", "iframe"):
+            continue
+        przodek = napis.find_parent(lambda el: el.has_attr("lang"))
+        if przodek is None:
+            continue
+        if id(przodek) not in bazy:
+            bazy[id(przodek)] = _pismo_bazowe(str(przodek["lang"]),
+                                              przodek.get_text())
+        kawalki = _kawalki_pism(str(napis), bazy[id(przodek)])
+        if not any(kod for _, kod in kawalki):
+            continue
+        nowe = []
+        for kawalek, kod in kawalki:
+            if kod:
+                span = soup.new_tag("span")
+                span["lang"] = kod
+                span.string = kawalek
+                nowe.append(span)
+            else:
+                nowe.append(NavigableString(kawalek))
+        napis.replace_with(*nowe)
+
+
+def _owin_obce_pisma_w_akapicie(body: str, kod: str | None = None) -> str:
+    """Fragment HTML / tekst: kawałek obcego pisma w ``<span lang>``.
+
+    Tagi zostają nietknięte. Stos otwartych tagów (audyt N2): pismo bazowe
+    bierzemy z NAJBLIŻSZEGO otwartego elementu z ``lang`` (więc tekst w
+    ``<span lang="el">…<b>…</b></span>`` nie dostaje drugiego spana, a drugi
+    przebieg po własnym wyniku nic nie dokłada), ``data-lang=`` to nie
+    ``lang=``, a treści ``script``/``style``/``textarea``/``title`` itp. nie
+    ruszamy w ogóle.
+    """
+    surowe = {"script", "style", "textarea", "title", "option", "noscript",
+              "template", "iframe"}
+    puste = {"br", "hr", "img", "input", "meta", "link", "wbr", "col", "area",
+             "base", "embed", "source", "track", "param"}
+    baza_dok = _pismo_bazowe(kod, _bez_tagow(body))
+    stos: list[tuple[str, str | None]] = []      # (nazwa tagu, kod lang | None)
+    czesci = re.split(r"(<[^>]+>)", body)
+    for i, czesc in enumerate(czesci):
+        if i % 2 == 1:
+            m = re.match(r"<\s*(/)?\s*([a-zA-Z][\w-]*)", czesc)
+            if not m:
+                continue
+            nazwa = m.group(2).lower()
+            if m.group(1):
+                for k in range(len(stos) - 1, -1, -1):
+                    if stos[k][0] == nazwa:
+                        del stos[k:]
+                        break
+            elif nazwa not in puste and not czesc.rstrip().endswith("/>"):
+                lang = re.search(r"(?<![\w-])lang\s*=\s*[\"']?([\w-]+)", czesc,
+                                 re.IGNORECASE)
+                stos.append((nazwa, lang.group(1) if lang else None))
+            continue
+        if not czesc or any(n in surowe for n, _ in stos):
+            continue
+        kod_lang = next((k for _, k in reversed(stos) if k), None)
+        # Kod bez paczki (np. ręczne `uk`): pismo z samego tekstu, jak w soup.
+        baza = _pismo_bazowe(kod_lang, czesc) if kod_lang else baza_dok
+        kawalki = _kawalki_pism(czesc, baza)
+        if any(kod for _, kod in kawalki):
+            czesci[i] = "".join(f'<span lang="{kod}">{k}</span>' if kod else k
+                                for k, kod in kawalki)
+    return "".join(czesci)
 
 
 def _iteruj_akapity_docx(kontener: Any) -> Any:
@@ -2734,6 +3154,7 @@ def zapisz_wynik(
                     continue
                 kod = kody.nastepny() if kody is not None else iso_code
                 _ustaw_lang_akapitu(para, kod)
+                _podziel_biegi_po_pismach(para, kod)
         else:
             # Nowy dokument: side-channel (tryb Rezyser/Szyfrant) lub live-detect
             # (naprawiacz bez pliku źródła, Tlumacz, inne wywołania).
@@ -2750,6 +3171,8 @@ def zapisz_wynik(
                 if kody is not None and linia.strip():
                     kod = kody.nastepny()
                 _ustaw_lang_akapitu(p, kod)
+                if jest_naprawiacz:
+                    _podziel_biegi_po_pismach(p, kod)
         if kody is not None:
             kody.zamknij()
         doc.save(out_path)
@@ -2767,7 +3190,8 @@ def zapisz_wynik(
             # zachowując resztę DOM-u. Globalny ``<html lang>`` to fallback.
             tekst = _wstrzyknij_lang_w_pelnym_html(tekst, iso_code,
                                                    mapa_iso=mapa_iso,
-                                                   kody=kody)
+                                                   kody=kody,
+                                                   pisma=jest_naprawiacz)
         else:
             # Fragment HTML / czysty tekst — owijamy akapity (``\n\s*\n``) w
             # ``<p lang="...">`` z dynamicznym językiem.
@@ -2776,6 +3200,7 @@ def zapisz_wynik(
                 segmenty_wynikowe if not jest_naprawiacz else None,
                 iso_code,
                 kody=kody,
+                pisma=jest_naprawiacz,
             )
 
         if kody is not None:
@@ -2794,6 +3219,7 @@ def zapisz_wynik(
             segmenty_wynikowe if not jest_naprawiacz else None,
             iso_code,
             kody=kody,
+            pisma=jest_naprawiacz,
         )
         if kody is not None:
             kody.zamknij()
@@ -2868,7 +3294,8 @@ def _zbuduj_html_z_akapitow(tresc: str,
                             segmenty: list[Segment] | None,
                             iso_fallback: str,
                             *,
-                            kody: _KodyPerJednostka | None = None) -> str:
+                            kody: _KodyPerJednostka | None = None,
+                            pisma: bool = False) -> str:
     """Buduje HTML, owijając każdy akapit w ``<p lang="...">``.
 
     Akapity są oddzielane wzorcem ``\\n\\s*\\n``. Wewnątrz akapitu pojedyncze
@@ -2887,5 +3314,8 @@ def _zbuduj_html_z_akapitow(tresc: str,
     for body, iso in _podziel_na_akapity_html(tresc, segmenty, iso_fallback):
         if kody is not None:
             iso = kody.nastepny()
+        if pisma:
+            # v19.17: Naprawiacz — obce pismo w akapicie dostaje własny `lang`.
+            body = _owin_obce_pisma_w_akapicie(body, iso)
         czesci_html.append(f'<p lang="{iso}">{body.replace(chr(10), "<br>")}</p>')
     return "\n".join(czesci_html)

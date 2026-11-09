@@ -7,7 +7,7 @@
 
 Strumenti autonomi alimentati da AI per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, oltre alla conduzione di giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata da zero per garantire piena accessibilità ai lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra di programma.
 
-Versione: **19.16.0** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versione: **19.17.0** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Moduli principali
@@ -39,7 +39,7 @@ Giochi testuali interattivi condotti dall'IA nel ruolo di motore narrativo. A di
 * **Traduttore Sicuro:** I testi lunghi vengono automaticamente suddivisi in blocchi misurati in token del modello (sicuro anche per lingue a scrittura densa, ad es. il cinese) e tradotti sequenzialmente; una risposta troncata del modello viene rilevata e ritentata su frammenti più piccoli. Ogni blocco viene immediatamente salvato in un file nascosto `.jsonl`. Il ripristino dopo l'esaurimento dei limiti API è completamente automatico.
 * **Automazione NVDA:** Le traduzioni vengono salvate come file `.html` pronti con tag di lingua incorporato o file `.docx` con tag iniettati direttamente nella struttura XML.
 * **8 accenti locali:** Possibilità di forzare intenzionalmente un accento spezzato per i sintetizzatori locali (Tiflotecnia Voices, eSpeak, OneCore) grazie a regole regex avanzate. Accenti stranieri supportati: inglese, russo (con traslitterazione in cirillico), francese, tedesco, spagnolo, polacco, finlandese, islandese.
-* **Modalità Cifrario:** 6 algoritmi locali di distorsione del testo — dalla lettura al contrario, attraverso la tipoglicemia, fino al classico cifrario di Cesare. Ognuno con l'alfabeto locale del pacchetto linguistico (ad esempio, cifrario di Cesare su alfabeto IT di 21 caratteri).
+* **Modalità Cifrario:** 6 algoritmi locali di distorsione del testo — dalla lettura al contrario, attraverso la tipoglicemia, fino al classico cifrario di Cesare. Ognuno con l'alfabeto locale del pacchetto linguistico (ad esempio, cifrario di Cesare su alfabeto IT esteso di 26 caratteri).
 * **Riparatore di Tag:** Inietta in modo non invasivo il codice ISO della lingua fornito — anche regionale, ad es. pt-BR o zh-CN — nei file esistenti.
 
 

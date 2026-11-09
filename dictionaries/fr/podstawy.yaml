@@ -336,6 +336,89 @@ polskie_znaki:
   - { wzor: "Ž", zamiana: "J" }
   - { wzor: "İ", zamiana: "I" }
 
+  # -- Grec (v19.17) : lettre à l’intérieur d’un mot → sa translittération (λόγος → logos).
+  #    Le moteur ramène d’abord le tonos, le polytonique, ϕ ϑ ϵ et le signe micro à ces 24 lettres. --
+  - { wzor: "α", zamiana: "a" }
+  - { wzor: "Α", zamiana: "A" }
+  - { wzor: "β", zamiana: "b" }
+  - { wzor: "Β", zamiana: "B" }
+  - { wzor: "γ", zamiana: "g" }
+  - { wzor: "Γ", zamiana: "G" }
+  - { wzor: "δ", zamiana: "d" }
+  - { wzor: "Δ", zamiana: "D" }
+  - { wzor: "ε", zamiana: "e" }
+  - { wzor: "Ε", zamiana: "E" }
+  - { wzor: "ζ", zamiana: "z" }
+  - { wzor: "Ζ", zamiana: "Z" }
+  - { wzor: "η", zamiana: "e" }
+  - { wzor: "Η", zamiana: "E" }
+  - { wzor: "θ", zamiana: "th" }
+  - { wzor: "Θ", zamiana: "Th" }
+  - { wzor: "ι", zamiana: "i" }
+  - { wzor: "Ι", zamiana: "I" }
+  - { wzor: "κ", zamiana: "k" }
+  - { wzor: "Κ", zamiana: "K" }
+  - { wzor: "λ", zamiana: "l" }
+  - { wzor: "Λ", zamiana: "L" }
+  - { wzor: "μ", zamiana: "m" }
+  - { wzor: "Μ", zamiana: "M" }
+  - { wzor: "ν", zamiana: "n" }
+  - { wzor: "Ν", zamiana: "N" }
+  - { wzor: "ξ", zamiana: "x" }
+  - { wzor: "Ξ", zamiana: "X" }
+  - { wzor: "ο", zamiana: "o" }
+  - { wzor: "Ο", zamiana: "O" }
+  - { wzor: "π", zamiana: "p" }
+  - { wzor: "Π", zamiana: "P" }
+  - { wzor: "ρ", zamiana: "r" }
+  - { wzor: "Ρ", zamiana: "R" }
+  - { wzor: "σ", zamiana: "s" }
+  - { wzor: "Σ", zamiana: "S" }
+  - { wzor: "τ", zamiana: "t" }
+  - { wzor: "Τ", zamiana: "T" }
+  - { wzor: "υ", zamiana: "y" }
+  - { wzor: "Υ", zamiana: "Y" }
+  - { wzor: "φ", zamiana: "ph" }
+  - { wzor: "Φ", zamiana: "Ph" }
+  - { wzor: "χ", zamiana: "kh" }
+  - { wzor: "Χ", zamiana: "Kh" }
+  - { wzor: "ψ", zamiana: "ps" }
+  - { wzor: "Ψ", zamiana: "Ps" }
+  - { wzor: "ω", zamiana: "o" }
+  - { wzor: "Ω", zamiana: "O" }
+
+# -----------------------------------------------------------------------------
+# NOMS DES LETTRES (v19.17) : une lettre grecque qui est la SEULE lettre de son mot
+# (π, 2π, β-bloquants) devient son nom dans un accent.
+# Les chiffrements ne développent jamais : seule la table `polskie_znaki` s’applique.
+# Clés en minuscule ; la majuscule reçoit le même nom.
+# -----------------------------------------------------------------------------
+nazwy_liter:
+  - { wzor: "α", nazwa: "alpha" }
+  - { wzor: "β", nazwa: "bêta" }
+  - { wzor: "γ", nazwa: "gamma" }
+  - { wzor: "δ", nazwa: "delta" }
+  - { wzor: "ε", nazwa: "epsilon" }
+  - { wzor: "ζ", nazwa: "zêta" }
+  - { wzor: "η", nazwa: "êta" }
+  - { wzor: "θ", nazwa: "thêta" }
+  - { wzor: "ι", nazwa: "iota" }
+  - { wzor: "κ", nazwa: "kappa" }
+  - { wzor: "λ", nazwa: "lambda" }
+  - { wzor: "μ", nazwa: "mu" }
+  - { wzor: "ν", nazwa: "nu" }
+  - { wzor: "ξ", nazwa: "xi" }
+  - { wzor: "ο", nazwa: "omicron" }
+  - { wzor: "π", nazwa: "pi" }
+  - { wzor: "ρ", nazwa: "rhô" }
+  - { wzor: "σ", nazwa: "sigma" }
+  - { wzor: "τ", nazwa: "tau" }
+  - { wzor: "υ", nazwa: "upsilon" }
+  - { wzor: "φ", nazwa: "phi" }
+  - { wzor: "χ", nazwa: "khi" }
+  - { wzor: "ψ", nazwa: "psi" }
+  - { wzor: "ω", nazwa: "oméga" }
+
 # -----------------------------------------------------------------------------
 # Alphabet français — 26 lettres latines, dans l'ordre natif.
 # Les lettres accentuées (à, â, ç, é, è, ê, ë, î, ï, ô, ù, û, ü, ÿ) NE sont

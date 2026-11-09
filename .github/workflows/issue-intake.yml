@@ -24,6 +24,7 @@ jobs:
       github.event.action == 'opened' ||
       (github.event.action == 'labeled' &&
        github.event.label.name != 'tiflotecnia-patch' &&
+       github.event.label.name != 'on-hold' &&
        github.event.label.name != 'fixed-in-release' &&
        github.event.label.name != 'wontfix' &&
        github.event.label.name != 'duplicate')

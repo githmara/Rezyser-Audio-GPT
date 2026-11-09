@@ -13,7 +13,8 @@ CZĘŚĆ 2 — treść `dictionaries/<kod>/podstawy.yaml` w każdej paczce na dy
 pole `lingua` skonfrontowane z kanonem i kodem ISO FOLDERA, `alfabet` (wejście
 szyfru Cezara), `polskie_znaki` (pre-pass KAŻDEGO akcentu paczki),
 `slowo_akcent` przeliczone REALNYM parserem Księgi Świata i endonim
-w `etykieta`, a od v19.17 także cyrylica pogranicza w paczkach cyrylickich.
+w `etykieta`, a od v19.17 także cyrylica pogranicza w paczkach cyrylickich
+oraz greka (tablica w pre-passie i `nazwy_liter`) we wszystkich.
 Każda klasa ma konsekwencję w działaniu (liczby tu nie podajemy — zestarzała
 się już raz, wyliczenie daje `grep 'dodaj("'`) — komentarz
 nad sekcją „CZĘŚĆ 2" tłumaczy, dlaczego to KONTROLA, a nie siódmy generator
@@ -533,6 +534,79 @@ def _sprawdz_pokrycie_cyrylicy(kod: str, dane: dict, dodaj) -> None:
               f"shows one way to map them)")
 
 
+def _sprawdz_greke(kod: str, dane: dict, dodaj) -> None:
+    """Greka w pre-passie i `nazwy_liter` (v19.17), mierzone REALNYM silnikiem.
+
+    Greka trafia do tekstu KAŻDEJ paczki (wzory, medycyna, cytaty), więc ta
+    kontrola, inaczej niż cyrylica pogranicza, dotyczy wszystkich paczek.
+    Trzy pytania:
+      * `greka-dziura` — czy któraś z 48 liter bazowych α–ω/Α–Ω (albo jej
+        wariant: tonos, politonik, `ϕ`, znak mikro — sprowadza je silnik)
+        wychodzi z pre-passu dalej jako greka. Litera z `alfabet` paczki jest
+        jej własna i nie jest wymagana (przyszła paczka `el`).
+      * `nazwy-ksztalt` / `nazwy-dziura` — `nazwy_liter` to lista
+        `{wzor, nazwa}`, `wzor` jedną z 24 MAŁYCH liter, komplet 24. Samotna
+        litera bez nazwy zostaje transliterowana do jednej litery, więc
+        „π" czytane byłoby jako „p".
+      * `nazwy-cel-obcy` — nazwa po pre-passie paczki (czyli tak, jak
+        realnie dojdzie do reguł akcentu) zawiera znak spoza ASCII i spoza
+        `alfabet`. Nazwę wolno pisać pełną ortografią (`es: épsilon`), bo
+        pre-pass ją potem i tak dostosowuje.
+    """
+    alfabet = str(dane.get("alfabet") or "")
+    litery_paczki = set(alfabet) | set(alfabet.lower())
+    greka = set(cp.GRECKIE_MALE + cp.GRECKIE_WIELKIE)
+    kandydaci = sorted(greka | set(cp.MAPA_WARIANTOW_GREKI))
+    przepuszczone = [
+        znak for znak in kandydaci
+        if znak not in litery_paczki
+        and cp.MAPA_WARIANTOW_GREKI.get(znak, znak) not in litery_paczki
+        and any(z in greka for z in cp._usun_polskie_znaki(znak, dane))
+    ]
+    if przepuszczone:
+        bazowe = "".join(z for z in przepuszczone if z in greka)
+        dodaj("greka-dziura",
+              f"the pre-pass lets {len(przepuszczone)} Greek character(s) through "
+              f"as Greek (base letters among them: {bazowe or 'none'}) — formulas, "
+              f"medical terms and quotations reach every accent and cipher of "
+              f"this pack as they are; add the 48 base letters α–ω/Α–Ω to "
+              f"`polskie_znaki` (the engine reduces tonos, polytonic and symbol "
+              f"variants to them first; every pack shows one way to map them)")
+
+    nazwy = dane.get("nazwy_liter")
+    if not isinstance(nazwy, list) or not nazwy:
+        dodaj("nazwy-dziura",
+              "no `nazwy_liter` list — a Greek letter standing alone (`π`, `2π`, "
+              "`β-blockers`) is read as one transliterated letter instead of its "
+              "name, so a formula read aloud loses its meaning")
+        return
+    obecne: set[str] = set()
+    for poz, wpis in enumerate(nazwy, 1):
+        wzor = str(wpis.get("wzor", "")) if isinstance(wpis, dict) else ""
+        nazwa = str(wpis.get("nazwa", "")) if isinstance(wpis, dict) else ""
+        if wzor not in cp.GRECKIE_MALE or len(wzor) != 1 or not nazwa.strip():
+            dodaj("nazwy-ksztalt",
+                  f"`nazwy_liter` entry #{poz} ({wpis!r}) must be "
+                  f"`{{ wzor: <one lowercase Greek letter>, nazwa: <non-empty name> }}`"
+                  f" — the capital letter gets the same name automatically")
+            continue
+        obecne.add(wzor)
+        po_prepassie = cp._usun_polskie_znaki(nazwa, dane)
+        obce = sorted({z for z in po_prepassie
+                       if z.isalpha() and not z.isascii() and z not in litery_paczki})
+        if obce:
+            dodaj("nazwy-cel-obcy",
+                  f"`{wzor}` → `{nazwa}` still carries {obce} after this pack's "
+                  f"pre-pass, and `alfabet` does not declare them letters of this "
+                  f"language — the name would bring them to the voice")
+    brak = "".join(z for z in cp.GRECKIE_MALE
+                   if z not in obecne and z not in litery_paczki)
+    if brak:
+        dodaj("nazwy-dziura",
+              f"`nazwy_liter` has no name for {brak} — standing alone, these "
+              f"letters are read as one transliterated letter, not as their name")
+
+
 def _sprawdz_slowo_akcent(kod: str, dane: dict, pary: dict, dodaj) -> None:
     """`slowo_akcent` przeliczone REALNYM parserem Księgi Świata (v18.25).
 
@@ -672,6 +746,7 @@ def sprawdz_paczki() -> list[Znalezisko]:
         _sprawdz_znaki(kod, dane, dodaj)
         _sprawdz_pokrycie_lacinki(kod, dane, dodaj)
         _sprawdz_pokrycie_cyrylicy(kod, dane, dodaj)
+        _sprawdz_greke(kod, dane, dodaj)
         _sprawdz_slowo_akcent(kod, dane, pary, dodaj)
         _sprawdz_etykieta(kod, dane, dodaj)
     return znaleziska

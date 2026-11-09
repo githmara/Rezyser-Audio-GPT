@@ -250,6 +250,10 @@ PL_TERMINY = [
     "KROK",
     # zmyślony transliterat halucynacji (is manual:468 „Ważar" zamiast „Mikilvæg")
     "Ważar",
+    # przykład z sekcji 19.17 („β-blokery" → „beta-blokery") zostawiony po
+    # polsku przez `_docs` w en/de/es/fi/it — bez polskiej litery, więc klasa B'
+    # go nie widzi (zmierzone 2026-11-09)
+    "blokery", "blokerów",
 ]
 RE_PL_TERMINY = re.compile(
     r"(?<![\wąęółńśćźżĄĘÓŁŃŚĆŹŻ])(?:"

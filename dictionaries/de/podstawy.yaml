@@ -283,6 +283,89 @@ polskie_znaki:
   - { wzor: "Ž", zamiana: "Sch" }
   - { wzor: "İ", zamiana: "I" }
 
+  # -- Griechisch (v19.17): Buchstabe innerhalb eines Wortes → Transliteration (λόγος → logos).
+  #    Tonos, Polytonik, ϕ ϑ ϵ und das Mikrozeichen führt die Engine vorher auf diese 24 zurück. --
+  - { wzor: "α", zamiana: "a" }
+  - { wzor: "Α", zamiana: "A" }
+  - { wzor: "β", zamiana: "b" }
+  - { wzor: "Β", zamiana: "B" }
+  - { wzor: "γ", zamiana: "g" }
+  - { wzor: "Γ", zamiana: "G" }
+  - { wzor: "δ", zamiana: "d" }
+  - { wzor: "Δ", zamiana: "D" }
+  - { wzor: "ε", zamiana: "e" }
+  - { wzor: "Ε", zamiana: "E" }
+  - { wzor: "ζ", zamiana: "z" }
+  - { wzor: "Ζ", zamiana: "Z" }
+  - { wzor: "η", zamiana: "e" }
+  - { wzor: "Η", zamiana: "E" }
+  - { wzor: "θ", zamiana: "th" }
+  - { wzor: "Θ", zamiana: "Th" }
+  - { wzor: "ι", zamiana: "i" }
+  - { wzor: "Ι", zamiana: "I" }
+  - { wzor: "κ", zamiana: "k" }
+  - { wzor: "Κ", zamiana: "K" }
+  - { wzor: "λ", zamiana: "l" }
+  - { wzor: "Λ", zamiana: "L" }
+  - { wzor: "μ", zamiana: "m" }
+  - { wzor: "Μ", zamiana: "M" }
+  - { wzor: "ν", zamiana: "n" }
+  - { wzor: "Ν", zamiana: "N" }
+  - { wzor: "ξ", zamiana: "x" }
+  - { wzor: "Ξ", zamiana: "X" }
+  - { wzor: "ο", zamiana: "o" }
+  - { wzor: "Ο", zamiana: "O" }
+  - { wzor: "π", zamiana: "p" }
+  - { wzor: "Π", zamiana: "P" }
+  - { wzor: "ρ", zamiana: "r" }
+  - { wzor: "Ρ", zamiana: "R" }
+  - { wzor: "σ", zamiana: "s" }
+  - { wzor: "Σ", zamiana: "S" }
+  - { wzor: "τ", zamiana: "t" }
+  - { wzor: "Τ", zamiana: "T" }
+  - { wzor: "υ", zamiana: "y" }
+  - { wzor: "Υ", zamiana: "Y" }
+  - { wzor: "φ", zamiana: "ph" }
+  - { wzor: "Φ", zamiana: "Ph" }
+  - { wzor: "χ", zamiana: "ch" }
+  - { wzor: "Χ", zamiana: "Ch" }
+  - { wzor: "ψ", zamiana: "ps" }
+  - { wzor: "Ψ", zamiana: "Ps" }
+  - { wzor: "ω", zamiana: "o" }
+  - { wzor: "Ω", zamiana: "O" }
+
+# -----------------------------------------------------------------------------
+# BUCHSTABENNAMEN (v19.17): ein griechischer Buchstabe, der der EINZIGE Buchstabe
+# seines Wortes ist (π, 2π, β-Blocker), wird im Akzent zu seinem Namen.
+# Chiffren expandieren nie: dort gilt nur die Tabelle in `polskie_znaki`.
+# Schlüssel klein; der Großbuchstabe bekommt denselben Namen.
+# -----------------------------------------------------------------------------
+nazwy_liter:
+  - { wzor: "α", nazwa: "Alpha" }
+  - { wzor: "β", nazwa: "Beta" }
+  - { wzor: "γ", nazwa: "Gamma" }
+  - { wzor: "δ", nazwa: "Delta" }
+  - { wzor: "ε", nazwa: "Epsilon" }
+  - { wzor: "ζ", nazwa: "Zeta" }
+  - { wzor: "η", nazwa: "Eta" }
+  - { wzor: "θ", nazwa: "Theta" }
+  - { wzor: "ι", nazwa: "Iota" }
+  - { wzor: "κ", nazwa: "Kappa" }
+  - { wzor: "λ", nazwa: "Lambda" }
+  - { wzor: "μ", nazwa: "My" }
+  - { wzor: "ν", nazwa: "Ny" }
+  - { wzor: "ξ", nazwa: "Xi" }
+  - { wzor: "ο", nazwa: "Omikron" }
+  - { wzor: "π", nazwa: "Pi" }
+  - { wzor: "ρ", nazwa: "Rho" }
+  - { wzor: "σ", nazwa: "Sigma" }
+  - { wzor: "τ", nazwa: "Tau" }
+  - { wzor: "υ", nazwa: "Ypsilon" }
+  - { wzor: "φ", nazwa: "Phi" }
+  - { wzor: "χ", nazwa: "Chi" }
+  - { wzor: "ψ", nazwa: "Psi" }
+  - { wzor: "ω", nazwa: "Omega" }
+
 # -----------------------------------------------------------------------------
 # Deutsches Alphabet — 29 Großbuchstaben (A–Z + Ä, Ö, Ü am Ende).
 # ß ist NICHT enthalten (wächst beim .upper(): ß→SS).

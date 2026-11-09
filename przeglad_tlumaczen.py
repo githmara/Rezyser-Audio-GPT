@@ -796,14 +796,66 @@ disjoint, because one rewrites German spelling and the other Polish. Never
   see are HOMOGRAPHS: the same character read differently by the neighbour.
   Ukrainian `и` is Russian `ы`, its `е` is `э` and its `г` is /ɦ/; Bulgarian
   `ъ` and `щ` are not the Russian sounds either. A character table cannot fix
-  these — mapping Ukrainian `и` would break every Russian word — so they stay
-  as a known limitation unless the engine decides per word or per paragraph.
+  these — mapping Ukrainian `и` would break every Russian word — and the
+  engine DELIBERATELY does not guess the language of a word to fix them: one
+  Ukrainian surname in a Russian sentence does not make the sentence
+  Ukrainian, words written only in shared letters are undecidable without an
+  external service, and the pre-pass also runs before every cipher, so a
+  guess would make the Caesar output unpredictable. They stay a documented
+  limitation until a human reports a concrete text and voice. Do not add a
+  per-word heuristic in a pack review.
   If your new pack's script has a neighbour like that, (1) add the
   neighbour's extra letters to the matching list (or start a list for a
   script that has none yet), and (2) name the homographs in a comment of
   your `podstawy.yaml`, so the next reviewer does not take the silence for
   coverage. If your language IS that neighbour (a future `uk` pack), its own
   letters go into `alfabet`, and the gate stops asking for them.
+- GREEK REACHES EVERY PACK, AND ITS TWO OUTPUTS ARE NOT INTERCHANGEABLE. A
+  Greek letter that is the ONLY letter of its word (`π`, `2π`, `β-blockers`)
+  becomes its name from `nazwy_liter` in every accent, in the `oczyszczenie`
+  tools and in the native passthrough (a paragraph already in the voice's
+  language), so a formula is read as a formula — measured on Cerence: a Greek
+  letter left in the text is either silent or read with a voice switch and a
+  "micro" prefix; inside a word (`λόγος`, `μg`, `Δt`) it is one transliterated
+  letter from `polskie_znaki`. Ciphers NEVER use the name — a name would be
+  scattered over several letters of the cryptogram, and after decryption the
+  reader gets the letter's transliteration back (`π` → `p`), not a word the
+  text never had. When you review a pack: (1) write each name the way YOUR
+  language spells it (pl „mi, ksi", it „csi", fi „myy", ru „мю"), not the
+  English one — the gate only checks that what reaches the voice is in your
+  script, not that it is your word; (2) choose the transliteration by how a
+  TTS voice of your language PRONOUNCES it — that wins over dictionary
+  convention whenever the two disagree — and otherwise for the reader of a
+  scientific or classical text in your language (pl `θ → t`, en
+  `θ → th`, is `θ → þ`), one convention for the whole table; (3) do not add
+  pairs for `ά`, `ϕ`, `µ` and other variants — the engine reduces them to the
+  48 base letters before your table runs.
+- `alfabet` ALSO DECIDES WHAT YOUR VOICE HEARS IN ITS OWN TEXT. The pack's
+  pre-pass (`polskie_znaki`, after the letter names) runs on EVERY Director
+  path except the Tag Fixer: accents, ciphers, both `oczyszczenie` tools and
+  the native passthrough (a paragraph already in the voice's language). There
+  is no "native text goes through untouched" — measured on Cerence: a
+  high-quality voice reads its own letters and at most some English ones,
+  flattens the rest (`Müller` → "muler") or skips them in silence, even when
+  spelling. So a letter missing from `alfabet` is flattened by the table even
+  inside your own language's text. Do NOT add a letter to `alfabet` because
+  your voice happens to read it (fi `š ž`, say): `alfabet` is also the Caesar
+  cipher's ring, which must stay the language's NATIVE alphabet in its native
+  order — a letter placed there for the voice moves every shift and puts the
+  reviewer's taste where a convention should be. Report such a letter instead;
+  it needs a voice-only mechanism, not the alphabet. Better-sounding foreign
+  words are a job for context-aware AI readers, not for this table.
+- A CYRILLIC PACK'S `alfabet` IS ALSO ITS LANGUAGE DETECTOR. A paragraph
+  written in Cyrillic gets its language from the alphabets of the deployed
+  Cyrillic packs (`detektor_pism.jezyk_cyrylicy`), before and instead of the
+  statistical detector, because the script is visible from one letter while
+  the detector needs about 20 characters. The rule: the pack whose alphabet
+  holds EVERY Cyrillic letter of the text wins; a tie or no winner falls back
+  to `ru`. So when you add a second Cyrillic pack (Ukrainian, say), its
+  `alfabet` must list the letters that tell it apart (`і ї є ґ`), and must not
+  list letters it does not use (`ы э ъ ё`): an alphabet copied from `ru` makes
+  the two packs tie on every text, and every Ukrainian paragraph is filed as
+  Russian.
 - LOOK THE SPELLING UP BEFORE YOU INVENT IT. A language that meets foreign
   names has already decided how to write the sounds it does not own, and that
   decision beats anything you would derive: Finnish has an official one (Kotus

@@ -432,6 +432,26 @@ def test_szablon_podstaw_liczy_tabela_z_kodu():
     assert yaml.safe_load(tekst) is not None
 
 
+def test_szablon_podstaw_niesie_greke_ktora_przechodzi_bramke():
+    """v19.17: nowa paczka startuje z greka i nazwami liter, ktore bramka przyjmuje.
+
+    Bramke mierzymy na sparsowanym SZABLONIE - inaczej kontrybutor dostalby
+    plik, ktory czerwieni `audyt_podstaw` zanim cokolwiek w nim zmieni.
+    """
+    import audyt_podstaw as ap
+    tekst = mrs.szablon_podstawy("sv", "szwedzki")
+    for wzor, cel in mrs.TABELA_GREKI:
+        assert f'wzor: "{wzor}", zamiana: "{cel}"' in tekst
+    dane = yaml.safe_load(tekst)
+    assert len(dane["nazwy_liter"]) == 24
+    trafienia: list[str] = []
+    ap._sprawdz_greke("sv", dane, lambda k, s: trafienia.append(k))
+    assert trafienia == []
+    assert any("international names" in m
+               for m in mrs.znajdz_markery_szkicu(tekst)), \
+        "szablon nie kaze przepisac nazw na pisownie jezyka"
+
+
 # Uruchomienie jako skrypt — deleguje do pytesta: jeden mechanizm, jedno
 # raportowanie (kanon v19.2.1). Własny harness łapał wyłącznie `AssertionError`,
 # więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były

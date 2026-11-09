@@ -511,6 +511,20 @@ tresc:
     Fix in version 19.1 — the language tag describes the VOICE, not the source. For accents, the tag is now the same everywhere and indicates the synthesizer that should read the result: for the Finnish accent it's lang="fi" in the file header AND in every paragraph. Previously, the header got the target language, but individual paragraphs got the language the file was written in before processing. The effect was exactly the opposite of what was intended: after entering a paragraph, NVDA would switch back to the source voice and read the phonetic transcription as if it were ordinary Polish text, so the accent wasn't audible. In files you loaded as full HTML, it was sometimes even worse — the language of each paragraph was guessed from text that had ALREADY been ground through the phonetic rules, so a single document could end up with several different codes, none of them the right one. If you have old output files where the accent "didn't work," simply run the original through the Polyglot again.
 
     Modes that don't change the language — both cleanup modes and ciphers — behave as before: a paragraph in Russian gets tagged as Russian, because after cleanup it's still in Russian.
+  krok_5_obce_pisma: |
+    ## Letters the voice will not read (NEW in version 19.17)
+
+    Measurements on screen readers showed a rule without exceptions: a high-quality voice reads the letters of its own language and at most some English ones. The rest it flattens ("Müller" sounds like "Muller") or silently skips — inside a word, and often even when reading character by character. A Greek letter without a Greek voice falls silent, and with a Greek voice it sounds like "2 micro pi", with a pause for the voice switch.
+
+    That is why, starting with this version, all Director modes except the Tag Fixer prepare text for the voice just as predictably. Both cleanups, and a paragraph that is already in the voice's language (which until now passed through untouched), receive the character table from the language pack — just as accents and ciphers always have. Letters from the pack's alphabet are never touched: Finnish keeps ä, ö and å. The Russian pack leaves words written in Latin script as they are in the source, so that no word made of two alphabets is created.
+
+    Greek now reaches every pack. A letter standing alone becomes its own name ("2π" sounds like "two pi", "β-blockers" becomes "beta-blockers"), and a letter in the middle of a word is transliterated ("λόγος" → "logos"). Ciphers do not expand names: after decryption a letter comes back, not a word that was not in the text.
+
+    A paragraph written in Cyrillic gets its language from the alphabets of the installed packs before the ordinary detector is asked — so even a short line such as "Мы ждём вас." is marked as Russian, not Polish.
+
+    The Tag Fixer does not change the content, but from this version on a word in another script receives its own language marker in the middle of a paragraph: Greek as el, Cyrillic according to the pack alphabets. The screen reader will switch the voice at exactly that spot. In Word files, a fragment of text is split while preserving formatting, and running the Tag Fixer again on its own output adds nothing.
+
+    If natural pronunciation of foreign words matters to you, reach for an AI-based reader that understands context — for example ElevenLabs (free with restrictive limits, or as a subscription with credits) or ElevenReader (10 free hours of reading per month, while the Ultra plan, also billed annually, gives unlimited reading). A screen reader reads in real time and by design will never know which language a single word comes from.
   krok_5_auto_jezyk_nvda: |
     ## Automatic Language Switching in NVDA — What You Need to Know
 

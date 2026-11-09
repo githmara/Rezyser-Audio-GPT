@@ -377,7 +377,10 @@ def test_f_kody_per_akapit_trafiaja_we_wlasne_jednostki() -> None:
         f"cells, the hyperlink-only paragraph, the content-control paragraph and "
         f"the closing one (the empty paragraph does not count); `doc.paragraphs` "
         f"would see only 2, because it skips every one of those containers")
-    kody = ["pl", "en", "de", "fi", "es", "it"]
+    # Jednostka nr 4 jest pisana cyrylica, wiec dostaje kod cyrylicki: od v19.17
+    # cyrylica pod kodem lacinskim dostaje wlasny segment `ru` i pierwszy
+    # `w:lang` akapitu mierzylby segment pisma, nie kolejnosc stempli.
+    kody = ["pl", "en", "de", "fi", "ru", "it"]
     plik = Path(cp.zapisz_wynik("", str(KAT), "kontrakt_f_out", ".docx", "xx",
                                 cp.TRYB_REZYSER, cfg, "", str(zrodlo),
                                 kody_jednostek=kody))
@@ -444,8 +447,10 @@ def test_f_kody_per_akapit_trafiaja_we_wlasne_jednostki() -> None:
     plik = Path(cp.zapisz_wynik(txt, str(KAT), "kontrakt_f_nowy", ".docx", "pl",
                                 cp.TRYB_REZYSER, cfg, txt,
                                 str(KAT / "nie_ma_mnie.docx"),
-                                kody_jednostek=["en", "de", "fi"]))
-    assert _langi_docx_kolejnosc(plik) == ["en", "de", "fi"], (
+                                kody_jednostek=["en", "ru", "fi"]))
+    # Linia nr 2 to cyrylica: kod cyrylicki, bo pierwszy `w:lang` akapitu
+    # mierzylby inaczej segment pisma (v19.17), nie kolejnosc stempli.
+    assert _langi_docx_kolejnosc(plik) == ["en", "ru", "fi"], (
         f"order in the freshly built .docx: {_langi_docx_kolejnosc(plik)}")
 
 

@@ -84,7 +84,9 @@ pypdfium2<5.15
 # / nazwy `post`. Wołamy `TTFont(lazy=True)`, `getBestCmap`, `getGlyphOrder`
 # i `fontTools.agl.toUnicode` — granica na następnym majorze ponad
 # przetestowane 4.67.0 (4.x trzyma tę powierzchnię od lat; 5.0 to decyzja).
-fonttools<5
+# 19.17.0: 4.68.0 wyszło w trakcie zamrożenia — kanon zachowawczy, granica
+# o krok niżej, migracja po wydaniu (`skrypty/zamrozone_19.17.0.txt`).
+fonttools<4.68
 # `jezyki_lingua.KANON` jest LUSTREM enuma `lingua.Language`, a `audyt_podstaw`
 # porównuje je 1:1. Nowy MINOR potrafi dodać język, więc granicą jest tu linia
 # minorowa, nie majorowa: upgrade jest zmianą kanonu, nie tylko biblioteki.
@@ -111,7 +113,9 @@ pyinstaller<7
 # która `return`uje zamiast asertować (taki test nie może zawieść — złapane
 # w v19.2.1 na `test_core_updater.py`), a w 10.x ta sytuacja ma być błędem.
 # Wołamy też `pytest.skip`/`pytest.main` wprost. 10.x = decyzja, nie awaria.
-pytest<10
+# 19.17.0: 9.2.0 wyszło w trakcie zamrożenia — granica o krok niżej,
+# migracja po wydaniu (`skrypty/zamrozone_19.17.0.txt`).
+pytest<9.2
 # packaging — porównanie wersji wg PEP 440 w `audyt_zaleznosci.py` (dev-only,
 # runtime tego nie importuje). Wjeżdżało dotąd tranzytywnie (pyinstaller,
 # setuptools); deklarujemy je, bo NARZĘDZIE Z REPO go używa, a bramka bez

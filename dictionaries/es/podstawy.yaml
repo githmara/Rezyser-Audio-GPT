@@ -320,6 +320,89 @@ polskie_znaki:
   - { wzor: "Ž", zamiana: "Y" }
   - { wzor: "İ", zamiana: "I" }
 
+  # -- Griego (v19.17): letra dentro de una palabra → su transliteración (λόγος → logos).
+  #    El motor reduce antes el tonos, el politónico, ϕ ϑ ϵ y el signo micro a estas 24. --
+  - { wzor: "α", zamiana: "a" }
+  - { wzor: "Α", zamiana: "A" }
+  - { wzor: "β", zamiana: "b" }
+  - { wzor: "Β", zamiana: "B" }
+  - { wzor: "γ", zamiana: "g" }
+  - { wzor: "Γ", zamiana: "G" }
+  - { wzor: "δ", zamiana: "d" }
+  - { wzor: "Δ", zamiana: "D" }
+  - { wzor: "ε", zamiana: "e" }
+  - { wzor: "Ε", zamiana: "E" }
+  - { wzor: "ζ", zamiana: "z" }
+  - { wzor: "Ζ", zamiana: "Z" }
+  - { wzor: "η", zamiana: "e" }
+  - { wzor: "Η", zamiana: "E" }
+  - { wzor: "θ", zamiana: "t" }
+  - { wzor: "Θ", zamiana: "T" }
+  - { wzor: "ι", zamiana: "i" }
+  - { wzor: "Ι", zamiana: "I" }
+  - { wzor: "κ", zamiana: "k" }
+  - { wzor: "Κ", zamiana: "K" }
+  - { wzor: "λ", zamiana: "l" }
+  - { wzor: "Λ", zamiana: "L" }
+  - { wzor: "μ", zamiana: "m" }
+  - { wzor: "Μ", zamiana: "M" }
+  - { wzor: "ν", zamiana: "n" }
+  - { wzor: "Ν", zamiana: "N" }
+  - { wzor: "ξ", zamiana: "x" }
+  - { wzor: "Ξ", zamiana: "X" }
+  - { wzor: "ο", zamiana: "o" }
+  - { wzor: "Ο", zamiana: "O" }
+  - { wzor: "π", zamiana: "p" }
+  - { wzor: "Π", zamiana: "P" }
+  - { wzor: "ρ", zamiana: "r" }
+  - { wzor: "Ρ", zamiana: "R" }
+  - { wzor: "σ", zamiana: "s" }
+  - { wzor: "Σ", zamiana: "S" }
+  - { wzor: "τ", zamiana: "t" }
+  - { wzor: "Τ", zamiana: "T" }
+  - { wzor: "υ", zamiana: "i" }
+  - { wzor: "Υ", zamiana: "I" }
+  - { wzor: "φ", zamiana: "f" }
+  - { wzor: "Φ", zamiana: "F" }
+  - { wzor: "χ", zamiana: "j" }
+  - { wzor: "Χ", zamiana: "J" }
+  - { wzor: "ψ", zamiana: "ps" }
+  - { wzor: "Ψ", zamiana: "Ps" }
+  - { wzor: "ω", zamiana: "o" }
+  - { wzor: "Ω", zamiana: "O" }
+
+# -----------------------------------------------------------------------------
+# NOMBRES DE LETRAS (v19.17): una letra griega que es la ÚNICA letra de su palabra
+# (π, 2π, β-bloqueantes) se convierte en su nombre en un acento.
+# Los cifrados nunca la expanden: allí solo vale la tabla de `polskie_znaki`.
+# Claves en minúscula; la mayúscula recibe el mismo nombre.
+# -----------------------------------------------------------------------------
+nazwy_liter:
+  - { wzor: "α", nazwa: "alfa" }
+  - { wzor: "β", nazwa: "beta" }
+  - { wzor: "γ", nazwa: "gamma" }
+  - { wzor: "δ", nazwa: "delta" }
+  - { wzor: "ε", nazwa: "épsilon" }
+  - { wzor: "ζ", nazwa: "dseta" }
+  - { wzor: "η", nazwa: "eta" }
+  - { wzor: "θ", nazwa: "theta" }
+  - { wzor: "ι", nazwa: "iota" }
+  - { wzor: "κ", nazwa: "kappa" }
+  - { wzor: "λ", nazwa: "lambda" }
+  - { wzor: "μ", nazwa: "mi" }
+  - { wzor: "ν", nazwa: "ni" }
+  - { wzor: "ξ", nazwa: "xi" }
+  - { wzor: "ο", nazwa: "ómicron" }
+  - { wzor: "π", nazwa: "pi" }
+  - { wzor: "ρ", nazwa: "ro" }
+  - { wzor: "σ", nazwa: "sigma" }
+  - { wzor: "τ", nazwa: "tau" }
+  - { wzor: "υ", nazwa: "ípsilon" }
+  - { wzor: "φ", nazwa: "fi" }
+  - { wzor: "χ", nazwa: "ji" }
+  - { wzor: "ψ", nazwa: "psi" }
+  - { wzor: "ω", nazwa: "omega" }
+
 # -----------------------------------------------------------------------------
 # Alfabeto español — 27 letras mayúsculas (A–Z + Ñ).
 # Utilizado por el cifrado de César. La Ñ no rompe el índice porque

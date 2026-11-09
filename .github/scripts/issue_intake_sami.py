@@ -108,6 +108,12 @@ LABELS_IGNORE = {
     "wontfix",
     "duplicate",
     "tiflotecnia-patch",
+    # `on-hold` nadaje patch-bot przy pauzie (TIFLO_PATCH_PAUSED). Issue z tą
+    # etykietą to prośba o patch z adresem email w treści: gdy maintainer
+    # zdejmuje i nakłada `tiflotecnia-patch`, przez chwilę jedyną etykietą jest
+    # `on-hold` — bez tego wpisu każde zdarzenie `labeled` w tym oknie puściłoby
+    # treść do OpenAI (2026-11-09).
+    "on-hold",
     "fixed-in-release",
     # `answered` USUNIĘTE w v17.1: flow odpowiedzi przeniesiony do lokalnego
     # odpowiedz_lokalnie.py (zamyka issue od razu, bez etykiety-triggera),
@@ -244,6 +250,30 @@ def _wczytaj_dane_issue() -> tuple[str, str, str, str, str]:
         os.environ.get("ISSUE_LABELS", ""),
         os.environ.get("ISSUE_URL", ""),
     )
+
+
+# Adres email w treści zgłoszenia. Wzór szerszy niż w send_patch.py (tam
+# chodzi o znalezienie adresata, tu o to, żeby ŻADEN adres nie wyszedł do
+# zewnętrznego API): plus-adresy, cyfry i myślniki w domenie. Domena najwyższego
+# poziomu musi mieć litery (audyt N6): `openai@1.40.0` to specyfikator wersji
+# ze zgłoszenia i zostaje; `git@github.com` jest zasłaniany (bezpieczniej).
+_ADRES_EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)*\.[A-Za-z]{2,}\b")
+ZASLONA_EMAIL = "[email ukryty]"
+
+
+def bez_adresow_email(tekst: str) -> str:
+    """Zasłania adresy email PRZED wysyłką do OpenAI (2026-11-09).
+
+    Prośba o patch Tiflotecnii to zgłoszenie z adresem email w treści, a
+    zwykły użytkownik nie może nadać etykiety przy otwieraniu issue — więc
+    zdarzenie ``opened`` przychodzi BEZ ``tiflotecnia-patch``, filtr etykiet
+    przepuszcza je jako „nowe, jeszcze nieoznaczone", i adres leciał do API,
+    zanim maintainer zdążył nadać etykietę. Filtrem etykiet tego się nie
+    zamknie (etykiety jeszcze nie ma), stąd zasłona na samej treści. Mail do
+    Centrum dostaje treść oryginalną — to skrzynka maintainera, nie strona
+    trzecia.
+    """
+    return _ADRES_EMAIL.sub(ZASLONA_EMAIL, tekst)
 
 
 def _przepuszczalne(labels_csv: str) -> tuple[bool, list[str]]:
@@ -1060,7 +1090,8 @@ def main() -> int:
         print(f"Sami pobrała załączniki issue #{number} ({len(zalaczniki_tresc)} znaków).")
     body_dla_llm = zloz_payload_llm(body, zalaczniki_tresc)
 
-    prompt_tresc, czy_llm = _przeredaguj_z_openai(title, body_dla_llm, labels)
+    prompt_tresc, czy_llm = _przeredaguj_z_openai(
+        bez_adresow_email(title), bez_adresow_email(body_dla_llm), labels)
     marker = "Sami (LLM)" if czy_llm else "Sami (fallback)"
     temat = f"[Reżyser Audio GPT][{marker}] Issue #{number}: {title[:80]}"
 

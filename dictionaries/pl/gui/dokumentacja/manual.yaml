@@ -564,6 +564,20 @@ tresc:
     Poprawka w wersji 19.1 — tag języka opisuje GŁOS, nie źródło. Przy akcencie tag jest teraz wszędzie ten sam i wskazuje syntezator, który ma przeczytać wynik: dla akcentu fińskiego to lang="fi" w nagłówku pliku ORAZ w każdym akapicie. Wcześniej nagłówek dostawał język docelowy, ale poszczególne akapity — język, w którym plik był napisany przed przetworzeniem. Skutek był dokładnie odwrotny do zamierzonego: NVDA po wejściu w akapit wracała na głos źródłowy i czytała zapis fonetyczny tak, jakby to był zwykły polski tekst, więc akcent nie był słyszalny. W plikach, które wczytywałeś jako pełny HTML, bywało jeszcze gorzej — język każdego akapitu był zgadywany z tekstu JUŻ przemielonego przez reguły fonetyczne, więc jeden dokument mógł dostać kilka różnych kodów i żaden z nich nie był tym właściwym. Jeśli masz stare pliki wynikowe, w których akcent „nie działał", wystarczy przepuścić oryginał przez Poliglotę jeszcze raz.
 
     Tryby, które języka nie zmieniają — oba czyszczenia i szyfry — zachowują się jak dotąd: akapit po rosyjsku zostaje otagowany jako rosyjski, bo po oczyszczeniu wciąż jest po rosyjsku.
+  krok_5_obce_pisma: |
+    ## Litery, których głos nie przeczyta (NOWOŚĆ w wersji 19.17)
+
+    Pomiary na czytnikach ekranu pokazały regułę bez wyjątków: głos wysokiej jakości czyta litery własnego języka i najwyżej część angielskich. Resztę spłaszcza („Müller" brzmi jak „Muller") albo przemilcza — w słowie, a często nawet przy czytaniu znak po znaku. Grecka litera bez greckiego głosu milknie, a z greckim głosem brzmi jak „2 mikro pi", z przerwą na zmianę głosu.
+
+    Dlatego od tej wersji wszystkie tryby Reżysera poza Naprawiaczem Tagów przygotowują tekst dla głosu tak samo przewidywalnie. Oba czyszczenia i akapit, który już jest w języku głosu (dotąd przechodził nietknięty), dostają tablicę znaków paczki językowej — tak jak od zawsze akcenty i szyfry. Litery z alfabetu paczki nigdy nie są ruszane: fiński zachowuje ä, ö i å. Paczka rosyjska zostawia słowa pisane łacinką tak, jak w źródle, żeby nie powstało słowo z dwóch alfabetów.
+
+    Greka trafia teraz do każdej paczki. Litera stojąca samotnie staje się swoją nazwą („2π" brzmi „dwa pi", „β-blokery" — „beta-blokery"), a litera w środku słowa jest transliterowana („λόγος" → „logos"). Szyfry nazw nie rozwijają: po odszyfrowaniu wraca litera, a nie słowo, którego w tekście nie było.
+
+    Akapit pisany cyrylicą dostaje język z alfabetów zainstalowanych paczek, zanim zapyta się zwykłego detektora — więc nawet krótka linia w rodzaju „Мы ждём вас." jest oznaczona jako rosyjska, a nie polska.
+
+    Naprawiacz Tagów treści nie zmienia, ale od tej wersji słowo w innym piśmie dostaje w środku akapitu własny znacznik języka: greka jako el, cyrylica według alfabetów paczek. Czytnik ekranu przełączy głos dokładnie w tym miejscu. W plikach Worda fragment tekstu jest rozcinany z zachowaniem formatowania, a ponowne użycie Naprawiacza na jego własnym wyniku niczego nie dokłada.
+
+    Jeśli zależy Ci na naturalnym brzmieniu obcych słów, sięgnij po czytnik oparty na sztucznej inteligencji, który rozumie kontekst — na przykład ElevenLabs (darmowy z restrykcyjnymi limitami albo w subskrypcji z kredytami) lub ElevenReader (darmowe 10 godzin czytania miesięcznie, a plan Ultra, opłacany także rocznie, daje czytanie bez limitu). Czytnik ekranu czyta w czasie rzeczywistym i z założenia nigdy nie będzie wiedział, z jakiego języka pochodzi pojedyncze słowo.
   krok_5_auto_jezyk_nvda: |
     ## Automatyczne przełączanie języka w NVDA — co musisz wiedzieć
 

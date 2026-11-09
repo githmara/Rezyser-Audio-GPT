@@ -1,26 +1,35 @@
 # -----------------------------------------------------------------------------
 #  DULMÁL: CAESAR-DULMÁL
-#  Klassískt skiptidulmál sem flytur hvern staf N stig í íslensku stafrófinu.
+#  Klassískt skiptidulmál sem flytur hvern staf N stig í íslensku stafrófinu,
+#  útvíkkuðu með C, Q, W og Z (36 stafir).
 # -----------------------------------------------------------------------------
 id: cezar
 etykieta: "Caesar-dulmál (Flutningur í íslensku stafrófinu)"
 opis: |
-  Klassískt Caesar-dulmál: hverjum staf er flutt N stig í íslensku stafrófinu
-  (AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ, 32 stafir, engin bil). Stafir utan
+  Klassískt Caesar-dulmál: hverjum staf er flutt N stig í útvíkkuðu íslensku
+  stafrófi (AÁBCDÐEÉFGHIÍJKLMNOÓPQRSTUÚVWXYÝZÞÆÖ, 36 stafir: 32 íslenskir
+  stafir auk C, Q, W og Z á sínum latneska stað, engin bil). Stafir utan
   stafrófsins (tölur, greinarmerki) haldast óbreyttir.
 
+  Erlendu stafirnir C, Q, W og Z eru hluti hringsins: án þeirra stæðu þeir
+  ódulkóðaðir í dulmálinu (til dæmis í „pizza").
+
   Flutningsgildi er gefið í notendaviðmótinu ("Caesar-dulmál flutningur"
-  -reiturinn). Gildi 0 þýðir "gildið er handahófskennt á bilinu 1..31".
+  -reiturinn). Gildi 0 þýðir "gildið er handahófskennt á bilinu 1..35".
 iso: is
 kategoria: szyfr
 kolejnosc: 60
 algorytm: cezar
 
-# Stafrófið er lesið úr skránni dictionaries/is/podstawy.yaml (lykill: alfabet).
-# Ef þú vilt nota annað stafróf, fjarlægðu athugasemdina og skrifaðu eigið:
-# alfabet: "AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ"
+# Hringur dulmálsins víkkar stafróf dictionaries/is/podstawy.yaml (32 stafir,
+# óbreytt fyrir málgreiningu og rödd) með C, Q, W og Z á sínum stað í latneskri
+# röð. Viljir þú hreint íslenskt stafróf, skrifaðu í ÞINNI uppsettu
+# útgáfu (ekki í kóðasafninu, þar sem próf bannar það)
+# "AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ" og minnkaðu bilið í ±31 — en þá standa
+# C, Q, W og Z ódulkóðaðir.
+alfabet: "AÁBCDÐEÉFGHIÍJKLMNOÓPQRSTUÚVWXYÝZÞÆÖ"
 
 # Leyfilegt flutningsbil í notendaviðmótinu (SpinCtrl).
-# 32 stafir → flutningur 32 ≡ 0 (sjálfsmynd); flutningar ±1..±31 eru einstakar.
-min_przesuniecie: -31
-max_przesuniecie: 31
+# 36 stafir → flutningur 36 ≡ 0 (sjálfsmynd); flutningar ±1..±35 eru einstakar.
+min_przesuniecie: -35
+max_przesuniecie: 35

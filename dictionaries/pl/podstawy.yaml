@@ -289,6 +289,89 @@ polskie_znaki:
   - { wzor: "ẞ", zamiana: "SS" }
   - { wzor: "İ", zamiana: "I" }
 
+  # -- Greka (v19.17): litera wewnątrz wyrazu → jej transliteracja (λόγος → logos).
+  #    Tonos, politonik, ϕ ϑ ϵ i znak mikro silnik sprowadza wcześniej do tych 24 liter. --
+  - { wzor: "α", zamiana: "a" }
+  - { wzor: "Α", zamiana: "A" }
+  - { wzor: "β", zamiana: "b" }
+  - { wzor: "Β", zamiana: "B" }
+  - { wzor: "γ", zamiana: "g" }
+  - { wzor: "Γ", zamiana: "G" }
+  - { wzor: "δ", zamiana: "d" }
+  - { wzor: "Δ", zamiana: "D" }
+  - { wzor: "ε", zamiana: "e" }
+  - { wzor: "Ε", zamiana: "E" }
+  - { wzor: "ζ", zamiana: "z" }
+  - { wzor: "Ζ", zamiana: "Z" }
+  - { wzor: "η", zamiana: "e" }
+  - { wzor: "Η", zamiana: "E" }
+  - { wzor: "θ", zamiana: "t" }
+  - { wzor: "Θ", zamiana: "T" }
+  - { wzor: "ι", zamiana: "i" }
+  - { wzor: "Ι", zamiana: "I" }
+  - { wzor: "κ", zamiana: "k" }
+  - { wzor: "Κ", zamiana: "K" }
+  - { wzor: "λ", zamiana: "l" }
+  - { wzor: "Λ", zamiana: "L" }
+  - { wzor: "μ", zamiana: "m" }
+  - { wzor: "Μ", zamiana: "M" }
+  - { wzor: "ν", zamiana: "n" }
+  - { wzor: "Ν", zamiana: "N" }
+  - { wzor: "ξ", zamiana: "ks" }
+  - { wzor: "Ξ", zamiana: "Ks" }
+  - { wzor: "ο", zamiana: "o" }
+  - { wzor: "Ο", zamiana: "O" }
+  - { wzor: "π", zamiana: "p" }
+  - { wzor: "Π", zamiana: "P" }
+  - { wzor: "ρ", zamiana: "r" }
+  - { wzor: "Ρ", zamiana: "R" }
+  - { wzor: "σ", zamiana: "s" }
+  - { wzor: "Σ", zamiana: "S" }
+  - { wzor: "τ", zamiana: "t" }
+  - { wzor: "Τ", zamiana: "T" }
+  - { wzor: "υ", zamiana: "y" }
+  - { wzor: "Υ", zamiana: "Y" }
+  - { wzor: "φ", zamiana: "f" }
+  - { wzor: "Φ", zamiana: "F" }
+  - { wzor: "χ", zamiana: "ch" }
+  - { wzor: "Χ", zamiana: "Ch" }
+  - { wzor: "ψ", zamiana: "ps" }
+  - { wzor: "Ψ", zamiana: "Ps" }
+  - { wzor: "ω", zamiana: "o" }
+  - { wzor: "Ω", zamiana: "O" }
+
+# -----------------------------------------------------------------------------
+# NAZWY LITER (v19.17): grecka litera, która jest JEDYNĄ literą wyrazu
+# (π, 2π, β-blokery), w akcencie staje się nazwą — głos czyta wzór.
+# Szyfr nazw NIE rozwija: tam działa tylko tablica w `polskie_znaki`.
+# Klucz małą literą; wielka litera dostaje tę samą nazwę.
+# -----------------------------------------------------------------------------
+nazwy_liter:
+  - { wzor: "α", nazwa: "alfa" }
+  - { wzor: "β", nazwa: "beta" }
+  - { wzor: "γ", nazwa: "gamma" }
+  - { wzor: "δ", nazwa: "delta" }
+  - { wzor: "ε", nazwa: "epsilon" }
+  - { wzor: "ζ", nazwa: "dzeta" }
+  - { wzor: "η", nazwa: "eta" }
+  - { wzor: "θ", nazwa: "theta" }
+  - { wzor: "ι", nazwa: "jota" }
+  - { wzor: "κ", nazwa: "kappa" }
+  - { wzor: "λ", nazwa: "lambda" }
+  - { wzor: "μ", nazwa: "mi" }
+  - { wzor: "ν", nazwa: "ni" }
+  - { wzor: "ξ", nazwa: "ksi" }
+  - { wzor: "ο", nazwa: "omikron" }
+  - { wzor: "π", nazwa: "pi" }
+  - { wzor: "ρ", nazwa: "rho" }
+  - { wzor: "σ", nazwa: "sigma" }
+  - { wzor: "τ", nazwa: "tau" }
+  - { wzor: "υ", nazwa: "ypsilon" }
+  - { wzor: "φ", nazwa: "fi" }
+  - { wzor: "χ", nazwa: "chi" }
+  - { wzor: "ψ", nazwa: "psi" }
+  - { wzor: "ω", nazwa: "omega" }
+
 # -----------------------------------------------------------------------------
 # Alfabet polski – 35 wielkich liter, bez znaków białych.
 # Używany przez szyfr Cezara (plik szyfry/cezar.yaml).

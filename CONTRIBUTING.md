@@ -181,7 +181,7 @@ reach X on the paths this project uses.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are 48 regression test files (907 tests, **about a minute for all of them**) and
+There are 52 regression test files (1076 tests, **about a minute for all of them**) and
 nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
 (`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
 Running every one of them after every small edit is not thoroughness — a green
@@ -419,3 +419,19 @@ Japanese equivalent has to come out as kana.
 
 Open an issue or PR describing the change. Keep accessibility (keyboard
 navigation, screen-reader labels) in mind for any GUI work.
+
+### Changes that will not be merged on their own
+
+**The Caesar rings of `it` and `is` stay extended.** Their
+`szyfry/cezar.yaml` adds the Latin letters their native alphabets lack
+(`it`: J K W X Y, `is`: C Q W Z), at their places in Latin order, because
+otherwise those letters come out of the cipher in plain text ("weekend",
+"pizza"). The Russian ring carries the whole Latin alphabet for the same
+reason. `test_cezar_szczelnosc.py` enforces this for every pack.
+
+A pull request whose only effect is to restore a purely native ring (or a
+Russian ring without Latin) and so turn that test red will be declined. A
+pull request that brings something worth having (a feature, a language) and
+also reverts the rings will be merged with the rings put back as they are.
+If you want a native-only ring for yourself, edit `szyfry/cezar.yaml` in
+your INSTALLED copy: the file's comment says how, and no test runs there.

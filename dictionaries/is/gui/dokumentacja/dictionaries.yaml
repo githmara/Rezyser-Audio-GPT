@@ -81,7 +81,7 @@ tresc:
        Bætir stami við upphaf orða: "stelpa" → "st-st-stelpa", "þrjótur" → "þr-þr-þrjótur". Orð styttri en 3 stafir eru sleppt. Ef annar stafur orðsins er samhljóði, eru fyrstu tveir stafir endurteknir (hljómar náttúrulegra); ef sérhljóði — aðeins fyrsti.
 
     6. Cæsar Dulritun (klassík)
-       Elsta skjalfesta dulritun í sögunni (notuð í forn Róm). Hver stafur er færður um N stöður í íslenska stafrófinu (32 stafir, með diakritískum: AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ). Færslan er gefin upp í GUI í tölusviði; ef þú slærð inn 0, velur forritið handahófskennt gildi á bilinu 1-31 og sýnir það í skilaboðum, svo þú getir síðan afkóðað skilaboðin. Stafir utan stafrófsins (tölur, bil, greinarmerki) eru óbreyttir.
+       Elsta skjalfesta dulritun í sögunni (notuð í forn Róm). Hver stafur er færður um N stöður í útvíkkuðu íslensku stafrófi (36 stafir, með diakritískum: AÁBCDÐEÉFGHIÍJKLMNOÓPQRSTUÚVWXYÝZÞÆÖ — 32 íslenskir stafir auk C, Q, W og Z, sem annars stæðu ódulkóðaðir). Færslan er gefin upp í GUI í tölusviði; ef þú slærð inn 0, velur forritið handahófskennt gildi á bilinu 1-35 og sýnir það í skilaboðum, svo þú getir síðan afkóðað skilaboðin. Stafir utan stafrófsins (tölur, bil, greinarmerki) eru óbreyttir.
   co_to_tryb_rezysera: |
     ## Hvað er "leikstjóra-hamur"?
     ---------------------------
