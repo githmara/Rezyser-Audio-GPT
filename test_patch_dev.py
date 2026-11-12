@@ -279,25 +279,31 @@ def test_klasyfikacja_zaleznosci_rozdziela_decyzje_od_zaniedbania():
     assert (nieznane.status, nieznane.trafienie) == ("nieznane", False), nieznane
 
 
-def test_manifest_ma_granice_na_pieciu_pakietach():
-    """Granice sa czescia kontraktu, nie ozdoba — trzymamy je pod asercja.
+def test_manifest_ma_granice_na_ustalonych_pakietach():
+    """KTORE pakiety maja granice — to decyzja; JAKA wartosc — to rutyna.
 
-    Wartosci zmieniaja sie WYLACZNIE decyzja: `anthropic<1.8` i `openai<3.17`
-    zapisuja wstrzymanie dwoch minorowych upgrade'ow (v19.8.0, kanon
-    zachowawczy; poprzednie takie wstrzymanie z v19.4.2 zdjeto w v19.5.0 po
-    `inspect.signature` na wolanej powierzchni), a `elevenlabs<2.69`
-    i `markdown<3.11` dwa kolejne (v19.8.1). Test ma o tym KRZYCZEC przy kazdej
-    takiej zmianie — to jego zadanie, a nie uciazliwosc: granica ponizej
-    najnowszego wydania znaczy „ktos zdecydowal", a granica przestarzala
-    znaczy „ktos zapomnial".
+    Do 19.17 test trzymal pod asercja same WARTOSCI (`anthropic<1.8`, ...),
+    zgodnie z kanonem zachowawczym. Kanon srodowiska (19.18) przeniosl zapis
+    decyzji do manifestu: przesuniecie granicy to zwykly krok commitu
+    srodowiska, a jego data stoi w `# hold:` (wygasa z minorem — pilnuje tego
+    `audyt_zaleznosci`, nie ten test). Test krzyczy teraz tylko wtedy, gdy
+    granica POJAWIA SIE albo ZNIKA: zdjecie granicy z pakietu grupy A albo
+    nowa granica bez uzasadnienia w komentarzu to zmiana kanonu.
     """
-    oczekiwane = {"wxpython": "<4.4", "anthropic": "<1.8", "openai": "<3.17",
-                  "elevenlabs": "<2.69", "lingua-language-detector": "<2.3",
-                  "markdown": "<3.11"}
-    manifest = {w.nazwa: w.specyfikator for w in az.wczytaj_manifest()}
-    for nazwa, granica in oczekiwane.items():
-        assert manifest.get(nazwa) == granica, (
-            f"{nazwa}: oczekiwana granica {granica}, jest {manifest.get(nazwa)!r}")
+    oczekiwane = {"wxpython", "anthropic", "openai", "elevenlabs",
+                  "lingua-language-detector", "markdown", "pyinstaller",
+                  "pypdfium2", "fonttools", "pytest"}
+    z_granica = {w.nazwa for w in az.wczytaj_manifest() if "<" in w.specyfikator}
+    assert z_granica == oczekiwane, (
+        f"nowe granice: {sorted(z_granica - oczekiwane)}, "
+        f"zdjete: {sorted(oczekiwane - z_granica)}")
+
+
+def test_hold_ma_date_w_formacie_wersji():
+    """`# hold:` bez czytelnej wersji = granica niedatowana, ktora nigdy nie wygasa."""
+    for wpis in az.wczytaj_manifest():
+        if wpis.wstrzymanie is not None:
+            assert az._RE_VERSION.match(wpis.wstrzymanie), (wpis.nazwa, wpis.wstrzymanie)
 
 
 def test_zadna_granica_nie_wyklucza_tego_co_mamy_zainstalowane():

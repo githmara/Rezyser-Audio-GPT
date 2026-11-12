@@ -89,17 +89,19 @@ python-docx
 # zamiast `pdfplumber` z ATA: PDFium bez zależności to ~8 MB bundla, pdfplumber
 # ciągnąłby pdfminer + Pillow + cryptography (~45 MB). Wołamy `PdfDocument`,
 # `get_textpage`, `get_text_range` i `get_charbox(loose=True)` — granica na
-# następnym minorze ponad przetestowane 5.14.0, bo kod znaku dywizu dzielenia
+# następnym minorze ponad przetestowane, bo kod znaku dywizu dzielenia
 # (U+FFFE w 5.14, zmierzone) to szczegół implementacji PDFium, nie kontrakt API.
-pypdfium2<5.15  # hold: 19.17.0
+# 19.18 (środowisko): 5.15.2 — 12 PDF-ów / 39 stron, surowy tekst i wynik
+# `core_pdf.wyciagnij` bajt w bajt jak na 5.14.0. W tej próbce nie było dywizu
+# dzielenia, więc kod U+FFFE na 5.15 NIE jest zmierzony ponownie.
+pypdfium2<5.16  # hold: 19.18.0
 # Naprawa zniekształconej warstwy tekstu PDF z osadzonego fontu (`core_pdf`,
 # od 19.15): czytamy program fontu TrueType z PDF-a i odwracamy jego `cmap`
 # / nazwy `post`. Wołamy `TTFont(lazy=True)`, `getBestCmap`, `getGlyphOrder`
 # i `fontTools.agl.toUnicode` — granica na następnym majorze ponad
-# przetestowane 4.67.0 (4.x trzyma tę powierzchnię od lat; 5.0 to decyzja).
-# 19.17.0: 4.68.0 wyszło w trakcie zamrożenia — kanon zachowawczy, granica
-# o krok niżej, migracja po wydaniu (`skrypty/zamrozone_19.17.0.txt`).
-fonttools<4.68  # hold: 19.17.0
+# przetestowane (4.x trzyma tę powierzchnię od lat; 5.0 to decyzja).
+# 19.18 (środowisko): 4.68.0 — testy `test_core_pdf` (naprawa z fontu) zielone.
+fonttools<4.69  # hold: 19.18.0
 # `jezyki_lingua.KANON` jest LUSTREM enuma `lingua.Language`, a `audyt_podstaw`
 # porównuje je 1:1. Nowy MINOR potrafi dodać język, więc granicą jest tu linia
 # minorowa, nie majorowa: upgrade jest zmianą kanonu, nie tylko biblioteki.
@@ -126,9 +128,8 @@ pyinstaller<7
 # która `return`uje zamiast asertować (taki test nie może zawieść — złapane
 # w v19.2.1 na `test_core_updater.py`), a w 10.x ta sytuacja ma być błędem.
 # Wołamy też `pytest.skip`/`pytest.main` wprost. 10.x = decyzja, nie awaria.
-# 19.17.0: 9.2.0 wyszło w trakcie zamrożenia — granica o krok niżej,
-# migracja po wydaniu (`skrypty/zamrozone_19.17.0.txt`).
-pytest<9.2  # hold: 19.17.0
+# 19.18 (środowisko): 9.2.0 — pełny zestaw zielony.
+pytest<9.3  # hold: 19.18.0
 # packaging — porównanie wersji wg PEP 440 w `audyt_zaleznosci.py` (dev-only,
 # runtime tego nie importuje). Wjeżdżało dotąd tranzytywnie (pyinstaller,
 # setuptools); deklarujemy je, bo NARZĘDZIE Z REPO go używa, a bramka bez
@@ -136,11 +137,11 @@ pytest<9.2  # hold: 19.17.0
 packaging
 # markdown — render szablonów docs (Markdown → HTML) w generuj_dokumentacje.py
 # (dev/build-time; runtime .exe go nie importuje, więc nie trafia do bundla).
-# WSTRZYMANIE ZAPISANE GRANICĄ (v19.8.1, kanon zachowawczy): PyPI ma 3.11,
-# krok MINOROWY ponad zainstalowane 3.10.3. Nowy minor renderera potrafi
-# zmienić HTML wszystkich `docs/`, więc upgrade = regeneracja + przegląd diffu
-# w osobnym cyklu, nie przy okazji patcha.
-markdown<3.11  # hold: 19.8.1
+# Nowy minor renderera potrafi zmienić HTML wszystkich `docs/`, więc upgrade =
+# regeneracja + przegląd diffu w commicie środowiska, nie przy okazji patcha.
+# 19.18 (środowisko): 3.10.3 → 3.11.3 — regeneracja `docs/` bez jednego bajtu
+# różnicy, `--waliduj` zielone.
+markdown<3.12  # hold: 19.18.0
 # openai — dwaj konsumenci, obaj żywi:
 #   1. RUNTIME aplikacji, od v18.4: wybór dostawcy AI. Przy
 #      `LLM_PROVIDER=openai_compat` (README, manual KROK 2B) `core_llm.zbuduj_klienta`
