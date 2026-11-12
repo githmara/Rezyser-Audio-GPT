@@ -46,37 +46,48 @@ a lektura logu następuje PO buildzie. Komunikat blokady świadomie NIE ma tonu
 jest `build_release.py --no-strict`, która audytu NIE ODPALA w ogóle (krytyczny
 hotfix wydawany bez sprawdzania zależności).
 
-KANON ZACHOWAWCZY (2026-09-18) — co robić, gdy przyjęcie nowego wydania
-wymagałoby PRZESUNIĘCIA GRANICY na następny minor albo major (a nie zwykłego
-kroku patchowego w jej wnętrzu):
-  1. wydanie robimy JAK JEST — migracja SDK nie jest treścią tego wydania;
-  2. notujemy pozycję w „co nie weszło" (`Planned or deferred`), więc decyzja
-     zostaje widoczna zamiast rozpłynąć się w „zrobimy kiedyś";
-  3. mrozimy środowisko: `pip freeze > skrypty/zamrozone_<wersja>.txt`
-     (gitignored, obok raportu wydania) — to bilet powrotny;
-  4. PO wydaniu: przesuwamy granicę, upgradujemy, testujemy i dostrajamy,
-     a wynik wydajemy jako OSOBNY patch / minor / major — zależnie od tego, ile
-     się realnie ruszyło;
-  5. albo przywracamy wersję zamrożoną, zostawiamy stałą granicę i robimy DEV
-     PATCH, bo zupgradowany i przywrócony bundle to w praktyce ten sam bundle
-     (wykonalne od 2026-09-18 — wcześniej sam zapis granicy blokował skróconą
-     procedurę, patrz wyjątek wyżej).
-Wariant patchowy WEWNĄTRZ granicy zostaje tani i normalny: upgrade
-+ `inspect.signature` wołanej powierzchni (zero zapytań do API) + nota
-w `### What's new`.
+KANON ŚRODOWISKA (2026-11-12, zastąpił kanon zachowawczy z 2026-09-18):
+  * ŚRODOWISKO NAJPIERW, jak w NVDA: pierwszy commit cyklu minorowego to
+    `WIP vX.Y: środowisko` — zdjęcie wstrzymań, upgrade, testy tego, co już
+    istnieje — i dopiero potem nowy kod. Funkcje cyklu są wtedy testowane na
+    wersjach, które pójdą do bundla, a zmiany środowiska trafiają do sekcji
+    wydania jako „Environment” (to, co widzi użytkownik, i to, co deweloper);
+  * GRUPY RYZYKA (:data:`GRUPY_RYZYKA`) mówią, KIEDY wolno podbić i CZYM to
+    udowodnić: A (okno, wyświetlanie, treść) tylko w commicie środowiska,
+    z dowodem właściwym dla pakietu; B (providerzy) w dowolnym momencie cyklu,
+    `inspect.signature` + jedno żywe wywołanie; C (dev-only) zawsze, a dowodem
+    jest przejście `pytest`;
+  * WSTRZYMANIE JEST DATOWANE: granica, która wyklucza istniejące wydanie, musi
+    mieć w swojej linii `# hold: <wersja wydania, które ją postawiło>`.
+    Wstrzymanie WYGASA z następnym minorem: build `X.Y.0` odmawia, dopóki stoi
+    wstrzymanie z wcześniejszego minora, a build patcha tylko ostrzega.
 
-CZTERY STANY per pakiet (rozróżnienie jest tu całą treścią bramki):
+Zastąpiony kanon zachowawczy miał krok „PO wydaniu migrujemy” bez żadnego
+wyzwalacza, a bramka liczyła zapisaną granicę jako zielone na zawsze. Zmierzone
+2026-11-12: siedem wstrzymań, `anthropic` trzymany granicą `<1.8` od v19.8.0
+przespał cały major (PyPI 2.8.0), `openai` był 33 minory w tyle, a trzy pliki
+`zamrozone_*.txt` (19.5.0, 19.8.0, 19.8.1) były identyczne co do bajtu.
 
-  * ``aktualne``  — zainstalowana wersja == najnowsza na PyPI;
-  * ``granica``   — nowsze wydanie ISTNIEJE, ale nasz specyfikator go NIE
-                    dopuszcza. To decyzja już podjęta i świadoma, więc NIE jest
-                    trafieniem bramki — tylko pozycją do przeglądu, gdy przyjdzie
-                    czas na migrację;
-  * ``nowsza``    — nowsze wydanie istnieje i nasz manifest je DOPUSZCZA, czyli
-                    nikt o nim nie zdecydował, a kontrybutor dostanie je od pip-a.
-                    To jest trafienie;
-  * ``brak``      — pakiet z manifestu nie jest w ogóle zainstalowany. Środowisko
-                    nie odpowiada manifestowi; też trafienie.
+STANY per pakiet (rozróżnienie jest tu całą treścią bramki):
+
+  * ``aktualne``        — zainstalowana wersja == najnowsza na PyPI;
+  * ``granica``         — nowsze wydanie ISTNIEJE, nasz specyfikator go NIE
+                          dopuszcza, a linia ma ważne `# hold:`. Decyzja, nie
+                          trafienie;
+  * ``przeterminowana`` — jak wyżej, ale `hold:` pochodzi z wcześniejszego
+                          minora niż `VERSION`. Trafienie w buildzie `X.Y.0`
+                          (otwarcie cyklu przegapiło commit środowiska),
+                          ostrzeżenie w buildzie patcha;
+  * ``niedatowana``     — granica wyklucza istniejące wydanie, a linia nie ma
+                          `# hold:`. Nikt nie zapisał, KIEDY zdecydował, więc
+                          nic nie przypomni o terminie. Trafienie;
+  * ``nowsza``          — nowsze wydanie istnieje i nasz manifest je DOPUSZCZA,
+                          czyli nikt o nim nie zdecydował, a kontrybutor dostanie
+                          je od pip-a. Trafienie;
+  * ``brak``            — pakiet z manifestu nie jest w ogóle zainstalowany.
+                          Środowisko nie odpowiada manifestowi; też trafienie;
+  * ``bez_grupy``       — pakiet nie ma grupy ryzyka w :data:`GRUPY_RYZYKA`.
+                          Nowa zależność musi dostać grupę razem z wpisem.
 
 CZEGO TA BRAMKA NIE UMIE, i mówi to wprost: stanu PyPI nie da się sprawdzić
 offline, więc runner `sync-dev-release.yml` (gdzie nasze zależności nie są
@@ -92,6 +103,7 @@ Użycie:
   python build_release.py --no-strict           # hotfix: audytu nie odpala
   python audyt_zaleznosci.py --bez-sieci        # tylko manifest kontra zainstalowane
   python audyt_zaleznosci.py --pakiety anthropic,openai
+  python audyt_zaleznosci.py --zamroz 19.18.0   # pip freeze, ale bez duplikatów
 """
 from __future__ import annotations
 
@@ -106,12 +118,16 @@ from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Optional
 
+import subprocess
+
 import dev_konsola
 
 dev_konsola.skonfiguruj_stdout()
 
 ROOT = Path(__file__).resolve().parent
 SCIEZKA_MANIFESTU = ROOT / "requirements.txt"
+SCIEZKA_VERSION = ROOT / "VERSION"
+KATALOG_ZAMROZEN = ROOT / "skrypty"
 URL_PYPI = "https://pypi.org/pypi/{}/json"
 TIMEOUT = 15
 
@@ -127,6 +143,51 @@ NARZEDZIE = "audyt_zaleznosci"
 
 # Nazwa dystrybucji + jej specyfikator (surowy, jak w manifeście).
 _RE_WPIS = re.compile(r"^(?P<nazwa>[A-Za-z0-9._-]+)\s*(?P<extras>\[[^\]]*\])?\s*(?P<spec>.*)$")
+# Data wstrzymania w komentarzu tej samej linii: `anthropic<1.8  # hold: 19.8.0`.
+# pip traktuje ` #` jako początek komentarza, więc manifest instaluje się bez zmian.
+_RE_HOLD = re.compile(r"\bhold:\s*(?P<wersja>\d+\.\d+(?:\.\d+)?)")
+_RE_VERSION = re.compile(r"^\s*(\d+)\.(\d+)(?:\.(\d+))?")
+
+#: Grupa ryzyka KAŻDEJ zależności z manifestu. Grupa mówi, kiedy wolno podbić
+#: wersję i czym to udowodnić — patrz :data:`OPIS_GRUP`. Pakiet spoza tej mapy
+#: to trafienie bramki (`bez_grupy`): nowa zależność dostaje grupę w tym samym
+#: commicie, w którym trafia do `requirements.txt`.
+GRUPY_RYZYKA: dict[str, str] = {
+    # A — okno, wyświetlanie i treść, którą użytkownik czyta albo słyszy.
+    "wxpython": "A",                  # całe GUI, przejście z czytnikiem ekranu
+    "lingua-language-detector": "A",  # lustro enuma w `jezyki_lingua.KANON`
+    "markdown": "A",                  # renderuje wszystkie `docs/*.html`
+    "fonttools": "A",                 # naprawa warstwy tekstu PDF (`core_pdf`)
+    "pypdfium2": "A",                 # warstwa tekstu PDF (`core_pdf`)
+    "pyinstaller": "A",               # kształt bundla, wychodzi dopiero w buildzie
+    "num2words": "A",                 # liczby zamieniane na słowa w Poliglocie
+    "python-docx": "A",               # wczytywanie i zapis .docx
+    "beautifulsoup4": "A",            # wczytywanie HTML w Poliglocie
+    "pyyaml": "A",                    # wczytywanie słowników i receptur
+    "ruamel.yaml": "A",               # zapis YAML z zachowaniem komentarzy
+    # B — providerzy i warstwa wokół wywołań modelu.
+    "anthropic": "B",
+    "openai": "B",
+    "elevenlabs": "B",
+    "tiktoken": "B",                  # liczenie tokenów (`core_tokeny`)
+    "jsonschema": "B",                # schematy structured outputs
+    "python-dotenv": "B",             # klucze providerów z `golden_key.env`
+    # C — tylko narzędzia deweloperskie, poza bundlem.
+    "pytest": "C",
+    "packaging": "C",
+}
+
+OPIS_GRUP: dict[str, str] = {
+    "A": "window, display, content: upgrade ONLY in the cycle's environment "
+         "commit, with the package's own proof (screen-reader pass for "
+         "wxpython, `docs/` regeneration + diff for markdown, `audyt_podstaw` "
+         "for lingua, PDF tests for pypdfium2/fonttools, a trial build for "
+         "pyinstaller)",
+    "B": "providers: upgrade any time in the cycle; bound on the MAJOR line; "
+         "proof = `inspect.signature` on the surface we call + one live call",
+    "C": "dev-only, outside the bundle: upgrade any time; proof = `pytest` "
+         "passes",
+}
 
 
 @dataclass
@@ -134,6 +195,7 @@ class Wpis:
     """Jedna linia manifestu: nazwa dystrybucji + specyfikator wersji."""
     nazwa: str
     specyfikator: str = ""
+    wstrzymanie: Optional[str] = None   # wersja z `# hold:` albo None
 
 
 @dataclass
@@ -143,12 +205,20 @@ class Stan:
     specyfikator: str
     zainstalowana: Optional[str]
     najnowsza: Optional[str]
-    status: str          # aktualne | granica | nowsza | brak | nieznane
+    status: str          # aktualne | granica | przeterminowana | niedatowana
+                         # | nowsza | brak | bez_grupy | nieznane
     powod: str = ""      # dlaczego `nieznane` (błąd sieci/parsowania)
+    grupa: str = ""
+    wstrzymanie: Optional[str] = None
+    #: Czy audyt dotyczy buildu otwierającego cykl (`VERSION` = X.Y.0). Tylko
+    #: wtedy przeterminowane wstrzymanie blokuje; w patchu ostrzega.
+    otwarcie_cyklu: bool = False
 
     @property
     def trafienie(self) -> bool:
-        return self.status in ("nowsza", "brak")
+        if self.status == "przeterminowana":
+            return self.otwarcie_cyklu
+        return self.status in ("nowsza", "brak", "niedatowana", "bez_grupy")
 
 
 @dataclass
@@ -177,7 +247,8 @@ def wczytaj_manifest(sciezka: Path | None = None) -> list[Wpis]:
             f"manifest there is nothing to audit.")
     wpisy: list[Wpis] = []
     for linia in plik.read_text(encoding="utf-8").splitlines():
-        tekst = linia.split("#", 1)[0].strip()
+        tekst, _, komentarz = linia.partition("#")
+        tekst = tekst.strip()
         if not tekst or tekst.startswith("-"):
             continue
         dopasowanie = _RE_WPIS.match(tekst)
@@ -186,8 +257,10 @@ def wczytaj_manifest(sciezka: Path | None = None) -> list[Wpis]:
                 f"❌ {NARZEDZIE}: cannot parse the manifest line {linia!r} in "
                 f"{plik.name} — refusing to audit a manifest this tool does not "
                 f"understand.")
+        hold = _RE_HOLD.search(komentarz)
         wpisy.append(Wpis(nazwa=dopasowanie.group("nazwa"),
-                          specyfikator=dopasowanie.group("spec").strip()))
+                          specyfikator=dopasowanie.group("spec").strip(),
+                          wstrzymanie=hold.group("wersja") if hold else None))
     if not wpisy:
         raise SystemExit(
             f"❌ {NARZEDZIE}: {plik.name} declares no packages — an audit of an "
@@ -269,12 +342,68 @@ def rozstrzygnij(wpis: Wpis, zainstalowana: Optional[str],
     return Stan(**wspolne, status="nowsza")
 
 
+def wersja_projektu(sciezka: Path | None = None) -> Optional[tuple[int, int, int]]:
+    """`VERSION` jako (major, minor, patch); brak patcha (`19.18-WIP`) = 0.
+
+    ``None``, gdy pliku nie ma albo nie zaczyna się od liczby — wtedy terminu
+    wstrzymań nie da się policzyć i bramka degraduje się głośno.
+    """
+    plik = sciezka or SCIEZKA_VERSION
+    try:
+        tekst = plik.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    m = _RE_VERSION.match(tekst)
+    if not m:
+        return None
+    return int(m.group(1)), int(m.group(2)), int(m.group(3) or 0)
+
+
+def ocen_wstrzymanie(stan: Stan, wpis: Wpis,
+                     projekt: Optional[tuple[int, int, int]]) -> Stan:
+    """Nakłada na stan `granica` datę z `# hold:` i grupę ryzyka.
+
+    Czysta funkcja (bez I/O), żeby testy mogły podać dowolną wersję projektu.
+    Granica bez daty to `niedatowana`; data z minora wcześniejszego niż
+    `VERSION` to `przeterminowana`. Data z TEGO SAMEGO albo późniejszego minora
+    jest ważna — dopisuje się ją przecież w cyklu, którego wydanie dopiero
+    wyjdzie, więc może wyprzedzać `VERSION` sprzed bumpu.
+    """
+    stan.grupa = GRUPY_RYZYKA.get(wpis.nazwa.lower(), "")
+    stan.wstrzymanie = wpis.wstrzymanie
+    if projekt is not None:
+        stan.otwarcie_cyklu = projekt[2] == 0
+    if not stan.grupa and stan.status not in ("brak", "nieznane"):
+        stan.status = "bez_grupy"
+        return stan
+    if stan.status != "granica":
+        return stan
+    if not wpis.wstrzymanie:
+        stan.status = "niedatowana"
+        return stan
+    if projekt is None:
+        stan.status = "nieznane"
+        stan.powod = "VERSION is unreadable, so the hold's age cannot be judged"
+        return stan
+    m = _RE_VERSION.match(wpis.wstrzymanie)
+    if m and (int(m.group(1)), int(m.group(2))) < projekt[:2]:
+        stan.status = "przeterminowana"
+    return stan
+
+
 # ---------------------------------------------------------------------------
 # Bramka
 # ---------------------------------------------------------------------------
 def bramka(pakiety: list[str] | None = None, *,
-           bez_sieci: bool = False) -> WynikBramki:
-    """Pełny przebieg. `czysto` = zero pakietów w stanie `nowsza`/`brak`."""
+           bez_sieci: bool = False,
+           projekt: Optional[tuple[int, int, int]] | str = "VERSION"
+           ) -> WynikBramki:
+    """Pełny przebieg. `czysto` = żaden :attr:`Stan.trafienie`.
+
+    ``projekt`` domyślnie czyta `VERSION`; testy podają krotkę wprost.
+    """
+    if projekt == "VERSION":
+        projekt = wersja_projektu()
     wpisy = wczytaj_manifest()
     if pakiety:
         chciane = {p.strip().lower() for p in pakiety if p.strip()}
@@ -295,7 +424,11 @@ def bramka(pakiety: list[str] | None = None, *,
             najnowsza, powod = None, "network check disabled (--bez-sieci)"
         else:
             najnowsza, powod = najnowsza_wersja(wpis.nazwa)
-        stany.append(rozstrzygnij(wpis, zainst, najnowsza, powod, narzedzia))
+        stany.append(ocen_wstrzymanie(
+            rozstrzygnij(wpis, zainst, najnowsza, powod, narzedzia),
+            wpis, projekt))
+    if projekt is None:
+        degradacje.append("VERSION is unreadable — hold expiry cannot be judged")
     nieznane = [s for s in stany if s.status == "nieznane"]
     if nieznane:
         degradacje.append(
@@ -309,12 +442,53 @@ def bramka(pakiety: list[str] | None = None, *,
 
 
 ETYKIETY = {
-    "aktualne": "✅ up to date",
-    "granica":  "🔒 newer exists, our bound excludes it",
-    "nowsza":   "⚠️  NEWER ALLOWED — undecided",
-    "brak":     "❌ NOT INSTALLED",
-    "nieznane": "ℹ️  not compared",
+    "aktualne":        "✅ up to date",
+    "granica":         "🔒 held on purpose",
+    "przeterminowana": "⏰ HOLD EXPIRED",
+    "niedatowana":     "⚠️  HOLD WITHOUT A DATE",
+    "nowsza":          "⚠️  NEWER ALLOWED — undecided",
+    "brak":            "❌ NOT INSTALLED",
+    "bez_grupy":       "⚠️  NO RISK GROUP",
+    "nieznane":        "ℹ️  not compared",
 }
+
+# Kolejność w tabeli: najpierw to, co wymaga decyzji.
+_PORZADEK = ("nowsza", "brak", "bez_grupy", "niedatowana", "przeterminowana",
+             "nieznane", "granica", "aktualne")
+
+
+def opis_trafienia(s: Stan) -> str:
+    """Jedna linia o pakiecie wymagającym decyzji — wspólna dla CLI i builda."""
+    if s.status == "brak":
+        return (f"{s.nazwa}: declared in the manifest but NOT installed here — "
+                f"the environment does not match the manifest")
+    if s.status == "bez_grupy":
+        return (f"{s.nazwa}: has no risk group — add it to "
+                f"`audyt_zaleznosci.GRUPY_RYZYKA` (A, B or C)")
+    if s.status == "niedatowana":
+        return (f"{s.nazwa}: {s.zainstalowana} → {s.najnowsza} is excluded by "
+                f"`{s.specyfikator}`, but the line has no `# hold: <version>` — "
+                f"date the hold or lift it")
+    if s.status == "przeterminowana":
+        return (f"{s.nazwa}: held since {s.wstrzymanie} ({s.zainstalowana}, "
+                f"PyPI {s.najnowsza}) — the hold expired with the next minor; "
+                f"lift it in the environment commit or re-date it on purpose")
+    return (f"{s.nazwa}: {s.zainstalowana} → {s.najnowsza} (our bound "
+            f"`{s.specyfikator or 'none'}` allows it, so a contributor gets it "
+            f"from pip)")
+
+
+ZASADA_DECYZJI = (
+    "Decide by the package's risk group (column `grp`):\n"
+    + "".join(f"  • {g}: {opis}\n" for g, opis in OPIS_GRUP.items())
+    + "  • Not now? Set the bound one step below the new release and DATE it in "
+      "the same line: `pkg<X.Y  # hold: <version you are releasing>`. A hold "
+      "expires with the next minor, so the cycle-opening build (X.Y.0) refuses "
+      "until the environment commit lifts it. Freeze the environment with "
+      "`python audyt_zaleznosci.py --zamroz <version>` (it skips a freeze "
+      "identical to the previous one).\n"
+    + "  • An upgrade that ships goes to the release section as 'Environment' "
+      "(what users see; what developers see).")
 
 
 def strict_przechodzi(wynik: WynikBramki) -> bool:
@@ -337,13 +511,14 @@ def strict_przechodzi(wynik: WynikBramki) -> bool:
 def raport(wynik: WynikBramki) -> None:
     """Tabela + werdykt na stdout."""
     szerokosc = max((len(s.nazwa) for s in wynik.stany), default=10)
-    print(f"\n{'package'.ljust(szerokosc)}  {'installed':>12}  {'PyPI':>12}  "
-          f"{'bound':<12} status")
-    for s in sorted(wynik.stany, key=lambda s: (s.status != "nowsza",
-                                                s.status != "brak", s.nazwa)):
-        print(f"{s.nazwa.ljust(szerokosc)}  {(s.zainstalowana or '-'):>12}  "
+    print(f"\n{'package'.ljust(szerokosc)}  grp  {'installed':>12}  {'PyPI':>12}  "
+          f"{'bound':<12} {'hold':<8} status")
+    for s in sorted(wynik.stany, key=lambda s: (
+            _PORZADEK.index(s.status) if s.status in _PORZADEK else 0, s.nazwa)):
+        print(f"{s.nazwa.ljust(szerokosc)}  {(s.grupa or '?'):^3}  "
+              f"{(s.zainstalowana or '-'):>12}  "
               f"{(s.najnowsza or '-'):>12}  {(s.specyfikator or '-'):<12} "
-              f"{ETYKIETY[s.status]}"
+              f"{(s.wstrzymanie or '-'):<8} {ETYKIETY[s.status]}"
               + (f" ({s.powod})" if s.status == "nieznane" and s.powod else ""))
 
     print("\n========== DEPENDENCY GATE ==========")
@@ -356,38 +531,64 @@ def raport(wynik: WynikBramki) -> None:
     if wynik.degradacja:
         print(f"⚠️  Ran with REDUCED coverage: {wynik.degradacja}.")
     trafienia = [s for s in wynik.stany if s.trafienie]
+    # Przeterminowane w buildzie patcha nie blokują, ale nie mogą być ciche:
+    # to dokładnie ta klasa, która do 2026-11-12 znikała pod zielonym 🔒.
+    ostrzezenia = [s for s in wynik.stany
+                   if s.status == "przeterminowana" and not s.trafienie]
     if not trafienia:
-        print("✅ No dependency has a newer release that our manifest allows.")
+        print("✅ No dependency waits for a decision.")
     else:
         print(f"⚠️  {len(trafienia)} dependency/dependencies to decide about:")
         for s in trafienia:
-            if s.status == "brak":
-                print(f"      • {s.nazwa}: declared in the manifest but NOT "
-                      f"installed here")
-            else:
-                print(f"      • {s.nazwa}: {s.zainstalowana} → {s.najnowsza} "
-                      f"(manifest allows it)")
-        print("Decide per package — and the size of the step decides which way:")
-        print("  • PATCH-level step, surface unchanged: upgrade + `inspect."
-              "signature` on the API we call (zero API calls, zero cost), then "
-              "note it under `### What's new` in RELEASE_NOTES.md. This is the "
-              "cheap, normal path.")
-        print("  • MINOR or MAJOR step: hold it. The CONSERVATIVE CANON "
-              "(2026-09-18) is to ship the release as it stands, note the "
-              "pending upgrade under 'what did not make it', freeze the "
-              "environment (`pip freeze > skrypty/zamrozone_<version>.txt`) and "
-              "set the bound one step below the new release — so the hold is "
-              "a RECORDED decision (status `bound excludes it`) and not "
-              "silence. AFTER the release: move the bound, upgrade, test, tune, "
-              "and ship that as its own patch / minor / major depending on how "
-              "much moved — or restore the frozen version, leave a fixed bound "
-              "and ship a dev patch, because an upgraded-then-restored bundle "
-              "is the same bundle.")
-        print("  • A `NOT INSTALLED` line is neither: the environment does not "
-              "match the manifest, so fix the environment first.")
-        print("A bound change is NOT dev-tools-only, so it escalates a "
-              "shortened release to the full procedure.")
+            print(f"      • {opis_trafienia(s)}")
+    if ostrzezenia:
+        print(f"⏰ {len(ostrzezenia)} expired hold(s) — a patch build allows "
+              f"them, the next X.Y.0 build will not:")
+        for s in ostrzezenia:
+            print(f"      • {opis_trafienia(s)}")
+    if trafienia or ostrzezenia:
+        print(ZASADA_DECYZJI)
+        print("Moving a bound of an existing package keeps a shortened "
+              "release possible; ADDING or REMOVING a package escalates it to "
+              "the full procedure.")
     print("=====================================")
+
+
+def zamroz(wersja: str, katalog: Path | None = None,
+           freeze: str | None = None) -> tuple[Path, bool]:
+    """`pip freeze` do `skrypty/zamrozone_<wersja>.txt` — chyba że nic się nie zmieniło.
+
+    Zwraca (plik, czy_zapisano). Gdy treść jest identyczna z NAJNOWSZYM
+    istniejącym zamrożeniem, nic nie zapisujemy i oddajemy tamten plik: on już
+    jest biletem powrotnym do tego środowiska. Do 2026-11-12 `pip freeze` szło
+    bezwarunkowo i trzy wydania (19.5.0, 19.8.0, 19.8.1) zostawiły trzy
+    identyczne pliki. ``freeze`` podają testy; normalnie pyta interpreter.
+    """
+    katalog = katalog or KATALOG_ZAMROZEN
+    if freeze is None:
+        freeze = subprocess.run(
+            [sys.executable, "-m", "pip", "freeze"], check=True,
+            capture_output=True, text=True, encoding="utf-8").stdout
+    narzedzia = _packaging()
+
+    def _klucz(p: Path):
+        surowa = p.stem.removeprefix("zamrozone_")
+        if narzedzia is not None:
+            try:
+                return (1, narzedzia[1](surowa), "")
+            except narzedzia[2]:
+                pass
+        return (0, None, surowa)
+
+    istniejace = sorted(katalog.glob("zamrozone_*.txt"), key=_klucz)
+    istniejace = [p for p in istniejace if _klucz(p)[0] == 1] or istniejace
+    if istniejace:
+        ostatni = istniejace[-1]
+        if ostatni.read_text(encoding="utf-8").splitlines() == freeze.splitlines():
+            return ostatni, False
+    cel = katalog / f"zamrozone_{wersja}.txt"
+    cel.write_text(freeze, encoding="utf-8")
+    return cel, True
 
 
 def main() -> int:
@@ -411,7 +612,21 @@ def main() -> int:
     parser.add_argument(
         "--pakiety", type=str, default="", metavar="NAME[,NAME...]",
         help="Audit only these distributions (names as in requirements.txt).")
+    parser.add_argument(
+        "--zamroz", type=str, default="", metavar="VERSION",
+        help="Write `pip freeze` to skrypty/zamrozone_<VERSION>.txt — unless "
+             "it is identical to the newest existing freeze, which then stays "
+             "the return ticket. Runs no audit.")
     args = parser.parse_args()
+
+    if args.zamroz:
+        plik, zapisano = zamroz(args.zamroz.strip())
+        if zapisano:
+            print(f"🧊 Environment frozen to {plik}.")
+        else:
+            print(f"🧊 Nothing to freeze: the environment is identical to "
+                  f"{plik.name}, which stays the return ticket.")
+        return 0
 
     wynik = bramka([p for p in args.pakiety.split(",") if p.strip()] or None,
                    bez_sieci=args.bez_sieci)

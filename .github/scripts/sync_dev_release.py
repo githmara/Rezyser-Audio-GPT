@@ -233,7 +233,10 @@ def pakiety_manifestu(tekst: str) -> dict[str, str]:
 def manifest_tylko_granice(tag: str) -> bool:
     """Czy diff `requirements.txt` rusza WYŁĄCZNIE granice istniejących pakietów?
 
-    KANON ZACHOWAWCZY (2026-09-18) ma wariant, w którym po wydaniu przywracamy
+    (Kanon zachowawczy został 2026-11-12 zastąpiony kanonem środowiska —
+    `audyt_zaleznosci.py` — ale ten wyjątek dalej służy jego datowanym
+    wstrzymaniom: dopisanie `# hold:` albo przesunięcie granicy to diff samych
+    specyfikatorów i komentarzy.) KANON ZACHOWAWCZY (2026-09-18) miał wariant, w którym po wydaniu przywracamy
     zamrożoną wersję biblioteki, zostawiamy stałą granicę i publikujemy DEV
     PATCH — bo zupgradowany i przywrócony bundle to w praktyce ten sam bundle.
     Ten wariant był mechanicznie niewykonalny: `requirements.txt` stoi

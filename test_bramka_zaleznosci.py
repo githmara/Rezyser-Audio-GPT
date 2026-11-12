@@ -117,7 +117,100 @@ def test_granica_nie_blokuje_buildu():
         stany=[_stan("lingua-language-detector", "granica",
                      zainstalowana="2.2.0", najnowsza="2.3.0", spec="<2.3")]))
     assert kod is None, log
-    assert "✅" in log and "bounded on purpose" in log, log
+    assert "✅" in log and "held on purpose" in log, log
+
+
+# ---------------------------------------------------------------------------
+# Kanon srodowiska (2026-11-12): datowane wstrzymania, grupy ryzyka, zamrozenia
+# ---------------------------------------------------------------------------
+def _granica(nazwa="anthropic", hold=None, projekt=(19, 18, 0)) -> az.Stan:
+    """`granica` z PRAWDZIWEGO `rozstrzygnij` + `ocen_wstrzymanie` (bez sieci)."""
+    wpis = az.Wpis(nazwa=nazwa, specyfikator="<1.8", wstrzymanie=hold)
+    stan = az.rozstrzygnij(wpis, "1.7.0", "2.8.0", "", az._packaging())
+    assert stan.status == "granica", stan
+    return az.ocen_wstrzymanie(stan, wpis, projekt)
+
+
+def test_hold_z_biezacego_minora_jest_decyzja():
+    """Data z tego samego albo pozniejszego minora = wazne wstrzymanie."""
+    for hold in ("19.18.0", "19.18.2", "19.19.0"):
+        stan = _granica(hold=hold)
+        assert stan.status == "granica" and not stan.trafienie, (hold, stan)
+
+
+def test_hold_bez_daty_jest_trafieniem():
+    """Granica wykluczajaca istniejace wydanie bez `# hold:` = nikt nie wie, od kiedy."""
+    stan = _granica(hold=None)
+    assert stan.status == "niedatowana" and stan.trafienie, stan
+
+
+def test_przeterminowany_hold_blokuje_tylko_otwarcie_cyklu():
+    """To jest serce kanonu: 🔒 przestaje byc zielone na zawsze.
+
+    Zmierzone 2026-11-12: `anthropic<1.8` stal od 19.8.0, a PyPI doszedl do 2.8.0.
+    Build X.Y.0 ma odmowic, build patcha ostrzec i przepuscic.
+    """
+    otwarcie = _granica(hold="19.8.0", projekt=(19, 18, 0))
+    assert otwarcie.status == "przeterminowana" and otwarcie.trafienie
+    patch = _granica(hold="19.8.0", projekt=(19, 18, 1))
+    assert patch.status == "przeterminowana" and not patch.trafienie
+
+
+def test_build_patcha_przepuszcza_przeterminowany_hold_glosno():
+    stan = _granica(hold="19.8.0", projekt=(19, 18, 1))
+    log, kod = _uruchom(az.WynikBramki(czysto=True, stany=[stan]))
+    assert kod is None, log
+    assert "⏰" in log and "held since 19.8.0" in log, log
+
+
+def test_build_otwarcia_cyklu_odmawia_przy_przeterminowanym_holdzie():
+    stan = _granica(hold="19.8.0", projekt=(19, 18, 0))
+    log, kod = _uruchom(az.WynikBramki(czysto=False, stany=[stan]))
+    assert kod == 1, log
+    assert "held since 19.8.0" in log and "FATAL" not in log, log
+
+
+def test_pakiet_bez_grupy_jest_trafieniem():
+    wpis = az.Wpis(nazwa="nowa-zaleznosc", specyfikator="")
+    stan = az.rozstrzygnij(wpis, "1.0", "1.0", "", az._packaging())
+    stan = az.ocen_wstrzymanie(stan, wpis, (19, 18, 0))
+    assert stan.status == "bez_grupy" and stan.trafienie, stan
+
+
+def test_kazdy_pakiet_manifestu_ma_grupe_i_parsuje_hold():
+    """Offline: manifest x GRUPY_RYZYKA oraz daty `# hold:` z prawdziwego pliku."""
+    wpisy = az.wczytaj_manifest()
+    bez = [w.nazwa for w in wpisy if w.nazwa.lower() not in az.GRUPY_RYZYKA]
+    assert not bez, f"pakiety bez grupy ryzyka: {bez}"
+    assert set(az.GRUPY_RYZYKA.values()) <= set(az.OPIS_GRUP)
+    daty = {w.nazwa: w.wstrzymanie for w in wpisy if w.wstrzymanie}
+    assert daty.get("anthropic") == "19.8.0", daty
+
+
+def test_wersja_projektu_czyta_wip_jako_otwarcie(tmp_path):
+    plik = tmp_path / "VERSION"
+    plik.write_text("19.18-WIP\n", encoding="utf-8")
+    assert az.wersja_projektu(plik) == (19, 18, 0)
+    plik.write_text("19.17.3", encoding="utf-8")
+    assert az.wersja_projektu(plik) == (19, 17, 3)
+    plik.write_text("nonsens", encoding="utf-8")
+    assert az.wersja_projektu(plik) is None
+
+
+def test_zamrozenie_nie_duplikuje_identycznego(tmp_path):
+    """Trzy identyczne pliki 19.5.0 / 19.8.0 / 19.8.1 — tego ma juz nie byc."""
+    srodowisko = "anthropic==1.7.0\nopenai==3.16.2\n"
+    plik, zapisano = az.zamroz("19.17.0", tmp_path, freeze=srodowisko)
+    assert zapisano and plik.name == "zamrozone_19.17.0.txt"
+    plik, zapisano = az.zamroz("19.17.1", tmp_path, freeze=srodowisko)
+    assert not zapisano and plik.name == "zamrozone_19.17.0.txt"
+    # Porownanie idzie z NAJNOWSZYM wg PEP 440, nie alfabetycznie (19.17 > 19.8).
+    (tmp_path / "zamrozone_19.8.1.txt").write_text("stare==1\n", encoding="utf-8")
+    plik, zapisano = az.zamroz("19.18.0", tmp_path, freeze=srodowisko)
+    assert not zapisano and plik.name == "zamrozone_19.17.0.txt"
+    plik, zapisano = az.zamroz("19.18.0", tmp_path,
+                               freeze=srodowisko + "pytest==9.2.0\n")
+    assert zapisano and plik.name == "zamrozone_19.18.0.txt"
 
 
 def test_nowsza_dopuszczona_blokuje_ale_nie_tonem_fatal():

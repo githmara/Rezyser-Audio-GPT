@@ -32,13 +32,26 @@
 # buildu, dopóki jakaś pozycja ma nowsze wydanie dopuszczone przez granicę
 # powyżej (`--no-strict` pomija audyt — dla krytycznego hotfixa).
 #
-# KANON ZACHOWAWCZY (2026-09-18): jeśli przyjęcie nowego wydania wymagałoby
-# przesunięcia granicy na następny MINOR albo MAJOR, wydanie idzie JAK JEST,
-# pozycja trafia do „co nie weszło", środowisko mrozimy (`pip freeze >
-# skrypty/zamrozone_<wersja>.txt`), a migracja jest OSOBNYM wydaniem po tym.
-# Krok patchowy wewnątrz granicy zostaje tani: upgrade + `inspect.signature`
-# wołanej powierzchni + nota w `### What's new` sekcji wydania (polska sekcja
-# „Pod maską", do której ta nota szła do v19.4.0, już nie istnieje).
+# KANON ŚRODOWISKA (2026-11-12, zastąpił kanon zachowawczy z 2026-09-18):
+# * ŚRODOWISKO NAJPIERW: pierwszy commit każdego cyklu minorowego to
+#   `WIP vX.Y: środowisko` (zdjęcie wstrzymań, upgrade, testy istniejącego
+#   kodu), dopiero potem nowe funkcje. Zmiany idą do sekcji wydania jako
+#   „Environment”.
+# * GRUPY RYZYKA (`audyt_zaleznosci.GRUPY_RYZYKA`): A = okno, wyświetlanie,
+#   treść (podbijane tylko w commicie środowiska, z dowodem właściwym dla
+#   pakietu); B = providerzy (w każdej chwili, granica na majorze,
+#   `inspect.signature` + żywe wywołanie); C = dev-only (w każdej chwili,
+#   dowodem jest `pytest`). Nowa zależność dostaje grupę w tym samym commicie.
+# * WSTRZYMANIE JEST DATOWANE: granica wykluczająca istniejące wydanie ma
+#   w swojej linii `# hold: <wersja wydania, które ją stawia>`. Wygasa
+#   z następnym minorem: build X.Y.0 odmawia, build patcha ostrzega.
+# * `pip freeze` przez `python audyt_zaleznosci.py --zamroz <wersja>`, który
+#   nie zapisuje kopii identycznej z poprzednim zamrożeniem.
+# Dlaczego: stary kanon miał krok „po wydaniu migrujemy” bez wyzwalacza, a 🔒
+# było zielone na zawsze — 2026-11-12 `anthropic<1.8` (od 19.8.0) przespał
+# cały major, `openai` był 33 minory w tyle, a trzy zamrożenia były identyczne.
+# Komentarze przy pakietach niżej, mówiące o „kanonie zachowawczym” i „bilecie
+# powrotnym”, opisują wstrzymania postawione według starego kanonu.
 
 # GUI całej aplikacji. 4.4 to następna linia minorowa fundamentu — podmiana
 # wymaga przejścia po panelach z czytnikiem ekranu, nie samego builda.
@@ -60,7 +73,7 @@ wxpython<4.4
 # (z powrotem na `<2` po `inspect.signature` na `Anthropic.__init__`
 # i `messages.create`, jak w v19.5.0) to treść osobnego cyklu. Bilet powrotny:
 # `skrypty/zamrozone_19.8.0.txt`.
-anthropic<1.8
+anthropic<1.8  # hold: 19.8.0
 # Most do Studio: wołamy `client.studio.projects.create/delete`
 # i `client.user.subscription.get` — dokładnie tę powierzchnię ten SDK
 # przemianowuje między wydaniami. 2.52 → 2.67 (15 minorów) przeszło bez zmian
@@ -69,7 +82,7 @@ anthropic<1.8
 # krok MINOROWY ponad zainstalowane 2.68.0. Wydanie idzie jak jest, upgrade
 # + `inspect.signature` na trójce wyżej to treść osobnego cyklu. Bilet
 # powrotny: `skrypty/zamrozone_19.8.1.txt`.
-elevenlabs<2.69
+elevenlabs<2.69  # hold: 19.8.1
 python-dotenv
 python-docx
 # Warstwa tekstu PDF w Poliglocie i Konwerterze (`core_pdf`, od 19.13). Wybrany
@@ -78,7 +91,7 @@ python-docx
 # `get_textpage`, `get_text_range` i `get_charbox(loose=True)` — granica na
 # następnym minorze ponad przetestowane 5.14.0, bo kod znaku dywizu dzielenia
 # (U+FFFE w 5.14, zmierzone) to szczegół implementacji PDFium, nie kontrakt API.
-pypdfium2<5.15
+pypdfium2<5.15  # hold: 19.17.0
 # Naprawa zniekształconej warstwy tekstu PDF z osadzonego fontu (`core_pdf`,
 # od 19.15): czytamy program fontu TrueType z PDF-a i odwracamy jego `cmap`
 # / nazwy `post`. Wołamy `TTFont(lazy=True)`, `getBestCmap`, `getGlyphOrder`
@@ -86,7 +99,7 @@ pypdfium2<5.15
 # przetestowane 4.67.0 (4.x trzyma tę powierzchnię od lat; 5.0 to decyzja).
 # 19.17.0: 4.68.0 wyszło w trakcie zamrożenia — kanon zachowawczy, granica
 # o krok niżej, migracja po wydaniu (`skrypty/zamrozone_19.17.0.txt`).
-fonttools<4.68
+fonttools<4.68  # hold: 19.17.0
 # `jezyki_lingua.KANON` jest LUSTREM enuma `lingua.Language`, a `audyt_podstaw`
 # porównuje je 1:1. Nowy MINOR potrafi dodać język, więc granicą jest tu linia
 # minorowa, nie majorowa: upgrade jest zmianą kanonu, nie tylko biblioteki.
@@ -115,7 +128,7 @@ pyinstaller<7
 # Wołamy też `pytest.skip`/`pytest.main` wprost. 10.x = decyzja, nie awaria.
 # 19.17.0: 9.2.0 wyszło w trakcie zamrożenia — granica o krok niżej,
 # migracja po wydaniu (`skrypty/zamrozone_19.17.0.txt`).
-pytest<9.2
+pytest<9.2  # hold: 19.17.0
 # packaging — porównanie wersji wg PEP 440 w `audyt_zaleznosci.py` (dev-only,
 # runtime tego nie importuje). Wjeżdżało dotąd tranzytywnie (pyinstaller,
 # setuptools); deklarujemy je, bo NARZĘDZIE Z REPO go używa, a bramka bez
@@ -127,7 +140,7 @@ packaging
 # krok MINOROWY ponad zainstalowane 3.10.3. Nowy minor renderera potrafi
 # zmienić HTML wszystkich `docs/`, więc upgrade = regeneracja + przegląd diffu
 # w osobnym cyklu, nie przy okazji patcha.
-markdown<3.11
+markdown<3.11  # hold: 19.8.1
 # openai — dwaj konsumenci, obaj żywi:
 #   1. RUNTIME aplikacji, od v18.4: wybór dostawcy AI. Przy
 #      `LLM_PROVIDER=openai_compat` (README, manual KROK 2B) `core_llm.zbuduj_klienta`
@@ -159,4 +172,4 @@ markdown<3.11
 # krok MINOROWY (trzy minory ponad zainstalowane 3.16.2), ta sama decyzja i ten
 # sam termin co przy `anthropic` wyżej. Granica stoi tuż nad zainstalowaną linią,
 # żeby 3.17/3.18 też nie wchodziły bez sprawdzenia.
-openai<3.17
+openai<3.17  # hold: 19.8.0

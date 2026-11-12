@@ -278,7 +278,10 @@ def test_granice_w_workflowach_zgadzaja_sie_z_requirements():
     """
     manifest = {}
     for linia in (ROOT / "requirements.txt").read_text(encoding="utf-8").splitlines():
-        linia = linia.strip()
+        # Komentarz w linii pakietu (`openai<3.17  # hold: 19.8.0`, kanon
+        # 2026-11-12) odcinamy PRZED regexem z `$` — inaczej linia z datą
+        # wstrzymania po cichu wypadałaby z porównania.
+        linia = linia.split("#", 1)[0].strip()
         if not linia or linia.startswith("#"):
             continue
         m = re.match(r"([A-Za-z0-9_.\-]+)\s*(<[0-9.]+)\s*$", linia)

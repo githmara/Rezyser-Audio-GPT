@@ -1139,9 +1139,17 @@ def _bramka_zaleznosci_lub_przerwij(args: argparse.Namespace) -> None:
             sys.exit(1)
         else:
             wynik_zal = audyt_zaleznosci.bramka()
+            # Przeterminowane wstrzymanie w buildzie PATCHA przepuszczamy, ale
+            # głośno: build X.Y.0 już go nie przepuści (kanon środowiska
+            # 2026-11-12 — dawniej 🔒 było zielone na zawsze i tak `anthropic`
+            # przespał cały major).
+            for s in (s for s in wynik_zal.stany
+                      if s.status == "przeterminowana" and not s.trafienie):
+                print(f"   ⏰ {audyt_zaleznosci.opis_trafienia(s)}")
             if audyt_zaleznosci.strict_przechodzi(wynik_zal):
-                print(f"✅ Every dependency is either up to date or bounded on "
-                      f"purpose ({len(wynik_zal.stany)} package(s)).\n")
+                print(f"✅ Every dependency is either up to date or held on "
+                      f"purpose with a dated hold "
+                      f"({len(wynik_zal.stany)} package(s)).\n")
             else:
                 # Ton celowo INNY niż „❌ FATAL" pozostałych bramek: tam zdanie
                 # znaczy „nasz kod/treść jest zepsuty". Tutaj nic nie jest
@@ -1157,21 +1165,12 @@ def _bramka_zaleznosci_lub_przerwij(args: argparse.Namespace) -> None:
                           f"{wynik_zal.degradacja}. 'I do not know whether an "
                           f"upgrade is pending' is not 'none is pending'.")
                 for s in (s for s in wynik_zal.stany if s.trafienie):
-                    if s.status == "brak":
-                        print(f"   • {s.nazwa}: declared in the manifest but NOT "
-                              f"installed here — the environment does not match "
-                              f"the manifest.")
-                    else:
-                        print(f"   • {s.nazwa}: {s.zainstalowana} → "
-                              f"{s.najnowsza} (our bound "
-                              f"`{s.specyfikator or 'none'}` allows it, so "
-                              f"a contributor gets it from pip)")
+                    print(f"   • {audyt_zaleznosci.opis_trafienia(s)}")
                 print("   Decide: `python audyt_zaleznosci.py` prints the full "
-                      "table and the decision rule (patch-level step → upgrade "
-                      "+ signature check; minor/major → conservative hold: ship "
-                      "as is, note it under 'what did not make it', freeze with "
-                      "`pip freeze`, set the bound one step below, and migrate "
-                      "AFTER the release).")
+                      "table and the decision rule by risk group (A: only in "
+                      "the cycle's environment commit; B: any time, signature "
+                      "+ live call; C: any time, pytest). A hold that stays "
+                      "must be dated: `pkg<X.Y  # hold: <version>`.")
                 print("   Critical hotfix that must ship without touching "
                       "dependencies: `python build_release.py --no-strict` "
                       "(skips this audit entirely).")
