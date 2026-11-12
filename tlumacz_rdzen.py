@@ -499,10 +499,9 @@ def wywolaj_llm(
             adaptacyjne jest domyślne — jawny `thinking` trzymamy, żeby
             intencja była widoczna w kodzie, nie w domyśle modelu.
             **DRUGA UWAGA, mina limitu (v18.30.0): myślenie WSPÓŁDZIELI budżet
-            `max_tokens` z odpowiedzią.** Rdzeń — inaczej niż
-            `core_llm._wywolaj_anthropic`, które przy `thinking_budget` dokłada
-            budżet namysłu PONAD limit wołającego — wysyła `max_tokens`
-            nietknięte. Ciasny limit (mikrocall-bramka, jak
+            `max_tokens` z odpowiedzią.** Rdzeń wysyła `max_tokens`
+            nietknięte (runtime `core_llm` od 19.18 w ogóle nie myśli — tryb
+            quality tłumacza AI usunięty, myślenie zostało tylko tutaj). Ciasny limit (mikrocall-bramka, jak
             `MAX_TOKENS_NAZWA_PL` u brata od akcentów) jest więc poprawny
             WYŁĄCZNIE przy `myslenie=False`; z myśleniem uderzyłby w limit na
             samym rozumowaniu, jeszcze przed pierwszym znakiem odpowiedzi.

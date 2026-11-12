@@ -73,7 +73,7 @@ _prompty: list[str] = []
 
 
 def _stub_llm(klient, *, model, system, messages, max_tokens, temperature,
-              timeout, segmenty=None, wymusz_json=False, thinking_budget=0,
+              timeout, segmenty=None, wymusz_json=False,
               schema_json=None, slad=None):
     """Model, ktory zawsze rozdmuchuje sekcje (parzystosc markerow zachowana)."""
     tresc_user = messages[0]["content"]

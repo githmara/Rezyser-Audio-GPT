@@ -940,9 +940,6 @@ poliglota:
   chk_wymus_tooltip: By default, each paragraph is processed according to its detected language. Check this to have the entire document — including foreign-language passages — go through the rules of a single language (e.g. reversible Caesar cipher using one alphabet). Requires selecting a language in the field above.
   wykryto_jezyk_tytul: Document language detected
   wykryto_jezyk_tresc: "The content of the loaded file is in \"{jezyk_wykryty}\".\nThe accent and cipher lists have been switched to this language."
-  chk_quality: Quality mode — deeper model reasoning (slower and more expensive; no effect on OpenAI-compatible endpoints)
-  chk_quality_name: Translation quality mode
-  chk_quality_tooltip: The model is given a budget for internal text analysis before translating (extended thinking). This improves difficult passages at the cost of time and tokens. Applies only to Anthropic Claude — has no effect on OpenAI-compatible endpoints.
   err_odmowa: The model refused to carry out this command — its content may have violated the model's policies or been too ambiguous. Nothing was saved; rephrase the command and try again.
   ai_ostrzezenie_cache_tytul: Resume Memory Warning
   ai_ostrzezenie_cache: "The translation was completed and saved, but the temporary file (resume cache) could not be deleted:\n{plik}\n\nPlease delete this file manually. As long as it remains there, re-translating a file with the same name into the same language may resume from this cache and return the PREVIOUS translation instead of a new one.\n\nDetails: {szczegoly}"

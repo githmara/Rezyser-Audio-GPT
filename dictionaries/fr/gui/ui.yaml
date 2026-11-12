@@ -854,9 +854,6 @@ poliglota:
   chk_wymus_tooltip: Par défaut, chaque paragraphe est traité selon la langue détectée pour lui. Cochez cette option pour que tout le document — y compris les passages en langue étrangère — soit traité selon les règles d'une seule langue (par exemple pour un chiffrement de César réversible avec un seul alphabet). Nécessite qu'une langue soit sélectionnée dans le champ ci-dessus.
   wykryto_jezyk_tytul: Langue du document détectée
   wykryto_jezyk_tresc: "Le contenu du fichier chargé est en langue « {jezyk_wykryty} ».\nLes listes d'accents et de chiffrements ont été basculées sur cette langue."
-  chk_quality: Mode qualité — réflexion plus approfondie du modèle (plus lent et plus coûteux ; sans effet sur les points de terminaison compatibles OpenAI)
-  chk_quality_name: Mode qualité de traduction
-  chk_quality_tooltip: Le modèle reçoit un budget pour une analyse interne du texte avant la traduction (extended thinking). Cela améliore les passages difficiles au prix du temps et des tokens. Concerne uniquement Anthropic Claude — sans effet sur les points de terminaison compatibles OpenAI.
   err_odmowa: Le modèle a refusé d'exécuter cette instruction — son contenu enfreignait peut-être les règles du modèle ou était trop ambigu. Rien n'a été enregistré ; reformulez l'instruction et réessayez.
   ai_ostrzezenie_cache_tytul: Avertissement concernant la mémoire de reprise
   ai_ostrzezenie_cache: "La traduction a été terminée et enregistrée, mais la suppression du fichier temporaire (cache de reprise) a échoué :\n{plik}\n\nSupprimez ce fichier manuellement. Tant qu'il reste présent, une nouvelle traduction d'un fichier portant le même nom vers la même langue risque de reprendre à partir de cette mémoire et de restituer l'ANCIENNE traduction au lieu de la nouvelle.\n\nDétails : {szczegoly}"

@@ -892,26 +892,9 @@ _MODELE_BEZ_WYLACZANIA_MYSLENIA: tuple[str, ...] = (
 THINKING_WYLACZONE: dict[str, str] = {"type": "disabled"}
 THINKING_MIEDZY_NARZEDZIAMI: dict[str, str] = {"type": "between_tools"}
 
-# Effort trybu quality (adaptive thinking). `high` = domyślny poziom Sonnet 5.5
-# podany JAWNIE, bo poziomy są rekalibrowane między modelami, a domyślny bywa
-# inny (Opus 5.5: `medium`) — jawna wartość nie zmieni się pod nami po cichu.
-EFFORT_QUALITY = "high"
-
-
-def _zdejmij_effort(kwargs: dict[str, Any]) -> None:
-    """Zdejmuje ``output_config.effort``; pusty ``output_config`` znika z nim.
-
-    Podmiana zamiast ``pop`` w miejscu — z tego samego powodu co w
-    :func:`zdejmij_temperature` (współdzielone płytkie kopie payloadu).
-    """
-    oc = kwargs.get("output_config")
-    if not oc or "effort" not in oc:
-        return
-    reszta = {k: v for k, v in oc.items() if k != "effort"}
-    if reszta:
-        kwargs["output_config"] = reszta
-    else:
-        kwargs.pop("output_config", None)
+# Runtime NIE myśli (19.18): tryb quality tłumacza AI usunięty decyzją
+# maintainera — myślenie zostaje w dev-tools (`tlumacz_rdzen`, `myslenie=`).
+# Uzasadnienie przy `_wywolaj_anthropic`.
 
 
 def thinking_bez_myslenia(mdl: str) -> dict[str, str] | None:
@@ -1578,10 +1561,8 @@ def _wywolaj_anthropic(
     max_tokens: int,
     temperature: float,
     timeout: float,
-    thinking_budget: int = 0,
     schema_json: dict | None = None,
     slad: list[dict] | None = None,
-    myslenie: list[str] | None = None,
 ) -> tuple[str, str | None]:
     """Gałąź Anthropic z degradacją ``temperature`` dla modeli, które ją odrzucają.
 
@@ -1595,16 +1576,16 @@ def _wywolaj_anthropic(
     własnego samplingu domyślnego. Modele, które ``temperature`` honorują
     (np. Sonnet 4.6), nigdy nie trafiają w tę ścieżkę.
 
-    ``thinking_budget`` > 0 (18.11, tryb quality tłumacza AI) włącza myślenie:
-    od v19.9 adaptive + ``output_config.effort`` = :data:`EFFORT_QUALITY`
-    (``budget_tokens`` zwraca 400 od Sonnet 5). ``temperature`` POMIJAMY,
-    a ``thinking_budget`` dokładamy PONAD limit odpowiedzi wołającego jako zapas
-    na namysł, żeby semantyka ``stop_reason=="max_tokens"`` (guard uciętej
-    odpowiedzi / bisekcja tłumacza) nie drgnęła. Bloki ``thinking`` w odpowiedzi
-    odfiltrowuje istniejąca sklejka ``type=="text"``. Odrzucenie konfiguracji
-    thinking (400/422) → retry z wariantem „bez myślenia" właściwym dla modelu
+    Runtime wysyła ZAWSZE „bez myślenia" w dialekcie modelu. Tryb quality
+    tłumacza AI (18.11, ``thinking_budget``) usunięto w 19.18 decyzją
+    maintainera: pomiar pokazał, że myślenie najwięcej daje jako diagnostyka
+    PAYLOADU (konflikty instrukcji, sprzeczne bramki) — a to praca dev-tools
+    (`tlumacz_rdzen`, ``myslenie=``), nie użytkownika końcowego, który zachowuje
+    sprawczość nad tekstem i może sam zlecić osobną recenzję. Na dwóch z trzech
+    providerów (OpenAI-compatible, OpenRouter) opcja i tak nie miała efektu.
+    Odrzucenie dialektu (400/422) → retry z następnym wariantem
     (:func:`kolejny_wariant_bez_myslenia` — ``disabled`` / ``between_tools`` /
-    pominięty), bez effort i bez ``temperature``.
+    pominięty).
 
     ``schema_json`` (v18.23) → ``output_config.format`` (structured outputs):
     kształt odpowiedzi egzekwuje API. Schemat musi być już przepuszczony przez
@@ -1659,27 +1640,6 @@ def _wywolaj_anthropic(
         kwargs["output_config"] = {
             "format": {"type": "json_schema", "schema": schema_json},
         }
-    if thinking_budget > 0:
-        # Tryb quality. `budget_tokens` zwraca 400 od Sonnet 5 (do v19.9 drabina
-        # po cichu spadała na `disabled`, więc „quality" = zwykły tryb + jałowy
-        # round-trip). Dziś: adaptive thinking + jawny effort, a budżet zostaje
-        # ZAPASEM `max_tokens` — myślenie wlicza się w limit, więc bez zapasu
-        # guard `stop_reason=="max_tokens"` łapałby odpowiedzi ucięte namysłem.
-        zdejmij_temperature(kwargs)
-        # `display: "summarized"` (19.18): bez niego nowsze modele oddają blok
-        # myślenia z PUSTYM tekstem (domyślne `omitted`), a tokeny namysłu i tak
-        # są płatne. Streszczenie idzie do `myslenie` wołającego — nigdy do
-        # `slad`, który trafia do `error_log.txt` i z założenia nie ma treści.
-        kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
-        kwargs["output_config"] = {
-            **kwargs.get("output_config", {}), "effort": EFFORT_QUALITY,
-        }
-        kwargs["max_tokens"] = max_tokens + thinking_budget
-        # Wysłany jest adaptive, NIE `bez_myslenia` — gdyby ten ostatni stał na
-        # liście wypróbowanych, drabina po odrzuceniu quality pominęłaby
-        # właściwy dialekt modelu (złapane testem: 5.5 spadał na `disabled`).
-        wyprobowane_thinking = [dict(kwargs["thinking"])]
-
     # Degradacja CELOWANA: zdejmujemy to, co API wskazało w komunikacie 400
     # (patrz `_co_odrzucono`), a nie kolejny element listy. Ślepa kolejność
     # kosztowałaby structured outputs przy KAŻDYM modelu nieprzyjmującym
@@ -1688,9 +1648,9 @@ def _wywolaj_anthropic(
     # bez thinking, bez schematu = zachowanie ≤v18.22).
     resp = None
     zdjete: set[str] = set()
-    # 7 = temperature + output_config + do trzech wariantów thinking (plus
-    # wyjście z quality) + próba awaryjna. Każdy szczebel jest jednorazowy,
-    # więc limit tylko zabezpiecza, pętli nie ogranicza.
+    # 7 = temperature + output_config + do trzech wariantów thinking + próba
+    # awaryjna (z zapasem). Każdy szczebel jest jednorazowy, więc limit tylko
+    # zabezpiecza, pętli nie ogranicza.
     for _krok in range(7):
         try:
             resp = klient.sdk.with_options(timeout=timeout).messages.create(**kwargs)
@@ -1718,21 +1678,8 @@ def _wywolaj_anthropic(
                     "(JSON wymuszany samym promptem, jak ≤v18.22)."
                 )
                 kwargs.pop("output_config", None)
-            elif (winowajca == "thinking"
-                  and (kwargs.get("thinking") or {}).get("display")
-                  and "display" in str(exc).lower()):
-                # Najpierw zdejmujemy samo `display` (model sprzed 4.7 może go
-                # nie znać) — inaczej odrzucenie streszczenia kosztowałoby całe
-                # myślenie trybu quality.
-                _dev_log(
-                    f"anthropic: model '{mdl}' odrzucił 'thinking.display' "
-                    f"({type(exc).__name__}) — ponawiam adaptive bez streszczenia."
-                )
-                kwargs["thinking"] = {"type": "adaptive"}
-                continue
             elif winowajca == "thinking":
-                # Z quality (adaptive + effort) schodzimy na „bez myślenia";
-                # z „bez myślenia" — na następny dialekt. Nigdy dwa razy ten sam.
+                # Z „bez myślenia" — na następny dialekt. Nigdy dwa razy ten sam.
                 jest, wariant = kolejny_wariant_bez_myslenia(
                     mdl, wyprobowane_thinking)
                 if not jest:
@@ -1740,12 +1687,10 @@ def _wywolaj_anthropic(
                 _dev_log(
                     f"anthropic: model '{mdl}' odrzucił 'thinking' "
                     f"{kwargs.get('thinking')} ({type(exc).__name__}) — "
-                    f"ponawiam z {wariant} (bez trybu quality)."
+                    f"ponawiam z {wariant}."
                 )
                 wyprobowane_thinking.append(wariant)
                 ustaw_thinking(kwargs, wariant)
-                _zdejmij_effort(kwargs)
-                kwargs["max_tokens"] = max_tokens
                 continue   # szczebel thinking rozlicza `wyprobowane_thinking`
             else:
                 _dev_log(
@@ -1757,27 +1702,13 @@ def _wywolaj_anthropic(
                 kwargs.pop("output_config", None)
                 # Wariant „bez myślenia", który JUŻ przeszedł walidację, zostaje
                 # (reset do `bez_myslenia` wskrzeszał dialekt odrzucony wcześniej
-                # — audyt v19.9). Z quality schodzimy na NASTĘPNY niewypróbowany.
-                if (kwargs.get("thinking") or {}).get("type") == "adaptive":
-                    jest, wariant = kolejny_wariant_bez_myslenia(
-                        mdl, wyprobowane_thinking)
-                    if jest:
-                        wyprobowane_thinking.append(wariant)
-                        ustaw_thinking(kwargs, wariant)
-                kwargs["max_tokens"] = max_tokens
+                # — audyt v19.9).
                 winowajca = "awaryjnie"
             zdjete.add(winowajca)
 
     tekst = "".join(
         b.text for b in resp.content if getattr(b, "type", None) == "text"
     )
-    if myslenie is not None:
-        streszczenie = "\n\n".join(
-            t for b in resp.content
-            if getattr(b, "type", None) == "thinking"
-            and (t := (getattr(b, "thinking", "") or "").strip()))
-        if streszczenie:
-            myslenie.append(streszczenie)
     stop = getattr(resp, "stop_reason", None)
     if slad is not None:
         uzycie = getattr(resp, "usage", None)
@@ -1786,8 +1717,8 @@ def _wywolaj_anthropic(
             "model":      mdl,
             "request_id": getattr(resp, "_request_id", None),
             "stop_reason": stop,
-            # Sam `format` — `effort` trybu quality to nie schemat, a jego
-            # obecność zmieniłaby odcisk i udawała „inny schemat" w diagnozie.
+            # Sam `format` — inne pola `output_config` (np. `effort`) to nie
+            # schemat, a ich obecność udawałaby „inny schemat" w diagnozie.
             "schemat":    _odcisk_schematu(
                 {"format": kwargs["output_config"]["format"]}
                 if "format" in kwargs.get("output_config", {}) else None),
@@ -1839,10 +1770,8 @@ def wywolaj_llm(
     timeout: float,
     segmenty: list[dict] | None = None,
     wymusz_json: bool = False,
-    thinking_budget: int = 0,
     schema_json: dict | None = None,
     slad: list[dict] | None = None,
-    myslenie: list[str] | None = None,
 ) -> tuple[str, str | None]:
     """Wywołuje LLM i zwraca ``(tekst, stop_reason)`` — wspólnie dla obu providerów.
 
@@ -1851,10 +1780,8 @@ def wywolaj_llm(
         jako pierwszą wiadomość ``role=system`` (gdy niepusty).
       * **reasoning** — Anthropic ``thinking``: domyślnie „bez myślenia" w
         dialekcie modelu (``disabled``, na Sonnet 5.5 ``between_tools`` — patrz
-        :func:`thinking_bez_myslenia`); ``thinking_budget`` > 0 włącza myślenie (18.11,
-        tryb quality tłumacza AI — patrz :func:`_wywolaj_anthropic`).
-        W ``openai_compat`` parametr IGNOROWANY — cicha degradacja, ten sam
-        wzorzec co ``segmenty``/``wymusz_json`` niżej.
+        :func:`thinking_bez_myslenia`). Runtime nie myśli — tryb quality
+        usunięty w 19.18 (uzasadnienie przy :func:`_wywolaj_anthropic`).
       * **odpowiedź** — Anthropic skleja bloki ``content[].text``; OpenAI bierze
         ``choices[0].message.content``.
       * **stop_reason** — OpenAI ``finish_reason=="length"`` mapujemy na
@@ -1919,10 +1846,8 @@ def wywolaj_llm(
             # nieużywane; kształt JSON wymusza `schema_json` (structured outputs).
             wynik = _wywolaj_anthropic(
                 klient, mdl, system, messages, max_tokens, temperature, timeout,
-                thinking_budget=thinking_budget,
                 schema_json=schema_json,
                 slad=slad,
-                myslenie=myslenie,
             )
         klient.udane = True
         return wynik
@@ -1935,8 +1860,7 @@ def wywolaj_llm(
                 klient, model=model, system=system, messages=messages,
                 max_tokens=max_tokens, temperature=temperature, timeout=timeout,
                 segmenty=segmenty, wymusz_json=wymusz_json,
-                thinking_budget=thinking_budget, schema_json=schema_json,
-                slad=slad, myslenie=myslenie,
+                schema_json=schema_json, slad=slad,
             )
         opakowany = _opakuj_blad(exc, mdl, klient.provider)
         if opakowany is None:

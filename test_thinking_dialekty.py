@@ -193,88 +193,35 @@ def test_rdzen_wyczerpane_dialekty_rzucaja():
     raise AssertionError("tlumacz_rdzen must not loop on thinking rejections")
 
 
-# --- 3. tryb quality -----------------------------------------------------------
+# --- 3. runtime nie mysli (tryb quality usuniety w 19.18) ----------------------
 
-def test_quality_to_adaptive_z_effort_a_nie_budget():
-    _t, wyslane = _anthropic("claude-sonnet-5-5", ["ok"], thinking_budget=4096)
-    w = wyslane[0]
-    # `display: summarized` (19.18) - bez niego tekst myslenia przychodzi pusty.
-    assert w["thinking"] == {"type": "adaptive", "display": "summarized"}
-    assert w["output_config"]["effort"] == cl.EFFORT_QUALITY
-    assert w["max_tokens"] == 1000 + 4096
-    assert "budget_tokens" not in json.dumps(w)
-
-
-def test_quality_ze_schematem_trzyma_oba_pola():
-    _t, wyslane = _anthropic("claude-sonnet-5-5", ["ok"], thinking_budget=4096,
-                             schema_json=SCHEMAT)
-    oc = wyslane[0]["output_config"]
-    assert "format" in oc and oc["effort"] == cl.EFFORT_QUALITY
-
-
-def test_odrzucone_quality_schodzi_na_bez_myslenia_bez_effort():
-    _t, wyslane = _anthropic("claude-sonnet-5-5", [_Blad400(BLAD_BUDGET), "ok"],
-                             thinking_budget=4096, schema_json=SCHEMAT)
-    druga = wyslane[1]
-    assert druga["thinking"] == {"type": "between_tools"}
-    assert "effort" not in druga["output_config"] and "format" in druga["output_config"]
-    assert druga["max_tokens"] == 1000
-
-
-def test_odrzucone_display_zostawia_myslenie_adaptive():
-    blad = _Blad400("thinking.display: Extra inputs are not permitted")
-    _t, wyslane = _anthropic("claude-sonnet-4-6", [blad, "ok"], thinking_budget=4096)
-    assert wyslane[1]["thinking"] == {"type": "adaptive"}
-    assert wyslane[1]["output_config"]["effort"] == cl.EFFORT_QUALITY
-
-
-def test_streszczenie_myslenia_trafia_do_kanalu_myslenie_nie_do_sladu():
-    from types import SimpleNamespace
-
-    class _SDK:
-        def __init__(self):
-            self.messages = self
-
-        def with_options(self, **_k):
-            return self
-
-        def create(self, **_k):
-            return SimpleNamespace(
-                content=[SimpleNamespace(type="thinking", thinking="Sprawdzam kalki."),
-                         SimpleNamespace(type="text", text="Talo")],
-                stop_reason="end_turn", usage=None)
-
-    myslenie, slad = [], []
-    tekst, _ = cl._wywolaj_anthropic(
-        cl.KlientLLM(provider=cl.PROVIDER_ANTHROPIC, sdk=_SDK()), "claude-sonnet-5-5",
-        "S.", [{"role": "user", "content": "x"}], max_tokens=10, temperature=1.0,
-        timeout=5.0, thinking_budget=4096, slad=slad, myslenie=myslenie)
-    assert tekst == "Talo" and myslenie == ["Sprawdzam kalki."]
-    assert "Sprawdzam" not in json.dumps(slad)
-
-
-def test_plik_myslenia_obok_wyniku_i_prompt_quality(tmp_path):
+def test_runtime_nie_przyjmuje_juz_myslenia():
+    import inspect
     import tlumacz_ai as ta
-    wynik = tmp_path / "rozdzial_suomi.html"
-    assert ta.zapisz_myslenie(str(wynik), []) is None
-    plik = ta.zapisz_myslenie(str(wynik), ["## 1/2\n\nA", "## 2/2\n\nB"])
-    assert plik == str(tmp_path / "rozdzial_suomi_myslenie.txt")
-    assert "## 2/2" in (tmp_path / "rozdzial_suomi_myslenie.txt").read_text(encoding="utf-8")
-    prompt = ta._PROMPT_QUALITY.format(jezyk_docelowy="Suomi")
-    assert "Suomi" in prompt and "{" not in prompt
+    for fn in (cl.wywolaj_llm, cl._wywolaj_anthropic):
+        parametry = inspect.signature(fn).parameters
+        assert "thinking_budget" not in parametry and "myslenie" not in parametry
+    assert "tryb_quality" not in inspect.signature(ta.tlumacz_dlugi_tekst).parameters
+    for nazwa in ("EFFORT_QUALITY", "_zdejmij_effort"):
+        assert not hasattr(cl, nazwa), nazwa
+    for nazwa in ("THINKING_BUDGET_QUALITY", "_PROMPT_QUALITY", "zapisz_myslenie"):
+        assert not hasattr(ta, nazwa), nazwa
 
 
-def test_odcisk_schematu_nie_zalezy_od_effort():
-    slad_a, slad_b = [], []
-    for slad, budzet in ((slad_a, 0), (slad_b, 4096)):
-        klient = cl.KlientLLM(provider=cl.PROVIDER_ANTHROPIC,
-                              sdk=_MockSDK(["ok"], []))
-        cl._wywolaj_anthropic(
-            klient, "claude-sonnet-5-5", "S.", [{"role": "user", "content": "x"}],
-            max_tokens=10, temperature=1.0, timeout=5.0, thinking_budget=budzet,
-            schema_json=SCHEMAT, slad=slad)
-    assert slad_a[0]["schemat"] == slad_b[0]["schemat"] != "no"
+def test_runtime_wysyla_tylko_dialekt_bez_myslenia():
+    _t, wyslane = _anthropic("claude-sonnet-5-5", ["ok"], schema_json=SCHEMAT)
+    w = wyslane[0]
+    assert w["thinking"] == {"type": "between_tools"}
+    assert "effort" not in w.get("output_config", {})
+    assert w["max_tokens"] == 1000
 
+
+def test_klucze_trybu_quality_zniknely_ze_wszystkich_paczek():
+    import yaml
+    from pathlib import Path
+    for plik in sorted(Path(__file__).parent.glob("dictionaries/*/gui/ui.yaml")):
+        sekcja = yaml.safe_load(plik.read_text(encoding="utf-8"))["poliglota"]
+        assert not [k for k in sekcja if k.startswith("chk_quality")], plik
 
 
 # --- 4. galaz awaryjna (znaleziska audytu v19.9, odtworzone 1:1) ----------------
@@ -322,13 +269,6 @@ def test_awaryjnie_nie_wskrzesza_odrzuconego_dialektu():
     tekst, wyslane = _po_payloadzie()
     assert tekst == "ok", _slad(wyslane)
     assert wyslane[-1]["thinking"] == {"type": "between_tools"}
-
-
-def test_awaryjnie_z_quality_bez_zduplikowanej_proby():
-    tekst, wyslane = _po_payloadzie(thinking_budget=4096)
-    assert tekst == "ok", _slad(wyslane)
-    kolejne = [json.dumps(w, sort_keys=True) for w in wyslane]
-    assert len(kolejne) == len(set(kolejne)), f"identical request re-sent: {_slad(wyslane)}"
 
 
 def test_effort_bez_pelnej_sciezki_to_thinking():

@@ -39,7 +39,7 @@ _licznik = {"blok": 0, "iso": 0}
 
 
 def _stub_llm(klient, *, model, system, messages, max_tokens, temperature,
-              timeout, segmenty=None, wymusz_json=False, thinking_budget=0,
+              timeout, segmenty=None, wymusz_json=False,
               schema_json=None, slad=None):
     """Model-echo; prompt ISO rozpoznawany po `BCP-47` (jak w `_pobierz_iso`)."""
     tresc_user = messages[0]["content"]

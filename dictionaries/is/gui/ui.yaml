@@ -856,9 +856,6 @@ poliglota:
   chk_wymus_tooltip: Sjálfgefið er hver efnisgrein unnin samkvæmt því tungumáli sem greint var fyrir hana. Hakaðu við til að láta allt skjalið — einnig innskot á öðrum tungumálum — fara í gegnum reglur eins tungumáls (t.d. afturkræfa Caesar-dulritun með einu stafrófi). Krefst þess að tungumál sé valið í reitnum hér að ofan.
   wykryto_jezyk_tytul: Mál skjals greint
   wykryto_jezyk_tresc: "Efni skráarinnar sem hlaðið var inn er á „{jezyk_wykryty}\".\nListar yfir áherslur og dulmál hafa verið skipt yfir í þetta mál."
-  chk_quality: Gæðastilling — dýpri yfirvegun líkans (hægara og dýrara; hefur engin áhrif á OpenAI-samhæfð endapunkta)
-  chk_quality_name: Gæðastilling þýðingar
-  chk_quality_tooltip: Líkanið fær fjárveitingu fyrir innri greiningu textans áður en þýðing hefst (extended thinking). Þetta bætir erfiða hluta á kostnað tíma og tóka. Gildir aðeins um Anthropic Claude — hefur engin áhrif á OpenAI-samhæfð endapunkta.
   err_odmowa: Líkanið hafnaði því að framkvæma þessa skipun — innihald hennar gæti hafa brotið gegn reglum líkansins eða verið of tvírætt. Engu var vistað; orðaðu skipunina á annan hátt og reyndu aftur.
   ai_ostrzezenie_cache_tytul: Viðvörun um endurupptökuminni
   ai_ostrzezenie_cache: "Þýðingin var kláruð og vistuð, en ekki tókst að fjarlægja bráðabirgðaskrána (endurupptökuminni):\n{plik}\n\nFjarlægðu þessa skrá handvirkt. Á meðan hún er til staðar getur það gerst að þýðing á sömu skrá yfir á sama tungumál taki upp þráðinn frá þessu minni og skili FYRRI þýðingunni í stað nýrrar.\n\nNánar: {szczegoly}"
