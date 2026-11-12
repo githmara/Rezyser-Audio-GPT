@@ -1581,6 +1581,7 @@ def _wywolaj_anthropic(
     thinking_budget: int = 0,
     schema_json: dict | None = None,
     slad: list[dict] | None = None,
+    myslenie: list[str] | None = None,
 ) -> tuple[str, str | None]:
     """Gałąź Anthropic z degradacją ``temperature`` dla modeli, które ją odrzucają.
 
@@ -1665,7 +1666,11 @@ def _wywolaj_anthropic(
         # ZAPASEM `max_tokens` — myślenie wlicza się w limit, więc bez zapasu
         # guard `stop_reason=="max_tokens"` łapałby odpowiedzi ucięte namysłem.
         zdejmij_temperature(kwargs)
-        kwargs["thinking"] = {"type": "adaptive"}
+        # `display: "summarized"` (19.18): bez niego nowsze modele oddają blok
+        # myślenia z PUSTYM tekstem (domyślne `omitted`), a tokeny namysłu i tak
+        # są płatne. Streszczenie idzie do `myslenie` wołającego — nigdy do
+        # `slad`, który trafia do `error_log.txt` i z założenia nie ma treści.
+        kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
         kwargs["output_config"] = {
             **kwargs.get("output_config", {}), "effort": EFFORT_QUALITY,
         }
@@ -1713,6 +1718,18 @@ def _wywolaj_anthropic(
                     "(JSON wymuszany samym promptem, jak ≤v18.22)."
                 )
                 kwargs.pop("output_config", None)
+            elif (winowajca == "thinking"
+                  and (kwargs.get("thinking") or {}).get("display")
+                  and "display" in str(exc).lower()):
+                # Najpierw zdejmujemy samo `display` (model sprzed 4.7 może go
+                # nie znać) — inaczej odrzucenie streszczenia kosztowałoby całe
+                # myślenie trybu quality.
+                _dev_log(
+                    f"anthropic: model '{mdl}' odrzucił 'thinking.display' "
+                    f"({type(exc).__name__}) — ponawiam adaptive bez streszczenia."
+                )
+                kwargs["thinking"] = {"type": "adaptive"}
+                continue
             elif winowajca == "thinking":
                 # Z quality (adaptive + effort) schodzimy na „bez myślenia";
                 # z „bez myślenia" — na następny dialekt. Nigdy dwa razy ten sam.
@@ -1741,7 +1758,7 @@ def _wywolaj_anthropic(
                 # Wariant „bez myślenia", który JUŻ przeszedł walidację, zostaje
                 # (reset do `bez_myslenia` wskrzeszał dialekt odrzucony wcześniej
                 # — audyt v19.9). Z quality schodzimy na NASTĘPNY niewypróbowany.
-                if kwargs.get("thinking") == {"type": "adaptive"}:
+                if (kwargs.get("thinking") or {}).get("type") == "adaptive":
                     jest, wariant = kolejny_wariant_bez_myslenia(
                         mdl, wyprobowane_thinking)
                     if jest:
@@ -1754,6 +1771,13 @@ def _wywolaj_anthropic(
     tekst = "".join(
         b.text for b in resp.content if getattr(b, "type", None) == "text"
     )
+    if myslenie is not None:
+        streszczenie = "\n\n".join(
+            t for b in resp.content
+            if getattr(b, "type", None) == "thinking"
+            and (t := (getattr(b, "thinking", "") or "").strip()))
+        if streszczenie:
+            myslenie.append(streszczenie)
     stop = getattr(resp, "stop_reason", None)
     if slad is not None:
         uzycie = getattr(resp, "usage", None)
@@ -1818,6 +1842,7 @@ def wywolaj_llm(
     thinking_budget: int = 0,
     schema_json: dict | None = None,
     slad: list[dict] | None = None,
+    myslenie: list[str] | None = None,
 ) -> tuple[str, str | None]:
     """Wywołuje LLM i zwraca ``(tekst, stop_reason)`` — wspólnie dla obu providerów.
 
@@ -1897,6 +1922,7 @@ def wywolaj_llm(
                 thinking_budget=thinking_budget,
                 schema_json=schema_json,
                 slad=slad,
+                myslenie=myslenie,
             )
         klient.udane = True
         return wynik
@@ -1910,7 +1936,7 @@ def wywolaj_llm(
                 max_tokens=max_tokens, temperature=temperature, timeout=timeout,
                 segmenty=segmenty, wymusz_json=wymusz_json,
                 thinking_budget=thinking_budget, schema_json=schema_json,
-                slad=slad,
+                slad=slad, myslenie=myslenie,
             )
         opakowany = _opakuj_blad(exc, mdl, klient.provider)
         if opakowany is None:

@@ -1966,6 +1966,12 @@ class PoliglotaPanel(wx.Panel):
                 wynik.tekst,
             )
             return
+        # 19.18 (próba): streszczenie myślenia trybu quality obok wyniku. Błąd
+        # zapisu tego pliku nie unieważnia tłumaczenia — trafia do logu.
+        try:
+            tlumacz_ai.zapisz_myslenie(out_path, wynik.myslenie)
+        except Exception as exc:  # noqa: BLE001
+            bledy_ai.zapisz_diagnostyke(exc, "poliglota.zapisz_myslenie")
 
         self._gauge.SetValue(100)
         self._btn_process.Enable()
