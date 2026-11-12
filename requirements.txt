@@ -56,33 +56,30 @@
 # GUI całej aplikacji. 4.4 to następna linia minorowa fundamentu — podmiana
 # wymaga przejścia po panelach z czytnikiem ekranu, nie samego builda.
 # Na 4.3.1 (wxWidgets 3.3.3) przejście zaliczone przy migracji środowiska.
-wxpython<4.4
-# Silnik AI całego runtime'u (`core_llm`). 2.x będzie nowym majorem SDK; nasze
-# wołania (structured outputs, `stop_reason`, `max_tokens`) idą po API 1.x.
+wxpython<4.4  # hold: 19.18.0
+# Silnik AI całego runtime'u (`core_llm`). Granica na linii majorowej (grupa B).
 # Przejście 0.x → 1.x kosztowało JEDNĄ zmianę: `temperature` wypadła z sygnatury
-# `messages.create` i jedzie odtąd przez `extra_body` (patrz `core_llm`).
+# `messages.create` i jechała przez `extra_body`.
 #
-# WSTRZYMANIE Z v19.4.2 ZDJĘTE (v19.5.0): 1.6.0 → 1.7.0 przeszło bez zmian
-# w kodzie. Dowód z uruchomienia, nie z changelogu: `inspect.signature` na
-# `Anthropic.__init__` (16 parametrów) i `messages.create` (22) dało ZBIORY
-# IDENTYCZNE przed i po, `with_options` na miejscu. Granica wraca więc na linię
-# majorową — tam, gdzie stoi realna przewidywana niezgodność.
-#
-# WSTRZYMANIE ZAPISANE GRANICĄ (v19.8.0, kanon zachowawczy): PyPI ma 1.8.0, czyli
-# krok MINOROWY — migracja SDK nie jest treścią tego wydania. Zdjęcie granicy
-# (z powrotem na `<2` po `inspect.signature` na `Anthropic.__init__`
-# i `messages.create`, jak w v19.5.0) to treść osobnego cyklu. Bilet powrotny:
-# `skrypty/zamrozone_19.8.0.txt`.
-anthropic<1.8  # hold: 19.8.0
+# 19.18: 1.7.0 → 2.8.0 = API 2026-10-21 (przewodnik migracji:
+# platform.claude.com/docs/en/api/migration-2026-10-21). Ta wersja API odrzuca
+# `temperature`/`top_p`/`top_k` 400-ką na KAŻDYM modelu, także domyślną wartość
+# i także przez `extra_body` — decyzja maintainera 2026-11-12: gałąź Anthropic
+# nie wysyła ich wcale (`core_llm._wywolaj_anthropic`, `tlumacz_rdzen`).
+# Reszta zmian 2.x nas nie dotyczy (wiadomości to dicty, jeden klucz w kliencie,
+# bez własnego `base_url`, bez `models.list(betas=)`); klucz jedzie teraz jako
+# `Authorization: Bearer`. 2.x ciągnie nową zależność `httpx2` (bundle).
+# Dowód: `inspect.signature` + żywe wywołanie sonnet-5-5 (tekst i structured
+# outputs, jedna próba każde). Licencja SDK od 2.0: Apache 2.0 (było MIT).
+anthropic<3  # hold: 19.18.0
 # Most do Studio: wołamy `client.studio.projects.create/delete`
 # i `client.user.subscription.get` — dokładnie tę powierzchnię ten SDK
 # przemianowuje między wydaniami. 2.52 → 2.67 (15 minorów) przeszło bez zmian
 # w kodzie: cała trójka i wszystkie nasze kwargi `create` są na miejscu.
-# WSTRZYMANIE ZAPISANE GRANICĄ (v19.8.1, kanon zachowawczy): PyPI ma 2.69.0,
-# krok MINOROWY ponad zainstalowane 2.68.0. Wydanie idzie jak jest, upgrade
-# + `inspect.signature` na trójce wyżej to treść osobnego cyklu. Bilet
-# powrotny: `skrypty/zamrozone_19.8.1.txt`.
-elevenlabs<2.69  # hold: 19.8.1
+# 19.18: 2.68.0 → 2.78.0 — `inspect.signature` na całej trójce z naszymi kwargami
+# przechodzi, `elevenlabs.core.ApiError` na miejscu, żywy odczyt subskrypcji OK.
+# Granica na linii majorowej (grupa B).
+elevenlabs<3  # hold: 19.18.0
 python-dotenv
 python-docx
 # Warstwa tekstu PDF w Poliglocie i Konwerterze (`core_pdf`, od 19.13). Wybrany
@@ -107,7 +104,7 @@ fonttools<4.69  # hold: 19.18.0
 # minorowa, nie majorowa: upgrade jest zmianą kanonu, nie tylko biblioteki.
 # 2.1.1 → 2.2.0 listy nie ruszyło — kanon dalej ma 75 wpisów i bramka to
 # potwierdziła; granica idzie więc na kolejny minor, nie znika.
-lingua-language-detector<2.3
+lingua-language-detector<2.3  # hold: 19.18.0
 beautifulsoup4
 num2words
 pyyaml
@@ -120,7 +117,7 @@ tiktoken
 # COLLECT — patrz CLAUDE.md `# DEPLOYMENT`). Ta powierzchnia nie ma kontraktu
 # stabilności między majorami, a jej złamanie objawia się dopiero w buildzie
 # wydania, czyli w najgorszym momencie. 7.x ma być decyzją z próbnym buildem.
-pyinstaller<7
+pyinstaller<7  # hold: 19.18.0
 # pytest — 13 plików `test_*.py` (179 asercji, ~13 s na całość) nie dało się
 # uruchomić, bo pakietu nie było ANI w manifeście, ANI w środowisku, choć
 # procedura wydawnicza wymieniała `python -m pytest test_*.py` jako bramkę.
@@ -147,7 +144,7 @@ markdown<3.12  # hold: 19.18.0
 #      `LLM_PROVIDER=openai_compat` (README, manual KROK 2B) `core_llm.zbuduj_klienta`
 #      buduje klienta tym SDK, więc `openai` JEST w bundlu PyInstallera.
 #   2. Dyspozytorski workflow GitHub Actions „Sami" (intake zgłoszeń,
-#      .github/scripts/issue_intake_sami.py) — woła gpt-4o-mini. Workflow instaluje
+#      .github/scripts/issue_intake_sami.py) — woła `MODEL_SAMI`. Workflow instaluje
 #      go też jawnie w issue-intake.yml; wpis tutaj służy lokalnemu debugowaniu bota.
 #
 # SPROSTOWANIE (v18.24, zmierzone): poprzednia wersja tego komentarza — oraz nota
@@ -169,8 +166,8 @@ markdown<3.12  # hold: 19.18.0
 # parametrów) i `chat.completions.create` (42) to zbiory identyczne przed i po,
 # `with_options` na miejscu. Granica wraca na linię majorową.
 #
-# WSTRZYMANIE ZAPISANE GRANICĄ (v19.8.0, kanon zachowawczy): PyPI ma 3.19.0 —
-# krok MINOROWY (trzy minory ponad zainstalowane 3.16.2), ta sama decyzja i ten
-# sam termin co przy `anthropic` wyżej. Granica stoi tuż nad zainstalowaną linią,
-# żeby 3.17/3.18 też nie wchodziły bez sprawdzenia.
-openai<3.17  # hold: 19.8.0
+# 19.18: 3.16.2 → 3.49.0 — `chat.completions.create` przyjmuje wszystkie nasze
+# kwargi (oba klucze limitu tokenów, `response_format`, `extra_body`),
+# `with_options(timeout)` jest; żywe wywołanie przez OpenRoutera OK. Granica
+# z powrotem na linii majorowej (grupa B).
+openai<4  # hold: 19.18.0

@@ -184,7 +184,9 @@ def test_kazdy_pakiet_manifestu_ma_grupe_i_parsuje_hold():
     assert not bez, f"pakiety bez grupy ryzyka: {bez}"
     assert set(az.GRUPY_RYZYKA.values()) <= set(az.OPIS_GRUP)
     daty = {w.nazwa: w.wstrzymanie for w in wpisy if w.wstrzymanie}
-    assert daty.get("anthropic") == "19.8.0", daty
+    assert daty and all(az._RE_VERSION.match(d) for d in daty.values()), daty
+    # Kazda granica (`<`) nosi date - inaczej po cichu stalaby na zawsze.
+    assert all(w.wstrzymanie for w in wpisy if "<" in w.specyfikator), daty
 
 
 def test_wersja_projektu_czyta_wip_jako_otwarcie(tmp_path):

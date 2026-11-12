@@ -572,13 +572,10 @@ def wywolaj_llm(
         # „Bez myślenia" w dialekcie modelu: `between_tools` na Sonnet 5.5
         # (`disabled` = 400), `disabled` na starszych — wiedza w `core_llm`.
         cl.ustaw_thinking(kwargs, cl.thinking_bez_myslenia(model))
-        # `temperature` wysyłamy TYLKO tam, gdzie ma szansę zadziałać — wiedzę
-        # (baseline modeli + trwały autocache) dzielimy z runtimem przez
-        # `core_llm`, zamiast trzymać trzecią kopię tej samej listy.
-        # Wkładamy przez `extra_body` — SDK 1.x wyciął `temperature`
-        # z sygnatury `messages.create` (uzasadnienie i pomiar: `core_llm`).
-        if cl.honoruje_temperature(model, TEMPERATURA_TLUMACZENIA):
-            cl.wstaw_temperature(kwargs, TEMPERATURA_TLUMACZENIA)
+        # `temperature` NIE jedzie do Anthropic (od 19.18: `anthropic` 2.x =
+        # API 2026-10-21, które odrzuca parametry próbkowania na każdym
+        # modelu, nawet domyślne i nawet przez `extra_body`; uzasadnienie
+        # i decyzja: `core_llm._wywolaj_anthropic`).
     # Reaktywna siatka bezpieczeństwa dla modelu spoza baseline'u (reżyser
     # może podać własny `--model`). Degradujemy DWIE rzeczy, każdą rozpoznaną
     # przez `core_llm`: odrzuconą `temperature` (wynik ZAPAMIĘTUJEMY — kolejne

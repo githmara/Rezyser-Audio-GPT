@@ -402,24 +402,37 @@ def test_rodzina_nie_placi_jalowym_round_tripem_na_domyslnym_modelu():
     assert not cl.temperatura_w_payloadzie(wyslane[0])
 
 
-def test_rodzina_nadal_wysyla_temperature_do_modelu_ktory_ja_honoruje():
+_POLA_PROBKOWANIA = ("temperature", "top_p", "top_k")
+
+
+def _bez_probkowania(kwargs):
+    """API 2026-10-21 (anthropic 2.x) odrzuca te pola 400-ka na KAZDYM modelu,
+    takze wartosc domyslna i takze przez `extra_body`."""
+    return not any(p in kwargs or p in kwargs.get("extra_body", {})
+                   for p in _POLA_PROBKOWANIA)
+
+
+def test_rodzina_nie_wysyla_temperature_nawet_do_modelu_ktory_ja_honorowal():
+    # Do 19.17 `claude-sonnet-4-6` dostawal `temperature` przez `extra_body`.
+    # Od 19.18 (decyzja maintainera 2026-11-12) nie dostaje jej zaden model.
     _mapa, wyslane = _wywolaj_rdzen("claude-sonnet-4-6", [ODP_TLUMACZENIA])
-    import tlumacz_rdzen as tr
-
-    assert wyslane[0]["extra_body"]["temperature"] == tr.TEMPERATURA_TLUMACZENIA
+    assert len(wyslane) == 1 and _bez_probkowania(wyslane[0])
 
 
-def test_rodzina_uczy_sie_nieznanego_modelu_raz_a_nie_co_chunk():
+def test_rodzina_nieznany_model_jedno_wywolanie_bez_probkowania():
     cl._NAUCZONE_BEZ_TEMPERATURY.discard("egzotyczny-endpoint-9")
-    _mapa, pierwsze = _wywolaj_rdzen(
-        "egzotyczny-endpoint-9", [_Blad400(BLAD_TEMPERATURY), ODP_TLUMACZENIA])
-    assert len(pierwsze) == 2, "the reactive safety net did not retry"
-    assert (cl.temperatura_w_payloadzie(pierwsze[0])
-            and not cl.temperatura_w_payloadzie(pierwsze[1]))
-    # Drugi chunk tego samego przebiegu juz NIE probuje - nauka jest trwala.
-    _mapa2, drugie = _wywolaj_rdzen("egzotyczny-endpoint-9", [ODP_TLUMACZENIA])
-    assert len(drugie) == 1, "the model rejection was not remembered"
-    assert not cl.temperatura_w_payloadzie(drugie[0])
+    _mapa, wyslane = _wywolaj_rdzen("egzotyczny-endpoint-9", [ODP_TLUMACZENIA])
+    assert len(wyslane) == 1, "an idle round-trip was paid"
+    assert _bez_probkowania(wyslane[0])
+
+
+def test_runtime_anthropic_pomija_temperature_z_przepisu():
+    # Przepis z `temperatura: 0.3` i model, ktory ja kiedys honorowal.
+    for temperatura in (0.3, 1.0):
+        klient, wyslane = klient_z([("ok", "end_turn")])
+        cl._wywolaj_anthropic(klient, "claude-haiku-4-5", "sys",
+                              [{"role": "user", "content": "x"}], 50, temperatura, 10)
+        assert _bez_probkowania(wyslane[0]), (temperatura, wyslane[0])
 
 
 def test_blad_ktory_nie_dotyczy_temperatury_leci_wyzej_z_rodziny():
@@ -444,10 +457,11 @@ def test_payload_pasuje_do_sygnatury_prawdziwego_SDK():
     import anthropic
 
     sygnatura = inspect.signature(anthropic.resources.messages.Messages.create)
-    # Model, ktory temperature HONORUJE - inaczej payload jej nie niesie
-    # i sprawdzalibysmy pusty przypadek.
+    # Model, ktory temperature kiedys HONOROWAL — przypadek, w ktorym do 19.17
+    # payload niosl `extra_body`. Od 2.x `bind` musi przejsc, a payload nie moze
+    # niesc pol probkowania nigdzie (`extra_body` ich nie ukryje przed API).
     _mapa, wyslane = _wywolaj_rdzen("claude-sonnet-4-6", [ODP_TLUMACZENIA])
-    assert cl.temperatura_w_payloadzie(wyslane[0]), "the case under test did not occur"
+    assert _bez_probkowania(wyslane[0])
 
     klient, wyslane_burza = klient_z([
         (json.dumps({"opcje": TRZY_OPCJE}), "end_turn"),

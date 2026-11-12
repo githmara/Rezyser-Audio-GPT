@@ -741,8 +741,13 @@ def honoruje_temperature(mdl: str, temperatura: float) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# `temperature` jedzie przez `extra_body` — SDK 1.x wyciął ją z sygnatury
+# `temperature` jechała przez `extra_body` — SDK 1.x wyciął ją z sygnatury
 # ---------------------------------------------------------------------------
+# HISTORIA od 19.18: `anthropic` 2.x = API 2026-10-21, które odrzuca parametry
+# próbkowania także przez `extra_body`, więc gałęzie Anthropic (runtime
+# i `tlumacz_rdzen`) przestały je wstawiać. Trójka poniżej zostaje publiczna,
+# bo drabiny degradacji (`zdejmij_temperature` na szczeblu awaryjnym) i testy
+# dalej z niej korzystają; pomiar 1.x niżej to zapis, dlaczego kiedyś działało.
 # `anthropic` 1.x nie przyjmuje już `temperature` (ani `top_p`/`top_k`) jako
 # kwargu `messages.create` — poleciałby `TypeError`, czyli wyjątek SPRZED HTTP,
 # którego reaktywna połowa kontraktu (`czy_odrzucono_temperature`, oparta na
@@ -1615,11 +1620,9 @@ def _wywolaj_anthropic(
     z :data:`_MODELE_BEZ_TEMPERATURY` ani z trwałego autocache'u, więc typowe
     wywołanie nie płaci nawet jednym jałowym round-tripem.
 
-    ``temperature`` wkładamy do payloadu przez :func:`wstaw_temperature`
-    (``extra_body``), bo SDK 1.x nie ma jej już w sygnaturze — pomiar i pełne
-    uzasadnienie stoją przy tamtej funkcji. Dla drabiny to zmiana bez znaczenia:
-    komunikat 400 pozostał ten sam, więc :func:`_co_odrzucono` rozpoznaje
-    winowajcę dokładnie jak dotąd.
+    ``temperature`` od 19.18 NIE jedzie do Anthropic wcale (API 2026-10-21
+    odrzuca parametry próbkowania na każdym modelu) — argument zostaje
+    w sygnaturze dla zgodności wołających i gałęzi OpenAI-compatible.
 
     ``slad`` (v18.23) → lista, do której dopisujemy metrykę KAŻDEGO wywołania
     (numer próby, ``request_id``, ``stop_reason``, liczniki tokenów). Nie zmienia
@@ -1638,15 +1641,18 @@ def _wywolaj_anthropic(
     bez_myslenia = thinking_bez_myslenia(mdl)
     ustaw_thinking(kwargs, bez_myslenia)
     wyprobowane_thinking: list[dict[str, str] | None] = [bez_myslenia]
-    # `temperature` wysyłamy TYLKO tam, gdzie ma szansę zadziałać (baseline +
-    # autocache). Dla `claude-sonnet-5-5` i pokrewnych pomijamy ją od razu, więc
-    # nie płacimy jałowym round-tripem przy każdej generacji.
-    if honoruje_temperature(mdl, temperature):
-        wstaw_temperature(kwargs, temperature)
-    else:
+    # `temperature` NIE jedzie do Anthropic w ogóle (od 19.18, `anthropic` 2.x =
+    # API 2026-10-21): ta wersja API odrzuca `temperature`/`top_p`/`top_k` 400-ką
+    # na KAŻDYM modelu, także wartość domyślną i także przez `extra_body`.
+    # Decyzja maintainera 2026-11-12: usunąć wszędzie — przepisy jadą na
+    # `claude-sonnet-5-5`, który i tak przyjmował tylko domyślną; tracą jedynie
+    # ręcznie ustawione starsze modele (haiku-4-5, sonnet-4-6), które dostają
+    # domyślne próbkowanie. Baseline/autocache niżej obsługują już tylko
+    # gałęzie OpenAI-compatible i OpenRoutera.
+    if temperature != _TEMPERATURA_DOMYSLNA:
         _dev_log(
-            f"anthropic: model '{mdl}' nie honoruje niedomyślnej 'temperature' "
-            f"({temperature}) — pomijam parametr bez próby (baseline/cache)."
+            f"anthropic: '{mdl}' — 'temperature' ({temperature}) z przepisu "
+            "pominięta: API 2026-10-21 nie przyjmuje parametrów próbkowania."
         )
     if schema_json is not None:
         kwargs["output_config"] = {
