@@ -344,6 +344,14 @@ _CHECKLIST_DOCS = """\
 - TIPOGLICEMIA (scrambled-letters demo): the example sentence must STAY
   scrambled (inner letters shuffled). If it reads as grammatically correct
   prose, the effect was lost — re-scramble it natively.
+- NUMBERS IN A RULE DESCRIPTION are engine parameters, not prose: a word
+  length, a repeat count, a shift range. Check each against the rule's YAML
+  (`min_dlugosc_slowa`, `min_powtorzen`, `min_przesuniecie`…), including in
+  the POLISH source. Measured 2026-11-12: the Polish manual said Typoglycemia
+  scrambles words "longer than 4 characters" while the engine scrambles them
+  FROM 4 letters on, and all nine packs had copied the mistake. No example
+  gate sees this, because the demo sentence is random; only a reviewer (or the
+  model's thinking summary, which flagged it) does.
 - TERMINOLOGY CONSISTENCY: pick ONE native word for recurring terms (e.g. the
   "vial"/fiolka) and use it across every section and file in the pack.
 - META-INSTRUCTION SKIP: for prompt-like passages ("You are a narrative

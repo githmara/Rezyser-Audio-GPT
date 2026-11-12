@@ -434,6 +434,32 @@ For English, a well-known canonical version exists you can use as a reference:
 For other languages, generate an equivalent in the same spirit.\
 """
 
+# 19.18 (pomiar myślenia): dwa szyfry, których przykład w `pl` opisuje POLSKĄ
+# paczkę, a nie miały bloku. Model zostawiał polski alfabet Cezara i polską parę
+# Samogłoskowca, więc rerun brata cofał ręcznie poprawione paczki (fi miało już
+# „29 merkkiä"); bramki LEAK (znak-PL) i EXAMPLE-PAIR łapały to dopiero po
+# zapłaconym przebiegu. Wartości liczymy z paczki DOCELOWEJ, nie zostawiamy modelowi.
+_PROMPT_CEZAR = """\
+### Cipher: Caesar — describe the {nazwa_natywna} pack, not the Polish one
+The Caesar Cipher entry describes the POLISH pack: the Polish alphabet (AĄBCĆ…ZŹŻ,
+35 letters), the shift range -34…34 and a random shift drawn from 1-34. The reader
+uses the {nazwa_natywna} pack, whose engine shifts over a DIFFERENT alphabet.
+Replace EVERY Polish value with these values of the {nazwa_natywna} pack:
+  - the cipher's name: "{etykieta}"
+  - the alphabet: {alfabet} ({liczba} letters)
+  - the shift range: {min_przes}…{max_przes}; a random shift is drawn from 1-{max_przes}
+{linia_etykiety}Do not mention the Polish alphabet or its letter count anywhere in this entry.\
+"""
+
+_PROMPT_SAMOGLOSKOWIEC = """\
+### Cipher: Vowelizer — the example must be the {nazwa_natywna} pack's own output
+The Vowelizer entry shows a POLISH example ("Dzień dobry" → "Dźoń dobro") produced by
+the Polish rules, including Polish softenings. The documentation gate recomputes every
+example with the {nazwa_natywna} engine, so the Polish pair would be reported as wrong.
+{przyklady}
+{zmiekczenia}\
+"""
+
 _PROMPT_CORE_LITERALY = """\
 ### Filenames, folders, placeholders and voice names — KEEP 1:1
 Polish filenames (angielski.yaml, cezar.yaml, podstawy.yaml, finski.yaml, islandzki.yaml,
@@ -503,6 +529,114 @@ def _sekcja_ma_typoglikemie(tresc: str) -> bool:
     return "typoglik" in tresc.lower()
 
 
+def _sekcja_ma_cezara(tresc: str) -> bool:
+    """True, gdy sekcja cytuje polski alfabet Cezara (artefakt „AĄBCĆ")."""
+    return "AĄBCĆ" in tresc
+
+
+def _sekcja_ma_samogloskowca(tresc: str) -> bool:
+    """True, gdy sekcja pokazuje polski przykład Samogłoskowca („Dźoń")."""
+    return "Dźoń" in tresc
+
+
+def _dane_cezara(kod: str) -> dict[str, str] | None:
+    """Wartości bloku CEZAR z paczki docelowej; ``None`` = paczka ich nie ma.
+
+    Alfabet tak jak silnik (`core_poliglota._algo_cezar`): `cezar.yaml::alfabet`,
+    potem `podstawy.yaml::alfabet`. Etykieta pola — z `ui.yaml` tej paczki,
+    z rozwiniętym zakresem, bo recenzent porównuje ją z GUI 1:1.
+    """
+    cfg = _wczytaj_regule(kod, "szyfry", "cezar")
+    podstawy = dev_yaml.wczytaj_jesli_jest(
+        DICT_DIR / kod / "podstawy.yaml", narzedzie=NARZEDZIE) or {}
+    alfabet = str(cfg.get("alfabet") or podstawy.get("alfabet") or "")
+    if not cfg or not alfabet:
+        return None
+    n = len(alfabet)
+    min_p = int(cfg.get("min_przesuniecie", -(n - 1)))
+    max_p = int(cfg.get("max_przesuniecie", n - 1))
+    ui = dev_yaml.wczytaj_jesli_jest(
+        DICT_DIR / kod / FOLDER_GUI / "ui.yaml", narzedzie=NARZEDZIE) or {}
+    szablon = str((ui.get("poliglota") or {}).get("lbl_cezar") or "")
+    etykieta_pola = ""
+    if szablon:
+        etykieta_pola = szablon.format(
+            min_przesuniecie=min_p, max_przesuniecie=max_p).rstrip(" :")
+    skrot = alfabet if n <= 8 else f"{alfabet[:4]}…{alfabet[-3:]}"
+    return {
+        "etykieta": str(cfg.get("etykieta") or ""),
+        "alfabet": skrot, "liczba": str(n),
+        "min_przes": str(min_p), "max_przes": str(max_p),
+        "linia_etykiety": (f'  - the shift field label, quoted EXACTLY as the GUI '
+                           f'shows it: "{etykieta_pola}"\n' if etykieta_pola else ""),
+    }
+
+
+def _przyklady_samogloskowca(
+    kod: str, nazwa_pliku: str, klucz_sekcji: str, tresc_pl: str,
+) -> list[tuple[str, str]]:
+    """Pary Samogłoskowca dla bloku: WEJŚCIE z istniejącej paczki, WYJŚCIE z silnika.
+
+    Wejście bierzemy z punktu listy paczki docelowej stojącego na tej samej
+    pozycji co polski punkt z „Dźoń" (wyrecenzowany, natywny przykład), wynik
+    liczy silnik — więc para jest poprawna nawet wtedy, gdy stary tekst miał
+    wynik policzony źle. Brak paczki, inna liczba punktów albo wciąż polskie
+    wejście = pusta lista (blok przechodzi wtedy na opis reguły).
+    """
+    punkty_pl = _punkty_listy(tresc_pl)
+    indeks = next((i for i, pkt in enumerate(punkty_pl) if "Dźoń" in pkt), None)
+    cel = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / nazwa_pliku
+    tekst = (wczytaj_istniejacy_docelowy(cel) or {}).get(klucz_sekcji) or ""
+    punkty = _punkty_listy(tekst)
+    if indeks is None or len(punkty) != len(punkty_pl):
+        return []
+    bwa, _bwp = _rodzenstwo_audytu()
+    cp = bwa.ustaw_silnik()
+    cfg = _wczytaj_regule(kod, "szyfry", "samogloskowiec")
+    algorytm = cp._ALGORYTMY_SZYFROW.get(str(cfg.get("algorytm") or ""))
+    if not cfg or algorytm is None:
+        return []
+    zrodla_pl = {src for src, _o, _k in bwa.lancuchy_z_opisu(
+        _bez_zawijania(punkty_pl[indeks]), dopusc_frazy=True)}
+    pary: list[tuple[str, str]] = []
+    for src, _oczek, _kontekst in bwa.lancuchy_z_opisu(
+            _bez_zawijania(punkty[indeks]), dopusc_frazy=True):
+        if src in zrodla_pl:
+            continue
+        pary.append((src, algorytm(src, cfg, bwa.podstawy_paczki(kod), {})))
+    return pary
+
+
+def _blok_samogloskowca(kod: str, nazwa_natywna: str, nazwa_pliku: str,
+                        klucz_sekcji: str, tresc_pl: str) -> str | None:
+    """Blok SAMOGŁOSKOWIEC albo ``None``, gdy paczka nie ma tego szyfru."""
+    cfg = _wczytaj_regule(kod, "szyfry", "samogloskowiec")
+    if not cfg:
+        return None
+    pary = _przyklady_samogloskowca(kod, nazwa_pliku, klucz_sekcji, tresc_pl)
+    if pary:
+        lista = "\n".join(f'  - "{src}" → "{wyn}"' for src, wyn in pary)
+        przyklady = ("Use EXACTLY these engine-computed pairs instead of the "
+                     "Polish ones, in the same order:\n" + lista)
+    else:
+        przyklady = (
+            f"Replace the Polish example with a short everyday {nazwa_natywna} "
+            f"phrase and apply the {nazwa_natywna} rule exactly: every vowel of "
+            f"\"{cfg.get('samogloski_male', '')}\" becomes "
+            f"\"{cfg.get('zamiana_samogloski_male', 'o')}\" and every vowel of "
+            f"\"{cfg.get('samogloski_wielkie', '')}\" becomes "
+            f"\"{cfg.get('zamiana_samogloski_wielkie', 'O')}\"; nothing else changes.")
+    ma_zmiekczenia = bool(cfg.get("zmiekszenia_przed_samogloska")
+                          or cfg.get("zmiekszenia_przed_spolgloska"))
+    zmiekczenia = (
+        f"The {nazwa_natywna} pack has its own softening rules: describe them, "
+        f"not the Polish ones." if ma_zmiekczenia else
+        f"The {nazwa_natywna} pack has NO softening rules: drop the remark about "
+        f"preserved Polish softenings.")
+    return _PROMPT_SAMOGLOSKOWIEC.format(
+        nazwa_natywna=nazwa_natywna, przyklady=przyklady, zmiekczenia=zmiekczenia)
+
+
 # ---------------------------------------------------------------------------
 # Model recenzji (od refaktoru 18.x): KAŻDE tłumaczenie ląduje jako DRAFT z
 # checklistą `przeglad_tlumaczen` — bez pętli feedbacku LLM. Dawne tryby
@@ -515,6 +649,8 @@ def _sekcja_ma_typoglikemie(tresc: str) -> bool:
 def _zbuduj_prompt_dodatkowy(
     kod: str, nazwa_natywna: str, tresc_sekcji: str = "",
     abbrev: list[tuple[str, str]] | None = None,
+    nazwa_pliku: str = "",
+    klucz_sekcji: str = "",
 ) -> str:
     """Buduje custom system-prompt dla pary (kod_docelowy, nazwa_natywna).
 
@@ -552,6 +688,17 @@ def _zbuduj_prompt_dodatkowy(
         ))
     if nieznana or _sekcja_ma_typoglikemie(tresc_sekcji):
         czesci.append(_PROMPT_TYPOGLIKEMIA.format(nazwa_natywna=nazwa_natywna))
+    # CEZAR / SAMOGŁOSKOWIEC (19.18) — tylko z treścią sekcji: wartości liczymy
+    # z paczki docelowej, więc wywołanie ad-hoc (bez treści) nie ma ich skąd wziąć.
+    if tresc_sekcji and _sekcja_ma_cezara(tresc_sekcji):
+        dane = _dane_cezara(kod)
+        if dane:
+            czesci.append(_PROMPT_CEZAR.format(nazwa_natywna=nazwa_natywna, **dane))
+    if tresc_sekcji and nazwa_pliku and _sekcja_ma_samogloskowca(tresc_sekcji):
+        blok = _blok_samogloskowca(kod, nazwa_natywna, nazwa_pliku,
+                                   klucz_sekcji, tresc_sekcji)
+        if blok:
+            czesci.append(blok)
 
     # Anty-meta-skip (v18.16, wspólny `tlumacz_bramki`) — BEZWARUNKOWO, wbrew
     # oszczędności teza-3. Powód: ryzyko nie ogranicza się do sekcji opisujących
@@ -1552,7 +1699,9 @@ def tlumacz_szablon(
         # wstrzykiwane tylko gdy sekcja faktycznie ich dotyczy (vs dawny monolit
         # doklejany do wszystkich 68 sekcji). `abbrev` rozwiązane wyżej (tabela
         # albo skrótowce z mini-promptu LLM) — steruje blokiem ODWRACACZ.
-        prompt_sekcji = _zbuduj_prompt_dodatkowy(kod, nazwa_natywna, tresc_pl, abbrev=abbrev)
+        prompt_sekcji = _zbuduj_prompt_dodatkowy(
+            kod, nazwa_natywna, tresc_pl, abbrev=abbrev,
+            nazwa_pliku=nazwa_pliku, klucz_sekcji=klucz)
         ok, tekst = _tlumacz_pojedyncza_sekcje(
             kod, nazwa_pl, klient, nazwa_pliku, rdzen, klucz, tresc_pl,
             dry_run=dry_run, model=model, prompt_dodatkowy=prompt_sekcji,

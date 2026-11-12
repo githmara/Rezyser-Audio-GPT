@@ -308,6 +308,29 @@ def _wywolaj_algorytm(nazwa: str, slowo: str, cfg: dict, podstawy: dict,
         return None
 
 
+def _wynik_przykladu(algorytm: str, slowo: str, cfg: dict, podstawy: dict,
+                     opcje: dict | None = None) -> str | None:
+    """Wynik silnika dla przykładu — algorytm szyfru ALBO normalizacja liczby.
+
+    Narzędzia `akcenty/oczyszczenie*` nie mają `algorytm`, ale `oczyszczenie`
+    zamienia liczby na słowa (`normalizuj_liczby: true`) i jego `opis` pokazuje
+    to przykładem („123" → „sto dwadzieścia trzy"). Bez tej gałęzi brat nie
+    miał czym karmić `computed_examples`, prompt kazał zostawić parę źródłową,
+    a bramka odrzucała „123" jako polski przykład — pętla bez wyjścia
+    (pomiar myślenia 2026-11-12, fi/is `oczyszczenie`).
+    """
+    if not algorytm:
+        if cfg.get("normalizuj_liczby") and slowo.strip().isdigit():
+            try:
+                import core_poliglota as cp
+                return cp.normalizuj_liczby(slowo.strip(),
+                                            jezyk=str(cfg.get("iso") or KOD_ZRODLOWY))
+            except Exception:  # noqa: BLE001 — brak języka w num2words = brak przykładu
+                return None
+        return None
+    return _wywolaj_algorytm(algorytm, slowo, cfg, podstawy, opcje)
+
+
 def rola_slowa_jakania(slowo: str, cfg: dict) -> str:
     """Rola słowa-przykładu w dydaktyce jąkania (gałąź algorytmu, którą pokazuje).
 
@@ -341,7 +364,7 @@ def przyklady_wyliczone(
     """
     wynik: list[dict[str, str]] = []
     for slowo in slowa:
-        wyjscie = _wywolaj_algorytm(algorytm, slowo, cfg, podstawy)
+        wyjscie = _wynik_przykladu(algorytm, slowo, cfg, podstawy)
         if wyjscie is None:
             continue
         wpis = {"source_word": slowo, "engine_output": wyjscie}
@@ -775,15 +798,17 @@ _ZASADY_PRZYKLADOW = (
     "illustrates (`samogloskowe` = second letter is a vowel, so ONE letter is "
     "repeated; `spolgloskowe` = second letter is a consonant, so TWO are; "
     "`za_krotkie` = the word is below the length threshold and comes back "
-    "unchanged). Keep each example in ITS role — do not swap them, do not drop "
-    "one, do not add a fourth.\n"
+    "unchanged). Keep each computed example in ITS role — do not swap them and "
+    "do not add one.\n"
     "- **`alphabet_facts` are also arithmetic**: the alphabet string, its "
     "LENGTH, the allowed shift range and the random-shift range belong to the "
     "TARGET language pack. Never carry over a number from the Polish text (the "
     "Polish alphabet has 35 letters; almost no other does).\n"
     "- If the payload carries NO computed example for a pair you see in the "
-    "source, keep the pair exactly as it is in the source and do not invent a "
-    "native replacement — an unverified example is worse than a foreign one.\n"
+    "source, DROP that example (and the words introducing it) — do not keep "
+    "the Polish word and do not invent a native replacement: a parent script "
+    "rejects Polish example words, and an unverified example is worse than "
+    "none.\n"
     "- **`previous_attempt_problems` MEANS YOUR PREVIOUS ANSWER WAS REJECTED.** "
     "When the payload carries it, a parent script already validated an earlier "
     "translation of these very items and refused it for exactly the listed "
@@ -995,9 +1020,11 @@ def waliduj_jednostke(
     uwagi: list[str] = []
     if klasa == KLASA_OPIS:
         uwagi += miekkie
-        nizsze = tgt.lower()
+        # Tylko ŹRÓDŁA par „X → Y": polskie „ja" jako podciąg trafiało w fińskie
+        # „kirjain" i w spójnik „ja", więc fi/jąkanie odpadało za każdym razem.
+        zrodla_tgt = {src.lower() for src, _ in pary_z_opisu(tgt)}
         for slowo in slowa_zakazane:
-            if slowo.lower() in nizsze:
+            if slowo.lower() in zrodla_tgt:
                 problemy.append(
                     f"przykład {slowo!r} został ze ŹRÓDŁA POLSKIEGO — model "
                     f"zignorował policzone `computed_examples` i przepisał "
@@ -1303,7 +1330,7 @@ def sprawdz_pare_przykladu(
         return (f"{src!r} → {oczek!r}: żadne przesunięcie z zakresu "
                 f"1..{len(alfabet) - 1} nie daje tego wyniku")
 
-    wynik = _wywolaj_algorytm(algorytm, src, cfg, podstawy)
+    wynik = _wynik_przykladu(algorytm, src, cfg, podstawy)
     if wynik is None or wynik == oczek:
         return None
     return f"{src!r} → {oczek!r}: silnik daje {wynik!r}"
@@ -1500,6 +1527,23 @@ def kontekst_paczki(kod: str, folder: str, nazwa: str) -> dict[str, str]:
     return wynik
 
 
+def slowa_zastapione(
+    pary_pl: list[tuple[str, str]],
+    wyliczone: list[dict[str, str]] | None,
+) -> tuple[str, ...]:
+    """Polskie słowa-przykłady zakazane w przekładzie: wszystkie, POZA wspólnymi.
+
+    Słowo, które samo jest policzonym wejściem paczki docelowej („123" w obu
+    paczkach `oczyszczenie`), nie jest polskim przeciekiem. Zakazywanie go
+    odrzucało poprawny przekład za każdym razem (pomiar myślenia 2026-11-12).
+    Polskie słowo BEZ policzonego zamiennika zostaje zakazane — prompt każe
+    wtedy przykład POMINĄĆ, jak zrobiła wyrecenzowana paczka `is` (bez gałęzi
+    samogłoskowej jąkania, zamiast polskiego „komputer").
+    """
+    wspolne = {w["source_word"].lower() for w in (wyliczone or [])}
+    return tuple(src for src, _ in pary_pl if src.lower() not in wspolne)
+
+
 def slowa_przykladowe(
     kod: str,
     folder: str,
@@ -1519,8 +1563,8 @@ def slowa_przykladowe(
 
     Dla jąkania kolejność słów jest ROLĄ, nie kolejnością: dopasowujemy je do
     gałęzi algorytmu policzonej dla DOCELOWYCH `samogloski`/`min_dlugosc_slowa`.
-    Rola bez pokrycia jest raportowana — wtedy model zachowa parę ze źródła PL,
-    a walidacja i tak przeliczy ją silnikiem (nie zgadujemy natywnego słowa).
+    Rola bez pokrycia jest raportowana — wtedy model POMIJA ten przykład
+    (19.18; polskie słowo odrzuca bramka, a natywnego słowa nie zgadujemy).
     """
     algorytm = str(cfg_efektywne.get("algorytm") or "")
     pary_pl = pary_z_opisu(str(cfg_pl.get("opis", "")))
@@ -1544,8 +1588,8 @@ def slowa_przykladowe(
             return skroty[:max(1, len(pary_pl))], uwagi
         uwagi.append(
             f"{kod}/{nazwa}: paczka nie ma tablicy `rozwiniecia`, z której "
-            f"wziąłbym skrótowiec-przykład — model zobaczy parę polską, "
-            f"a bramka przeliczy ją silnikiem")
+            f"wziąłbym skrótowiec-przykład — model ma pominąć polski przykład, "
+            f"a bramka odrzuci go, jeśli zostanie")
 
     if not pary_pl:
         return [], uwagi
@@ -1567,7 +1611,7 @@ def slowa_przykladowe(
                  if isinstance(s, str)]
     if not kandydaci:
         return [], [f"{kod}/{nazwa}: nie mam natywnych słów-przykładów — model "
-                    f"zobaczy pary polskie i bramka je przeliczy silnikiem"]
+                    f"ma pominąć polskie przykłady (bramka je odrzuca)"]
 
     if algorytm != "jakanie":
         # Pozostałe algorytmy mają jedną gałąź na przykład, więc bierzemy słowa
@@ -1585,7 +1629,7 @@ def slowa_przykladowe(
         if slowo is None:
             uwagi.append(
                 f"{kod}/{nazwa}: model nie podał słowa dla gałęzi {rola!r} "
-                f"(kandydaci: {kandydaci}) — ta jedna para zostanie ze źródła PL")
+                f"(kandydaci: {kandydaci}) — ten przykład zostanie pominięty")
             continue
         if slowo not in wybrane:
             wybrane.append(slowo)
@@ -2054,9 +2098,9 @@ def tlumacz_plik(
 
     if not _bramki_z_powtorka(jednostki, mapa_tgt, kod, nazwa, klient, model,
                               kontekst=kontekst, pola_payloadu=pola_payloadu,
-                              slowa_zakazane=tuple(
-                                  s for s, _ in pary_z_opisu(
-                                      str(cfg_pl.get("opis", "")))),
+                              slowa_zakazane=slowa_zastapione(
+                                  pary_z_opisu(str(cfg_pl.get("opis", ""))),
+                                  pola_payloadu.get("computed_examples")),
                               wzorce_pustych_krokow=_wzorce_pustych_krokow(
                                   cfg_pl, dane_jezyka),
                               cfg_dla_przykladow=cfg_efektywne,

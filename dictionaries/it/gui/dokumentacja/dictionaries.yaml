@@ -93,7 +93,7 @@ tresc:
        Cambrdige, non ipmtorta in qaule odirne saino le lttreere in una palora,
        l'uinca csoa imptraonte è che la pirma e l'utlima lteetra sniao al psoto
        gusito". Lo script mescola
-       casualmente il centro di ogni parola più lunga di 4 caratteri, il primo e l'ultimo
+       casualmente il centro di ogni parola di almeno 4 caratteri, il primo e l'ultimo
        carattere rimangono al loro posto. Ottimo per testare "quanto vedo veramente e
        quanto mi suggerisce il cervello".
 

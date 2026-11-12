@@ -1281,11 +1281,21 @@ def _pytania_pary(
          f"1. Put MULTI-CHARACTER patterns BEFORE any single character they "
          f"contain (a rule for `sch` must precede the rule for `s`).\n"
          f"2. Give a separate line for the capitalized form of every rule "
-         f"whose pattern starts with a letter.\n"
+         f"whose pattern starts with a letter, and one more for the ALL-CAPS "
+         f"form of every pattern with two or more letters (`sz`, `Sz`, `SZ`).\n"
          f"3. Never introduce a character that a LATER rule consumes, unless "
          f"the cascade is what you want.\n"
          f"4. Patterns are literal text, not regex.\n"
-         f"5. 12-40 rules. No commentary, no numbering, no code fences."),
+         # 19.18 (pomiar myślenia, replay `pl/finski`): goły limit „12-40 rules"
+         # liczył też warianty wielkości liter, których żąda punkt 2. Polskie
+         # dwuznaki × 3 warianty rozsadzały go, więc model ŚWIADOMIE wycinał
+         # dźwięki (w→v, ź), a bez myślenia łamał limit po cichu i gubił ą/ę/ń.
+         # Zrecenzowane tabele mają do 66 linii (`ru/finski`), więc limit
+         # dotyczy DŹWIĘKÓW, a kopie wielkości liter są poza nim.
+         f"5. 12-40 SOUND rules: count only the lowercase patterns. The "
+         f"capitalized and ALL-CAPS copies required by rule 2 do not count "
+         f"against the limit, so never drop a sound to make room for them. "
+         f"No commentary, no numbering, no code fences."),
         (1, "label",
          f"DROPDOWN LABEL for this accent, written in {nazwa_zrodla} — the "
          f"language of the pack's user interface. Follow the shape used by the "

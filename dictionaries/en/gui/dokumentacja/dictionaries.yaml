@@ -130,7 +130,7 @@ tresc:
        Cmabrigde Uinervtisy, it deosn't mttaer in waht oredr the ltteers
        in a wrod are, the olny iprmoatnt tihng is taht the frist and lsat
        ltteer be at the rghit pclae." The script randomly shuffles the
-       middle of each word longer than 4 characters, leaving the first and
+       middle of each word of 4 or more characters, leaving the first and
        last character in place. Great for testing "how much do I really see,
        and how much does my brain suggest."
 
