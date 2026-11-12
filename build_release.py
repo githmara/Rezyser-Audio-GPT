@@ -1139,6 +1139,8 @@ def _bramka_zaleznosci_lub_przerwij(args: argparse.Namespace) -> None:
             sys.exit(1)
         else:
             wynik_zal = audyt_zaleznosci.bramka()
+            # Pełny audyt cofa też budzik maintainera (znacznik w `skrypty/`).
+            audyt_zaleznosci.zapisz_znacznik(wynik_zal, "build_release")
             # Przeterminowane wstrzymanie w buildzie PATCHA przepuszczamy, ale
             # głośno: build X.Y.0 już go nie przepuści (kanon środowiska
             # 2026-11-12 — dawniej 🔒 było zielone na zawsze i tak `anthropic`

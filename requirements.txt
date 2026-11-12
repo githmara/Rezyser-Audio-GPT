@@ -45,6 +45,11 @@
 # * WSTRZYMANIE JEST DATOWANE: granica wykluczająca istniejące wydanie ma
 #   w swojej linii `# hold: <wersja wydania, które ją stawia>`. Wygasa
 #   z następnym minorem: build X.Y.0 odmawia, build patcha ostrzega.
+# * DRUGI ZEGAR I BUDZIK: hold wygasa też po `WIEK_HOLDU_DNI` (60) dniach od
+#   commitu, który ostatnio zmienił jego linię — zegar wersji staje, gdy nic
+#   nie wychodzi. Pełny audyt (CLI albo build) zapisuje znacznik
+#   `skrypty/audyt_zaleznosci_ostatni.json`; czyta go hak startu sesji
+#   maintainera, więc przypomnienie przychodzi także bez żadnego buildu.
 # * `pip freeze` przez `python audyt_zaleznosci.py --zamroz <wersja>`, który
 #   nie zapisuje kopii identycznej z poprzednim zamrożeniem.
 # Dlaczego: stary kanon miał krok „po wydaniu migrujemy” bez wyzwalacza, a 🔒

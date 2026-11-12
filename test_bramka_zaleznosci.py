@@ -81,6 +81,9 @@ def _uruchom(wynik: az.WynikBramki | None, *, no_strict: bool = False,
         return wynik
 
     az.bramka = _podstawiona
+    # Build zapisuje znacznik budzika - w tescie NIE do prawdziwego `skrypty/`.
+    znacznik = az.ZNACZNIK_BUDZIKA
+    az.ZNACZNIK_BUDZIKA = Path(tempfile.mkdtemp()) / "znacznik.json"
     bufor = io.StringIO()
     kod: int | None = None
     try:
@@ -92,6 +95,7 @@ def _uruchom(wynik: az.WynikBramki | None, *, no_strict: bool = False,
                 kod = exc.code if isinstance(exc.code, int) else 1
     finally:
         az.bramka = oryginalna
+        az.ZNACZNIK_BUDZIKA = znacznik
     return bufor.getvalue(), kod
 
 
@@ -168,6 +172,54 @@ def test_build_otwarcia_cyklu_odmawia_przy_przeterminowanym_holdzie():
     log, kod = _uruchom(az.WynikBramki(czysto=False, stany=[stan]))
     assert kod == 1, log
     assert "held since 19.8.0" in log and "FATAL" not in log, log
+
+
+def test_drugi_zegar_hold_wygasa_po_wieku_bez_zmiany_minora():
+    """Budzik: projekt nie wydaje, `VERSION` stoi - hold i tak wygasa po czasie.
+
+    Bez tego hold z biezacego minora bylby wazny na zawsze, a wstrzymany pakiet
+    swiecilby 🔒 - ta sama klasa, ktora kanon srodowiska mial zamknac.
+    """
+    wpis = az.Wpis(nazwa="anthropic", specyfikator="<1.8", wstrzymanie="19.18.0")
+
+    def _ocen(wiek, projekt=(19, 18, 1)):
+        stan = az.rozstrzygnij(wpis, "1.7.0", "2.8.0", "", az._packaging())
+        return az.ocen_wstrzymanie(stan, wpis, projekt, wiek)
+
+    assert _ocen(az.WIEK_HOLDU_DNI).status == "granica"
+    assert _ocen(None).status == "granica"          # bez gita: wiek nieznany
+    stary = _ocen(az.WIEK_HOLDU_DNI + 1)
+    assert stary.status == "przeterminowana" and not stary.trafienie, stary
+    assert "days old" in az.opis_trafienia(stary)
+    assert _ocen(az.WIEK_HOLDU_DNI + 1, (19, 19, 0)).trafienie
+    # Aktualny pakiet ze stara linia nie ma czego testowac.
+    swiezy = az.rozstrzygnij(wpis, "1.7.0", "1.7.0", "", az._packaging())
+    assert az.ocen_wstrzymanie(swiezy, wpis, (19, 18, 1), 999).status == "aktualne"
+
+
+def test_wiek_linii_manifestu_z_git_blame():
+    from datetime import date, timedelta
+    wieki = az.wiek_linii_manifestu()
+    if not wieki:
+        pytest.skip("git blame unavailable here")
+    assert "anthropic" in wieki and wieki["anthropic"] >= 0
+    pozniej = az.wiek_linii_manifestu(dzis=date.today() + timedelta(days=100))
+    assert pozniej["anthropic"] == wieki["anthropic"] + 100
+
+
+def test_znacznik_budzika_tylko_po_pelnym_audycie(tmp_path):
+    from datetime import date
+    import json
+    stan = _granica(hold="19.8.0", projekt=(19, 18, 1))   # ⏰ nieblokujace
+    plik = tmp_path / "znacznik.json"
+    zdegradowany = az.WynikBramki(czysto=True, stany=[stan], degradacja="no network")
+    assert not az.zapisz_znacznik(zdegradowany, "test", plik)
+    assert not plik.exists(), "an offline run must not silence the alarm clock"
+    pelny = az.WynikBramki(czysto=True, stany=[stan])
+    assert az.zapisz_znacznik(pelny, "test", plik, dzis=date(2026, 11, 12))
+    dane = json.loads(plik.read_text(encoding="utf-8"))
+    assert dane["format"] == 1 and dane["data"] == "2026-11-12"
+    assert len(dane["do_decyzji"]) == 1 and "anthropic" in dane["do_decyzji"][0]
 
 
 def test_pakiet_bez_grupy_jest_trafieniem():

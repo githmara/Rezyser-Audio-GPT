@@ -60,7 +60,13 @@ KANON ŚRODOWISKA (2026-11-12, zastąpił kanon zachowawczy z 2026-09-18):
   * WSTRZYMANIE JEST DATOWANE: granica, która wyklucza istniejące wydanie, musi
     mieć w swojej linii `# hold: <wersja wydania, które ją postawiło>`.
     Wstrzymanie WYGASA z następnym minorem: build `X.Y.0` odmawia, dopóki stoi
-    wstrzymanie z wcześniejszego minora, a build patcha tylko ostrzega.
+    wstrzymanie z wcześniejszego minora, a build patcha tylko ostrzega;
+  * DRUGI ZEGAR + BUDZIK: wstrzymanie wygasa też po :data:`WIEK_HOLDU_DNI`
+    dniach od commitu, który ostatnio zmienił jego linię (`git blame`) — zegar
+    wersji staje, gdy nic nie wychodzi. Pełny audyt zapisuje
+    :data:`ZNACZNIK_BUDZIKA` (data + sprawy do decyzji), który czyta hak startu
+    sesji maintainera: przypomnienie przychodzi także wtedy, gdy przez miesiące
+    nie powstaje żaden build.
 
 Zastąpiony kanon zachowawczy miał krok „PO wydaniu migrujemy” bez żadnego
 wyzwalacza, a bramka liczyła zapisaną granicę jako zielone na zawsze. Zmierzone
@@ -114,6 +120,7 @@ import re
 import sys
 import urllib.request
 from dataclasses import dataclass, field
+from datetime import date, datetime
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Optional
@@ -130,6 +137,15 @@ SCIEZKA_VERSION = ROOT / "VERSION"
 KATALOG_ZAMROZEN = ROOT / "skrypty"
 URL_PYPI = "https://pypi.org/pypi/{}/json"
 TIMEOUT = 15
+
+#: Drugi zegar wstrzymania: hold starszy niż tyle dni (od commitu, który
+#: ostatnio zmienił jego linię) wygasa nawet bez zmiany minora.
+WIEK_HOLDU_DNI = 60
+
+#: Znacznik BUDZIKA: wynik ostatniego pełnego audytu (z siecią, cały manifest).
+#: Czyta go hak startu sesji maintainera — budzik ma działać także wtedy, gdy
+#: przez miesiące nie powstaje żaden build. `skrypty/` jest poza gitem.
+ZNACZNIK_BUDZIKA = KATALOG_ZAMROZEN / "audyt_zaleznosci_ostatni.json"
 
 #: Python, na którym zestaw z manifestu był ostatnio przetestowany — jedno miejsce,
 #: lustro `PYTHON_PRZETESTOWANY` z ATA (klasa bliźniaków `zaleznosci`). Workflowy
@@ -213,6 +229,9 @@ class Stan:
     #: Czy audyt dotyczy buildu otwierającego cykl (`VERSION` = X.Y.0). Tylko
     #: wtedy przeterminowane wstrzymanie blokuje; w patchu ostrzega.
     otwarcie_cyklu: bool = False
+    #: Dni od commitu, który ostatnio zmienił linię manifestu (`git blame`);
+    #: None = nie wiadomo (brak gita, plik spoza repo).
+    wiek_holdu: Optional[int] = None
 
     @property
     def trafienie(self) -> bool:
@@ -359,8 +378,44 @@ def wersja_projektu(sciezka: Path | None = None) -> Optional[tuple[int, int, int
     return int(m.group(1)), int(m.group(2)), int(m.group(3) or 0)
 
 
+def wiek_linii_manifestu(sciezka: Path | None = None,
+                         dzis: date | None = None) -> dict[str, int]:
+    """{nazwa pakietu (lower): dni od commitu, który ostatnio zmienił jego linię}.
+
+    Z `git blame --line-porcelain` — jedno wywołanie na cały plik. Linia
+    zmieniona w drzewie roboczym ma wiek 0 (git oddaje ją jako „Not Committed
+    Yet” z bieżącym czasem). Bez gita albo poza repo: pusty słownik, a bramka
+    ocenia wtedy same wersje (wiek nie jest wtedy znany, nie zerowy).
+    """
+    plik = sciezka or SCIEZKA_MANIFESTU
+    dzis = dzis or date.today()
+    try:
+        wynik = subprocess.run(
+            ["git", "blame", "--line-porcelain", "--", plik.name],
+            cwd=plik.parent, capture_output=True, text=True, encoding="utf-8",
+            errors="replace", timeout=30)
+    except (OSError, subprocess.SubprocessError):
+        return {}
+    if wynik.returncode != 0:
+        return {}
+    wieki: dict[str, int] = {}
+    czas: Optional[int] = None
+    for linia in wynik.stdout.splitlines():
+        if linia.startswith("committer-time "):
+            czas = int(linia.split()[1])
+        elif linia.startswith("\t") and czas is not None:
+            tekst = linia[1:].partition("#")[0].strip()
+            m = _RE_WPIS.match(tekst) if tekst and not tekst.startswith("-") else None
+            if m:
+                dni = (dzis - datetime.fromtimestamp(czas).date()).days
+                wieki.setdefault(m.group("nazwa").lower(), max(dni, 0))
+            czas = None
+    return wieki
+
+
 def ocen_wstrzymanie(stan: Stan, wpis: Wpis,
-                     projekt: Optional[tuple[int, int, int]]) -> Stan:
+                     projekt: Optional[tuple[int, int, int]],
+                     wiek_dni: Optional[int] = None) -> Stan:
     """Nakłada na stan `granica` datę z `# hold:` i grupę ryzyka.
 
     Czysta funkcja (bez I/O), żeby testy mogły podać dowolną wersję projektu.
@@ -368,9 +423,16 @@ def ocen_wstrzymanie(stan: Stan, wpis: Wpis,
     `VERSION` to `przeterminowana`. Data z TEGO SAMEGO albo późniejszego minora
     jest ważna — dopisuje się ją przecież w cyklu, którego wydanie dopiero
     wyjdzie, więc może wyprzedzać `VERSION` sprzed bumpu.
+
+    DRUGI ZEGAR (budzik, 2026-11-12): hold wygasa też po :data:`WIEK_HOLDU_DNI`
+    dniach od commitu, który ostatnio zmienił jego linię (``wiek_dni``). Sam
+    zegar wersji staje, gdy projekt nie wydaje: `VERSION` stoi, hold z tego
+    samego minora jest „ważny” na zawsze, a wstrzymany pakiet świeci 🔒 —
+    dokładnie klasa, którą kanon środowiska miał zamknąć.
     """
     stan.grupa = GRUPY_RYZYKA.get(wpis.nazwa.lower(), "")
     stan.wstrzymanie = wpis.wstrzymanie
+    stan.wiek_holdu = wiek_dni
     if projekt is not None:
         stan.otwarcie_cyklu = projekt[2] == 0
     if not stan.grupa and stan.status not in ("brak", "nieznane"):
@@ -388,6 +450,9 @@ def ocen_wstrzymanie(stan: Stan, wpis: Wpis,
     m = _RE_VERSION.match(wpis.wstrzymanie)
     if m and (int(m.group(1)), int(m.group(2))) < projekt[:2]:
         stan.status = "przeterminowana"
+    elif wiek_dni is not None and wiek_dni > WIEK_HOLDU_DNI:
+        stan.status = "przeterminowana"
+        stan.powod = f"held for {wiek_dni} days (limit {WIEK_HOLDU_DNI})"
     return stan
 
 
@@ -396,11 +461,13 @@ def ocen_wstrzymanie(stan: Stan, wpis: Wpis,
 # ---------------------------------------------------------------------------
 def bramka(pakiety: list[str] | None = None, *,
            bez_sieci: bool = False,
-           projekt: Optional[tuple[int, int, int]] | str = "VERSION"
+           projekt: Optional[tuple[int, int, int]] | str = "VERSION",
+           wieki: dict[str, int] | None = None,
            ) -> WynikBramki:
     """Pełny przebieg. `czysto` = żaden :attr:`Stan.trafienie`.
 
-    ``projekt`` domyślnie czyta `VERSION`; testy podają krotkę wprost.
+    ``projekt`` domyślnie czyta `VERSION`, ``wieki`` — `git blame` manifestu;
+    testy podają jedno i drugie wprost.
     """
     if projekt == "VERSION":
         projekt = wersja_projektu()
@@ -418,6 +485,7 @@ def bramka(pakiety: list[str] | None = None, *,
         degradacje.append("`packaging` is not importable — version comparison "
                           "is unavailable, so nothing can be classified")
     stany: list[Stan] = []
+    wieki = wiek_linii_manifestu() if wieki is None else wieki
     for wpis in wpisy:
         zainst = zainstalowana_wersja(wpis.nazwa)
         if bez_sieci:
@@ -426,7 +494,7 @@ def bramka(pakiety: list[str] | None = None, *,
             najnowsza, powod = najnowsza_wersja(wpis.nazwa)
         stany.append(ocen_wstrzymanie(
             rozstrzygnij(wpis, zainst, najnowsza, powod, narzedzia),
-            wpis, projekt))
+            wpis, projekt, wieki.get(wpis.nazwa.lower())))
     if projekt is None:
         degradacje.append("VERSION is unreadable — hold expiry cannot be judged")
     nieznane = [s for s in stany if s.status == "nieznane"]
@@ -470,9 +538,12 @@ def opis_trafienia(s: Stan) -> str:
                 f"`{s.specyfikator}`, but the line has no `# hold: <version>` — "
                 f"date the hold or lift it")
     if s.status == "przeterminowana":
+        dlaczego = (f"the hold is {s.wiek_holdu} days old (limit "
+                    f"{WIEK_HOLDU_DNI})" if s.powod.startswith("held for")
+                    else "the hold expired with the next minor")
         return (f"{s.nazwa}: held since {s.wstrzymanie} ({s.zainstalowana}, "
-                f"PyPI {s.najnowsza}) — the hold expired with the next minor; "
-                f"lift it in the environment commit or re-date it on purpose")
+                f"PyPI {s.najnowsza}) — {dlaczego}; lift it in the environment "
+                f"commit or re-date it on purpose")
     return (f"{s.nazwa}: {s.zainstalowana} → {s.najnowsza} (our bound "
             f"`{s.specyfikator or 'none'}` allows it, so a contributor gets it "
             f"from pip)")
@@ -554,6 +625,44 @@ def raport(wynik: WynikBramki) -> None:
     print("=====================================")
 
 
+def do_decyzji(wynik: WynikBramki) -> list[str]:
+    """Wszystko, co czeka na człowieka: trafienia ORAZ ⏰ nieblokujące w patchu."""
+    return [opis_trafienia(s) for s in wynik.stany
+            if s.trafienie or s.status == "przeterminowana"]
+
+
+def zapisz_znacznik(wynik: WynikBramki, zrodlo: str,
+                    sciezka: Path | None = None, dzis: date | None = None) -> bool:
+    """Zapisuje znacznik BUDZIKA po PEŁNYM audycie; zwraca, czy zapisał.
+
+    Pełny = cały manifest i bez degradacji (sieć, `packaging`, `VERSION`):
+    audyt, który nie wie, czy upgrade czeka, nie może cofnąć budzika — inaczej
+    jeden przebieg offline uciszałby go na kolejny miesiąc. Wołający odpowiada
+    za to, że ``wynik`` dotyczy całego manifestu. Format czyta hak startu sesji
+    maintainera (stdlib, bez importu tego modułu), więc zmiana kluczy = zmiana
+    po obu stronach. Błąd zapisu jest cichy: budzik to przypomnienie, nie bramka.
+    """
+    if wynik.degradacja:
+        return False
+    cel = sciezka or ZNACZNIK_BUDZIKA
+    dane = {
+        "format": 1,
+        "data": (dzis or date.today()).isoformat(),
+        "zrodlo": zrodlo,
+        "wersja_projektu": (SCIEZKA_VERSION.read_text(encoding="utf-8").strip()
+                            if SCIEZKA_VERSION.is_file() else ""),
+        "do_decyzji": do_decyzji(wynik),
+    }
+    try:
+        cel.parent.mkdir(parents=True, exist_ok=True)
+        tmp = cel.with_suffix(".tmp")
+        tmp.write_text(json.dumps(dane, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp.replace(cel)
+    except OSError:
+        return False
+    return True
+
+
 def zamroz(wersja: str, katalog: Path | None = None,
            freeze: str | None = None) -> tuple[Path, bool]:
     """`pip freeze` do `skrypty/zamrozone_<wersja>.txt` — chyba że nic się nie zmieniło.
@@ -628,9 +737,12 @@ def main() -> int:
                   f"{plik.name}, which stays the return ticket.")
         return 0
 
-    wynik = bramka([p for p in args.pakiety.split(",") if p.strip()] or None,
-                   bez_sieci=args.bez_sieci)
+    pakiety = [p for p in args.pakiety.split(",") if p.strip()] or None
+    wynik = bramka(pakiety, bez_sieci=args.bez_sieci)
     raport(wynik)
+    if pakiety is None and zapisz_znacznik(wynik, "audyt_zaleznosci"):
+        print(f"⏱️  Alarm clock reset: {ZNACZNIK_BUDZIKA.relative_to(ROOT)} "
+              f"(read by the maintainer's session-start hook).")
     if args.strict and not strict_przechodzi(wynik):
         # Świadomie surowo: `--strict` służy decyzji „czy wolno pójść skróconą
         # procedurą", a ta jest OPTYMALIZACJĄ. Kiedy nie wiemy, czy upgrade
