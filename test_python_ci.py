@@ -43,7 +43,8 @@ def test_tested_python_is_an_exact_patch():
 def test_every_workflow_matches_tested_python():
     expected = _tested_python(ROOT / "audyt_zaleznosci.py")
     seen = 0
-    for wf in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+    katalog = ROOT / ".github" / "workflows"
+    for wf in sorted(katalog.glob("*.yml")) + sorted(katalog.glob("*.yaml")):
         for v in _workflow_versions(wf.read_text(encoding="utf-8")):
             seen += 1
             assert v == expected, f"{wf.name}: python-version {v!r}, expected {expected!r}"
