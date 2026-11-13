@@ -451,6 +451,16 @@ Replace EVERY Polish value with these values of the {nazwa_natywna} pack:
 {linia_etykiety}Do not mention the Polish alphabet or its letter count anywhere in this entry.\
 """
 
+_PROMPT_JAKANIE = """\
+### Cipher: Stutter — use the {nazwa_natywna} pack's own example words
+The Stutter entry illustrates the rule with POLISH words ("komputer", "prysznic", "ja").
+A Polish word run through the {nazwa_natywna} rules still LOOKS right, so no gate
+notices it — but the reader sees Polish. Use the examples of the {nazwa_natywna}
+rule file instead, keeping the same roles (a stuttered word, a short word left
+unchanged), with the hyphenated forms exactly as below:
+{przyklady}\
+"""
+
 _PROMPT_SAMOGLOSKOWIEC = """\
 ### Cipher: Vowelizer — the example must be the {nazwa_natywna} pack's own output
 The Vowelizer entry shows a POLISH example ("Dzień dobry" → "Dźoń dobro") produced by
@@ -532,6 +542,23 @@ def _sekcja_ma_typoglikemie(tresc: str) -> bool:
 def _sekcja_ma_cezara(tresc: str) -> bool:
     """True, gdy sekcja cytuje polski alfabet Cezara (artefakt „AĄBCĆ")."""
     return "AĄBCĆ" in tresc
+
+
+def _sekcja_ma_jakanie(tresc: str) -> bool:
+    """True, gdy sekcja pokazuje polski przykład jąkania („komputer")."""
+    return "komputer" in tresc
+
+
+def _blok_jakania(kod: str, nazwa_natywna: str) -> str | None:
+    """Blok JĄKANIE z par `opis` reguły paczki docelowej (zweryfikowanych silnikiem
+    przez bramkę brata Poligloty); ``None`` = paczka nie ma takich par."""
+    bwa, bwp = _rodzenstwo_audytu()
+    cfg = _wczytaj_regule(kod, "szyfry", "jakanie")
+    pary = bwp.pary_z_opisu(str(cfg.get("opis", ""))) if cfg else []
+    if not pary:
+        return None
+    lista = "\n".join(f'  - "{src}" → "{wyn}"' for src, wyn in pary)
+    return _PROMPT_JAKANIE.format(nazwa_natywna=nazwa_natywna, przyklady=lista)
 
 
 def _sekcja_ma_samogloskowca(tresc: str) -> bool:
@@ -694,6 +721,10 @@ def _zbuduj_prompt_dodatkowy(
         dane = _dane_cezara(kod)
         if dane:
             czesci.append(_PROMPT_CEZAR.format(nazwa_natywna=nazwa_natywna, **dane))
+    if tresc_sekcji and _sekcja_ma_jakanie(tresc_sekcji):
+        blok = _blok_jakania(kod, nazwa_natywna)
+        if blok:
+            czesci.append(blok)
     if tresc_sekcji and nazwa_pliku and _sekcja_ma_samogloskowca(tresc_sekcji):
         blok = _blok_samogloskowca(kod, nazwa_natywna, nazwa_pliku,
                                    klucz_sekcji, tresc_sekcji)
@@ -2063,6 +2094,49 @@ def _inna_operacja_zgodna(
     return None
 
 
+# D3 (19.18): cytat w punkcie szyfru, który jest IDENTYCZNY z cytatem polskiego
+# punktu. Pomiar myślenia 2026-11-12: brat zostawiał w fi/is „k-k-k-komputer",
+# „prysznic" — polskie słowo przeliczone fińskimi regułami jąkania jest
+# arytmetycznie poprawne, więc D2 milczała. Pierwszy przebieg sondy znalazł też
+# realny wyciek w WYDANEJ paczce (es/dictionaries: polskie „m.in." → „.nim").
+_RE_CYTAT_PUNKTU = re.compile(r"[\"„“”«»]([^\"„“”«»\n]{3,60})[\"„“”«»]")
+
+
+def _cytaty_pl_w_obcych(
+    nazwa_pliku: str, klucz_sekcji: str, tekst_pl: str,
+    operacje: dict[int, tuple[str, str]],
+) -> dict[str, list[tuple[str, str]]]:
+    """D3: kod paczki → [(reguła, polski cytat, który przeżył w jej punkcie szyfru)].
+
+    Wyrównanie po punktach listy, jak D2. Cytat obecny w co najmniej połowie
+    obcych paczek to tytuł albo nazwa własna („Slay the Spire"), nie przykład —
+    pomijamy go. Ciągi o ≤ 2 różnych znakach („ssssss") też: są wspólne z natury.
+    """
+    punkty_pl = _punkty_listy(tekst_pl)
+    obce = [k for k in KODY_AUDYTU if k != KOD_ZRODLOWY]
+    trafienia: dict[str, list[tuple[str, str]]] = {}
+    for kod in obce:
+        cel = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / nazwa_pliku
+        tekst = (wczytaj_istniejacy_docelowy(cel) or {}).get(klucz_sekcji)
+        punkty = _punkty_listy(tekst or "")
+        if not tekst or len(punkty) != len(punkty_pl):
+            continue
+        for indeks, (punkt_pl, punkt) in enumerate(zip(punkty_pl, punkty)):
+            operacja = operacje.get(indeks)
+            if operacja is None or operacja[0] != "szyfry":
+                continue
+            cytaty_pl = {c.strip() for c in _RE_CYTAT_PUNKTU.findall(
+                _bez_zawijania(punkt_pl))}
+            for cytat in _RE_CYTAT_PUNKTU.findall(_bez_zawijania(punkt)):
+                cytat = cytat.strip()
+                if cytat in cytaty_pl and len(set(cytat.lower()) - set(" -")) > 2:
+                    trafienia.setdefault(kod, []).append((operacja[1], cytat))
+    wspolne = Counter(c for lista in trafienia.values() for c in {c for _r, c in lista})
+    prog = max(2, len(obce) // 2)
+    return {kod: [(r, c) for r, c in lista if wspolne[c] < prog]
+            for kod, lista in trafienia.items()}
+
+
 def audytuj_przyklady(
     kody: list[str] | None = None,
     nazwy_plikow: list[str] | None = None,
@@ -2095,6 +2169,8 @@ def audytuj_przyklady(
             punkty_pl = len(_punkty_listy(tekst_pl))
             if operacje:
                 staty["sekcji"] += 1
+            polskie_cytaty = (_cytaty_pl_w_obcych(
+                nazwa_pliku, klucz_sekcji, tekst_pl, operacje) if operacje else {})
             for kod in zakres_kodow:
                 cel = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / nazwa_pliku
                 sekcje = (wczytaj_istniejacy_docelowy(cel) or {}
@@ -2107,6 +2183,13 @@ def audytuj_przyklady(
                     _bez_zawijania(tekst), dopusc_frazy=True)
                 staty["par"] += len(pary_sekcji)
                 etykieta = f"{kod}/{nazwa_pliku}::{klucz_sekcji}"
+                for regula, cytat in polskie_cytaty.get(kod, []):
+                    znaleziska.append(bwa.Znalezisko(
+                        etykieta, "D3",
+                        f"[szyfry/{regula}] polski cytat {cytat!r} przeżył "
+                        f"w tej paczce — przykład nie przeszedł na ten język "
+                        f"(silnik liczy go poprawnie, więc D2 milczy)",
+                        blad=True))
                 if operacje and len(punkty) != punkty_pl:
                     znaleziska.append(bwa.Znalezisko(
                         etykieta, "D1",

@@ -66,5 +66,40 @@ def test_prog_typoglikemii_w_zrodle_zgadza_sie_z_silnikiem() -> None:
         assert f"dłuższego niż {prog} znaki" not in tekst
 
 
+def test_jakanie_dostaje_slowa_z_reguly_paczki() -> None:
+    blok = _prompt("fi", "manual.yaml", "krok_5_tryb_szyfrant").split(
+        "### Cipher: Stutter", 1)[1].split("\n\n", 1)[0]
+    assert '"tietokone" → "t-t-t-tietokone"' in blok
+
+
+def test_d3_lapie_polski_cytat_ktory_przezyl(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Polskie „k-k-k-komputer" w punkcie jąkania paczki fi = D3; „ssssss" i
+    cytat obecny we wszystkich paczkach (tytuł) — nie."""
+    szablony = {n: sek for n, _i, sek in d.wczytaj_szablony_pl()}
+    tekst_pl = szablony["manual.yaml"]["krok_5_tryb_szyfrant"]
+    bwa, _bwp = d._rodzenstwo_audytu()
+    operacje = d._operacje_punktow_pl(tekst_pl, d.nazwy_operacji_pl(bwa))
+    oryginal = d.wczytaj_istniejacy_docelowy
+
+    def podmieniony(cel):
+        sekcje = dict(oryginal(cel) or {})
+        if cel.parts[-4] == "fi":
+            sekcje["krok_5_tryb_szyfrant"] = tekst_pl   # cała sekcja po polsku
+        return sekcje
+
+    monkeypatch.setattr(d, "wczytaj_istniejacy_docelowy", podmieniony)
+    wynik = d._cytaty_pl_w_obcych("manual.yaml", "krok_5_tryb_szyfrant",
+                                  tekst_pl, operacje)
+    cytaty = {c for _r, c in wynik.get("fi", [])}
+    assert "k-k-k-komputer" in cytaty
+    assert not any(set(c) <= {"s", "z", " ", "-"} for c in cytaty)
+    assert [k for k in wynik if wynik[k]] == ["fi"]
+
+
+def test_repo_bez_bledow_d3() -> None:
+    znaleziska, _staty = d.audytuj_przyklady(None, ["manual.yaml", "dictionaries.yaml"])
+    assert not [z for z in znaleziska if z.blad and "D3" in str(z)]
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-q"]))
