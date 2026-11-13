@@ -4,6 +4,62 @@ Release entries in reverse-chronological order. The section of a version is copi
 
 ---
 
+## 19.18.0 — minor release
+
+### What's new
+
+**The "quality" translation mode is gone.** Polyglot and the AI Translator
+no longer offer the checkbox that let the model think before translating, and
+no `_myslenie.txt` file is written next to the result. Measured on real
+translations, thinking did not improve the grammar of the prose; it was
+useful only to us, as a way to find contradictions in our own instructions
+(see below). On two of the three providers the option did not work at all.
+Every translation now runs in the plain mode, which was already the default.
+
+**Anthropic: the model's own sampling.** The Anthropic API version used
+since this release no longer accepts temperature settings on any model, so
+the Anthropic path does not send them. Your recipes are unchanged; the
+temperature field still applies to OpenRouter and other OpenAI-compatible
+endpoints.
+
+**Corrected manuals.** Typoglycemia shuffles words of 4 letters or more; the
+manuals in every language said "longer than 4". The cipher chapters now quote
+examples computed with each language's own alphabet and rules, and the
+Spanish description of the Reverser no longer uses Polish abbreviations.
+
+**Environment.** anthropic 2.8.0, openai 3.50.0, elevenlabs 2.78.0, markdown
+3.11.3, fonttools 4.68.0, pypdfium2 5.15.2 (text extraction checked byte for
+byte on 12 PDFs), pytest 9.2.0. Each was checked live or by its own test
+before the bound was raised.
+
+**For contributors.**
+- The dependency gate follows an environment canon. Every package has a risk
+  group (A: window and content, B: providers, C: development only) that says
+  what to test before raising its bound. Every bound carries
+  `# hold: <version>` and expires with the next minor, or 60 days after its
+  line last changed. A shallow clone or a source archive makes the age
+  unknown, and the gate says so out loud instead of staying green.
+- New test: the upper bound of each package installed by a workflow must
+  equal the manifest's bound, compared semantically (`<4.0` equals `<4`,
+  `~=` and `==` count as bounds).
+- The Python version gate reads `*.yml` and `*.yaml` workflows.
+- The `_docs` translator rebuilds the Caesar, Vowel-shifter and Stutter
+  blocks from the target pack's own values.
+- Gate D3 reports a Polish cipher example quoted in a foreign pack. Titles
+  shared by every pack must be listed in `CYTATY_WSPOLNE`.
+- `_poliglota` stops treating a Polish example found inside a foreign word
+  as a leak.
+- `_akcenty` counts its 12–40 rule limit in sounds, so case copies no longer
+  push real rules out.
+- Removed from `core_llm`: the quality-mode helpers and three unused
+  temperature helpers.
+
+### Planned or deferred
+
+- None.
+
+---
+
 ## 19.17.0 — minor release
 
 ### What's new

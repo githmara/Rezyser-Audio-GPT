@@ -227,7 +227,7 @@ def test_400_o_temperature_leci_wyzej_bez_ponowienia(tmp_path, monkeypatch):
     except _Blad400:
         pass
     else:
-        raise AssertionError("400 o temperature musi poleciec wyzej")
+        raise AssertionError("a 400 about temperature must propagate to the caller")
     assert len(wyslane) == 1 and "temperature" not in json.dumps(wyslane[0])
     assert not cache.exists()
 
