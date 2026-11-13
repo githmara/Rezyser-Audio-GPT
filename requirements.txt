@@ -175,4 +175,7 @@ markdown<3.12  # hold: 19.18.0
 # kwargi (oba klucze limitu tokenów, `response_format`, `extra_body`),
 # `with_options(timeout)` jest; żywe wywołanie przez OpenRoutera OK. Granica
 # z powrotem na linii majorowej (grupa B).
+# 2026-11-13: 3.49.0 → 3.50.0 (wyszło w trakcie cyklu, bramka zatrzymała build) —
+# `OpenAI.__init__`, `chat.completions.create` i 8 łapanych klas wyjątków bez zmian;
+# żywe wywołanie OpenRoutera (tekst + json_schema) OK, także w ATA.
 openai<4  # hold: 19.18.0

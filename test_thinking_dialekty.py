@@ -11,8 +11,9 @@ wylaczyc myslenia wcale. Kontrakty, wszystkie przez WYKONANIE na atrapie SDK
      a po wyczerpaniu - oryginalny wyjatek;
   3. komunikat 400 o `disabled` wspomina `output_config` - NIE moze zdjac
      structured outputs (regresja kolejnosci w `_co_odrzucono`);
-  4. tryb quality = adaptive + effort (nie `budget_tokens`, ktory jest 400
-     od Sonnet 5), a jego odrzucenie schodzi na "bez myslenia" bez effort.
+  4. runtime nie mysli wcale: tryb quality usuniety w 19.18 (sekcja 3 pilnuje,
+     ze nie wraca), a 400 o `temperature` - ktorej nie wysylamy - leci wyzej
+     zamiast identycznego ponowienia i zapisu do autocache'u.
 """
 from __future__ import annotations
 
@@ -40,10 +41,6 @@ BLAD_DISABLED_ZYWY = (
     'as thinking blocks.'
 )
 BLAD_BETWEEN ='"thinking.type.between_tools" is not supported for this model.'
-BLAD_BUDGET = (
-    '"thinking.type.enabled" is not supported for this model. Use '
-    '"thinking.type.adaptive" and "output_config.effort" to control thinking.'
-)
 SCHEMAT = {"type": "object", "properties": {"a": {"type": "string"}},
            "required": ["a"], "additionalProperties": False}
 
@@ -214,6 +211,25 @@ def test_runtime_wysyla_tylko_dialekt_bez_myslenia():
     assert w["thinking"] == {"type": "between_tools"}
     assert "effort" not in w.get("output_config", {})
     assert w["max_tokens"] == 1000
+
+
+def test_400_o_temperature_leci_wyzej_bez_ponowienia(tmp_path, monkeypatch):
+    """Audyt 19.18: szczebel `temperature` ponawial identyczny payload i dopisywal
+    model Anthropic do trwalego autocache'u, choc temperature nie wysylamy."""
+    cache = tmp_path / "modele_bez_temperatury.json"
+    monkeypatch.setattr(cl, "_sciezka_cache_samplingu", lambda: str(cache))
+    wyslane = []
+    klient = cl.KlientLLM(provider=cl.PROVIDER_ANTHROPIC, sdk=_MockSDK(
+        [_Blad400("`temperature` is deprecated for this model."), "ok"], wyslane))
+    try:
+        cl._wywolaj_anthropic(klient, "egzotyk-9", "S.", [{"role": "user", "content": "x"}],
+                              max_tokens=10, temperature=0.85, timeout=5.0)
+    except _Blad400:
+        pass
+    else:
+        raise AssertionError("400 o temperature musi poleciec wyzej")
+    assert len(wyslane) == 1 and "temperature" not in json.dumps(wyslane[0])
+    assert not cache.exists()
 
 
 def test_klucze_trybu_quality_zniknely_ze_wszystkich_paczek():

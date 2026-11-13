@@ -207,6 +207,45 @@ def test_wiek_linii_manifestu_z_git_blame():
     assert pozniej["anthropic"] == wieki["anthropic"] + 100
 
 
+def test_hold_bez_znanego_wieku_degraduje_glosno():
+    """Audyt 19.18: bez gita (paczka „Source code”) drugi zegar stal po cichu,
+    hold wygladal zielono, a budzik i tak sie cofal."""
+    wynik = az.bramka(["anthropic"], bez_sieci=True, projekt=(19, 18, 0), wieki={})
+    assert "unknown" in wynik.degradacja and "anthropic" in wynik.degradacja
+    z_wiekiem = az.bramka(["anthropic"], bez_sieci=True, projekt=(19, 18, 0),
+                          wieki={"anthropic": 1})
+    assert "unknown" not in (z_wiekiem.degradacja or "")
+
+
+def test_wiek_tylko_z_linii_hold(tmp_path):
+    """Komentarz proza zaczynajacy sie od nazwy pakietu nie podaje wieku
+    (blizniak ATA bral wiek komentarza naglowka zamiast linii z granica)."""
+    import subprocess
+    repo = tmp_path / "r"
+    repo.mkdir()
+    plik = repo / "requirements.txt"
+
+    def git(*a, data):
+        env = {"GIT_AUTHOR_DATE": data, "GIT_COMMITTER_DATE": data,
+               "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t",
+               "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"}
+        import os
+        subprocess.run(["git", *a], cwd=repo, check=True, capture_output=True,
+                       env={**os.environ, **env})
+
+    subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+    plik.write_text("# markdown 3.10: stary komentarz naglowka\n", encoding="utf-8")
+    git("add", ".", data="2020-01-01T12:00:00")
+    git("commit", "-qm", "a", data="2020-01-01T12:00:00")
+    plik.write_text("# markdown 3.10: stary komentarz naglowka\n"
+                    "markdown<3.12  # hold: 19.18.0\n", encoding="utf-8")
+    git("add", ".", data="2026-01-01T12:00:00")
+    git("commit", "-qm", "b", data="2026-01-01T12:00:00")
+    from datetime import date
+    wieki = az.wiek_linii_manifestu(plik, dzis=date(2026, 1, 11))
+    assert wieki == {"markdown": 10}
+
+
 def test_znacznik_budzika_tylko_po_pelnym_audycie(tmp_path):
     from datetime import date
     import json

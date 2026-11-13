@@ -297,18 +297,19 @@ def test_rozpoznanie_winowajcy_400():
     assert cl._co_odrzucono(_Blad400("something else entirely")) is None
 
 
-def test_blad_temperatury_NIE_zdejmuje_schematu():
-    """Sedno kontroli: gdyby degradacja byla kolejnosciowa, structured outputs
-    nie zadzialalyby ani razu (domyslny model nie honoruje temperatury)."""
+def test_anthropic_nie_wysyla_temperatury_a_schemat_jedzie():
+    """Od 19.18 (API 2026-10-21) gałąź Anthropic nie wysyła `temperature` wcale,
+    więc dawny scenariusz „400 o temperaturze -> ponowienie bez niej" zniknął:
+    pierwsze żądanie niesie schemat i nie niesie temperatury."""
     klient, wyslane = klient_z([
-        _Blad400(BLAD_TEMPERATURY),
         (json.dumps({"typ": "tura", "opcje": TRZY_OPCJE}), "end_turn"),
     ])
     wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     assert len(wynik.opcje) == 3
-    assert len(wyslane) == 2, f"prob={len(wyslane)}"
-    assert not cl.temperatura_w_payloadzie(wyslane[1]), "temperature was not dropped"
-    assert "output_config" in wyslane[1], "the SCHEMA was dropped for no reason"
+    assert len(wyslane) == 1
+    assert not cl.temperatura_w_payloadzie(wyslane[0])
+    assert "temperature" not in wyslane[0]
+    assert "output_config" in wyslane[0]
 
 
 def test_blad_schematu_zdejmuje_tylko_schemat():

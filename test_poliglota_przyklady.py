@@ -59,6 +59,18 @@ def test_bez_normalizacji_liczb_nie_ma_przykladu() -> None:
     assert bwp._wynik_przykladu("", "123", {"normalizuj_liczby": False}, {}) is None
 
 
+def test_nieznany_jezyk_albo_brak_iso_to_brak_przykladu() -> None:
+    """Audyt 19.18: `normalizuj_liczby` połyka błąd num2words i oddaje „123"."""
+    assert bwp._wynik_przykladu("", "123", {"normalizuj_liczby": True, "iso": "xx"}, {}) is None
+    assert bwp._wynik_przykladu("", "123", {"normalizuj_liczby": True}, {}) is None
+
+
+def test_polskie_slowo_w_prozie_bez_strzalki_jest_przeciekiem() -> None:
+    tgt = OPIS_FI.replace('"tietokone" → "t-t-tietokone"',
+                          '"komputer" muuttuu muotoon "k-k-komputer"')
+    assert len(_problemy(tgt, ("komputer",))) == 1
+
+
 def test_prompt_kaze_pominac_przyklad_bez_zamiennika() -> None:
     assert "DROP that example" in bwp._ZASADY_PRZYKLADOW
     assert "keep the pair exactly as it is in the source" not in bwp._ZASADY_PRZYKLADOW

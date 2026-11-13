@@ -157,8 +157,9 @@ MAX_TOKENS_CALOSC_DOMYSLNE = 8_000
 # milcząca i płatna: przebieg kosztuje tyle samo, co przebieg poprawny.
 MAX_DLUGOSC_PROBKI_DOMYSLNA = 6_000
 
-# Dozwolony zakres `temperatura:`. Wspólny mianownik obu gałęzi providerów
-# (Anthropic 0–1, OpenAI-compat 0–2), więc bierzemy szerszy — zawężanie do 1
+# Dozwolony zakres `temperatura:`. Od 19.18 wartość czytają wyłącznie gałęzie
+# OpenAI-compatible i OpenRoutera (0–2); Anthropic (API 2026-10-21) nie
+# przyjmuje parametrów próbkowania wcale. Zawężanie do 1
 # odrzucałoby plik, który na endpoincie usera działa. Poza tym zakresem API
 # odpowiada 400 przy KAŻDYM wywołaniu, a użytkownik widzi błąd sieciowy,
 # nie literówkę (`temperatura: 85` zamiast `0.85` to jeden zgubiony znak).
@@ -825,9 +826,10 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
                 if zakres == ZAKRES_PER_ROZDZIAL
                 else MAX_TOKENS_CALOSC_DOMYSLNE
             )
-        # Temperatura jedzie do KAŻDEGO wywołania tego przepisu, więc wartość
-        # spoza zakresu providera nie psuje jednej funkcji, tylko cały tryb —
-        # i to komunikatem o API, nie o pliku.
+        # Temperatura jedzie do KAŻDEGO wywołania tego przepisu w gałęzi
+        # OpenAI-compatible/OpenRoutera (Anthropic jej od 19.18 nie dostaje),
+        # więc wartość spoza zakresu nie psuje jednej funkcji, tylko cały
+        # tryb — i to komunikatem o API, nie o pliku.
         temperatura = float(data.get("temperatura", 0.85))
         if not TEMPERATURA_MIN <= temperatura <= TEMPERATURA_MAX:
             zglos_pominiecie(

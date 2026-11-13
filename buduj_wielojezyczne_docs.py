@@ -545,8 +545,12 @@ def _sekcja_ma_cezara(tresc: str) -> bool:
 
 
 def _sekcja_ma_jakanie(tresc: str) -> bool:
-    """True, gdy sekcja pokazuje polski przykład jąkania („komputer")."""
-    return "komputer" in tresc
+    """True, gdy sekcja pokazuje polski przykład jąkania („k-k-k-komputer").
+
+    Samo „komputer" trafiało w sekcje o instalacji (audyt 19.18) — blok kazałby
+    tam „zastąpić przykłady jąkania", których nie ma.
+    """
+    return "k-k-k-komputer" in tresc
 
 
 def _blok_jakania(kod: str, nazwa_natywna: str) -> str | None:
@@ -2133,8 +2137,43 @@ def _cytaty_pl_w_obcych(
                     trafienia.setdefault(kod, []).append((operacja[1], cytat))
     wspolne = Counter(c for lista in trafienia.values() for c in {c for _r, c in lista})
     prog = max(2, len(obce) // 2)
-    return {kod: [(r, c) for r, c in lista if wspolne[c] < prog]
+    chronione = _polskie_przyklady_szyfrow()
+    return {kod: [(r, c) for r, c in lista
+                  if wspolne[c] < prog or _jest_polskim_przykladem(c, chronione)]
             for kod, lista in trafienia.items()}
+
+
+_RE_LITERA_PL = re.compile(r"[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]")
+
+
+def _polskie_przyklady_szyfrow() -> tuple[set[str], str]:
+    """(słowa z par przykładów reguł `pl/szyfry/*`, cały tekst tych reguł)."""
+    _bwa, bwp = _rodzenstwo_audytu()
+    slowa: set[str] = set()
+    teksty: list[str] = []
+    for plik in sorted((DICT_DIR / KOD_ZRODLOWY / "szyfry").glob("*.yaml")):
+        cfg = _wczytaj_regule(KOD_ZRODLOWY, "szyfry", plik.stem)
+        opis = str(cfg.get("opis", ""))
+        teksty.append(plik.read_text(encoding="utf-8"))
+        for src, wyn in bwp.pary_z_opisu(opis):
+            slowa.update(w.lower() for w in re.findall(r"\w+", f"{src} {wyn}"))
+    return slowa, "\n".join(teksty)
+
+
+def _jest_polskim_przykladem(cytat: str, chronione: tuple[set[str], str]) -> bool:
+    """Cytat, którego D3 NIGDY nie wygasza jako „wspólnego tytułu”.
+
+    Audyt 19.18: próg „≥ połowa obcych paczek” chował masowy wyciek po rerunie
+    z `-a` — dokładnie scenariusz, który D3 ma łapać. Polski przykład poznajemy
+    po polskiej literze, po słowie z par reguł `pl/szyfry/*` albo po tym, że
+    cytat bez spacji stoi dosłownie w pliku polskiej reguły (`.nim`). Tytuł
+    („Slay the Spire”) też stoi w polskiej regule, ale ma spacje i żadnego
+    słowa z par przykładów, więc zostaje wspólny.
+    """
+    slowa, teksty = chronione
+    if _RE_LITERA_PL.search(cytat) or (" " not in cytat and cytat in teksty):
+        return True
+    return any(len(w) >= 3 and w.lower() in slowa for w in re.findall(r"\w+", cytat))
 
 
 def audytuj_przyklady(

@@ -96,6 +96,32 @@ def test_d3_lapie_polski_cytat_ktory_przezyl(monkeypatch: pytest.MonkeyPatch) ->
     assert [k for k in wynik if wynik[k]] == ["fi"]
 
 
+def test_d3_lapie_masowy_wyciek_we_wszystkich_paczkach(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Audyt 19.18: rerun z `-a` psuje WSZYSTKIE paczki naraz, a próg
+    „cytat w ≥ połowie paczek = tytuł” chował wtedy cały wyciek."""
+    szablony = {n: sek for n, _i, sek in d.wczytaj_szablony_pl()}
+    tekst_pl = szablony["manual.yaml"]["krok_5_tryb_szyfrant"]
+    bwa, _bwp = d._rodzenstwo_audytu()
+    operacje = d._operacje_punktow_pl(tekst_pl, d.nazwy_operacji_pl(bwa))
+    oryginal = d.wczytaj_istniejacy_docelowy
+
+    def wszystkie_po_polsku(cel):
+        return {**(oryginal(cel) or {}), "krok_5_tryb_szyfrant": tekst_pl}
+
+    monkeypatch.setattr(d, "wczytaj_istniejacy_docelowy", wszystkie_po_polsku)
+    wynik = d._cytaty_pl_w_obcych("manual.yaml", "krok_5_tryb_szyfrant",
+                                  tekst_pl, operacje)
+    obce = [k for k in d.KODY_AUDYTU if k != d.KOD_ZRODLOWY]
+    assert sorted(k for k in wynik if any(c == "k-k-k-komputer" for _r, c in wynik[k])) \
+        == sorted(obce)
+    assert not any(c == "Slay the Spire" for lista in wynik.values() for _r, c in lista)
+
+
+def test_blok_jakania_tylko_w_sekcji_z_przykladem_jakania() -> None:
+    for klucz in ("krok_1_pierwsze_uruchomienie", "krok_5_akcenty_nvda"):
+        assert "### Cipher: Stutter" not in _prompt("fi", "manual.yaml", klucz), klucz
+
+
 def test_repo_bez_bledow_d3() -> None:
     znaleziska, _staty = d.audytuj_przyklady(None, ["manual.yaml", "dictionaries.yaml"])
     assert not [z for z in znaleziska if z.blad and "D3" in str(z)]

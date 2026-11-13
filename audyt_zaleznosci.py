@@ -384,8 +384,11 @@ def wiek_linii_manifestu(sciezka: Path | None = None,
 
     Z `git blame --line-porcelain` — jedno wywołanie na cały plik. Linia
     zmieniona w drzewie roboczym ma wiek 0 (git oddaje ją jako „Not Committed
-    Yet” z bieżącym czasem). Bez gita albo poza repo: pusty słownik, a bramka
-    ocenia wtedy same wersje (wiek nie jest wtedy znany, nie zerowy).
+    Yet” z bieżącym czasem). Bez gita albo poza repo: pusty słownik — wiek nie
+    jest wtedy znany, nie zerowy, i :func:`audytuj` degraduje się GŁOŚNO
+    (audyt 19.18: cicha degradacja zostawiała hold zielony i cofała budzik).
+    Liczą się wyłącznie linie z `hold:` (także zakomentowane wpisy opcjonalne):
+    komentarz prozą zaczynający się od nazwy pakietu nie może podać wieku.
     """
     plik = sciezka or SCIEZKA_MANIFESTU
     dzis = dzis or date.today()
@@ -404,7 +407,9 @@ def wiek_linii_manifestu(sciezka: Path | None = None,
         if linia.startswith("committer-time "):
             czas = int(linia.split()[1])
         elif linia.startswith("\t") and czas is not None:
-            tekst = linia[1:].partition("#")[0].strip()
+            surowa = linia[1:].strip()
+            tekst = (surowa.lstrip("#").strip().partition("#")[0].strip()
+                     if _RE_HOLD.search(surowa) else "")
             m = _RE_WPIS.match(tekst) if tekst and not tekst.startswith("-") else None
             if m:
                 dni = (dzis - datetime.fromtimestamp(czas).date()).days
@@ -497,6 +502,15 @@ def bramka(pakiety: list[str] | None = None, *,
             wpis, projekt, wieki.get(wpis.nazwa.lower())))
     if projekt is None:
         degradacje.append("VERSION is unreadable — hold expiry cannot be judged")
+    bez_wieku = sorted(w.nazwa for w in wpisy
+                       if w.wstrzymanie and w.nazwa.lower() not in wieki)
+    if bez_wieku:
+        degradacje.append(
+            f"the age of {len(bez_wieku)} dated hold(s) is unknown "
+            f"({', '.join(bez_wieku[:5])}{'…' if len(bez_wieku) > 5 else ''}) — "
+            f"no git history for {SCIEZKA_MANIFESTU.name} (no git, a source "
+            f"archive or a failed blame), so the {WIEK_HOLDU_DNI}-day clock "
+            f"cannot run and a stale hold would look green")
     nieznane = [s for s in stany if s.status == "nieznane"]
     if nieznane:
         degradacje.append(
@@ -707,8 +721,9 @@ def main() -> int:
                     "manifest still allows (i.e. nobody decided about it).")
     parser.add_argument(
         "--strict", action="store_true",
-        help="Exit 1 when any package is in the `newer allowed` or `not "
-             "installed` state, or when the audit could not be completed. Use "
+        help="Exit 1 when any package waits for a decision (`newer allowed`, "
+             "`not installed`, an expired or undated hold, no risk group), or "
+             "when the audit could not be completed. Use "
              "it before deciding on the shortened (dev-tools-only) release "
              "procedure: a pending upgrade escalates it to the full one. Since "
              "v19.4.0 `build_release.py` applies this same verdict by DEFAULT "

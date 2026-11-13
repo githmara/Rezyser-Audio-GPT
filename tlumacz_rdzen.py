@@ -576,10 +576,9 @@ def wywolaj_llm(
         # modelu, nawet domyślne i nawet przez `extra_body`; uzasadnienie
         # i decyzja: `core_llm._wywolaj_anthropic`).
     # Reaktywna siatka bezpieczeństwa dla modelu spoza baseline'u (reżyser
-    # może podać własny `--model`). Degradujemy DWIE rzeczy, każdą rozpoznaną
-    # przez `core_llm`: odrzuconą `temperature` (wynik ZAPAMIĘTUJEMY — kolejne
-    # chunki i przebiegi nie zapłacą jałowym round-tripem) i odrzucony dialekt
-    # „bez myślenia" (następny wariant, nigdy dwa razy ten sam). Myślenie
+    # może podać własny `--model`): odrzucony dialekt „bez myślenia" →
+    # następny wariant, nigdy dwa razy ten sam. Gałąź `temperature` zniknęła
+    # w 19.18 razem z wysyłaniem tego parametru (audyt: była martwa). Myślenie
     # adaptacyjne (`myslenie=True`) nie degraduje się do „bez" — to świadomy
     # wybór wołającego, więc 400 na nim leci wyżej.
     wyprobowane_thinking = [kwargs.get("thinking")]
@@ -590,11 +589,6 @@ def wywolaj_llm(
             klient.udane = True
             break
         except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO rozpoznane 400
-            if (cl.temperatura_w_payloadzie(kwargs)
-                    and cl.czy_odrzucono_temperature(exc)):
-                cl.zapamietaj_odrzucenie_temperatury(model)
-                cl.zdejmij_temperature(kwargs)
-                continue
             if not myslenie and cl.czy_odrzucono_thinking(exc):
                 jest, wariant = cl.kolejny_wariant_bez_myslenia(
                     model, wyprobowane_thinking)

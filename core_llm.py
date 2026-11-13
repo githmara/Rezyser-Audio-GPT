@@ -601,12 +601,17 @@ _POWODY_ODRZUCENIA = ("safety", "brak_informacji", "niejednoznacznosc", "inne")
 # ---------------------------------------------------------------------------
 # Sampling: modele, które odrzucają niedomyślną `temperature` (v18.23)
 # ---------------------------------------------------------------------------
+# OD 19.18 SEKCJA OBSŁUGUJE JUŻ TYLKO GAŁĘZIE OpenAI-compatible i OpenRoutera:
+# `anthropic` 2.x (API 2026-10-21) odrzuca parametry próbkowania na każdym
+# modelu, więc gałąź Anthropic ich nie wysyła (uzasadnienie przy
+# `_wywolaj_anthropic`). Historia poniżej opisuje, po co ta sekcja powstała.
 # PUBLICZNE API TEJ SEKCJI (v18.24, rozszerzone przy migracji środowiska
 # 2026-09-11): DECYZJA — `honoruje_temperature`, `czy_odrzucono_temperature`,
 # `zapamietaj_odrzucenie_temperatury`; WYKONANIE — `temperatura_w_payloadzie`,
-# `wstaw_temperature`, `zdejmij_temperature`. `_co_odrzucono` ma jednego
-# konsumenta (drabinę niżej) i zostaje prywatne.
-# Nie uprywatniać żadnej z tych szóstki: poza runtimem korzysta
+# `zdejmij_temperature` (`wstaw_temperature` usunięte w 19.18 — nie miało już
+# wołających). `_co_odrzucono` ma jednego konsumenta (drabinę niżej) i zostaje
+# prywatne.
+# Nie uprywatniać żadnej z tych pięciu: poza runtimem korzysta
 # z nich RODZINA AUTOTŁUMACZY, która ma własnych klientów
 # Anthropic (`tlumacz_rdzen`, `buduj_wielojezyczne_ui`) i bez tego płaciła
 # jałowym round-tripem 400 przy KAŻDYM chunku: wszystkie sześć narzędzi jedzie
@@ -745,9 +750,10 @@ def honoruje_temperature(mdl: str, temperatura: float) -> bool:
 # ---------------------------------------------------------------------------
 # HISTORIA od 19.18: `anthropic` 2.x = API 2026-10-21, które odrzuca parametry
 # próbkowania także przez `extra_body`, więc gałęzie Anthropic (runtime
-# i `tlumacz_rdzen`) przestały je wstawiać. Trójka poniżej zostaje publiczna,
-# bo drabiny degradacji (`zdejmij_temperature` na szczeblu awaryjnym) i testy
-# dalej z niej korzystają; pomiar 1.x niżej to zapis, dlaczego kiedyś działało.
+# i `tlumacz_rdzen`) przestały je wstawiać, a `wstaw_temperature` zniknęło
+# (audyt 19.18: zero wołających). Dwójka poniżej zostaje publiczna, bo szczebel
+# awaryjny drabiny (`zdejmij_temperature`) i testy dalej z niej korzystają;
+# pomiar 1.x niżej to zapis, dlaczego kiedyś działało.
 # `anthropic` 1.x nie przyjmuje już `temperature` (ani `top_p`/`top_k`) jako
 # kwargu `messages.create` — poleciałby `TypeError`, czyli wyjątek SPRZED HTTP,
 # którego reaktywna połowa kontraktu (`czy_odrzucono_temperature`, oparta na
@@ -770,11 +776,6 @@ def honoruje_temperature(mdl: str, temperatura: float) -> bool:
 def temperatura_w_payloadzie(kwargs: dict[str, Any]) -> bool:
     """Czy ``kwargs`` niesie jeszcze ``temperature`` (do wysłania lub zdjęcia)."""
     return "temperature" in kwargs.get("extra_body", {})
-
-
-def wstaw_temperature(kwargs: dict[str, Any], wartosc: float) -> None:
-    """Dokłada ``temperature`` do ``extra_body``, nie gubiąc innych jego pól."""
-    kwargs["extra_body"] = {**kwargs.get("extra_body", {}), "temperature": wartosc}
 
 
 def zdejmij_temperature(kwargs: dict[str, Any]) -> None:
@@ -1564,17 +1565,15 @@ def _wywolaj_anthropic(
     schema_json: dict | None = None,
     slad: list[dict] | None = None,
 ) -> tuple[str, str | None]:
-    """Gałąź Anthropic z degradacją ``temperature`` dla modeli, które ją odrzucają.
+    """Gałąź Anthropic z CELOWANĄ degradacją payloadu (schemat, dialekt myślenia).
 
-    Od Claude Sonnet 5 (i Opus 4.7+/Fable 5) niedomyślna wartość ``temperature``
-    zwraca 400 zamiast być po prostu zignorowana. Reżyser może podmienić `model:`
-    w YAML na taki model punktowo (patrz :mod:`przepisy_rezysera`) — bez tej
-    degradacji dostałby gołego wyjątku zamiast wygenerowanego tekstu. Próbujemy
-    NAJPIERW z ``temperature`` z przepisu (kontrola kreatywności per tryb, patrz
-    ``temperatura:`` w YAML); dopiero przy błędzie STRUKTURY (400/422, via
-    :func:`_czy_zla_struktura`) ponawiamy BEZ tego parametru — model wraca do
-    własnego samplingu domyślnego. Modele, które ``temperature`` honorują
-    (np. Sonnet 4.6), nigdy nie trafiają w tę ścieżkę.
+    ``temperature`` od 19.18 NIE jedzie do Anthropic wcale: `anthropic` 2.x =
+    API 2026-10-21, które odrzuca parametry próbkowania 400-ką na KAŻDYM
+    modelu (także wartość domyślną i przez ``extra_body``). Przepisowe
+    ``temperatura:`` działa więc już tylko w gałęziach OpenAI-compatible
+    i OpenRoutera; tu jest jedynie logowane w trybie dev. 400 wspominające
+    ``temperature`` nie dotyczy naszego payloadu i leci wyżej (audyt 19.18:
+    dawny szczebel ponawiał identyczne żądanie i dopisywał model do autocache'u).
 
     Runtime wysyła ZAWSZE „bez myślenia" w dialekcie modelu. Tryb quality
     tłumacza AI (18.11, ``thinking_budget``) usunięto w 19.18 decyzją
@@ -1598,13 +1597,8 @@ def _wywolaj_anthropic(
     ``temperature`` (dziś: domyślny `claude-sonnet-5-5`) zdejmowałby najpierw
     ``output_config`` — czyli structured outputs nie zadziałałyby ANI RAZU
     w produkcji, a wyjście wracałoby do stanu, który wywołał zgłoszenie
-    z 2026-08-29. Dodatkowo ``temperature`` nie jest już wysyłana do modeli
-    z :data:`_MODELE_BEZ_TEMPERATURY` ani z trwałego autocache'u, więc typowe
-    wywołanie nie płaci nawet jednym jałowym round-tripem.
-
-    ``temperature`` od 19.18 NIE jedzie do Anthropic wcale (API 2026-10-21
-    odrzuca parametry próbkowania na każdym modelu) — argument zostaje
-    w sygnaturze dla zgodności wołających i gałęzi OpenAI-compatible.
+    z 2026-08-29. Argument ``temperature`` zostaje w sygnaturze dla zgodności
+    wołających i gałęzi OpenAI-compatible.
 
     ``slad`` (v18.23) → lista, do której dopisujemy metrykę KAŻDEGO wywołania
     (numer próby, ``request_id``, ``stop_reason``, liczniki tokenów). Nie zmienia
@@ -1664,14 +1658,10 @@ def _wywolaj_anthropic(
             ):
                 raise   # już to zdjęliśmy, a błąd wraca — nie ma czego degradować
             if winowajca == "temperature":
-                _dev_log(
-                    f"anthropic: model '{mdl}' odrzucił 'temperature' "
-                    f"({type(exc).__name__}) — ponawiam bez tego parametru "
-                    "i zapamiętuję model w cache."
-                )
-                zdejmij_temperature(kwargs)
-                zapamietaj_odrzucenie_temperatury(mdl)
-            elif winowajca == "output_config":
+                # Nie wysyłamy `temperature` (19.18), więc to nie nasz payload:
+                # ponowienie byłoby identyczne, a zapis do autocache'u fałszywy.
+                raise
+            if winowajca == "output_config":
                 _dev_log(
                     f"anthropic: model/endpoint '{mdl}' odrzucił 'output_config' "
                     f"({type(exc).__name__}) — ponawiam bez structured outputs "
@@ -1821,9 +1811,9 @@ def wywolaj_llm(
     z przepisu przechodzi przez :func:`model_dla_openroutera`. Endpoint, który
     modelu nie zna, daje :class:`BladModeluLLM` (zlokalizowany ``str``).
 
-    ``temperature`` w gałęzi Anthropic ma degradację (patrz :func:`_wywolaj_anthropic`):
-    modele, które odrzucają niedomyślną wartość (Claude Sonnet 5 i nowsze), dostają
-    retry bez tego parametru zamiast wywalać wyjątek — patrz [[reguly_architektury]].
+    ``temperature`` od 19.18 jedzie wyłącznie do gałęzi OpenAI-compatible
+    i OpenRoutera (z degradacją dla modeli, które jej nie przyjmują); gałąź
+    Anthropic jej nie wysyła — patrz :func:`_wywolaj_anthropic`.
 
     Rate-limit (429) i wyczerpane kredyty (400/402, :func:`czy_brak_kredytow`)
     → :class:`BladLimituLLM`, timeout → :class:`BladTimeoutLLM`,

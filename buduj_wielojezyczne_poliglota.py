@@ -320,13 +320,13 @@ def _wynik_przykladu(algorytm: str, slowo: str, cfg: dict, podstawy: dict,
     (pomiar myślenia 2026-11-12, fi/is `oczyszczenie`).
     """
     if not algorytm:
-        if cfg.get("normalizuj_liczby") and slowo.strip().isdigit():
-            try:
-                import core_poliglota as cp
-                return cp.normalizuj_liczby(slowo.strip(),
-                                            jezyk=str(cfg.get("iso") or KOD_ZRODLOWY))
-            except Exception:  # noqa: BLE001 — brak języka w num2words = brak przykładu
-                return None
+        iso = str(cfg.get("iso") or "")
+        if cfg.get("normalizuj_liczby") and iso and slowo.strip().isdigit():
+            import core_poliglota as cp
+            wynik = cp.normalizuj_liczby(slowo.strip(), jezyk=iso)
+            # `normalizuj_liczby` sam połyka błąd num2words i oddaje wejście
+            # (audyt 19.18): „123" → „123" nie jest przykładem, tylko jego brakiem.
+            return None if wynik.strip() == slowo.strip() else wynik
         return None
     return _wywolaj_algorytm(algorytm, slowo, cfg, podstawy, opcje)
 
@@ -1024,7 +1024,12 @@ def waliduj_jednostke(
         # „kirjain" i w spójnik „ja", więc fi/jąkanie odpadało za każdym razem.
         zrodla_tgt = {src.lower() for src, _ in pary_z_opisu(tgt)}
         for slowo in slowa_zakazane:
-            if slowo.lower() in zrodla_tgt:
+            # Para ze strzałką — zawsze; całe słowo w prozie — od 4 znaków
+            # (audyt 19.18: „"komputer" muuttuu muotoon …" przechodziło). Krótsze
+            # słowa tylko w parach: polskie „ja" to też fiński spójnik.
+            w_prozie = len(slowo) >= 4 and re.search(
+                rf"(?<!\w){re.escape(slowo)}(?!\w)", tgt, re.IGNORECASE)
+            if slowo.lower() in zrodla_tgt or w_prozie:
                 problemy.append(
                     f"przykład {slowo!r} został ze ŹRÓDŁA POLSKIEGO — model "
                     f"zignorował policzone `computed_examples` i przepisał "
