@@ -280,6 +280,44 @@ def test_kazdy_pakiet_manifestu_ma_grupe_i_parsuje_hold():
     assert all(w.wstrzymanie for w in wpisy if "<" in w.specyfikator), daty
 
 
+def _gorne_granice_w_workflow(tekst: str) -> dict[str, str]:
+    """{pakiet: "<X"} z cudzyslowow w liniach `pip install` workflowu."""
+    wynik = {}
+    for linia in tekst.splitlines():
+        if "pip install" not in linia:
+            continue
+        for kawalek in linia.split(chr(34))[1::2]:
+            poczatek = min((kawalek.find(z) for z in "<>=!~" if z in kawalek), default=-1)
+            if poczatek <= 0:
+                continue
+            nazwa = kawalek[:poczatek].strip().lower()
+            gorne = [c.strip() for c in kawalek[poczatek:].split(",") if c.strip().startswith("<")]
+            if nazwa and gorne:
+                wynik[nazwa] = gorne[0]
+    return wynik
+
+
+def test_gorne_granice_workflowow_zgodne_z_manifestem():
+    """Bliźniak ATA (audyt 2026-11-13): tam release.yml instalował fonttools<4.68
+    po podbiciu manifestu do <4.69. Boty Reżysera instalują `openai` i `lingua`
+    osobno — po podbiciu manifestu workflow nie może zostać przy starej granicy."""
+    manifest = {w.nazwa.lower(): w.specyfikator for w in az.wczytaj_manifest()}
+    rozjazdy, widziane = [], set()
+    for wf in sorted((_KORZEN / ".github" / "workflows").glob("*.yml")):
+        for nazwa, gorna in _gorne_granice_w_workflow(wf.read_text(encoding="utf-8")).items():
+            widziane.add(nazwa)
+            spec = manifest.get(nazwa)
+            if spec is not None and gorna not in [c.strip() for c in spec.split(",")]:
+                rozjazdy.append(f"{wf.name}: {nazwa}{gorna}, requirements.txt: {nazwa}{spec}")
+    assert {"openai", "lingua-language-detector"} <= widziane, widziane
+    assert not rozjazdy, rozjazdy
+
+
+def test_bramka_granic_workflow_lapie_rozjazd():
+    tekst = f'run: pip install --upgrade {chr(34)}openai>=1.40,<3{chr(34)}'
+    assert _gorne_granice_w_workflow(tekst) == {"openai": "<3"}
+
+
 def test_wersja_projektu_czyta_wip_jako_otwarcie(tmp_path):
     plik = tmp_path / "VERSION"
     plik.write_text("19.18-WIP\n", encoding="utf-8")
