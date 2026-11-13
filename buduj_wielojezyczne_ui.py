@@ -435,7 +435,7 @@ def wywolaj_llm(
 ) -> dict[int, str]:
     """Wysyła JEDEN chunk, zwraca mapę id → tgt.
 
-    Od v18.25 samo wywołanie (klient, structured outputs, degradacja `temperature`,
+    Od v18.25 samo wywołanie (klient, structured outputs, degradacja payloadu,
     parsowanie `id`→`target`) należy do :func:`tlumacz_rdzen.wywolaj_llm` — ten
     builder był OSTATNIM, który miał własną, bliźniaczą kopię tej maszynerii, choć
     to z niego wzięliśmy dla całej rodziny wzorzec structured outputs. Tutaj zostaje

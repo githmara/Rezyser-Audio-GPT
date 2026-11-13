@@ -246,6 +246,37 @@ def test_wiek_tylko_z_linii_hold(tmp_path):
     assert wieki == {"markdown": 10}
 
 
+def test_wiek_nie_z_prozy_ani_z_plytkiego_klonu(tmp_path):
+    """Audyt 2026-11-13: (a) swiezy komentarz prozą z `hold:` NAD wpisem dawal
+    wiek komentarza (10 dni zamiast 130); (b) klon `--depth 1` przypisywal
+    kazda linie commitowi granicznemu — hold zielony, zadnej degradacji."""
+    import os
+    import subprocess
+    from datetime import date
+    repo = tmp_path / "r"
+    repo.mkdir()
+    plik = repo / "requirements.txt"
+    env = {**os.environ, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t",
+           "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"}
+
+    def commit(tresc, data):
+        plik.write_text(tresc, encoding="utf-8")
+        e = {**env, "GIT_AUTHOR_DATE": data, "GIT_COMMITTER_DATE": data}
+        subprocess.run(["git", "add", "."], cwd=repo, check=True, env=e)
+        subprocess.run(["git", "commit", "-qm", "x"], cwd=repo, check=True, env=e)
+
+    subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+    commit("openai<4  # hold: 19.18.0\n", "2026-01-01T12:00:00")
+    commit("# openai: hold: 19.18.0 przedluzony po pomiarze\nopenai<4  # hold: 19.18.0\n",
+           "2026-05-01T12:00:00")
+    assert az.wiek_linii_manifestu(plik, dzis=date(2026, 5, 11)) == {"openai": 130}
+    klon = tmp_path / "klon"
+    subprocess.run(["git", "clone", "-q", "--depth", "1", repo.as_uri(), str(klon)],
+                   check=True, capture_output=True)
+    assert az._klon_plytki(klon)
+    assert az.wiek_linii_manifestu(klon / "requirements.txt", dzis=date(2026, 5, 11)) == {}
+
+
 def test_znacznik_budzika_tylko_po_pelnym_audycie(tmp_path):
     from datetime import date
     import json
@@ -280,42 +311,145 @@ def test_kazdy_pakiet_manifestu_ma_grupe_i_parsuje_hold():
     assert all(w.wstrzymanie for w in wpisy if "<" in w.specyfikator), daty
 
 
-def _gorne_granice_w_workflow(tekst: str) -> dict[str, str]:
-    """{pakiet: "<X"} z cudzyslowow w liniach `pip install` workflowu."""
-    wynik = {}
-    for linia in tekst.splitlines():
-        if "pip install" not in linia:
+def _instalacje_w_workflow(tekst: str) -> list[tuple[str, str]]:
+    """[(nazwa kanoniczna, specyfikator)] dla KAZDEGO pakietu z `pip install`
+    (tez `pip3`, `python -m pip`, kontynuacje linii, apostrofy, extras,
+    markery) — lista, nie dict: dwa joby w jednym pliku nie nadpisuja sie.
+    Audyt 2026-11-13: poprzedni parser dzielil tylko po cudzyslowie `"`
+    i szukal dokladnie „pip install", wiec kilka zwyklych zapisow przechodzilo
+    po cichu jako „zgodne"."""
+    import shlex
+    from packaging.requirements import InvalidRequirement, Requirement
+    from packaging.utils import canonicalize_name
+
+    wynik = []
+    for linia in tekst.replace(chr(92) + chr(10), " ").splitlines():
+        if linia.strip().startswith("#"):
             continue
-        for kawalek in linia.split(chr(34))[1::2]:
-            poczatek = min((kawalek.find(z) for z in "<>=!~" if z in kawalek), default=-1)
-            if poczatek <= 0:
+        try:
+            tokeny = shlex.split(linia)
+        except ValueError:
+            continue
+        for i, tok in enumerate(tokeny):
+            if tok != "install" or i == 0 or tokeny[i - 1] not in ("pip", "pip3"):
                 continue
-            nazwa = kawalek[:poczatek].strip().lower()
-            gorne = [c.strip() for c in kawalek[poczatek:].split(",") if c.strip().startswith("<")]
-            if nazwa and gorne:
-                wynik[nazwa] = gorne[0]
+            pomin = False
+            for arg in tokeny[i + 1:]:
+                if arg in ("&&", "||", ";", "|"):
+                    break
+                if pomin:
+                    pomin = False
+                    continue
+                if arg.startswith("-"):
+                    # `-r plik`, `-c plik`, `-e sciezka`... biora argument.
+                    pomin = arg in ("-r", "--requirement", "-c", "--constraint", "-e",
+                                    "--editable", "-i", "--index-url", "--extra-index-url")
+                    continue
+                try:
+                    req = Requirement(arg)
+                except InvalidRequirement:
+                    continue
+                wynik.append((canonicalize_name(req.name), str(req.specifier)))
     return wynik
+
+
+def _gorna_granica(spec: str):
+    """(Version, czy_wlacznie) — najciasniejsza gorna granica zbioru wersji
+    albo None. Pin `==` i `~=` tez ja wyznaczaja (pin jest granica)."""
+    from packaging.specifiers import SpecifierSet
+    from packaging.version import Version
+
+    granice = []
+    for s in SpecifierSet(spec):
+        v = s.version
+        if s.operator == "<":
+            granice.append((Version(v), False))
+        elif s.operator == "<=" or (s.operator in ("==", "===") and "*" not in v):
+            granice.append((Version(v), True))
+        elif s.operator == "==":       # X.Y.* -> < X.(Y+1)
+            czesci = [int(c) for c in v[:-2].split(".")]
+            czesci[-1] += 1
+            granice.append((Version(".".join(map(str, czesci))), False))
+        elif s.operator == "~=":       # ~=X.Y -> < (X+1); ~=X.Y.Z -> < X.(Y+1)
+            czesci = list(Version(v).release[:-1])
+            czesci[-1] += 1
+            granice.append((Version(".".join(map(str, czesci))), False))
+    return min(granice) if granice else None
+
+
+def _rozjazdy_granic(workflowy: dict[str, str], manifest: dict[str, str]):
+    """(rozjazdy, widziane[nazwa -> zbior plikow]). Rozjazd = pakiet z
+    manifestu, ktorego gorna granica w workflowie jest INNA (semantycznie:
+    `<4.0` == `<4`) — wezsza zamrozilaby bota na starej wersji, szersza albo
+    brak granicy wpuscilyby nieprzetestowana."""
+    from packaging.utils import canonicalize_name
+
+    manifest = {canonicalize_name(n): s for n, s in manifest.items()}
+    rozjazdy, widziane = [], {}
+    for plik, tekst in sorted(workflowy.items()):
+        for nazwa, spec in _instalacje_w_workflow(tekst):
+            if nazwa not in manifest:
+                continue
+            widziane.setdefault(nazwa, set()).add(plik)
+            if _gorna_granica(spec) != _gorna_granica(manifest[nazwa]):
+                rozjazdy.append(f"{plik}: {nazwa}{spec or ' (bez granicy)'}, "
+                                f"requirements.txt: {nazwa}{manifest[nazwa]}")
+    return rozjazdy, widziane
 
 
 def test_gorne_granice_workflowow_zgodne_z_manifestem():
     """Bliźniak ATA (audyt 2026-11-13): tam release.yml instalował fonttools<4.68
     po podbiciu manifestu do <4.69. Boty Reżysera instalują `openai` i `lingua`
     osobno — po podbiciu manifestu workflow nie może zostać przy starej granicy."""
-    manifest = {w.nazwa.lower(): w.specyfikator for w in az.wczytaj_manifest()}
-    rozjazdy, widziane = [], set()
-    for wf in sorted((_KORZEN / ".github" / "workflows").glob("*.yml")):
-        for nazwa, gorna in _gorne_granice_w_workflow(wf.read_text(encoding="utf-8")).items():
-            widziane.add(nazwa)
-            spec = manifest.get(nazwa)
-            if spec is not None and gorna not in [c.strip() for c in spec.split(",")]:
-                rozjazdy.append(f"{wf.name}: {nazwa}{gorna}, requirements.txt: {nazwa}{spec}")
-    assert {"openai", "lingua-language-detector"} <= widziane, widziane
+    katalog = _KORZEN / ".github" / "workflows"
+    workflowy = {wf.name: wf.read_text(encoding="utf-8")
+                 for wf in sorted(katalog.glob("*.yml")) + sorted(katalog.glob("*.yaml"))}
+    manifest = {w.nazwa: w.specyfikator for w in az.wczytaj_manifest()}
+    rozjazdy, widziane = _rozjazdy_granic(workflowy, manifest)
+    # Kazdy plik instalujacy pakiet sprawdzany OSOBNO (do 2026-11-13 zbior byl
+    # wspolny, wiec pin w jednym z trzech workflowow lingua przechodzil).
+    assert len(widziane.get("lingua-language-detector", ())) == 3, widziane
+    assert widziane.get("openai") == {"issue-intake.yml"}, widziane
     assert not rozjazdy, rozjazdy
 
 
-def test_bramka_granic_workflow_lapie_rozjazd():
-    tekst = f'run: pip install --upgrade {chr(34)}openai>=1.40,<3{chr(34)}'
-    assert _gorne_granice_w_workflow(tekst) == {"openai": "<3"}
+_Q = chr(34)
+
+
+@pytest.mark.parametrize("instalacja, rozjazd", [
+    (f"pip install {_Q}openai<4{_Q}", False),
+    (f"pip install {_Q}openai<4.0{_Q}", False),
+    ("pip install 'openai >= 1.40, < 4'", False),
+    (f"pip install --upgrade {_Q}openai>=1.40,<4{_Q} pyyaml", False),
+    (f"pip install {_Q}openai~=3.0{_Q}", False),       # ~=3.0 = <4
+    ("pip install -r requirements.txt", False),
+    (f"pip install {_Q}openai<3{_Q}", True),
+    ("pip install 'openai<3'", True),
+    (f"pip install {_Q}openai~=3.49.0{_Q}", True),     # = <3.50
+    (f"pip install {_Q}openai==3.49.0{_Q}", True),
+    (f"pip install {_Q}openai[realtime]<3{_Q}", True),
+    (f"pip3 install {_Q}openai<3{_Q}", True),
+    (f"python -m pip install {_Q}openai<3{_Q}", True),
+    (f"pip install {chr(92)}{chr(10)}  {_Q}openai<3{_Q}", True),
+    (f"pip install {_Q}openai>=4{_Q}", True),
+    ("pip install openai", True),
+])
+def test_bramka_granic_workflow_lapie_rozjazd(instalacja, rozjazd):
+    """Porownanie z manifestem widziane na czerwono — kazda forma z audytu."""
+    wynik, _ = _rozjazdy_granic({"x.yml": "run: " + instalacja}, {"openai": ">=1.40,<4"})
+    assert bool(wynik) is rozjazd, wynik
+
+
+def test_bramka_granic_dwa_joby_w_pliku_nie_nadpisuja_sie():
+    tekst = f"run: pip install {_Q}openai<4{_Q}{chr(10)}run: pip install {_Q}openai<3{_Q}"
+    wynik, _ = _rozjazdy_granic({"x.yml": tekst}, {"openai": "<4"})
+    assert len(wynik) == 1 and "<3" in wynik[0], wynik
+
+
+def test_bramka_granic_nazwa_z_podkreslnikami():
+    tekst = f"run: pip install {_Q}lingua_language_detector<2.2{_Q}"
+    wynik, widziane = _rozjazdy_granic({"x.yml": tekst}, {"lingua-language-detector": "<2.3"})
+    assert wynik and "lingua-language-detector" in widziane
 
 
 def test_wersja_projektu_czyta_wip_jako_otwarcie(tmp_path):

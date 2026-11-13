@@ -742,7 +742,7 @@ def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str) -> str:
 # ---------------------------------------------------------------------------
 # Wywołanie LLM (jeden chunk, structured outputs) — maszyneria w `tlumacz_rdzen`
 # ---------------------------------------------------------------------------
-# Klient Anthropic, degradacja `temperature` (400 od Sonnet 5), guard ucięcia
+# Klient Anthropic, degradacja payloadu (schemat, thinking), guard ucięcia
 # na `max_tokens` i parsowanie `id`→`target` są identyczne u wszystkich braci.
 # Tutaj zostaje jedyna rzecz własna: prompt systemowy `_PROMPT_SYSTEMOWY`.
 def _zainicjuj_klienta_anthropic() -> Any:

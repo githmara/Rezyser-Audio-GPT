@@ -117,6 +117,34 @@ def test_d3_lapie_masowy_wyciek_we_wszystkich_paczkach(monkeypatch: pytest.Monke
     assert not any(c == "Slay the Spire" for lista in wynik.values() for _r, c in lista)
 
 
+def test_d3_masowy_wyciek_bez_polskich_liter(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Audyt 2026-11-13: polskie „albo" (punkt Wąż w dictionaries.yaml) nie ma
+    polskiej litery ani nie stoi w parach przykładów, więc heurystyka „czy to
+    polskie" wygaszała je przy masowym wycieku. Teraz wygasza się tylko tytuły
+    z CYTATY_WSPOLNE."""
+    szablony = {n: sek for n, _i, sek in d.wczytaj_szablony_pl()}
+    tekst_pl = szablony["dictionaries.yaml"]["co_to_szyfr"]
+    bwa, _bwp = d._rodzenstwo_audytu()
+    operacje = d._operacje_punktow_pl(tekst_pl, d.nazwy_operacji_pl(bwa))
+    oryginal = d.wczytaj_istniejacy_docelowy
+
+    def wszystkie_po_polsku(cel):
+        return {**(oryginal(cel) or {}), "co_to_szyfr": tekst_pl}
+
+    monkeypatch.setattr(d, "wczytaj_istniejacy_docelowy", wszystkie_po_polsku)
+    wynik = d._cytaty_pl_w_obcych("dictionaries.yaml", "co_to_szyfr", tekst_pl, operacje)
+    obce = [k for k in d.KODY_AUDYTU if k != d.KOD_ZRODLOWY]
+    assert sorted(k for k in wynik if any(c == "albo" for _r, c in wynik[k])) == sorted(obce)
+    assert not any(c in d.CYTATY_WSPOLNE for lista in wynik.values() for _r, c in lista)
+
+
+def test_cytaty_tylko_z_pasujacych_cudzyslowow() -> None:
+    """Klasa „dowolny otwierający … dowolny zamykający" parowała na krzyż
+    i z prozy powstawał cytat „z" lub dwuznak „ (audyt 2026-11-13)."""
+    tekst = "każde „s\", „z\" lub dwuznak „sz\" — „k-k-k-komputer”, «abc» i “def”"
+    assert d._cytaty_punktu(tekst) == ["k-k-k-komputer", "abc", "def"]
+
+
 def test_blok_jakania_tylko_w_sekcji_z_przykladem_jakania() -> None:
     for klucz in ("krok_1_pierwsze_uruchomienie", "krok_5_akcenty_nvda"):
         assert "### Cipher: Stutter" not in _prompt("fi", "manual.yaml", klucz), klucz

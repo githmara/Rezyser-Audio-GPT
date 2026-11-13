@@ -307,7 +307,7 @@ def test_anthropic_nie_wysyla_temperatury_a_schemat_jedzie():
     wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     assert len(wynik.opcje) == 3
     assert len(wyslane) == 1
-    assert not cl.temperatura_w_payloadzie(wyslane[0])
+    assert _bez_probkowania(wyslane[0])
     assert "temperature" not in wyslane[0]
     assert "output_config" in wyslane[0]
 
@@ -329,7 +329,7 @@ def test_nierozpoznany_400_konczy_sie_najprostszym_payloadem():
     ])
     ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     assert ("output_config" not in wyslane[1]
-            and not cl.temperatura_w_payloadzie(wyslane[1]))
+            and _bez_probkowania(wyslane[1]))
 
 
 def test_autocache_uczy_sie_nieznanego_modelu():
@@ -388,19 +388,22 @@ def _wywolaj_rdzen(model, odpowiedzi):
     return mapa, wyslane
 
 
-def test_czy_odrzucono_temperature_rozdziela_przypadki():
-    assert cl.czy_odrzucono_temperature(_Blad400(BLAD_TEMPERATURY))
-    # Blad schematu to TEN SAM kod 400 - pomylenie ich kosztowaloby structured outputs.
-    assert not cl.czy_odrzucono_temperature(_Blad400(BLAD_SCHEMATU))
+def test_klasyfikacja_400_o_temperature_rozdziela_przypadki():
+    # Drabina Anthropic rzuca od razu na 400 o `temperature` (19.18) i
+    # degraduje schemat na 400 o schemacie - pomylenie ich kosztowaloby
+    # structured outputs albo ponawialo identyczny payload.
+    blad = _Blad400(BLAD_TEMPERATURY)
+    assert cl._czy_zla_struktura(blad) and cl._co_odrzucono(blad) == "temperature"
+    assert cl._co_odrzucono(_Blad400(BLAD_SCHEMATU)) != "temperature"
     # Sam komunikat nie wystarcza: 429 nie jest bledem struktury payloadu.
-    assert not cl.czy_odrzucono_temperature(_Blad429(BLAD_TEMPERATURY))
+    assert not cl._czy_zla_struktura(_Blad429(BLAD_TEMPERATURY))
 
 
 def test_rodzina_nie_placi_jalowym_round_tripem_na_domyslnym_modelu():
     mapa, wyslane = _wywolaj_rdzen("claude-sonnet-5", [ODP_TLUMACZENIA])
     assert mapa == {1: "Talo"}
     assert len(wyslane) == 1, f"idle 400 round-trip was paid anyway: {len(wyslane)} calls"
-    assert not cl.temperatura_w_payloadzie(wyslane[0])
+    assert _bez_probkowania(wyslane[0])
 
 
 _POLA_PROBKOWANIA = ("temperature", "top_p", "top_k")
@@ -480,7 +483,7 @@ def test_builder_ui_dostal_ten_sam_kontrakt_co_rdzen():
     sdk = _MockSDK([ODP_TLUMACZENIA], wyslane)
     mapa = bu.wywolaj_llm(cl.KlientLLM(cl.PROVIDER_ANTHROPIC, sdk), "claude-sonnet-5", "Suomi", "fi", [(1, "Dom")])
     assert mapa == {1: "Talo"}
-    assert len(wyslane) == 1 and not cl.temperatura_w_payloadzie(wyslane[0])
+    assert len(wyslane) == 1 and _bez_probkowania(wyslane[0])
 
 
 # ---------------------------------------------------------------------------

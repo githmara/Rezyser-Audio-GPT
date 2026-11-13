@@ -605,19 +605,18 @@ _POWODY_ODRZUCENIA = ("safety", "brak_informacji", "niejednoznacznosc", "inne")
 # `anthropic` 2.x (API 2026-10-21) odrzuca parametry próbkowania na każdym
 # modelu, więc gałąź Anthropic ich nie wysyła (uzasadnienie przy
 # `_wywolaj_anthropic`). Historia poniżej opisuje, po co ta sekcja powstała.
-# PUBLICZNE API TEJ SEKCJI (v18.24, rozszerzone przy migracji środowiska
-# 2026-09-11): DECYZJA — `honoruje_temperature`, `czy_odrzucono_temperature`,
-# `zapamietaj_odrzucenie_temperatury`; WYKONANIE — `temperatura_w_payloadzie`,
-# `zdejmij_temperature` (`wstaw_temperature` usunięte w 19.18 — nie miało już
-# wołających). `_co_odrzucono` ma jednego konsumenta (drabinę niżej) i zostaje
-# prywatne.
-# Nie uprywatniać żadnej z tych pięciu: poza runtimem korzysta
-# z nich RODZINA AUTOTŁUMACZY, która ma własnych klientów
-# Anthropic (`tlumacz_rdzen`, `buduj_wielojezyczne_ui`) i bez tego płaciła
-# jałowym round-tripem 400 przy KAŻDYM chunku: wszystkie sześć narzędzi jedzie
-# domyślnie na `claude-sonnet-5-5`, a tłumaczenie wysyła `temperature=0.0`
-# (determinizm), czyli wartość niedomyślną. Baseline + autocache poniżej są
-# więc wspólne dla runtime'u i dev-toolingu — jeden plik nauki, jedna prawda.
+# PUBLICZNE API TEJ SEKCJI: `honoruje_temperature`,
+# `zapamietaj_odrzucenie_temperatury` (gałęzie OpenAI-compatible/OpenRouter
+# w runtimie i w rodzinie autotłumaczy). W 19.18 zniknęły funkcje bez
+# produkcyjnych wołających: `wstaw_temperature`, a po audycie 2026-11-13 także
+# `temperatura_w_payloadzie`, `zdejmij_temperature` i `czy_odrzucono_temperature`
+# — trzymały je przy życiu wyłącznie testy, a gałęzie Anthropic (runtime
+# i `tlumacz_rdzen`) temperatury już nie wysyłają. `_co_odrzucono` ma jednego
+# konsumenta (drabinę Anthropic niżej) i zostaje prywatne.
+# Do 19.17 rodzina autotłumaczy miała własnych klientów Anthropic i bez tej
+# sekcji płaciła jałowym round-tripem 400 przy KAŻDYM chunku (`temperature=0.0`
+# dla determinizmu na modelu, który jej nie honoruje). Baseline + autocache
+# poniżej zostały wspólne dla runtime'u i dev-toolingu — jeden plik nauki.
 # Do v18.22 degradacja `temperature` była REAKTYWNA: wysyłamy z przepisu →
 # 400 → ponawiamy bez. Na dziś domyślny model runtime'u (`claude-sonnet-5-5`)
 # NIE honoruje `temperature` w ogóle, więc ten scenariusz zachodził przy KAŻDYM
@@ -748,17 +747,18 @@ def honoruje_temperature(mdl: str, temperatura: float) -> bool:
 # ---------------------------------------------------------------------------
 # `temperature` jechała przez `extra_body` — SDK 1.x wyciął ją z sygnatury
 # ---------------------------------------------------------------------------
-# HISTORIA od 19.18: `anthropic` 2.x = API 2026-10-21, które odrzuca parametry
-# próbkowania także przez `extra_body`, więc gałęzie Anthropic (runtime
-# i `tlumacz_rdzen`) przestały je wstawiać, a `wstaw_temperature` zniknęło
-# (audyt 19.18: zero wołających). Dwójka poniżej zostaje publiczna, bo szczebel
-# awaryjny drabiny (`zdejmij_temperature`) i testy dalej z niej korzystają;
-# pomiar 1.x niżej to zapis, dlaczego kiedyś działało.
+# SAMA HISTORIA od 19.18: `anthropic` 2.x = API 2026-10-21, które odrzuca
+# parametry próbkowania także przez `extra_body`, więc gałęzie Anthropic
+# (runtime i `tlumacz_rdzen`) przestały je wstawiać, a pomocniki `extra_body`
+# (`wstaw_temperature`, `temperatura_w_payloadzie`, `zdejmij_temperature`)
+# zniknęły — audyty 19.18: zero produkcyjnych wołających, a wywołanie
+# `zdejmij_temperature` w próbie awaryjnej drabiny było no-opem. Pomiar 1.x
+# niżej to zapis, dlaczego ten idiom kiedyś działał.
 # `anthropic` 1.x nie przyjmuje już `temperature` (ani `top_p`/`top_k`) jako
 # kwargu `messages.create` — poleciałby `TypeError`, czyli wyjątek SPRZED HTTP,
-# którego reaktywna połowa kontraktu (`czy_odrzucono_temperature`, oparta na
-# kodzie 400) nie ma jak złapać. Parametr zniknął z SDK, NIE z API: `extra_body`
-# wkleja go do JSON-a żądania as-is.
+# którego reaktywna połowa kontraktu (oparta na kodzie 400) nie ma jak złapać.
+# Parametr zniknął z SDK, NIE z API: `extra_body` wkleja go do JSON-a żądania
+# as-is.
 #
 # Zmierzone żywo 2026-09-11 na `anthropic` 1.5.0:
 #   claude-haiku-4-5 + extra_body{"temperature": 0.2}  → OK
@@ -769,56 +769,6 @@ def honoruje_temperature(mdl: str, temperatura: float) -> bool:
 # baseline, autocache i drabina degradacji działają dalej bez zmiany w logice —
 # przenosimy wyłącznie miejsce, w które wstawiamy wartość. Gałąź `openai_compat`
 # tego nie dotyczy (OpenAI dalej ma `temperature` w sygnaturze).
-#
-# Ta trójka jest PUBLICZNA z tego samego powodu co trójka wyżej: rodzina
-# autotłumaczy ma własnych klientów Anthropic i nie może składać tego idiomu
-# z prymitywów u siebie.
-def temperatura_w_payloadzie(kwargs: dict[str, Any]) -> bool:
-    """Czy ``kwargs`` niesie jeszcze ``temperature`` (do wysłania lub zdjęcia)."""
-    return "temperature" in kwargs.get("extra_body", {})
-
-
-def zdejmij_temperature(kwargs: dict[str, Any]) -> None:
-    """Zdejmuje ``temperature``; pusty ``extra_body`` znika razem z nią.
-
-    Pustego dicta nie zostawiamy, żeby payload po degradacji był DOKŁADNIE tym,
-    czym był przed przejściem na ``extra_body`` — inaczej porównania „ten sam
-    request" (ślad, cache) widziałyby różnicę tam, gdzie jej nie ma.
-
-    ``extra_body`` PODMIENIAMY na nowy dict zamiast robić ``pop`` na starym.
-    Ten sam zagnieżdżony dict bywa współdzielony przez zapis payloadu sprzed
-    degradacji (płytka kopia ``dict(kwargs)`` w logu, w śladzie, w atrapie
-    testowej); mutacja w miejscu cofnęłaby czas także tamtym zapisom i kazała
-    im twierdzić, że pierwsza próba też poszła bez parametru.
-    """
-    cialo = kwargs.get("extra_body")
-    if not cialo or "temperature" not in cialo:
-        return
-    reszta = {k: v for k, v in cialo.items() if k != "temperature"}
-    if reszta:
-        kwargs["extra_body"] = reszta
-    else:
-        kwargs.pop("extra_body", None)
-
-
-def czy_odrzucono_temperature(exc: Exception) -> bool:
-    """Czy ten wyjątek to odrzucenie parametru ``temperature`` przez API.
-
-    Reaktywna połowa kontraktu samplingu — dla modelu SPOZA
-    :data:`_MODELE_BEZ_TEMPERATURY` (np. podanego przez reżysera w `--model`),
-    o którym baseline nic nie wie. Wołający ma po ``True`` zdjąć parametr,
-    ponowić i wywołać :func:`zapamietaj_odrzucenie_temperatury`.
-
-    Złożone z dwóch warunków celowo: sam komunikat nie wystarcza (429 albo błąd
-    sieci też może zawierać słowo „temperature" w cudzym tekście), a sam kod 400
-    tym bardziej nie — tym samym kodem API zgłasza zły schemat, a pomylenie tych
-    dwóch przypadków kosztowałoby structured outputs (patrz :func:`_co_odrzucono`).
-
-    Wystawione jako API, żeby rodzina autotłumaczy — która ma WŁASNYCH klientów
-    Anthropic, poza :func:`wywolaj_llm` — nie musiała ani składać tej decyzji
-    z prymitywów, ani sięgać po prywatne funkcje modułu.
-    """
-    return _czy_zla_struktura(exc) and _co_odrzucono(exc) == "temperature"
 
 
 def _co_odrzucono(exc: Exception) -> str | None:
@@ -941,8 +891,10 @@ def ustaw_thinking(kwargs: dict[str, Any], wariant: dict[str, str] | None) -> No
 
 
 def czy_odrzucono_thinking(exc: Exception) -> bool:
-    """Czy 400 dotyczy konfiguracji ``thinking`` — odpowiednik
-    :func:`czy_odrzucono_temperature` dla rodziny autotłumaczy z własnym klientem.
+    """Czy 400 dotyczy konfiguracji ``thinking`` — dla rodziny autotłumaczy
+    z własnym klientem (`tlumacz_rdzen`). Dwa warunki naraz: sam komunikat nie
+    wystarcza (429 też może go cytować), a sam kod 400 tym bardziej — tym samym
+    kodem API zgłasza zły schemat (patrz :func:`_co_odrzucono`).
     """
     return _czy_zla_struktura(exc) and _co_odrzucono(exc) == "thinking"
 
@@ -1642,8 +1594,8 @@ def _wywolaj_anthropic(
     # bez thinking, bez schematu = zachowanie ≤v18.22).
     resp = None
     zdjete: set[str] = set()
-    # 7 = temperature + output_config + do trzech wariantów thinking + próba
-    # awaryjna (z zapasem). Każdy szczebel jest jednorazowy, więc limit tylko
+    # 7 = output_config + do trzech wariantów thinking + próba awaryjna
+    # (z zapasem; szczebla `temperature` nie ma od 19.18 — 400 o niej rzuca). Każdy szczebel jest jednorazowy, więc limit tylko
     # zabezpiecza, pętli nie ogranicza.
     for _krok in range(7):
         try:
@@ -1688,7 +1640,6 @@ def _wywolaj_anthropic(
                     f"którego nie rozpoznaję ({type(exc).__name__}: "
                     f"{str(exc)[:120]}) — ponawiam z najprostszym payloadem."
                 )
-                zdejmij_temperature(kwargs)
                 kwargs.pop("output_config", None)
                 # Wariant „bez myślenia", który JUŻ przeszedł walidację, zostaje
                 # (reset do `bez_myslenia` wskrzeszał dialekt odrzucony wcześniej

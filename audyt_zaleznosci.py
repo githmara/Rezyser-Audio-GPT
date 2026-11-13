@@ -378,6 +378,17 @@ def wersja_projektu(sciezka: Path | None = None) -> Optional[tuple[int, int, int
     return int(m.group(1)), int(m.group(2)), int(m.group(3) or 0)
 
 
+def _klon_plytki(katalog: Path) -> bool:
+    """True, gdy repo jest płytkim klonem — wiek z blame jest wtedy fałszywy.
+    Bliźniak ATA (`audyt_zaleznosci._klon_plytki`)."""
+    try:
+        wynik = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
+                               cwd=katalog, capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return wynik.returncode == 0 and wynik.stdout.strip() == "true"
+
+
 def wiek_linii_manifestu(sciezka: Path | None = None,
                          dzis: date | None = None) -> dict[str, int]:
     """{nazwa pakietu (lower): dni od commitu, który ostatnio zmienił jego linię}.
@@ -387,11 +398,17 @@ def wiek_linii_manifestu(sciezka: Path | None = None,
     Yet” z bieżącym czasem). Bez gita albo poza repo: pusty słownik — wiek nie
     jest wtedy znany, nie zerowy, i :func:`audytuj` degraduje się GŁOŚNO
     (audyt 19.18: cicha degradacja zostawiała hold zielony i cofała budzik).
-    Liczą się wyłącznie linie z `hold:` (także zakomentowane wpisy opcjonalne):
-    komentarz prozą zaczynający się od nazwy pakietu nie może podać wieku.
+    Liczą się wyłącznie linie z `hold:` (także zakomentowane wpisy opcjonalne)
+    i tylko takie, w których po nazwie stoi operator wersji: komentarz prozą
+    („# openai: hold: 19.18.0 przedłużony…”) nie może podać wieku.
+    Płytki klon (`--depth 1`) też daje pusty słownik: blame przypisałby każdą
+    linię commitowi granicznemu i odmłodził hold (audyt 2026-11-13: 130 dni
+    w pełnej historii, 10 w płytkim klonie, bez żadnej degradacji).
     """
     plik = sciezka or SCIEZKA_MANIFESTU
     dzis = dzis or date.today()
+    if _klon_plytki(plik.parent):
+        return {}
     try:
         wynik = subprocess.run(
             ["git", "blame", "--line-porcelain", "--", plik.name],
@@ -411,7 +428,7 @@ def wiek_linii_manifestu(sciezka: Path | None = None,
             tekst = (surowa.lstrip("#").strip().partition("#")[0].strip()
                      if _RE_HOLD.search(surowa) else "")
             m = _RE_WPIS.match(tekst) if tekst and not tekst.startswith("-") else None
-            if m:
+            if m and m.group("spec")[:1] in tuple("<>=!~"):
                 dni = (dzis - datetime.fromtimestamp(czas).date()).days
                 wieki.setdefault(m.group("nazwa").lower(), max(dni, 0))
             czas = None

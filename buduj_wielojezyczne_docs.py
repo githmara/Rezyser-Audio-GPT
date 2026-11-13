@@ -2103,7 +2103,25 @@ def _inna_operacja_zgodna(
 # „prysznic" — polskie słowo przeliczone fińskimi regułami jąkania jest
 # arytmetycznie poprawne, więc D2 milczała. Pierwszy przebieg sondy znalazł też
 # realny wyciek w WYDANEJ paczce (es/dictionaries: polskie „m.in." → „.nim").
-_RE_CYTAT_PUNKTU = re.compile(r"[\"„“”«»]([^\"„“”«»\n]{3,60})[\"„“”«»]")
+# Tylko PASUJĄCE pary cudzysłowów (audyt 2026-11-13): jedna klasa „dowolny
+# otwierający … dowolny zamykający” parowała je na krzyż przy nierównej
+# liczbie i z prozy powstawały cytaty typu „) Każda samogłoska w tekście…”.
+# „ zamyka się ”, “ albo prostym " (polska instrukcja pisze „k-k-k-komputer").
+_RE_CYTAT_PUNKTU = re.compile(
+    r"„([^„“”\"\n]{3,60})[”“\"]|“([^“”\"\n]{3,60})”|«([^«»\n]{3,60})»|\"([^\"„“”\n]{3,60})\"")
+# Cytaty, które Z ZAŁOŻENIA stoją w każdej paczce bez tłumaczenia: tytuły
+# i nazwy własne. D3 wygasza WYŁĄCZNIE je. Do 2026-11-13 było odwrotnie —
+# cytat w ≥ połowie paczek uchodził za tytuł, chyba że heurystyka uznała go
+# za polski (polska litera, słowo z par reguł, podciąg pliku reguły). Audyt
+# pokazał obie strony tej zgadywanki: masowy wyciek „albo”, „lub dwuznak”
+# przechodził, a uniwersalne „ABC” zostałoby błędem w każdej paczce. Nowy
+# wspólny tytuł w instrukcji = głośny D3 we wszystkich paczkach i dopisek tutaj.
+CYTATY_WSPOLNE = frozenset({"Slay the Spire"})
+
+
+def _cytaty_punktu(tekst: str) -> list[str]:
+    return [next(g for g in m.groups() if g).strip()
+            for m in _RE_CYTAT_PUNKTU.finditer(tekst)]
 
 
 def _cytaty_pl_w_obcych(
@@ -2112,9 +2130,9 @@ def _cytaty_pl_w_obcych(
 ) -> dict[str, list[tuple[str, str]]]:
     """D3: kod paczki → [(reguła, polski cytat, który przeżył w jej punkcie szyfru)].
 
-    Wyrównanie po punktach listy, jak D2. Cytat obecny w co najmniej połowie
-    obcych paczek to tytuł albo nazwa własna („Slay the Spire"), nie przykład —
-    pomijamy go. Ciągi o ≤ 2 różnych znakach („ssssss") też: są wspólne z natury.
+    Wyrównanie po punktach listy, jak D2. Pomijamy tylko tytuły i nazwy własne
+    z :data:`CYTATY_WSPOLNE` oraz ciągi o ≤ 2 różnych znakach („ssssss"),
+    wspólne z natury — nie liczbę paczek, w których cytat stoi.
     """
     punkty_pl = _punkty_listy(tekst_pl)
     obce = [k for k in KODY_AUDYTU if k != KOD_ZRODLOWY]
@@ -2129,51 +2147,12 @@ def _cytaty_pl_w_obcych(
             operacja = operacje.get(indeks)
             if operacja is None or operacja[0] != "szyfry":
                 continue
-            cytaty_pl = {c.strip() for c in _RE_CYTAT_PUNKTU.findall(
-                _bez_zawijania(punkt_pl))}
-            for cytat in _RE_CYTAT_PUNKTU.findall(_bez_zawijania(punkt)):
-                cytat = cytat.strip()
-                if cytat in cytaty_pl and len(set(cytat.lower()) - set(" -")) > 2:
+            cytaty_pl = set(_cytaty_punktu(_bez_zawijania(punkt_pl)))
+            for cytat in _cytaty_punktu(_bez_zawijania(punkt)):
+                if (cytat in cytaty_pl and cytat not in CYTATY_WSPOLNE
+                        and len(set(cytat.lower()) - set(" -")) > 2):
                     trafienia.setdefault(kod, []).append((operacja[1], cytat))
-    wspolne = Counter(c for lista in trafienia.values() for c in {c for _r, c in lista})
-    prog = max(2, len(obce) // 2)
-    chronione = _polskie_przyklady_szyfrow()
-    return {kod: [(r, c) for r, c in lista
-                  if wspolne[c] < prog or _jest_polskim_przykladem(c, chronione)]
-            for kod, lista in trafienia.items()}
-
-
-_RE_LITERA_PL = re.compile(r"[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]")
-
-
-def _polskie_przyklady_szyfrow() -> tuple[set[str], str]:
-    """(słowa z par przykładów reguł `pl/szyfry/*`, cały tekst tych reguł)."""
-    _bwa, bwp = _rodzenstwo_audytu()
-    slowa: set[str] = set()
-    teksty: list[str] = []
-    for plik in sorted((DICT_DIR / KOD_ZRODLOWY / "szyfry").glob("*.yaml")):
-        cfg = _wczytaj_regule(KOD_ZRODLOWY, "szyfry", plik.stem)
-        opis = str(cfg.get("opis", ""))
-        teksty.append(plik.read_text(encoding="utf-8"))
-        for src, wyn in bwp.pary_z_opisu(opis):
-            slowa.update(w.lower() for w in re.findall(r"\w+", f"{src} {wyn}"))
-    return slowa, "\n".join(teksty)
-
-
-def _jest_polskim_przykladem(cytat: str, chronione: tuple[set[str], str]) -> bool:
-    """Cytat, którego D3 NIGDY nie wygasza jako „wspólnego tytułu”.
-
-    Audyt 19.18: próg „≥ połowa obcych paczek” chował masowy wyciek po rerunie
-    z `-a` — dokładnie scenariusz, który D3 ma łapać. Polski przykład poznajemy
-    po polskiej literze, po słowie z par reguł `pl/szyfry/*` albo po tym, że
-    cytat bez spacji stoi dosłownie w pliku polskiej reguły (`.nim`). Tytuł
-    („Slay the Spire”) też stoi w polskiej regule, ale ma spacje i żadnego
-    słowa z par przykładów, więc zostaje wspólny.
-    """
-    slowa, teksty = chronione
-    if _RE_LITERA_PL.search(cytat) or (" " not in cytat and cytat in teksty):
-        return True
-    return any(len(w) >= 3 and w.lower() in slowa for w in re.findall(r"\w+", cytat))
+    return trafienia
 
 
 def audytuj_przyklady(
