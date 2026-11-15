@@ -4,6 +4,64 @@ Release entries in reverse-chronological order. The section of a version is copi
 
 ---
 
+## 19.19.0 — minor release
+
+### What's new
+
+**Letters replaced with ■ can be restored.** Some programs that write PDFs
+put ■ in place of every letter outside the basic Western character set, so a
+Polish document, for example, arrives with holes in its words. After
+loading such a PDF, Polyglot names a few example words and offers to restore
+the letters with the AI model. It asks first, and "Skip" is the default.
+Only the affected words travel to the service, each with a short piece of
+context, and every answer is checked before it is used: the model may change
+only the ■ positions, only to letters of the deployed language packs, and
+only in the script and letter case of the rest of the word. A word it cannot
+restore keeps its ■. Measured on a real document: 146 of 149 words restored
+for about four US cents. It works with an Anthropic or OpenRouter key;
+Converter does not use AI and leaves ■ visible.
+
+**Very tall scanned pages are read in strips.** The model receives every page
+scaled to the same size, so on a long screenshot or a note scanned on a roll
+the small print became unreadable and was guessed (a date on a real note was
+invented). A page without a text layer that is about twice as long as an A4
+sheet of the same width is now read in overlapping A4-shaped strips, joined
+back into one page. The consent dialog counts every strip in its cost and
+time estimate, "Cancel" works between strips, and strips already paid for
+are kept if the provider stops in the middle of a page.
+
+**Better text from broken PDF fonts.**
+- When a font's letter map is broken, the whole font is now rebuilt from its
+  own glyph names, including characters the broken map did not flag (an
+  apostrophe used to come out as a foreign letter).
+- Arrows from the Symbol font's private code points become real arrows. Other
+  symbol fonts use the same code points for different shapes, so they are
+  left alone.
+- A page that is a single lossless digital image (a screenshot saved as PDF)
+  is read with its own instruction: no guessing at small print that is not
+  there and no transcribing of watermarks.
+
+**Manuals.** The chapter on broken PDF text describes both new features in
+every language.
+
+**Environment.** openai 3.51.0, checked with live calls on every consumer
+(OpenRouter, the issue bot, both accessible_text_analyst providers).
+
+**For contributors.**
+- A cycle is opened explicitly: the first commit of a new cycle sets
+  `VERSION` to `X.Y.0-WIP`. `.github/scripts/cykl_wersji.py` reports
+  CYCLE NOT OPENED when `VERSION` still names a released tag although
+  release content changed since it, counting untracked files too; the
+  dependency audit prints it.
+- New module `core_zastepcze.py` with its tests; the strip logic lives in
+  `core_skany.py`.
+
+### Planned or deferred
+
+- None.
+
+---
+
 ## 19.18.0 — minor release
 
 ### What's new

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 19.18.0 – Fullbúin útgáfa)</title>
+<title>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 19.19.0 – Fullbúin útgáfa)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 19.18.0 – Fullbúin útgáfa)</h1>
+<h1>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 19.19.0 – Fullbúin útgáfa)</h1>
 <p>Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).</p>
 <p>Verkfærakistan samanstendur af aðalstúdíóinu (Leikstjórn), þýðinga- og hreimaverkfærinu (Tungumálamaður), skráarbyggingarverkfærinu (Hljóðbókararkitekt), Reglustjóra (frá útgáfu 13.0 — án Python geturðu bætt við nýjum hreim, dulmáli eða sköpunarham, sjá SKREF 7b hér að neðan) og — frá útgáfu 15.0 — Sögueiningunni (gervigreindarframleiddur gagnvirkur skáldskapur í annarri persónu, lesin af TTS eða skjálesara, lýst í sérstöku handriti tales.is.html). Öll fimm verkfærin eru aðgengileg í einum forritsglugga, skipt á milli með hnöppum á stikunni eða með lyklaborðssamsetningum Ctrl+1..Ctrl+5.</p>
 <h2>SKREF 1: Fyrsta gangsetning (Cross-Platform)</h2>
@@ -265,6 +265,8 @@ Valkosturinn með normalíseringu talna breytir sjálfkrafa tölustöfum í orð
 <p>Forritið lagar einnig texta sem er vistaður með rangri kóðun, til dæmis kýrillískt letur sem lítur út eins og „Áèáëèîòåêà“ í stað „Библиотека“. Það endurkóðar aðeins þegar niðurstaðan er greinilega læsilegri en frumtextinn, og segir til um hvaða síður þetta átti við.</p>
 <p>Skjöl sem verða til við umbreytingu úr PDF í Word bera oft merki síðuskiptingar. Þegar .docx-skrá er lesin inn (og við PDF-skjöl) límir forritið saman orð sem skipt var yfir í næstu línu, en aðeins þegar það hefur sönnun fyrir því í skjalinu sjálfu: samansetta myndin kemur fyrir annars staðar í því eða síðari hlutinn er ekki sjálfstætt orð. Í handskrifuðum minnisblöðum, þar sem „- “ getur verið hugsunarstrik, límir það ekkert saman. Orð sem eru gisin til áherslu („S o c j a l n e“) tengir það aftur saman þegar sama orð kemur fyrir í skjalinu, og bil úr Symbol-letrinu breytir það í venjuleg bil. Eftir innlestur gefur forritið upp hversu margar slíkar lagfæringar það gerði. Merkjaviðgerð beitir þessum lagfæringum ekki, því hún afritar upprunalegu .docx-skrána.</p>
 <p>Langt PDF-skjal er lesið inn í bakgrunni: framvindugluggi sýnir skráarnafnið og síðunúmerið, og skjálesari tilkynnir að hann birtist. Ekki er hægt að lesa inn aðra skrá á meðan fyrri innlestur stendur yfir.</p>
+<p>Stafir sem ■ kemur í stað fyrir (NÝTT í útgáfu 19.19). Sum forrit sem skrifa PDF-skjöl setja táknið ■ í stað stafa utan grunnstafasettsins — oftast stafa með stafmerkjum. Þegar þú hleður inn slíkri skrá nefnir Tungumálamaður nokkur dæmi um orð og býðst til að endurheimta stafina með gervigreindarlíkani — aðeins með samþykki þínu (sjálfgefni hnappurinn er „Sleppa“) og aðeins með Anthropic- eða OpenRouter-lykli. Til ytri þjónustunnar eru aðeins send orð sem innihalda ■, hvert með stuttum bút af textanum í kring. Líkanið má aðeins breyta stöðunum sem merktar eru með ■ og aðeins í stafi tungumála sem forritið styður; orð sem það getur ekki endurheimt með vissu helst óbreytt. Fyrir venjulegt skjal kostar þetta nokkur bandarísk sent. Breytingartæki notar ekki gervigreind, svo ■ helst sýnilegt í niðurstöðu þess.</p>
+<p>Mjög háar skannaðar síður (NÝTT í útgáfu 19.19). Við lestur úr mynd fær líkanið síðuna minnkaða í fasta stærð, svo á síðu sem er margfalt lengri en A4-blað — til dæmis löngu skjáskoti eða skannaðri minnismiðarúllu — varð smátt letur ólæsilegt og líkanið giskaði á það. Nú er síða án textalags, sem er um það bil tvöfalt lengri en A4-blað af sömu breidd, lesin í nokkrum skörunarræmum og forritið setur texta þeirra aftur saman í eina síðu. Hver ræma er sérstakur lestur, svo slík síða kostar þeim mun meira; kostnaðarmatið í samþykkisglugganum tekur þegar tillit til þess.</p>
 <h2>Merkjaviðgerð: tungumálakóði fyrir hverja efnisgrein sér (NÝTT í útgáfu 19.2)</h2>
 <p>Undir ISO-kóðareitnum finnur þú valreit „Setja ISO-kóða fyrir hverja efnisgrein sérstaklega". Sé hann óhakaður — allt helst eins og áður: einn kóði gildir fyrir allan skjalið og ekkert aukaglugga birtist. Sé hann hakaður — við ýtingu á „Keyra vinnslu" opnast listi yfir efnisgreinar skjalsins þíns.</p>
 <p>Hver færsla á listanum segir strax þrennt: númer efnisgreinarinnar, upphaf innihalds hennar og kóðann sem hún fær. Þú þarft því ekki að fara inn í neinn reit til að heyra hvað fer hvert. Undir listanum eru þrjú atriði fyrir völdu efnisgreinina: fullt innihald hennar, niðurstaða tungumálagreiningar og reitur þar sem þú breytir kóðanum. Allar efnisgreinar byrja með kóðanum sem þú slóst inn í reitinn „ISO-kóði" — enginn kóði sem þú hefur ekki staðfest ratar inn í skrána.</p>
