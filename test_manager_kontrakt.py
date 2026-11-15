@@ -144,7 +144,11 @@ def test_werdykty_graniczne():
     assert not mrk.ocen_cel("de/opowiesci/tryb_swobodny.yaml", {})
     # Klasa C: nazwa wolna, bo dispatch idzie z pol.
     assert not mrk.ocen_cel("pl/rezyser/tryb_cokolwiek.yaml", {})
-    assert not mrk.ocen_cel("pl/szyfry/moj_szyfr.yaml", {"kategoria": "szyfr"})
+    assert not mrk.ocen_cel("pl/szyfry/moj_szyfr.yaml",
+                            {"kategoria": "szyfr", "zamiany": [{"z": "a", "na": "b"}]})
+    # Ani algorytmu, ani zamian: silnik wywroci sie dopiero przy uzyciu (19.6.0).
+    assert ("ostrzezenie", "szyfr_bez_tresci") in _klucze(
+        "pl/szyfry/moj_szyfr.yaml", {"kategoria": "szyfr"})
     assert not mrk.ocen_cel("pl/podstawy.yaml", {})
 
 
@@ -232,6 +236,7 @@ def _wszystkie_zastrzezenia():
         ("pl/opowiesci/tryb_horror.yaml", {}),
         ("pl/opowiesci/zaczatki_kopia.yaml", {}),
         ("pl/szyfry/moj.yaml", {"kategoria": "szyfr", "algorytm": "enigma"}),
+        ("pl/szyfry/pusty.yaml", {"kategoria": "szyfr", "zamiany": []}),
     ]
     zebrane = {}
     for sciezka, cfg in przypadki:

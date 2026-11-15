@@ -1547,6 +1547,10 @@ manager:
       Pole `algorytm: {algorytm}` nie odpowiada żadnemu algorytmowi w silniku.
 
       Algorytmy szyfrów są kodem Pythona, nie danymi – dostępne: {dostepne}. Szyfr z nieznaną nazwą zgłosi błąd przy pierwszym użyciu.
+    szyfr_bez_tresci: |-
+      Ten szyfr nie ma ani pola `algorytm`, ani listy `zamiany` z choćby jedną parą – silnik nie ma czego wykonać.
+
+      Dodaj `algorytm:` (dostępne: {dostepne}) albo wypełnij listę `zamiany`. Bez tego szyfr pojawi się na liście, ale zgłosi błąd przy pierwszym użyciu.
   # Wynik kreatora
   wynik_tytul:           "Nowy plik reguł – wynik"
   wynik_sukces_naglowek: "✅  Utworzono plik:\n{sciezka_pliku}"

@@ -1295,6 +1295,7 @@ manager:
     opowiesci_tryb_bez_okablowania: "Nýja Söguhaminn er ekki hægt að búa til með YAML-skrá.\n\nVélin þekkir ham eftir tölugildi og tveimur römmum í Python-kóðanum (ólíkt hömum Leikstjórans, sem er úthlutað út frá reitum í skrá), þannig að „{nazwa}.yaml\" myndi enginn hlaða inn. Heitin sem vélin les eru: {kanon}.\n\nNýjum ham er bætt við á annan hátt: í þessum glugga skaltu búa til nýja reglnaskrá og velja í leiðarvísinum þá tegund sem ætluð er fyrir Söguhaminn. Leiðarvísirinn vistar þá enga skrá – hann útbýr í staðinn heildstæðan leiðarvísi fyrir forritara."
     opowiesci_nazwa_nieczytana: "Sögu-vélin les úr þessari möppu EINGÖNGU föst nöfn ({kanon}), þannig að „{nazwa}.yaml\" verður ekki lesin af neinum.\n\nAfritið nýtist fyrst þegar þú flytur það í möppu ANNARS tungumáls og gefur því nafn upprunaskrárinnar – þá verður það útgáfa af þessari uppskrift fyrir þann pakka."
     szyfr_algorytm_nieznany: "Reiturinn `algorytm: {algorytm}` samsvarar engum algríma í vélinni.\n\nDulkóðunaralgrímur eru Python-kóði, ekki gögn – tiltækir: {dostepne}. Dulmál með óþekktu nafni gefur villu í fyrstu notkun."
+    szyfr_bez_tresci: "Þetta dulmál hefur hvorki reitinn `algorytm` né lista `zamiany` með að minnsta kosti einu pari – vélin hefur ekkert til að framkvæma.\n\nBættu við `algorytm:` (tiltæk gildi: {dostepne}) eða fylltu út lista `zamiany`. Án þess birtist dulmálið á listanum en gefur villu við fyrstu notkun."
 updater:
   # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Uppfærsla í boði"

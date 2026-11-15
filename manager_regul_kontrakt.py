@@ -272,4 +272,13 @@ def _ocen_szyfr(cfg: dict) -> list[Zastrzezenie]:
             {"algorytm": algorytm,
              "dostepne": ", ".join(sorted(cp._ALGORYTMY_SZYFROW))},
         )]
+    # v19.20.0 (dług 19.6.0): bez `algorytm` silnik bierze gałąź „czyste
+    # zamiany” — a pusta lista albo jej brak to szyfr, który wczytuje się do
+    # GUI i dopiero przy użyciu rzuca „Szyfr nie do uruchomienia”.
+    zamiany = cfg.get("zamiany")
+    if not algorytm and not (isinstance(zamiany, list) and zamiany):
+        return [Zastrzezenie(
+            OSTRZEZENIE, "szyfr_bez_tresci",
+            {"dostepne": ", ".join(sorted(cp._ALGORYTMY_SZYFROW))},
+        )]
     return []
