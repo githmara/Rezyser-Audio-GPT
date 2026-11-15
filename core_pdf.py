@@ -49,7 +49,10 @@ potem nazwy `post`). Słownik: 550 z 550 stron naprawionych, zgodność liter
 z `.docx` uczelni 99,6–99,8% na typowej stronie, akcenty U+0301 wracają przy
 literach. 99 innych PDF-ów z dysku: tekst bajt w bajt taki sam jak przed
 naprawą. Bramka zostaje siatką bezpieczeństwa — strona naprawiona częściowo
-dalej jest zgłaszana.
+dalej jest zgłaszana. Od 19.19 naprawiany jest CAŁY font: jego znaki bez flagi
+też idą przez mapę glifów, jeśli font sam ich nie rysuje (słownik: glify „ʽ ʼ”
+wychodziły bez flagi jako U+078D/U+078C, litery Thaana — pismo RTL odwracało
+nawiasy). 37 innych PDF-ów z sondy: tekst bez zmian.
 """
 
 from __future__ import annotations
@@ -412,13 +415,22 @@ def _napraw_z_fontu(tp, znaki: list[tuple[int, str]], znane: frozenset[str],
     import ctypes
     import pypdfium2.raw as pdfium_c
     zflagowane: dict[str, list[int]] = {}
+    # Znaki BEZ flagi, per font (19.19, naprawa całego fontu): PDFium oddaje
+    # część numerów glifów bez `HasUnicodeMapError` — słownik: glif „ʽ”
+    # wychodził jako U+078D (Thaana, pismo RTL, które odwracało nawiasy).
+    bez_flagi: dict[str, list[int]] = {}
     # Wskaźnik fontu → klucz, w obrębie strony: dane i nazwa fontu raz na
     # font strony, nie raz na znak (zmierzone na 880 tys. znaków słownika).
     nazwy: dict[int | None, tuple] = {}
     adresy: dict = fonty.setdefault("_adresy", {})
     flaga = flaga or _blad_mapowania
     for poz, (i, z) in enumerate(znaki):
-        if z.isspace() or not flaga(tp, i):
+        if z.isspace():
+            continue
+        flagowany = flaga(tp, i)
+        # Bez flagi kandydatem jest tylko pojedynczy znak spoza paczek (szybka
+        # ścieżka: litery „А”–„М” z poprawnej ToUnicode nie pytają o font).
+        if not flagowany and (len(z) != 1 or z in znane or z.isascii()):
             continue
         obiekt = pdfium_c.FPDFText_GetTextObject(tp.raw, i)
         font = pdfium_c.FPDFTextObj_GetFont(obiekt) if obiekt else None
@@ -446,7 +458,7 @@ def _napraw_z_fontu(tp, znaki: list[tuple[int, str]], znane: frozenset[str],
                     fonty[klucz] = mapa_glifow(dane) if osadzony else {}
             nazwy[adres] = klucz
         nazwa = nazwy[adres]
-        zflagowane.setdefault(nazwa, []).append(poz)
+        (zflagowane if flagowany else bez_flagi).setdefault(nazwa, []).append(poz)
     wynik = list(znaki)
     zmiana = False
     for nazwa, pozycje in zflagowane.items():
@@ -468,6 +480,17 @@ def _napraw_z_fontu(tp, znaki: list[tuple[int, str]], znane: frozenset[str],
             i, z = znaki[p]
             nowy = mapa.get(ord(z)) if len(z) == 1 else None
             if nowy is not None and nowy != z:
+                wynik[p] = (i, nowy)
+                zmiana = True
+        # Font uznany za oddający numery glifów: jego znaki bez flagi też są
+        # numerami glifów, jeśli font sam ich NIE rysuje (nie ma ich w swoim
+        # `cmap`/`post`). Znak, który font rysuje, zostaje — to poprawna
+        # ToUnicode (słownik: „А”–„М”), a nie kod glifu.
+        rysuje = set(mapa.values())
+        for p in bez_flagi.get(nazwa, ()):
+            i, z = znaki[p]
+            nowy = mapa.get(ord(z))
+            if nowy is not None and nowy != z and z not in rysuje:
                 wynik[p] = (i, nowy)
                 zmiana = True
     return wynik if zmiana else None
@@ -540,6 +563,30 @@ def _znaki_strony(tp) -> list[tuple[int, str]]:
     return wynik
 
 
+def _znaki_symbol(tp, znaki: list[tuple[int, str]]) -> list[tuple[int, str]]:
+    """Strzałki fontu Symbol z prywatnego obszaru Unicode → ⇑ ⇓ (19.19).
+
+    Nazwę fontu czytamy tylko dla znaków z mapy `czyszczenie_tekstu.
+    ZNAKI_SYMBOL_PUA`, więc dokument bez nich nie płaci nic. Decyzja (czy to
+    font Symbol) jest we wspólnym module, bliźniaczym z ATA.
+    """
+    from czyszczenie_tekstu import ZNAKI_SYMBOL_PUA, znak_fontu_symbol
+    if getattr(tp, "raw", None) is None or not any(
+            len(z) == 1 and ord(z) in ZNAKI_SYMBOL_PUA for _, z in znaki):
+        return znaki
+    import pypdfium2.raw as pdfium_c
+    wynik = list(znaki)
+    for poz, (i, z) in enumerate(znaki):
+        if len(z) != 1 or ord(z) not in ZNAKI_SYMBOL_PUA:
+            continue
+        obiekt = pdfium_c.FPDFText_GetTextObject(tp.raw, i)
+        font = pdfium_c.FPDFTextObj_GetFont(obiekt) if obiekt else None
+        nowy = znak_fontu_symbol(z, _nazwa_fontu(font)) if font else None
+        if nowy:
+            wynik[poz] = (i, nowy)
+    return wynik
+
+
 def _znaki_po_naprawie(tp, znane: frozenset[str] | None, fonty: dict | None
                        ) -> tuple[list[tuple[int, str]], int, int, bool]:
     """(znaki, liter, podejrzanych, naprawiona) strony, po próbie naprawy z fontu.
@@ -548,7 +595,7 @@ def _znaki_po_naprawie(tp, znane: frozenset[str] | None, fonty: dict | None
     wtedy, gdy zmniejsza liczbę podejrzanych liter — czysta strona zostaje
     co do bajta taka jak przed etapem 2.
     """
-    wszystkie = _znaki_strony(tp)
+    wszystkie = _znaki_symbol(tp, _znaki_strony(tp))
     flaga = _flagi_strony(tp)
     litery, podejrzane = _policz_litery(tp, wszystkie, znane, flaga)
     if znane is None or fonty is None or not czy_znieksztalcona(litery, podejrzane):

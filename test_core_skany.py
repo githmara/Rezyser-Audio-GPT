@@ -13,7 +13,9 @@ Kontrakty `core_skany`, których nie sprawdza żadna bramka danych:
      escapowany PRZED renderem (wejście niezaufane — `<script>` z obrazu nie
      może trafić do pliku), znaczniki podmienione PO renderze (nie stają się
      linkami), nieznany token zostaje dosłownie;
-  E. każdy token z `ZNACZNIKI` ma klucz w `ui.yaml` paczki `pl`.
+  E. każdy token z `ZNACZNIKI` ma klucz w `ui.yaml` paczki `pl`;
+  F. strona „obraz cyfrowy” (slajd, zrzut; 19.19) rozpoznana po sygnaturze
+     obrazu i czytana `SYSTEM_CYFROWA`, skan — `SYSTEM_SKANY`.
 
 Mock modelu, zero wywołań API.
 
@@ -207,6 +209,58 @@ def test_anuluj_w_trakcie_strony_nie_wysyla_nastepnej(monkeypatch):
         (3, cs.STATUS_BLAD, "poliglota.skan_powod_anulowano"),
         (5, cs.STATUS_BLAD, "poliglota.skan_powod_anulowano")]
     assert wyslane == [b"PDF2"]
+
+
+def _pdf_z_obrazem(szer_pt, wys_pt, szer_px, wys_px, filtr="FlateDecode"):
+    """Jednostronicowy PDF z JEDNYM obrazem na całą stronę (szary, `szer_px`×`wys_px`)."""
+    import zlib
+    piksele = bytes(szer_px * wys_px)
+    dane = zlib.compress(piksele) if filtr == "FlateDecode" else piksele
+    tresc = b"q %d 0 0 %d 0 0 cm /Im0 Do Q" % (szer_pt, wys_pt)
+    obiekty = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 %d %d] "
+        b"/Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>" % (szer_pt, wys_pt),
+        b"<< /Length %d >>\nstream\n" % len(tresc) + tresc + b"\nendstream",
+        b"<< /Type /XObject /Subtype /Image /Width %d /Height %d /ColorSpace /DeviceGray "
+        b"/BitsPerComponent 8 /Filter /%s /Length %d >>\nstream\n"
+        % (szer_px, wys_px, filtr.encode(), len(dane)) + dane + b"\nendstream",
+    ]
+    out = bytearray(b"%PDF-1.7\n")
+    offsety = []
+    for i, obj in enumerate(obiekty, 1):
+        offsety.append(len(out))
+        out += b"%d 0 obj\n" % i + obj + b"\nendobj\n"
+    xref = len(out)
+    out += b"xref\n0 %d\n0000000000 65535 f \n" % (len(obiekty) + 1)
+    out += b"".join(b"%010d 00000 n \n" % o for o in offsety)
+    out += b"trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (
+        len(obiekty) + 1, xref)
+    return bytes(out)
+
+
+def test_strona_cyfrowa_po_sygnaturze_obrazu(tmp_path):
+    # 19.19 (sonda 2026-11-13): slajd = obraz 72 dpi (piksele = punkty strony),
+    # bezstratny; skan ma wyższą rozdzielczość albo JPEG.
+    assert cs.strona_cyfrowa(_pdf_z_obrazem(160, 90, 160, 90))           # slajd 16:9
+    assert not cs.strona_cyfrowa(_pdf_z_obrazem(72, 100, 200, 278))      # skan ~200 dpi
+    assert not cs.strona_cyfrowa(_pdf_z_obrazem(160, 90, 160, 90, filtr="DCTDecode"))
+    p = tmp_path / "tekst.pdf"
+    _zbuduj_pdf(p, [[("Strona z tekstem.", 72, 700)]])
+    assert not cs.strona_cyfrowa(p.read_bytes())
+    assert not cs.strona_cyfrowa(b"to nie jest PDF")
+
+
+def test_strona_cyfrowa_dostaje_osobny_prompt(monkeypatch):
+    wyslane = _model(monkeypatch, [("SLAJD", "end_turn"), ("SKAN", "end_turn")])
+    monkeypatch.setattr(cs, "strona_cyfrowa", lambda pdf: pdf == b"PDF2")
+    cs.odczytaj_strony(KLIENT, "x.pdf", AKAPITY, [2, 3])
+    assert [kw["system"] for kw in wyslane] == [cs.SYSTEM_CYFROWA, cs.SYSTEM_SKANY]
+    # Wspólne reguły: zakaz zgadywania i znaczniki z `ZNACZNIKI` (klucze ui.yaml).
+    assert "NEVER guess" in cs.SYSTEM_CYFROWA
+    uzyte = set(cs._RE_ZNACZNIK.findall(cs.SYSTEM_CYFROWA))
+    assert uzyte <= set(cs.ZNACZNIKI)
 
 
 def test_zla_strona_przy_cieciu_nie_kasuje_odczytanych(monkeypatch):

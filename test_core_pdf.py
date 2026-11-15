@@ -588,7 +588,12 @@ def test_strona_znieksztalcona_blokuje_sklejanie(monkeypatch):
 _TEKST_G = "Утверждено к печати"
 
 
-def _font_ttf(*, cmap=True, nazwy=True, polowa=False, ligatura=False):
+#: Numer glifu „ʽ” w foncie słownika — PDFium oddaje go jako U+078D (Thaana)
+#: BEZ flagi błędu mapowania (19.19, zmierzone na stronach 182 i 205).
+_GID_APOSTROFU = 0x78D
+
+
+def _font_ttf(*, cmap=True, nazwy=True, polowa=False, ligatura=False, apostrof=False):
     import io
     from fontTools.fontBuilder import FontBuilder
     from fontTools.pens.ttGlyphPen import TTGlyphPen
@@ -603,10 +608,17 @@ def _font_ttf(*, cmap=True, nazwy=True, polowa=False, ligatura=False):
     if ligatura:                       # jak w fontach łacińskich: tylko `post`, nie `cmap`
         gid["ffi"] = len(kolejnosc)
         kolejnosc.append("f_f_i")
+    if apostrof:
+        kolejnosc += [f"pusty{i}" for i in range(len(kolejnosc), _GID_APOSTROFU)]
+        gid["apostrof"] = len(kolejnosc)
+        kolejnosc.append("uni02BD")
     w_cmap = litery[: len(litery) // 2] if polowa else litery
     fb = FontBuilder(1000, isTTF=True)
     fb.setupGlyphOrder(kolejnosc)
-    fb.setupCharacterMap({ord(z): f"uni{ord(z):04X}" for z in w_cmap} if cmap else {})
+    mapa = {ord(z): f"uni{ord(z):04X}" for z in w_cmap} if cmap else {}
+    if apostrof:
+        mapa[0x2BD] = "uni02BD"
+    fb.setupCharacterMap(mapa)
     pen = TTGlyphPen(None)
     pen.moveTo((0, 0))
     pen.lineTo((0, 500))
@@ -624,22 +636,26 @@ def _font_ttf(*, cmap=True, nazwy=True, polowa=False, ligatura=False):
     return bufor.getvalue(), gid
 
 
-def _pdf_osadzony(sciezka, ligatura=False, **opcje_fontu):
+def _pdf_osadzony(sciezka, ligatura=False, apostrof=False, **opcje_fontu):
     """Słowa jako osobne biegi (PDFium generuje spacje), akcent po „Утве”;
-    `ligatura` dokleja glif „f_f_i” do ostatniego słowa."""
-    ttf, gid = _font_ttf(ligatura=ligatura, **opcje_fontu)
+    `ligatura` dokleja glif „f_f_i” do ostatniego słowa, `apostrof` — glif
+    „ʽ” na początek pierwszego, z ToUnicode wskazującą na U+078D (jak słownik)."""
+    ttf, gid = _font_ttf(ligatura=ligatura, apostrof=apostrof, **opcje_fontu)
     x, tresc = 72, b""
     for nr, slowo in enumerate(_TEKST_G.split()):
-        kody = []
+        kody = [f"{gid['apostrof']:04x}"] if apostrof and nr == 0 else []
         for z in slowo:
             kody.append(f"{gid[z]:04x}")
-            if nr == 0 and len(kody) == 4:
+            if nr == 0 and len(kody) == 4 + bool(apostrof):
                 kody.append(f"{gid['akcent']:04x}")
         if ligatura and nr == len(_TEKST_G.split()) - 1:
             kody.append(f"{gid['ffi']:04x}")
         tresc += f"BT /F1 12 Tf {x} 700 Td <{''.join(kody)}> Tj ET ".encode()
         x += len(kody) * 6 + 4          # `/DW 500` daje szerokość także akcentowi
-    cmap = _CMAP_UCIETA.encode()
+    cmap = _CMAP_UCIETA
+    if apostrof:
+        cmap = cmap.replace("endbfrange", "endbfrange 1 beginbfchar <078d> <078d> endbfchar")
+    cmap = cmap.encode()
     obiekty = [
         b"<< /Type /Catalog /Pages 2 0 R >>",
         b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
@@ -682,6 +698,23 @@ def test_naprawa_z_osadzonego_fontu_cmap_i_post(tmp_path):
     assert unicodedata.normalize("NFC", w.akapity[0]) == w.akapity[0]
     assert w.strony_naprawione == [1] and w.strony_znieksztalcone == []
     assert w.tekst_wiarygodny == w.tekst
+
+
+def test_naprawa_calego_fontu_bierze_tez_znak_bez_flagi(tmp_path):
+    # 19.19 (sonda 2026-11-13): w naprawianym foncie PDFium oddał glif „ʽ”
+    # jako U+078D (Thaana) BEZ flagi błędu mapowania — dawna naprawa brała
+    # tylko znaki flagowane. Font nie rysuje U+078D, więc to numer glifu.
+    p = tmp_path / "apostrof.pdf"
+    _pdf_osadzony(p, apostrof=True)
+    import pypdfium2 as pdfium
+    import pypdfium2.raw as pdfium_c
+    tp = pdfium.PdfDocument(str(p))[0].get_textpage()
+    # Fixtura odtwarza słownik: surowe PDFium daje U+078D i NIE zgłasza błędu.
+    assert pdfium_c.FPDFText_GetUnicode(tp, 0) == 0x78D
+    assert pdfium_c.FPDFText_HasUnicodeMapError(tp, 0) == 0
+    w = core_pdf.wyciagnij(str(p), ZNANE)
+    assert w.akapity == [f"{chr(0x2BD)}Утве{chr(0x301)}рждено к печати"]
+    assert w.strony_naprawione == [1] and w.strony_znieksztalcone == []
 
 
 def test_naprawa_z_ligatura_spoza_cmap(tmp_path):
