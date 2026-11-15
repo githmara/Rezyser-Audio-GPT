@@ -275,6 +275,16 @@ def pliki_runtime_w_zakresie(tag: str) -> list[str]:
     zmienione = [w for w in surowe.split("\n") if w.strip()]
     if not zmienione:
         return []
+    return klasyfikuj_zmiany(zmienione, tag)
+
+
+def klasyfikuj_zmiany(zmienione: list[str], tag: str) -> list[str]:
+    """Winowajcy dev-tools-only spośród ``zmienione`` (ścieżki względem roota).
+
+    Wydzielone z :func:`pliki_runtime_w_zakresie` (2026-11-14), bo tę samą
+    granicę czyta `cykl_wersji.py`: zmiana, która wyklucza skróconą procedurę,
+    jest dokładnie zmianą, która otwiera nowy cykl wydania.
+    """
     runtime = domkniecie_runtime()
     winowajcy: list[str] = []
     for sciezka in zmienione:

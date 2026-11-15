@@ -61,6 +61,12 @@ KANON ŚRODOWISKA (2026-11-12, zastąpił kanon zachowawczy z 2026-09-18):
     mieć w swojej linii `# hold: <wersja wydania, które ją postawiło>`.
     Wstrzymanie WYGASA z następnym minorem: build `X.Y.0` odmawia, dopóki stoi
     wstrzymanie z wcześniejszego minora, a build patcha tylko ostrzega;
+  * CYKL OTWIERA SIĘ JAWNIE (2026-11-14): „następny minor” istnieje dla bramki
+    dopiero wtedy, gdy `VERSION` go nazywa. Pierwszy commit cyklu ustawia
+    `X.Y.0-WIP` (minor/major) albo `X.Y.Z-WIP` (patch); commit wydania zdejmuje
+    `-WIP`. Praca po tagu bez `-WIP` = `.github/scripts/cykl_wersji.py`
+    zgłasza „cykl nieotwarty” (hak startu sesji i :func:`ostrzez_cykl`), bo
+    werdykty wstrzymań są wtedy liczone względem STAREGO numeru;
   * DRUGI ZEGAR + BUDZIK: wstrzymanie wygasa też po :data:`WIEK_HOLDU_DNI`
     dniach od commitu, który ostatnio zmienił jego linię (`git blame`) — zegar
     wersji staje, gdy nic nie wychodzi. Pełny audyt zapisuje
@@ -731,6 +737,26 @@ def zamroz(wersja: str, katalog: Path | None = None,
     return cel, True
 
 
+def ostrzez_cykl() -> bool:
+    """Drukuje błąd cyklu z `.github/scripts/cykl_wersji.py`; True = błąd.
+
+    Wygaśnięcie wstrzymań liczy się względem `VERSION`, więc przy cyklu
+    nieotwartym (praca po tagu bez `-WIP`) werdykty wyżej są fałszywie zielone
+    — audyt musi to powiedzieć obok nich, nie tylko hak startu sesji.
+    """
+    skrypt = ROOT / ".github" / "scripts" / "cykl_wersji.py"
+    try:
+        wynik = subprocess.run([sys.executable, str(skrypt)], cwd=ROOT, capture_output=True,
+                               text=True, encoding="utf-8", errors="replace", timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    if wynik.returncode == 1:
+        print("🔓 " + wynik.stdout.strip())
+        print("   Hold verdicts above are judged against the OLD version until then.")
+        return True
+    return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Audits requirements.txt against the installed environment "
@@ -772,6 +798,7 @@ def main() -> int:
     pakiety = [p for p in args.pakiety.split(",") if p.strip()] or None
     wynik = bramka(pakiety, bez_sieci=args.bez_sieci)
     raport(wynik)
+    ostrzez_cykl()
     if pakiety is None and zapisz_znacznik(wynik, "audyt_zaleznosci"):
         print(f"⏱️  Alarm clock reset: {ZNACZNIK_BUDZIKA.relative_to(ROOT)} "
               f"(read by the maintainer's session-start hook).")
