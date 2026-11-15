@@ -94,7 +94,7 @@ def winowajcy(tag: str) -> list[str]:
     wszystko, co wyklucza skróconą procedurę dev-tools-only)."""
     kod, surowe = _git("diff", "--name-only", tag)
     if kod != 0:
-        raise RuntimeError(f"git diff {tag} failed")
+        raise RuntimeError(f"git diff {tag} nie powiódł się")
     # Nowy, jeszcze nieśledzony moduł też otwiera cykl (audyt 19.19:
     # `git diff` go nie widzi, więc hook przed pierwszym commitem milczał).
     kod, nowe = _git("ls-files", "--others", "--exclude-standard")
@@ -141,25 +141,30 @@ def stan_cyklu(korzen: Path = Path(".")) -> dict:
 
 
 def komunikat(stan: dict) -> str:
+    """Zdanie dla maintainera — po polsku, jak cały `.github/scripts/` (v19.20.0).
+
+    Narzędzie kontrybutora (`audyt_zaleznosci.ostrzez_cykl`) czyta `--json`
+    i składa własne zdanie po angielsku, więc ten tekst do niego nie trafia.
+    """
     s = stan["stan"]
     w = stan.get("wersja", "?")
     if s == "nieotwarty":
         pliki = stan.get("winowajcy", [])
-        return (f"Release cycle not opened: VERSION={w} is already tagged ({stan['tag']}), "
-                f"but {len(pliki)} release file(s) changed since ({', '.join(pliki[:3])}"
-                f"{', ...' if len(pliki) > 3 else ''}). Set VERSION to X.Y.0-WIP for a "
-                f"minor/major or X.Y.Z-WIP for a patch, so dependency holds expire now, "
-                f"not in the closing build.")
+        return (f"Cykl wydania nieotwarty: VERSION={w} ma już tag ({stan['tag']}), "
+                f"a od niego zmieniło się {len(pliki)} plik(ów) wydania ({', '.join(pliki[:3])}"
+                f"{', ...' if len(pliki) > 3 else ''}). Ustaw VERSION na X.Y.0-WIP (minor/major) "
+                f"albo X.Y.Z-WIP (patch), żeby wstrzymania zależności wygasły teraz, "
+                f"a nie w buildzie zamykającym.")
     if s == "wip_wydanej":
-        return (f"VERSION={w} is WIP, but tag {stan['tag']} already exists — "
-                f"the cycle must carry the NEXT version number.")
+        return (f"VERSION={w} ma -WIP, ale tag {stan['tag']} już istnieje — "
+                f"cykl musi nieść NASTĘPNY numer wersji.")
     if s == "wip":
-        return f"Cycle open: VERSION={w} ({stan['typ']})."
+        return f"Cykl otwarty: VERSION={w} ({stan['typ']})."
     if s == "wydany":
-        return f"At rest after release {stan['tag']} (only dev-tooling changed since)."
+        return f"Spoczynek po wydaniu {stan['tag']} (od tamtej pory tylko dev-tooling)."
     if s == "zamykanie":
-        return f"Closing the cycle: VERSION={w} has no tag yet."
-    return f"Cycle state unknown: {stan.get('powod', '?')}."
+        return f"Zamykanie cyklu: VERSION={w} nie ma jeszcze tagu."
+    return f"Stan cyklu nieznany: {stan.get('powod', '?')}."
 
 
 def main(argv: list[str] | None = None) -> int:

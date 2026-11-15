@@ -26,6 +26,13 @@ identifiers** quoted inside an English sentence (flag names such as
 message is usually one short phrase, so after that masking the gate needs fewer
 letters before it asks `lingua` for a verdict there than it does elsewhere.
 
+**Outside the contract: the maintainer's tools.** `odpowiedz_lokalnie.py` and everything
+under `.github/scripts/` (the issue bots, release-notes extraction, the dev-patch sync, the
+release-cycle check) run only with the maintainer's `gh` session or inside GitHub Actions,
+so their console output is Polish by decision (19.20) and the gate does not scan them.
+When a contributor tool needs one of them, it reads machine output (`cykl_wersji.py
+--json`) and writes its own English sentence — `audyt_zaleznosci.py` does exactly that.
+
 ## Emoji status legend (canonical)
 
 Every dev tool uses the same status emoji. Read them first:
@@ -181,7 +188,7 @@ reach X on the paths this project uses.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are 58 regression test files (1189 tests, **about a minute for all of them**) and
+There are 58 regression test files (1190 tests, **about a minute for all of them**) and
 nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
 (`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
 Running every one of them after every small edit is not thoroughness — a green

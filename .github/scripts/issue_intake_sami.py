@@ -432,12 +432,12 @@ def _koperta_danych(tresc: str) -> str:
         if tresc == poprzednia:
             break
     if _ZNACZNIK_OTW in tresc or _ZNACZNIK_ZAM in tresc:
-        # Komunikat kończący pracę idzie po angielsku — kontrakt CONTRIBUTING
-        # („anything saying why it failed is in English"). Polska zostaje tam,
-        # gdzie czyta Centrum: stderr i treść maila.
+        # Po polsku od v19.20.0: `.github/scripts/` jest poza kontraktem
+        # językowym CONTRIBUTING (narzędzia maintainera, patrz
+        # `audyt_leakow.KATALOGI_POZA_KONTRAKTEM`).
         raise RuntimeError(
-            "failed to neutralise the data-envelope markers inside the "
-            "attachment content")
+            "nie udało się zneutralizować znaczników koperty danych "
+            "w treści załącznika")
     return f"{_ZNACZNIK_OTW}\n{tresc}\n{_ZNACZNIK_ZAM}"
 
 

@@ -121,6 +121,27 @@ def test_prawdziwe_repo_ma_czytelny_stan():
         os.chdir(stary)
 
 
+def test_granica_jezyka_maintainer_pl_kontrybutor_en(monkeypatch, capsys):
+    """v19.20.0: `.github/scripts/` mówi po polsku (narzędzia maintainera), a
+    `audyt_zaleznosci` (narzędzie kontrybutora) składa zdanie sam z `--json`."""
+    import json
+    stan = {"stan": "nieotwarty", "wersja": "1.2.0", "tag": "v1.2.0",
+            "winowajcy": ["silnik.py"]}
+    assert cw.komunikat(stan).startswith("Cykl wydania nieotwarty")
+
+    import audyt_zaleznosci as az
+    wolane = []
+
+    def run(cmd, **kw):
+        wolane.append(cmd)
+        return subprocess.CompletedProcess(cmd, 1, stdout=json.dumps(stan), stderr="")
+    monkeypatch.setattr(az.subprocess, "run", run)
+    assert az.ostrzez_cykl() is True
+    out = capsys.readouterr().out
+    assert "--json" in wolane[0]
+    assert "Release cycle not opened: VERSION=1.2.0" in out and "Cykl" not in out
+
+
 # Uruchomienie jako skrypt — deleguje do pytesta (kanon v19.2.1).
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))

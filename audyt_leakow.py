@@ -1474,6 +1474,16 @@ _WYWOLANIA_KONCZACE = frozenset({"error", "exit"})
 # pliku, nie snapshot jego treści (ten sam argument, co przy `DEV_TOOLE`).
 POZA_KONTRAKTEM = {"odpowiedz_lokalnie.py"}
 
+# Katalog `.github/scripts/` jest POZA kontraktem z tego samego powodu
+# (decyzja maintainera 2026-11-15, v19.20.0; dług 19.0.0 „skan tylko w
+# korzeniu”): boty zgłoszeń, wycięcie sekcji notatek, sync dev patcha i stan
+# cyklu chodzą wyłącznie w Actions albo z `gh` maintainera — mówią po polsku.
+# `skanuj_kontrakt` patrzy tylko na `root.glob("*.py")`, więc to wyłączenie
+# jest ZAPISEM granicy, nie kodem. Narzędzie kontrybutora, które potrzebuje
+# któregoś z nich, czyta wyjście maszynowe i mówi samo (`audyt_zaleznosci.
+# ostrzez_cykl` ← `cykl_wersji.py --json`).
+KATALOGI_POZA_KONTRAKTEM = (".github/scripts",)
+
 # Repozytorium jest polskojęzyczne, więc angielskie zdanie dev-toola RUTYNOWO
 # cytuje polskie IDENTYFIKATORY: nazwy flag (`--tylko-walidacja`), nazwy plików
 # (`finski,rosyjski`), stałe (`KLASY_POL`, `BATCH_MAX_ZNAKOW`) i nazwy klas

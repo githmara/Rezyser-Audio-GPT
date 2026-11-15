@@ -743,18 +743,32 @@ def ostrzez_cykl() -> bool:
     Wygaśnięcie wstrzymań liczy się względem `VERSION`, więc przy cyklu
     nieotwartym (praca po tagu bez `-WIP`) werdykty wyżej są fałszywie zielone
     — audyt musi to powiedzieć obok nich, nie tylko hak startu sesji.
+
+    Od v19.20.0 czytamy `--json`, nie zdanie: `.github/scripts/` to narzędzia
+    maintainera i mówią po polsku, a ten audyt jest narzędziem kontrybutora.
     """
     skrypt = ROOT / ".github" / "scripts" / "cykl_wersji.py"
     try:
-        wynik = subprocess.run([sys.executable, str(skrypt)], cwd=ROOT, capture_output=True,
-                               text=True, encoding="utf-8", errors="replace", timeout=60)
-    except (OSError, subprocess.SubprocessError):
+        wynik = subprocess.run([sys.executable, str(skrypt), "--json"], cwd=ROOT,
+                               capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", timeout=60)
+        stan = json.loads(wynik.stdout)
+    except (OSError, subprocess.SubprocessError, ValueError):
         return False
-    if wynik.returncode == 1:
-        print("🔓 " + wynik.stdout.strip())
-        print("   Hold verdicts above are judged against the OLD version until then.")
-        return True
-    return False
+    if wynik.returncode != 1:
+        return False
+    w, tag = stan.get("wersja", "?"), stan.get("tag", "?")
+    if stan.get("stan") == "nieotwarty":
+        pliki = stan.get("winowajcy", [])
+        print(f"🔓 Release cycle not opened: VERSION={w} is already tagged ({tag}), "
+              f"but {len(pliki)} release file(s) changed since "
+              f"({', '.join(pliki[:3])}{', ...' if len(pliki) > 3 else ''}). "
+              f"Set VERSION to X.Y.0-WIP for a minor/major or X.Y.Z-WIP for a patch.")
+    else:
+        print(f"🔓 VERSION={w} is WIP, but tag {tag} already exists — "
+              f"the cycle must carry the NEXT version number.")
+    print("   Hold verdicts above are judged against the OLD version until then.")
+    return True
 
 
 def main() -> int:
