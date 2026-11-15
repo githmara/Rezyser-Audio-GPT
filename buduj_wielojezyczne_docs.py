@@ -1899,6 +1899,33 @@ def tlumacz_szablon(
     return True
 
 
+def _dryf_draftow(
+    wytworzone: list[tuple[str, str]],
+) -> dict[tuple[str, str], list[tuple[str, str, str]]]:
+    """Bramka dryfu (v19.20.0) dla podręczników: sekcja = jednostka `tresc.<klucz>`.
+
+    Ta sama logika co u pięciu braci (`tlumacz_rdzen.zbierz_dryf_niezmienionych`);
+    tu tylko budujemy jednostki z sekcji zapisanego draftu. Schemat legacy
+    (jeden string `tresc`) pomijamy — nie ma kluczy sekcji do porównania.
+    """
+    folder_pl = DICT_DIR / KOD_ZRODLOWY / FOLDER_GUI / FOLDER_DOKUMENTACJA
+    jednostki_per_plik: dict[tuple[str, str], list] = {}
+    sciezki: dict[tuple[str, str], tuple[Path, Path]] = {}
+    for kod, nazwa in wytworzone:
+        cel = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / nazwa
+        sekcje = wczytaj_istniejacy_docelowy(cel)
+        if not sekcje or KLUCZ_LEGACY in sekcje:
+            continue
+        jednostki = []
+        for i, (klucz, tresc) in enumerate(sekcje.items()):
+            j = tlumacz_rdzen.Jednostka(i, "sekcja", "proza", ("sciezka", "tresc", klucz), "")
+            j.cel = tresc
+            jednostki.append(j)
+        jednostki_per_plik[(kod, nazwa)] = jednostki
+        sciezki[(kod, nazwa)] = (folder_pl / nazwa, cel)
+    return tlumacz_rdzen.zbierz_dryf_niezmienionych(jednostki_per_plik, sciezki, ROOT)
+
+
 def _zbierz_leaki_draftow(
     wytworzone: list[tuple[str, str]],
 ) -> dict[tuple[str, str], dict]:
@@ -2841,9 +2868,10 @@ def main() -> int:
         # recenzenta (zwł. nie-polskojęzycznego), doklejany do checklisty.
         print("\n🔎 DRAFT: skan audyt_leakow na wytworzonych draftach…")
         leaki_per_plik = _zbierz_leaki_draftow(wytworzone_drafty)
+        dryf = _dryf_draftow(wytworzone_drafty)
         sciezka_prompt = przeglad_tlumaczen.zapisz_prompt_przegladu(
             "buduj_wielojezyczne_docs.py", wytworzone_drafty, ROOT,
-            leaki_per_plik=leaki_per_plik,
+            leaki_per_plik=leaki_per_plik, dryf_per_plik=dryf,
         )
         if sciezka_prompt is not None:
             ile_leakow = sum(

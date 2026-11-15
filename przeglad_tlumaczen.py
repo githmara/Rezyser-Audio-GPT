@@ -1028,10 +1028,38 @@ def _formatuj_leaki(leaki_per_plik) -> str:
     )
 
 
+def _formatuj_dryf(dryf_per_plik) -> str:
+    """Appendix: jednostki przepisane mimo NIEZMIENIONEGO źródła PL (v19.20.0).
+
+    `dryf_per_plik`: ``{(kod, plik): [(adres, stare, nowe), ...]}`` z
+    `tlumacz_rdzen.zbierz_dryf_niezmienionych`. Zwraca "" gdy pusto.
+    """
+    if not dryf_per_plik:
+        return ""
+    bloki: list[str] = []
+    for kod, plik in sorted(dryf_per_plik):
+        wiersze = [f"### `{kod}` / {plik}"]
+        for adres, stare, nowe in dryf_per_plik[(kod, plik)]:
+            wiersze.append(f"- `{adres}`\n  - reviewed: {stare[:200]!r}\n"
+                           f"  - draft:    {nowe[:200]!r}")
+        bloki.append("\n".join(wiersze))
+    return (
+        "## Reworded although the Polish source did not change\n\n"
+        "The Polish source of these units is identical to the version the\n"
+        "committed translation was made from, yet the draft words them\n"
+        "differently. A rerun retranslates whole files, so this is usually\n"
+        "drift away from already-reviewed wording, not an improvement. Default:\n"
+        "restore the reviewed text, unless the new one is clearly better.\n\n"
+        + "\n\n".join(bloki)
+        + "\n\n"
+    )
+
+
 def _tekst_promptu(
     narzedzie: str,
     wytworzone: list[tuple[str, str]],
     leaki_per_plik=None,
+    dryf_per_plik=None,
 ) -> str:
     """Składa treść markdown checklisty przeglądu."""
     # Grupuj wytworzone drafty per język dla czytelnej listy.
@@ -1061,6 +1089,7 @@ def _tekst_promptu(
         f"{_CHECKLIST_WSPOLNA}\n"
         f"{hotspoty}\n"
         f"{_formatuj_leaki(leaki_per_plik)}"
+        f"{_formatuj_dryf(dryf_per_plik)}"
         "## How to return\n\n"
         "Edit the draft files in place and send them back. Do not touch the\n"
         "Polish source. When in doubt about a native idiom, leave a `# REVIEW:`\n"
@@ -1073,6 +1102,7 @@ def zapisz_prompt_przegladu(
     wytworzone: list[tuple[str, str]],
     root: Path,
     leaki_per_plik=None,
+    dryf_per_plik=None,
 ) -> Path | None:
     """Zapisuje checklistę przeglądu do ``skrypty/przeglad_<rdzen>.md``.
 
@@ -1098,7 +1128,7 @@ def zapisz_prompt_przegladu(
     try:
         katalog.mkdir(parents=True, exist_ok=True)
         cel.write_text(
-            _tekst_promptu(narzedzie, wytworzone, leaki_per_plik),
+            _tekst_promptu(narzedzie, wytworzone, leaki_per_plik, dryf_per_plik),
             encoding="utf-8",
         )
     except OSError:

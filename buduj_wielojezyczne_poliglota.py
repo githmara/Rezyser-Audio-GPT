@@ -2371,6 +2371,8 @@ def main() -> int:
     porazki: list[str] = []
     wytworzone: dict[tuple[str, str], list[Jednostka]] = {}
     kotwice_per_plik: dict[tuple[str, str], list[str]] = {}
+    # (źródło PL, cel) per draft — klucz `wytworzone` gubi folder (szyfry/akcenty).
+    sciezki_plikow: dict[tuple[str, str], tuple[Path, Path]] = {}
 
     for kod in kody:
         print(f"\n========== {kod.upper()} "
@@ -2422,6 +2424,8 @@ def main() -> int:
                 wszystko_ok = False
             elif jednostki:
                 wytworzone[(kod, nazwa)] = jednostki
+                sciezki_plikow[(kod, nazwa)] = (DICT_DIR / KOD_ZRODLOWY / folder / nazwa,
+                                                DICT_DIR / kod / folder / nazwa)
                 kotwice_per_plik[(kod, nazwa)] = wykryj_kotwice(
                     [j.zrodlo for j in jednostki], None, kotwice_extra)
         (sukcesy if wszystko_ok else porazki).append(kod)
@@ -2429,9 +2433,10 @@ def main() -> int:
     if wytworzone:
         print("\n🔎 DRAFT: skan audyt_leakow na wytworzonych draftach…")
         leaki = tlumacz_rdzen.zbierz_leaki(wytworzone, kotwice_per_plik)
+        dryf = tlumacz_rdzen.zbierz_dryf_niezmienionych(wytworzone, sciezki_plikow, ROOT)
         sciezka = przeglad_tlumaczen.zapisz_prompt_przegladu(
             "buduj_wielojezyczne_poliglota.py", sorted(wytworzone.keys()), ROOT,
-            leaki_per_plik=leaki,
+            leaki_per_plik=leaki, dryf_per_plik=dryf,
         )
         if sciezka is not None:
             ile = sum(len(v) for per in leaki.values() for v in per.values())

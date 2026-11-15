@@ -1080,6 +1080,27 @@ def zamroz_cytowane_naglowki(
 def waliduj_silnikiem(
     kod: str, nazwa_pliku: str, dane_pl: dict, kotwice: list[str],
 ) -> list[str]:
+    """Walidacja silnikiem z PRZYWRÓCENIEM globalnych katalogów silnika (v19.20.0).
+
+    `_waliduj_silnikiem` podmienia `przepisy_rezysera.DICTIONARIES_DIR` i
+    `core_poliglota.DICTIONARIES_DIR` na katalog paczek narzędzia. Do 19.19
+    podmiana zostawała: w zestawie testów wskazywała skasowany katalog
+    tymczasowy `test_tryby_narzedzia`, więc `test_jezyk_odpowiedzi` uruchomiony
+    PO nim widział jedną paczkę (8 porażek, ciche w alfabetycznym przebiegu).
+    """
+    import core_poliglota as cp
+    import przepisy_rezysera as pr
+    stare = (cp.DICTIONARIES_DIR, pr.DICTIONARIES_DIR)
+    try:
+        return _waliduj_silnikiem(kod, nazwa_pliku, dane_pl, kotwice)
+    finally:
+        cp.DICTIONARIES_DIR, pr.DICTIONARIES_DIR = stare
+        pr.wyczysc_cache()
+
+
+def _waliduj_silnikiem(
+    kod: str, nazwa_pliku: str, dane_pl: dict, kotwice: list[str],
+) -> list[str]:
     """Ładuje wynikowy przepis SILNIKIEM i porównuje z polskim. Zwraca listę błędów.
 
     Sprawdza kolejno:
@@ -1879,9 +1900,12 @@ def main() -> int:
     if wytworzone:
         print("\n🔎 DRAFT: skan audyt_leakow na wytworzonych draftach…")
         leaki = zbierz_leaki(wytworzone, kotwice_per_plik)
+        dryf = tlumacz_rdzen.zbierz_dryf_niezmienionych(wytworzone, {
+            (k, n): (DICT_DIR / KOD_ZRODLOWY / FOLDER_REZYSER / n,
+                     DICT_DIR / k / FOLDER_REZYSER / n) for k, n in wytworzone}, ROOT)
         sciezka = przeglad_tlumaczen.zapisz_prompt_przegladu(
             "buduj_wielojezyczne_tryby.py", sorted(wytworzone.keys()), ROOT,
-            leaki_per_plik=leaki,
+            leaki_per_plik=leaki, dryf_per_plik=dryf,
         )
         if sciezka is not None:
             ile = sum(len(v) for per in leaki.values() for v in per.values())

@@ -1837,9 +1837,12 @@ def main() -> int:
     if wytworzone:
         print("\n🔎 DRAFT: skan audyt_leakow na wytworzonych draftach…")
         leaki = tlumacz_rdzen.zbierz_leaki(wytworzone, kotwice_per_plik)
+        dryf = tlumacz_rdzen.zbierz_dryf_niezmienionych(wytworzone, {
+            (k, n): (DICT_DIR / KOD_ZRODLOWY / FOLDER_OPOWIESCI / n,
+                     DICT_DIR / k / FOLDER_OPOWIESCI / n) for k, n in wytworzone}, ROOT)
         sciezka = przeglad_tlumaczen.zapisz_prompt_przegladu(
             "buduj_wielojezyczne_opowiesci.py", sorted(wytworzone.keys()), ROOT,
-            leaki_per_plik=leaki,
+            leaki_per_plik=leaki, dryf_per_plik=dryf,
         )
         if sciezka is not None:
             ile = sum(len(v) for per in leaki.values() for v in per.values())

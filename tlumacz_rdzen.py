@@ -1243,15 +1243,17 @@ def bledy_skanu_dopuszczalne() -> tuple[type[BaseException], ...]:
     Drafty są już wtedy zapisane na dysku — przepada tylko appendix checklisty.
     """
     import yaml  # pyyaml — tego używa audyt_leakow do czytania draftów
-    return (ImportError, OSError, UnicodeDecodeError, yaml.YAMLError)
+    from ruamel.yaml.error import YAMLError as RuamelYAMLError  # bramka dryfu
+    return (ImportError, OSError, UnicodeDecodeError, yaml.YAMLError, RuamelYAMLError)
 
 
-def zglos_blad_skanu(exc: BaseException, kod: str, nazwa_pliku: str) -> None:
+def zglos_blad_skanu(exc: BaseException, kod: str, nazwa_pliku: str,
+                     skan: str = "audyt_leakow") -> None:
     """Fail-open dla błędu środowiska, `raise` dla błędu kodu (patrz wyżej)."""
     if isinstance(exc, bledy_skanu_dopuszczalne()):
-        print(f"⚠️  audyt_leakow skipped for {kod}/{nazwa_pliku}: {exc}")
+        print(f"⚠️  {skan} skipped for {kod}/{nazwa_pliku}: {exc}")
         return
-    print(f"❌ audyt_leakow crashed on {kod}/{nazwa_pliku} with "
+    print(f"❌ {skan} crashed on {kod}/{nazwa_pliku} with "
           f"{type(exc).__name__} — a bug in the scanner code, not in the draft. "
           f"Drafts are saved; the review checklist was NOT written.")
     raise exc
@@ -1296,4 +1298,110 @@ def zbierz_leaki(
             continue
         if per_sekcja:
             wynik[(kod, nazwa_pliku)] = per_sekcja
+    return wynik
+
+
+# ---------------------------------------------------------------------------
+# BRAMKA DRYFU: przekład zmieniony, choć źródło PL nie (v19.20.0)
+# ---------------------------------------------------------------------------
+# Dług 19.18.0, zmierzony: rerun brata przepisał wyrecenzowane brzmienie także
+# POZA celem zmiany (`[täytetään käsin]` → `[täytettävä käsin]`, `[dż]` → `[dž]`).
+# Bazą porównania jest commit, który OSTATNI dotknął pliku docelowego — to
+# wersja, którą ktoś przyjął. Jednostka jest „nieruszona”, gdy jej wartość PL
+# w tym commicie równa się dzisiejszej; jeśli wtedy przekład z tego commitu
+# różni się od draftu, to dryf. Komentarze (adres po indeksie bloku) pomijamy:
+# indeks nie jest stabilny między wersjami pliku.
+def _git_pokaz(root: Path, rewizja: str, sciezka: Path) -> str | None:
+    import subprocess
+    try:
+        wzgledna = sciezka.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return None                       # --slowniki poza repo: brak historii
+    try:
+        wynik = subprocess.run(["git", "show", f"{rewizja}:{wzgledna}"], cwd=root,
+                               capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", timeout=30)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return wynik.stdout if wynik.returncode == 0 else None
+
+
+def _ostatni_commit(root: Path, sciezka: Path) -> str | None:
+    import subprocess
+    try:
+        wzgledna = sciezka.resolve().relative_to(root.resolve()).as_posix()
+        wynik = subprocess.run(["git", "log", "-1", "--format=%H", "--", wzgledna],
+                               cwd=root, capture_output=True, text=True, timeout=30)
+    except (ValueError, OSError, subprocess.SubprocessError):
+        return None
+    return wynik.stdout.strip() or None
+
+
+def dryf_jednostek(
+    jednostki: list[Jednostka], pl_bazy: Any, cel_bazy: Any, pl_dzis: Any = None,
+) -> list[tuple[str, str, str]]:
+    """Czysta logika bramki: `[(adres, przyjęte, draft)]` dla nieruszonego PL.
+
+    `pl_dzis` (drzewo dzisiejszego źródła) jest potrzebne, bo `Jednostka.zrodlo`
+    bywa przetworzone przez brata (np. słowa wyzwalające łączone w jedną
+    jednostkę); bez niego porównujemy z `j.zrodlo`.
+    """
+    wynik: list[tuple[str, str, str]] = []
+    for j in jednostki:
+        if not j.kroki or not j.cel:
+            continue
+        stare_pl = wartosc_po_sciezce(pl_bazy, j.kroki)
+        dzis_pl = (wartosc_po_sciezce(pl_dzis, j.kroki) if pl_dzis is not None
+                   else j.zrodlo)
+        stary_cel = wartosc_po_sciezce(cel_bazy, j.kroki)
+        if stare_pl is None or dzis_pl is None or not isinstance(stary_cel, str):
+            continue
+        if str(stare_pl).strip() != str(dzis_pl).strip():
+            continue                      # źródło się zmieniło — nowy przekład legalny
+        if stary_cel.strip() != j.cel.strip():
+            wynik.append((j.opis(), stary_cel.strip(), j.cel.strip()))
+    return wynik
+
+
+def zbierz_dryf_niezmienionych(
+    wytworzone: dict[tuple[str, str], list[Jednostka]],
+    sciezki: dict[tuple[str, str], tuple[Path, Path]],
+    root: Path,
+) -> dict[tuple[str, str], list[tuple[str, str, str]]]:
+    """Bramka dryfu dla draftów braci → appendix checklisty + linia w logu.
+
+    `sciezki[(kod, plik)] = (źródło_pl, cel)`. Plik bez historii w gicie (nowy
+    przekład, `--slowniki` poza repo) jest pomijany — nie ma czego chronić.
+    """
+    wynik: dict[tuple[str, str], list[tuple[str, str, str]]] = {}
+    y = yaml_io()
+    for klucz, jednostki in wytworzone.items():
+        if klucz not in sciezki:
+            continue
+        zrodlo, cel = sciezki[klucz]
+        rewizja = _ostatni_commit(root, cel)
+        if not rewizja:
+            continue
+        pl_tekst = _git_pokaz(root, rewizja, zrodlo)
+        cel_tekst = _git_pokaz(root, rewizja, cel)
+        if pl_tekst is None or cel_tekst is None:
+            continue
+        try:
+            pl_bazy, cel_bazy = y.load(pl_tekst), y.load(cel_tekst)
+            pl_dzis = y.load(zrodlo.read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001 — rozdział jak w skanie leaków
+            zglos_blad_skanu(exc, *klucz, skan="drift check")
+            continue
+        dryf = dryf_jednostek(jednostki, pl_bazy, cel_bazy, pl_dzis)
+        if dryf:
+            wynik[klucz] = dryf
+    if wynik:
+        ile = sum(len(v) for v in wynik.values())
+        print(f"⚠️  DRAFT: {ile} unit(s) reworded although their Polish source did "
+              f"not change since the last commit of the file — see the review "
+              f"checklist (restore the reviewed wording unless the new one is "
+              f"clearly better):")
+        for (kod, plik), lista in sorted(wynik.items()):
+            print(f"     {kod}/{plik}: " + ", ".join(a for a, _s, _n in lista[:8])
+                  + (f" (+{len(lista) - 8})" if len(lista) > 8 else ""))
     return wynik
