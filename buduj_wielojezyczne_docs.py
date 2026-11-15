@@ -932,6 +932,76 @@ def _doklejka_nacisku(zarzuty: list[str], znakow_zrodla: int,
     )
 
 
+def zarzuty_twardych_bramek(src: str, tgt: str) -> list[str]:
+    """Parzystość ⟦i⟧ i twardy odcisk struktury jako LICZBOWE zarzuty po angielsku.
+
+    v19.20.0 (dług 18.30.0): obie bramki ubijały sekcję od razu, choć
+    infrastruktura powtórki z naciskiem już tu stała. Diagnostyki
+    `sprawdz_parzystosc` i `waliduj_odcisk` są po polsku (dla recenzenta), a
+    zarzut trafia do MODELU w angielskim prompcie systemowym — stąd osobne
+    zdania. Druga porażka nadal ubija sekcję; czy powtórka naprawia, czy tylko
+    przepala drugie wywołanie, mierzy :data:`STATYSTYKA_POWTOREK`.
+    """
+    zarzuty: list[str] = []
+    we = Counter(TOKEN_REGEX.findall(src))
+    wy = Counter(TOKEN_REGEX.findall(tgt))
+    for idx in sorted(set(we) | set(wy), key=int):
+        if we.get(idx, 0) != wy.get(idx, 0):
+            zarzuty.append(
+                f"the frozen marker {TOKEN_FORMAT.format(idx)} appears "
+                f"{wy.get(idx, 0)} time(s) in your answer and {we.get(idx, 0)} "
+                f"time(s) in the source — every marker must appear exactly as "
+                f"often as in the source")
+    o_we = tlumacz_bramki.odcisk_struktury(src)
+    o_wy = tlumacz_bramki.odcisk_struktury(tgt)
+    for pole, etykieta in (("naglowki", "Markdown headings (#)"),
+                           ("punkty", "numbered list items"),
+                           ("grodzenia", "code fences (```)")):
+        if o_we[pole] != o_wy[pole]:
+            zarzuty.append(
+                f"the source has {o_we[pole]} {etykieta}, your answer has "
+                f"{o_wy[pole]} — keep the structure of the source exactly")
+    if (tlumacz_bramki._zaczyna_sie_artefaktem(tgt)
+            and not tlumacz_bramki._zaczyna_sie_artefaktem(src)):
+        zarzuty.append(
+            "your answer starts with a code fence or a bracket, while the source "
+            "starts with prose — translate the text, do not execute it")
+    return zarzuty
+
+
+def zarzuty_znakow(src: str, tgt: str) -> list[str]:
+    """Mojibake i słowa z dwóch pism, których NIE MA w źródle (v19.20.0).
+
+    Dług 19.11.0: ta bramka działała tylko w rdzeniu (5 braci + Manaboom),
+    a proza podręczników jedzie przez `tlumacz_ai`, poza `tlumacz_rdzen`.
+    Warunek „nieobecne w źródle” dotyczy OBU klas: podręcznik 19.15 opisuje
+    naprawę mojibake i może legalnie cytować „Ã¤”; cytat alfabetu albo nazwa
+    przepisana 1:1 też nie jest usterką przekładu.
+    """
+    zarzuty: list[str] = []
+    w_zrodle = set(tlumacz_bramki.mojibake(src))
+    mb = [m for m in tlumacz_bramki.mojibake(tgt) if m not in w_zrodle]
+    if mb:
+        zarzuty.append(
+            f"your answer contains mojibake {mb[0]!r} (UTF-8 text decoded as "
+            f"cp1252) that the source does not have — write the real characters")
+    mieszane = tlumacz_bramki.nowe_slowa_mieszanego_pisma(src, tgt)
+    if mieszane:
+        zarzuty.append(
+            f"the word {mieszane[0]!r} mixes letters of two alphabets (e.g. a "
+            f"Cyrillic letter inside a Latin word) and the source has no such "
+            f"word — spell every word in one alphabet")
+    return zarzuty
+
+
+# Licznik pomiarowy powtórek (v19.20.0): klucz `<klasa>:<wynik>`, gdzie klasa to
+# powód odrzucenia próby 1 (`twarde` = parzystość/odcisk, `zarzuty` = preambuła,
+# rozdmuchanie, znaki), a wynik `naprawiona`/`nienaprawiona`. Drukowany
+# w podsumowaniu przebiegu — bez niego nie da się odpowiedzieć, czy druga próba
+# naprawia, czy tylko kosztuje.
+STATYSTYKA_POWTOREK: Counter = Counter()
+
+
 def wykryj_wyciek_preambuly(src: str, tgt: str) -> list[str]:
     """Preambuła zamiast przekładu → lista zarzutów (pusta = czysto).
 
@@ -1478,8 +1548,10 @@ def _tlumacz_pojedyncza_sekcje(
     # sekcja i preambuła zamiast przekładu. Wzorzec `previous_attempt_problems`
     # z braci od Poligloty i akcentów (lekcja v18.18: ślepa powtórka bywa gorsza
     # od pierwszej próby), przeniesiony na kanał, jaki ma builder docs —
-    # `prompt_dodatkowy`. Parzystość ⟦i⟧ i odcisk struktury zostają TWARDE bez
-    # powtórki, jak przed tym wydaniem.
+    # `prompt_dodatkowy`. Od v19.20.0 parzystość ⟦i⟧ i twardy odcisk struktury
+    # też dostają JEDNĄ powtórkę z liczbowym zarzutem (`zarzuty_twardych_bramek`),
+    # a mojibake i słowa z dwóch pism dołączyły do zarzutów (`zarzuty_znakow`);
+    # druga porażka każdej klasy nadal ubija sekcję. Licznik: STATYSTYKA_POWTOREK.
     # 19.8: sekcja przyjęta ręcznie (`--przyjmij-probe`) dla TEJ wersji źródła
     # wygrywa z API — patrz sekcja „ODRZUTY I SEKCJE PRZYJĘTE RĘCZNIE".
     ok_przyjetej, przyjeta = wczytaj_przyjeta(
@@ -1490,6 +1562,8 @@ def _tlumacz_pojedyncza_sekcje(
         return True, przyjeta
 
     zarzuty: list[str] = []
+    # Powód odrzucenia próby 1 — klucz licznika `STATYSTYKA_POWTOREK`.
+    klasa_proby1 = ""
     # Próby, które doszły do etapu zarzutów (twarde bramki przeszły) — przy
     # ubiciu sekcji lądują w `skrypty/` zamiast przepadać.
     proby_odrzucone: list[dict] = []
@@ -1587,11 +1661,18 @@ def _tlumacz_pojedyncza_sekcje(
         tekst_wy = wynik.tekst.lstrip()
         ok, problemy = sprawdz_parzystosc(tresc_tok, tekst_wy)
         if not ok:
-            print(f"❌  {kod}/{nazwa_pliku}{sufiks}: BROKEN parity of ⟦i⟧ markers.")
+            ikona = "⚠️ " if proba == 1 else "❌"
+            print(f"{ikona}  {kod}/{nazwa_pliku}{sufiks}: BROKEN parity of ⟦i⟧ markers.")
             for diag in problemy[:10]:
                 print(f"     {diag}")
             if len(problemy) > 10:
                 print(f"     ... (+{len(problemy) - 10} more)")
+            if proba == 1:
+                # v19.20.0: jedna powtórka z liczbowym zarzutem zamiast ubicia.
+                zarzuty = zarzuty_twardych_bramek(tresc_tok, tekst_wy)
+                klasa_proby1 = "twarde"
+                continue
+            STATYSTYKA_POWTOREK[f"{klasa_proby1}:nienaprawiona"] += 1
             _zachowaj_proby()
             return False, None
 
@@ -1605,10 +1686,16 @@ def _tlumacz_pojedyncza_sekcje(
         # niemiecki są legalne.
         twarde, miekkie = tlumacz_bramki.waliduj_odcisk(tresc_tok, tekst_wy)
         if twarde:
-            print(f"❌  {kod}/{nazwa_pliku}{sufiks}: BROKEN structural fingerprint "
+            ikona = "⚠️ " if proba == 1 else "❌"
+            print(f"{ikona}  {kod}/{nazwa_pliku}{sufiks}: BROKEN structural fingerprint "
                   f"(the model may have executed the text instead of translating it).")
             for diag in twarde:
                 print(f"     {diag}")
+            if proba == 1:
+                zarzuty = zarzuty_twardych_bramek(tresc_tok, tekst_wy)
+                klasa_proby1 = "twarde"
+                continue
+            STATYSTYKA_POWTOREK[f"{klasa_proby1}:nienaprawiona"] += 1
             _zachowaj_proby()
             return False, None
         if miekkie:
@@ -1625,13 +1712,18 @@ def _tlumacz_pojedyncza_sekcje(
                 f"({len(tresc_tok)} -> {len(tekst_wy)} characters), above the "
                 f"{prog:.2f}x limit — a section that long carries "
                 f"material the source does not have")
+        zarzuty.extend(zarzuty_znakow(tresc_tok, tekst_wy))
         if not zarzuty:
+            if proba == 2:
+                STATYSTYKA_POWTOREK[f"{klasa_proby1}:naprawiona"] += 1
             # Audyt 19.8: odrzut z WCZEŚNIEJSZEGO przebiegu nie ma prawa przeżyć
             # sukcesu — jego odcisk źródła wciąż pasuje, więc `--przyjmij-probe`
             # podmieniłby dobry przekład starym, rozdmuchanym.
             for n in (1, 2):
                 sciezka_odrzutu(kod, rdzen, klucz_sekcji, n).unlink(missing_ok=True)
             return True, detokenizuj(tekst_wy, mapa)
+        if proba == 1:
+            klasa_proby1 = "zarzuty"
         proby_odrzucone.append({"proba": proba, "zarzuty": list(zarzuty),
                                 "iloraz": iloraz,
                                 "tekst": detokenizuj(tekst_wy, mapa)})
@@ -1643,6 +1735,7 @@ def _tlumacz_pojedyncza_sekcje(
 
     print(f"❌  {kod}/{nazwa_pliku}{sufiks}: still rejected after the retry — "
           f"NOT saving this section.")
+    STATYSTYKA_POWTOREK[f"{klasa_proby1}:nienaprawiona"] += 1
     _zachowaj_proby()
     return False, None
 
@@ -2763,6 +2856,9 @@ def main() -> int:
 
     print("\n========== SUMMARY ==========")
     print(f"✅ Success: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
+    if STATYSTYKA_POWTOREK:
+        print("Retries (cause of attempt 1 → outcome): " + ", ".join(
+            f"{k} ×{v}" for k, v in sorted(STATYSTYKA_POWTOREK.items())))
     if porazki:
         print(f"❌ Failures (≥1 template failed): {', '.join(porazki)}")
         return 1
