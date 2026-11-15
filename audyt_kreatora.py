@@ -24,7 +24,7 @@ znaczy „tekst dla użytkownika opisuje coś, czego nie ma", a taki stan nie ma
 dopuszczalnej postaci. Naprawą jest zdanie w szablonie albo interpolacja
 z kodu, nie negocjacja.
 
-OSIEM KLAS:
+DZIEWIĘĆ KLAS (dziewiąta od v19.20.0):
 
   * ``render-blad``          — `zbuduj_wynik(typ)` rzuca wyjątkiem. Klasa
     pierwsza, bo unieruchamia cały typ w GUI: najczęstsza przyczyna to
@@ -46,6 +46,11 @@ OSIEM KLAS:
     który silnik zna.
   * ``sciezka-nieznana``     — konkretna ścieżka `dictionaries/...` (bez
     placeholderów i bez pliku, który dopiero ma powstać) nie istnieje.
+  * ``kontrola-bez-sondy``   — gałąź odrzucenia w kontroli loadera, którą tekst
+    kreatora opisuje (rejestr :data:`KONTROLE_Z_SONDAMI`), nie jest osiągana
+    przez żadną sondę. Osiem klas wyżej pyta, czy opis jest PRAWDZIWY; ta —
+    czy jest KOMPLETNY. Bez niej nowa kontrola w silniku zostawiała tekst
+    prawdziwy, ale niepełny, a agent pisał plik, który silnik pomija.
 
 SONDA. Teksty są f-stringami parametryzowanymi przez id, etykietę, ISO i kod
 paczki bazowej, więc bramka renderuje je dla ustalonej sondy: id `zzsonda`,
@@ -298,11 +303,75 @@ def _sprawdz_szablon(typ: str, pakiet: dict, zglos) -> None:
                   f"default or skip the file")
 
 
+# ---------------------------------------------------------------------------
+# Klasa 9: kontrola-bez-sondy (v19.20.0, dług 19.7.0)
+# ---------------------------------------------------------------------------
+# Kontrola loadera, którą tekst kreatora OPISUJE, ma w `manager_regul_szablony`
+# krotkę sond `(wejście, opis)`; opis trafia do promptu tylko wtedy, gdy kontrola
+# naprawdę odrzuca sondę. To pilnuje PRAWDZIWOŚCI opisu, nie KOMPLETNOŚCI:
+# nowa gałąź odrzucenia dopisana w loaderze bez sondy zostawia tekst prawdziwy,
+# ale niepełny — dokładnie stan sprzed audytu v19.7.0 („it MUST contain a
+# capturing group”, gdy silnik odrzucał pięć kształtów).
+#
+# Sonda per kontrola: AST funkcji kontroli wylicza jej gałęzie `return <werdykt>`
+# (stały napis albo f-string — liczy się jego literalny początek), a każda
+# gałąź musi zostać wywołana przez co najmniej jedną sondę. Nowa kontrola
+# opisana w kreatorze = nowy wiersz tego rejestru.
+KONTROLE_Z_SONDAMI: tuple[tuple[str, str, str], ...] = (
+    # (moduł.funkcja kontroli, moduł.krotka sond, typ kreatora, który ją opisuje)
+    ("przepisy_rezysera._blad_wzorca_rozdzialow",
+     "manager_regul_szablony._SONDY_WZORCA", mrs.TYP_POSTPRODUKCJA),
+)
+
+
+def _galezie_werdyktu(funkcja) -> list[str]:
+    """Literalne początki niepustych werdyktów `return` funkcji kontroli."""
+    import ast
+    import inspect
+    import textwrap
+    drzewo = ast.parse(textwrap.dedent(inspect.getsource(funkcja)))
+    galezie: list[str] = []
+    for wezel in ast.walk(drzewo):
+        if not isinstance(wezel, ast.Return) or wezel.value is None:
+            continue
+        v = wezel.value
+        if isinstance(v, ast.Constant) and isinstance(v.value, str):
+            poczatek = v.value
+        elif isinstance(v, ast.JoinedStr) and v.values and isinstance(
+                v.values[0], ast.Constant):
+            poczatek = str(v.values[0].value)
+        else:
+            continue
+        if poczatek and poczatek not in galezie:
+            galezie.append(poczatek)
+    return galezie
+
+
+def _obiekt(sciezka: str):
+    modul, _, nazwa = sciezka.rpartition(".")
+    return getattr(importlib.import_module(modul), nazwa)
+
+
+def sprawdz_kontrole(zglos_typ) -> None:
+    """Każda gałąź odrzucenia kontroli musi mieć sondę (patrz komentarz wyżej)."""
+    for sciezka_kontroli, sciezka_sond, typ in KONTROLE_Z_SONDAMI:
+        kontrola, sondy = _obiekt(sciezka_kontroli), _obiekt(sciezka_sond)
+        werdykty = [kontrola(wejscie) for wejscie, _opis in sondy]
+        for galaz in _galezie_werdyktu(kontrola):
+            if not any(w.startswith(galaz) for w in werdykty):
+                zglos_typ(typ, "kontrola-bez-sondy",
+                          f"`{sciezka_kontroli}` rejects with {galaz!r}, but no "
+                          f"probe in `{sciezka_sond}` reaches that branch — the "
+                          f"creator text is silent about this rejection")
+
+
 def zbierz() -> dict[str, list[str]]:
     """Trafienia jako `{"<typ>": ["<klasa>|<szczegol>", …]}` — kanon raportu."""
     _NOTY_DEGRADACJI.clear()
     znaleziska: list[Znalezisko] = []
     pliki_paczki = _pliki_paczki_referencyjnej()
+    sprawdz_kontrole(lambda typ, klasa, szczegol: znaleziska.append(
+        Znalezisko(typ, klasa, szczegol)))
 
     for typ in mrs.LISTA_TYPOW:
         def zglos(klasa: str, szczegol: str, _typ: str = typ) -> None:

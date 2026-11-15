@@ -188,7 +188,7 @@ reach X on the paths this project uses.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are 60 regression test files (1201 tests, **about a minute for all of them**) and
+There are 61 regression test files (1254 tests, **about a minute for all of them**) and
 nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
 (`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
 Running every one of them after every small edit is not thoroughness — a green
@@ -228,11 +228,13 @@ Two facts decide what that means, and both are easy to get backwards:
 | `build_release.py`, `patch_dev.json`, `installer.iss` | `pytest test_patch_dev.py test_sprzatanie_bundla.py` |
 | `.github/scripts/issue_intake_sami.py` | `pytest test_intake_zalaczniki.py` |
 | any `.github/workflows/*.yml` with `python-version:`, or `audyt_zaleznosci.PYTHON_PRZETESTOWANY` | `pytest test_python_ci.py` — every workflow pins EXACTLY the tested patch (a bare `'3.14'` installs the newest one); bump the constant and the workflows in one commit |
-| a `buduj_wielojezyczne_*.py` / `tlumacz_*.py` | `pytest test_cache_powtorki.py test_zrodlo_pl_raz.py test_openrouter.py test_audyt_pism.py` |
+| a `buduj_wielojezyczne_*.py` / `tlumacz_*.py` / `przeglad_tlumaczen.py` | `pytest test_cache_powtorki.py test_zrodlo_pl_raz.py test_openrouter.py test_audyt_pism.py test_docs_powtorka_bramek.py test_dryf_draftow.py test_skan_leakow_draftow.py test_tryby_narzedzia.py` |
+| `rezyser_ai.py`, `opowiesci_ai.py`, `core_zastepcze.py`, or a recipe / tale prompt in `dictionaries/**/rezyser/` or `dictionaries/**/opowiesci/` | `pytest test_pola_schematu_w_prompcie.py test_burza_schemat.py` — every field of a structured-output schema must be named in the prompt that ships with it |
+| `manager_regul_kontrakt.py` | `pytest test_manager_kontrakt.py` |
 | any `dictionaries/**/gui/dokumentacja/*.yaml` or `gui/ui.yaml` | `generuj_dokumentacje.py --waliduj` **and** `audyt_leakow.py --bramka` + `audyt_pism.py --bramka` |
 | any other `dictionaries/**` (engine data: accents, ciphers, modes, tales) | `audyt_podstaw.py --bramka` + `audyt_ciszy.py --bramka` + `audyt_pism.py --bramka` |
 | a new or renamed `.py` in the repo root | `audyt_leakow.py --bramka-py` (the build is otherwise the first place this fires) |
-| `manager_regul_szablony.py` (creator templates and prompts) | `audyt_kreatora.py --bramka` — the texts must not describe an engine that does not exist |
+| `manager_regul_szablony.py` (creator templates and prompts), or a loader check the creator describes | `audyt_kreatora.py --bramka` + `pytest test_audyt_kreatora.py` — the texts must not describe an engine that does not exist, and every rejection branch of a described check needs a probe (`KONTROLE_Z_SONDAMI`) |
 | a new `test_*.py` | `pytest test_kanon_testow.py` (checks how every test file runs, not what it tests — and that the counts above still match, via `przelicznik_testow.py`) |
 | `requirements.txt`, or before any freeze | `audyt_zaleznosci.py` (the build runs it too, and stops on a hit unless you pass `--no-strict`) |
 

@@ -202,5 +202,40 @@ def test_szablon_trybu_cytuje_pelne_zbiory_wartosci():
 # więc `pytest.skip` wywracał mu cały przebieg, a fixture i `parametrize` były
 # dla niego niewidzialne.
 
+def test_galezie_kontroli_wzorca_ida_z_ast():
+    import przepisy_rezysera as pr
+    assert sorted(ak._galezie_werdyktu(pr._blad_wzorca_rozdzialow)) == sorted([
+        "len=0", "re.error: ", "groups=", "match('') ≠ None"])
+
+
+def test_lapie_kontrole_bez_sondy(monkeypatch):
+    """v19.20.0: usunięcie sondy = tekst kreatora milczy o jednym odrzuceniu.
+
+    Granulacja to GAŁĄŹ `return`, nie kształt wejścia: `groups=` obsługuje
+    i zero, i dwie grupy, więc zdjęcie jednej z tych sond nic nie odsłania.
+    Pusty wzorzec ma gałąź tylko dla siebie.
+    """
+    bez_pustego = tuple(s for s in mrs._SONDY_WZORCA if s[0] != "")
+    assert len(bez_pustego) == len(mrs._SONDY_WZORCA) - 1
+    monkeypatch.setattr(mrs, "_SONDY_WZORCA", bez_pustego)
+    trafienia = ak.zbierz().get(mrs.TYP_POSTPRODUKCJA, [])
+    assert any(t.startswith("kontrola-bez-sondy|") and "'len=0'" in t
+               for t in trafienia), trafienia
+
+
+def test_lapie_nowa_galaz_kontroli(monkeypatch):
+    """Nowa gałąź w loaderze bez sondy — dokładnie stan sprzed audytu v19.7.0."""
+    import przepisy_rezysera as pr
+    stara = pr._blad_wzorca_rozdzialow
+
+    def kontrola(wzor):
+        if wzor.startswith("^"):
+            return "anchor"
+        return stara(wzor)
+    monkeypatch.setattr(pr, "_blad_wzorca_rozdzialow", kontrola)
+    trafienia = ak.zbierz().get(mrs.TYP_POSTPRODUKCJA, [])
+    assert any("'anchor'" in t for t in trafienia), trafienia
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))
