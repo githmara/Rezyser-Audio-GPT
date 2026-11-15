@@ -181,7 +181,7 @@ reach X on the paths this project uses.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are 57 regression test files (1181 tests, **about a minute for all of them**) and
+There are 58 regression test files (1189 tests, **about a minute for all of them**) and
 nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
 (`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
 Running every one of them after every small edit is not thoroughness — a green
@@ -247,7 +247,9 @@ Under pytest a test function's **return value is ignored**. A function that ends
 checks is broken — and the summary line counts it among the passes. `test_core_updater.py`
 carried four such functions until 19.2.1 (a leftover from when it was a standalone script
 with its own bool-summing harness). Pytest 9 reports this as
-`PytestReturnNotNoneWarning`; treat that warning as a failure. Use `assert`, and for a
+`PytestReturnNotNoneWarning`; since 19.20 `test_kanon_testow.py` turns it into a real
+failure (an AST check: a `test*` function or method that returns a value; a bare `return`
+for an early exit is fine). Use `assert`, and for a
 check that needs the network use `pytest.skip()` on a connection error rather than letting
 it report green — a skip is visible in the summary, a false pass is not.
 

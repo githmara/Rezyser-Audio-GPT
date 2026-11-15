@@ -83,6 +83,44 @@ def sumuje_wyniki_sam(tekst: str) -> bool:
     return False
 
 
+def _returny_wlasne(funkcja: ast.FunctionDef | ast.AsyncFunctionDef) -> list[ast.Return]:
+    """`return` należące do TEJ funkcji — bez zagnieżdżonych def/lambda/klas."""
+    wynik: list[ast.Return] = []
+    stos = list(funkcja.body)
+    while stos:
+        wezel = stos.pop()
+        if isinstance(wezel, (ast.FunctionDef, ast.AsyncFunctionDef,
+                              ast.Lambda, ast.ClassDef)):
+            continue
+        if isinstance(wezel, ast.Return):
+            wynik.append(wezel)
+        stos.extend(ast.iter_child_nodes(wezel))
+    return wynik
+
+
+def zwracajace_wartosc(tekst: str) -> list[str]:
+    """Funkcje `test_*` (także metody klas `Test*`), które zwracają WARTOŚĆ.
+
+    Bramka v19.20.0 (dług z 19.2.1). Pytest ignoruje wartość zwróconą przez
+    test i tylko ostrzega (`PytestReturnNotNoneWarning`) — więc test pisany
+    w stylu „zwróć wynik porównania” zamiast `assert` jest ZIELONY zawsze.
+    Ostrzeżenie ginie w podsumowaniu; ta bramka nie. Goły `return` i
+    `return None` są legalne (wczesne wyjście).
+    """
+    trafienia: list[str] = []
+    for wezel in ast.walk(ast.parse(tekst)):
+        if not (isinstance(wezel, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and wezel.name.startswith("test")):
+            continue
+        for ret in _returny_wlasne(wezel):
+            if ret.value is None:
+                continue
+            if isinstance(ret.value, ast.Constant) and ret.value.value is None:
+                continue
+            trafienia.append(f"{wezel.name}:{ret.lineno}")
+    return trafienia
+
+
 # ---------------------------------------------------------------------------
 # 1. Kanon na realnym repo
 # ---------------------------------------------------------------------------
@@ -110,6 +148,14 @@ def test_zaden_plik_nie_sumuje_wynikow_sam():
               if sumuje_wyniki_sam(p.read_text(encoding="utf-8"))]
     assert not wlasne, (
         "własny harness sumujący wyniki wrócił do: " + ", ".join(wlasne))
+
+
+def test_zaden_test_nie_zwraca_wartosci():
+    """Wartość zwrócona z testu jest dla pytesta niema — zamień ją na `assert`."""
+    trafienia = [f"{p.name}::{t}" for p in _pliki_testowe()
+                 for t in zwracajace_wartosc(p.read_text(encoding="utf-8"))]
+    assert not trafienia, (
+        "te testy zwracają wartość zamiast ją asertować: " + ", ".join(trafienia))
 
 
 # ---------------------------------------------------------------------------
@@ -153,6 +199,18 @@ def test_detektor_akceptuje_kanon():
 def test_wolanie_pytesta_poza_blokiem_nie_liczy_sie():
     """`pytest.main` w ciele modułu odpaliłby się też pod pytestem — to nie kanon."""
     assert not deleguje_do_pytesta(_POZA_BLOKIEM)
+
+
+def test_detektor_returnu_lapie_wartosc_i_puszcza_wczesne_wyjscie():
+    zly = "def test_a():\n    return 1 == 1\n\nclass TestK:\n    def test_b(self):\n        return x\n"
+    assert zwracajace_wartosc(zly) == ["test_a:2", "test_b:6"]
+    dobry = (
+        "def test_a():\n    if warunek:\n        return\n    assert True\n\n"
+        "def test_b():\n    return None\n\n"
+        "def test_c():\n    def pomoc():\n        return 5\n    assert pomoc() == 5\n\n"
+        "def _pomocnik():\n    return 3\n"
+    )
+    assert zwracajace_wartosc(dobry) == []
 
 
 def test_zrodlo_kanonu_przechodzi_mimo_wlasnego_printu():

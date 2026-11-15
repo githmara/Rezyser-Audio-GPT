@@ -1814,8 +1814,9 @@ def _zbierz_leaki_draftow(
     Zwraca ``{(kod, plik): {sekcja: [Leak]}}`` (tylko pliki z leakami) do
     doklejenia jako appendix checklisty przeglądu (`przeglad_tlumaczen`).
     Detektor budujemy raz na język (ładowanie modeli lingua jest drogie) i
-    reużywamy między plikami. Fail-open — błąd skanu (np. brak `lingua`) NIE
-    wywraca buildu draftów; appendix to wygoda dla recenzenta, nie część krytyczna.
+    reużywamy między plikami. Fail-open TYLKO dla błędu środowiska lub danych
+    (`tlumacz_rdzen.bledy_skanu_dopuszczalne`); błąd kodu skanera leci głośno
+    (v19.20.0) — drafty są już zapisane, przepada tylko appendix.
 
     NAPRAWA v18.30.0: wołaliśmy tu `audyt_leakow._zbuduj_detektor`, a ta funkcja
     nazywa się `detektor_dla` od v18.26.1. Fail-open zamieniał `AttributeError`
@@ -1834,8 +1835,8 @@ def _zbierz_leaki_draftow(
                 detektor = audyt_leakow.detektor_dla(kod)
                 detektory[kod] = detektor
             per_sekcja = audyt_leakow.leaki_per_sekcja(kod, nazwa_pliku, detektor)
-        except Exception as exc:   # lingua brak / błąd modelu — nie wywracaj buildu
-            print(f"⚠️  audyt_leakow skipped for {kod}/{nazwa_pliku}: {exc}")
+        except Exception as exc:  # noqa: BLE001 — rozdział w zglos_blad_skanu
+            tlumacz_rdzen.zglos_blad_skanu(exc, kod, nazwa_pliku)
             continue
         if per_sekcja:
             wynik[(kod, nazwa_pliku)] = per_sekcja

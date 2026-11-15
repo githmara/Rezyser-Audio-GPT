@@ -1229,6 +1229,34 @@ def wczytaj_orakuly(
 # ---------------------------------------------------------------------------
 # POST-PROCESSOR: skan PL-leaków na świeżych draftach
 # ---------------------------------------------------------------------------
+def bledy_skanu_dopuszczalne() -> tuple[type[BaseException], ...]:
+    """Wyjątki, przy których skan leaków na draftach wolno POMINĄĆ (fail-open).
+
+    Tylko środowisko i dane: brak modułu, nieczytelny plik, złe kodowanie,
+    zepsuty YAML draftu. Brak samej `lingua` w ogóle tu nie trafia —
+    `audyt_leakow.detektor_dla` zwraca wtedy `None` i ostrzega sam.
+
+    Wszystko inne (`AttributeError`, `TypeError`, `NameError`, …) to błąd
+    KODU skanera i idzie głośno w górę (v19.20.0). Do 19.19 łapaliśmy
+    `Exception` i tak przez trzy wydania (18.27–18.29) ukrywał się martwy
+    `_zbuduj_detektor`: checklista meldowała „0 kandydatów” dla każdego draftu.
+    Drafty są już wtedy zapisane na dysku — przepada tylko appendix checklisty.
+    """
+    import yaml  # pyyaml — tego używa audyt_leakow do czytania draftów
+    return (ImportError, OSError, UnicodeDecodeError, yaml.YAMLError)
+
+
+def zglos_blad_skanu(exc: BaseException, kod: str, nazwa_pliku: str) -> None:
+    """Fail-open dla błędu środowiska, `raise` dla błędu kodu (patrz wyżej)."""
+    if isinstance(exc, bledy_skanu_dopuszczalne()):
+        print(f"⚠️  audyt_leakow skipped for {kod}/{nazwa_pliku}: {exc}")
+        return
+    print(f"❌ audyt_leakow crashed on {kod}/{nazwa_pliku} with "
+          f"{type(exc).__name__} — a bug in the scanner code, not in the draft. "
+          f"Drafts are saved; the review checklist was NOT written.")
+    raise exc
+
+
 def zbierz_leaki(
     wytworzone: dict[tuple[str, str], list[Jednostka]],
     kotwice_per_plik: dict[tuple[str, str], list[str]],
@@ -1238,13 +1266,13 @@ def zbierz_leaki(
     Kotwice MASKUJEMY przed skanem: `[STRESZCZENIE POPRZEDNICH WYDARZEŃ]` czy
     `[ODRZUCENIE_AI]` to celowo polskie literały zamrożone w każdej paczce —
     bez maskowania zalałyby raport fałszywymi trafieniami i recenzent przestałby
-    go czytać. Fail-open: brak `lingua` nie wywraca buildu.
+    go czytać. Fail-open tylko dla błędu środowiska (`bledy_skanu_dopuszczalne`).
 
     NAPRAWA v18.30.0: wołaliśmy `audyt_leakow._zbuduj_detektor`, a ta funkcja
     nazywa się `detektor_dla` od v18.26.1 — fail-open zamieniał `AttributeError`
     w jedno ostrzeżenie, po którym checklista meldowała „0 kandydatów na leak"
     dla KAŻDEGO draftu wszystkich pięciu braci. Bliźniacza wpadka siedziała
-    w `buduj_wielojezyczne_docs._skanuj_leaki_draftow`.
+    w `buduj_wielojezyczne_docs._zbierz_leaki_draftow`.
     """
     import audyt_leakow
     wynik: dict[tuple[str, str], dict] = {}
@@ -1263,8 +1291,8 @@ def zbierz_leaki(
                 leaki = audyt_leakow.wykryj_leaki_w_tekscie(tekst, kod, detektor)
                 if leaki:
                     per_sekcja[j.opis()] = leaki
-        except Exception as exc:  # noqa: BLE001 — appendix to wygoda, nie bramka
-            print(f"⚠️  audyt_leakow skipped for {kod}/{nazwa_pliku}: {exc}")
+        except Exception as exc:  # noqa: BLE001 — rozdział w zglos_blad_skanu
+            zglos_blad_skanu(exc, kod, nazwa_pliku)
             continue
         if per_sekcja:
             wynik[(kod, nazwa_pliku)] = per_sekcja
