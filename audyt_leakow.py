@@ -1068,6 +1068,9 @@ DEV_TOOLE = {
     # v19.16: bramka słów mieszanego pisma w paczkach. Ta sama klasa co
     # `audyt_ciszy.py` — wołana wyłącznie ze źródła i z `build_release`.
     "audyt_pism.py",
+    # v19.20.0: tabela „co ruszyłeś → co uruchomić” i diagnoza ostrzeżeń
+    # PyInstallera. Wołane ze źródła i z `build_release`; do bundla nie wchodzą.
+    "co_uruchomic.py", "diagnoza_importow.py",
 }
 
 # `jezyki_lingua.py` CELOWO NIE JEST na liście wyżej i to jest decyzja, nie

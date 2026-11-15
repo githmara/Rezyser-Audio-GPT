@@ -792,12 +792,22 @@ def buduj_pyinstaller() -> Path:
         sys.exit(1)
 
     print("🔨 Freezing the app with PyInstaller (onedir, windowed)...")
+    # v19.20.0: log idzie i na terminal, i do `build/pyinstaller_log.txt` —
+    # `Hidden import … not found` żyło dotąd tylko w przewiniętym terminalu,
+    # a `diagnoza_importow.raport_buildu` czyta właśnie ten plik.
+    plik_logu = Path(__file__).parent / "build" / "pyinstaller_log.txt"
     try:
-        subprocess.run(
-            [sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean",
-             "--log-level=WARN", str(spec)],
-            check=True,
-        )
+        plik_logu.parent.mkdir(parents=True, exist_ok=True)
+        with open(plik_logu, "w", encoding="utf-8") as log, subprocess.Popen(
+                [sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean",
+                 "--log-level=WARN", str(spec)],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                encoding="utf-8", errors="replace") as proc:
+            for linia in proc.stdout:
+                sys.stdout.write(linia)
+                log.write(linia)
+        if proc.returncode:
+            raise subprocess.CalledProcessError(proc.returncode, proc.args)
     except subprocess.CalledProcessError:
         print("❌ FATAL: PyInstaller returned a non-zero exit code. Build aborted.")
         print("Tip: run it manually for the full log:")
@@ -814,7 +824,13 @@ def buduj_pyinstaller() -> Path:
         print(f"❌ FATAL: PyInstaller finished but '{exe.name}' is missing in {dist_dir}.")
         print("Check the spec's EXE/COLLECT `name` matches NAZWA_DIST in build_release.py.")
         sys.exit(1)
-    print(f"✅ PyInstaller build complete: {dist_dir}\n")
+    print(f"✅ PyInstaller build complete: {dist_dir}")
+    # Ostrzeżenia o NASZYM kodzie spoza listy znanych — raport, nie blokada:
+    # bundel powstał, a decyzję (wpis do `ZNANE` z powodem albo poprawka)
+    # podejmuje człowiek.
+    import diagnoza_importow
+    diagnoza_importow.raport_buildu(log=plik_logu)
+    print()
     return dist_dir
 
 
