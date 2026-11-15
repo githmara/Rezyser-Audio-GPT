@@ -947,6 +947,15 @@ poliglota:
   skan_zgoda_linia_znieksztalcone: '– með brengluðum texta (letur skráarinnar gefur ekki upp hvaða stafir þetta eru): {lista_stron}'
   pdf_strony_naprawione: 'Á þessum síðum var texti PDF-skjalsins brenglaður, því forritið endurgerði stafina út frá letrinu sem er fellt inn í skrána: {lista_stron}. Einstakir stafir geta verið frábrugðnir útprentuninni.'
   pdf_strony_przekodowane: 'Á þessum síðum var textinn í PDF-skjalinu með rangri stafakóðun (í stað bókstafa birtust tilviljanakenndir stafir með áherslumerkjum), þannig að forritið umkóðaði hann ({kodowanie}): {lista_stron}.'
+  zastepcze_zgoda_tytul: Endurheimta stafi sem var skipt út fyrir táknið ■?
+  zastepcze_zgoda_tresc: "Í skránni {nazwa_pliku} setti forritið sem bjó hana til táknið ■ í stað sumra stafa – yfirleitt stafa með stafmerkjum eða annarra stafa utan grunnstafasettsins. Þetta á við um {liczba_slow} mismunandi orð, til dæmis: {przyklady}.\n\nÉg get endurheimt þessa stafi með gervigreindarlíkani ({model}). Aðeins þessi orð verða send til ytri þjónustu ({usluga}), hvert með stuttum textabút í kringum sig. Líkanið má aðeins breyta stöðum sem eru merktir með ■ og orð sem það getur ekki endurheimt með vissu verða óbreytt.\n\nÁætlaður kostnaður: {koszt}.\n\nEf þú velur „Sleppa“ verða táknin ■ áfram í textanum og skjálesarinn les þau sem tákn."
+  zastepcze_zgoda_btn_tak: '&Endurheimta stafi'
+  zastepcze_zgoda_btn_nie: '&Sleppa'
+  zastepcze_postep_tytul: Endurheimt stafa
+  zastepcze_postep_tresc: Endurheimti stafi í {liczba_slow} orðum…
+  zastepcze_wynik_tytul: 'Endurheimt stafa: niðurstaða'
+  zastepcze_wynik_tresc: Stafir voru endurheimtir í {liczba_odtworzonych} af {liczba_slow} mismunandi orðum. Önnur orð eru áfram með tákninu ■.
+  zastepcze_blad_tresc: "Ekki tókst að endurheimta stafi: {tresc_bledu}\n\nSkráin var opnuð óbreytt, með táknunum ■."
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)

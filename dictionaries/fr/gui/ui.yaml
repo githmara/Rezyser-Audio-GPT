@@ -945,6 +945,15 @@ poliglota:
   skan_zgoda_linia_znieksztalcone: "– avec un texte déformé (la police du fichier n'indique pas de quelles lettres il s'agit) : {lista_stron}"
   pdf_strony_naprawione: 'Sur ces pages, le texte enregistré dans le PDF était déformé ; le programme a donc reconstitué les lettres à partir de la police intégrée au fichier : {lista_stron}. Certains caractères peuvent différer de la version imprimée.'
   pdf_strony_przekodowane: "Sur ces pages, le texte enregistré dans le PDF avait un encodage de caractères incorrect (à la place des lettres, on voyait des caractères accentués aléatoires), c'est pourquoi le programme l'a réencodé ({kodowanie}) : {lista_stron}."
+  zastepcze_zgoda_tytul: Reconstituer les lettres remplacées par le caractère ■ ?
+  zastepcze_zgoda_tresc: "Dans le fichier {nazwa_pliku}, le programme qui l'a créé a inséré le caractère ■ à la place de certaines lettres – généralement des lettres accentuées ou d'autres lettres hors du jeu de caractères de base. Cela concerne {liczba_slow} mots différents, par exemple : {przyklady}.\n\nJe peux reconstituer ces lettres à l'aide d'un modèle d'IA ({model}). Seuls ces mots seront envoyés au service externe ({usluga}), chacun accompagné d'un court extrait de texte l'entourant. Le modèle ne peut modifier que les emplacements marqués par le caractère ■, et un mot qu'il ne parvient pas à reconstituer avec certitude restera inchangé.\n\nCoût estimé : {koszt}.\n\nSi vous choisissez « Ignorer », les caractères ■ resteront dans le texte et le lecteur d'écran les lira comme un symbole."
+  zastepcze_zgoda_btn_tak: '&Reconstituer les lettres'
+  zastepcze_zgoda_btn_nie: '&Ignorer'
+  zastepcze_postep_tytul: Reconstitution des lettres
+  zastepcze_postep_tresc: Reconstitution des lettres dans {liczba_slow} mots…
+  zastepcze_wynik_tytul: 'Reconstitution des lettres : résultat'
+  zastepcze_wynik_tresc: Lettres reconstituées dans {liczba_odtworzonych} mots sur {liczba_slow}. Les autres mots ont conservé le caractère ■.
+  zastepcze_blad_tresc: "Impossible de reconstituer les lettres : {tresc_bledu}\n\nLe fichier a été chargé sans modification, avec les caractères ■."
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)

@@ -1031,6 +1031,15 @@ poliglota:
   skan_zgoda_linia_znieksztalcone: "– with garbled text (the file's font does not say which letters they are): {lista_stron}"
   pdf_strony_naprawione: 'On these pages the text stored in the PDF was garbled, so the program reconstructed the letters from the font embedded in the file: {lista_stron}. Individual characters may differ from the printed version.'
   pdf_strony_przekodowane: 'On these pages, the text stored in the PDF had the wrong character encoding (random accented characters appeared instead of letters), so the program re-encoded it ({kodowanie}): {lista_stron}.'
+  zastepcze_zgoda_tytul: Restore the letters replaced by the ■ character?
+  zastepcze_zgoda_tresc: "In {nazwa_pliku}, the program that created it inserted a ■ character in place of some letters, usually accented letters or others outside the basic character set. This affects {liczba_slow} different words, for example: {przyklady}.\n\nI can restore these letters using an AI model ({model}). Only those words will be sent to the external service ({usluga}), each with a short snippet of text around it. The model may change only the places marked with ■, and any word it cannot restore with confidence will be left unchanged.\n\nEstimated cost: {koszt}.\n\nIf you choose \"Skip\", the ■ characters will stay in the text, and the screen reader will read them as a symbol."
+  zastepcze_zgoda_btn_tak: '&Restore letters'
+  zastepcze_zgoda_btn_nie: '&Skip'
+  zastepcze_postep_tytul: Restoring letters
+  zastepcze_postep_tresc: Restoring letters in {liczba_slow} words…
+  zastepcze_wynik_tytul: 'Restoring letters: result'
+  zastepcze_wynik_tresc: Restored letters in {liczba_odtworzonych} of {liczba_slow} different words. The remaining words were left with the ■ character.
+  zastepcze_blad_tresc: "Could not restore the letters: {tresc_bledu}\n\nThe file was loaded unchanged, with ■ characters."
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)

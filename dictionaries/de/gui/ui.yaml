@@ -947,6 +947,15 @@ poliglota:
   skan_zgoda_linia_znieksztalcone: '– mit verzerrtem Text (die Schriftart der Datei verrät nicht, um welche Buchstaben es sich handelt): {lista_stron}'
   pdf_strony_naprawione: 'Auf diesen Seiten war der im PDF gespeicherte Text verzerrt, daher hat das Programm die Buchstaben anhand der in der Datei eingebetteten Schriftart rekonstruiert: {lista_stron}. Einzelne Zeichen können vom Ausdruck abweichen.'
   pdf_strony_przekodowane: 'Auf diesen Seiten war der im PDF gespeicherte Text falsch kodiert (statt Buchstaben erschienen zufällige Zeichen mit Akzenten), daher hat das Programm ihn neu kodiert ({kodowanie}): {lista_stron}.'
+  zastepcze_zgoda_tytul: Durch ■ ersetzte Buchstaben wiederherstellen?
+  zastepcze_zgoda_tresc: "In der Datei {nazwa_pliku} hat das Programm, das sie erstellt hat, bei einigen Buchstaben das Zeichen ■ eingesetzt – meist bei Buchstaben mit diakritischen Zeichen oder anderen Buchstaben außerhalb des Basiszeichensatzes. Das betrifft {liczba_slow} verschiedene Wörter, zum Beispiel: {przyklady}.\n\nIch kann diese Buchstaben mit einem KI-Modell ({model}) wiederherstellen. An den externen Dienst ({usluga}) werden nur diese Wörter gesendet, jeweils mit einem kurzen Textausschnitt drumherum. Das Modell darf ausschließlich die mit ■ markierten Stellen ändern; ein Wort, das es nicht sicher wiederherstellen kann, bleibt unverändert.\n\nGeschätzte Kosten: {koszt}.\n\nWenn Sie „Überspringen“ wählen, bleiben die ■-Zeichen im Text erhalten, und der Screenreader liest sie als Symbol vor."
+  zastepcze_zgoda_btn_tak: Buchstaben &wiederherstellen
+  zastepcze_zgoda_btn_nie: '&Überspringen'
+  zastepcze_postep_tytul: Buchstaben wiederherstellen
+  zastepcze_postep_tresc: Buchstaben in {liczba_slow} Wörtern werden wiederhergestellt …
+  zastepcze_wynik_tytul: 'Buchstaben wiederherstellen: Ergebnis'
+  zastepcze_wynik_tresc: Buchstaben wurden in {liczba_odtworzonych} von {liczba_slow} verschiedenen Wörtern wiederhergestellt. Die übrigen Wörter enthalten weiterhin das Zeichen ■.
+  zastepcze_blad_tresc: "Die Buchstaben konnten nicht wiederhergestellt werden: {tresc_bledu}\n\nDie Datei wurde unverändert geladen, mit ■-Zeichen."
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)

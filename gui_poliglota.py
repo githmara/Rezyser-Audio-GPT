@@ -44,6 +44,7 @@ import core_markdown
 import core_pdf
 import core_poliglota
 import core_skany
+import core_zastepcze
 import gui_wczytanie_pdf
 import core_tokeny as ct
 import gui_diagnostyka as gd
@@ -418,6 +419,7 @@ class PoliglotaPanel(wx.Panel):
         self._postep_skanow: wx.ProgressDialog | None = None
         self._anuluj_skany = threading.Event()
         self._timer_skanow = wx.Timer(self)
+        self._postep_zastepczych: wx.ProgressDialog | None = None
         self.Bind(wx.EVT_TIMER, self._skany_sprawdz_anulowanie, self._timer_skanow)
         # Treść do detekcji języka, gdy `_file_content` ma dopiski w języku UI
         # (akapity pochodzenia stron-skanów). Pusty = detekcja z `_file_content`.
@@ -858,6 +860,14 @@ class PoliglotaPanel(wx.Panel):
             return
         self._file_content = wynik_pdf.tekst
         self._file_ext = ".txt"
+        # 19.19: litery zastąpione przez generator PDF znakiem ■ — oferta
+        # odtworzenia modelem AI; po niej (albo bez niej) dalej jak dotąd.
+        if self._zaproponuj_zastepcze(file_name, wynik_pdf):
+            return
+        self._po_zastepczych(file_name, wynik_pdf)
+
+    def _po_zastepczych(self, file_name: str, wynik_pdf: core_pdf.WynikPdf) -> None:
+        """Reszta końca wczytania PDF-a: oferta odczytu skanów albo koniec."""
         # 19.15: strony ze zniekształconą warstwą tekstu idą tą samą drogą
         # co skany — ich akapity to śmieci, które zastąpi odczyt obrazu.
         if wynik_pdf.strony_do_odczytu and \
@@ -872,6 +882,96 @@ class PoliglotaPanel(wx.Panel):
                                        wynik_pdf.strony_do_odczytu)
             return
         self._dokoncz_wczytanie(file_name, wynik_pdf)
+
+    # ------------------------------------------------------------------
+    # 19.19: litery zastąpione znakiem ■ odtwarzane modelem AI (core_zastepcze)
+    # ------------------------------------------------------------------
+    def _zaproponuj_zastepcze(self, file_name: str, wynik_pdf: core_pdf.WynikPdf) -> bool:
+        """Jawna zgoda, domyślnie NIE; `True` = odtwarzanie ruszyło w wątku tła.
+
+        Ta sama dostępność co odczyt skanów (Anthropic, OpenRouter): dialog
+        musi umieć powiedzieć, DOKĄD jadą słowa i ile to kosztuje.
+        """
+        if not core_skany.odczyt_dostepny(self._client):
+            return False
+        slowa = core_zastepcze.slowa_do_odtworzenia(wynik_pdf.tekst)
+        if not slowa:
+            return False
+        koszt = core_zastepcze.szacuj_koszt(self._client, len(slowa))
+        dlg = wx.MessageDialog(
+            self,
+            t("poliglota.zastepcze_zgoda_tresc",
+              nazwa_pliku=os.path.basename(file_name), liczba_slow=len(slowa),
+              przyklady=", ".join(slowa[:5]),
+              model=cl.model_wywolania(self._client, core_zastepcze.MODEL_ZASTEPCZE),
+              usluga=core_skany.opis_uslugi(self._client),
+              koszt=core_skany.opis_kosztu(koszt)),
+            t("poliglota.zastepcze_zgoda_tytul"),
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        dlg.SetYesNoLabels(t("poliglota.zastepcze_zgoda_btn_tak"),
+                           t("poliglota.zastepcze_zgoda_btn_nie"))
+        try:
+            if dlg.ShowModal() != wx.ID_YES:
+                return False
+        finally:
+            dlg.Destroy()
+        # Treść ustawi koniec wątku — do tego czasu panel jest „bez pliku”,
+        # a guardy `is_alive()` trzymają resztę akcji (jak przy skanach).
+        self._file_content = ""
+        self._file_ext = ""
+        self._txt_file.Disable()
+        self._btn_browse.Disable()
+        self._btn_load.Disable()
+        self._postep_zastepczych = wx.ProgressDialog(
+            t("poliglota.zastepcze_postep_tytul"),
+            t("poliglota.zastepcze_postep_tresc", liczba_slow=len(slowa)),
+            maximum=100, parent=self, style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME)
+        self._worker_thread = threading.Thread(
+            target=self._zastepcze_worker, args=(file_name, wynik_pdf, len(slowa)),
+            daemon=True)
+        self._worker_thread.start()
+        return True
+
+    def _zastepcze_worker(self, file_name: str, wynik_pdf: core_pdf.WynikPdf,
+                          liczba_slow: int) -> None:
+        """Wątek tła – żaden bezpośredni wx.* (tylko przez CallAfter), cały w try/except."""
+        try:
+            mapa = core_zastepcze.odtworz(self._client, wynik_pdf.tekst, core_pdf.litery_paczek())
+        except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
+            if not isinstance(exc, cl.BladLLM):
+                bledy_ai.zapisz_diagnostyke(exc, "poliglota._zastepcze_worker",
+                                            slad=traceback.format_exc())
+            gui_wczytanie_pdf._zapowiedz(self._zastepcze_koniec, file_name, wynik_pdf,
+                                         liczba_slow, None, str(exc))
+            return
+        gui_wczytanie_pdf._zapowiedz(self._zastepcze_koniec, file_name, wynik_pdf,
+                                     liczba_slow, mapa, "")
+
+    def _zastepcze_koniec(self, file_name: str, wynik_pdf: core_pdf.WynikPdf,
+                          liczba_slow: int, mapa: dict | None, tresc_bledu: str) -> None:
+        """Koniec odtwarzania (wątek GUI): wynik albo błąd jawnie, potem dalej wczytanie."""
+        if not self:
+            return
+        dlg, self._postep_zastepczych = getattr(self, "_postep_zastepczych", None), None
+        if dlg:
+            dlg.Destroy()
+        self._txt_file.Enable()
+        self._btn_browse.Enable()
+        self._btn_load.Enable()
+        if mapa is None:
+            # Błąd nie kasuje wczytania: tekst idzie dalej ze znakami ■.
+            gd.pokaz_tekst(self, t("poliglota.zastepcze_wynik_tytul"),
+                           t("poliglota.zastepcze_blad_tresc", tresc_bledu=tresc_bledu))
+        else:
+            wynik_pdf.akapity[:] = [core_zastepcze.zastosuj(a, mapa) for a in wynik_pdf.akapity]
+            wynik_pdf.akapity_stron[:] = [[core_zastepcze.zastosuj(a, mapa) for a in strona]
+                                          for strona in wynik_pdf.akapity_stron]
+            wx.MessageBox(t("poliglota.zastepcze_wynik_tresc", liczba_odtworzonych=len(mapa),
+                            liczba_slow=liczba_slow),
+                          t("poliglota.zastepcze_wynik_tytul"), wx.OK | wx.ICON_INFORMATION, self)
+        self._file_content = wynik_pdf.tekst
+        self._file_ext = ".txt"
+        self._po_zastepczych(file_name, wynik_pdf)
 
     def _blad_wczytania(self, file_name: str, exc: Exception) -> None:
         """Błąd odczytu pliku — te same komunikaty co przy odczycie synchronicznym."""
@@ -1016,7 +1116,9 @@ class PoliglotaPanel(wx.Panel):
         znieksztalcone = znieksztalcone or []
         znaki_zlych = [znaki_stron[n - 1] for n in znieksztalcone] if znaki_stron else \
             [0] * len(znieksztalcone)
-        koszt = core_skany.szacuj_koszt(self._client, len(strony), znaki_zlych)
+        # Wysoka strona-skan idzie w pasach (19.19) — każdy pas to osobne wywołanie.
+        pasy = core_skany.dodatkowe_wywolania(file_name, strony)
+        koszt = core_skany.szacuj_koszt(self._client, len(strony), znaki_zlych, pasy)
         wspolne = dict(
             nazwa_pliku=os.path.basename(file_name), liczba_stron=liczba_stron,
             model=core_skany.model_odczytu(self._client),
@@ -1038,7 +1140,7 @@ class PoliglotaPanel(wx.Panel):
             tresc = t("poliglota.skan_zgoda_tresc_znieksztalcone",
                       liczba_do_odczytu=len(strony) + len(znieksztalcone),
                       opis_stron="\n".join(linie),
-                      liczba_minut=core_skany.szacuj_minuty(len(strony), znaki_zlych),
+                      liczba_minut=core_skany.szacuj_minuty(len(strony), znaki_zlych, pasy),
                       **wspolne)
         dlg = wx.MessageDialog(self, tresc, tytul,
                                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)

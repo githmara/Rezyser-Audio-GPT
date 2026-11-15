@@ -58,6 +58,15 @@ def test_zmiana_runtime_bez_wip_to_blad(repo):
     assert cw.main([]) == 1
 
 
+def test_nowy_niesledzony_plik_wydania_bez_wip_to_blad(repo):
+    """Audyt 19.19: `git diff <tag>` nie widzi plików nieśledzonych — nowy plik
+    treści wydania (tu spec PyInstallera) przechodził jako „wydany”."""
+    (repo / "nowy.spec").write_text("a = 1\n", encoding="utf-8")
+    stan = cw.stan_cyklu()
+    assert stan["stan"] == "nieotwarty"
+    assert any("nowy.spec" in w for w in stan["winowajcy"])
+
+
 def test_zacommitowana_zmiana_danych_bez_wip_to_blad(repo):
     (repo / "dictionaries").mkdir()
     (repo / "dictionaries" / "a.yaml").write_text("a: 1\n", encoding="utf-8")

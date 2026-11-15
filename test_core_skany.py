@@ -15,7 +15,10 @@ Kontrakty `core_skany`, których nie sprawdza żadna bramka danych:
      linkami), nieznany token zostaje dosłownie;
   E. każdy token z `ZNACZNIKI` ma klucz w `ui.yaml` paczki `pl`;
   F. strona „obraz cyfrowy” (slajd, zrzut; 19.19) rozpoznana po sygnaturze
-     obrazu i czytana `SYSTEM_CYFROWA`, skan — `SYSTEM_SKANY`.
+     obrazu i czytana `SYSTEM_CYFROWA`, skan — `SYSTEM_SKANY`;
+  G. wysoka strona bez warstwy tekstu (19.19) idzie w pasach o proporcjach A4
+     z zakładką; każdy pas dostaje koniec poprzedniego, pas nieodczytany nie
+     kasuje odczytanych, a koszt w dialogu liczy każdy pas.
 
 Mock modelu, zero wywołań API.
 
@@ -515,6 +518,141 @@ def test_podsumowanie_kazda_strona_w_jednej_grupie():
 
 def test_kazdy_znacznik_jest_w_prompcie():
     assert all(f"[[{z}]]" in cs.SYSTEM_SKANY for z in cs.ZNACZNIKI)
+
+
+# --------------------------------------------------------------------- G ---
+def _wysoka_strona_tekstu(tmp_path, wys_pt):
+    import pypdfium2 as pdfium
+    p = tmp_path / "t.pdf"
+    _zbuduj_pdf(p, [[("Tekst.", 72, 700)]])
+    dok = pdfium.PdfDocument(p.read_bytes())
+    dok[0].set_mediabox(0, 0, 595, wys_pt)
+    import io
+    buf = io.BytesIO()
+    dok.save(buf)
+    dok.close()
+    return buf.getvalue()
+
+
+def test_liczba_pasow_z_proporcji_i_tylko_bez_tekstu(tmp_path):
+    # Sonda 2026-11-15: notatka OneNote 5172 × 10441 (2,02) → 2 pasy dały
+    # prawdziwą datę nagłówka; A4 i Legal idą w całości.
+    assert cs.liczba_pasow(_pdf_z_obrazem(100, 141, 100, 141)) == 1      # A4
+    assert cs.liczba_pasow(_pdf_z_obrazem(100, 165, 100, 165)) == 1      # Legal
+    assert cs.liczba_pasow(_pdf_z_obrazem(100, 202, 100, 202)) == 2      # Rolki
+    assert cs.liczba_pasow(_pdf_z_obrazem(50, 1000, 50, 1000)) == cs.MAX_PASOW
+    # Warstwa tekstu jedzie do modelu cała przy każdym pasie — taka strona nie jest cięta.
+    assert cs.liczba_pasow(_wysoka_strona_tekstu(tmp_path, 1700)) == 1
+    assert cs.liczba_pasow(b"to nie jest PDF") == 1
+
+
+def test_wytnij_pas_z_zakladka_u_gory():
+    import pypdfium2 as pdfium
+    pdf = _pdf_z_obrazem(100, 200, 100, 200)
+    pasy = [pdfium.PdfDocument(cs.wytnij_pas(pdf, i, 2))[0].get_mediabox() for i in (1, 2)]
+    assert pasy[0] == pytest.approx((0, 100, 100, 200))
+    assert pasy[1] == pytest.approx((0, 0, 100, 100 + cs.ZAKLADKA_PASA * 200))
+
+
+def test_pasy_po_kolei_z_kontekstem_poprzedniego_pasa(monkeypatch):
+    wyslane = _model(monkeypatch, [("# Rolki\n\n28 września [[ILLEGIBLE]]", "end_turn"),
+                                   ("dalej [[ILLEGIBLE]]", "end_turn")])
+    monkeypatch.setattr(cs, "liczba_pasow", lambda pdf: 2)
+    monkeypatch.setattr(cs, "wytnij_pas", lambda pdf, i, n: f"PAS{i}/{n}".encode())
+    w = cs.odczytaj_strone_w_pasach(KLIENT, b"PDF", 4, "koniec strony 3", cs.SYSTEM_CYFROWA)
+    assert [kw["pdf"] for kw in wyslane] == [b"PAS1/2", b"PAS2/2"]
+    assert "strip 1 of 2" in wyslane[0]["tekst_po"] and "strip 2 of 2" in wyslane[1]["tekst_po"]
+    assert "<previous_page>" in wyslane[0]["tekst_przed"]              # pierwszy: poprzednia strona
+    assert "<previous_strip>" in wyslane[1]["tekst_przed"]             # drugi: poprzedni pas
+    assert "28 września" in wyslane[1]["tekst_przed"]
+    assert {kw["system"] for kw in wyslane} == {cs.SYSTEM_CYFROWA}
+    assert (w.numer, w.status) == (4, cs.STATUS_OK)
+    assert w.markdown == "# Rolki\n\n28 września [[ILLEGIBLE]]\n\ndalej [[ILLEGIBLE]]"
+    assert w.znaczniki == {"ILLEGIBLE": 2}
+
+
+def test_pas_nieodczytany_nie_kasuje_oplaconych(monkeypatch):
+    _model(monkeypatch, [("Góra strony.", "end_turn"), ("", cl.STOP_ODRZUCENIE)])
+    monkeypatch.setattr(cs, "liczba_pasow", lambda pdf: 2)
+    monkeypatch.setattr(cs, "wytnij_pas", lambda pdf, i, n: b"P")
+    w = cs.odczytaj_strone_w_pasach(KLIENT, b"PDF", 1)
+    assert w.status == cs.STATUS_UCIETA
+    assert w.markdown == "Góra strony.\n\npoliglota.skan_powod_odmowa"   # powód w miejscu pasa
+
+
+def _przerob(pdf, *, obrot=0, media=None, crop=None):
+    import io
+
+    import pypdfium2 as pdfium
+    dok = pdfium.PdfDocument(pdf)
+    s = dok[0]
+    if media:
+        s.set_mediabox(*media)
+    if crop:
+        s.set_cropbox(*crop)
+    if obrot:
+        s.set_rotation(obrot)
+    buf = io.BytesIO()
+    dok.save(buf)
+    dok.close()
+    return buf.getvalue()
+
+
+def test_pasy_wzdluz_wyswietlanej_strony_obrot_i_cropbox():
+    # Audyt 19.19: strona pozioma z /Rotate 90 (wyświetlana pionowo) cięta po
+    # zapisanej osi y dawała pionowe plastry; CropBox był ignorowany, więc pasy
+    # niosły ukryty obszar strony.
+    import pypdfium2 as pdfium
+    obrocona = _przerob(_pdf_z_obrazem(300, 100, 300, 100), obrot=90)    # widać 100 × 300
+    assert cs.liczba_pasow(obrocona) == 2
+    pasy = [pdfium.PdfDocument(cs.wytnij_pas(obrocona, i, 2))[0] for i in (1, 2)]
+    assert [p.get_size()[0] for p in pasy] == pytest.approx([100, 100])  # pełna szerokość
+    assert pasy[0].get_mediabox()[0] == pytest.approx(0)                 # góra (90°) = małe x
+    przyciete = _przerob(_pdf_z_obrazem(100, 400, 100, 400), crop=(0, 0, 100, 200))
+    ramki = [pdfium.PdfDocument(cs.wytnij_pas(przyciete, i, 2))[0].get_mediabox() for i in (1, 2)]
+    assert ramki[0] == pytest.approx((0, 100, 100, 200))                 # tylko widoczna część
+    assert ramki[1][1] == pytest.approx(0)
+
+
+def test_krytyczny_na_drugim_pasie_zostawia_pierwszy(monkeypatch):
+    _model(monkeypatch, [("Pas pierwszy.", "end_turn"), cl.BladLimituLLM("429")])
+    monkeypatch.setattr(cs, "liczba_pasow", lambda pdf: 2)
+    monkeypatch.setattr(cs, "wytnij_pas", lambda pdf, i, n: b"P")
+    wyniki, blad = cs.odczytaj_strony(KLIENT, "x.pdf", AKAPITY, [2, 3])
+    assert isinstance(blad, cl.BladLimituLLM)
+    assert (wyniki[0].numer, wyniki[0].status) == (2, cs.STATUS_UCIETA)
+    assert wyniki[0].markdown.startswith("Pas pierwszy.")
+    assert (wyniki[1].numer, wyniki[1].status) == (3, cs.STATUS_BLAD)
+
+
+def test_anuluj_miedzy_pasami_nie_wysyla_nastepnego(monkeypatch):
+    wyslane = _model(monkeypatch, [("Pas pierwszy.", "end_turn")])
+    monkeypatch.setattr(cs, "liczba_pasow", lambda pdf: 3)
+    monkeypatch.setattr(cs, "wytnij_pas", lambda pdf, i, n: b"P")
+    stan = {"anuluj": False}
+
+    def model_i_anuluj(klient, **kw):
+        stan["anuluj"] = True                # „Anuluj” wciśnięte w trakcie pasa 1
+        return "Pas pierwszy.", "end_turn"
+
+    monkeypatch.setattr(cl, "wywolaj_llm_z_pdf", model_i_anuluj)
+    w = cs.odczytaj_strone_w_pasach(KLIENT, b"PDF", 1, przerwij=lambda: stan["anuluj"])
+    assert w.status == cs.STATUS_UCIETA and "skan_powod_anulowano" in w.markdown
+    assert wyslane == []                     # drugi i trzeci pas nie poszły
+
+
+def test_pusty_pas_nie_daje_znacznika_w_srodku_strony(monkeypatch):
+    _model(monkeypatch, [("Tekst.", "end_turn"), ("[[NO_TEXT]]", "end_turn")])
+    monkeypatch.setattr(cs, "liczba_pasow", lambda pdf: 2)
+    monkeypatch.setattr(cs, "wytnij_pas", lambda pdf, i, n: b"P")
+    w = cs.odczytaj_strone_w_pasach(KLIENT, b"PDF", 1)
+    assert (w.markdown, w.znaczniki, w.status) == ("Tekst.", {}, cs.STATUS_OK)
+
+
+def test_koszt_i_czas_licza_dodatkowe_pasy():
+    anthropic = cl.KlientLLM(cl.PROVIDER_ANTHROPIC, None)
+    assert cs.szacuj_koszt(anthropic, 3, dodatkowe_pasy=2) == pytest.approx(cs.szacuj_koszt(anthropic, 5))
+    assert cs.szacuj_minuty(30, dodatkowe_pasy=30) == cs.szacuj_minuty(60)
 
 
 # Uruchomienie jako skrypt — deleguje do pytesta (kanon v19.2.1).

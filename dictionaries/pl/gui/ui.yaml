@@ -995,6 +995,26 @@ poliglota:
   skan_zgoda_koszt_nieznany: "nieznany dla tego modelu"
   skan_zgoda_btn_tak: "&Odczytaj strony"
   skan_zgoda_btn_nie: "&Pomiń"
+  # v19.19: litery zastąpione przez generator PDF znakiem ■, odtwarzane modelem AI
+  zastepcze_zgoda_tytul: "Odtworzyć litery zastąpione znakiem ■?"
+  zastepcze_zgoda_tresc: |-
+    W pliku {nazwa_pliku} program, który go utworzył, wstawił znak ■ zamiast niektórych liter – zwykle liter z ogonkami albo innych spoza podstawowego zestawu znaków. Dotyczy to {liczba_slow} różnych słów, na przykład: {przyklady}.
+
+    Mogę odtworzyć te litery modelem AI ({model}). Do zewnętrznej usługi ({usluga}) zostaną wysłane tylko te słowa, każde z krótkim fragmentem tekstu wokół niego. Model może zmienić wyłącznie miejsca oznaczone znakiem ■, a słowo, którego nie odtworzy pewnie, zostanie bez zmian.
+
+    Szacowany koszt: {koszt}.
+
+    Jeśli wybierzesz „Pomiń”, znaki ■ zostaną w tekście, a czytnik ekranu przeczyta je jako symbol.
+  zastepcze_zgoda_btn_tak: "&Odtwórz litery"
+  zastepcze_zgoda_btn_nie: "&Pomiń"
+  zastepcze_postep_tytul: "Odtwarzanie liter"
+  zastepcze_postep_tresc: "Odtwarzam litery w {liczba_slow} słowach…"
+  zastepcze_wynik_tytul: "Odtwarzanie liter: wynik"
+  zastepcze_wynik_tresc: "Odtworzono litery w {liczba_odtworzonych} z {liczba_slow} różnych słów. Pozostałe słowa zostały ze znakiem ■."
+  zastepcze_blad_tresc: |-
+    Nie udało się odtworzyć liter: {tresc_bledu}
+
+    Plik wczytano bez zmian, ze znakami ■.
   skan_postep_tytul: "Odczyt stron-skanów"
   skan_postep_tresc: "Odczytuję stronę {numer_strony} ({numer} z {liczba})…"
   skan_podsumowanie_tytul: "Odczyt stron-skanów: podsumowanie"

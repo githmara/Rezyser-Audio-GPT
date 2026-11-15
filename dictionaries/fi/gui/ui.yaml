@@ -945,6 +945,15 @@ poliglota:
   skan_zgoda_linia_znieksztalcone: '– vääristynyt teksti (tiedoston fontti ei kerro, mitä kirjaimia ne ovat): {lista_stron}'
   pdf_strony_naprawione: 'Näillä sivuilla PDF-tiedostoon tallennettu teksti oli vääristynyt, joten ohjelma palautti kirjaimet tiedostoon upotetun fontin avulla: {lista_stron}. Yksittäiset merkit voivat poiketa tulosteesta.'
   pdf_strony_przekodowane: 'Näillä sivuilla PDF-tiedostoon tallennetun tekstin merkistökoodaus oli virheellinen (kirjainten tilalla oli satunnaisia aksenttimerkkejä), joten ohjelma koodasi sen uudelleen ({kodowanie}): {lista_stron}.'
+  zastepcze_zgoda_tytul: Palautetaanko ■-merkillä korvatut kirjaimet?
+  zastepcze_zgoda_tresc: "Tiedostossa {nazwa_pliku} sen luonut ohjelma on korvannut osan kirjaimista merkillä ■ – yleensä tarkkeellisia tai muita perusmerkistön ulkopuolisia kirjaimia. Tämä koskee {liczba_slow} eri sanaa, esimerkiksi: {przyklady}.\n\nVoin palauttaa nämä kirjaimet tekoälymallilla ({model}). Ulkoiseen palveluun ({usluga}) lähetetään vain nämä sanat, kukin lyhyen ympäröivän tekstinpätkän kanssa. Malli saa muuttaa vain ■-merkillä merkityt kohdat, ja sana, jota se ei pysty palauttamaan varmasti, jää ennalleen.\n\nArvioitu hinta: {koszt}.\n\nJos valitset \"Ohita\", ■-merkit jäävät tekstiin ja ruudunlukija lukee ne symbolina."
+  zastepcze_zgoda_btn_tak: '&Palauta kirjaimet'
+  zastepcze_zgoda_btn_nie: '&Ohita'
+  zastepcze_postep_tytul: Kirjainten palautus
+  zastepcze_postep_tresc: Palautan kirjaimia {liczba_slow} sanasta…
+  zastepcze_wynik_tytul: 'Kirjainten palautus: tulos'
+  zastepcze_wynik_tresc: Kirjaimet palautettiin {liczba_odtworzonych} sanassa {liczba_slow} eri sanasta. Loput sanat jäivät ■-merkkeineen.
+  zastepcze_blad_tresc: "Kirjainten palautus epäonnistui: {tresc_bledu}\n\nTiedosto avattiin muuttamattomana, ■-merkkeineen."
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)

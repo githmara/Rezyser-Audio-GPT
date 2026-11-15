@@ -947,6 +947,15 @@ poliglota:
   skan_zgoda_linia_znieksztalcone: '– con texto distorsionado (la fuente del archivo no indica qué letras son): {lista_stron}'
   pdf_strony_naprawione: 'En estas páginas el texto guardado en el PDF estaba distorsionado, por lo que el programa reconstruyó las letras a partir de la fuente incrustada en el archivo: {lista_stron}. Algunos caracteres sueltos pueden diferir de la versión impresa.'
   pdf_strony_przekodowane: 'En estas páginas, el texto guardado en el PDF tenía una codificación de caracteres incorrecta (en lugar de letras aparecían caracteres aleatorios con acentos), por lo que el programa lo recodificó ({kodowanie}): {lista_stron}.'
+  zastepcze_zgoda_tytul: ¿Restaurar las letras sustituidas por el carácter ■?
+  zastepcze_zgoda_tresc: "En el archivo {nazwa_pliku}, el programa que lo creó insertó el carácter ■ en lugar de algunas letras, normalmente letras con diacríticos u otras ajenas al juego de caracteres básico. Esto afecta a {liczba_slow} palabras distintas, por ejemplo: {przyklady}.\n\nPuedo restaurar esas letras con un modelo de IA ({model}). Al servicio externo ({usluga}) solo se enviarán esas palabras, cada una con un breve fragmento de texto a su alrededor. El modelo solo puede modificar los lugares marcados con el carácter ■, y una palabra que no pueda restaurar con seguridad se dejará sin cambios.\n\nCoste estimado: {koszt}.\n\nSi eliges «Omitir», los caracteres ■ permanecerán en el texto y el lector de pantalla los leerá como un símbolo."
+  zastepcze_zgoda_btn_tak: '&Restaurar letras'
+  zastepcze_zgoda_btn_nie: '&Omitir'
+  zastepcze_postep_tytul: Restauración de letras
+  zastepcze_postep_tresc: Restaurando letras en {liczba_slow} palabras…
+  zastepcze_wynik_tytul: 'Restauración de letras: resultado'
+  zastepcze_wynik_tresc: Se restauraron las letras en {liczba_odtworzonych} de {liczba_slow} palabras distintas. Las demás palabras se quedaron con el carácter ■.
+  zastepcze_blad_tresc: "No se pudieron restaurar las letras: {tresc_bledu}\n\nEl archivo se cargó sin cambios, con los caracteres ■."
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)

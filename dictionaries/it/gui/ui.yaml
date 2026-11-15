@@ -947,6 +947,15 @@ poliglota:
   skan_zgoda_linia_znieksztalcone: '– con testo alterato (il font del file non indica di quali lettere si tratti): {lista_stron}'
   pdf_strony_naprawione: 'In queste pagine il testo salvato nel PDF era alterato, quindi il programma ha ricostruito le lettere dal font incorporato nel file: {lista_stron}. Alcuni singoli caratteri potrebbero differire dalla versione stampata.'
   pdf_strony_przekodowane: 'In queste pagine il testo salvato nel PDF aveva una codifica dei caratteri errata (al posto delle lettere comparivano caratteri casuali con accenti), quindi il programma lo ha ricodificato ({kodowanie}): {lista_stron}.'
+  zastepcze_zgoda_tytul: Ripristinare le lettere sostituite dal carattere ■?
+  zastepcze_zgoda_tresc: "Nel file {nazwa_pliku} il programma che lo ha creato ha inserito il carattere ■ al posto di alcune lettere, di solito lettere accentate o altre non comprese nel set di caratteri di base. Il problema riguarda {liczba_slow} parole diverse, ad esempio: {przyklady}.\n\nPosso ripristinare queste lettere con un modello di IA ({model}). Al servizio esterno ({usluga}) verranno inviate solo queste parole, ciascuna con un breve frammento di testo intorno. Il modello può modificare soltanto i punti contrassegnati dal carattere ■, e una parola che non riesce a ripristinare con sicurezza resterà invariata.\n\nCosto stimato: {koszt}.\n\nSe scegli \"Salta\", i caratteri ■ resteranno nel testo e il lettore di schermo li leggerà come un simbolo."
+  zastepcze_zgoda_btn_tak: '&Ripristina le lettere'
+  zastepcze_zgoda_btn_nie: '&Salta'
+  zastepcze_postep_tytul: Ripristino delle lettere
+  zastepcze_postep_tresc: Ripristino delle lettere in {liczba_slow} parole…
+  zastepcze_wynik_tytul: 'Ripristino delle lettere: risultato'
+  zastepcze_wynik_tresc: Lettere ripristinate in {liczba_odtworzonych} di {liczba_slow} parole diverse. Le altre parole sono rimaste con il carattere ■.
+  zastepcze_blad_tresc: "Impossibile ripristinare le lettere: {tresc_bledu}\n\nIl file è stato caricato senza modifiche, con i caratteri ■."
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   # 18.8: segmento localizzato del nome del file di output (una parola, senza spazi)

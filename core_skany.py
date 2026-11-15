@@ -124,6 +124,27 @@ SYSTEM_CYFROWA = (
 #: Bez numeru strony: PDF po cięciu ma JEDNĄ stronę, a „page 3" wywoływało
 #: komentarz „ten dokument ma tylko jedną stronę" (zmierzone).
 INSTRUKCJA = "Transcribe the attached page."
+#: Pas wysokiej strony (19.19, `odczytaj_strone_w_pasach`). Kontekstem jest
+#: poprzedni PAS tej samej strony, a jego koniec stoi też na górze tego pasa
+#: (zakładka) — bez tego zdania model przepisywał zakładkę drugi raz (zmierzone).
+INSTRUKCJA_PASA = ("Transcribe the attached strip {numer} of {liczba} of one tall page. "
+                   "Its top edge repeats the bottom of the previous strip, given in "
+                   "<previous_strip>: do not transcribe those lines again.")
+
+#: Wysoka strona bez warstwy tekstu (OneNote, zrzut przewijanej strony) idzie
+#: w pasach o proporcjach A4. Model dostaje stronę pomniejszoną do stałej
+#: liczby pikseli (zmierzone: ok. 2200 tokenów wejścia na wywołanie, niezależnie
+#: od rozmiaru), więc strona 2× wyższa od A4 traci połowę rozdzielczości.
+#: Sonda 2026-11-15 (notatka OneNote 5172 × 10441 px): cała strona → zmyślona
+#: data w nagłówku mimo reguły 4 promptu; 2 i 3 pasy → data prawdziwa, a zamiast
+#: dopowiadania słów pisma ręcznego pojawia się [[ILLEGIBLE]].
+PROPORCJA_PASA = 1.42
+#: Zakładka między pasami (część wysokości strony): wiersz przecięty granicą
+#: pasa jest w całości w jednym z nich.
+ZAKLADKA_PASA = 0.03
+#: Górna granica kosztu jednej strony (dłuższa idzie i tak, tylko gęstszymi pasami).
+MAX_PASOW = 6
+ZAPAS_PASA = 0.3
 
 #: Strona cyfrowa: obraz w pikselach równy stronie w punktach (72 dpi) z tą
 #: tolerancją. Skan ma 150–300 dpi (zmierzone: karta MPK 1600 px na 576 pt).
@@ -227,14 +248,18 @@ def model_odczytu(klient: cl.KlientLLM) -> str:
 
 
 def szacuj_koszt(klient: cl.KlientLLM, liczba_stron: int,
-                 znaki_stron_tekstu: list[int] | tuple[int, ...] = ()) -> float | None:
+                 znaki_stron_tekstu: list[int] | tuple[int, ...] = (),
+                 dodatkowe_pasy: int = 0) -> float | None:
     """Szacowany koszt w USD albo `None`, gdy model jest spoza `KOSZT_STRONY_USD`.
 
     Args:
         liczba_stron: strony-skany (bez warstwy tekstu), stawka zmierzona.
         znaki_stron_tekstu: liczba znaków warstwy tekstu KAŻDEJ strony
             zniekształconej — taka strona kosztuje co najmniej tyle co skan.
+        dodatkowe_pasy: wywołania ponad jedno na stronę (`dodatkowe_wywolania`),
+            każde po stawce skanu — obraz pasa kosztuje tyle co obraz strony.
     """
+    liczba_stron += dodatkowe_pasy
     model = cl.model_natywny(model_odczytu(klient))
     stawka = KOSZT_STRONY_USD.get(model)
     if stawka is None:
@@ -247,9 +272,10 @@ def szacuj_koszt(klient: cl.KlientLLM, liczba_stron: int,
 
 
 def szacuj_minuty(liczba_stron: int,
-                  znaki_stron_tekstu: list[int] | tuple[int, ...] = ()) -> int:
+                  znaki_stron_tekstu: list[int] | tuple[int, ...] = (),
+                  dodatkowe_pasy: int = 0) -> int:
     """Szacowany czas odczytu w pełnych minutach (co najmniej 1)."""
-    sekundy = SEKUNDY_STRONY * (liczba_stron + len(znaki_stron_tekstu)) + sum(
+    sekundy = SEKUNDY_STRONY * (liczba_stron + len(znaki_stron_tekstu) + dodatkowe_pasy) + sum(
         z / ZNAKI_NA_TOKEN_WYJSCIA / TOKENY_NA_SEKUNDE for z in znaki_stron_tekstu)
     return max(1, round(sekundy / 60))
 
@@ -387,22 +413,205 @@ def strona_cyfrowa(pdf: bytes) -> bool:
             and abs(wys_px - wys_pt) <= TOLERANCJA_72DPI * wys_pt)
 
 
+def liczba_pasow(pdf: bytes) -> int:
+    """Na ile pasów ciąć jednostronicowy PDF (1 = wcale).
+
+    Tylko strona BEZ warstwy tekstu: cropbox nie usuwa treści, a Anthropic
+    dokleja do bloku `document` tekst całej strony — każdy pas niósłby go
+    całego. Błąd odczytu struktury = 1 (strona idzie w całości, jak dotąd).
+    """
+    try:
+        import pypdfium2 as pdfium
+        dokument = pdfium.PdfDocument(pdf)
+        try:
+            return _pasy_strony(dokument[0])
+        finally:
+            dokument.close()
+    except Exception:  # noqa: BLE001 — cięcie to ulepszenie, nie warunek odczytu
+        return 1
+
+
+def _pasy_strony(strona) -> int:
+    """`liczba_pasow` dla otwartej strony PDFium (wspólne z `dodatkowe_wywolania`)."""
+    import math
+
+    import pypdfium2.raw as pdfium_c
+    if any(o.type == pdfium_c.FPDF_PAGEOBJ_TEXT for o in strona.get_objects()):
+        return 1
+    # `get_size` = strona WYŚWIETLANA (CropBox, z obrotem `/Rotate`).
+    szer, wys = strona.get_size()
+    if szer <= 0:
+        return 1
+    # Zapas 0,3 pasa: Legal (1,65 = 1,16 A4) i inne lekko wydłużone formaty idą
+    # w całości; tnie się dopiero od ok. 1,85 wysokości A4 (Rolki: 2,02 → 2 pasy).
+    return max(1, min(MAX_PASOW, math.ceil(wys / (szer * PROPORCJA_PASA) - ZAPAS_PASA)))
+
+
+def wytnij_pas(pdf: bytes, numer: int, liczba: int) -> bytes:
+    """Pas `numer` (od 1, od góry) z `liczba` pasów jednostronicowego PDF-a; z zakładką u góry.
+
+    Tnie stronę TAKĄ, JAK JĄ WIDAĆ (audyt 19.19): w obrębie CropBoxa — obszar
+    ukryty poza nim nie jedzie do usługi — i w pionie wyświetlania, także przy
+    `/Rotate` (skaner zapisuje stronę poziomo z obrotem 90°; cięcie po
+    zapisanej osi y dawało pionowe plastry przez środek wierszy). MediaBox
+    pasa = jego CropBox, więc nic spoza pasa nie zostaje w pliku.
+    """
+    import pypdfium2 as pdfium
+
+    zrodlo = pdfium.PdfDocument(pdf)
+    try:
+        cel = pdfium.PdfDocument.new()
+        try:
+            cel.import_pages(zrodlo, [0])
+            strona = cel[0]
+            lewo, dol, prawo, gora = strona.get_cropbox()
+            obrot = strona.get_rotation() % 360
+            pionowo = obrot in (0, 180)
+            poczatek, koniec = (dol, gora) if pionowo else (lewo, prawo)
+            dlugosc = koniec - poczatek
+            krok, zakladka = dlugosc / liczba, (ZAKLADKA_PASA * dlugosc if numer > 1 else 0)
+            # Gdzie jest „góra” wyświetlania: 0° — duże y; 180° — małe y;
+            # 90° (obrót w prawo) — małe x; 270° — duże x.
+            if obrot in (0, 270):
+                hi, lo = koniec - (numer - 1) * krok + zakladka, koniec - numer * krok
+            else:
+                lo, hi = poczatek + (numer - 1) * krok - zakladka, poczatek + numer * krok
+            lo, hi = max(poczatek, lo), min(koniec, hi)
+            ramka = (lewo, lo, prawo, hi) if pionowo else (lo, dol, hi, gora)
+            strona.set_mediabox(*ramka)
+            strona.set_cropbox(*ramka)
+            bufor = io.BytesIO()
+            cel.save(bufor)
+            return bufor.getvalue()
+        finally:
+            cel.close()
+    finally:
+        zrodlo.close()
+
+
+class PasyPrzerwane(Exception):
+    """Błąd krytyczny w środku pasów strony — z wynikiem pasów już opłaconych.
+
+    `odczytaj_strony` dokłada `wynik` do wyników (audyt 19.19: limit na pasie 2
+    kasował opłacony pas 1), a resztę stron oznacza `przyczyna`.
+    """
+
+    def __init__(self, wynik: WynikStrony, przyczyna: Exception) -> None:
+        super().__init__(str(przyczyna))
+        self.wynik = wynik
+        self.przyczyna = przyczyna
+
+
+_NO_TEXT = "[[NO_TEXT]]"
+
+
+def _zloz_pasy(numer: int, wyniki: list[WynikStrony], reszta_powod: str = "") -> WynikStrony:
+    """Pasy → jedna strona. Pas „[[NO_TEXT]]” znika, gdy inny pas ma treść
+    (audyt 19.19: pusty dół notatki dawał „[strona bez tekstu]” w środku strony)."""
+    udane = [w for w in wyniki if w.status in (STATUS_OK, STATUS_UCIETA)]
+    if not udane and not reszta_powod:
+        return wyniki[0]
+    z_trescia = [w for w in udane if w.markdown.strip() != _NO_TEXT]
+    pomin = {id(w) for w in udane if w.markdown.strip() == _NO_TEXT} if z_trescia else set()
+    czesci = [w.markdown if w.status in (STATUS_OK, STATUS_UCIETA) else w.powod
+              for w in wyniki if id(w) not in pomin]
+    if reszta_powod:
+        czesci.append(reszta_powod)
+    znaczniki: dict[str, int] = {}
+    for w in udane:
+        if id(w) in pomin:
+            continue
+        for token, ile in w.znaczniki.items():
+            znaczniki[token] = znaczniki.get(token, 0) + ile
+    status = (STATUS_OK if not reszta_powod and all(w.status == STATUS_OK for w in wyniki)
+              else STATUS_UCIETA)
+    return WynikStrony(numer, status, "\n\n".join(c for c in czesci if c),
+                       szczegol="; ".join(w.szczegol for w in wyniki if w.szczegol),
+                       znaczniki=znaczniki, slad=[s for w in wyniki for s in w.slad])
+
+
+def odczytaj_strone_w_pasach(klient: cl.KlientLLM, pdf: bytes, numer: int,
+                             kontekst: str = "", system: str = SYSTEM_SKANY,
+                             przerwij: Callable[[], bool] | None = None) -> WynikStrony:
+    """Strona w całości albo — gdy wysoka (`liczba_pasow`) — pas po pasie.
+
+    Pierwszy pas dostaje kontekst poprzedniej strony, każdy następny koniec
+    poprzedniego pasa. Wynik to JEDNA strona: Markdown pasów po kolei,
+    znaczniki i ślad zsumowane. Pas nieodczytany nie kasuje opłaconych:
+    jego powód staje w tekście w miejscu pasa (zero ciszy), a strona dostaje
+    `STATUS_UCIETA`; gdy nie udał się żaden pas — wynik pierwszego.
+    `przerwij` jest sprawdzane przed KAŻDYM pasem od drugiego (cofnięta zgoda
+    nie przepuszcza kolejnych pasów). Błąd krytyczny na pierwszym pasie leci
+    wyżej jak z `odczytaj_strone`; na dalszym — jako `PasyPrzerwane`
+    z wynikiem pasów już odczytanych.
+    """
+    liczba = liczba_pasow(pdf)
+    if liczba == 1:
+        return odczytaj_strone(klient, pdf, numer, kontekst, system)
+    wyniki: list[WynikStrony] = []
+    for i in range(1, liczba + 1):
+        if i > 1 and przerwij is not None and przerwij():
+            return _zloz_pasy(numer, wyniki, t("poliglota.skan_powod_anulowano"))
+        try:
+            if i == 1:
+                w = odczytaj_strone(klient, wytnij_pas(pdf, i, liczba), numer, kontekst, system,
+                                    instrukcja=INSTRUKCJA_PASA.format(numer=i, liczba=liczba))
+            else:
+                w = odczytaj_strone(klient, wytnij_pas(pdf, i, liczba), numer,
+                                    wyniki[-1].markdown, system,
+                                    instrukcja=INSTRUKCJA_PASA.format(numer=i, liczba=liczba),
+                                    znacznik_kontekstu="previous_strip")
+        except Exception as exc:
+            if not wyniki or not _czy_krytyczny(exc):
+                raise
+            raise PasyPrzerwane(_zloz_pasy(numer, wyniki, _blad_strony(numer, exc).powod),
+                                exc) from exc
+        wyniki.append(w)
+    return _zloz_pasy(numer, wyniki)
+
+
+def dodatkowe_wywolania(sciezka: str, numery: list[int]) -> int:
+    """Ile wywołań ponad jedno na stronę dołożą pasy — do szacunku kosztu i czasu.
+
+    Dokument otwierany RAZ, bez zapisu kopii strony (audyt 19.19: kopia per
+    strona to 6,7 s w wątku GUI na 300 stron, przed dialogiem zgody).
+    """
+    try:
+        import pypdfium2 as pdfium
+        dokument = pdfium.PdfDocument(sciezka)
+    except Exception:  # noqa: BLE001 — szacunek, nie bramka
+        return 0
+    dodatkowe = 0
+    try:
+        for n in numery:
+            try:
+                dodatkowe += _pasy_strony(dokument[n - 1]) - 1
+            except Exception:  # noqa: BLE001 — szacunek, nie bramka
+                continue
+    finally:
+        dokument.close()
+    return dodatkowe
+
+
 def odczytaj_strone(klient: cl.KlientLLM, pdf: bytes, numer: int,
-                    kontekst: str = "", system: str = SYSTEM_SKANY) -> WynikStrony:
-    """Jedno wywołanie modelu dla jednej strony.
+                    kontekst: str = "", system: str = SYSTEM_SKANY, *,
+                    instrukcja: str = INSTRUKCJA,
+                    znacznik_kontekstu: str = "previous_page") -> WynikStrony:
+    """Jedno wywołanie modelu dla jednej strony (albo jednego pasa strony).
 
     `system`: `SYSTEM_SKANY` albo `SYSTEM_CYFROWA` (wybiera `odczytaj_strony`
-    przez `strona_cyfrowa`).
+    przez `strona_cyfrowa`). `instrukcja` i `znacznik_kontekstu` zmienia
+    `odczytaj_strone_w_pasach`.
     Błąd tej strony (timeout, sieć, odrzucony plik) → `STATUS_BLAD` z powodem.
     Błąd krytyczny (`_czy_krytyczny`) leci wyżej — decyduje `odczytaj_strony`.
     """
-    przed = (f"<previous_page>\n{kontekst[-KONTEKST_ZNAKI:]}\n</previous_page>"
+    przed = (f"<{znacznik_kontekstu}>\n{kontekst[-KONTEKST_ZNAKI:]}\n</{znacznik_kontekstu}>"
              if kontekst.strip() else "")
     slad: list[dict] = []
     try:
         tekst, stop = cl.wywolaj_llm_z_pdf(
             klient, model=MODEL_SKANY, system=system, pdf=pdf,
-            tekst_przed=przed, tekst_po=INSTRUKCJA,
+            tekst_przed=przed, tekst_po=instrukcja,
             max_tokens=MAX_TOKENS_STRONA, timeout=TIMEOUT_S, slad=slad)
     except Exception as exc:  # noqa: BLE001 — błąd strony to status, krytyczny leci wyżej
         if _czy_krytyczny(exc):
@@ -473,9 +682,15 @@ def odczytaj_strony(
         if anulowano(i):
             return wyniki, None
         try:
-            wynik = odczytaj_strone(klient, pdf, numer,
-                                    _kontekst(numer, akapity_stron, skany, odczytane),
-                                    SYSTEM_CYFROWA if strona_cyfrowa(pdf) else SYSTEM_SKANY)
+            wynik = odczytaj_strone_w_pasach(klient, pdf, numer,
+                                             _kontekst(numer, akapity_stron, skany, odczytane),
+                                             SYSTEM_CYFROWA if strona_cyfrowa(pdf) else SYSTEM_SKANY,
+                                             przerwij=przerwij)
+        except PasyPrzerwane as exc:
+            # Krytyczny w środku pasów: opłacone pasy zostają, reszta stron z powodem.
+            wyniki.append(exc.wynik)
+            wyniki.extend(_blad_strony(n, exc.przyczyna) for n in numery[i + 1:])
+            return wyniki, exc.przyczyna
         except Exception as exc:  # noqa: BLE001 — krytyczny: reszta stron z tym powodem
             if not _czy_krytyczny(exc):
                 raise
