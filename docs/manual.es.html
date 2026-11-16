@@ -63,7 +63,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 <p>•  Clave Anthropic (Claude) — alimenta TODO el motor de IA: la narración del Director (audiolibro, teatro leído, lluvia de ideas), el modo Historias, el Políglota (traductor) y la asignación de títulos a capítulos y la detección del idioma del contenido. Comienza por sk-ant-.</p>
 <p>Si estás actualizando desde una versión anterior: la antigua clave OpenAI ya no es necesaria para la variante predeterminada — puedes dejar o eliminar su línea en golden_key.env, la aplicación la ignorará (a menos que estés configurando conscientemente otro proveedor — véase el PASO 2B más abajo).</p>
 <p>Cómo obtener la clave Anthropic:<br>
-1. Crea una cuenta en console.anthropic.com y añade fondos (pestaña Billing / Plans).<br>
+1. Crea una cuenta en console.anthropic.com y añade fondos (pestaña Billing / Plans). Si la consola pregunta "Where does your code run?", elige "Somewhere else": las demás respuestas (p. ej., "Your own machine", que lleva a instalar la herramienta ant CLI) no sirven para este programa.<br>
 2. Genera la clave en la sección API Keys (comienza por sk-ant-). Cópiala de inmediato — en ocasiones solo se muestra una vez.</p>
 <p>Cómo introducir la clave en el programa:<br>
 3. En la pantalla de inicio del programa, haz clic en el botón "Generar archivo golden_key.env y abrir editor de texto". El sistema creará automáticamente un archivo de configuración limpio en el lugar correcto y abrirá el Bloc de notas con una plantilla lista para editar.<br>

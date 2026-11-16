@@ -133,7 +133,7 @@ Pass `--help` for full usage (help text is in English).
 
 | Tool | What it does |
 |------|--------------|
-| `generuj_dokumentacje.py [-v | --waliduj]` | Regenerates `docs/*.txt` from `dictionaries/*/gui/dokumentacja/*.yaml`. `-v` = generate **and** hard-check. Run before committing doc changes. |
+| `generuj_dokumentacje.py [-v | --waliduj]` | Regenerates `docs/*.txt` from `dictionaries/*/gui/dokumentacja/*.yaml`. `-v` = generate **and** hard-check. Run before committing doc changes. While `VERSION` carries a suffix (`19.20.0-WIP` — a cycle is open) the lines that show the version number keep the number the files already have, so regenerated docs can be committed together with the template change; only the release commit, without the suffix, moves that number. |
 | `buduj_wielojezyczne_ui.py` | Batch-translates UI strings (`gui/ui.yaml`) from the Polish source into the other languages. Surgical mode: `-k <dotted.key>`. Review workflow: a full run always lands as a draft → review → `-f`/`--finalizuj`. |
 | `buduj_wielojezyczne_docs.py` | Batch-translates the manuals (`gui/dokumentacja/*.yaml`) pl → others. Same draft → review → `-f` workflow. A section rejected twice by the length/preamble gate is saved as `skrypty/odrzut_*.md` (both attempts); if the rejection was wrong, fix the better attempt and accept it with `-l <code> -t <file> -k <key> --przyjmij-probe <1|2>` (zero API). |
 | `buduj_wielojezyczne_tryby.py` | Batch-translates the Director's **recipes** (`<code>/rezyser/*.yaml` — prompt templates, GUI labels, developer comments) pl → others. Same draft → review → `-f` workflow, plus `--tylko-walidacja` (no API) to audit existing packs against each other. Re-running it on an EXISTING recipe rewrites the whole file, reviewed text included — for a small change splice only the changed rules into the pack from git HEAD (see the recipe checklist in `przeglad_tlumaczen.py`). |
@@ -200,7 +200,7 @@ tree — import errors and warnings raised on import, no build needed.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are 64 regression test files (1285 tests, **about a minute for all of them**) and
+There are 65 regression test files (1297 tests, **about a minute for all of them**) and
 nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
 (`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
 Running every one of them after every small edit is not thoroughness — a green
@@ -245,6 +245,7 @@ Two facts decide what that means, and both are easy to get backwards:
 | `rezyser_ai.py`, `opowiesci_ai.py`, `core_zastepcze.py`, or a recipe / tale prompt in `dictionaries/**/rezyser/` or `dictionaries/**/opowiesci/` | `pytest test_pola_schematu_w_prompcie.py test_burza_schemat.py` — every field of a structured-output schema must be named in the prompt that ships with it |
 | `manager_regul_kontrakt.py` | `pytest test_manager_kontrakt.py` |
 | any `dictionaries/**/gui/dokumentacja/*.yaml` or `gui/ui.yaml` | `generuj_dokumentacje.py --waliduj` **and** `audyt_leakow.py --bramka` + `audyt_pism.py --bramka` |
+| `generuj_dokumentacje.py` | `pytest test_stempel_wersji.py test_bliskie_cytaty.py test_markdown_poliglota.py` + `generuj_dokumentacje.py --waliduj` |
 | any other `dictionaries/**` (engine data: accents, ciphers, modes, tales) | `audyt_podstaw.py --bramka` + `audyt_ciszy.py --bramka` + `audyt_pism.py --bramka` |
 | a new or renamed `.py` in the repo root | `audyt_leakow.py --bramka-py` (the build is otherwise the first place this fires) |
 | `audyt_leakow.py` | `audyt_leakow.py --bramka` + `--bramka-py` + `--bramka-kontrakt`, and `pytest test_skan_leakow_draftow.py test_bliskie_cytaty.py test_tytul_screen_readera.py` |

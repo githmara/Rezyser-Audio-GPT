@@ -92,6 +92,54 @@ try:
 except OSError:
     NUMER_WERSJI = "?"
 
+# STEMPEL WERSJI W TRAKCIE CYKLU (od 2026-11-16, decyzja maintainera).
+# `VERSION` z JAKIMKOLWIEK sufiksem (`19.20.0-WIP`; bety i RC to przeszłość) =
+# cykl otwarty: wygenerowane pliki zachowują numer, który już noszą (ostatnie
+# wydanie), więc docs/readme da się regenerować i commitować razem ze zmianą
+# szablonu, a commit wydania zmienia w nich tylko linie z numerem. Mechanizm:
+# render z ZNACZNIKIEM w miejscu numeru, potem każda linia ze znacznikiem bierze
+# numer z tej samej linii starego pliku (`_stempluj_wersje`).
+_WYDANA_WERSJA = re.compile(r"^\d+(?:\.\d+)+$")
+_ZNACZNIK_WERSJI = "Zq7StempelWersji7qZ"
+_NUMER_W_PLIKU = r"(\d+(?:\.\d+)+(?:-[0-9A-Za-z.]+)?)"
+
+
+def wersja_z_sufiksem(numer: str | None = None) -> bool:
+    """Czy `VERSION` ma sufiks (cykl otwarty) — wszystko poza czystym `X.Y[.Z]`."""
+    return not _WYDANA_WERSJA.match(NUMER_WERSJI if numer is None else numer)
+
+
+def _stempluj_wersje(tresc: str, stara: str | None, numer: str) -> tuple[str, list[str]]:
+    """Podmienia znacznik wersji w ``tresc``.
+
+    Bez sufiksu: na ``numer``. Z sufiksem: każda linia ze znacznikiem bierze
+    numer z IDENTYCZNEJ (poza numerem) linii starego pliku; linia bez pary
+    (nowy plik, zmieniony nagłówek) bierze numer innej sparowanej linii tego
+    pliku, a gdy takiej nie ma — ``numer`` (z sufiksem, uczciwie) i trafia na
+    zwracaną listę, żeby wywołujący mógł ostrzec.
+    """
+    if _ZNACZNIK_WERSJI not in tresc:
+        return tresc, []
+    if not wersja_z_sufiksem(numer):
+        return tresc.replace(_ZNACZNIK_WERSJI, numer), []
+    linie = tresc.split("\n")
+    znalezione: list[str] = []
+    bez_pary: list[int] = []
+    for i, linia in enumerate(linie):
+        if _ZNACZNIK_WERSJI not in linia:
+            continue
+        wzor = re.escape(linia).replace(re.escape(_ZNACZNIK_WERSJI), _NUMER_W_PLIKU)
+        m = re.search(f"^{wzor}$", stara or "", re.M)
+        if m:
+            linie[i] = m.group(0)
+            znalezione.append(m.group(1))
+        else:
+            bez_pary.append(i)
+    zastepczy = znalezione[0] if znalezione else numer
+    for i in bez_pary:
+        linie[i] = linie[i].replace(_ZNACZNIK_WERSJI, zastepczy)
+    return "\n".join(linie), ([] if znalezione else [linie[i] for i in bez_pary])
+
 # Podfoldery w dictionaries/<kod>/gui/
 FOLDER_GUI = "gui"
 FOLDER_DOKUMENTACJA = "dokumentacja"
@@ -1286,7 +1334,7 @@ def _rozwin_placeholdery(
         # występuje w wartości (np. `app.wersja: "{numer_wersji} – Sufiks"`
         # w ui.yaml — od 13.4 numer wersji żyje w pliku VERSION).
         if "{numer_wersji}" in wartosc:
-            wartosc = wartosc.replace("{numer_wersji}", NUMER_WERSJI)
+            wartosc = wartosc.replace("{numer_wersji}", globalne.get("numer_wersji", NUMER_WERSJI))
         return _normalizuj_etykiete(wartosc)
 
     wynik = PLACEHOLDER_REGEX.sub(_zamien, szablon)
@@ -1337,6 +1385,9 @@ def generuj(
     # docelowego (wszystkie referowane wartości pochodzą z `dictionaries/pl/`,
     # paczki rdzennej projektu).
     placeholdery_globalne = _zbuduj_placeholdery_globalne()
+    # Numer wchodzi jako znacznik; prawdziwy stempel nadaje `_stempluj_wersje`
+    # po renderze (patrz STEMPEL WERSJI W TRAKCIE CYKLU przy NUMER_WERSJI).
+    placeholdery_globalne["numer_wersji"] = _ZNACZNIK_WERSJI
 
     for jezyk in jezyki:
         # GUARD (poziom UI): niesfinalizowany `ui.yaml` ⇒ pomiń CAŁY język.
@@ -1386,6 +1437,14 @@ def generuj(
                 wynik_tresc = _renderuj_html(wynik_tresc, jezyk)
 
             sciezka_wyjscia = _sciezka_wyjscia(id_szablonu, jezyk, docelowy_katalog)
+            try:
+                stara = sciezka_wyjscia.read_text(encoding="utf-8")
+            except OSError:
+                stara = None
+            wynik_tresc, bez_stempla = _stempluj_wersje(wynik_tresc, stara, NUMER_WERSJI)
+            if bez_stempla and not cicho:
+                print(f"⚠️  {jezyk}/{id_szablonu}: no released version number to keep "
+                      f"(VERSION {NUMER_WERSJI} has a suffix) — stamped as is.")
             # Piszemy z `newline="\n"` — celowo LF, nie platform-default.
             # Dzięki temu diff na Windowsie vs Linux zwraca ten sam wynik,
             # a `git` może sam zdecydować o konwersji przy checkoucie.

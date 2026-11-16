@@ -63,7 +63,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 <p>•  Anthropic (Claude) -avain — käyttää KOKO tekoälymoottoria: Ohjaajan kerrontaa (äänikirja, luettu teatteri, aivoriihi), Tarinat-tilaa, Polygloottia (kääntäjä) sekä lukujen otsikoiden antamista ja sisällön kielen tunnistamista. Alkaa merkeillä sk-ant-.</p>
 <p>Jos päivität vanhemmasta versiosta: vanhaa OpenAI-avainta ei enää tarvita oletusvaihtoehdon käyttöön — voit jättää tai poistaa sen rivin tiedostosta golden_key.env, sovellus ohittaa sen (ellei tietoisesti määritä toista toimittajaa — katso VAIHE 2B alla).</p>
 <p>Kuinka hankkia Anthropic-avain:<br>
-1. Luo tili osoitteessa console.anthropic.com ja lataa saldoa (välilehti Billing / Plans).<br>
+1. Luo tili osoitteessa console.anthropic.com ja lataa saldoa (välilehti Billing / Plans). Jos konsoli kysyy "Where does your code run?", valitse "Somewhere else" — muut vastaukset (esim. "Your own machine", joka johtaa ant CLI -työkalun asentamiseen) eivät koske tätä ohjelmaa.<br>
 2. Luo avain osiossa API Keys (alkaa merkeillä sk-ant-). Kopioi se heti — se saatetaan näyttää vain kerran.</p>
 <p>Kuinka syöttää avain ohjelmaan:<br>
 3. Napsauta ohjelman aloitusnäytöllä painiketta "Luo golden_key.env-tiedosto ja avaa tekstieditori". Järjestelmä luo automaattisesti puhtaan konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistiossa valmiin mallin, jota voit muokata.<br>
