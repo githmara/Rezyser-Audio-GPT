@@ -1372,6 +1372,18 @@ _BEZ_JSON_SCHEMA: set[tuple[str, str]] = set()
 # schematu po stronie providera bywa cache'owana bajtowo (jak u Anthropic).
 _NAZWA_SCHEMATU = "odpowiedz"
 
+#: Myślenie w TEKSTOWEJ gałęzi OpenRoutera (v19.20). Bez tego pola Sonnet 5.5
+#: przez OpenRoutera myśli domyślnie (408–647 tokenów na sekcję podręcznika),
+#: wbrew decyzji „runtime nie myśli”, a myślenie wlicza się do `max_tokens`:
+#: przy limicie 4000 przekład ucinał się o ok. 10%. `low` dało 0 tokenów
+#: myślenia; `enabled: false` kończy się 400 „Reasoning is mandatory”
+#: (zmierzone 2026-11-16, `skrypty/pomiar_reasoning_openrouter.py`).
+_OPENROUTER_REASONING_TEKST: dict = {"effort": "low"}
+
+# (provider, model), które odrzuciły `reasoning` w tej sesji — kolejne
+# wywołania nie wysyłają pola i nie płacą jałowym 400 (wzorzec `_BEZ_JSON_SCHEMA`).
+_BEZ_REASONING: set[tuple[str, str]] = set()
+
 
 def _wywolaj_openai_compat(
     klient: "KlientLLM",
@@ -1470,6 +1482,14 @@ def _wywolaj_openai_compat(
          True, "max_completion_tokens"))
 
     bez_temp = not honoruje_temperature(model_baseline or mdl, temperature)
+    # `reasoning` tylko na OpenRouterze (pole jego API, nie OpenAI). Model,
+    # który go nie przyjmie (np. wskazany przez `LLM_MODEL`), dostaje TEN SAM
+    # szczebel bez pola — jak `temperature` niżej, nie zejście po drabinie.
+    reasoning: dict | None = (
+        _OPENROUTER_REASONING_TEKST
+        if klient.provider == PROVIDER_OPENROUTER and klucz_schematu not in _BEZ_REASONING
+        else None
+    )
     ostatni = len(proby) - 1
     i = 0
     while i <= ostatni:
@@ -1479,10 +1499,19 @@ def _wywolaj_openai_compat(
                 klient, mdl, msgs, max_tokens, temperature, timeout, fmt,
                 bez_temperatury=bez_temp or bez_temp_szczebla,
                 klucz_tokenow=klucz_tok,
+                extra_body={"reasoning": reasoning} if reasoning else None,
             )
         except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO błąd struktury
             if not _czy_zla_struktura(exc):
                 raise  # 429/timeout/sieć/kontekst/nieznany model → wyżej
+            if reasoning and "reasoning" in str(exc).lower():
+                _dev_log(
+                    f"{klient.provider}: model '{mdl}' odrzucił 'reasoning' — "
+                    f"powtarzam szczebel '{opis}' bez tego pola."
+                )
+                reasoning = None
+                _BEZ_REASONING.add(klucz_schematu)
+                continue   # ten sam szczebel, bez `reasoning`
             if not (bez_temp or bez_temp_szczebla) and _co_odrzucono(exc) == "temperature":
                 _dev_log(
                     f"{klient.provider}: model '{mdl}' odrzucił 'temperature' — "

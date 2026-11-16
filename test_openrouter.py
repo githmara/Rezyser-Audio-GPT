@@ -99,6 +99,7 @@ def _wywolaj(klient, model="claude-sonnet-5-5", temperature=0.85, **extra):
 @pytest.fixture(autouse=True)
 def _czysta_pamiec_sesji():
     cl._BEZ_JSON_SCHEMA.clear()
+    cl._BEZ_REASONING.clear()
     cl._NAUCZONE_BEZ_TEMPERATURY.clear()
     yield
 
@@ -254,6 +255,33 @@ def test_brak_kredytow_to_limit_bez_drabiny(blad):
     with pytest.raises(cl.BladLimituLLM):
         _wywolaj(klient, schema_json=SCHEMAT, wymusz_json=True)
     assert len(wyslane) == 1
+
+
+def test_tekst_przez_openroutera_wysyla_reasoning_low():
+    # v19.20: bez pola Sonnet 5.5 myśli domyślnie i zjada `max_tokens`.
+    klient, wyslane = _klient([('{"opcje": []}', "stop")])
+    _wywolaj(klient, schema_json=SCHEMAT, wymusz_json=True)
+    assert wyslane[0]["extra_body"] == {"reasoning": {"effort": "low"}}
+
+
+def test_compat_nie_wysyla_reasoning():
+    sdk = _Sdk([("ok", "stop")])
+    klient = cl.KlientLLM(cl.PROVIDER_OPENAI_COMPAT, sdk, model_override="x/y")
+    _wywolaj(klient)
+    assert "extra_body" not in sdk.chat.completions.wyslane[0]
+
+
+def test_odrzucone_reasoning_ten_sam_szczebel_i_pamiec():
+    klient, wyslane = _klient([
+        BadRequestError("Unrecognized request argument: reasoning"),
+        ('{"opcje": []}', "stop"),
+        ('{"opcje": []}', "stop"),
+    ], model_override="egzotyk/model-1")
+    _wywolaj(klient, schema_json=SCHEMAT, wymusz_json=True)
+    assert "extra_body" not in wyslane[1]
+    assert wyslane[1]["response_format"]["type"] == "json_schema"
+    _wywolaj(klient, schema_json=SCHEMAT, wymusz_json=True)
+    assert len(wyslane) == 3 and "extra_body" not in wyslane[2]
 
 
 def test_content_filter_to_odmowa():
