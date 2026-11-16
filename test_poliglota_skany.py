@@ -107,6 +107,10 @@ def srodowisko(monkeypatch):
                                znaczniki={"ILLEGIBLE": 1}) for n in strony], None
 
     monkeypatch.setattr(cs, "odczytaj_strony", odczytaj)
+    # Konstruktor panelu (`_init_api`) wczytywal PRAWDZIWY `golden_key.env` do
+    # `os.environ` na reszte zestawu (bramka higieny, 2026-11-16). Klienta
+    # i tak podstawiamy nizej.
+    monkeypatch.setattr(gp, "load_dotenv", lambda *_a, **_k: False)
 
     ramka = wx.Frame(None)
     panel = gp.PoliglotaPanel(ramka)

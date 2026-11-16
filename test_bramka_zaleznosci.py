@@ -94,6 +94,7 @@ def _uruchom(wynik: az.WynikBramki | None, *, no_strict: bool = False,
             except SystemExit as exc:
                 kod = exc.code if isinstance(exc.code, int) else 1
     finally:
+        _sprzataj(az.ZNACZNIK_BUDZIKA.parent)
         az.bramka = oryginalna
         az.ZNACZNIK_BUDZIKA = znacznik
     return bufor.getvalue(), kod
@@ -574,22 +575,10 @@ def _manifest(*linie: str) -> str:
 
 
 def _sprzataj(katalog: Path) -> None:
-    """Usuwa repo tymczasowe — z odblokowaniem read-only obiektow `.git/`.
-
-    Goly `rmtree` z `ignore_errors` NIE wystarcza i to jest zmierzone: po
-    dwoch seriach testow w `%TEMP%` zostawalo 5 z 6 repo, bo pliki
-    w `.git/objects/` sa na Windows read-only, a tlumienie bledow zjada
-    `PermissionError` w milczeniu. `onexc` (nie `onerror` — ten wypadl
-    w Pythonie 3.14) zdejmuje flage i ponawia.
-    """
-    def _odblokuj(func, sciezka, _wyjatek):
-        try:
-            os.chmod(sciezka, stat.S_IWRITE)
-            func(sciezka)
-        except OSError:
-            pass
-
-    shutil.rmtree(katalog, onexc=_odblokuj)
+    """Usuwa repo tymczasowe — logika (read-only `.git/objects`) w
+    `higiena_testow.usun_katalog`, od v19.20 wspolna dla calego zestawu."""
+    import higiena_testow as ht
+    ht.usun_katalog(katalog)
 
 
 def _repo_z_manifestem(przed: str, po: str) -> Path:

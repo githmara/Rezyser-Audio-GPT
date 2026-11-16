@@ -90,6 +90,9 @@ def _dokoncz(app, watek):
 
 def _poliglota(ramka, monkeypatch, tmp_path):
     import gui_poliglota as gp
+    # `_init_api` w konstruktorze wczytywal PRAWDZIWY `golden_key.env` do
+    # `os.environ` na reszte zestawu (bramka higieny, 2026-11-16).
+    monkeypatch.setattr(gp, "load_dotenv", lambda *_a, **_k: False)
     panel = gp.PoliglotaPanel(ramka)
     zakonczone = []
     monkeypatch.setattr(panel, "_dokoncz_wczytanie",

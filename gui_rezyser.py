@@ -3108,6 +3108,7 @@ class RezyserPanel(wx.Panel):
             sciezka_out = os.path.join(
                 app_dir, self.SKRYPTY_DIR, f"{nazwa}_screen_reader.html"
             )
+            os.makedirs(os.path.dirname(sciezka_out), exist_ok=True)
             with open(sciezka_out, "w", encoding="utf-8") as fh:
                 fh.write(html)
         except Exception as exc:  # noqa: BLE001
@@ -3565,6 +3566,7 @@ class RezyserPanel(wx.Panel):
         po cichu — user dostaje pełny komunikat i może ponowić narzędzie.
         """
         try:
+            os.makedirs(os.path.dirname(sciezka), exist_ok=True)
             with open(sciezka, "w", encoding="utf-8") as fh:
                 fh.write(tekst + "\n")
             return True

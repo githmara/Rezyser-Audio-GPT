@@ -35,6 +35,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import buduj_wielojezyczne_tryby as bt
 import tlumacz_rdzen
+import higiena_testow as ht
 
 REPO = Path(__file__).parent
 
@@ -49,7 +50,7 @@ def _paczki(stub):
         yield katalog / "dictionaries"
     finally:
         bt.DICT_DIR, bt.wywolaj_llm = stary_dict, stary_llm
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def _tlumacz(kod: str, plik: str, orakuly=None):

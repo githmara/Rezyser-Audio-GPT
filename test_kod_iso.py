@@ -32,6 +32,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import core_llm as cl
 import core_poliglota as cp
 import tlumacz_ai
+import higiena_testow as ht
 
 TRESC = "Krotki tekst zrodlowy do przetlumaczenia.\n"
 
@@ -60,7 +61,7 @@ def _srodowisko():
         yield katalog
     finally:
         cl.wywolaj_llm = stary_llm
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def _przebieg(katalog: str, **kwargs):

@@ -1661,11 +1661,25 @@ def sprawdz_zrodla_pl(przepisy: list[str]) -> None:
 
     Gałąź `p_pl is None` w :func:`waliduj_silnikiem` zostaje jako obrona w głąb —
     ta funkcja jest wołana z `main()`, a tamta bywa wołana z testów.
+
+    Globalny katalog silnika wraca po pre-flighcie (v19.20.0, bramka higieny
+    testów): bez tego `test_zrodlo_pl_raz` zostawiał `przepisy_rezysera`
+    wpatrzone w skasowany katalog tymczasowy — ten sam wyciek, który
+    `waliduj_silnikiem` zamknął wcześniej.
     """
     import przepisy_rezysera as pr
 
+    stary = pr.DICTIONARIES_DIR
     pr.DICTIONARIES_DIR = str(DICT_DIR)
     pr.wyczysc_cache()
+    try:
+        _sprawdz_zrodla_pl(pr, przepisy)
+    finally:
+        pr.DICTIONARIES_DIR = stary
+        pr.wyczysc_cache()
+
+
+def _sprawdz_zrodla_pl(pr, przepisy: list[str]) -> None:
     zepsute: list[str] = []
     for nazwa in przepisy:
         plik = DICT_DIR / KOD_ZRODLOWY / FOLDER_REZYSER / nazwa

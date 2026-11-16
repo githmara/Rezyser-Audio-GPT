@@ -31,6 +31,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent))
 
 import core_rezyser as cr
+import higiena_testow as ht
 
 # Proza modelu w realnym ksztalcie: akapity rozdzielone pusta linia.
 FRAGMENT_DWA_AKAPITY = "Pierwszy akapit prozy.\n\nDrugi akapit prozy."
@@ -54,7 +55,7 @@ class Sesja:
         return surowe[:-1] if surowe and surowe[-1] == "" else surowe
 
     def sprzataj(self):
-        shutil.rmtree(self.katalog, ignore_errors=True)
+        ht.usun_katalog(self.katalog)
 
 
 def maks_pustych_pod_rzad(linie):

@@ -1071,6 +1071,9 @@ DEV_TOOLE = {
     # v19.20.0: tabela „co ruszyłeś → co uruchomić” i diagnoza ostrzeżeń
     # PyInstallera. Wołane ze źródła i z `build_release`; do bundla nie wchodzą.
     "co_uruchomic.py", "diagnoza_importow.py",
+    # v19.20.0: logika bramki higieny testów (`conftest.py`). Importują ją
+    # wyłącznie testy; do bundla nie wchodzi.
+    "higiena_testow.py",
 }
 
 # `jezyki_lingua.py` CELOWO NIE JEST na liście wyżej i to jest decyzja, nie

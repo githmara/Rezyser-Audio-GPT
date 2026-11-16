@@ -37,6 +37,7 @@ import jsonschema
 
 import core_rezyser as cr
 import rezyser_ai as rai
+import higiena_testow as ht
 
 ODPOWIEDZ_OK = {
     "opcje": [
@@ -111,7 +112,7 @@ def test_persystencja_ignoruje_klucz_ze_starych_plikow():
         wczytane = projekt.wczytaj_brainstorm("proba")
         assert wczytane == {"opcje": ODPOWIEDZ_OK["opcje"]}, wczytane
     finally:
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_regula_adhoc_z_ksiegi_nie_psuje_tekstu():

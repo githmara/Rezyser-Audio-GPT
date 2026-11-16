@@ -46,6 +46,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import audyt_zaleznosci as az
 import build_release as br
 import core_updater as cu
+import higiena_testow as ht
 
 WERSJA = "18.31.0"
 
@@ -113,7 +114,7 @@ def _srodowisko(*, licznik_lokalny=0, wersja_pliku=WERSJA, licznik_zdalny=None,
     finally:
         (cu._SCIEZKA_PATCH_DEV, cu._SCIEZKA_VERSION,
          cu.urllib.request.urlopen) = stare
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def _przebieg(funkcja):
@@ -234,7 +235,7 @@ def _z_plikiem_patch_dev(tresc: str, wersja: str):
         return br.sprawdz_licznik_patch_dev(wersja)
     finally:
         br.PLIK_PATCH_DEV = stara
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_pelne_wydanie_wymaga_zerowego_licznika():
@@ -359,7 +360,7 @@ def _repo_z_hookiem(pliki: dict):
             _git(katalog, "add", nazwa)
         yield katalog
     finally:
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def _licznik(wersja: str, n: int = 0) -> str:

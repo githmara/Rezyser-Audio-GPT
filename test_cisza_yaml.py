@@ -36,6 +36,7 @@ import opowiesci_ai
 import przepisy_rezysera as pr
 import refresh_languages
 import tlumacz_rdzen
+import higiena_testow as ht
 
 # Trzy ksztalty korzenia, ktore parsuja sie POPRAWNIE, ale nie sa mapa. Kazdy
 # powstaje realnie: skalar po skasowaniu wszystkiego oprocz jednej linii, lista
@@ -75,7 +76,7 @@ def test_przepisy_ksztalt_trafia_do_rejestru():
         assert powody["pusty.yaml"].szczegol == "NoneType", powody["pusty.yaml"]
     finally:
         pr.wyczysc_pominiecia()
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_poliglota_ksztalt_trafia_do_rejestru():
@@ -90,7 +91,7 @@ def test_poliglota_ksztalt_trafia_do_rejestru():
         assert wpisy[0].szczegol == "str", wpisy[0]
     finally:
         pr.wyczysc_pominiecia()
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_jeden_wpis_na_plik_nie_dwa():
@@ -104,7 +105,7 @@ def test_jeden_wpis_na_plik_nie_dwa():
         assert len(pr.pominiete_pliki()) == 1, pr.pominiete_pliki()
     finally:
         pr.wyczysc_pominiecia()
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_opowiesci_skalar_spada_na_en_bez_crasha():
@@ -133,7 +134,7 @@ def test_opowiesci_skalar_spada_na_en_bez_crasha():
         opowiesci_ai.ROOT_DICT = stare
         opowiesci_ai._zaladuj_przepis.cache_clear()
         pr.wyczysc_pominiecia()
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_konwerter_zepsuta_paczka_zglasza_powod():
@@ -169,7 +170,7 @@ def test_konwerter_zepsuta_paczka_zglasza_powod():
             gui_konwerter._DICTIONARIES_DIR = stare
             gui_konwerter._slowa_kluczowe_konwertera.cache_clear()
             pr.wyczysc_pominiecia()
-            shutil.rmtree(katalog, ignore_errors=True)
+            ht.usun_katalog(katalog)
     finally:
         app.Destroy()
 
@@ -187,7 +188,7 @@ def test_szablony_managera_zglaszaja_powod():
         assert powody == [pr.POWOD_KSZTALT, pr.POWOD_PARSE], powody
     finally:
         pr.wyczysc_pominiecia()
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_klucz_i18n_dla_nowego_powodu_istnieje_w_kazdej_paczce():
@@ -275,7 +276,7 @@ def test_brak_plikow_tlumaczen_nie_jest_juz_cisza():
         i18n._DICTIONARIES_DIR = pierwotny_dir
         i18n._CACHE.clear()
         i18n.ustaw_jezyk(pierwotny_jezyk)
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_alarmy_cytuja_istniejacy_klucz():
@@ -335,7 +336,7 @@ def test_dev_yaml_pada_na_ksztalcie_i_skladni():
         else:
             raise AssertionError("a missing file must be fatal for `wczytaj_lub_padnij`")
     finally:
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_refresh_nie_kasuje_zepsutego_rejestru():
@@ -355,7 +356,7 @@ def test_refresh_nie_kasuje_zepsutego_rejestru():
         assert zepsuty.read_text(encoding="utf-8") == ZLA_SKLADNIA
     finally:
         refresh_languages.REJESTR = stary
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_rdzen_nie_zaweza_zasiegu_po_cichu():
@@ -382,7 +383,7 @@ def test_rdzen_nie_zaweza_zasiegu_po_cichu():
         mapa = tlumacz_rdzen.wczytaj_mape_jezykow(katalog)
         assert mapa == dict(tlumacz_rdzen.FALLBACK_JEZYKOW), mapa
     finally:
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 # ---------------------------------------------------------------------------
@@ -439,7 +440,7 @@ def test_bramka_lapie_cisze_i_milczy_o_naprawie():
         assert audyt_ciszy.skanuj_plik(naprawiony) == [], \
             audyt_ciszy.skanuj_plik(naprawiony)
     finally:
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_bramka_nie_sciga_kontroli_pol():
@@ -468,7 +469,7 @@ def wczytaj(plik):
 ''')
         assert audyt_ciszy.skanuj_plik(modul) == [], audyt_ciszy.skanuj_plik(modul)
     finally:
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 # Trzy wzorce z audytu v18.28.0: dwa przepuszczane przez pierwsza wersje bramki
@@ -534,7 +535,7 @@ def test_bramka_lapie_wzorce_z_audytu():
         # Kod wspolny dla obu sciezek nie jest galezia porazki.
         assert not [z for z in wyniki if z.zakres == "wspolny_kod_po_if"], wyniki
     finally:
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 # ---------------------------------------------------------------------------
@@ -563,7 +564,7 @@ def test_dev_yaml_pada_na_zlym_zapisie_znakowym():
         else:
             raise AssertionError("a non-UTF-8 file passed the loader")
     finally:
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_i18n_zly_zapis_znakowy_trafia_do_rejestru_awarii():
@@ -584,7 +585,7 @@ def test_i18n_zly_zapis_znakowy_trafia_do_rejestru_awarii():
         i18n._DICTIONARIES_DIR = stare
         i18n._CACHE.pop("xx", None)
         i18n._AWARIE.pop("xx", None)
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_szablony_managera_milcza_o_braku_pliku():
@@ -607,7 +608,7 @@ def test_szablony_managera_milcza_o_braku_pliku():
         assert len(wpisy) == 1 and wpisy[0].powod == pr.POWOD_PARSE, wpisy
     finally:
         pr.wyczysc_pominiecia()
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_baza_rezysera_bez_pliku_nie_zglasza_powodu():
@@ -625,7 +626,7 @@ def test_baza_rezysera_bez_pliku_nie_zglasza_powodu():
         pr.DICTIONARIES_DIR = stare
         pr._CACHE_BAZA.clear()
         pr.wyczysc_pominiecia()
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_drzewo_jest_czyste():

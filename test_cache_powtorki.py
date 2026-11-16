@@ -50,6 +50,7 @@ import yaml
 import core_llm as cl
 import tlumacz_ai
 import buduj_wielojezyczne_docs as bd
+import higiena_testow as ht
 
 KOD = "fi"
 NAZWA_PL = "finski"
@@ -103,7 +104,7 @@ def _srodowisko():
     finally:
         bd.RUNTIME_DIR, cl.wywolaj_llm = stary_runtime, stary_llm
         bd.KATALOG_ODRZUTOW = stare_odrzuty
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def _sciezka_cache() -> str:
@@ -264,7 +265,7 @@ def test_uniewaznianie_zajetego_pliku_obcina():
             assert tlumacz_ai.uniewaznij_cache_tlumaczenia(sciezka) is None
             assert os.path.getsize(sciezka) == 0, "plik mial zostac obciety"
     finally:
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_uniewaznianie_braku_pliku_milczy():
@@ -274,7 +275,7 @@ def test_uniewaznianie_braku_pliku_milczy():
         brak = os.path.join(katalog, "temp_nie_ma.jsonl")
         assert tlumacz_ai.uniewaznij_cache_tlumaczenia(brak) is None
     finally:
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def test_uniewaznianie_niemozliwe_zwraca_powod():
@@ -292,7 +293,7 @@ def test_uniewaznianie_niemozliwe_zwraca_powod():
         assert isinstance(powod, str) and powod, powod
         assert "remove:" in powod and "truncate:" in powod, powod
     finally:
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 # ---------------------------------------------------------------------------

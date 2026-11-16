@@ -30,7 +30,6 @@ Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_pamiec_dlugotr
 import json
 import os
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -48,8 +47,7 @@ KANDYDACI = [SUF_A, SUF_B, "_overview"]
 NARZEDZIA = [SUF_A, SUF_B]
 
 
-def _projekt(kandydaci=KANDYDACI, narzedzia=NARZEDZIA) -> tuple[cr.ProjektRezysera, Path]:
-    tmp = Path(tempfile.mkdtemp(prefix="pamiec_"))
+def _projekt(tmp: Path, kandydaci=KANDYDACI, narzedzia=NARZEDZIA) -> tuple[cr.ProjektRezysera, Path]:
     (tmp / "skrypty").mkdir()
     (tmp / "runtime" / "skrypty").mkdir(parents=True)
     projekt = cr.ProjektRezysera(app_dir=str(tmp))
@@ -78,9 +76,9 @@ def _pliki(tmp: Path) -> tuple[list[str], list[str]]:
 # ---------------------------------------------------------------------------
 # 1. Migracja: co wolno przemianowac, a czego nie
 # ---------------------------------------------------------------------------
-def test_plik_drugiego_narzedzia_nie_jest_przemianowywany():
+def test_plik_drugiego_narzedzia_nie_jest_przemianowywany(tmp_path):
     """Pamiec zapisana narzedziem B zostaje pod sufiksem B."""
-    projekt, tmp = _projekt()
+    projekt, tmp = _projekt(tmp_path)
     _pamiec(tmp, "kroniki", SUF_B, "PAMIEC POD AI", "Rozdział 7")
 
     odrzucona = projekt._rozstrzygnij_pamiec("kroniki")
@@ -97,9 +95,9 @@ def test_plik_drugiego_narzedzia_nie_jest_przemianowywany():
     assert meta == [f"kroniki{SUF_B}_meta.json"], meta
 
 
-def test_plik_obcej_paczki_nadal_migruje():
+def test_plik_obcej_paczki_nadal_migruje(tmp_path):
     """Lekarstwo nie zjada migracji, dla ktorej ten kod powstal (v18.14)."""
-    projekt, tmp = _projekt()
+    projekt, tmp = _projekt(tmp_path)
     # `_overview` to sufiks MIEDZYNARODOWY, nie narzedzie tej paczki - plik
     # przyszedl z innej maszyny albo z paczki, ktorej user juz nie ma.
     _pamiec(tmp, "kroniki", "_overview", "PAMIEC Z OBCEJ PACZKI", "Rozdział 3")
@@ -114,9 +112,9 @@ def test_plik_obcej_paczki_nadal_migruje():
         f"meta ma jechac z plikiem - anchor rekoncyliacji jest para do tresci: {meta}")
 
 
-def test_dwa_pliki_pyta_usera_i_nie_rusza_nazw():
+def test_dwa_pliki_pyta_usera_i_nie_rusza_nazw(tmp_path):
     """Przy dwoch kandydatach decyduje rezyser, a pliki zostaja, gdzie sa."""
-    projekt, tmp = _projekt()
+    projekt, tmp = _projekt(tmp_path)
     _pamiec(tmp, "kroniki", SUF_A, "POD SIEBIE", "Rozdział 1")
     _pamiec(tmp, "kroniki", SUF_B, "POD AI", "Rozdział 7")
 
@@ -133,9 +131,9 @@ def test_dwa_pliki_pyta_usera_i_nie_rusza_nazw():
     assert set(tresc) == {f"kroniki{SUF_A}.txt", f"kroniki{SUF_B}.txt"}, tresc
 
 
-def test_kandydaci_bez_narzedzi_zachowuja_stary_zbior():
+def test_kandydaci_bez_narzedzi_zachowuja_stary_zbior(tmp_path):
     """`ustaw_kandydatow_pamieci` bez drugiego argumentu nie kasuje wiedzy."""
-    projekt, _tmp = _projekt()
+    projekt, _tmp = _projekt(tmp_path)
     projekt.ustaw_kandydatow_pamieci([SUF_B, SUF_A])
     assert projekt.sufiksy_narzedzi_pamieci == set(NARZEDZIA), (
         "pominiety argument ma ZOSTAWIC poprzedni zbior narzedzi, a nie "

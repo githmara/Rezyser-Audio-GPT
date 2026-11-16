@@ -45,6 +45,7 @@ import gui_diagnostyka as gd
 import i18n
 import manager_regul_szablony as mrs
 import przepisy_rezysera as pr
+import higiena_testow as ht
 
 _KORZEN = Path(__file__).parent
 _DICT = _KORZEN / "dictionaries"
@@ -180,7 +181,7 @@ def test_rejestr_w_aplikacji_zglasza_szkic():
     finally:
         pr.DICTIONARIES_DIR = pierwotny
         pr.wyczysc_pominiecia()
-        shutil.rmtree(tmp, ignore_errors=True)
+        ht.usun_katalog(tmp)
 
 
 def test_komunikat_powodu_jest_w_kazdej_paczce():

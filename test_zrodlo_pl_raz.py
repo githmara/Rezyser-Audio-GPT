@@ -41,6 +41,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent))
 
 import buduj_wielojezyczne_tryby as bwt
+import higiena_testow as ht
 
 ZRODLO_REPO = Path(__file__).parent / "dictionaries"
 PRZEPIS = "tryb_skrypt.yaml"
@@ -67,7 +68,7 @@ def _kopia_pl():
     finally:
         bwt.DICT_DIR = stary
         bwt.zapomnij_ostrzezenia_o_zrodle()
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def _zepsuj_etykiete(dict_dir: Path, nazwa: str = PRZEPIS) -> None:

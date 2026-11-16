@@ -200,7 +200,7 @@ tree — import errors and warnings raised on import, no build needed.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are 63 regression test files (1270 tests, **about a minute for all of them**) and
+There are 64 regression test files (1285 tests, **about a minute for all of them**) and
 nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
 (`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
 Running every one of them after every small edit is not thoroughness — a green
@@ -250,6 +250,7 @@ Two facts decide what that means, and both are easy to get backwards:
 | `audyt_leakow.py` | `audyt_leakow.py --bramka` + `--bramka-py` + `--bramka-kontrakt`, and `pytest test_skan_leakow_draftow.py test_bliskie_cytaty.py test_tytul_screen_readera.py` |
 | `manager_regul_szablony.py` (creator templates and prompts), `audyt_kreatora.py`, or a loader check the creator describes | `audyt_kreatora.py --bramka` + `pytest test_audyt_kreatora.py` — the texts must not describe an engine that does not exist, and every rejection branch of a described check needs a probe (`KONTROLE_Z_SONDAMI`) |
 | a new `test_*.py` | `pytest test_kanon_testow.py` (checks how every test file runs, not what it tests — and that the counts above still match, via `przelicznik_testow.py`) |
+| any code that writes a file, or `conftest.py` / `higiena_testow.py` | `pytest test_higiena_testow.py` (no write without an ensured directory, no silent cleanup in tests) |
 | `requirements.txt`, or before any freeze | `audyt_zaleznosci.py` (the build runs it too, and stops on a hit unless you pass `--no-strict`) |
 
 The mapping comes from the test files' own imports (`grep -oE '^(import\|from) [a-z_]+'`),
@@ -296,6 +297,31 @@ showing up as a skip, and `@pytest.mark.parametrize` and fixtures (`tmp_path`,
 and gets a `TypeError`. One mechanism, one way of reporting. `test_kanon_testow.py`
 enforces the delegation (not byte-identity: `test_core_updater.py`, where the rule was
 first written, also prints whether `GITHUB_TOKEN` is set before it hands over).
+
+### A test leaves the world as it found it
+
+Since 19.20 `conftest.py` takes a snapshot before **every** test and compares after it.
+The snapshot covers:
+- the working directory and the environment variables (values are never printed);
+- the scalar globals of the project's modules;
+- the git-ignored data folders (`runtime/`, `skrypty/`) and every directory made by
+  `tempfile.mkdtemp`;
+- after each file, `git status`.
+
+Anything the test changed and did not restore is an ERROR of **that** test. Before the
+gate, the suite passed in alphabetical order and failed 53 + 14 times in reverse order:
+leaks surfaced in some other file, depending on which file happened to run next. The
+logic and its proofs live in `higiena_testow.py` / `test_higiena_testow.py`. To stay
+clean:
+- use `monkeypatch` (`setattr`, `setenv`, `chdir` all restore themselves) and
+  `tmp_path` rather than `mkdtemp`;
+- if a temporary directory is unavoidable, remove it with
+  `higiena_testow.usun_katalog`, never `rmtree(..., ignore_errors=True)`. That call
+  silently left git repositories with read-only `.git/objects` in `%TEMP%`, and the gate
+  rejects it in tests.
+- The same file holds the other half of the rule: a function that writes a file must
+  make sure its directory exists (`mkdir(parents=True, exist_ok=True)`), or appear in
+  `ZAPISY_BEZ_ENSURE` with a reason.
 
 ## Adding a UI language
 

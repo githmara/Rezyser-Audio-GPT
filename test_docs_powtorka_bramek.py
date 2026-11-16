@@ -31,6 +31,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import core_llm as cl
 import buduj_wielojezyczne_docs as bd
+import higiena_testow as ht
 
 KOD = "fi"
 NAZWA_PL = "finski"
@@ -76,7 +77,7 @@ def _srodowisko(*odpowiedzi):
         bd.RUNTIME_DIR, cl.wywolaj_llm, bd.KATALOG_ODRZUTOW = (
             stary_runtime, stary_llm, stare_odrzuty)
         bd.STATYSTYKA_POWTOREK.clear()
-        shutil.rmtree(katalog, ignore_errors=True)
+        ht.usun_katalog(katalog)
 
 
 def _przebieg(tresc_pl: str = TRESC_PL) -> tuple[bool, str | None, str]:

@@ -733,6 +733,8 @@ def zamroz(wersja: str, katalog: Path | None = None,
         if ostatni.read_text(encoding="utf-8").splitlines() == freeze.splitlines():
             return ostatni, False
     cel = katalog / f"zamrozone_{wersja}.txt"
+    # `skrypty/` jest gitignorowany - swiezy klon go nie ma (bramka higieny 19.20).
+    katalog.mkdir(parents=True, exist_ok=True)
     cel.write_text(freeze, encoding="utf-8")
     return cel, True
 
