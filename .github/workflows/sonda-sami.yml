@@ -1,0 +1,42 @@
+name: Sonda Sami (production key check)
+
+# Jedno żywe wywołanie Sami SEKRETEM repozytorium — jedyny dowód, że ścieżka
+# produkcyjna bota działa (2026-11-17). Lokalny golden_key.env tego nie dowodzi:
+# po rotacji kluczy sekret Actions trzeba przestawić osobno (`gh secret set`),
+# a lokalny OPENAI_API_KEY może należeć do endpointu openai_compat.
+# Wołane przez `zywe_wywolania.py sami` (gh workflow run + gh run watch).
+# Tylko ręczny wyzwalacz: zero danych z zewnątrz, żadnych inputów.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sonda-sami
+  cancel-in-progress: false
+
+jobs:
+  sonda:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie kodu repozytorium
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Konfiguracja srodowiska Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14.3'  # = audyt_zaleznosci.PYTHON_PRZETESTOWANY (test_python_ci.py)
+
+      - name: Instalacja zaleznosci (openai + pyyaml)
+        run: |
+          # Granice jak w issue-intake.yml — sonda ma jechać tym samym SDK co bot.
+          pip install --upgrade "openai>=1.40,<4" pyyaml
+
+      - name: Jedno wywolanie MODEL_SAMI sekretem OPENAI_API_KEY
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python .github/scripts/sonda_sami.py

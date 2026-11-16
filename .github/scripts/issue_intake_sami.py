@@ -855,6 +855,21 @@ def zloz_payload_llm(body: str, zalaczniki_tresc: str) -> str:
     )
 
 
+def zapytaj_model(klucz: str, wiadomosci: list[dict]):
+    """JEDYNE wywołanie OpenAI w Sami (model ze stałej, BEZ `temperature`).
+
+    Z tej samej funkcji korzysta `sonda_sami.py` (workflow `sonda-sami.yml`), więc
+    sonda sprawdza ścieżkę produkcyjną: sekret Actions + `MODEL_SAMI` + te kwargs.
+    Lokalny `OPENAI_API_KEY` z `golden_key.env` NIE jest tą ścieżką — może należeć
+    do innego konta albo do endpointu `openai_compat` (otwór z 2026-11-17).
+    Wyjątki przechodzą do wołającego: produkcja łapie je w fallback, sonda nie.
+    """
+    from openai import OpenAI
+    return OpenAI(api_key=klucz).chat.completions.create(
+        model=MODEL_SAMI, messages=wiadomosci
+    )
+
+
 def _przeredaguj_z_openai(
     title: str, body: str, labels: list[str]
 ) -> tuple[str, bool]:
@@ -872,16 +887,15 @@ def _przeredaguj_z_openai(
         return _fallback(), False
 
     try:
-        from openai import OpenAI
+        import openai  # noqa: F401 — sama obecność SDK; wywołanie w zapytaj_model
     except ImportError as exc:
         sys.stderr.write(f"[!] openai SDK nie zainstalowane: {exc}\n")
         return _fallback(), False
 
     try:
-        klient = OpenAI(api_key=klucz)
-        odp = klient.chat.completions.create(
-            model=MODEL_SAMI,
-            messages=[
+        odp = zapytaj_model(
+            klucz,
+            [
                 {"role": "system", "content": SAMI_SYSTEM_PROMPT},
                 {
                     "role": "user",
