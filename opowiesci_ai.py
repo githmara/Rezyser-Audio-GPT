@@ -231,6 +231,34 @@ SCHEMA_TURA_API: dict[str, Any] = cl.schemat_z_dyskryminatorem(
 )
 
 
+def _bez_fiolki(schemat: dict[str, Any]) -> dict[str, Any]:
+    """Kopia schematu tury bez ``stan.fiolka`` (v19.20)."""
+    kopia = json.loads(json.dumps(schemat))
+    del kopia["properties"]["stan"]["properties"]["fiolka"]
+    return kopia
+
+
+# Schemat tury PER TRYB (v19.20). Fiolka to mechanika WYŁĄCZNIE Mniejszego Zła:
+# prompty trybów 3/4 jej nie opisują, a schemat wspólny dla wszystkich trybów
+# kazał modelowi wypełniać pole, którego znaczenia nie znał — i stan wracał do
+# niego w kolejnej turze (bramka `test_pola_schematu_w_prompcie`). Walidacja
+# zostaje przy kanonicznym `SCHEMA_TURA`: `stan` ma tam `additionalProperties:
+# True`, więc stary zapis trybu 3/4 z fiolką w stanie dalej przechodzi.
+SCHEMA_TURA_BEZ_FIOLKI: dict[str, Any] = _bez_fiolki(SCHEMA_TURA)
+SCHEMA_TURA_PER_TRYB: dict[int, dict[str, Any]] = {
+    TRYB_SWOBODNY:     SCHEMA_TURA_BEZ_FIOLKI,
+    TRYB_WYBOROW:      SCHEMA_TURA_BEZ_FIOLKI,
+    TRYB_MNIEJSZE_ZLO: SCHEMA_TURA,
+}
+SCHEMA_TURA_API_PER_TRYB: dict[int, dict[str, Any]] = {
+    TRYB_SWOBODNY:     cl.schemat_z_dyskryminatorem(SCHEMA_TURA_BEZ_FIOLKI, TAG_ODRZUCENIA_AI),
+    TRYB_MNIEJSZE_ZLO: SCHEMA_TURA_API,
+}
+# Ten sam OBIEKT dla 3 i 4: kompilacja schematu po stronie API jest cache'owana
+# bajtowo, więc dwa identyczne schematy i tak dałyby jeden wpis.
+SCHEMA_TURA_API_PER_TRYB[TRYB_WYBOROW] = SCHEMA_TURA_API_PER_TRYB[TRYB_SWOBODNY]
+
+
 # =============================================================================
 # Snapshot stanu i wynik tury (dataclasses — GIL-safe, niezmienne payloady
 # do wątku tła; wzorzec jak :class:`core_rezyser.SnapshotProjektu`)
@@ -861,7 +889,7 @@ def generuj_ture(
             klient, efektywny_model, prompt_systemowy, messages,
             max_tokens=MAX_TOKENS_OUT, temperature=temperatura, timeout=TIMEOUT_S,
             segmenty=segmenty, wymusz_json=True,
-            schema_json=SCHEMA_TURA_API, slad=slad,
+            schema_json=SCHEMA_TURA_API_PER_TRYB.get(tryb, SCHEMA_TURA_API), slad=slad,
         )
         ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
 

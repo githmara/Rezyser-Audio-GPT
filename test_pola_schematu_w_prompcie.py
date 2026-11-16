@@ -12,10 +12,11 @@ systemowym, ktory jedzie z tym schematem - w KAZDEJ paczce i w kazdym trybie.
 
 Pierwszy przeglad (2026-11-15) znalazl jedna dziure: blok `stan.fiolka`
 (`obecna`, `uzyto_razy`, `zniszczona`) jest w schemacie tury wszystkich trzech
-trybow narracyjnych, a opisuje go tylko prompt Mniejszego Zla. Silnik w trybach
-Swobodnym i Wyborow fiolke ignoruje, ale model moze ja wypelnic sam, a stan
-wraca do niego w nastepnej turze. Stoi w `ZNANE_DZIURY` - i ten wpis sam sie
-zglosi jako przeterminowany, gdy dziura zostanie zamknieta.
+trybow narracyjnych, a opisuje go tylko prompt Mniejszego Zla. Zamknieta w tym
+samym cyklu schematem PER TRYB (`opowiesci_ai.SCHEMA_TURA_PER_TRYB`): tryby 3/4
+nie dostaja juz `stan.fiolka` ani w walidowanym kanonie testu, ani w kopii API.
+`ZNANE_DZIURY` zostaje jako mechanizm (pusty) - wpis, ktory przestal byc
+prawdziwy, zglasza sie sam.
 
 Uruchom:  .venv/Scripts/python -m pytest test_pola_schematu_w_prompcie.py -q
 Albo jako skrypt (deleguje do pytesta): .venv/Scripts/python test_pola_schematu_w_prompcie.py
@@ -59,11 +60,7 @@ def nieopisane(schemat, prompt: str) -> set[str]:
 
 
 # (zrodlo, tryb) -> pola swiadomie nieopisane, z powodem w docstringu modulu.
-_FIOLKA = frozenset({"fiolka", "obecna", "uzyto_razy", "zniszczona"})
-ZNANE_DZIURY: dict[tuple[str, int], frozenset[str]] = {
-    ("opowiesci", oai.TRYB_SWOBODNY): _FIOLKA,
-    ("opowiesci", oai.TRYB_WYBOROW): _FIOLKA,
-}
+ZNANE_DZIURY: dict[tuple[str, int], frozenset[str]] = {}
 
 KODY = cp.dostepne_jezyki_bazowe()
 
@@ -76,7 +73,7 @@ def _przypadki():
                 lambda k=kod, i=id_przepisu: pr.buduj_prompt_systemowy(
                     pr.zaladuj_przepis(i, k), ""))
         for tryb in (oai.TRYB_SWOBODNY, oai.TRYB_WYBOROW, oai.TRYB_MNIEJSZE_ZLO):
-            yield f"{kod}/opowiesci/tryb{tryb}", ("opowiesci", tryb), oai.SCHEMA_TURA, (
+            yield f"{kod}/opowiesci/tryb{tryb}", ("opowiesci", tryb), oai.SCHEMA_TURA_PER_TRYB[tryb], (
                 lambda k=kod, t=tryb: oai._zbuduj_prompt_systemowy(t, k))
     yield "core_zastepcze", ("zastepcze", 0), cz.SCHEMAT, (lambda: cz.SYSTEM)
 
@@ -98,15 +95,46 @@ def test_kazde_pole_schematu_jest_w_prompcie(nazwa, zrodlo, schemat, prompt):
         f"never mentions - the model will invent their meaning")
 
 
-@pytest.mark.parametrize("zrodlo", sorted(ZNANE_DZIURY))
-def test_znane_dziury_sa_wciaz_prawdziwe(zrodlo):
-    """Zamknieta dziura musi zniknac z `ZNANE_DZIURY`, inaczej maskuje regres."""
-    for nazwa, z, schemat, prompt in PRZYPADKI:
-        if z == zrodlo:
-            wciaz = nieopisane(schemat, prompt()) & ZNANE_DZIURY[zrodlo]
-            assert wciaz == ZNANE_DZIURY[zrodlo], (
-                f"{nazwa}: {sorted(ZNANE_DZIURY[zrodlo] - wciaz)} are described now "
-                f"- remove them from ZNANE_DZIURY")
+def test_znane_dziury_sa_wciaz_prawdziwe():
+    """Zamknieta dziura musi zniknac z `ZNANE_DZIURY`, inaczej maskuje regres.
+
+    Petla zamiast parametryzacji: pusty `ZNANE_DZIURY` dalby pytestowi pusty
+    zbior parametrow, czyli skip, ktory nic nie mowi.
+    """
+    for zrodlo, dziury in ZNANE_DZIURY.items():
+        for nazwa, z, schemat, prompt in PRZYPADKI:
+            if z == zrodlo:
+                wciaz = nieopisane(schemat, prompt()) & dziury
+                assert wciaz == dziury, (
+                    f"{nazwa}: {sorted(dziury - wciaz)} are described now "
+                    f"- remove them from ZNANE_DZIURY")
+
+
+def test_fiolka_tylko_w_mniejszym_zlu():
+    """Schemat API trybow 3/4 nie zna fiolki; Mniejsze Zlo tak."""
+    def stan_api(tryb):
+        return oai.SCHEMA_TURA_API_PER_TRYB[tryb]["anyOf"][0]["properties"]["stan"]
+    for tryb in (oai.TRYB_SWOBODNY, oai.TRYB_WYBOROW):
+        assert "fiolka" not in stan_api(tryb)["properties"]
+        assert stan_api(tryb)["additionalProperties"] is False
+    assert "fiolka" in stan_api(oai.TRYB_MNIEJSZE_ZLO)["properties"]
+    # Kanon walidacji nietkniety: stary zapis 3/4 z fiolka w stanie przechodzi.
+    assert "fiolka" in oai.SCHEMA_TURA["properties"]["stan"]["properties"]
+
+
+@pytest.mark.parametrize("tryb", [oai.TRYB_SWOBODNY, oai.TRYB_WYBOROW, oai.TRYB_MNIEJSZE_ZLO])
+def test_generuj_ture_wysyla_schemat_swojego_trybu(tryb, monkeypatch):
+    wyslane = []
+    tura = ('{"narracja": "n", "wybory": [], "postacie_aktywne": [], '
+            '"stan": {"lokacja": "x"}, "meta": {}}')
+
+    def atrapa(*_a, **kw):
+        wyslane.append(kw["schema_json"])
+        return tura, "end_turn"
+
+    monkeypatch.setattr(oai, "_wywolaj_claude", atrapa)
+    oai.generuj_ture(None, oai.SnapshotOpowiesci(nazwa_gry="t", numer_tury=1), "go", tryb)
+    assert wyslane == [oai.SCHEMA_TURA_API_PER_TRYB[tryb]]
 
 
 def test_detektor_lapie_pole_i_granice_slowa():
