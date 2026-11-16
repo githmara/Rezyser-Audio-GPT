@@ -200,7 +200,7 @@ tree — import errors and warnings raised on import, no build needed.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are 65 regression test files (1297 tests, **about a minute for all of them**) and
+There are 66 regression test files (1302 tests, **about a minute for all of them**) and
 nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
 (`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
 Running every one of them after every small edit is not thoroughness — a green
@@ -245,7 +245,7 @@ Two facts decide what that means, and both are easy to get backwards:
 | `rezyser_ai.py`, `opowiesci_ai.py`, `core_zastepcze.py`, or a recipe / tale prompt in `dictionaries/**/rezyser/` or `dictionaries/**/opowiesci/` | `pytest test_pola_schematu_w_prompcie.py test_burza_schemat.py` — every field of a structured-output schema must be named in the prompt that ships with it |
 | `manager_regul_kontrakt.py` | `pytest test_manager_kontrakt.py` |
 | any `dictionaries/**/gui/dokumentacja/*.yaml` or `gui/ui.yaml` | `generuj_dokumentacje.py --waliduj` **and** `audyt_leakow.py --bramka` + `audyt_pism.py --bramka` |
-| `generuj_dokumentacje.py` | `pytest test_stempel_wersji.py test_bliskie_cytaty.py test_markdown_poliglota.py` + `generuj_dokumentacje.py --waliduj` |
+| `generuj_dokumentacje.py` | `pytest test_stempel_wersji.py test_sciezki_dokumentacji.py test_bliskie_cytaty.py test_markdown_poliglota.py` + `generuj_dokumentacje.py --waliduj` |
 | any other `dictionaries/**` (engine data: accents, ciphers, modes, tales) | `audyt_podstaw.py --bramka` + `audyt_ciszy.py --bramka` + `audyt_pism.py --bramka` |
 | a new or renamed `.py` in the repo root | `audyt_leakow.py --bramka-py` (the build is otherwise the first place this fires) |
 | `audyt_leakow.py` | `audyt_leakow.py --bramka` + `--bramka-py` + `--bramka-kontrakt`, and `pytest test_skan_leakow_draftow.py test_bliskie_cytaty.py test_tytul_screen_readera.py` |

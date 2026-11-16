@@ -283,14 +283,29 @@ SEKCJE_POMIJANE_W_PL: dict[str, set[str]] = {
 # między build'ami. Dorzucenie kolejnego szablonu = jeden wpis w tym słowniku
 # + plik `dictionaries/pl/gui/dokumentacja/<id>.yaml` (i analogiczne dla
 # pozostałych jzk po retranslate).
+#   - w_korzeniu:     True = plik ląduje w KORZENIU projektu, którego słowniki
+#                     czytamy (`_korzen_projektu`), nie w katalogu docs.
+#                     Do 2026-11-16 był tu `katalog: ROOT` — przebieg do
+#                     katalogu tymczasowego albo na testowych słownikach
+#                     NADPISYWAŁ `readme*.md` w korzeniu repo.
 KONFIG_SZABLONOW: dict[str, dict] = {
     "readme": {
-        "katalog": ROOT,
+        "w_korzeniu": True,
         "rozszerzenie": "md",
         "render": "surowy",
         "iso_w_nazwie": "smart_en",
     },
 }
+
+
+def _korzen_projektu() -> Path:
+    """Korzeń drzewa, z którego generator czyta słowniki.
+
+    Prawdziwe słowniki (`ROOT/dictionaries`) → korzeń repo. Słowniki testowe
+    (`DICT_DIR` podmieniony) → korzeń wskazanego katalogu: rodzic folderu
+    `dictionaries/`, a gdy słowniki leżą wprost w podanym katalogu — on sam.
+    """
+    return DICT_DIR.parent if DICT_DIR.name == "dictionaries" else DICT_DIR
 
 
 def _sciezka_wyjscia(
@@ -301,9 +316,16 @@ def _sciezka_wyjscia(
     """Zwraca docelową ścieżkę pliku wynikowego wg `KONFIG_SZABLONOW`.
 
     Default (brak wpisu): `docelowy_katalog / "<id>.<jezyk>.html"`.
+    Wpis `w_korzeniu` (README): korzeń projektu, z wyjątkiem jednego
+    przypadku — prawdziwe słowniki i JAWNIE inny katalog wyjścia (przebieg
+    porównawczy) piszą README do tego katalogu, nigdy do korzenia repo.
     """
     cfg = KONFIG_SZABLONOW.get(id_szablonu, {})
-    katalog = cfg.get("katalog", docelowy_katalog)
+    katalog = docelowy_katalog
+    if cfg.get("w_korzeniu"):
+        korzen = _korzen_projektu()
+        porownawczy = korzen == ROOT and docelowy_katalog.resolve() != DOCS_DIR.resolve()
+        katalog = docelowy_katalog if porownawczy else korzen
     rozszerzenie = cfg.get("rozszerzenie", "html")
     tryb_iso = cfg.get("iso_w_nazwie", "zawsze")
 
@@ -364,7 +386,7 @@ def _renderuj_html(tresc_md: str, jezyk: str) -> str:
     w `core_markdown` — od tego wydania ten sam kod obsługuje `.md` wczytane
     przez użytkownika w Poliglocie, a runtime nie może importować dev-toola.
     Wyjście musi zostać BAJT W BAJT takie jak przed wydzieleniem; pilnuje tego
-    `git diff docs/` po regeneracji (Step 0a procedury wydawniczej) oraz
+    `git diff docs/` po regeneracji (Krok 4 procedury zamykania) oraz
     bramka RAW-HTML niżej, która czyta wynikowe pliki.
 
     Raises:
@@ -1346,7 +1368,7 @@ def _rozwin_placeholdery(
 # Główna funkcja generatora
 # ---------------------------------------------------------------------------
 def generuj(
-    docelowy_katalog: Path = DOCS_DIR,
+    docelowy_katalog: Path | None = None,
     *,
     cicho: bool = False,
     zbieraj_brakujace: dict[str, list[str]] | None = None,
@@ -1355,7 +1377,10 @@ def generuj(
     """Generuje wszystkie pliki ``docs/<id>.<kod>.html`` z szablonów YAML.
 
     Args:
-        docelowy_katalog:   Gdzie zapisać wynikowe pliki (domyślnie ``docs/``).
+        docelowy_katalog:   Gdzie zapisać wynikowe pliki (domyślnie ``docs/``
+                            w korzeniu projektu, którego słowniki czytamy —
+                            testowe słowniki piszą do SWOJEGO ``docs/``).
+                            README idzie do korzenia (`_sciezka_wyjscia`).
         cicho:              Czy pominąć przyjazne komunikaty print (dla testów).
         zbieraj_brakujace:  Jeśli podasz pusty dict, funkcja wypełni go
                             mapowaniem ``"<jezyk>/<id_szablonu>"`` →
@@ -1373,7 +1398,9 @@ def generuj(
     Returns:
         Lista ścieżek wygenerowanych plików.
     """
-    docelowy_katalog.mkdir(exist_ok=True)
+    if docelowy_katalog is None:
+        docelowy_katalog = _korzen_projektu() / DOCS_DIR.name
+    docelowy_katalog.mkdir(parents=True, exist_ok=True)
     wyniki: list[Path] = []
 
     jezyki = _jezyki_ze_szablonami()
@@ -1452,7 +1479,9 @@ def generuj(
                 fh.write(wynik_tresc)
             wyniki.append(sciezka_wyjscia)
             if not cicho:
-                print(f"✅  {sciezka_wyjscia.relative_to(ROOT)}")
+                pokaz = (sciezka_wyjscia.relative_to(ROOT)
+                         if sciezka_wyjscia.is_relative_to(ROOT) else sciezka_wyjscia)
+                print(f"✅  {pokaz}")
 
     return wyniki
 

@@ -62,10 +62,11 @@ def test_znacznik_nigdy_nie_zostaje_w_wyniku():
 
 
 def test_cykl_generatora_od_wydania_do_wydania(tmp_path, monkeypatch):
-    """Wydanie → WIP (tylko treść) → wydanie (tylko linie z numerem), na prawdziwych szablonach."""
-    for cfg in gd.KONFIG_SZABLONOW.values():
-        if "katalog" in cfg:                       # readme pisze do korzenia repo
-            monkeypatch.setitem(cfg, "katalog", tmp_path)
+    """Wydanie → WIP (tylko treść) → wydanie (tylko linie z numerem), na prawdziwych szablonach.
+
+    Katalog tymczasowy przy prawdziwych słownikach = przebieg porównawczy,
+    więc readme też ląduje w `tmp_path` (bramka higieny pilnuje korzenia repo).
+    """
 
     def przebieg(numer: str) -> dict[str, str]:
         monkeypatch.setattr(gd, "NUMER_WERSJI", numer)
