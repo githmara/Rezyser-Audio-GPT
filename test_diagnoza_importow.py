@@ -68,5 +68,13 @@ def test_brak_plikow_buildu_nie_jest_zielony(tmp_path, capsys):
     assert "not checked" in capsys.readouterr().out
 
 
+def test_sam_log_bez_warn_nie_daje_falszywej_czerwieni(tmp_path, capsys):
+    """Audyt 19.20: `--log PLIK` bez `--warn` konczylo sie kodem 1 o pliku-atrapie."""
+    log = tmp_path / "pyinstaller_log.txt"
+    log.write_text("INFO: building\n", encoding="utf-8")
+    assert di.main(["--log", str(log)]) == 0
+    assert "not checked" not in capsys.readouterr().out
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))

@@ -274,7 +274,12 @@ def _wygeneruj_skrotowce_llm(
         f"No numbering, no commentary, no blank lines. If {nazwa_natywna} rarely uses "
         f"dotted abbreviations, give the closest common written shortenings anyway."
     )
+    # Mikro-wywołanie pomocnicze idzie BEZ myślenia dev (audyt 19.20): `myslenie_dev`
+    # to cecha klienta, a tu płacilibyśmy za high, którego streszczenia nikt nie zapisze.
+    myslenie_dev = getattr(klient, "myslenie_dev", "")
     try:
+        if myslenie_dev:
+            klient.myslenie_dev = ""
         surowa_raw, stop_reason = cl.wywolaj_llm(
             klient,
             model=model,
@@ -289,6 +294,9 @@ def _wygeneruj_skrotowce_llm(
         print(f"⚠️  {kod}: LLM abbreviation generation failed ({exc}); "
               f"the Odwracacz block will be skipped (will retry in this run).")
         return None   # stan PRZEJŚCIOWY — nie wolno go zacementować w cache'u
+    finally:
+        if myslenie_dev:
+            klient.myslenie_dev = myslenie_dev
 
     # Ucięcie odpowiedzi (v18.30.0). `core_llm` niczego nie rzuca — zwraca
     # `stop_reason`, a ten do v18.29.0 lądował w `_stop` i był wyrzucany. Parser
@@ -1591,6 +1599,9 @@ def _tlumacz_pojedyncza_sekcje(
         return False, None
     if przyjeta is not None:
         return True, przyjeta
+    # Myślenie poprzedniego przebiegu nie może leżeć obok NOWEGO draftu, gdy ta
+    # próba nie odda streszczenia (audyt 19.20; odrzuty mają tę regułę od 19.8).
+    sciezka_myslenia(kod, rdzen, klucz_sekcji).unlink(missing_ok=True)
 
     zarzuty: list[str] = []
     # Powód odrzucenia próby 1 — klucz licznika `STATYSTYKA_POWTOREK`.

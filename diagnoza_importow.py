@@ -129,11 +129,16 @@ def importuj(modul: str, korzen: Path = KORZEN, python: str = sys.executable) ->
         return {"blad": f"unreadable probe output: {wynik.stdout[-200:]!r}"}
 
 
-def raport_buildu(warn: Path = WARN_DOMYSLNY, log: Path = LOG_DOMYSLNY) -> bool:
-    """Raport po buildzie; True = czysto. Brak plików = głośna nota, nie zielone."""
+def raport_buildu(warn: Path | None = WARN_DOMYSLNY, log: Path | None = LOG_DOMYSLNY) -> bool:
+    """Raport po buildzie; True = czysto. Brak plików = głośna nota, nie zielone.
+
+    ``None`` = tego źródła nie sprawdzaj i nie raportuj (tryb, o który CLI nie
+    poproszono — audyt 19.20: samo ``--log`` kończyło się fałszywą czerwienią)."""
     czysto = True
     nasze = set(moduly_projektu())
-    if warn.is_file():
+    if warn is None:
+        pass
+    elif warn.is_file():
         nowe = ostrzezenia_naszego_kodu(parsuj_warn(warn.read_text(encoding="utf-8",
                                                                    errors="replace")), nasze)
         for brak, kto in sorted(nowe.items()):
@@ -143,7 +148,9 @@ def raport_buildu(warn: Path = WARN_DOMYSLNY, log: Path = LOG_DOMYSLNY) -> bool:
     else:
         czysto = False
         print(f"⚠️  PyInstaller warnings not checked: {warn} does not exist.")
-    if log.is_file():
+    if log is None:
+        pass
+    elif log.is_file():
         for brak in hidden_z_logu(log.read_text(encoding="utf-8", errors="replace")):
             czysto = False
             print(f"⚠️  PyInstaller: new 'Hidden import {brak} not found' — find who "
@@ -178,8 +185,8 @@ def main(argv: list[str] | None = None) -> int:
 
     kod = 0
     if args.warn or args.log:
-        if not raport_buildu(Path(args.warn) if args.warn else Path("/nonexistent"),
-                             Path(args.log) if args.log else LOG_DOMYSLNY):
+        if not raport_buildu(Path(args.warn) if args.warn else None,
+                             Path(args.log) if args.log else None):
             kod = 1
     if args.moduly or args.kto:
         moduly = moduly_projektu()

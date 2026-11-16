@@ -35,6 +35,22 @@ def test_bez_sufiksu_stempluje_numer():
     assert tresc == "<h1>App (2.0.0 – Release)</h1>\nx" and bez == []
 
 
+def test_stary_plik_z_crlf_dostaje_pare():
+    """Audyt 19.20: checkout z core.autocrlf=true daje CRLF — dawniej zero par i -WIP wszedzie."""
+    nl = chr(13) + chr(10)
+    stara = f"<title>App (19.19.0 – Release)</title>{nl}x{nl}<h1>App (19.19.0 – Release)</h1>{nl}"
+    nowa = f"<title>App ({Z} – Release)</title>\ny\n<h1>App ({Z} – Release)</h1>\n"
+    tresc, bez = gd._stempluj_wersje(nowa, stara, "19.20.0-WIP")
+    assert "-WIP" not in tresc and tresc.count("19.19.0") == 2 and bez == []
+
+
+def test_plik_juz_zatruty_wip_ostrzega_zamiast_zachowac():
+    """Audyt 19.20: para tylko z numerem WYDANYM — zatruty plik nie utrwala -WIP po cichu."""
+    stara = "<h1>App (19.20.0-WIP – Release)</h1>"
+    tresc, bez = gd._stempluj_wersje(f"<h1>App ({Z} – Release)</h1>", stara, "19.20.0-WIP")
+    assert bez == ["<h1>App (19.20.0-WIP – Release)</h1>"]
+
+
 def test_z_sufiksem_linia_zostaje_jak_w_starym_pliku():
     stara = "<title>App (19.19.0 – Release)</title>\nstary akapit\n<h1>App (19.19.0 – Release)</h1>"
     nowa = f"<title>App ({Z} – Release)</title>\nnowy akapit\n<h1>App ({Z} – Release)</h1>"

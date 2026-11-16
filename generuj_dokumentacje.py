@@ -101,7 +101,9 @@ except OSError:
 # numer z tej samej linii starego pliku (`_stempluj_wersje`).
 _WYDANA_WERSJA = re.compile(r"^\d+(?:\.\d+)+$")
 _ZNACZNIK_WERSJI = "Zq7StempelWersji7qZ"
-_NUMER_W_PLIKU = r"(\d+(?:\.\d+)+(?:-[0-9A-Za-z.]+)?)"
+# Para TYLKO z numerem wydanym (audyt 19.20): plik już zatruty `-WIP` nie może
+# „zachować” sufiksu po cichu — jego linia ląduje na liście bez pary i ostrzega.
+_NUMER_W_PLIKU = r"(\d+(?:\.\d+)+)"
 
 
 def wersja_z_sufiksem(numer: str | None = None) -> bool:
@@ -122,6 +124,9 @@ def _stempluj_wersje(tresc: str, stara: str | None, numer: str) -> tuple[str, li
         return tresc, []
     if not wersja_z_sufiksem(numer):
         return tresc.replace(_ZNACZNIK_WERSJI, numer), []
+    # Stary plik z drzewa roboczego bywa CRLF (core.autocrlf=true, docs/ bez
+    # eol=lf) — bez normalizacji żadna linia nie dostawała pary (audyt 19.20).
+    stara = (stara or "").replace(chr(13) + chr(10), chr(10))
     linie = tresc.split("\n")
     znalezione: list[str] = []
     bez_pary: list[int] = []
@@ -129,7 +134,7 @@ def _stempluj_wersje(tresc: str, stara: str | None, numer: str) -> tuple[str, li
         if _ZNACZNIK_WERSJI not in linia:
             continue
         wzor = re.escape(linia).replace(re.escape(_ZNACZNIK_WERSJI), _NUMER_W_PLIKU)
-        m = re.search(f"^{wzor}$", stara or "", re.M)
+        m = re.search(f"^{wzor}$", stara, re.M)
         if m:
             linie[i] = m.group(0)
             znalezione.append(m.group(1))

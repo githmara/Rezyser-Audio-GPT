@@ -155,6 +155,39 @@ def test_bez_myslenia_dev_nie_ma_pliku_myslenia():
         assert not bd.sciezka_myslenia(KOD, RDZEN, bd.KLUCZ_LEGACY).exists()
 
 
+def test_stare_myslenie_nie_przezywa_przebiegu_bez_nowego():
+    """Audyt 19.20: plik z przebiegu 1 nie moze lezec obok draftu przebiegu 2."""
+    from types import SimpleNamespace
+    with _srodowisko():
+        plik = bd.sciezka_myslenia(KOD, RDZEN, bd.KLUCZ_LEGACY)
+        plik.parent.mkdir(parents=True, exist_ok=True)
+        plik.write_text("Myslenie o STARYM przekladzie.", encoding="utf-8")
+        ok, _wynik, log = _przebieg(klient=SimpleNamespace(myslenie_dev=""))
+        assert ok, log
+        assert not plik.exists()
+
+
+def test_skrotowce_ida_bez_myslenia_dev():
+    """Audyt 19.20: mikro-wywolanie skrotowcow nie placi za myslenie, ktorego nikt nie zapisze."""
+    from types import SimpleNamespace
+    widziane = []
+
+    def _stub(klient, **kw):
+        widziane.append(klient.myslenie_dev)
+        return "z.B. | zum Beispiel\nusw. | und so weiter", "end_turn"
+
+    klient = SimpleNamespace(myslenie_dev="high", myslenie_zapis=None)
+    stary = cl.wywolaj_llm
+    cl.wywolaj_llm = _stub
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            bd._wygeneruj_skrotowce_llm(klient, "de", "Deutsch", "stub")
+    finally:
+        cl.wywolaj_llm = stary
+    assert widziane == [""]
+    assert klient.myslenie_dev == "high"
+
+
 # ---------------------------------------------------------------------------
 # 2. Znaki: mojibake i dwa pisma tylko wtedy, gdy zrodla ich nie ma
 # ---------------------------------------------------------------------------
