@@ -20,6 +20,8 @@ Skip jest widoczny w podsumowaniu pytesta, "pass" nie da sie odroznic od realnej
 weryfikacji.
 """
 
+import http.client
+import json
 import os
 import sys
 import urllib.error
@@ -35,7 +37,12 @@ import core_updater as cu
 TOKEN = os.environ.get("GITHUB_TOKEN") or None
 
 # Bledy, ktore znacza "nie ma sieci / API nie odpowiada", a nie "nasz kod jest zly".
-BLEDY_SIECI = (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError)
+# JSONDecodeError / UnicodeDecodeError / HTTPException (np. IncompleteRead):
+# odpowiedz urwana albo zastapiona strona bledu przez siec lub proxy - stan
+# zdalny, nie nasz kod (zmierzone w 19.20: jeden przebieg padl na
+# JSONDecodeError). Produkcja i tak lapie wszystko w `sprawdz_aktualizacje`.
+BLEDY_SIECI = (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError,
+               json.JSONDecodeError, UnicodeDecodeError, http.client.HTTPException)
 
 
 # ---------------------------------------------------------------------------

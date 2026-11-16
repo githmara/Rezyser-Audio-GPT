@@ -301,6 +301,13 @@ class KlientLLM:
     # „na starcie" (zły klucz — automat) od 401 „w trakcie" (klucz unieważniony
     # po udanych chunkach — przełączenie na inne konto wymaga zgody).
     udane: bool = False
+    # Effort myślenia (v19.20, WYŁĄCZNIE dev-tooling — runtime GUI go nie
+    # ustawia, pilnuje tego `test_thinking_dialekty.py`). Pusty = „bez
+    # myślenia” jak dotąd; np. `"high"` = Anthropic `thinking: adaptive` +
+    # `output_config.effort`, OpenRouter `reasoning.effort`. Ustawia go
+    # `buduj_wielojezyczne_docs.py`. Przełączenie na zapas go NIE zeruje:
+    # to cecha wołającego, nie konta.
+    myslenie_dev: str = ""
 
     def przelacz_na(self, inny: "KlientLLM") -> None:
         """Podmienia klienta W MIEJSCU, żeby każdy, kto trzyma referencję, jechał dalej nowym.
@@ -1380,6 +1387,15 @@ _NAZWA_SCHEMATU = "odpowiedz"
 #: (zmierzone 2026-11-16, `skrypty/pomiar_reasoning_openrouter.py`).
 _OPENROUTER_REASONING_TEKST: dict = {"effort": "low"}
 
+#: Dopłata do `max_tokens` i `timeout`, gdy dev-tool włączył myślenie
+#: (`KlientLLM.myslenie_dev`). Myślenie WSPÓŁDZIELI budżet wyjścia z
+#: odpowiedzią, więc bez dopłaty limit dobrany pod samą prozę ucinałby
+#: przekład (pomiar 2026-11-15: `effort: high` = 620–789 tokenów myślenia na
+#: sekcję 6982 zn.; dopłata ma zapas na trudniejsze bloki). 8192 + 8192 =
+#: 16 384 mieści się poniżej progu, od którego SDK Anthropic żąda streamingu.
+ZAPAS_TOKENOW_MYSLENIA_DEV = 8192
+ZAPAS_CZASU_MYSLENIA_DEV = 180.0
+
 # (provider, model), które odrzuciły `reasoning` w tej sesji — kolejne
 # wywołania nie wysyłają pola i nie płacą jałowym 400 (wzorzec `_BEZ_JSON_SCHEMA`).
 _BEZ_REASONING: set[tuple[str, str]] = set()
@@ -1485,8 +1501,10 @@ def _wywolaj_openai_compat(
     # `reasoning` tylko na OpenRouterze (pole jego API, nie OpenAI). Model,
     # który go nie przyjmie (np. wskazany przez `LLM_MODEL`), dostaje TEN SAM
     # szczebel bez pola — jak `temperature` niżej, nie zejście po drabinie.
+    # Dev-tool z `myslenie_dev` dostaje swój effort zamiast domyślnego `low`.
     reasoning: dict | None = (
-        _OPENROUTER_REASONING_TEKST
+        ({"effort": klient.myslenie_dev} if getattr(klient, "myslenie_dev", "")
+         else _OPENROUTER_REASONING_TEKST)
         if klient.provider == PROVIDER_OPENROUTER and klucz_schematu not in _BEZ_REASONING
         else None
     )
@@ -1615,6 +1633,14 @@ def _wywolaj_anthropic(
         kwargs["output_config"] = {
             "format": {"type": "json_schema", "schema": schema_json},
         }
+    # Myślenie dev-tools (v19.20, `KlientLLM.myslenie_dev`): adaptive + effort
+    # zamiast „bez myślenia”. Odrzucone przez model → ten sam szczebel w trybie
+    # „bez myślenia” (z logiem), a dalej zwykła drabina dialektów.
+    myslenie = getattr(klient, "myslenie_dev", "")
+    if myslenie:
+        ustaw_thinking(kwargs, {"type": "adaptive"})
+        kwargs.setdefault("output_config", {})["effort"] = myslenie
+        wyprobowane_thinking = [kwargs["thinking"]]
     # Degradacja CELOWANA: zdejmujemy to, co API wskazało w komunikacie 400
     # (patrz `_co_odrzucono`), a nie kolejny element listy. Ślepa kolejność
     # kosztowałaby structured outputs przy KAŻDYM modelu nieprzyjmującym
@@ -1649,6 +1675,19 @@ def _wywolaj_anthropic(
                     "(JSON wymuszany samym promptem, jak ≤v18.22)."
                 )
                 kwargs.pop("output_config", None)
+            elif winowajca == "thinking" and kwargs.get("thinking") == {"type": "adaptive"}:
+                _dev_log(
+                    f"anthropic: model '{mdl}' odrzucił myślenie '{myslenie}' "
+                    f"({type(exc).__name__}: {str(exc)[:120]}) — ponawiam BEZ "
+                    "myślenia."
+                )
+                oc = kwargs.get("output_config", {})
+                oc.pop("effort", None)
+                if not oc:
+                    kwargs.pop("output_config", None)
+                wyprobowane_thinking.append(bez_myslenia)
+                ustaw_thinking(kwargs, bez_myslenia)
+                continue
             elif winowajca == "thinking":
                 # Z „bez myślenia" — na następny dialekt. Nigdy dwa razy ten sam.
                 jest, wariant = kolejny_wariant_bez_myslenia(
@@ -1752,6 +1791,9 @@ def wywolaj_llm(
         dialekcie modelu (``disabled``, na Sonnet 5.5 ``between_tools`` — patrz
         :func:`thinking_bez_myslenia`). Runtime nie myśli — tryb quality
         usunięty w 19.18 (uzasadnienie przy :func:`_wywolaj_anthropic`).
+        Wyjątek dev-tools (v19.20): ``klient.myslenie_dev`` (np. ``"high"``)
+        włącza myślenie adaptacyjne z effortem i dopłaca
+        :data:`ZAPAS_TOKENOW_MYSLENIA_DEV` do ``max_tokens``.
       * **odpowiedź** — Anthropic skleja bloki ``content[].text``; OpenAI bierze
         ``choices[0].message.content``.
       * **stop_reason** — OpenAI ``finish_reason=="length"`` mapujemy na
@@ -1802,12 +1844,19 @@ def wywolaj_llm(
     (łapie je szeroki ``except`` wołającego).
     """
     mdl = model_wywolania(klient, model)
+    # Dopłata dla myślenia dev-tools liczona LOKALNIE: rekurencja na zapas niżej
+    # dostaje oryginalne `max_tokens`, więc nie dopłaca drugi raz. Compat nie
+    # myśli (nie ma tam `thinking` ani `reasoning`), więc nic nie dostaje.
+    limit, czas = max_tokens, timeout
+    if getattr(klient, "myslenie_dev", "") and klient.provider != PROVIDER_OPENAI_COMPAT:
+        limit += ZAPAS_TOKENOW_MYSLENIA_DEV
+        czas += ZAPAS_CZASU_MYSLENIA_DEV
 
     try:
         if klient.provider in (PROVIDER_OPENAI_COMPAT, PROVIDER_OPENROUTER):
             wynik = _wywolaj_openai_compat(
                 klient, mdl, system, messages, segmenty, wymusz_json,
-                max_tokens, temperature, timeout,
+                limit, temperature, czas,
                 schema_json=schema_json,
                 model_baseline=model_natywny(mdl),
             )
@@ -1815,7 +1864,7 @@ def wywolaj_llm(
             # Anthropic (domyślny filar jakości) — `segmenty`/`wymusz_json` celowo
             # nieużywane; kształt JSON wymusza `schema_json` (structured outputs).
             wynik = _wywolaj_anthropic(
-                klient, mdl, system, messages, max_tokens, temperature, timeout,
+                klient, mdl, system, messages, limit, temperature, czas,
                 schema_json=schema_json,
                 slad=slad,
             )

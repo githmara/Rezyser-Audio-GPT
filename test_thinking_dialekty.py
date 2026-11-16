@@ -213,6 +213,48 @@ def test_runtime_wysyla_tylko_dialekt_bez_myslenia():
     assert w["max_tokens"] == 1000
 
 
+def _anthropic_myslacy(odpowiedzi, **extra):
+    wyslane = []
+    klient = cl.KlientLLM(provider=cl.PROVIDER_ANTHROPIC,
+                          sdk=_MockSDK(odpowiedzi, wyslane), myslenie_dev="high")
+    tekst, _stop = cl.wywolaj_llm(
+        klient, model="claude-sonnet-5-5", system="System.",
+        messages=[{"role": "user", "content": "Hi"}],
+        max_tokens=1000, temperature=0.3, timeout=30.0, **extra)
+    return tekst, wyslane
+
+
+def test_myslenie_dev_adaptive_z_effortem_i_doplata():
+    """v19.20: kanal dev-only (`_docs`) - adaptive + effort, schemat nietkniety."""
+    tekst, wyslane = _anthropic_myslacy(["ok"], schema_json=SCHEMAT)
+    w = wyslane[0]
+    assert tekst == "ok"
+    assert w["thinking"] == {"type": "adaptive"}
+    assert w["output_config"]["effort"] == "high"
+    assert w["output_config"]["format"]["schema"] == SCHEMAT
+    assert w["max_tokens"] == 1000 + cl.ZAPAS_TOKENOW_MYSLENIA_DEV
+
+
+def test_myslenie_dev_odrzucone_wraca_do_dialektu_bez_myslenia():
+    _t, wyslane = _anthropic_myslacy([_Blad400("effort is not supported on this model"), "ok"])
+    assert len(wyslane) == 2
+    assert wyslane[1]["thinking"] == {"type": "between_tools"}
+    assert "output_config" not in wyslane[1]
+
+
+def test_runtime_nie_ustawia_myslenia_dev():
+    """Myslenie zostaje w dev-tools: zaden modul runtime nie ustawia pola."""
+    import re
+    from pathlib import Path
+    korzen = Path(__file__).parent
+    wolno = {"core_llm.py", "buduj_wielojezyczne_docs.py"}
+    ustawia = re.compile(r"myslenie_dev\s*=(?!=)")
+    winni = [p.name for p in korzen.glob("*.py")
+             if p.name not in wolno and not p.name.startswith("test_")
+             and ustawia.search(p.read_text(encoding="utf-8"))]
+    assert not winni, winni
+
+
 def test_400_o_temperature_leci_wyzej_bez_ponowienia(tmp_path, monkeypatch):
     """Audyt 19.18: szczebel `temperature` ponawial identyczny payload i dopisywal
     model Anthropic do trwalego autocache'u, choc temperature nie wysylamy."""

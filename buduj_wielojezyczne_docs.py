@@ -112,6 +112,12 @@ FOLDER_GUI = "gui"
 FOLDER_DOKUMENTACJA = "dokumentacja"
 KOD_ZRODLOWY = "pl"
 
+# Effort myślenia tego brata (v19.20) — `KlientLLM.myslenie_dev`. Natywnie
+# `thinking: adaptive` + `output_config.effort`, na OpenRouterze
+# `reasoning.effort`; na `openai_compat` bez efektu. Pomiar 2026-11-15:
+# `high` = 620–789 tokenów myślenia na sekcję 6982 zn. (PL→fi).
+MYSLENIE_DOCS = "high"
+
 # 13.4: skrypt obsługuje WSZYSTKIE szablony z ``dictionaries/pl/gui/dokumentacja/``
 # (manual.yaml + dictionaries.yaml + przyszłe). Wcześniej wpis ``NAZWA_MANUAL``
 # zamykał generację na jednym pliku; teraz iterujemy po katalogu — dorzucenie
@@ -2718,6 +2724,10 @@ def _zainicjuj_klienta(*, potwierdz: bool = True) -> Any:
             "   + OPENAI_API_KEY + LLM_MODEL.\n"
             "   The same file the GUI uses (System Check in Director mode)."
         )
+    # Myślenie dev-only (v19.20, decyzja maintainera 2026-11-16): runtime nie
+    # myśli, ale ten brat przekłada najdłuższą prozę projektu i to jego
+    # odrzuty kosztują najwięcej. `core_llm` dopłaca budżet tokenów i czasu.
+    klient.myslenie_dev = MYSLENIE_DOCS
     return klient
 
 

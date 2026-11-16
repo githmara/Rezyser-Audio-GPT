@@ -264,6 +264,24 @@ def test_tekst_przez_openroutera_wysyla_reasoning_low():
     assert wyslane[0]["extra_body"] == {"reasoning": {"effort": "low"}}
 
 
+def test_myslenie_dev_przez_openroutera_wysyla_swoj_effort_i_doplate():
+    # v19.20: `_docs` ustawia `myslenie_dev="high"` - effort zamiast `low`.
+    klient, wyslane = _klient([("przeklad", "stop")])
+    klient.myslenie_dev = "high"
+    _wywolaj(klient)
+    assert wyslane[0]["extra_body"] == {"reasoning": {"effort": "high"}}
+    assert wyslane[0]["max_tokens"] == 100 + cl.ZAPAS_TOKENOW_MYSLENIA_DEV
+
+
+def test_compat_nie_dostaje_doplaty_myslenia():
+    sdk = _Sdk([("ok", "stop")])
+    klient = cl.KlientLLM(cl.PROVIDER_OPENAI_COMPAT, sdk, model_override="x/y",
+                          myslenie_dev="high")
+    _wywolaj(klient)
+    w = sdk.chat.completions.wyslane[0]
+    assert "extra_body" not in w and w["max_tokens"] == 100
+
+
 def test_compat_nie_wysyla_reasoning():
     sdk = _Sdk([("ok", "stop")])
     klient = cl.KlientLLM(cl.PROVIDER_OPENAI_COMPAT, sdk, model_override="x/y")
