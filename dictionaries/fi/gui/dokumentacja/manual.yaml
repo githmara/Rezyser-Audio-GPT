@@ -83,7 +83,7 @@ tresc:
     Jos päivität vanhemmasta versiosta: vanhaa OpenAI-avainta ei enää tarvita oletusvaihtoehdon käyttöön — voit jättää tai poistaa sen rivin tiedostosta golden_key.env, sovellus ohittaa sen (ellei tietoisesti määritä toista toimittajaa — katso VAIHE 2B alla).
 
     Kuinka hankkia Anthropic-avain:
-    1. Luo tili osoitteessa console.anthropic.com ja lataa saldoa (välilehti Billing / Plans).
+    1. Luo tili osoitteessa console.anthropic.com ja lataa saldoa (välilehti Billing / Plans). Jos konsoli kysyy "Where does your code run?", valitse "Somewhere else" — muut vastaukset (esim. "Your own machine", joka johtaa ant CLI -työkalun asentamiseen) eivät koske tätä ohjelmaa.
     2. Luo avain osiossa API Keys (alkaa merkeillä sk-ant-). Kopioi se heti — se saatetaan näyttää vain kerran.
 
     Kuinka syöttää avain ohjelmaan:

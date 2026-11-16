@@ -136,7 +136,7 @@ tresc:
     Jeśli aktualizujesz ze starszej wersji: dawny klucz OpenAI nie jest już potrzebny do wariantu domyślnego — możesz zostawić lub usunąć jego linię w golden_key.env, aplikacja ją ignoruje (chyba że świadomie konfigurujesz innego dostawcę — patrz KROK 2B niżej).
 
     Jak zdobyć klucz Anthropic:
-    1. Załóż konto na console.anthropic.com i doładuj środki (zakładka Billing / Plans).
+    1. Załóż konto na console.anthropic.com i doładuj środki (zakładka Billing / Plans). Jeśli konsola zapyta "Where does your code run?", wybierz "Somewhere else" — pozostałe odpowiedzi (np. "Your own machine", która prowadzi do instalacji narzędzia ant CLI) nie dotyczą tego programu.
     2. Wygeneruj klucz w sekcji API Keys (zaczyna się od sk-ant-). Skopiuj go od razu — bywa wyświetlany tylko raz.
 
     Jak wpisać klucz do programu:

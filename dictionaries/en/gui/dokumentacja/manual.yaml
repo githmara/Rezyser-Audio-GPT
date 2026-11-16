@@ -83,7 +83,7 @@ tresc:
     If you are upgrading from an older version: the former OpenAI key is no longer needed for the default configuration — you can leave or remove its line in golden_key.env; the application ignores it (unless you are deliberately configuring a different provider — see STEP 2B below).
 
     How to obtain an Anthropic key:
-    1. Create an account at console.anthropic.com and add funds (Billing / Plans tab).
+    1. Create an account at console.anthropic.com and add funds (Billing / Plans tab). If the console asks "Where does your code run?", choose "Somewhere else" — the other answers (e.g. "Your own machine", which leads to installing the ant CLI) do not apply to this program.
     2. Generate a key in the API Keys section (starts with sk-ant-). Copy it immediately — it may only be displayed once.
 
     How to enter the key into the application:

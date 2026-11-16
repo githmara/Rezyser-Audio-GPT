@@ -83,7 +83,7 @@ tresc:
     Falls Sie von einer älteren Version aktualisieren: Der frühere OpenAI-Schlüssel wird für die Standardvariante nicht mehr benötigt — Sie können seine Zeile in golden_key.env belassen oder löschen, die Anwendung ignoriert sie (es sei denn, Sie konfigurieren bewusst einen anderen Anbieter — siehe SCHRITT 2B weiter unten).
 
     So erhalten Sie einen Anthropic-Schlüssel:
-    1. Erstellen Sie ein Konto auf console.anthropic.com und laden Sie Guthaben auf (Reiter Billing / Plans).
+    1. Erstellen Sie ein Konto auf console.anthropic.com und laden Sie Guthaben auf (Reiter Billing / Plans). Fragt die Konsole "Where does your code run?", wählen Sie "Somewhere else" — die anderen Antworten (z. B. "Your own machine", die zur Installation des ant CLI führt) gelten nicht für dieses Programm.
     2. Generieren Sie einen Schlüssel im Bereich API Keys (beginnt mit sk-ant-). Kopieren Sie ihn sofort — er wird mitunter nur einmal angezeigt.
 
     So tragen Sie den Schlüssel in das Programm ein:
