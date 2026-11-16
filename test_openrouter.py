@@ -63,7 +63,8 @@ class _Completions:
             raise nastepna
         tekst, finish, *reszta = nastepna
         wiadomosc = SimpleNamespace(content=tekst,
-                                    refusal=reszta[0] if reszta else None)
+                                    refusal=reszta[0] if reszta else None,
+                                    reasoning=reszta[1] if len(reszta) > 1 else None)
         return SimpleNamespace(choices=[SimpleNamespace(
             message=wiadomosc, finish_reason=finish)])
 
@@ -271,6 +272,15 @@ def test_myslenie_dev_przez_openroutera_wysyla_swoj_effort_i_doplate():
     _wywolaj(klient)
     assert wyslane[0]["extra_body"] == {"reasoning": {"effort": "high"}}
     assert wyslane[0]["max_tokens"] == 100 + cl.ZAPAS_TOKENOW_MYSLENIA_DEV
+
+
+def test_myslenie_openroutera_trafia_do_zapisu():
+    # Sonda 2026-11-16: streszczenie myslenia w `message.reasoning`.
+    klient, _w = _klient([("przeklad", "stop", None, "Wazę termin X.")])
+    klient.myslenie_dev = "high"
+    klient.myslenie_zapis = []
+    _wywolaj(klient)
+    assert klient.myslenie_zapis == ["Wazę termin X."]
 
 
 def test_compat_nie_dostaje_doplaty_myslenia():

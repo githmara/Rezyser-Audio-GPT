@@ -1083,6 +1083,31 @@ def sciezka_odrzutu(kod: str, rdzen: str, klucz: str, proba: int) -> Path:
     return KATALOG_ODRZUTOW / f"odrzut_{kod}_{rdzen}_{klucz.strip('_')}_proba{proba}.md"
 
 
+def sciezka_myslenia(kod: str, rdzen: str, klucz: str) -> Path:
+    return KATALOG_ODRZUTOW / f"myslenie_{kod}_{rdzen}_{klucz.strip('_')}.md"
+
+
+def zapisz_myslenie(kod: str, nazwa_pliku: str, rdzen: str, klucz: str,
+                    proby: list[tuple[int, list[str]]]) -> Path | None:
+    """Zapisuje streszczenia myślenia modelu z prób sekcji (`skrypty/myslenie_*.md`).
+
+    Płacimy za myślenie `high` (MYSLENIE_DOCS), więc ma być do przeczytania OBOK
+    przekładu: tu widać decyzje terminologiczne (co zostawić po angielsku, jak
+    oddać nazwę trybu), które recenzent sprawdza w drafcie. Nadpisywany per
+    sekcja; brak streszczeń (model nie myślał, cache wznowienia) = brak pliku.
+    """
+    if not any(teksty for _p, teksty in proby):
+        return None
+    KATALOG_ODRZUTOW.mkdir(parents=True, exist_ok=True)
+    czesci = [f"# Myślenie modelu — {kod}/{nazwa_pliku} ({klucz})\n"]
+    for proba, teksty in proby:
+        czesci.append(f"\n## Próba {proba}\n")
+        czesci.extend(f"\n{t}\n" for t in teksty)
+    cel = sciezka_myslenia(kod, rdzen, klucz)
+    cel.write_text("".join(czesci), encoding="utf-8", newline="\n")
+    return cel
+
+
 def sciezka_przyjetej(cache_key: str) -> Path:
     return RUNTIME_DIR / "przyjete_sekcje" / f"{cache_key}.json"
 
@@ -1573,6 +1598,24 @@ def _tlumacz_pojedyncza_sekcje(
     # Próby, które doszły do etapu zarzutów (twarde bramki przeszły) — przy
     # ubiciu sekcji lądują w `skrypty/` zamiast przepadać.
     proby_odrzucone: list[dict] = []
+    # Streszczenia myślenia per próba (MYSLENIE_DOCS) — zapisywane zaraz po
+    # każdej próbie, więc zostają także po ubiciu sekcji.
+    myslenie_prob: list[tuple[int, list[str]]] = []
+
+    def _zachowaj_myslenie(proba: int) -> None:
+        zebrane = getattr(klient, "myslenie_zapis", None)
+        if zebrane is None:
+            return
+        klient.myslenie_zapis = None
+        myslenie_prob.append((proba, zebrane))
+        try:
+            cel = zapisz_myslenie(kod, nazwa_pliku, rdzen, klucz_sekcji, myslenie_prob)
+        except OSError as exc:
+            print(f"     ⚠️ Could not save the model's thinking for review: {exc}")
+            return
+        if cel is not None:
+            print(f"🧠  {kod}/{nazwa_pliku}{sufiks}: model thinking → "
+                  f"{cel.relative_to(ROOT) if ROOT in cel.parents else cel}")
 
     def _zachowaj_proby() -> None:
         """Zapisuje próby odrzucone do `skrypty/` (no-op, gdy żadnej nie ma).
@@ -1626,30 +1669,37 @@ def _tlumacz_pojedyncza_sekcje(
             print(f"🔁  {kod}/{nazwa_pliku}{sufiks}: powtórka z "
                   f"{len(zarzuty)} zarzutami…")
 
-        wynik = tlumacz_dlugi_tekst(
-            tresc=payload,
-            jezyk_docelowy=nazwa_pl,
-            klient=klient,
-            runtime_dir=str(RUNTIME_DIR),
-            oryginalna_nazwa=cache_key,
-            on_postep=_on_postep,
-            on_blad_krytyczny=_on_blad_krytyczny,
-            on_blad_miekki=_on_blad_miekki,
-            model_tlumacz=model,
-            prompt_dodatkowy=prompt_proby,
-            # 18.9: cache sekcji NIE ginie po jej sukcesie — plik wynikowy powstaje
-            # dopiero po WSZYSTKICH sekcjach, więc błąd sekcji 40/68 kasował dotąd
-            # 39 opłaconych cache'ów i rerun płacił za nie ponownie. Sprzątamy je
-            # w `tlumacz_szablon` dopiero po faktycznym zapisie pliku.
-            zachowaj_cache=True,
-            # 19.8: kod celu znamy z `-l`, więc mikrocall ISO (płatny, per
-            # sekcja i per próba, a jego wyniku BWD i tak nie czyta) odpada.
-            kod_iso=kod,
-            # Domyślne chunkowanie (~2 500 tok/blok): duża sekcja może rozpaść się
-            # na wiele bloków — bezpieczne, bo nie ma już META, której wielokrotny
-            # marker po podziale psułby sklejkę (dawny override 4 000 wymuszał
-            # „sekcja = jeden blok" wyłącznie pod META; zniesiony razem z META).
-        )
+        # Myślenie (MYSLENIE_DOCS) zbierane per próba i zapisywane także wtedy,
+        # gdy próba skończy się wyjątkiem — zapłacone, więc do przeczytania.
+        if getattr(klient, "myslenie_dev", ""):
+            klient.myslenie_zapis = []
+        try:
+            wynik = tlumacz_dlugi_tekst(
+                tresc=payload,
+                jezyk_docelowy=nazwa_pl,
+                klient=klient,
+                runtime_dir=str(RUNTIME_DIR),
+                oryginalna_nazwa=cache_key,
+                on_postep=_on_postep,
+                on_blad_krytyczny=_on_blad_krytyczny,
+                on_blad_miekki=_on_blad_miekki,
+                model_tlumacz=model,
+                prompt_dodatkowy=prompt_proby,
+                # 18.9: cache sekcji NIE ginie po jej sukcesie — plik wynikowy powstaje
+                # dopiero po WSZYSTKICH sekcjach, więc błąd sekcji 40/68 kasował dotąd
+                # 39 opłaconych cache'ów i rerun płacił za nie ponownie. Sprzątamy je
+                # w `tlumacz_szablon` dopiero po faktycznym zapisie pliku.
+                zachowaj_cache=True,
+                # 19.8: kod celu znamy z `-l`, więc mikrocall ISO (płatny, per
+                # sekcja i per próba, a jego wyniku BWD i tak nie czyta) odpada.
+                kod_iso=kod,
+                # Domyślne chunkowanie (~2 500 tok/blok): duża sekcja może rozpaść się
+                # na wiele bloków — bezpieczne, bo nie ma już META, której wielokrotny
+                # marker po podziale psułby sklejkę (dawny override 4 000 wymuszał
+                # „sekcja = jeden blok" wyłącznie pod META; zniesiony razem z META).
+            )
+        finally:
+            _zachowaj_myslenie(proba)
         if wynik is None:
             komunikat = blad_kryt["msg"] or "unknown error from the tlumacz_ai.py engine"
             print(f"❌  {kod}/{nazwa_pliku}{sufiks}: translation aborted.\n    {komunikat.splitlines()[0]}")

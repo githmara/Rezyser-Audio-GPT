@@ -57,6 +57,9 @@ def _stub_llm(klient, *, model, system, messages, max_tokens, temperature,
               timeout, segmenty=None, wymusz_json=False, schema_json=None, slad=None):
     _prompty.append(system)
     tresc = messages[0]["content"]
+    # Jak `core_llm._zbierz_myslenie`: wolajacy, ktory zbiera, dostaje streszczenie.
+    if getattr(klient, "myslenie_zapis", None) is not None:
+        klient.myslenie_zapis.append(f"Mysle nad proba {len(_prompty)}.")
     psuj = _odpowiedzi.pop(0) if _odpowiedzi else (lambda t: t)
     return psuj(tresc), "end_turn"
 
@@ -80,11 +83,11 @@ def _srodowisko(*odpowiedzi):
         ht.usun_katalog(katalog)
 
 
-def _przebieg(tresc_pl: str = TRESC_PL) -> tuple[bool, str | None, str]:
+def _przebieg(tresc_pl: str = TRESC_PL, klient=None) -> tuple[bool, str | None, str]:
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(io.StringIO()):
         ok, wynik = bd._tlumacz_pojedyncza_sekcje(
-            KOD, NAZWA_PL, None, "test.yaml", RDZEN, bd.KLUCZ_LEGACY, tresc_pl,
+            KOD, NAZWA_PL, klient, "test.yaml", RDZEN, bd.KLUCZ_LEGACY, tresc_pl,
             dry_run=False, model="stub", prompt_dodatkowy="")
     return ok, wynik, buf.getvalue()
 
@@ -128,6 +131,28 @@ def test_druga_porazka_twardej_bramki_ubija_sekcje():
         assert len(_prompty) == 2
         assert "❌" in log.split("BROKEN parity")[-2]          # druga = blad
         assert bd.STATYSTYKA_POWTOREK == {"twarde:nienaprawiona": 1}
+
+
+def test_myslenie_obu_prob_zapisane_obok_przekladu():
+    """Oplacone myslenie (`MYSLENIE_DOCS`) laduje w `skrypty/myslenie_*.md`, takze z proby odrzuconej."""
+    from types import SimpleNamespace
+    klient = SimpleNamespace(myslenie_dev="high", myslenie_zapis=None)
+    with _srodowisko(_bez_markera):
+        ok, _wynik, log = _przebieg(klient=klient)
+        assert ok, log
+        plik = bd.sciezka_myslenia(KOD, RDZEN, bd.KLUCZ_LEGACY)
+        tresc = plik.read_text(encoding="utf-8")
+        assert "## Próba 1" in tresc and "Mysle nad proba 1." in tresc
+        assert "## Próba 2" in tresc and "Mysle nad proba 2." in tresc
+        assert klient.myslenie_zapis is None          # inne wywolania nie zbieraja
+
+
+def test_bez_myslenia_dev_nie_ma_pliku_myslenia():
+    from types import SimpleNamespace
+    with _srodowisko():
+        ok, _wynik, log = _przebieg(klient=SimpleNamespace(myslenie_dev=""))
+        assert ok, log
+        assert not bd.sciezka_myslenia(KOD, RDZEN, bd.KLUCZ_LEGACY).exists()
 
 
 # ---------------------------------------------------------------------------

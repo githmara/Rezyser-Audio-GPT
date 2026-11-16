@@ -67,9 +67,11 @@ class _MockSDK:
         pozycja = self._odpowiedzi.pop(0)
         if isinstance(pozycja, Exception):
             raise pozycja
+        # (tekst, myslenie) = odpowiedz z czytelnym streszczeniem myslenia.
+        tekst, myslenie = pozycja if isinstance(pozycja, tuple) else (pozycja, "")
         resp = SimpleNamespace(
-            content=[SimpleNamespace(type="thinking", thinking=""),
-                     SimpleNamespace(type="text", text=pozycja)],
+            content=[SimpleNamespace(type="thinking", thinking=myslenie),
+                     SimpleNamespace(type="text", text=tekst)],
             stop_reason="end_turn",
             usage=SimpleNamespace(input_tokens=1, output_tokens=1),
         )
@@ -229,7 +231,8 @@ def test_myslenie_dev_adaptive_z_effortem_i_doplata():
     tekst, wyslane = _anthropic_myslacy(["ok"], schema_json=SCHEMAT)
     w = wyslane[0]
     assert tekst == "ok"
-    assert w["thinking"] == {"type": "adaptive"}
+    # `display: summarized` - domyslne `omitted` daje myslenie oplacone i puste.
+    assert w["thinking"] == {"type": "adaptive", "display": "summarized"}
     assert w["output_config"]["effort"] == "high"
     assert w["output_config"]["format"]["schema"] == SCHEMAT
     assert w["max_tokens"] == 1000 + cl.ZAPAS_TOKENOW_MYSLENIA_DEV
@@ -240,6 +243,24 @@ def test_myslenie_dev_odrzucone_wraca_do_dialektu_bez_myslenia():
     assert len(wyslane) == 2
     assert wyslane[1]["thinking"] == {"type": "between_tools"}
     assert "output_config" not in wyslane[1]
+
+
+def test_myslenie_czytelne_trafia_do_zapisu_tylko_gdy_wolajacy_zbiera():
+    wyslane = []
+    klient = cl.KlientLLM(provider=cl.PROVIDER_ANTHROPIC, myslenie_dev="high",
+                          sdk=_MockSDK([("ok", "  Wazę termin X.  "), ("ok", "")], wyslane))
+    klient.myslenie_zapis = []
+    for _ in range(2):              # druga odpowiedz: pusty blok (display omitted)
+        cl.wywolaj_llm(klient, model="claude-sonnet-5-5", system="S.",
+                       messages=[{"role": "user", "content": "Hi"}],
+                       max_tokens=100, temperature=0.3, timeout=30.0)
+    assert klient.myslenie_zapis == ["Wazę termin X."]
+    bez_zapisu = cl.KlientLLM(provider=cl.PROVIDER_ANTHROPIC,
+                              sdk=_MockSDK([("ok", "myslenie")], []))
+    cl.wywolaj_llm(bez_zapisu, model="claude-sonnet-5-5", system="S.",
+                   messages=[{"role": "user", "content": "Hi"}],
+                   max_tokens=100, temperature=0.3, timeout=30.0)
+    assert bez_zapisu.myslenie_zapis is None
 
 
 def test_runtime_nie_ustawia_myslenia_dev():

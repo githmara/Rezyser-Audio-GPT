@@ -308,6 +308,12 @@ class KlientLLM:
     # `buduj_wielojezyczne_docs.py`. Przełączenie na zapas go NIE zeruje:
     # to cecha wołającego, nie konta.
     myslenie_dev: str = ""
+    # Czytelne myślenie (v19.20, dev-only jak `myslenie_dev`): lista → każde
+    # udane wywołanie dopisuje streszczenie myślenia modelu (Anthropic: bloki
+    # `thinking` przy `display: "summarized"`; OpenRouter: `message.reasoning`).
+    # `None` = nie zbieramy. Płacimy za myślenie, więc ma być do przeczytania
+    # obok wyniku — `_docs` zapisuje je jako `skrypty/myslenie_*.md`.
+    myslenie_zapis: list[str] | None = None
 
     def przelacz_na(self, inny: "KlientLLM") -> None:
         """Podmienia klienta W MIEJSCU, żeby każdy, kto trzyma referencję, jechał dalej nowym.
@@ -1355,6 +1361,10 @@ def _openai_chat(
     resp = klient.sdk.with_options(timeout=timeout).chat.completions.create(**kwargs)
     choice = resp.choices[0]
     tekst = choice.message.content or ""
+    # OpenRouter oddaje streszczenie myślenia w `message.reasoning` (pole spoza
+    # schematu OpenAI — SDK trzyma je w `model_extra`; sonda 2026-11-16).
+    _zbierz_myslenie(klient, getattr(choice.message, "reasoning", None)
+                     or (getattr(choice.message, "model_extra", None) or {}).get("reasoning"))
     finish = getattr(choice, "finish_reason", None)
     if finish == "length":
         return tekst, "max_tokens"
@@ -1393,6 +1403,17 @@ _OPENROUTER_REASONING_TEKST: dict = {"effort": "low"}
 #: przekład (pomiar 2026-11-15: `effort: high` = 620–789 tokenów myślenia na
 #: sekcję 6982 zn.; dopłata ma zapas na trudniejsze bloki). 8192 + 8192 =
 #: 16 384 mieści się poniżej progu, od którego SDK Anthropic żąda streamingu.
+#: Payload `thinking` dev-tooli: adaptive ze streszczeniem do przeczytania.
+MYSLENIE_CZYTELNE: dict = {"type": "adaptive", "display": "summarized"}
+
+
+def _zbierz_myslenie(klient: "KlientLLM", tekst: Any) -> None:
+    """Dopisuje czytelne myślenie do `klient.myslenie_zapis` (gdy wołający zbiera)."""
+    zapis = getattr(klient, "myslenie_zapis", None)
+    if zapis is not None and isinstance(tekst, str) and tekst.strip():
+        zapis.append(tekst.strip())
+
+
 ZAPAS_TOKENOW_MYSLENIA_DEV = 8192
 ZAPAS_CZASU_MYSLENIA_DEV = 180.0
 
@@ -1636,9 +1657,13 @@ def _wywolaj_anthropic(
     # Myślenie dev-tools (v19.20, `KlientLLM.myslenie_dev`): adaptive + effort
     # zamiast „bez myślenia”. Odrzucone przez model → ten sam szczebel w trybie
     # „bez myślenia” (z logiem), a dalej zwykła drabina dialektów.
+    # `display: "summarized"` jest WARUNKIEM sensu: domyślne na Sonnecie 5.5
+    # `omitted` zwraca bloki `thinking` z pustym tekstem — myślenie opłacone
+    # i nieczytelne (sonda 2026-11-16). Model, który `display` odrzuci, wraca
+    # do „bez myślenia”, nie do myślenia niewidocznego.
     myslenie = getattr(klient, "myslenie_dev", "")
     if myslenie:
-        ustaw_thinking(kwargs, {"type": "adaptive"})
+        ustaw_thinking(kwargs, dict(MYSLENIE_CZYTELNE))
         kwargs.setdefault("output_config", {})["effort"] = myslenie
         wyprobowane_thinking = [kwargs["thinking"]]
     # Degradacja CELOWANA: zdejmujemy to, co API wskazało w komunikacie 400
@@ -1675,7 +1700,7 @@ def _wywolaj_anthropic(
                     "(JSON wymuszany samym promptem, jak ≤v18.22)."
                 )
                 kwargs.pop("output_config", None)
-            elif winowajca == "thinking" and kwargs.get("thinking") == {"type": "adaptive"}:
+            elif winowajca == "thinking" and kwargs.get("thinking") == MYSLENIE_CZYTELNE:
                 _dev_log(
                     f"anthropic: model '{mdl}' odrzucił myślenie '{myslenie}' "
                     f"({type(exc).__name__}: {str(exc)[:120]}) — ponawiam BEZ "
@@ -1718,6 +1743,9 @@ def _wywolaj_anthropic(
     tekst = "".join(
         b.text for b in resp.content if getattr(b, "type", None) == "text"
     )
+    _zbierz_myslenie(klient, "\n\n".join(
+        getattr(b, "thinking", "") or "" for b in resp.content
+        if getattr(b, "type", None) == "thinking"))
     stop = getattr(resp, "stop_reason", None)
     if slad is not None:
         uzycie = getattr(resp, "usage", None)
