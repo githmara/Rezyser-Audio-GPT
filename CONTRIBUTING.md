@@ -200,7 +200,7 @@ tree — import errors and warnings raised on import, no build needed.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are 67 regression test files (1318 tests, **about a minute for all of them**) and
+There are 68 regression test files (1329 tests, **about a minute for all of them**) and
 nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
 (`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
 Running every one of them after every small edit is not thoroughness — a green
@@ -234,14 +234,14 @@ Two facts decide what that means, and both are easy to get backwards:
 | `core_pdf.py`, `core_skany.py` | `pytest test_core_pdf.py test_core_skany.py test_poliglota_skany.py` |
 | `czyszczenie_tekstu.py` (shared byte-for-byte with accessible_text_analyst — edit only in pairs) | `python czyszczenie_tekstu_wektory.py` (stdlib runner over `czyszczenie_tekstu_wektory.json`, identical in both repos) + `pytest test_przeniesienia_docx.py test_core_pdf.py` |
 | `gui_wczytanie_pdf.py`, or PDF loading in `gui_poliglota.py` / `gui_konwerter.py` (worker thread, progress, guards) | `pytest test_wczytanie_pdf_watek.py test_poliglota_skany.py` |
-| `core_llm.py` | `pytest test_json_structured.py test_cache_powtorki.py test_sprzatanie_bundla.py` |
+| `core_llm.py` | `pytest test_json_structured.py test_cache_powtorki.py test_sprzatanie_bundla.py test_openrouter.py test_myslenie_dev.py` |
 | `core_updater.py` | `pytest test_core_updater.py test_patch_dev.py` |
 | `core_markdown.py` | `pytest test_markdown_poliglota.py` |
 | `build_release.py`, `patch_dev.json`, `installer.iss`, `diagnoza_importow.py` | `pytest test_patch_dev.py test_sprzatanie_bundla.py test_diagnoza_importow.py` |
 | `.github/scripts/issue_intake_sami.py`, `sonda_sami.py`, `sonda-sami.yml` | `pytest test_intake_zalaczniki.py test_sonda_sami.py` |
 | `.github/scripts/cykl_wersji.py`, `audyt_zaleznosci.py` | `pytest test_cykl_wersji.py test_bramka_zaleznosci.py` |
 | any `.github/workflows/*.yml` with `python-version:`, or `audyt_zaleznosci.PYTHON_PRZETESTOWANY` | `pytest test_python_ci.py` — every workflow pins EXACTLY the tested patch (a bare `'3.14'` installs the newest one); bump the constant and the workflows in one commit |
-| a `buduj_wielojezyczne_*.py` / `tlumacz_*.py` / `przeglad_tlumaczen.py` | `pytest test_cache_powtorki.py test_zrodlo_pl_raz.py test_openrouter.py test_audyt_pism.py test_docs_powtorka_bramek.py test_dryf_draftow.py test_skan_leakow_draftow.py test_tryby_narzedzia.py` |
+| a `buduj_wielojezyczne_*.py` / `tlumacz_*.py` / `przeglad_tlumaczen.py` | `pytest test_cache_powtorki.py test_zrodlo_pl_raz.py test_openrouter.py test_audyt_pism.py test_docs_powtorka_bramek.py test_dryf_draftow.py test_skan_leakow_draftow.py test_tryby_narzedzia.py test_myslenie_dev.py` |
 | `rezyser_ai.py`, `opowiesci_ai.py`, `core_zastepcze.py`, or a recipe / tale prompt in `dictionaries/**/rezyser/` or `dictionaries/**/opowiesci/` | `pytest test_pola_schematu_w_prompcie.py test_burza_schemat.py` — every field of a structured-output schema must be named in the prompt that ships with it |
 | `manager_regul_kontrakt.py` | `pytest test_manager_kontrakt.py` |
 | any `dictionaries/**/gui/dokumentacja/*.yaml` or `gui/ui.yaml` | `generuj_dokumentacje.py --waliduj` **and** `audyt_leakow.py --bramka` + `audyt_pism.py --bramka` |

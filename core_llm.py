@@ -1417,9 +1417,28 @@ def _zbierz_myslenie(klient: "KlientLLM", tekst: Any) -> None:
 ZAPAS_TOKENOW_MYSLENIA_DEV = 8192
 ZAPAS_CZASU_MYSLENIA_DEV = 180.0
 
-# (provider, model), które odrzuciły `reasoning` w tej sesji — kolejne
+# (provider, model, effort), które odrzuciły `reasoning` w tej sesji — kolejne
 # wywołania nie wysyłają pola i nie płacą jałowym 400 (wzorzec `_BEZ_JSON_SCHEMA`).
-_BEZ_REASONING: set[tuple[str, str]] = set()
+# Effort jest w kluczu (bliźniak ATA 2.0.1, Z3): model, który odrzucił `high`
+# dev-toola, mógł przyjąć `low` runtime'u — i odwrotnie.
+_BEZ_REASONING: set[tuple[str, str, str]] = set()
+
+
+def _czy_odrzucono_reasoning(exc: Exception) -> bool:
+    """Czy 400 dotyczy pola ``reasoning`` OpenRoutera.
+
+    Gdy błąd wskazuje pole wprost (``param`` w SDK OpenAI), rozstrzyga tylko
+    ono (bliźniak ATA 2.0.1, Z1): odrzucony ``response_format`` z opisem
+    wspominającym rozumowanie nie może zdjąć myślenia — dev-tool zapłaciłby
+    wtedy za przebieg bez myślenia, którego nie ma czego zapisać. Bez ``param``
+    zostaje dawne sprawdzenie treści.
+    """
+    if not _czy_zla_struktura(exc):
+        return False
+    param = getattr(exc, "param", None)
+    if isinstance(param, str) and param:
+        return param.split(".")[0] == "reasoning"
+    return "reasoning" in str(exc).lower()
 
 
 def _wywolaj_openai_compat(
@@ -1524,11 +1543,12 @@ def _wywolaj_openai_compat(
     # szczebel bez pola — jak `temperature` niżej, nie zejście po drabinie.
     # Dev-tool z `myslenie_dev` dostaje swój effort zamiast domyślnego `low`.
     reasoning: dict | None = (
-        ({"effort": klient.myslenie_dev} if getattr(klient, "myslenie_dev", "")
-         else _OPENROUTER_REASONING_TEKST)
-        if klient.provider == PROVIDER_OPENROUTER and klucz_schematu not in _BEZ_REASONING
-        else None
-    )
+        {"effort": klient.myslenie_dev} if getattr(klient, "myslenie_dev", "")
+        else _OPENROUTER_REASONING_TEKST
+    ) if klient.provider == PROVIDER_OPENROUTER else None
+    klucz_reasoning = (klient.provider, mdl, (reasoning or {}).get("effort", ""))
+    if klucz_reasoning in _BEZ_REASONING:
+        reasoning = None
     ostatni = len(proby) - 1
     i = 0
     while i <= ostatni:
@@ -1543,13 +1563,14 @@ def _wywolaj_openai_compat(
         except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO błąd struktury
             if not _czy_zla_struktura(exc):
                 raise  # 429/timeout/sieć/kontekst/nieznany model → wyżej
-            if reasoning and "reasoning" in str(exc).lower():
+            if reasoning and _czy_odrzucono_reasoning(exc):
                 _dev_log(
-                    f"{klient.provider}: model '{mdl}' odrzucił 'reasoning' — "
-                    f"powtarzam szczebel '{opis}' bez tego pola."
+                    f"{klient.provider}: model '{mdl}' odrzucił 'reasoning' "
+                    f"(effort {reasoning.get('effort')}) — powtarzam szczebel "
+                    f"'{opis}' bez tego pola."
                 )
                 reasoning = None
-                _BEZ_REASONING.add(klucz_schematu)
+                _BEZ_REASONING.add(klucz_reasoning)
                 continue   # ten sam szczebel, bez `reasoning`
             if not (bez_temp or bez_temp_szczebla) and _co_odrzucono(exc) == "temperature":
                 _dev_log(
@@ -1956,7 +1977,7 @@ def _pdf_openrouter(
         # Model bez myślenia wskazany przez `LLM_MODEL` może odrzucić sam
         # parametr — wtedy jedno ponowienie bez niego. Każdy inny 400 leci
         # wyżej, bo żadne ponowienie go nie naprawi.
-        if not (_czy_zla_struktura(exc) and "reasoning" in str(exc).lower()):
+        if not _czy_odrzucono_reasoning(exc):
             raise
         _dev_log(f"openrouter: model '{mdl}' odrzucił 'reasoning' — ponawiam bez niego.")
         return _openai_chat(klient, mdl, msgs, max_tokens, _TEMPERATURA_DOMYSLNA,

@@ -566,7 +566,11 @@ def wywolaj_llm(
         # Myślenie adaptacyjne i sterowanie samplingiem wykluczają się — obok
         # `thinking` NIE wysyłamy `temperature` (na Sonnet 5 niedomyślna wartość
         # to 400, a przy myśleniu nie ma czego determinizować).
-        kwargs["thinking"] = {"type": "adaptive"}
+        # `display: summarized` (audyt 19.20): bez niego Sonnet 5.5 oddaje
+        # myślenie pominięte — płacimy za nie, a nie ma czego przeczytać ani
+        # zapisać. Streszczenie trafia do `klient.myslenie_zapis`, gdy wołający
+        # je zbiera (brat od akcentów, `skrypty/myslenie_akcent_*.md`).
+        kwargs["thinking"] = dict(cl.MYSLENIE_CZYTELNE)
     else:
         # „Bez myślenia" w dialekcie modelu: `between_tools` na Sonnet 5.5
         # (`disabled` = 400), `disabled` na starszych — wiedza w `core_llm`.
@@ -596,6 +600,13 @@ def wywolaj_llm(
                     wyprobowane_thinking.append(wariant)
                     cl.ustaw_thinking(kwargs, wariant)
                     continue
+            # Model spoza baseline'u (`--model`) może nie znać `display` —
+            # jedno ponowienie z gołym adaptive: myślenie zostaje, tylko bez
+            # streszczenia do zapisu. Samo myślenie nadal się nie degraduje.
+            if (myslenie and "display" in (kwargs.get("thinking") or {})
+                    and cl.czy_odrzucono_thinking(exc)):
+                kwargs["thinking"] = {"type": "adaptive"}
+                continue
             # v19.11: 401 / 429 / brak kredytów → zapas na OpenRoutera (polityka
             # zgody wyżej). Po przełączeniu pętla się kończy, a ten sam chunk
             # idzie gałęzią niżej.
@@ -610,6 +621,9 @@ def wywolaj_llm(
         surowa = "".join(
             b.text for b in resp.content if getattr(b, "type", None) == "text"
         )
+        cl._zbierz_myslenie(klient, "\n\n".join(
+            getattr(b, "thinking", "") or "" for b in resp.content
+            if getattr(b, "type", None) == "thinking"))
     else:
         # OpenRouter (zapas albo konfiguracja bez klucza Anthropic). Ten sam
         # schemat jako strict `json_schema`; `core_llm` schodzi do `json_object`,

@@ -1561,6 +1561,31 @@ def _zapisz_z_walidacja(paczka: str, akcent: str, tresc: str) -> list[Znalezisko
     return znaleziska
 
 
+def sciezka_myslenia_pary(paczka: str, akcent: str) -> Path:
+    return ROOT / "skrypty" / f"myslenie_akcent_{paczka}_{akcent}.md"
+
+
+def _zapisz_myslenie_pary(paczka: str, akcent: str,
+                          proby: list[tuple[int, list[str]]]) -> None:
+    """Streszczenia myślenia prób pary → `skrypty/myslenie_akcent_*.md`.
+
+    Zapis po KAŻDEJ próbie (także zakończonej wyjątkiem), więc myślenie
+    przeżywa odrzucenie pary. Błąd zapisu nie przerywa przebiegu.
+    """
+    cel = sciezka_myslenia_pary(paczka, akcent)
+    czesci = [f"# Myślenie modelu — para {paczka}/{akcent}\n"]
+    for proba, teksty in proby:
+        czesci.append(f"\n## Próba {proba}\n")
+        czesci.extend(f"\n{t}\n" for t in teksty)
+    try:
+        cel.parent.mkdir(parents=True, exist_ok=True)
+        cel.write_text("".join(czesci), encoding="utf-8", newline="\n")
+    except OSError as exc:
+        print(f"     ⚠️ Could not save the model's thinking for review: {exc}")
+        return
+    print(f"🧠  {paczka}/{akcent}: model thinking → {cel.relative_to(ROOT)}")
+
+
 def generuj_pare(
     klient: Any, paczka: str, akcent: str, iso_celu: str, *,
     model: str, dry_run: bool, pary: dict[tuple[str, str], dict], cp: Any,
@@ -1617,11 +1642,17 @@ def generuj_pare(
     # model zapomniał zastosować własną regułę do pierwszej litery słowa —
     # dokładnie ta klasa wpadki, którą powtórka z zarzutem naprawia.
     zarzuty: list[str] = []
+    # Myślenie adaptacyjne jest zapłacone, więc ląduje obok draftu (audyt 19.20).
+    # Plik z poprzedniego przebiegu znika od razu: inaczej leżałby przy NOWYM
+    # drafcie, gdy ta para nie odda streszczenia (wzorzec `_docs`).
+    sciezka_myslenia_pary(paczka, akcent).unlink(missing_ok=True)
+    myslenie_prob: list[tuple[int, list[str]]] = []
     for proba in (1, 2):
         pola_proby = dict(pola)
         if zarzuty:
             pola_proby["previous_attempt_problems"] = zarzuty
             print(f"🔁 {paczka}/{akcent}: powtórka z {len(zarzuty)} zarzutami…")
+        klient.myslenie_zapis = []
         try:
             odpowiedzi = tlumacz_rdzen.wywolaj_llm(
                 klient, model=model, system=system,
@@ -1642,6 +1673,12 @@ def generuj_pare(
             # BARDZIEJ prawdopodobne niż u braci (v18.30.0).
             print(f"❌ {paczka}/{akcent}: LLM error — {exc}")
             return False
+        finally:
+            zebrane = klient.myslenie_zapis
+            klient.myslenie_zapis = None
+            if zebrane:
+                myslenie_prob.append((proba, zebrane))
+                _zapisz_myslenie_pary(paczka, akcent, myslenie_prob)
 
         wpisy, uwagi = _parsuj_reguly(odpowiedzi.get(0, ""))
         for uwaga in uwagi:
