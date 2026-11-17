@@ -4,6 +4,67 @@ Release entries in reverse-chronological order. The section of a version is copi
 
 ---
 
+## 19.20.0 — minor release
+
+### What's new
+
+**Getting an Anthropic key.** The Anthropic console now asks "Where does your
+code run?" before it shows a key. The manuals in every language say to choose
+"Somewhere else": the other answer leads to installing a command-line tool,
+which this program does not need.
+
+**Tales.** Free mode and Choices mode no longer ask the model to fill in the
+vial state, which only Lesser Evil mode uses. Saved stories from earlier
+versions load as before.
+
+**OpenRouter.** Through OpenRouter, Claude reasoned at its default effort on
+ordinary text even though the program asks for none, and the reasoning used
+up the output limit: a long translation could stop short. Text requests now
+ask for the lowest effort, which measured zero reasoning tokens. A model that
+does not accept the setting is asked again without it.
+
+**Rule Manager.** A cipher file with neither an algorithm nor a list of
+replacements now gets a warning when it is checked. Before, the program
+failed only when the cipher was first used.
+
+**Environment.** anthropic 2.9.0, elevenlabs 2.79.0 and openai 3.52.0, checked
+with live calls on every consumer: Anthropic, OpenRouter, ElevenLabs and the
+issue bot.
+
+**For contributors.**
+- Paid model thinking in the translation tools can be read. The manuals tool
+  and the accent tool ask for a readable summary of the thinking and save it
+  next to the draft in `skrypty/` as `myslenie_*.md`. A raised thinking effort
+  is sent only to models whose thinking can be read: measured on 2026-11-17,
+  GPT through OpenRouter returns it encrypted. Other models get the lowest
+  effort and a console warning. A warning also appears when a tool tuned for
+  a model that does not reason runs on a model that always does.
+- The manuals tool retries a section once when marker parity or the
+  structure check fails, and checks the prose for mojibake and words mixing
+  two scripts.
+- Translation drafts are checked for drift: a unit whose Polish source did
+  not change but whose translation did is listed for review.
+- Test hygiene gate: every test is checked for leaked working directory,
+  environment, module globals and temporary folders; the suite passes in
+  both file orders.
+- `co_uruchomic.py` prints which tests and gates the current changes need,
+  from the table in `CONTRIBUTING.md`. `diagnoza_importow.py` reports
+  PyInstaller warnings about our own code.
+- With an open cycle (`VERSION` ending in `-WIP`) the documentation generator
+  keeps the version number each generated file already shows, so a template
+  change is committed together with its regenerated files.
+- The issue bot's production key can be checked with the manual workflow
+  `sonda-sami.yml`, which calls the model through the bot's own function
+  with the Actions secret. Bot workflows run on a pinned `ubuntu-24.04`
+  image, because the exact Python patch they test is not built for the
+  newer image.
+
+### Planned or deferred
+
+- None.
+
+---
+
 ## 19.19.0 — minor release
 
 ### What's new

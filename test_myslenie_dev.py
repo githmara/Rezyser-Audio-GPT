@@ -124,7 +124,7 @@ def test_para_zapisuje_myslenie_takze_po_bledzie_i_sprzata_stare(tmp_path, monke
     stary.write_text("myślenie z poprzedniego przebiegu", encoding="utf-8")
 
     def _llm_bez_myslenia(klient, **_kw):
-        raise RuntimeError("chunk padł")
+        raise RuntimeError("chunk failed")
 
     monkeypatch.setattr(ak.tlumacz_rdzen, "wywolaj_llm", _llm_bez_myslenia)
     klient = SimpleNamespace(myslenie_zapis=None)
@@ -135,7 +135,7 @@ def test_para_zapisuje_myslenie_takze_po_bledzie_i_sprzata_stare(tmp_path, monke
 
     def _llm_mysli_i_pada(klient, **_kw):
         klient.myslenie_zapis.append("Reguła dla ä.")
-        raise RuntimeError("chunk padł")
+        raise RuntimeError("chunk failed")
 
     monkeypatch.setattr(ak.tlumacz_rdzen, "wywolaj_llm", _llm_mysli_i_pada)
     assert ak.generuj_pare(klient, "pl", akcent, "fi", model="m", dry_run=False,
@@ -306,10 +306,10 @@ def test_zablokowany_stary_plik_myslenia_nie_wywraca_pary(tmp_path, monkeypatch,
     monkeypatch.setattr(ak, "ROOT", tmp_path)
 
     def _zablokowany(self, missing_ok=False):
-        raise PermissionError("[WinError 32] plik w użyciu")
+        raise PermissionError("[WinError 32] file in use")
 
     def _llm(klient, **_kw):
-        raise RuntimeError("chunk padł")
+        raise RuntimeError("chunk failed")
 
     monkeypatch.setattr(ak.Path, "unlink", _zablokowany)
     monkeypatch.setattr(ak.tlumacz_rdzen, "wywolaj_llm", _llm)

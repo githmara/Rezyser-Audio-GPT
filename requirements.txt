@@ -76,7 +76,7 @@ wxpython<4.4  # hold: 19.18.0
 # `Authorization: Bearer`. 2.x ciągnie nową zależność `httpx2` (bundle).
 # Dowód: `inspect.signature` + żywe wywołanie sonnet-5-5 (tekst i structured
 # outputs, jedna próba każde). Licencja SDK od 2.0: Apache 2.0 (było MIT).
-anthropic<3  # hold: 19.18.0
+anthropic<3  # hold: 19.20.0
 # Most do Studio: wołamy `client.studio.projects.create/delete`
 # i `client.user.subscription.get` — dokładnie tę powierzchnię ten SDK
 # przemianowuje między wydaniami. 2.52 → 2.67 (15 minorów) przeszło bez zmian
@@ -84,7 +84,7 @@ anthropic<3  # hold: 19.18.0
 # 19.18: 2.68.0 → 2.78.0 — `inspect.signature` na całej trójce z naszymi kwargami
 # przechodzi, `elevenlabs.core.ApiError` na miejscu, żywy odczyt subskrypcji OK.
 # Granica na linii majorowej (grupa B).
-elevenlabs<3  # hold: 19.18.0
+elevenlabs<3  # hold: 19.20.0
 python-dotenv
 python-docx
 # Warstwa tekstu PDF w Poliglocie i Konwerterze (`core_pdf`, od 19.13). Wybrany
@@ -178,4 +178,4 @@ markdown<3.12  # hold: 19.18.0
 # 2026-11-13: 3.49.0 → 3.50.0 (wyszło w trakcie cyklu, bramka zatrzymała build) —
 # `OpenAI.__init__`, `chat.completions.create` i 8 łapanych klas wyjątków bez zmian;
 # żywe wywołanie OpenRoutera (tekst + json_schema) OK, także w ATA.
-openai<4  # hold: 19.18.0
+openai<4  # hold: 19.20.0
