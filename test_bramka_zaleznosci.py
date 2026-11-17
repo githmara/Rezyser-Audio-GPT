@@ -409,7 +409,7 @@ def test_gorne_granice_workflowow_zgodne_z_manifestem():
     rozjazdy, widziane = _rozjazdy_granic(workflowy, manifest)
     # Kazdy plik instalujacy pakiet sprawdzany OSOBNO (do 2026-11-13 zbior byl
     # wspolny, wiec pin w jednym z trzech workflowow lingua przechodzil).
-    assert len(widziane.get("lingua-language-detector", ())) == 3, widziane
+    assert len(widziane.get("lingua-language-detector", ())) == 4, widziane
     assert widziane.get("openai") == {"issue-intake.yml", "sonda-sami.yml"}, widziane
     assert not rozjazdy, rozjazdy
 

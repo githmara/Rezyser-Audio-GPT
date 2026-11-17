@@ -34,10 +34,11 @@ jobs:
         with:
           python-version: '3.14.3'  # = audyt_zaleznosci.PYTHON_PRZETESTOWANY (test_python_ci.py)
 
-      - name: Instalacja zaleznosci (openai + pyyaml)
+      - name: Instalacja zaleznosci (openai + lingua + pyyaml)
         run: |
-          # Granice jak w issue-intake.yml — sonda ma jechać tym samym SDK co bot.
-          pip install --upgrade "openai>=1.40,<4" pyyaml
+          # Ten sam zestaw co issue-intake.yml: moduł Sami importuje lingua przy starcie.
+          pip install --upgrade "openai>=1.40,<4"
+          pip install "lingua-language-detector<2.3" pyyaml
 
       - name: Jedno wywolanie MODEL_SAMI sekretem OPENAI_API_KEY
         env:
