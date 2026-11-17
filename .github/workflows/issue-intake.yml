@@ -28,7 +28,10 @@ jobs:
        github.event.label.name != 'fixed-in-release' &&
        github.event.label.name != 'wontfix' &&
        github.event.label.name != 'duplicate')
-    runs-on: ubuntu-latest
+    # Obraz PRZYPIĘTY (2026-11-17): ubuntu-latest = 26.04, a build CPython 3.14.3
+    # dla 26.04 nie istnieje (pierwszy: 3.14.6) — setup-python padał przed
+    # pierwszą linią bota. Pilnuje test_python_ci.py.
+    runs-on: ubuntu-24.04
     permissions:
       # write — Sami zostawia komentarz na issue po pomyslnej wysylce
       # maila do Centrum (zeby user nie patrzyl w "czarna dziure" miedzy

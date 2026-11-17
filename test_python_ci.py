@@ -51,6 +51,18 @@ def test_every_workflow_matches_tested_python():
     assert seen > 0, "no python-version found — the parser no longer matches the workflows"
 
 
+def test_exact_patch_never_runs_on_a_moving_image():
+    """`ubuntu-latest` moves (2026-11: 24.04 -> 26.04) and setup-python has no build of
+    an older patch for the new image: 3.14.3 does not exist for 26.04, so Sami's
+    setup step failed before its first line (found by sonda-sami.yml, 2026-11-17).
+    A job that installs an exact patch must name its image."""
+    katalog = ROOT / ".github" / "workflows"
+    zle = [wf.name for wf in sorted(katalog.glob("*.yml"))
+           if "setup-python" in (t := wf.read_text(encoding="utf-8"))
+               and any(w.strip().startswith("runs-on:") and "-latest" in w for w in t.splitlines())]
+    assert not zle, f"exact Python patch on a moving runner image: {zle}"
+
+
 def test_parser_sees_a_bare_minor_and_ignores_comments():
     q = chr(39)
     assert _workflow_versions(f"  python-version: {q}3.14{q}") == ["3.14"]

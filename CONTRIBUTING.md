@@ -200,7 +200,7 @@ tree — import errors and warnings raised on import, no build needed.
 
 ## Tests and gates: run the ones your change can actually break
 
-There are 67 regression test files (1317 tests, **about a minute for all of them**) and
+There are 67 regression test files (1318 tests, **about a minute for all of them**) and
 nine gates. The two counts are checked against the repository by `przelicznik_testow.py`
 (`--zapisz` rewrites them); the duration is a rounded figure the tool does not measure.
 Running every one of them after every small edit is not thoroughness — a green
