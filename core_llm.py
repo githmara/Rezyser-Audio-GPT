@@ -1417,6 +1417,73 @@ def _zbierz_myslenie(klient: "KlientLLM", tekst: Any) -> None:
 ZAPAS_TOKENOW_MYSLENIA_DEV = 8192
 ZAPAS_CZASU_MYSLENIA_DEV = 180.0
 
+
+def mysli_czytelnie(klient: "KlientLLM", mdl: str) -> bool:
+    """Czy myślenie tego modelu da się PRZECZYTAĆ (i dlatego warto je podbijać).
+
+    Zmierzone 2026-11-17 (`skrypty/pomiar_reasoning_gpt_openrouter.py`): GPT
+    przez OpenRoutera oddaje myślenie jako `reasoning.encrypted` — płatne
+    (do 369 tokenów przy `high`), a streszczenie przyszło raz na 10 wywołań,
+    także przy `summary: detailed|auto`. Claude przez OpenRoutera oddaje je
+    w `message.reasoning` (pomiar 2026-11-15), natywnie `display: summarized`.
+    `openai_compat` nie ma pola myślenia wcale. Podbity effort nieczytelnego
+    modelu to czysty koszt, więc dev-tool dostaje tam `low`.
+    """
+    if klient.provider == PROVIDER_ANTHROPIC:
+        return True
+    if klient.provider == PROVIDER_OPENROUTER:
+        return mdl.startswith("anthropic/")
+    return False
+
+
+_OSTRZEZENIA_MYSLENIA: set[tuple[str, str, str]] = set()
+
+
+def _ostrzez_o_mysleniu(klient: "KlientLLM", mdl: str) -> None:
+    """Raz na (provider, model, rodzaj): myślenie inne, niż chce narzędzie.
+
+    Dwie strony (decyzja maintainera 2026-11-17):
+      * narzędzie CHCE czytelnego myślenia (`myslenie_dev`), a model/endpoint go
+        nie odda → effort `low` i ostrzeżenie, że recenzent nie dostanie pliku;
+      * narzędzie ma prompt strojony pod brak rozumowania, a model myśli zawsze
+        (rodzina spoza Anthropic przez OpenRoutera: „Reasoning is mandatory”;
+        compat: pola nie ma, więc model myśli z domyślnym effortem).
+    Claude przez OpenRoutera na `low` myślał 0 tokenów (pomiar 2026-11-16),
+    natywnie `between_tools` — tam ostrzeżenia nie ma. Kanał jak `_dev_log`:
+    konsola dewelopera; w paczce bez konsoli milczy.
+    """
+    chce = bool(getattr(klient, "myslenie_dev", ""))
+    if chce and not mysli_czytelnie(klient, mdl):
+        rodzaj = "nieczytelne"
+        compat = klient.provider == PROVIDER_OPENAI_COMPAT
+        powod = ("openai_compat has no thinking field" if compat
+                 else "OpenRouter returns it encrypted")
+        zamiast = "the model's default applies" if compat else "'low' is sent instead"
+        tekst = (f"⚠️  {mdl} through {klient.provider} cannot return readable thinking "
+                 f"({powod}) — the requested effort '{klient.myslenie_dev}' is NOT sent, "
+                 f"{zamiast}. No thinking file will be written for review.")
+    elif not chce and klient.provider == PROVIDER_OPENROUTER and not mysli_czytelnie(klient, mdl):
+        rodzaj = "obowiazkowe"
+        tekst = (f"⚠️  {mdl} through OpenRouter always reasons (it cannot be switched "
+                 f"off) — sending effort 'low'. This tool's prompts are tuned for a "
+                 f"model that does not reason; check the output with that in mind.")
+    elif not chce and klient.provider == PROVIDER_OPENAI_COMPAT:
+        rodzaj = "domyslne"
+        tekst = (f"⚠️  {mdl} through openai_compat: there is no thinking field to send, "
+                 f"so a reasoning model thinks at its DEFAULT effort (paid). This "
+                 f"tool's prompts are tuned for a model that does not reason.")
+    else:
+        return
+    klucz = (klient.provider, mdl, rodzaj)
+    if klucz in _OSTRZEZENIA_MYSLENIA:
+        return
+    _OSTRZEZENIA_MYSLENIA.add(klucz)
+    try:
+        if sys.stdout is not None:
+            print(tekst, file=sys.stdout)
+    except Exception:  # noqa: BLE001 — ostrzeżenie nigdy nie może ubić wywołania
+        pass
+
 # (provider, model, effort), które odrzuciły `reasoning` w tej sesji — kolejne
 # wywołania nie wysyłają pola i nie płacą jałowym 400 (wzorzec `_BEZ_JSON_SCHEMA`).
 # Effort jest w kluczu (bliźniak ATA 2.0.1, Z3): model, który odrzucił `high`
@@ -1542,8 +1609,10 @@ def _wywolaj_openai_compat(
     # który go nie przyjmie (np. wskazany przez `LLM_MODEL`), dostaje TEN SAM
     # szczebel bez pola — jak `temperature` niżej, nie zejście po drabinie.
     # Dev-tool z `myslenie_dev` dostaje swój effort zamiast domyślnego `low`.
+    # Podbity effort tylko tam, gdzie myślenie da się przeczytać (`mysli_czytelnie`).
     reasoning: dict | None = (
-        {"effort": klient.myslenie_dev} if getattr(klient, "myslenie_dev", "")
+        {"effort": klient.myslenie_dev}
+        if getattr(klient, "myslenie_dev", "") and mysli_czytelnie(klient, mdl)
         else _OPENROUTER_REASONING_TEKST
     ) if klient.provider == PROVIDER_OPENROUTER else None
     klucz_reasoning = (klient.provider, mdl, (reasoning or {}).get("effort", ""))
@@ -1897,9 +1966,10 @@ def wywolaj_llm(
     # dostaje oryginalne `max_tokens`, więc nie dopłaca drugi raz. Compat nie
     # myśli (nie ma tam `thinking` ani `reasoning`), więc nic nie dostaje.
     limit, czas = max_tokens, timeout
-    if getattr(klient, "myslenie_dev", "") and klient.provider != PROVIDER_OPENAI_COMPAT:
+    if getattr(klient, "myslenie_dev", "") and mysli_czytelnie(klient, mdl):
         limit += ZAPAS_TOKENOW_MYSLENIA_DEV
         czas += ZAPAS_CZASU_MYSLENIA_DEV
+    _ostrzez_o_mysleniu(klient, mdl)
 
     try:
         if klient.provider in (PROVIDER_OPENAI_COMPAT, PROVIDER_OPENROUTER):

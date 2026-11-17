@@ -268,7 +268,9 @@ def test_runtime_nie_ustawia_myslenia_dev():
     import re
     from pathlib import Path
     korzen = Path(__file__).parent
-    wolno = {"core_llm.py", "buduj_wielojezyczne_docs.py"}
+    # `tlumacz_rdzen` (od audytu 19.20): mapuje `myslenie=True` brata od akcentow
+    # na effort OpenRoutera; importuja go wylacznie bracia `buduj_wielojezyczne_*`.
+    wolno = {"core_llm.py", "buduj_wielojezyczne_docs.py", "tlumacz_rdzen.py"}
     ustawia = re.compile(r"myslenie_dev\s*=(?!=)")
     winni = [p.name for p in korzen.glob("*.py")
              if p.name not in wolno and not p.name.startswith("test_")

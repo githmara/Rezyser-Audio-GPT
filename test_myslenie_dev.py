@@ -83,8 +83,10 @@ def _rdzen(odpowiedzi: list, myslenie: bool = True, zbieraj: bool = True):
 def _czysta_pamiec_sesji():
     cl._BEZ_REASONING.clear()
     cl._BEZ_JSON_SCHEMA.clear()
+    cl._OSTRZEZENIA_MYSLENIA.clear()
     yield
     cl._BEZ_REASONING.clear()
+    cl._OSTRZEZENIA_MYSLENIA.clear()
 
 
 # --- 1. rdzeń: myślenie akcentów czytelne i zbierane -------------------------
@@ -196,6 +198,81 @@ def test_odrzucone_high_nie_zdejmuje_low():
     assert wyslane[1].get("extra_body") is None                       # high zdjęte
     assert wyslane[2]["extra_body"] == {"reasoning": {"effort": "low"}}  # low żyje
     assert wyslane[3].get("extra_body") is None                       # high zapamiętane
+
+
+# --- 4. czytelność decyduje o podbiciu; ostrzeżenia w obie strony -----------
+def _openrouter(model_override: str = "", effort: str = "", odpowiedzi=None):
+    sdk = _Sdk(odpowiedzi or [("ok", "stop")] * 3)
+    klient = cl.KlientLLM(cl.PROVIDER_OPENROUTER, sdk, model_override=model_override)
+    klient.myslenie_dev = effort
+    return klient, sdk.chat.completions.wyslane
+
+
+def _tekst(klient):
+    return cl.wywolaj_llm(klient, model="claude-sonnet-5-5", system="s",
+                          messages=[{"role": "user", "content": "x"}], max_tokens=100,
+                          temperature=1.0, timeout=5.0)
+
+
+def test_gpt_przez_openroutera_nie_dostaje_podbitego_effortu(capsys):
+    klient, wyslane = _openrouter("openai/gpt-6.1-sol", "high")
+    _tekst(klient)
+    _tekst(klient)
+    assert wyslane[0]["extra_body"] == {"reasoning": {"effort": "low"}}
+    assert wyslane[0]["max_tokens"] == 100            # bez dopłaty na myślenie
+    out = capsys.readouterr().out
+    assert out.count("cannot return readable thinking") == 1   # raz na model
+
+
+def test_claude_przez_openroutera_dostaje_high_bez_ostrzezenia(capsys):
+    klient, wyslane = _openrouter("", "high")
+    _tekst(klient)
+    assert wyslane[0]["extra_body"] == {"reasoning": {"effort": "high"}}
+    assert "⚠️" not in capsys.readouterr().out
+
+
+def test_gpt_bez_myslenia_ostrzega_ze_mysli_zawsze(capsys):
+    klient, wyslane = _openrouter("openai/gpt-6-luna")
+    _tekst(klient)
+    assert wyslane[0]["extra_body"] == {"reasoning": {"effort": "low"}}
+    assert "always reasons" in capsys.readouterr().out
+
+
+def test_claude_bez_myslenia_przez_openroutera_milczy(capsys):
+    klient, _ = _openrouter()
+    _tekst(klient)
+    assert "⚠️" not in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("effort, fraza", [
+    ("high", "cannot return readable thinking"),
+    ("", "DEFAULT effort"),
+])
+def test_compat_ostrzega_w_obie_strony(capsys, effort, fraza):
+    sdk = _Sdk([("ok", "stop")])
+    klient = cl.KlientLLM(cl.PROVIDER_OPENAI_COMPAT, sdk, model_override="gpt-6.1-sol")
+    klient.myslenie_dev = effort
+    _tekst(klient)
+    assert "extra_body" not in sdk.chat.completions.wyslane[0]
+    assert fraza in capsys.readouterr().out
+
+
+def test_rdzen_z_mysleniem_na_zapasie_openroutera_mapuje_effort():
+    klient, wyslane = _openrouter(odpowiedzi=[(ODP, "stop")])
+    klient.myslenie_zapis = []
+    wynik = tr.wywolaj_llm(klient, model="claude-sonnet-5-5", system="T.",
+                           nazwa_celu="Suomi", kod="fi", pozycje=[(1, "pole", "Dom")],
+                           max_tokens=1000, myslenie=True)
+    assert wynik == {1: "Talo"}
+    assert wyslane[0]["extra_body"] == {"reasoning": {"effort": tr.MYSLENIE_RDZENIA_OPENROUTER}}
+    assert klient.myslenie_dev == ""                  # przywrócone po wywołaniu
+
+
+def test_rdzen_bez_myslenia_na_zapasie_zostaje_przy_low():
+    klient, wyslane = _openrouter(odpowiedzi=[(ODP, "stop")])
+    tr.wywolaj_llm(klient, model="claude-sonnet-5-5", system="T.", nazwa_celu="Suomi",
+                   kod="fi", pozycje=[(1, "pole", "Dom")], max_tokens=1000)
+    assert wyslane[0]["extra_body"] == {"reasoning": {"effort": "low"}}
 
 
 if __name__ == "__main__":

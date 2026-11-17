@@ -201,6 +201,10 @@ TEMPERATURA_TLUMACZENIA = 0.0
 # chunk tłumaczenia potrafi generować kilka minut.
 TIMEOUT_OPENROUTER = 600.0
 
+# Odpowiednik `myslenie=True` na OpenRouterze (audyt 19.20): natywnie wysyłamy
+# adaptive bez effortu, czyli domyślny effort Sonnet 5.5 = `high`.
+MYSLENIE_RDZENIA_OPENROUTER = "high"
+
 
 # ---------------------------------------------------------------------------
 # DWA KONTA: ANTHROPIC ⟷ OPENROUTER, jedno pierwsze, drugie zapasem (v19.11)
@@ -628,14 +632,24 @@ def wywolaj_llm(
         # OpenRouter (zapas albo konfiguracja bez klucza Anthropic). Ten sam
         # schemat jako strict `json_schema`; `core_llm` schodzi do `json_object`,
         # gdy model go nie przyjmie, więc tolerancyjna naprawa składni zostaje
-        # pasem bezpieczeństwa. `myslenie` przepada (compat nie ma `thinking`),
-        # a `temperature` decyduje baseline po nazwie natywnej modelu.
-        surowa, stop = cl.wywolaj_llm(
-            klient, model=model, system=system, messages=kwargs["messages"],
-            max_tokens=max_tokens, temperature=TEMPERATURA_TLUMACZENIA,
-            timeout=TIMEOUT_OPENROUTER, wymusz_json=True,
-            schema_json=cl.schemat_do_api(SCHEMA_TLUMACZENIA),
-        )
+        # pasem bezpieczeństwa; `temperature` decyduje baseline po nazwie
+        # natywnej modelu. `myslenie=True` mapujemy na `myslenie_dev` (audyt
+        # 19.20 — do tej pory przepadało i para szła na `low`): natywne adaptive
+        # bez effortu = domyślny effort Sonnet 5.5, czyli `high`. Model spoza
+        # Anthropic dostaje od `core_llm` `low` z ostrzeżeniem (nieczytelne).
+        poprzedni_effort = getattr(klient, "myslenie_dev", "")
+        if myslenie:
+            klient.myslenie_dev = MYSLENIE_RDZENIA_OPENROUTER
+        try:
+            surowa, stop = cl.wywolaj_llm(
+                klient, model=model, system=system, messages=kwargs["messages"],
+                max_tokens=max_tokens, temperature=TEMPERATURA_TLUMACZENIA,
+                timeout=TIMEOUT_OPENROUTER, wymusz_json=True,
+                schema_json=cl.schemat_do_api(SCHEMA_TLUMACZENIA),
+            )
+        finally:
+            if myslenie:
+                klient.myslenie_dev = poprzedni_effort
         surowa = cl.napraw_luzny_json(surowa)
 
     if stop == "max_tokens":
