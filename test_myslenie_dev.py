@@ -235,7 +235,7 @@ def test_gpt_bez_myslenia_ostrzega_ze_mysli_zawsze(capsys):
     klient, wyslane = _openrouter("openai/gpt-6-luna")
     _tekst(klient)
     assert wyslane[0]["extra_body"] == {"reasoning": {"effort": "low"}}
-    assert "always reasons" in capsys.readouterr().out
+    assert "cannot be switched off" in capsys.readouterr().out
 
 
 def test_claude_bez_myslenia_przez_openroutera_milczy(capsys):
@@ -273,6 +273,50 @@ def test_rdzen_bez_myslenia_na_zapasie_zostaje_przy_low():
     tr.wywolaj_llm(klient, model="claude-sonnet-5-5", system="T.", nazwa_celu="Suomi",
                    kod="fi", pozycje=[(1, "pole", "Dom")], max_tokens=1000)
     assert wyslane[0]["extra_body"] == {"reasoning": {"effort": "low"}}
+
+
+# --- 5. audyt delty 19.20: F1, F3, H1 ----------------------------------------
+def test_blad_formatu_wspominajacy_rozumowanie_nie_zdejmuje_reasoning():
+    # OpenRouter nie podaje `param` (zmierzone) — decyduje treść (H1).
+    blad = BadRequestError("response_format json_schema is not supported for reasoning models")
+    assert cl._czy_odrzucono_reasoning(blad) is False
+    assert cl._czy_odrzucono_reasoning(BadRequestError("Reasoning is mandatory")) is True
+
+
+def test_odrzucony_effort_bez_doplaty_i_z_ostrzezeniem(capsys):
+    klient, wyslane = _openrouter("", "high", odpowiedzi=[
+        BadRequestError("Invalid reasoning effort"), ("a", "stop"), ("b", "stop")])
+    _tekst(klient)                                    # odrzucone high, ponowienie bez pola
+    _tekst(klient)
+    assert wyslane[2].get("extra_body") is None
+    assert wyslane[2]["max_tokens"] == 100            # bez dopłaty na myślenie, które nie idzie
+    assert "rejected the thinking effort 'high'" in capsys.readouterr().out
+
+
+def test_nieczytelny_po_odrzuconym_low_nie_obiecuje_low(capsys):
+    cl._BEZ_REASONING.add((cl.PROVIDER_OPENROUTER, "openai/gpt-6.1-sol", "low"))
+    klient, wyslane = _openrouter("openai/gpt-6.1-sol", "high")
+    _tekst(klient)
+    assert wyslane[0].get("extra_body") is None
+    out = capsys.readouterr().out
+    assert "default applies" in out and "'low' is sent" not in out
+
+
+def test_zablokowany_stary_plik_myslenia_nie_wywraca_pary(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(ak, "ROOT", tmp_path)
+
+    def _zablokowany(self, missing_ok=False):
+        raise PermissionError("[WinError 32] plik w użyciu")
+
+    def _llm(klient, **_kw):
+        raise RuntimeError("chunk padł")
+
+    monkeypatch.setattr(ak.Path, "unlink", _zablokowany)
+    monkeypatch.setattr(ak.tlumacz_rdzen, "wywolaj_llm", _llm)
+    assert ak.generuj_pare(SimpleNamespace(myslenie_zapis=None), "pl", "testowy_nieistniejacy",
+                           "fi", model="m", dry_run=False, pary=ak.pary_akcentowe(),
+                           cp=None) is False
+    assert "STALE" in capsys.readouterr().out
 
 
 if __name__ == "__main__":

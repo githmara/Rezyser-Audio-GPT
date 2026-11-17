@@ -1645,7 +1645,11 @@ def generuj_pare(
     # Myślenie adaptacyjne jest zapłacone, więc ląduje obok draftu (audyt 19.20).
     # Plik z poprzedniego przebiegu znika od razu: inaczej leżałby przy NOWYM
     # drafcie, gdy ta para nie odda streszczenia (wzorzec `_docs`).
-    sciezka_myslenia_pary(paczka, akcent).unlink(missing_ok=True)
+    try:
+        sciezka_myslenia_pary(paczka, akcent).unlink(missing_ok=True)
+    except OSError as exc:   # plik otwarty w edytorze/antywirusie (audyt 19.20, F1)
+        print(f"     ⚠️ The previous thinking file could not be removed and is now "
+              f"STALE: {exc}")
     myslenie_prob: list[tuple[int, list[str]]] = []
     for proba in (1, 2):
         pola_proby = dict(pola)

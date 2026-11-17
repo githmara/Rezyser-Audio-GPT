@@ -1453,25 +1453,35 @@ def _ostrzez_o_mysleniu(klient: "KlientLLM", mdl: str) -> None:
     konsola dewelopera; w paczce bez konsoli milczy.
     """
     chce = bool(getattr(klient, "myslenie_dev", ""))
+    # Pamięć odrzuceń (audyt 19.20, F3): model, który odrzucił pole, nie dostaje
+    # go wcale — wtedy nie idzie ani `low`, ani podbity effort.
+    odrzucil_low = (klient.provider, mdl, "low") in _BEZ_REASONING
     if chce and not mysli_czytelnie(klient, mdl):
         rodzaj = "nieczytelne"
         compat = klient.provider == PROVIDER_OPENAI_COMPAT
         powod = ("openai_compat has no thinking field" if compat
                  else "OpenRouter returns it encrypted")
-        zamiast = "the model's default applies" if compat else "'low' is sent instead"
+        zamiast = ("the model's default applies" if compat or odrzucil_low
+                   else "'low' is sent instead")
         tekst = (f"⚠️  {mdl} through {klient.provider} cannot return readable thinking "
                  f"({powod}) — the requested effort '{klient.myslenie_dev}' is NOT sent, "
-                 f"{zamiast}. No thinking file will be written for review.")
+                 f"{zamiast}.")
+    elif chce and (klient.provider, mdl, klient.myslenie_dev) in _BEZ_REASONING:
+        rodzaj = "odrzucone"
+        tekst = (f"⚠️  {mdl} rejected the thinking effort '{klient.myslenie_dev}' earlier "
+                 f"in this run — it is no longer requested, so the model thinks at its "
+                 f"default and may return nothing to review.")
     elif not chce and klient.provider == PROVIDER_OPENROUTER and not mysli_czytelnie(klient, mdl):
         rodzaj = "obowiazkowe"
-        tekst = (f"⚠️  {mdl} through OpenRouter always reasons (it cannot be switched "
-                 f"off) — sending effort 'low'. This tool's prompts are tuned for a "
-                 f"model that does not reason; check the output with that in mind.")
+        tekst = (f"⚠️  {mdl} through OpenRouter: reasoning cannot be switched off there, "
+                 f"so a reasoning model thinks at effort "
+                 + ("its default (it rejected 'low')" if odrzucil_low else "'low'")
+                 + ". The prompts here are tuned for a model that does not reason.")
     elif not chce and klient.provider == PROVIDER_OPENAI_COMPAT:
         rodzaj = "domyslne"
         tekst = (f"⚠️  {mdl} through openai_compat: there is no thinking field to send, "
-                 f"so a reasoning model thinks at its DEFAULT effort (paid). This "
-                 f"tool's prompts are tuned for a model that does not reason.")
+                 f"so a reasoning model thinks at its DEFAULT effort (paid). The prompts "
+                 f"here are tuned for a model that does not reason.")
     else:
         return
     klucz = (klient.provider, mdl, rodzaj)
@@ -1505,7 +1515,14 @@ def _czy_odrzucono_reasoning(exc: Exception) -> bool:
     param = getattr(exc, "param", None)
     if isinstance(param, str) and param:
         return param.split(".")[0] == "reasoning"
-    return "reasoning" in str(exc).lower()
+    # OpenRouter `param` NIE podaje (zmierzone: `{"error": {"message", "code",
+    # "metadata"}}`, `skrypty/pomiar_reasoning_openrouter_2026-11-15.json`), więc
+    # tam decyduje treść. Błąd, który nazywa format odpowiedzi, dotyczy formatu —
+    # nawet gdy wspomina rozumowanie (audyt 19.20, H1).
+    tresc = str(exc).lower()
+    if "response_format" in tresc or "json_schema" in tresc:
+        return False
+    return "reasoning" in tresc
 
 
 def _wywolaj_openai_compat(
@@ -1966,7 +1983,10 @@ def wywolaj_llm(
     # dostaje oryginalne `max_tokens`, więc nie dopłaca drugi raz. Compat nie
     # myśli (nie ma tam `thinking` ani `reasoning`), więc nic nie dostaje.
     limit, czas = max_tokens, timeout
-    if getattr(klient, "myslenie_dev", "") and mysli_czytelnie(klient, mdl):
+    effort_dev = getattr(klient, "myslenie_dev", "")
+    if (effort_dev and mysli_czytelnie(klient, mdl)
+            and (klient.provider, mdl, effort_dev) not in _BEZ_REASONING):
+        # Odrzucony effort nie idzie, więc nie ma czego dopłacać (audyt 19.20, F3).
         limit += ZAPAS_TOKENOW_MYSLENIA_DEV
         czas += ZAPAS_CZASU_MYSLENIA_DEV
     _ostrzez_o_mysleniu(klient, mdl)

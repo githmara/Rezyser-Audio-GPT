@@ -1601,7 +1601,11 @@ def _tlumacz_pojedyncza_sekcje(
         return True, przyjeta
     # Myślenie poprzedniego przebiegu nie może leżeć obok NOWEGO draftu, gdy ta
     # próba nie odda streszczenia (audyt 19.20; odrzuty mają tę regułę od 19.8).
-    sciezka_myslenia(kod, rdzen, klucz_sekcji).unlink(missing_ok=True)
+    try:
+        sciezka_myslenia(kod, rdzen, klucz_sekcji).unlink(missing_ok=True)
+    except OSError as exc:   # plik otwarty w edytorze/antywirusie (audyt 19.20, F1)
+        print(f"     ⚠️ The previous thinking file could not be removed and is now "
+              f"STALE: {exc}")
 
     zarzuty: list[str] = []
     # Powód odrzucenia próby 1 — klucz licznika `STATYSTYKA_POWTOREK`.

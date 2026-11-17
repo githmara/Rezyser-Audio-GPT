@@ -41,7 +41,10 @@ jobs:
     # Szyba bezpieczenstwa na poziomie joba — input `potwierdz` musi byc
     # dokladnie „tak" (case-sensitive). Inny tekst -> job nie odpala.
     if: github.event.inputs.potwierdz == 'tak'
-    runs-on: ubuntu-latest
+    # Obraz PRZYPIETY (audyt 19.20, H2): krok niżej woła gołe `python` z obrazu
+    # (bez setup-python), a ubuntu-latest przechodzi na 26.04 losowo — wydanie
+    # nie może zależeć od tego, który obraz trafi się danego dnia.
+    runs-on: ubuntu-24.04
     permissions:
       # contents: write — workflow tworzy tag (git push origin v<wersja>)
       # i Release (gh release create wymaga write). secrets.GITHUB_TOKEN
