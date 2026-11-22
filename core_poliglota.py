@@ -54,6 +54,7 @@ import os
 import random
 import re
 import sys
+from dataclasses import dataclass
 from typing import Any, Callable
 
 import yaml
@@ -3120,6 +3121,59 @@ def tekst_docx(sciezka: str) -> str:
     czegoś nie widzi.
     """
     return tekst_docx_z_licznikami(sciezka)[0]
+
+
+_VML = "{urn:schemas-microsoft-com:vml}"
+_R_ID = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
+
+
+@dataclass
+class ObrazDocx:
+    """Obraz wstawiony w `.docx` (19.21): bajty, tekst alternatywny, numer od 1."""
+    numer: int
+    dane: bytes
+    opis: str = ""
+
+
+def elementy_docx(sciezka: str) -> list[str | ObrazDocx]:
+    """Treść `.docx` w KOLEJNOŚCI DOKUMENTU: teksty akapitów i obrazy (19.21).
+
+    Ten sam iterator co :func:`tekst_docx` (komórki tabel też), a obraz stoi
+    tuż po tekście akapitu, w którym jest zakotwiczony. Do 19.20 Poliglota
+    znała wyłącznie tekst: prezentacja z 46 slajdami wklejonymi jako obrazy
+    wczytywała się jako jedno zdanie i 48 pustych linii, z komunikatem
+    o sukcesie. Obraz bez danych (link zewnętrzny, zepsuta relacja) i tak
+    trafia do listy — z pustymi bajtami, żeby wołający go policzył i zgłosił.
+    Teksty akapitów są surowe; czyszczenie po konwersji PDF→Word robi
+    :func:`tekst_docx_z_licznikami`.
+    """
+    doc = docx.Document(sciezka)
+    elementy: list[str | ObrazDocx] = []
+    for para in _iteruj_akapity_docx(doc):
+        elementy.append(para.text)
+        for el in para._p.iter():
+            rid, opis = None, ""
+            if el.tag in (qn("wp:inline"), qn("wp:anchor")):
+                blip = next(el.iter(qn("a:blip")), None)
+                if blip is None:
+                    continue
+                rid = blip.get(qn("r:embed"))
+                docpr = el.find(qn("wp:docPr"))
+                if docpr is not None:
+                    opis = (docpr.get("descr") or docpr.get("title") or "").strip()
+            elif el.tag == _VML + "imagedata":
+                rid = el.get(_R_ID)
+                ksztalt = el.getparent()
+                opis = (ksztalt.get("alt") or "").strip() if ksztalt is not None else ""
+            else:
+                continue
+            try:
+                dane = para.part.related_parts[rid].blob if rid else b""
+            except (KeyError, AttributeError):
+                dane = b""
+            elementy.append(ObrazDocx(sum(isinstance(e, ObrazDocx) for e in elementy) + 1,
+                                      dane, opis))
+    return elementy
 
 
 def tekst_docx_z_licznikami(sciezka: str) -> tuple[str, dict[str, int]]:

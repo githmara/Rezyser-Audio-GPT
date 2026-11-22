@@ -702,6 +702,148 @@ def odczytaj_strony(
     return wyniki, None
 
 
+# ---------------------------------------------------------------------------
+# Obrazy wstawione w .docx (19.21) — wywołanie z OBRAZEM, nie z PDF-em
+# ---------------------------------------------------------------------------
+#: Bez numeru obrazu — z tego samego powodu co `INSTRUKCJA` (zmierzone na stronach).
+INSTRUKCJA_OBRAZU = "Transcribe the attached image."
+
+
+def system_obrazu(dane: bytes) -> str:
+    """JPEG to zwykle zdjęcie albo skan dokumentu → `SYSTEM_SKANY`; obraz
+    bezstratny (PNG, GIF, WebP) to zrzut ekranu albo slajd → `SYSTEM_CYFROWA`.
+
+    Ta sama granica co `strona_cyfrowa` dla PDF-ów: stratna kompresja = skan.
+    Sonda 2026-11-19: 46 wycinków slajdów PNG z prezentacji, wszystkie poszły
+    promptem cyfrowym, zero zgadywania (7 znaczników przy zasłoniętym tekście).
+    """
+    return SYSTEM_SKANY if cl.typ_obrazu(dane) == "image/jpeg" else SYSTEM_CYFROWA
+
+
+def odczytaj_obraz(klient: cl.KlientLLM, obraz, kontekst: str = "") -> WynikStrony:
+    """Jeden obraz z `.docx` (`core_poliglota.ObrazDocx`) — wynik jak dla strony.
+
+    Obraz bez bajtów w pliku albo w formacie, którego model nie przyjmuje
+    (EMF/WMF z Worda), dostaje powód BEZ wywołania — nigdy ciszę.
+    """
+    if not obraz.dane:
+        return WynikStrony(obraz.numer, STATUS_BLAD,
+                           powod=t("poliglota.obraz_powod_brak_danych"))
+    if cl.typ_obrazu(obraz.dane) is None:
+        return WynikStrony(obraz.numer, STATUS_BLAD,
+                           powod=t("poliglota.obraz_powod_format"))
+    przed = (f"<previous_page>\n{kontekst[-KONTEKST_ZNAKI:]}\n</previous_page>"
+             if kontekst.strip() else "")
+    slad: list[dict] = []
+    try:
+        tekst, stop = cl.wywolaj_llm_z_obrazem(
+            klient, model=MODEL_SKANY, system=system_obrazu(obraz.dane),
+            obraz=obraz.dane, tekst_przed=przed, tekst_po=INSTRUKCJA_OBRAZU,
+            max_tokens=MAX_TOKENS_STRONA, timeout=TIMEOUT_S, slad=slad)
+    except Exception as exc:  # noqa: BLE001 — błąd obrazu to status, krytyczny leci wyżej
+        if _czy_krytyczny(exc):
+            raise
+        return _blad_strony(obraz.numer, exc, slad)
+    if stop == cl.STOP_ODRZUCENIE:
+        return WynikStrony(obraz.numer, STATUS_ODMOWA,
+                           powod=t("poliglota.skan_powod_odmowa"), slad=slad)
+    tekst = _zdejmij_plot(tekst.strip()).strip()
+    if not tekst:
+        return WynikStrony(obraz.numer, STATUS_BLAD,
+                           powod=t("poliglota.skan_powod_pusta"), slad=slad)
+    status = STATUS_UCIETA if stop == "max_tokens" else STATUS_OK
+    return WynikStrony(obraz.numer, status, tekst, znaczniki=policz_znaczniki(tekst),
+                       slad=slad)
+
+
+def _obrazy(elementy: list) -> list:
+    return [e for e in elementy if not isinstance(e, str)]
+
+
+def odczytaj_obrazy(
+    klient: cl.KlientLLM,
+    elementy: list,
+    *,
+    postep: Callable[[int, int, int], None] | None = None,
+    przerwij: Callable[[], bool] | None = None,
+) -> tuple[list[WynikStrony], Exception | None]:
+    """Czyta obrazy z `core_poliglota.elementy_docx` PO KOLEI (kontekst jak w D7).
+
+    Kontekstem obrazu jest odczyt obrazu tuż przed nim albo — gdy przed nim
+    stoi tekst — ostatnie niepuste akapity dokumentu. Kontrakt zwrotu jak
+    w :func:`odczytaj_strony`: wynik KAŻDEGO obrazu i błąd krytyczny albo `None`.
+    """
+    obrazy = _obrazy(elementy)
+    wyniki: list[WynikStrony] = []
+    kontekst = ""
+    for el in elementy:
+        if isinstance(el, str):
+            if el.strip():
+                kontekst = (kontekst + "\n\n" + el)[-KONTEKST_ZNAKI:]
+            continue
+        k = len(wyniki)
+        if przerwij is not None and przerwij():
+            powod = t("poliglota.skan_powod_anulowano")
+            wyniki.extend(WynikStrony(o.numer, STATUS_BLAD, powod=powod) for o in obrazy[k:])
+            return wyniki, None
+        if postep is not None:
+            postep(k, len(obrazy), el.numer)
+        try:
+            wynik = odczytaj_obraz(klient, el, kontekst)
+        except Exception as exc:  # noqa: BLE001 — krytyczny: reszta obrazów z tym powodem
+            if not _czy_krytyczny(exc):
+                raise
+            wyniki.extend(_blad_strony(o.numer, exc) for o in obrazy[k:])
+            return wyniki, exc
+        wyniki.append(wynik)
+        kontekst = wynik.markdown if wynik.status in (STATUS_OK, STATUS_UCIETA) else ""
+    return wyniki, None
+
+
+def scal_docx(elementy: list, wyniki: list[WynikStrony], jezyk: str, tytul: str) -> str:
+    """Pełny HTML: akapity `.docx` i odczytane obrazy na swoich miejscach.
+
+    Obraz nieodczytany z tekstem alternatywnym oddaje ten tekst (z numerem
+    obrazu); bez niego — akapit z powodem, jak strona-skan.
+    """
+    per_obraz = {w.numer: w for w in wyniki}
+    czesci: list[str] = []
+    for el in elementy:
+        if isinstance(el, str):
+            if el.strip():
+                czesci.append(_akapit(el))
+            continue
+        wynik = per_obraz.get(el.numer)
+        if wynik is not None and wynik.status in (STATUS_OK, STATUS_UCIETA):
+            czesci.append(_akapit(t("poliglota.obraz_pochodzenie", numer_obrazu=el.numer)))
+            czesci.append(_fragment_strony(wynik.markdown))
+            if wynik.status == STATUS_UCIETA:
+                czesci.append(_akapit(t("poliglota.obraz_ucieta", numer_obrazu=el.numer)))
+        elif el.opis:
+            czesci.append(_akapit(t("poliglota.obraz_opis", numer_obrazu=el.numer,
+                                    opis=el.opis)))
+        else:
+            powod = wynik.powod if wynik is not None else ""
+            czesci.append(_akapit(t("poliglota.obraz_nieodczytany",
+                                    numer_obrazu=el.numer, powod=powod)))
+    return core_markdown.zloz_dokument("\n".join(czesci), jezyk, tytul)
+
+
+def tekst_tresci_docx(elementy: list, wyniki: list[WynikStrony]) -> str:
+    """Sama treść (teksty + odczyty, bez akapitów pochodzenia) — do detekcji języka."""
+    per_obraz = {w.numer: w for w in wyniki}
+    czesci: list[str] = []
+    for el in elementy:
+        if isinstance(el, str):
+            if el.strip():
+                czesci.append(el)
+            continue
+        wynik = per_obraz.get(el.numer)
+        if wynik is not None and wynik.status in (STATUS_OK, STATUS_UCIETA):
+            czesci.append(_RE_ZNACZNIK.sub(" ", wynik.markdown))
+    return "\n\n".join(czesci)
+
+
 def _kontekst(numer: int, akapity_stron: list[list[str]], skany: set[int],
               odczytane: dict[int, WynikStrony]) -> str:
     """Treść tuż przed stroną `numer`: odczytany skan albo ostatnie akapity tekstu.

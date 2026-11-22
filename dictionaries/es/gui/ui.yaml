@@ -956,6 +956,28 @@ poliglota:
   zastepcze_wynik_tytul: 'Restauración de letras: resultado'
   zastepcze_wynik_tresc: Se restauraron las letras en {liczba_odtworzonych} de {liczba_slow} palabras distintas. Las demás palabras se quedaron con el carácter ■.
   zastepcze_blad_tresc: "No se pudieron restaurar las letras: {tresc_bledu}\n\nEl archivo se cargó sin cambios, con los caracteres ■."
+  obraz_pochodzenie: 'Imagen {numer_obrazu}: texto leído de la imagen por un modelo de IA; puede contener errores de lectura.'
+  obraz_nieodczytany: '[Imagen {numer_obrazu}: no se pudo leer. Motivo: {powod}]'
+  obraz_ucieta: '[Imagen {numer_obrazu}: la lectura se interrumpió porque la respuesta del modelo superó el límite de longitud. El resto de esta imagen no se ha leído.]'
+  obraz_opis: '[Imagen {numer_obrazu}, texto alternativo: {opis}]'
+  obraz_powod_format: formato de imagen que el modelo no admite (por ejemplo, EMF o WMF de Word)
+  obraz_powod_brak_danych: la imagen no está en el archivo (por ejemplo, es solo un enlace a una imagen en internet)
+  obrazy_zgoda_tytul: ¿Leer las imágenes del documento con un modelo de IA?
+  obrazy_zgoda_tresc: "El archivo {nazwa_pliku} contiene imágenes (número de imágenes: {liczba_obrazow}), por ejemplo diapositivas pegadas, capturas de pantalla o fotos de documentos. Su contenido no aparece en el texto del documento.\n\nPuedo leer el texto de estas imágenes con un modelo de IA ({model}). Cada imagen se enviará a un servicio externo: {usluga}.\nLas imágenes de documentos suelen contener datos personales. Envíalas solo si tienes derecho a hacerlo.\n\nCoste estimado: {koszt}. Tiempo: unos 5 segundos por imagen.\n\nSi eliges «Omitir», cargaré solo el texto del documento, sin el contenido de las imágenes."
+  obrazy_zgoda_btn_tak: '&Leer imágenes'
+  obrazy_postep_tytul: Lectura de las imágenes del documento
+  obrazy_postep_tresc: Leyendo la imagen {numer_obrazu} ({numer} de {liczba})…
+  obrazy_podsumowanie_tytul: 'Lectura de imágenes: resumen'
+  obrazy_podsumowanie_tresc: "Imágenes leídas: {liczba_odczytanych} de {liczba_obrazow}.\nFragmentos ilegibles u ocultos: {liczba_nieczytelnych}.\nEl resultado se guardará como archivo .html. Antes de cada imagen leída aparece un párrafo que indica que su texto procede de la lectura de una imagen."
+  obrazy_podsumowanie_nieodczytane: 'Imágenes no leídas (en el resultado, en su lugar aparece un párrafo con el motivo o el texto alternativo de la imagen):'
+  obrazy_podsumowanie_obraz: 'Imagen {numer_obrazu}: {powod}'
+  obrazy_podsumowanie_przerwano: 'Se interrumpió la lectura porque las siguientes imágenes también fallarían: {powod}'
+  obrazy_pominiete_tytul: No se han cargado las imágenes del documento
+  obrazy_pominiete_tresc: 'El archivo {nazwa_pliku} contiene imágenes (número de imágenes: {liczba_obrazow}). Se cargó solo el texto del documento; el contenido de las imágenes no aparece en el resultado.'
+  obrazy_niedostepny_brak_api: La lectura de imágenes con un modelo de IA requiere una clave de API (Anthropic u OpenRouter) en el archivo golden_key.env.
+  obrazy_niedostepny_compat: La lectura de imágenes con un modelo de IA no funciona con un endpoint propio compatible con OpenAI (LLM_PROVIDER=openai_compat). Funciona con Anthropic y con OpenRouter.
+  obrazy_blad_tytul: No se pudieron leer las imágenes
+  obrazy_blad_tresc: "Un error inesperado interrumpió la lectura de las imágenes:\n{tresc_bledu}\n\nSe cargó solo el texto del documento, sin el contenido de las imágenes."
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)

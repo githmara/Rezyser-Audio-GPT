@@ -954,6 +954,28 @@ poliglota:
   zastepcze_wynik_tytul: 'Reconstitution des lettres : résultat'
   zastepcze_wynik_tresc: Lettres reconstituées dans {liczba_odtworzonych} mots sur {liczba_slow}. Les autres mots ont conservé le caractère ■.
   zastepcze_blad_tresc: "Impossible de reconstituer les lettres : {tresc_bledu}\n\nLe fichier a été chargé sans modification, avec les caractères ■."
+  obraz_pochodzenie: "Image {numer_obrazu} : texte lu sur l'image par un modèle d'IA ; il peut contenir des erreurs de lecture."
+  obraz_nieodczytany: '[Image {numer_obrazu} : non lue. Motif : {powod}]'
+  obraz_ucieta: "[Image {numer_obrazu} : lecture interrompue, car la réponse du modèle a dépassé la limite de longueur. Le reste de cette image n'a pas été lu.]"
+  obraz_opis: '[Image {numer_obrazu}, texte alternatif : {opis}]'
+  obraz_powod_format: format d'image non pris en charge par le modèle (par exemple EMF ou WMF provenant de Word)
+  obraz_powod_brak_danych: l'image n'est pas dans le fichier (par exemple, il ne s'agit que d'un lien vers une image sur Internet)
+  obrazy_zgoda_tytul: Lire les images du document avec un modèle d'IA ?
+  obrazy_zgoda_tresc: "Le fichier {nazwa_pliku} contient des images (nombre d'images : {liczba_obrazow}), par exemple des diapositives collées, des captures d'écran ou des photos de documents. Leur contenu ne figure pas dans le texte du document.\n\nJe peux lire le texte de ces images avec un modèle d'IA ({model}). Chaque image sera envoyée à un service externe : {usluga}.\nLes images de documents contiennent souvent des données personnelles. Ne les envoyez que si vous y êtes autorisé.\n\nCoût estimé : {koszt}. Durée : environ 5 secondes par image.\n\nSi vous choisissez « Ignorer », je ne chargerai que le texte du document, sans le contenu des images."
+  obrazy_zgoda_btn_tak: '&Lire les images'
+  obrazy_postep_tytul: Lecture des images du document
+  obrazy_postep_tresc: Lecture de l'image {numer_obrazu} ({numer} sur {liczba})…
+  obrazy_podsumowanie_tytul: 'Lecture des images : récapitulatif'
+  obrazy_podsumowanie_tresc: "Images lues : {liczba_odczytanych} sur {liczba_obrazow}.\nPassages illisibles ou masqués : {liczba_nieczytelnych}.\nLe résultat sera enregistré sous forme de fichier .html. Avant chaque image lue figure un paragraphe indiquant que son texte provient de la lecture d'une image."
+  obrazy_podsumowanie_nieodczytane: "Images non lues (dans le résultat, un paragraphe indiquant le motif ou le texte alternatif de l'image figure à leur place) :"
+  obrazy_podsumowanie_obraz: 'Image {numer_obrazu} : {powod}'
+  obrazy_podsumowanie_przerwano: 'Lecture interrompue, car les images suivantes auraient également échoué : {powod}'
+  obrazy_pominiete_tytul: Les images du document n'ont pas été chargées
+  obrazy_pominiete_tresc: "Le fichier {nazwa_pliku} contient des images (nombre d'images : {liczba_obrazow}). Seul le texte du document a été chargé – le contenu des images ne figure pas dans le résultat."
+  obrazy_niedostepny_brak_api: La lecture des images par un modèle d'IA nécessite une clé API (Anthropic ou OpenRouter) dans le fichier golden_key.env.
+  obrazy_niedostepny_compat: La lecture des images par un modèle d'IA ne fonctionne pas avec un endpoint personnalisé compatible OpenAI (LLM_PROVIDER=openai_compat). Elle fonctionne avec Anthropic et OpenRouter.
+  obrazy_blad_tytul: La lecture des images a échoué
+  obrazy_blad_tresc: "La lecture des images a été interrompue par une erreur inattendue :\n{tresc_bledu}\n\nSeul le texte du document a été chargé, sans le contenu des images."
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)

@@ -956,6 +956,28 @@ poliglota:
   zastepcze_wynik_tytul: 'Ripristino delle lettere: risultato'
   zastepcze_wynik_tresc: Lettere ripristinate in {liczba_odtworzonych} di {liczba_slow} parole diverse. Le altre parole sono rimaste con il carattere ■.
   zastepcze_blad_tresc: "Impossibile ripristinare le lettere: {tresc_bledu}\n\nIl file è stato caricato senza modifiche, con i caratteri ■."
+  obraz_pochodzenie: "Immagine {numer_obrazu}: testo letto dall'immagine da un modello AI; potrebbero esserci errori di lettura."
+  obraz_nieodczytany: '[Immagine {numer_obrazu}: non letta. Motivo: {powod}]'
+  obraz_ucieta: '[Immagine {numer_obrazu}: lettura interrotta perché la risposta del modello ha superato il limite di lunghezza. Il resto di questa immagine non è stato letto.]'
+  obraz_opis: '[Immagine {numer_obrazu}, testo alternativo: {opis}]'
+  obraz_powod_format: formato di immagine non supportato dal modello (ad esempio EMF o WMF di Word)
+  obraz_powod_brak_danych: l'immagine non è presente nel file (ad esempio è solo un collegamento a un'immagine su internet)
+  obrazy_zgoda_tytul: Leggere le immagini del documento con un modello AI?
+  obrazy_zgoda_tresc: "Nel file {nazwa_pliku} ci sono immagini (numero di immagini: {liczba_obrazow}), ad esempio diapositive incollate, schermate o foto di documenti. Il loro contenuto non è presente nel testo del documento.\n\nPosso leggere il testo di queste immagini con un modello AI ({model}). Ogni immagine verrà inviata a un servizio esterno: {usluga}.\nLe immagini di documenti contengono spesso dati personali. Inviale solo se ne hai il diritto.\n\nCosto stimato: {koszt}. Tempo: circa 5 secondi per immagine.\n\nSe scegli «Salta», caricherò solo il testo del documento, senza il contenuto delle immagini."
+  obrazy_zgoda_btn_tak: '&Leggi le immagini'
+  obrazy_postep_tytul: Lettura delle immagini del documento
+  obrazy_postep_tresc: Lettura dell'immagine {numer_obrazu} ({numer} di {liczba})…
+  obrazy_podsumowanie_tytul: 'Lettura delle immagini: riepilogo'
+  obrazy_podsumowanie_tresc: "Immagini lette: {liczba_odczytanych} su {liczba_obrazow}.\nPunti illeggibili o coperti: {liczba_nieczytelnych}.\nIl risultato verrà salvato come file .html. Prima di ogni immagine letta c'è un paragrafo che indica che il suo testo proviene dalla lettura di un'immagine."
+  obrazy_podsumowanie_nieodczytane: "Immagini non lette (nel risultato, al loro posto c'è un paragrafo con il motivo o il testo alternativo dell'immagine):"
+  obrazy_podsumowanie_obraz: 'Immagine {numer_obrazu}: {powod}'
+  obrazy_podsumowanie_przerwano: 'Lettura interrotta perché anche le immagini successive non sarebbero riuscite: {powod}'
+  obrazy_pominiete_tytul: Le immagini del documento non sono state caricate
+  obrazy_pominiete_tresc: 'Nel file {nazwa_pliku} ci sono immagini (numero di immagini: {liczba_obrazow}). È stato caricato solo il testo del documento: il contenuto delle immagini non è presente nel risultato.'
+  obrazy_niedostepny_brak_api: La lettura delle immagini con un modello AI richiede una chiave API (Anthropic o OpenRouter) nel file golden_key.env.
+  obrazy_niedostepny_compat: La lettura delle immagini con un modello AI non funziona con un endpoint personalizzato compatibile con OpenAI (LLM_PROVIDER=openai_compat). Funziona con Anthropic e OpenRouter.
+  obrazy_blad_tytul: Lettura delle immagini non riuscita
+  obrazy_blad_tresc: "La lettura delle immagini è stata interrotta da un errore imprevisto:\n{tresc_bledu}\n\nÈ stato caricato solo il testo del documento, senza il contenuto delle immagini."
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   # 18.8: segmento localizzato del nome del file di output (una parola, senza spazi)

@@ -1040,6 +1040,28 @@ poliglota:
   zastepcze_wynik_tytul: 'Restoring letters: result'
   zastepcze_wynik_tresc: Restored letters in {liczba_odtworzonych} of {liczba_slow} different words. The remaining words were left with the ■ character.
   zastepcze_blad_tresc: "Could not restore the letters: {tresc_bledu}\n\nThe file was loaded unchanged, with ■ characters."
+  obraz_pochodzenie: 'Image {numer_obrazu}: text read from the image by an AI model; it may contain reading errors.'
+  obraz_nieodczytany: '[Image {numer_obrazu}: not read. Reason: {powod}]'
+  obraz_ucieta: "[Image {numer_obrazu}: reading cut off because the model's response exceeded the length limit. The rest of this image was not read.]"
+  obraz_opis: '[Image {numer_obrazu}, alt text: {opis}]'
+  obraz_powod_format: an image format the model does not accept (for example EMF or WMF from Word)
+  obraz_powod_brak_danych: the image is not in the file (for example, it is only a link to an image on the internet)
+  obrazy_zgoda_tytul: Read the images in the document with an AI model?
+  obrazy_zgoda_tresc: "The file {nazwa_pliku} contains images (number of images: {liczba_obrazow}), such as pasted slides, screenshots, or photos of documents. Their content is not in the document text.\n\nI can read the text from these images using an AI model ({model}). Each image will be sent to an external service: {usluga}.\nImages of documents often contain personal data. Send them only if you have the right to do so.\n\nEstimated cost: {koszt}. Time: about 5 seconds per image.\n\nIf you choose \"Skip\", I will load only the document text, without the image content."
+  obrazy_zgoda_btn_tak: '&Read images'
+  obrazy_postep_tytul: Reading images from the document
+  obrazy_postep_tresc: Reading image {numer_obrazu} ({numer} of {liczba})…
+  obrazy_podsumowanie_tytul: 'Image reading: summary'
+  obrazy_podsumowanie_tresc: "Images read: {liczba_odczytanych} of {liczba_obrazow}.\nIllegible or obscured spots: {liczba_nieczytelnych}.\nThe result will be saved as an .html file. Before each image that was read, there is a paragraph noting that its text comes from reading the image."
+  obrazy_podsumowanie_nieodczytane: "Images not read (in the result, a paragraph with the reason or the image's alt text appears in their place):"
+  obrazy_podsumowanie_obraz: 'Image {numer_obrazu}: {powod}'
+  obrazy_podsumowanie_przerwano: 'Reading was stopped because the remaining images would fail as well: {powod}'
+  obrazy_pominiete_tytul: Images from the document were not loaded
+  obrazy_pominiete_tresc: 'The file {nazwa_pliku} contains images (number of images: {liczba_obrazow}). Only the document text was loaded – the image content is not in the result.'
+  obrazy_niedostepny_brak_api: Reading images with an AI model requires an API key (Anthropic or OpenRouter) in the golden_key.env file.
+  obrazy_niedostepny_compat: Reading images with an AI model does not work with a custom OpenAI-compatible endpoint (LLM_PROVIDER=openai_compat). It works with Anthropic and OpenRouter.
+  obrazy_blad_tytul: Image reading failed
+  obrazy_blad_tresc: "Image reading was interrupted by an unexpected error:\n{tresc_bledu}\n\nOnly the document text was loaded, without the image content."
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)

@@ -844,6 +844,23 @@ class PoliglotaPanel(wx.Panel):
                 if zdanie:
                     wx.MessageBox(zdanie, t("common.docx_oczyszczony_tytul"),
                                   wx.OK | wx.ICON_INFORMATION, self)
+                # 19.21: obrazy wstawione w dokument (slajdy, zrzuty, zdjęcia
+                # dokumentów). Do 19.20 znikały bez słowa — 46 slajdów dawało
+                # jedno zdanie i komunikat o sukcesie.
+                elementy = core_poliglota.elementy_docx(file_name)
+                liczba_obrazow = sum(not isinstance(e, str) for e in elementy)
+                if liczba_obrazow:
+                    if self._zgoda_na_odczyt_obrazow(file_name, liczba_obrazow):
+                        self._start_odczytu_obrazow(file_name, elementy)
+                        return
+                    tresc = t("poliglota.obrazy_pominiete_tresc",
+                              nazwa_pliku=os.path.basename(file_name),
+                              liczba_obrazow=liczba_obrazow)
+                    dopisek = self._powod_braku_odczytu_obrazow()
+                    if dopisek:
+                        tresc += "\n\n" + dopisek
+                    wx.MessageBox(tresc, t("poliglota.obrazy_pominiete_tytul"),
+                                  wx.OK | wx.ICON_WARNING, self)
             else:
                 with open(file_name, "r", encoding="utf-8") as fh:
                     self._file_content = fh.read()
@@ -1100,6 +1117,127 @@ class PoliglotaPanel(wx.Panel):
         if self._client is not None and self._client.provider == cl.PROVIDER_OPENAI_COMPAT:
             return t("poliglota.skan_niedostepny_compat")
         return t("poliglota.skan_niedostepny_brak_api")
+
+    # ------------------------------------------------------------------
+    # 19.21: obrazy wstawione w .docx odczytywane modelem AI (core_skany)
+    # ------------------------------------------------------------------
+    def _powod_braku_odczytu_obrazow(self) -> str | None:
+        """Zdanie, dlaczego odczytu obrazów nie ma; `None` = odczyt dostępny."""
+        if core_skany.odczyt_dostepny(self._client):
+            return None
+        if self._client is not None and self._client.provider == cl.PROVIDER_OPENAI_COMPAT:
+            return t("poliglota.obrazy_niedostepny_compat")
+        return t("poliglota.obrazy_niedostepny_brak_api")
+
+    def _zgoda_na_odczyt_obrazow(self, file_name: str, liczba_obrazow: int) -> bool:
+        """Jawna zgoda PER PLIK, domyślnie NIE — jak przy stronach-skanach."""
+        if not core_skany.odczyt_dostepny(self._client):
+            return False
+        koszt = core_skany.szacuj_koszt(self._client, liczba_obrazow, [], 0)
+        tresc = t("poliglota.obrazy_zgoda_tresc",
+                  nazwa_pliku=os.path.basename(file_name), liczba_obrazow=liczba_obrazow,
+                  model=core_skany.model_odczytu(self._client),
+                  usluga=core_skany.opis_uslugi(self._client),
+                  koszt=core_skany.opis_kosztu(koszt))
+        dlg = wx.MessageDialog(self, tresc, t("poliglota.obrazy_zgoda_tytul"),
+                               wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        dlg.SetYesNoLabels(t("poliglota.obrazy_zgoda_btn_tak"),
+                           t("poliglota.skan_zgoda_btn_nie"))
+        try:
+            return dlg.ShowModal() == wx.ID_YES
+        finally:
+            dlg.Destroy()
+
+    def _start_odczytu_obrazow(self, file_name: str, elementy: list) -> None:
+        """Ten sam wzorzec co `_start_odczytu_skanow` (timer „Anuluj", wątek)."""
+        teksty = [e for e in elementy if isinstance(e, str)]
+        czyste, _ = core_poliglota.oczysc_akapity_docx(teksty)
+        iterator = iter(czyste)
+        elementy = [next(iterator) if isinstance(e, str) else e for e in elementy]
+        liczba = sum(not isinstance(e, str) for e in elementy)
+        self._txt_file.Disable()
+        self._btn_browse.Disable()
+        self._btn_load.Disable()
+        self._anuluj_skany = threading.Event()
+        self._postep_skanow = wx.ProgressDialog(
+            t("poliglota.obrazy_postep_tytul"),
+            t("poliglota.obrazy_postep_tresc", numer_obrazu=1, numer=1, liczba=liczba),
+            maximum=liczba, parent=self,
+            style=wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+        self._timer_skanow.Start(200)
+        self._worker_thread = threading.Thread(
+            target=self._obrazy_worker,
+            args=(file_name, elementy, self._jezyk_aktywny,
+                  os.path.splitext(os.path.basename(file_name))[0]),
+            daemon=True,
+        )
+        self._worker_thread.start()
+
+    def _obrazy_worker(self, file_name: str, elementy: list, jezyk: str, tytul: str) -> None:
+        """Wątek tła – żaden bezpośredni wx.* (tylko przez wx.CallAfter!)."""
+        try:
+            wyniki, blad = core_skany.odczytaj_obrazy(
+                self._client, elementy,
+                postep=lambda i, n, nr: wx.CallAfter(self._obrazy_postep, i, n, nr),
+                przerwij=self._anuluj_skany.is_set)
+            dokument = core_skany.scal_docx(elementy, wyniki, jezyk, tytul)
+            tekst_detekcji = core_skany.tekst_tresci_docx(elementy, wyniki)
+        except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
+            bledy_ai.zapisz_diagnostyke(exc, "poliglota._obrazy_worker",
+                                        slad=traceback.format_exc())
+            wx.CallAfter(self._obrazy_blad, file_name, str(exc))
+            return
+        wx.CallAfter(self._obrazy_gotowe, file_name, wyniki, blad, dokument, tekst_detekcji)
+
+    def _obrazy_postep(self, i: int, n: int, numer_obrazu: int) -> None:
+        if not self or not self._postep_skanow:
+            return
+        dalej, _ = self._postep_skanow.Update(
+            i, t("poliglota.obrazy_postep_tresc", numer_obrazu=numer_obrazu,
+                 numer=i + 1, liczba=n))
+        if not dalej:
+            self._anuluj_skany.set()
+
+    @staticmethod
+    def _tekst_podsumowania_obrazow(wyniki: list, blad: Exception | None) -> str:
+        p = core_skany.podsumuj(wyniki)
+        czesci = [t("poliglota.obrazy_podsumowanie_tresc",
+                    liczba_odczytanych=p.odczytane, liczba_obrazow=len(wyniki),
+                    liczba_nieczytelnych=p.znaczniki.get("ILLEGIBLE", 0))]
+        if blad is not None:
+            czesci.append(t("poliglota.obrazy_podsumowanie_przerwano", powod=str(blad)))
+        if p.nieodczytane:
+            czesci.append("\n".join(
+                [t("poliglota.obrazy_podsumowanie_nieodczytane")]
+                + [t("poliglota.obrazy_podsumowanie_obraz", numer_obrazu=w.numer,
+                     powod=f"{w.powod} ({w.szczegol})" if w.szczegol else w.powod)
+                   for w in p.nieodczytane]))
+        return "\n\n".join(czesci)
+
+    def _obrazy_gotowe(self, file_name: str, wyniki: list, blad: Exception | None,
+                       dokument: str, tekst_detekcji: str) -> None:
+        if not self:
+            return
+        self._zamknij_postep_skanow()
+        podsumowanie = self._tekst_podsumowania_obrazow(wyniki, blad)
+        if core_skany.podsumuj(wyniki).odczytane == 0:
+            # Nic nie odczytano: zostaje sam tekst dokumentu (już w `_file_content`).
+            gd.pokaz_tekst(self, t("poliglota.obrazy_podsumowanie_tytul"), podsumowanie)
+            self._dokoncz_wczytanie(file_name, None)
+            return
+        self._file_content = dokument
+        self._file_ext = ".html"
+        self._tekst_detekcji = tekst_detekcji
+        self._dokoncz_wczytanie(file_name, None, podsumowanie)
+
+    def _obrazy_blad(self, file_name: str, tresc_bledu: str) -> None:
+        """Nieoczekiwany błąd wątku: mówimy to i wczytujemy sam tekst dokumentu."""
+        if not self:
+            return
+        self._zamknij_postep_skanow()
+        gd.pokaz_tekst(self, t("poliglota.obrazy_blad_tytul"),
+                       t("poliglota.obrazy_blad_tresc", tresc_bledu=tresc_bledu))
+        self._dokoncz_wczytanie(file_name, None)
 
     def _zgoda_na_odczyt_skanow(self, file_name: str, strony: list[int],
                                 liczba_stron: int, znieksztalcone: list[int] | None = None,

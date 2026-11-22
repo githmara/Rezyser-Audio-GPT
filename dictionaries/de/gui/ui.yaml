@@ -956,6 +956,28 @@ poliglota:
   zastepcze_wynik_tytul: 'Buchstaben wiederherstellen: Ergebnis'
   zastepcze_wynik_tresc: Buchstaben wurden in {liczba_odtworzonych} von {liczba_slow} verschiedenen Wörtern wiederhergestellt. Die übrigen Wörter enthalten weiterhin das Zeichen ■.
   zastepcze_blad_tresc: "Die Buchstaben konnten nicht wiederhergestellt werden: {tresc_bledu}\n\nDie Datei wurde unverändert geladen, mit ■-Zeichen."
+  obraz_pochodzenie: 'Bild {numer_obrazu}: Text, der von einem KI-Modell aus dem Bild gelesen wurde; er kann Lesefehler enthalten.'
+  obraz_nieodczytany: '[Bild {numer_obrazu}: nicht gelesen. Grund: {powod}]'
+  obraz_ucieta: '[Bild {numer_obrazu}: Lesevorgang abgebrochen, weil die Antwort des Modells das Längenlimit überschritten hat. Der restliche Teil dieses Bildes wurde nicht gelesen.]'
+  obraz_opis: '[Bild {numer_obrazu}, Alternativtext: {opis}]'
+  obraz_powod_format: Bildformat, das vom Modell nicht unterstützt wird (zum Beispiel EMF oder WMF aus Word)
+  obraz_powod_brak_danych: das Bild ist nicht in der Datei enthalten (zum Beispiel nur ein Link auf ein Bild im Internet)
+  obrazy_zgoda_tytul: Bilder aus dem Dokument mit einem KI-Modell auslesen?
+  obrazy_zgoda_tresc: "Die Datei {nazwa_pliku} enthält Bilder (Anzahl der Bilder: {liczba_obrazow}), zum Beispiel eingefügte Folien, Screenshots oder Fotos von Dokumenten. Ihr Inhalt ist nicht im Text des Dokuments enthalten.\n\nIch kann den Text aus diesen Bildern mit einem KI-Modell ({model}) auslesen. Jedes Bild wird dazu an einen externen Dienst gesendet: {usluga}.\nBilder von Dokumenten enthalten oft personenbezogene Daten. Senden Sie sie nur, wenn Sie dazu berechtigt sind.\n\nGeschätzte Kosten: {koszt}. Dauer: etwa 5 Sekunden pro Bild.\n\nWenn Sie „Überspringen“ wählen, lade ich nur den Text des Dokuments, ohne den Inhalt der Bilder."
+  obrazy_zgoda_btn_tak: Bilder &auslesen
+  obrazy_postep_tytul: Bilder aus dem Dokument auslesen
+  obrazy_postep_tresc: Lese Bild {numer_obrazu} aus ({numer} von {liczba})…
+  obrazy_podsumowanie_tytul: 'Bilder auslesen: Zusammenfassung'
+  obrazy_podsumowanie_tresc: "Ausgelesene Bilder: {liczba_odczytanych} von {liczba_obrazow}.\nUnleserliche oder verdeckte Stellen: {liczba_nieczytelnych}.\nDas Ergebnis wird als .html-Datei gespeichert. Vor jedem ausgelesenen Bild steht ein Absatz mit dem Hinweis, dass dessen Text aus dem Auslesen eines Bildes stammt."
+  obrazy_podsumowanie_nieodczytane: 'Nicht ausgelesene Bilder (im Ergebnis steht an ihrer Stelle ein Absatz mit dem Grund oder der Alternativtext des Bildes):'
+  obrazy_podsumowanie_obraz: 'Bild {numer_obrazu}: {powod}'
+  obrazy_podsumowanie_przerwano: 'Das Auslesen wurde abgebrochen, weil auch die weiteren Bilder fehlgeschlagen wären: {powod}'
+  obrazy_pominiete_tytul: Die Bilder aus dem Dokument wurden nicht geladen
+  obrazy_pominiete_tresc: 'Die Datei {nazwa_pliku} enthält Bilder (Anzahl der Bilder: {liczba_obrazow}). Es wurde nur der Text des Dokuments geladen – der Inhalt der Bilder ist nicht im Ergebnis enthalten.'
+  obrazy_niedostepny_brak_api: Zum Auslesen von Bildern mit einem KI-Modell ist ein API-Schlüssel (Anthropic oder OpenRouter) in der Datei golden_key.env erforderlich.
+  obrazy_niedostepny_compat: Das Auslesen von Bildern mit einem KI-Modell funktioniert nicht mit einem eigenen OpenAI-kompatiblen Endpunkt (LLM_PROVIDER=openai_compat). Es funktioniert mit Anthropic und mit OpenRouter.
+  obrazy_blad_tytul: Das Auslesen der Bilder ist fehlgeschlagen
+  obrazy_blad_tresc: "Das Auslesen der Bilder wurde durch einen unerwarteten Fehler unterbrochen:\n{tresc_bledu}\n\nEs wurde nur der Text des Dokuments geladen, ohne den Inhalt der Bilder."
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)

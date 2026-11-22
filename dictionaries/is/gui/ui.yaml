@@ -956,6 +956,28 @@ poliglota:
   zastepcze_wynik_tytul: 'Endurheimt stafa: niðurstaða'
   zastepcze_wynik_tresc: Stafir voru endurheimtir í {liczba_odtworzonych} af {liczba_slow} mismunandi orðum. Önnur orð eru áfram með tákninu ■.
   zastepcze_blad_tresc: "Ekki tókst að endurheimta stafi: {tresc_bledu}\n\nSkráin var opnuð óbreytt, með táknunum ■."
+  obraz_pochodzenie: 'Mynd {numer_obrazu}: texti lesinn úr myndinni af gervigreindarlíkani, í honum geta leynst lesvillur.'
+  obraz_nieodczytany: '[Mynd {numer_obrazu}: ekki lesin. Ástæða: {powod}]'
+  obraz_ucieta: '[Mynd {numer_obrazu}: lestur rofnaði vegna þess að svar líkansins fór yfir lengdarmörk. Afgangur þessarar myndar var ekki lesinn.]'
+  obraz_opis: '[Mynd {numer_obrazu}, alt-texti: {opis}]'
+  obraz_powod_format: myndsnið sem líkanið tekur ekki við (til dæmis EMF eða WMF úr Word)
+  obraz_powod_brak_danych: myndin er ekki í skránni (til dæmis er þetta aðeins tengill á mynd á netinu)
+  obrazy_zgoda_tytul: Á að lesa myndir úr skjalinu með gervigreindarlíkani?
+  obrazy_zgoda_tresc: "Í skránni {nazwa_pliku} eru myndir (fjöldi mynda: {liczba_obrazow}), til dæmis innlímdar glærur, skjámyndir eða ljósmyndir af skjölum. Efni þeirra er ekki í texta skjalsins.\n\nÉg get lesið texta úr þessum myndum með gervigreindarlíkani ({model}). Hver mynd verður send til utanaðkomandi þjónustu: {usluga}.\nMyndir af skjölum innihalda oft persónuupplýsingar. Sendu þær aðeins ef þú hefur heimild til þess.\n\nÁætlaður kostnaður: {koszt}. Tími: um það bil 5 sekúndur á mynd.\n\nEf þú velur „Sleppa“ les ég aðeins texta skjalsins, án efnis myndanna."
+  obrazy_zgoda_btn_tak: '&Lesa myndir'
+  obrazy_postep_tytul: Lestur mynda úr skjalinu
+  obrazy_postep_tresc: Les mynd {numer_obrazu} ({numer} af {liczba})…
+  obrazy_podsumowanie_tytul: 'Lestur mynda: samantekt'
+  obrazy_podsumowanie_tresc: "Myndir lesnar: {liczba_odczytanych} af {liczba_obrazow}.\nÓlæsilegir eða hulin svæði: {liczba_nieczytelnych}.\nNiðurstaðan verður vistuð sem .html skrá. Á undan hverri lesinni mynd er málsgrein sem segir að textinn sé fenginn með lestri úr mynd."
+  obrazy_podsumowanie_nieodczytane: 'Myndir sem ekki voru lesnar (í niðurstöðunni er á þeirra stað málsgrein með ástæðunni eða alt-texti myndarinnar):'
+  obrazy_podsumowanie_obraz: 'Mynd {numer_obrazu}: {powod}'
+  obrazy_podsumowanie_przerwano: 'Lesturinn var stöðvaður vegna þess að næstu myndir hefðu líka mistekist: {powod}'
+  obrazy_pominiete_tytul: Myndir úr skjalinu voru ekki lesnar inn
+  obrazy_pominiete_tresc: 'Í skránni {nazwa_pliku} eru myndir (fjöldi mynda: {liczba_obrazow}). Aðeins texti skjalsins var lesinn inn – efni myndanna er ekki í niðurstöðunni.'
+  obrazy_niedostepny_brak_api: Lestur mynda með gervigreindarlíkani krefst API-lykils (Anthropic eða OpenRouter) í skránni golden_key.env.
+  obrazy_niedostepny_compat: Lestur mynda með gervigreindarlíkani virkar ekki með eigin endapunkti sem er samhæfður OpenAI (LLM_PROVIDER=openai_compat). Hann virkar með Anthropic og OpenRouter.
+  obrazy_blad_tytul: Lestur mynda mistókst
+  obrazy_blad_tresc: "Óvænt villa stöðvaði lestur mynda:\n{tresc_bledu}\n\nAðeins texti skjalsins var lesinn inn, án efnis myndanna."
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)

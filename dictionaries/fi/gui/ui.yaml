@@ -954,6 +954,28 @@ poliglota:
   zastepcze_wynik_tytul: 'Kirjainten palautus: tulos'
   zastepcze_wynik_tresc: Kirjaimet palautettiin {liczba_odtworzonych} sanassa {liczba_slow} eri sanasta. Loput sanat jäivät ■-merkkeineen.
   zastepcze_blad_tresc: "Kirjainten palautus epäonnistui: {tresc_bledu}\n\nTiedosto avattiin muuttamattomana, ■-merkkeineen."
+  obraz_pochodzenie: 'Kuva {numer_obrazu}: tekoälymallin kuvasta lukema teksti, jossa voi olla lukuvirheitä.'
+  obraz_nieodczytany: '[Kuva {numer_obrazu}: ei luettu. Syy: {powod}]'
+  obraz_ucieta: '[Kuva {numer_obrazu}: lukeminen katkesi, koska mallin vastaus ylitti pituusrajan. Kuvan loppuosaa ei luettu.]'
+  obraz_opis: '[Kuva {numer_obrazu}, vaihtoehtoinen teksti: {opis}]'
+  obraz_powod_format: kuvamuoto, jota malli ei hyväksy (esimerkiksi Wordin EMF tai WMF)
+  obraz_powod_brak_danych: kuvaa ei ole tiedostossa (esimerkiksi kyseessä on vain linkki internetissä olevaan kuvaan)
+  obrazy_zgoda_tytul: Luetaanko asiakirjan kuvat tekoälymallilla?
+  obrazy_zgoda_tresc: "Tiedostossa {nazwa_pliku} on kuvia (kuvien määrä: {liczba_obrazow}), esimerkiksi liitettyjä dioja, kuvakaappauksia tai asiakirjojen valokuvia. Niiden sisältöä ei ole asiakirjan tekstissä.\n\nVoin lukea näiden kuvien tekstin tekoälymallilla ({model}). Jokainen kuva lähetetään ulkoiseen palveluun: {usluga}.\nAsiakirjakuvat sisältävät usein henkilötietoja. Lähetä ne vain, jos sinulla on siihen oikeus.\n\nArvioitu hinta: {koszt}. Aika: noin 5 sekuntia kuvaa kohden.\n\nJos valitset ”Ohita”, avaan pelkän asiakirjan tekstin ilman kuvien sisältöä."
+  obrazy_zgoda_btn_tak: '&Lue kuvat'
+  obrazy_postep_tytul: Asiakirjan kuvien lukeminen
+  obrazy_postep_tresc: Luetaan kuvaa {numer_obrazu} ({numer}/{liczba})…
+  obrazy_podsumowanie_tytul: 'Kuvien lukeminen: yhteenveto'
+  obrazy_podsumowanie_tresc: "Luettuja kuvia: {liczba_odczytanych}/{liczba_obrazow}.\nLukukelvottomia tai peitettyjä kohtia: {liczba_nieczytelnych}.\nTulos tallennetaan .html-tiedostona. Jokaisen luetun kuvan edessä on kappale, jossa kerrotaan, että sen teksti on peräisin kuvasta luetusta sisällöstä."
+  obrazy_podsumowanie_nieodczytane: 'Lukemattomat kuvat (tuloksessa niiden paikalla on kappale, jossa on syy, tai kuvan vaihtoehtoinen teksti):'
+  obrazy_podsumowanie_obraz: 'Kuva {numer_obrazu}: {powod}'
+  obrazy_podsumowanie_przerwano: 'Lukeminen keskeytettiin, koska seuraavatkaan kuvat eivät onnistuisi: {powod}'
+  obrazy_pominiete_tytul: Asiakirjan kuvia ei avattu
+  obrazy_pominiete_tresc: 'Tiedostossa {nazwa_pliku} on kuvia (kuvien määrä: {liczba_obrazow}). Avattiin pelkkä asiakirjan teksti – kuvien sisältöä ei ole tuloksessa.'
+  obrazy_niedostepny_brak_api: Kuvien lukeminen tekoälymallilla edellyttää API-avainta (Anthropic tai OpenRouter) golden_key.env-tiedostossa.
+  obrazy_niedostepny_compat: Kuvien lukeminen tekoälymallilla ei toimi OpenAI-yhteensopivan oman päätepisteen kanssa (LLM_PROVIDER=openai_compat). Se toimii Anthropicin ja OpenRouterin kanssa.
+  obrazy_blad_tytul: Kuvien lukeminen epäonnistui
+  obrazy_blad_tresc: "Kuvien lukemisen keskeytti odottamaton virhe:\n{tresc_bledu}\n\nAvattiin pelkkä asiakirjan teksti ilman kuvien sisältöä."
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)

@@ -2134,3 +2134,98 @@ def wywolaj_llm_z_pdf(
         if opakowany is None:
             raise
         raise opakowany from exc
+
+
+#: Formaty obrazu, które przyjmują oba nasze kanały (blok ``image`` Anthropic
+#: i ``image_url`` OpenRoutera) — bez konwersji. Inne (EMF, WMF, TIFF, BMP)
+#: wołający raportuje, zamiast je wysyłać.
+TYPY_OBRAZU: dict[str, str] = {
+    "png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg",
+    "gif": "image/gif", "webp": "image/webp",
+}
+
+
+def typ_obrazu(dane: bytes) -> str | None:
+    """Media type z sygnatury bajtów (nie z rozszerzenia) albo ``None``."""
+    if dane[:8] == bytes([137, 80, 78, 71, 13, 10, 26, 10]):
+        return "image/png"
+    if dane[:3] == bytes([255, 216, 255]):
+        return "image/jpeg"
+    if dane[:6] in (b"GIF87a", b"GIF89a"):
+        return "image/gif"
+    if dane[:4] == b"RIFF" and dane[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
+
+def wywolaj_llm_z_obrazem(
+    klient: KlientLLM,
+    *,
+    model: str,
+    system: str,
+    obraz: bytes,
+    tekst_po: str,
+    max_tokens: int,
+    timeout: float,
+    tekst_przed: str = "",
+    slad: list[dict] | None = None,
+) -> tuple[str, str | None]:
+    """Wywołanie z OBRAZEM w treści (19.21), kontrakt jak :func:`wywolaj_llm_z_pdf`.
+
+    Użycie: obrazy wstawione w `.docx` (`core_skany.odczytaj_obrazy`). Do
+    19.20 obraz dało się przeczytać tylko po złożeniu go w jednostronicowy PDF;
+    decyzja maintainera 2026-11-22: obraz idzie jako obraz. Format z sygnatury
+    bajtów (:func:`typ_obrazu`); nieobsługiwany → ``ValueError`` przed
+    wywołaniem, bo wołający ma go zgłosić użytkownikowi, a nie wysłać.
+
+      * **anthropic**: blok ``image`` (base64) przez :func:`_wywolaj_anthropic`;
+      * **openrouter**: część ``image_url`` (data URL) + ``reasoning`` low —
+        bez pluginu parsera plików, który dotyczy wyłącznie PDF-ów;
+      * **openai_compat**: :class:`BladFunkcjiNiedostepnej` (decyzja D3).
+    """
+    if klient.provider == PROVIDER_OPENAI_COMPAT:
+        raise BladFunkcjiNiedostepnej("image", klient.provider)
+    media = typ_obrazu(obraz)
+    if media is None:
+        raise ValueError("Unsupported image format (supported: PNG, JPEG, GIF, WebP).")
+    mdl = model_wywolania(klient, model)
+    b64 = base64.standard_b64encode(obraz).decode("ascii")
+    try:
+        if klient.provider == PROVIDER_OPENROUTER:
+            czesci: list[dict] = []
+            if tekst_przed:
+                czesci.append({"type": "text", "text": tekst_przed})
+            czesci.append({"type": "image_url",
+                           "image_url": {"url": f"data:{media};base64,{b64}"}})
+            czesci.append({"type": "text", "text": tekst_po})
+            msgs: list[dict] = [{"role": "system", "content": system}] if system else []
+            msgs.append({"role": "user", "content": czesci})
+            try:
+                wynik = _openai_chat(klient, mdl, msgs, max_tokens, _TEMPERATURA_DOMYSLNA,
+                                     timeout, bez_temperatury=True,
+                                     extra_body={"reasoning": _OPENROUTER_REASONING_PDF})
+            except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO odrzucone `reasoning`
+                if not _czy_odrzucono_reasoning(exc):
+                    raise
+                _dev_log(f"openrouter: model '{mdl}' odrzucił 'reasoning' — ponawiam bez niego.")
+                wynik = _openai_chat(klient, mdl, msgs, max_tokens, _TEMPERATURA_DOMYSLNA,
+                                     timeout, bez_temperatury=True)
+        else:
+            tresc: list[dict] = []
+            if tekst_przed:
+                tresc.append({"type": "text", "text": tekst_przed})
+            tresc.append({"type": "image", "source": {
+                "type": "base64", "media_type": media, "data": b64,
+            }})
+            tresc.append({"type": "text", "text": tekst_po})
+            wynik = _wywolaj_anthropic(
+                klient, mdl, system, [{"role": "user", "content": tresc}],
+                max_tokens, _TEMPERATURA_DOMYSLNA, timeout, slad=slad,
+            )
+        klient.udane = True
+        return wynik
+    except Exception as exc:  # noqa: BLE001 — 429/timeout/kontekst opakowujemy; reszta leci dalej
+        opakowany = _opakuj_blad(exc, mdl, klient.provider)
+        if opakowany is None:
+            raise
+        raise opakowany from exc
