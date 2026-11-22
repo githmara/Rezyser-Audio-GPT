@@ -1342,6 +1342,235 @@ def _wykryj_jezyk_fragmentu(tekst: str, fallback: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Języki WEWNĄTRZ akapitu (19.21): pismo najpierw, lingua z progiem słów
+# ---------------------------------------------------------------------------
+# Decyzja maintainera 2026-11-22. Prezentacja z wycinkami slajdów („organy
+# pojednawcze — примирительного характера; mediacja") dawała cały akapit pod
+# jednym językiem, więc rosyjska połowa szła regułami polskimi albo odwrotnie.
+# Wzór logiki: dodatek NVDA Enhanced Language Detection (`minWordsForLanguage
+# Change`, domyślnie 3) — odcinek krótszy niż próg nie przełącza języka.
+# Różnice wobec wzoru, zmierzone na 335 akapitach tej prezentacji:
+#   * granica PISMA dzieli zawsze i bez progu (pismo widać po jednej literze,
+#     a `detect_multiple_languages_of` doklejał „mediacja" do odcinka
+#     rosyjskiego); próg dotyczy tylko zmiany języka w obrębie jednego pisma;
+#   * słowa liczymy sami: lingua liczyła „Commerce - ICC)" jako 3 słowa i dawała
+#     `fr`. Słowo = co najmniej 2 litery, nie skrót wersalikami, nie adres URL;
+#   * łacinka bez ani jednego takiego słowa („N 4-", „III.", „ICC RUSSIA") jest
+#     NEUTRALNA i dziedziczy język sąsiada — inaczej szum w rosyjskich
+#     akapitach dawał `it`/`en` i przestawiał język krótkich odcinków.
+# Krótki odcinek łacinki (1–2 słowa) dostaje „łaciński język dokumentu":
+# ostatni wykryty z pewnością, a na starcie wynik lingua dla całej łacinki
+# dokumentu. Greka jest neutralna (brak paczki `el`; pre-pass paczki akapitu
+# ją transliteruje, jak dotąd).
+
+#: Minimalna liczba słów odcinka, żeby zmienił język w obrębie jednego pisma.
+PROG_SLOW_ZMIANY_JEZYKA = 3
+
+_RE_ADRES = re.compile(r"\S*(?:://|www\.|@)\S*")
+_RE_SLOWO_DETEKCJI = re.compile(r"[^\W\d_]{2,}")
+
+
+def _liczba_slow_detekcji(tekst: str) -> int:
+    """Słowa, które coś mówią o języku: >= 2 litery, nie wersaliki, nie adres."""
+    return sum(1 for s in _RE_SLOWO_DETEKCJI.findall(_RE_ADRES.sub(" ", tekst))
+               if not s.isupper())
+
+
+def _iso_wyniku_lingua(jezyk: Any) -> str | None:
+    """`Language` lingua → kod paczki obecnej w ``dictionaries/`` albo ``None``."""
+    if jezyk is None:
+        return None
+    iso = _zbuduj_mapowanie_lingua_to_iso().get(jezyk.name)
+    return iso if iso and iso in _jezyki_obecne_w_dictionaries() else None
+
+
+def _jezyk_lacinki(tekst: str) -> str | None:
+    """Język odcinka łacinki z co najmniej ``PROG_SLOW_ZMIANY_JEZYKA`` słowami."""
+    if _liczba_slow_detekcji(tekst) < PROG_SLOW_ZMIANY_JEZYKA:
+        return None
+    detektor = _zbuduj_detektor_lingua()
+    if detektor is None:
+        return None
+    return _iso_wyniku_lingua(detektor.detect_language_of(_RE_ADRES.sub(" ", tekst)))
+
+
+def _kawalki_lacinki(tekst: str, baza: str) -> list[tuple[str, str]]:
+    """Odcinek łacinki języka ``baza``: wydziela pododcinki innego języka.
+
+    Pododcinek musi mieć próg słów i przejść weryfikację: w ocenie samego
+    pododcinka jego język ma co najmniej 2× pewność języka ``baza``.
+    """
+    detektor = _zbuduj_detektor_lingua()
+    if detektor is None or _liczba_slow_detekcji(tekst) <= PROG_SLOW_ZMIANY_JEZYKA:
+        return [(baza, tekst)]
+    kawalki: list[tuple[str, str]] = []
+    pozycja = 0
+    for wynik in detektor.detect_multiple_languages_of(tekst):
+        iso = _iso_wyniku_lingua(wynik.language)
+        fragment = tekst[wynik.start_index:wynik.end_index]
+        if (iso is None or iso == baza or wynik.start_index < pozycja
+                or _liczba_slow_detekcji(fragment) < PROG_SLOW_ZMIANY_JEZYKA):
+            continue
+        pewnosc = {_iso_wyniku_lingua(p.language): p.value
+                   for p in detektor.compute_language_confidence_values(fragment)}
+        if pewnosc.get(iso, 0.0) < 2 * pewnosc.get(baza, 0.0):
+            continue
+        kawalki.append((baza, tekst[pozycja:wynik.start_index]))
+        kawalki.append((iso, fragment))
+        pozycja = wynik.end_index
+    kawalki.append((baza, tekst[pozycja:]))
+    return [(k, t) for k, t in kawalki if t]
+
+
+def _jezyk_lacinki_dokumentu(czesci: list[str], fallback: str) -> str | None:
+    """Startowy język krótkich odcinków łacinki: lingua na całej łacince tekstu."""
+    lacinka = " ".join(c[s:e] for c in czesci
+                       for s, e, pismo in detektor_pism.odcinki_pism(c)
+                       if pismo == detektor_pism.LACINKA)
+    wykryty = _jezyk_lacinki(lacinka)
+    if wykryty:
+        return wykryty
+    alfabety = _alfabety_wdrozone()
+    if fallback in alfabety and \
+            detektor_pism.dominujace_pismo(alfabety[fallback]) == detektor_pism.LACINKA:
+        return fallback
+    return None
+
+
+def _kawalki_jezykow(akapit: str, stan: dict) -> list[tuple[str | None, str]]:
+    """Akapit jako ``(kod | None, kawałek)``; ``None`` = cały akapit neutralny.
+
+    ``stan["lacinka"]`` to łaciński język dokumentu — aktualizowany, gdy
+    odcinek łacinki ma próg słów. Kawałki pokrywają akapit bez reszty
+    i sąsiednie kawałki mają różne kody.
+    """
+    odcinki = detektor_pism.odcinki_pism(akapit)
+    alfabety: dict[str, str] | None = None
+    surowe: list[tuple[str | None, int, int]] = []
+    for start, koniec, pismo in odcinki:
+        kod: str | None = None
+        tekst = akapit[start:koniec]
+        if pismo == detektor_pism.CYRYLICA:
+            if alfabety is None:
+                alfabety = _alfabety_wdrozone()
+            if detektor_pism.jezyki_cyrylickie(alfabety):
+                kod = detektor_pism.jezyk_cyrylicy(tekst, alfabety)
+        elif pismo == detektor_pism.LACINKA and _liczba_slow_detekcji(tekst):
+            baza = _jezyk_lacinki(tekst)
+            if baza:
+                stan["lacinka"] = baza
+                for k, t in _kawalki_lacinki(tekst, baza):
+                    surowe.append((k, start, start + len(t)))
+                    start += len(t)
+                continue
+            kod = stan.get("lacinka")
+        surowe.append((kod, start, koniec))
+    # Neutralne odcinki i przerwy dziedziczą po poprzedniku (początek: po następniku).
+    pierwszy = next((k for k, _, _ in surowe if k), None)
+    if pierwszy is None:
+        return [(None, akapit)]
+    kawalki: list[tuple[str | None, str]] = []
+    biezacy, od = pierwszy, 0
+    for kod, start, _ in surowe:
+        if kod and kod != biezacy:
+            kawalki.append((biezacy, akapit[od:start]))
+            biezacy, od = kod, start
+    kawalki.append((biezacy, akapit[od:]))
+    return [(k, t) for k, t in kawalki if t]
+
+
+def _scal_kawalki_akapitow(segmenty: list[Segment]) -> list[Segment]:
+    """Kawałki jednego akapitu (sąsiednie segmenty tekstowe) → jeden segment.
+
+    Kod segmentu = język GŁOSU z największą liczbą liter; kawałek innego głosu
+    dostaje ``<span lang>`` (linia po linii — zapis `.docx` buduje akapit
+    Worda z każdej linii). Akcent ma wspólne ``iso`` celu, więc tu nic nie
+    owija; oczyszczenie i szyfr owijają wtręty obcego języka.
+    """
+    wynik: list[Segment] = []
+    grupa: list[Segment] = []
+
+    def domknij() -> None:
+        # Białe znaki po ostatnim kawałku tekstu nie należą do grupy.
+        ogon: list[Segment] = []
+        while grupa and not grupa[-1][2]:
+            ogon.insert(0, grupa.pop())
+        tekstowe = [g for g in grupa if g[2]]
+        if len(tekstowe) == 1 and len(grupa) == 1:
+            wynik.append(grupa[0])
+        elif tekstowe:
+            litery: dict[str, int] = {}
+            for kod, tresc, _ in tekstowe:
+                litery[kod] = litery.get(kod, 0) + sum(z.isalpha() for z in tresc)
+            kolejnosc = [g[0] for g in tekstowe]
+            glowny = max(litery, key=lambda k: (litery[k], -kolejnosc.index(k)))
+            czesci = []
+            for kod, tresc, czy_tekst in grupa:
+                if kod == glowny or not czy_tekst:
+                    czesci.append(tresc)
+                    continue
+                czesci.append("\n".join(
+                    _owin_span(linia, kod) for linia in tresc.split("\n")))
+            wynik.append((glowny, "".join(czesci), True))
+        grupa.clear()
+        wynik.extend(ogon)
+
+    for seg in segmenty:
+        if seg[2]:
+            grupa.append(seg)
+        elif grupa and _czy_biel_kawalka(seg[1]):
+            grupa.append(seg)
+        else:
+            domknij()
+            wynik.append(seg)
+    domknij()
+    return wynik
+
+
+def _czy_biel_kawalka(tresc: str) -> bool:
+    """Biały znak na granicy kawałków akapitu — nie separator akapitów ani tag."""
+    return bool(tresc) and not tresc.strip() and not re.fullmatch(r"\n\s*\n", tresc)
+
+
+def _owin_span(linia: str, kod: str) -> str:
+    """``<span lang>`` wokół treści linii; białe znaki brzegowe zostają poza."""
+    if not linia.strip():
+        return linia
+    lewy = len(linia) - len(linia.lstrip())
+    prawy = len(linia.rstrip())
+    return f'{linia[:lewy]}<span lang="{kod}">{linia[lewy:prawy]}</span>{linia[prawy:]}'
+
+
+_RE_SPAN_LANG = re.compile(r'<span lang="([\w-]+)">(.*?)</span>')
+
+
+def _kawalki_spanow(linia: str) -> list[tuple[str | None, str]] | None:
+    """Linia z ``<span lang>`` od :func:`_owin_span` → ``(kod | None, tekst)``.
+
+    ``None`` = w linii nie ma takiego spana (zwykła ścieżka zapisu). Białe
+    znaki poza spanem nie tworzą osobnego kawałka „języka" akapitu, jeśli
+    poza nimi cała linia jest jednym spanem.
+    """
+    if '<span lang="' not in linia:
+        return None
+    kawalki: list[tuple[str | None, str]] = []
+    pozycja = 0
+    for m in _RE_SPAN_LANG.finditer(linia):
+        if m.start() > pozycja:
+            kawalki.append((None, linia[pozycja:m.start()]))
+        kawalki.append((m.group(1), m.group(2)))
+        pozycja = m.end()
+    if pozycja < len(linia):
+        kawalki.append((None, linia[pozycja:]))
+    if not any(k for k, _ in kawalki):
+        return None
+    tresciwe = [kt for kt in kawalki if kt[0] or kt[1].strip()]
+    if len(tresciwe) == 1:
+        return [(tresciwe[0][0], "".join(t for _, t in kawalki))]
+    return kawalki
+
+
+# ---------------------------------------------------------------------------
 # Detektor PEŁNEGO kanonu Lingui — wyłącznie jako OPINIA dla użytkownika
 # ---------------------------------------------------------------------------
 
@@ -1567,6 +1796,9 @@ def _segmentuj_z_ochrona_tagow(
     czesci = re.split(r"(<[^>]+>)", tekst)
     wynik: list[Segment] = []
     poprzedni_jezyk = fallback_jezyk
+    # 19.21: języki wewnątrz akapitu (patrz `_kawalki_jezykow`).
+    stan = {} if wymus_jezyk else {
+        "lacinka": _jezyk_lacinki_dokumentu(czesci[::2], fallback_jezyk)}
 
     for i, czesc in enumerate(czesci):
         if i % 2 == 1:
@@ -1584,6 +1816,28 @@ def _segmentuj_z_ochrona_tagow(
                 continue
             if not akapit:
                 continue
+            if not wymus_jezyk:
+                kawalki = _kawalki_jezykow(akapit, stan)
+                if len(kawalki) > 1:
+                    # Akapit wielojęzyczny: każdy kawałek dostaje reguły
+                    # własnego języka; dyspozytory scalają je z powrotem
+                    # (`_scal_kawalki_akapitow`). Język „lepki" = kawałek
+                    # z największą liczbą słów.
+                    # Białe znaki na brzegach kawałka idą osobno, NIEPRZETWARZANE:
+                    # oczyszczenie przycina brzegi, więc ginęła spacja między
+                    # językami („определение<span>ochrona prawna</span>существенно").
+                    for k, t in kawalki:
+                        rdzen = t.strip()
+                        lewy, prawy = t[:len(t) - len(t.lstrip())], t[len(t.rstrip()):]
+                        if lewy:
+                            wynik.append((k, lewy, False))
+                        if rdzen:
+                            wynik.append((k, rdzen, True))
+                        if prawy and rdzen:
+                            wynik.append((k, prawy, False))
+                    poprzedni_jezyk = max(
+                        kawalki, key=lambda kt: _liczba_slow_detekcji(kt[1]))[0]
+                    continue
             jez = wymus_jezyk or _wykryj_jezyk_fragmentu(
                 akapit, fallback=poprzedni_jezyk)
             wynik.append((jez, akapit, True))
@@ -1812,8 +2066,9 @@ def _przetworz_rezyser(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
             )
             wyniki.append(wynik_fr)
             zapisane.append((jez_seg, wynik_fr, True))
+        zapisane = _scal_kawalki_akapitow(zapisane)
         opcje["_segmenty_wynikowe"] = zapisane
-        return "".join(wyniki)
+        return "".join(s[1] for s in zapisane)
 
     # Zwykły akcent – per fragment szukamy YAML-a dla wykrytego języka.
     segmenty_in = _segmentuj_z_ochrona_tagow(
@@ -1871,8 +2126,9 @@ def _przetworz_rezyser(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
         wyniki.append(wynik_fr)
         zapisane.append((iso_sticky, wynik_fr, True))
 
+    zapisane = _scal_kawalki_akapitow(zapisane)
     opcje["_segmenty_wynikowe"] = zapisane
-    return "".join(wyniki)
+    return "".join(s[1] for s in zapisane)
 
 
 # =============================================================================
@@ -2154,8 +2410,9 @@ def _przetworz_szyfrant(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
         wyniki.append(wynik_fr)
         zapisane.append((iso_sticky, wynik_fr, True))
 
+    zapisane = _scal_kawalki_akapitow(zapisane)
     opcje["_segmenty_wynikowe"] = zapisane
-    return "".join(wyniki)
+    return "".join(s[1] for s in zapisane)
 
 
 # =============================================================================
@@ -2576,6 +2833,7 @@ def _iso_dla_tekstu(tekst: str, mapa_iso: dict[str, str] | None,
     """
     if not mapa_iso:
         return iso_fallback
+    tekst = re.sub(r"\s+", " ", tekst).strip()
     trafienie = mapa_iso.get(tekst)
     if trafienie:
         return trafienie
@@ -3133,7 +3391,10 @@ def zapisz_wynik(
     # stempluje ręcznym kodem, więc mapy nie dostaje.
     mapa_iso: dict[str, str] | None = None
     if segmenty_wynikowe and not jest_naprawiacz:
-        pary = {s[1].strip(): s[0] for s in segmenty_wynikowe if s[2] and s[1].strip()}
+        # 19.21: klucz bez znaczników — akapit wielojęzyczny niesie `<span lang>`,
+        # a blok HTML porównujemy po `get_text()`.
+        pary = {_bez_tagow(s[1]): s[0] for s in segmenty_wynikowe
+                if s[2] and _bez_tagow(s[1])}
         if len(set(pary.values())) > 1:
             mapa_iso = pary
 
@@ -3166,11 +3427,23 @@ def zapisz_wynik(
 
             linie = zawartosc.split("\n")
             for linia, iso_lin in zip(linie, iso_lista):
-                p = doc.add_paragraph(linia)
+                kawalki = None if jest_naprawiacz else _kawalki_spanow(linia)
                 kod = iso_lin
                 if kody is not None and linia.strip():
                     kod = kody.nastepny()
-                _ustaw_lang_akapitu(p, kod)
+                if kawalki is None:
+                    p = doc.add_paragraph(linia)
+                    _ustaw_lang_akapitu(p, kod)
+                else:
+                    # 19.21: akapit wielojęzyczny — `<span lang>` z dyspozytora
+                    # staje się biegiem z własnym `w:lang`. Linia w całości
+                    # w jednym spanie dostaje jego język jako język akapitu.
+                    if len(kawalki) == 1 and kawalki[0][0]:
+                        kod = kawalki[0][0]
+                    p = doc.add_paragraph()
+                    _ustaw_lang_akapitu(p, kod)
+                    for kod_kaw, tekst_kaw in kawalki:
+                        _ustaw_lang_runa(p.add_run(tekst_kaw), kod_kaw or kod)
                 if jest_naprawiacz:
                     _podziel_biegi_po_pismach(p, kod)
         if kody is not None:
