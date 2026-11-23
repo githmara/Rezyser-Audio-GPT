@@ -33,6 +33,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import audyt_podstaw as ap
 import core_poliglota as cp
 import detektor_pism as dp
+import manager_regul_szablony as mrs
 
 PACZKI = ["pl", "en", "de", "es", "fi", "fr", "is", "it", "ru"]
 GREKA = set(cp.GRECKIE_MALE + cp.GRECKIE_WIELKIE)
@@ -72,7 +73,10 @@ def test_zadna_greka_nie_wychodzi_z_pre_passu(kod):
 def test_kazda_paczka_ma_komplet_nazw(kod):
     podstawy = cp._zaladuj_podstawy(kod)
     nazwy = {w["wzor"] for w in podstawy["nazwy_liter"]}
-    assert nazwy == set(cp.GRECKIE_MALE)
+    # v19.21: obok kompletu greki wolno nazwać literę pogranicza cyrylicy
+    # (`ru`: ѣ ѳ ѵ cytowane w tekście o dawnej ortografii) — nic poza tym.
+    assert set(cp.GRECKIE_MALE) <= nazwy
+    assert nazwy - set(cp.GRECKIE_MALE) <= set(mrs.ZNAKI_POGRANICZA_CYRYLICY)
 
 
 def test_akcent_rozwija_samotna_litere_i_transliteruje_reszte():

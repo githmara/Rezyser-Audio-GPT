@@ -76,7 +76,11 @@ wxpython<4.4  # hold: 19.18.0
 # `Authorization: Bearer`. 2.x ciągnie nową zależność `httpx2` (bundle).
 # Dowód: `inspect.signature` + żywe wywołanie sonnet-5-5 (tekst i structured
 # outputs, jedna próba każde). Licencja SDK od 2.0: Apache 2.0 (było MIT).
-anthropic<3  # hold: 19.20.0
+# 19.21 (środowisko): 2.9.0 → 2.12.0 — `inspect.signature` Messages.create/stream
+# i Anthropic.__init__ bez zmian na naszej powierzchni; żywe wywołania
+# (tekst, structured outputs, myślenie dev) OK. Sonda myślenia bywa pusta na
+# 2.9 i 2.12 jednakowo — model adaptacyjny czasem nie myśli; to nie SDK.
+anthropic<3  # hold: 19.21.0
 # Most do Studio: wołamy `client.studio.projects.create/delete`
 # i `client.user.subscription.get` — dokładnie tę powierzchnię ten SDK
 # przemianowuje między wydaniami. 2.52 → 2.67 (15 minorów) przeszło bez zmian
@@ -112,6 +116,8 @@ fonttools<4.69  # hold: 19.18.0
 lingua-language-detector<2.3  # hold: 19.18.0
 beautifulsoup4
 num2words
+# 19.21 (środowisko): pyyaml 6.0.3 → 6.0.4 (grupa A) — pełny zestaw testów
+# zielony, bramki paczek czyste, regeneracja `docs/` bez żadnego diffu.
 pyyaml
 ruamel.yaml
 jsonschema
@@ -178,4 +184,7 @@ markdown<3.12  # hold: 19.18.0
 # 2026-11-13: 3.49.0 → 3.50.0 (wyszło w trakcie cyklu, bramka zatrzymała build) —
 # `OpenAI.__init__`, `chat.completions.create` i 8 łapanych klas wyjątków bez zmian;
 # żywe wywołanie OpenRoutera (tekst + json_schema) OK, także w ATA.
-openai<4  # hold: 19.20.0
+# 19.21 (środowisko): 3.52.0 → 3.57.0 (ta sama, którą ATA ma od 2.1.0;
+# Sami w Actions instaluje `<4` bez przypięcia) — sygnatury bez zmian,
+# żywe wywołania OpenRoutera (tekst, json_schema, reasoning) OK.
+openai<4  # hold: 19.21.0
