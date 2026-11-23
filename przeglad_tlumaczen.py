@@ -334,6 +334,15 @@ _CHECKLIST_DOCS = """\
 
 - FIRST LINE / TITLE must be in the target language — never leave a Polish
   title (`Podręcznik`, `Reżyser`, `Kompletny…`). A Polish first line is a leak.
+- QUOTED EXAMPLES: decide per quote whether its POINT is the Polish text. A
+  quote that illustrates a mechanism („pisano ѣ” = "written as ѣ") gets
+  translated — and the gate does not see it when it has no Polish letters
+  (four of eight packs kept `pisano` in 19.21). A quote whose point IS the
+  Polish string (the Zoom label „opuść (alt+q) przycisk” misdetected as
+  Finnish) stays Polish, and its gate hit goes to the leak BASELINE.
+- TOOL NAMES in a NEW section: the model copies the Polish name
+  (`Poliglota`, `Konwerter`) when the section has no native one to anchor to.
+  Use the name the pack already uses (its GUI label / the rest of its manual).
 - INVENTED SECTIONS: if a translated section is noticeably longer than the
   Polish source (rule of thumb: > 1.5×), the model probably bolted on an extra
   chapter. Compare against the PL source and delete anything with no PL counterpart.
