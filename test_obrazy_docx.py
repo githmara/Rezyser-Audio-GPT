@@ -130,5 +130,43 @@ def test_tekst_tresci_bez_akapitow_pochodzenia(dokument):
     assert cs.t("poliglota.obraz_pochodzenie", numer_obrazu=1) not in tekst
 
 
+def _jpeg(szer, wys):
+    """Minimalny nagłówek JPEG: SOI, APP0 i SOF0 z wymiarami (reszta zbędna)."""
+    app0 = bytes([255, 224]) + (16).to_bytes(2, "big") + b"JFIF" + bytes(10)
+    sof0 = (bytes([255, 192]) + (17).to_bytes(2, "big") + bytes([8])
+            + wys.to_bytes(2, "big") + szer.to_bytes(2, "big") + bytes(10))
+    return bytes([255, 216]) + app0 + sof0
+
+
+class _Klient:
+    def __init__(self, provider):
+        self.provider = provider
+
+
+def test_wymiary_z_naglowka_bez_pillow():
+    assert cl.wymiary_obrazu(_png(4, 3)) == (4, 3)
+    assert cl.wymiary_obrazu(_jpeg(9000, 120)) == (9000, 120)
+    assert cl.wymiary_obrazu(b"GIF89a" + (5).to_bytes(2, "little")
+                             + (7).to_bytes(2, "little") + bytes(10)) == (5, 7)
+    assert cl.wymiary_obrazu(b"BM" + bytes(30)) is None
+
+
+def test_limity_api_przed_wywolaniem(monkeypatch):
+    """Obraz ponad limit dostaje powód z wartościami — bez wywołania API."""
+    wyslane = _atrapa(monkeypatch, [])
+    za_szeroki = cp.ObrazDocx(1, _jpeg(9000, 120))
+    wyniki, blad = cs.odczytaj_obrazy(_Klient(cl.PROVIDER_ANTHROPIC), [za_szeroki])
+    assert wyslane == [] and blad is None
+    assert wyniki[0].status == cs.STATUS_BLAD
+    assert wyniki[0].powod == cs.t("poliglota.obraz_powod_wymiary",
+                                   szerokosc=9000, wysokosc=120, limit_px=8000)
+    # 4 MB surowych = ~5,3 MB w base64: Anthropic (10 MB) przyjmuje,
+    # OpenRouter (próg Bedrocka, 5 MB) już nie.
+    duzy = _jpeg(100, 100) + bytes(4 * 1000 * 1000)
+    assert cl.limit_obrazu(_Klient(cl.PROVIDER_ANTHROPIC), duzy) is None
+    rodzaj, wartosci = cl.limit_obrazu(_Klient(cl.PROVIDER_OPENROUTER), duzy)
+    assert rodzaj == "rozmiar" and wartosci["limit_mb"] == "5"
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))

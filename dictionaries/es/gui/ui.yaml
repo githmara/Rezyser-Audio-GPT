@@ -978,6 +978,8 @@ poliglota:
   obrazy_niedostepny_compat: La lectura de imágenes con un modelo de IA no funciona con un endpoint propio compatible con OpenAI (LLM_PROVIDER=openai_compat). Funciona con Anthropic y con OpenRouter.
   obrazy_blad_tytul: No se pudieron leer las imágenes
   obrazy_blad_tresc: "Un error inesperado interrumpió la lectura de las imágenes:\n{tresc_bledu}\n\nSe cargó solo el texto del documento, sin el contenido de las imágenes."
+  obraz_powod_rozmiar: 'la imagen es demasiado grande: {rozmiar_mb} MB tras la codificación, y el modelo admite como máximo {limit_mb} MB — comprime las imágenes del documento y vuelve a cargar el archivo'
+  obraz_powod_wymiary: la imagen mide {szerokosc}×{wysokosc} píxeles, y el modelo admite como máximo {limit_px} píxeles por lado — reduce el tamaño de la imagen en el documento y vuelve a cargar el archivo
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)

@@ -978,6 +978,8 @@ poliglota:
   obrazy_niedostepny_compat: Lestur mynda með gervigreindarlíkani virkar ekki með eigin endapunkti sem er samhæfður OpenAI (LLM_PROVIDER=openai_compat). Hann virkar með Anthropic og OpenRouter.
   obrazy_blad_tytul: Lestur mynda mistókst
   obrazy_blad_tresc: "Óvænt villa stöðvaði lestur mynda:\n{tresc_bledu}\n\nAðeins texti skjalsins var lesinn inn, án efnis myndanna."
+  obraz_powod_rozmiar: 'myndin er of stór: {rozmiar_mb} MB eftir kóðun, en líkanið tekur við að hámarki {limit_mb} MB — þjappaðu myndunum í skjalinu og hladdu skrána aftur inn'
+  obraz_powod_wymiary: myndin er {szerokosc}×{wysokosc} díplar, en líkanið tekur við að hámarki {limit_px} díplum á hverja hlið — minnkaðu myndina í skjalinu og hladdu skrána aftur inn
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)

@@ -2158,6 +2158,89 @@ def typ_obrazu(dane: bytes) -> str | None:
     return None
 
 
+#: Limity obrazu po stronie API (dokumentacja Vision, sprawdzona 2026-11-23):
+#: 8000×8000 px na obraz; 10 MB PO ZAKODOWANIU base64 na Claude API, 5 MB na
+#: Amazon Bedrock — a OpenRouter może kierować model Anthropic przez Bedrock,
+#: więc dla niego przyjmujemy ostrzejszy próg. Próg „ponad 20 obrazów
+#: w zapytaniu” nas nie dotyczy: każdy obraz idzie osobnym wywołaniem.
+MAX_BOK_OBRAZU_PX = 8000
+MAX_OBRAZ_B64: dict[str, int] = {
+    PROVIDER_ANTHROPIC: 10 * 1000 * 1000,
+    PROVIDER_OPENROUTER: 5 * 1000 * 1000,
+}
+
+
+def wymiary_obrazu(dane: bytes) -> tuple[int, int] | None:
+    """(szerokość, wysokość) z nagłówka PNG/JPEG/GIF/WebP — bez Pillow.
+
+    ``None``, gdy nagłówka nie da się odczytać; wołający NIE odmawia wtedy
+    odczytu (decyzję zostawia API), bo nieczytelny nagłówek to nie dowód,
+    że obraz jest za duży.
+    """
+    media = typ_obrazu(dane)
+    try:
+        if media == "image/png" and dane[12:16] == b"IHDR":
+            return int.from_bytes(dane[16:20], "big"), int.from_bytes(dane[20:24], "big")
+        if media == "image/gif":
+            return int.from_bytes(dane[6:8], "little"), int.from_bytes(dane[8:10], "little")
+        if media == "image/webp":
+            fourcc = dane[12:16]
+            if fourcc == b"VP8X":
+                return (int.from_bytes(dane[24:27], "little") + 1,
+                        int.from_bytes(dane[27:30], "little") + 1)
+            if fourcc == b"VP8L":
+                b = int.from_bytes(dane[21:25], "little")
+                return (b & 0x3FFF) + 1, ((b >> 14) & 0x3FFF) + 1
+            if fourcc == b"VP8 ":
+                return (int.from_bytes(dane[26:28], "little") & 0x3FFF,
+                        int.from_bytes(dane[28:30], "little") & 0x3FFF)
+            return None
+        if media == "image/jpeg":
+            i = 2
+            while i + 9 < len(dane):
+                if dane[i] != 0xFF:
+                    return None
+                znacznik = dane[i + 1]
+                if znacznik == 0xFF:           # bajt wypełnienia
+                    i += 1
+                    continue
+                if znacznik in (0x01, 0xD8) or 0xD0 <= znacznik <= 0xD7:
+                    i += 2                     # znaczniki bez długości
+                    continue
+                dlugosc = int.from_bytes(dane[i + 2:i + 4], "big")
+                if 0xC0 <= znacznik <= 0xCF and znacznik not in (0xC4, 0xC8, 0xCC):
+                    return (int.from_bytes(dane[i + 7:i + 9], "big"),
+                            int.from_bytes(dane[i + 5:i + 7], "big"))
+                if znacznik == 0xDA or dlugosc < 2:   # dane obrazu: SOF się nie pojawił
+                    return None
+                i += 2 + dlugosc
+    except (IndexError, ValueError):
+        return None
+    return None
+
+
+def limit_obrazu(klient: KlientLLM, dane: bytes) -> tuple[str, dict] | None:
+    """Który limit API obraz przekracza: (rodzaj, wartości do komunikatu) albo ``None``.
+
+    Sprawdzane PRZED wysłaniem (19.21): bez tego obraz ponad limit wracał jako
+    surowy błąd HTTP 400 przy tym obrazie — po wysłaniu całego pliku przez
+    sieć. Rodzaje: ``"rozmiar"`` (``rozmiar_mb``, ``limit_mb``) i ``"wymiary"``
+    (``szerokosc``, ``wysokosc``, ``limit_px``).
+    """
+    # Nieznany provider (albo atrapa bez pola) = ostrzejszy próg.
+    limit_b64 = MAX_OBRAZ_B64.get(getattr(klient, "provider", ""),
+                                  MAX_OBRAZ_B64[PROVIDER_OPENROUTER])
+    dlugosc_b64 = 4 * ((len(dane) + 2) // 3)
+    if dlugosc_b64 > limit_b64:
+        return "rozmiar", {"rozmiar_mb": f"{dlugosc_b64 / 1e6:.1f}",
+                           "limit_mb": f"{limit_b64 / 1e6:.0f}"}
+    wymiary = wymiary_obrazu(dane)
+    if wymiary and max(wymiary) > MAX_BOK_OBRAZU_PX:
+        return "wymiary", {"szerokosc": wymiary[0], "wysokosc": wymiary[1],
+                           "limit_px": MAX_BOK_OBRAZU_PX}
+    return None
+
+
 def wywolaj_llm_z_obrazem(
     klient: KlientLLM,
     *,
@@ -2188,6 +2271,9 @@ def wywolaj_llm_z_obrazem(
     media = typ_obrazu(obraz)
     if media is None:
         raise ValueError("Unsupported image format (supported: PNG, JPEG, GIF, WebP).")
+    przekroczony = limit_obrazu(klient, obraz)
+    if przekroczony is not None:
+        raise ValueError(f"Image over the API limit ({przekroczony[0]}: {przekroczony[1]}).")
     mdl = model_wywolania(klient, model)
     b64 = base64.standard_b64encode(obraz).decode("ascii")
     try:

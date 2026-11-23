@@ -732,6 +732,12 @@ def odczytaj_obraz(klient: cl.KlientLLM, obraz, kontekst: str = "") -> WynikStro
     if cl.typ_obrazu(obraz.dane) is None:
         return WynikStrony(obraz.numer, STATUS_BLAD,
                            powod=t("poliglota.obraz_powod_format"))
+    przekroczony = cl.limit_obrazu(klient, obraz.dane)
+    if przekroczony is not None:
+        rodzaj, wartosci = przekroczony
+        powod = (t("poliglota.obraz_powod_rozmiar", **wartosci) if rodzaj == "rozmiar"
+                 else t("poliglota.obraz_powod_wymiary", **wartosci))
+        return WynikStrony(obraz.numer, STATUS_BLAD, powod=powod)
     przed = (f"<previous_page>\n{kontekst[-KONTEKST_ZNAKI:]}\n</previous_page>"
              if kontekst.strip() else "")
     slad: list[dict] = []

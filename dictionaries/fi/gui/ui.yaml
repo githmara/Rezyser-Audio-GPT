@@ -976,6 +976,8 @@ poliglota:
   obrazy_niedostepny_compat: Kuvien lukeminen tekoälymallilla ei toimi OpenAI-yhteensopivan oman päätepisteen kanssa (LLM_PROVIDER=openai_compat). Se toimii Anthropicin ja OpenRouterin kanssa.
   obrazy_blad_tytul: Kuvien lukeminen epäonnistui
   obrazy_blad_tresc: "Kuvien lukemisen keskeytti odottamaton virhe:\n{tresc_bledu}\n\nAvattiin pelkkä asiakirjan teksti ilman kuvien sisältöä."
+  obraz_powod_rozmiar: 'kuva on liian suuri: {rozmiar_mb} Mt koodauksen jälkeen, ja malli hyväksyy enintään {limit_mb} Mt — pakkaa asiakirjan kuvat ja lataa tiedosto uudelleen'
+  obraz_powod_wymiary: kuvan koko on {szerokosc}×{wysokosc} pikseliä, ja malli hyväksyy kuvan pidemmälle sivulle enintään {limit_px} pikseliä — pienennä asiakirjan kuvaa ja lataa tiedosto uudelleen
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)

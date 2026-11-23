@@ -978,6 +978,8 @@ poliglota:
   obrazy_niedostepny_compat: Das Auslesen von Bildern mit einem KI-Modell funktioniert nicht mit einem eigenen OpenAI-kompatiblen Endpunkt (LLM_PROVIDER=openai_compat). Es funktioniert mit Anthropic und mit OpenRouter.
   obrazy_blad_tytul: Das Auslesen der Bilder ist fehlgeschlagen
   obrazy_blad_tresc: "Das Auslesen der Bilder wurde durch einen unerwarteten Fehler unterbrochen:\n{tresc_bledu}\n\nEs wurde nur der Text des Dokuments geladen, ohne den Inhalt der Bilder."
+  obraz_powod_rozmiar: 'das Bild ist zu groß: {rozmiar_mb} MB nach der Kodierung, das Modell akzeptiert aber höchstens {limit_mb} MB – komprimieren Sie die Bilder im Dokument und laden Sie die Datei erneut'
+  obraz_powod_wymiary: das Bild hat {szerokosc}×{wysokosc} Pixel, das Modell akzeptiert aber höchstens {limit_px} Pixel pro Seite – verkleinern Sie das Bild im Dokument und laden Sie die Datei erneut
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)

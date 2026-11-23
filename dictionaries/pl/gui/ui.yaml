@@ -1041,6 +1041,8 @@ poliglota:
   obraz_opis: "[Obraz {numer_obrazu}, tekst alternatywny: {opis}]"
   obraz_powod_format: "format obrazu, którego model nie przyjmuje (na przykład EMF albo WMF z Worda)"
   obraz_powod_brak_danych: "obrazu nie ma w pliku (na przykład to tylko link do obrazu w internecie)"
+  obraz_powod_rozmiar: "obraz jest za duży: {rozmiar_mb} MB po zakodowaniu, a model przyjmuje najwyżej {limit_mb} MB — skompresuj obrazy w dokumencie i wczytaj plik ponownie"
+  obraz_powod_wymiary: "obraz ma {szerokosc}×{wysokosc} pikseli, a model przyjmuje najwyżej {limit_px} pikseli na bok — zmniejsz obraz w dokumencie i wczytaj plik ponownie"
   obrazy_zgoda_tytul: "Odczytać obrazy z dokumentu przez model AI?"
   obrazy_zgoda_tresc: |-
     W pliku {nazwa_pliku} są obrazy (liczba obrazów: {liczba_obrazow}), na przykład wklejone slajdy, zrzuty ekranu albo zdjęcia dokumentów. Ich treści nie ma w tekście dokumentu.
