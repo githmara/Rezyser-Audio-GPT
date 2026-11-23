@@ -985,6 +985,9 @@ poliglota:
   obraz_plik_niewczytany_tresc: Skráin {nazwa_pliku} er mynd. Aðeins gervigreindarlíkan getur lesið textann í henni, en sá lestur fór ekki fram og því var ekkert lesið inn.
   obraz_plik_nic_nie_wczytano: Ekki tókst að lesa texta úr myndinni og því var ekkert lesið inn.
   obraz_plik_blad_tresc: "Óvænt villa stöðvaði lestur myndarinnar:\n{tresc_bledu}\n\nEkkert var lesið inn."
+  obraz_powod_wykres: þetta er graf eða SmartArt-mynd sem forritið sendir ekki til líkansins — bættu við öðrum texta (alt-texta) í Word og hann skilar sér í niðurstöðuna
+  docx_naglowki_tytul: Haus og fótur eru ekki lesin inn
+  docx_naglowki_tresc: 'Skjalið er með haus eða fót með texta eða myndum (fjöldi: {liczba}). Forritið les þá ekki inn, þar sem þeir endurtaka sig á hverri síðu — í niðurstöðunni er aðeins efni skjalsins sjálfs.'
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)

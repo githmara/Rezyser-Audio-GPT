@@ -50,7 +50,9 @@ def dokument(tmp_path):
     d = docx.Document()
     d.add_paragraph("Wstęp przed slajdem.")
     d.add_paragraph().add_run().add_picture(io.BytesIO(_png()))
-    d.add_paragraph().add_run().add_picture(io.BytesIO(_png()))
+    # Inny obraz: identyczne bajty python-docx zapisuje jako JEDNĄ część pakietu,
+    # a ta sama część jest od 19.21 czytana raz (test_docx_struktura).
+    d.add_paragraph().add_run().add_picture(io.BytesIO(_png(5, 3)))
     docpr = list(d.element.body.iter(qn("wp:docPr")))[1]
     docpr.set("descr", "Schemat sądów")
     d.add_paragraph("Zakończenie.")

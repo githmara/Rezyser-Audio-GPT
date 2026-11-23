@@ -983,6 +983,9 @@ poliglota:
   obraz_plik_niewczytany_tresc: Tiedosto {nazwa_pliku} on kuva. Sen tekstin voi lukea vain tekoälymalli, eikä lukemista suoritettu, joten mitään ei ladattu.
   obraz_plik_nic_nie_wczytano: Kuvasta ei onnistuttu lukemaan tekstiä, joten mitään ei ladattu.
   obraz_plik_blad_tresc: "Kuvan lukeminen keskeytyi odottamattomaan virheeseen:\n{tresc_bledu}\n\nMitään ei ladattu."
+  obraz_powod_wykres: on kaavio tai SmartArt-grafiikka, jota ohjelma ei lähetä mallille — lisää siihen vaihtoehtoinen teksti Wordissa, niin se päätyy tulokseen
+  docx_naglowki_tytul: Ylä- ja alatunnisteita ei ladata
+  docx_naglowki_tresc: 'Asiakirjassa on ylä- tai alatunnisteita, joissa on tekstiä tai kuvia (määrä: {liczba}). Ohjelma ei lataa niitä, koska ne toistuvat jokaisella sivulla — tulos sisältää vain asiakirjan varsinaisen sisällön.'
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)

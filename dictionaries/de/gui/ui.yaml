@@ -985,6 +985,9 @@ poliglota:
   obraz_plik_niewczytany_tresc: Die Datei {nazwa_pliku} ist ein Bild. Ihr Text kann nur von einem KI-Modell ausgelesen werden, der Vorgang hat jedoch nicht stattgefunden, daher wurde nichts eingelesen.
   obraz_plik_nic_nie_wczytano: Aus dem Bild konnte kein Text ausgelesen werden, daher wurde nichts eingelesen.
   obraz_plik_blad_tresc: "Das Auslesen des Bildes wurde durch einen unerwarteten Fehler abgebrochen:\n{tresc_bledu}\n\nEs wurde nichts eingelesen."
+  obraz_powod_wykres: das ist ein Diagramm oder eine SmartArt-Grafik, die das Programm nicht an das Modell sendet – fügen Sie in Word einen Alternativtext hinzu, dann erscheint er im Ergebnis
+  docx_naglowki_tytul: Kopf- und Fußzeilen werden nicht eingelesen
+  docx_naglowki_tresc: 'Das Dokument enthält Kopf- oder Fußzeilen mit Text oder Bildern (Anzahl: {liczba}). Das Programm liest sie nicht ein, da sie sich auf jeder Seite wiederholen – im Ergebnis steht nur der eigentliche Inhalt des Dokuments.'
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)

@@ -1043,6 +1043,9 @@ poliglota:
   obraz_powod_brak_danych: "obrazu nie ma w pliku (na przykład to tylko link do obrazu w internecie)"
   obraz_powod_rozmiar: "obraz jest za duży: {rozmiar_mb} MB po zakodowaniu, a model przyjmuje najwyżej {limit_mb} MB — skompresuj obrazy w dokumencie i wczytaj plik ponownie"
   obraz_powod_wymiary: "obraz ma {szerokosc}×{wysokosc} pikseli, a model przyjmuje najwyżej {limit_px} pikseli na bok — zmniejsz obraz w dokumencie i wczytaj plik ponownie"
+  obraz_powod_wykres: "to wykres albo grafika SmartArt, której program nie wysyła do modelu — dodaj jej tekst alternatywny w Wordzie, a trafi do wyniku"
+  docx_naglowki_tytul: "Nagłówki i stopki nie są wczytywane"
+  docx_naglowki_tresc: "Dokument ma nagłówki albo stopki z tekstem lub obrazami (liczba: {liczba}). Program ich nie wczytuje, bo powtarzają się na każdej stronie — w wyniku jest sama treść dokumentu."
   obrazy_zgoda_tytul: "Odczytać obrazy z dokumentu przez model AI?"
   obrazy_zgoda_tresc: |-
     W pliku {nazwa_pliku} są obrazy (liczba obrazów: {liczba_obrazow}), na przykład wklejone slajdy, zrzuty ekranu albo zdjęcia dokumentów. Ich treści nie ma w tekście dokumentu.

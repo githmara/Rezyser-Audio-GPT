@@ -985,6 +985,9 @@ poliglota:
   obraz_plik_niewczytany_tresc: El archivo {nazwa_pliku} es una imagen. Solo un modelo de IA puede leer su texto, y la lectura no se realizó, por lo que no se cargó nada.
   obraz_plik_nic_nie_wczytano: No se pudo leer ningún texto de la imagen, por lo que no se cargó nada.
   obraz_plik_blad_tresc: "La lectura de la imagen se interrumpió por un error inesperado:\n{tresc_bledu}\n\nNo se cargó nada."
+  obraz_powod_wykres: es un gráfico o un elemento SmartArt que el programa no envía al modelo; añade su texto alternativo en Word y se incluirá en el resultado
+  docx_naglowki_tytul: Los encabezados y pies de página no se cargan
+  docx_naglowki_tresc: 'El documento tiene encabezados o pies de página con texto o imágenes (cantidad: {liczba}). El programa no los carga porque se repiten en cada página; el resultado contiene únicamente el contenido del documento.'
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)

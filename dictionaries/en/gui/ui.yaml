@@ -1069,6 +1069,9 @@ poliglota:
   obraz_plik_niewczytany_tresc: The file {nazwa_pliku} is an image. Only an AI model can read its text, and the reading did not take place, so nothing was loaded.
   obraz_plik_nic_nie_wczytano: No text could be read from the image, so nothing was loaded.
   obraz_plik_blad_tresc: "Reading the image was interrupted by an unexpected error:\n{tresc_bledu}\n\nNothing was loaded."
+  obraz_powod_wykres: this is a chart or SmartArt graphic that the program does not send to the model — add alt text to it in Word, and it will be included in the result
+  docx_naglowki_tytul: Headers and footers are not loaded
+  docx_naglowki_tresc: 'The document has headers or footers containing text or images (count: {liczba}). The program does not load them because they repeat on every page — the result contains only the document body.'
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)

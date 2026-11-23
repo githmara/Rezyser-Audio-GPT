@@ -847,13 +847,21 @@ class PoliglotaPanel(wx.Panel):
                 if zdanie:
                     wx.MessageBox(zdanie, t("common.docx_oczyszczony_tytul"),
                                   wx.OK | wx.ICON_INFORMATION, self)
+                # 19.21 (wspólna polityka bliźniaków): nagłówki i stopki nie
+                # wchodzą do treści, ale użytkownik ma wiedzieć, że są.
+                naglowki = core_poliglota.czesci_pominiete_docx(file_name)
+                if naglowki:
+                    wx.MessageBox(t("poliglota.docx_naglowki_tresc", liczba=naglowki),
+                                  t("poliglota.docx_naglowki_tytul"),
+                                  wx.OK | wx.ICON_INFORMATION, self)
                 # 19.21: obrazy wstawione w dokument (slajdy, zrzuty, zdjęcia
                 # dokumentów). Do 19.20 znikały bez słowa — 46 slajdów dawało
                 # jedno zdanie i komunikat o sukcesie.
                 elementy = core_poliglota.elementy_docx(file_name)
                 liczba_obrazow = sum(not isinstance(e, str) for e in elementy)
                 if liczba_obrazow:
-                    if self._zgoda_na_odczyt_obrazow(file_name, liczba_obrazow):
+                    if self._zgoda_na_odczyt_obrazow(file_name, liczba_obrazow,
+                                                     elementy=elementy):
                         self._start_odczytu_obrazow(file_name, elementy)
                         return
                     tresc = t("poliglota.obrazy_pominiete_tresc",
@@ -862,6 +870,14 @@ class PoliglotaPanel(wx.Panel):
                     dopisek = self._powod_braku_odczytu_obrazow()
                     if dopisek:
                         tresc += "\n\n" + dopisek
+                    if not self._file_content.strip():
+                        # Audyt F5: dokument z samych obrazów bez odczytu nie
+                        # ma treści — nie wczytujemy pustki z komunikatem o sukcesie.
+                        self._file_content, self._file_ext = "", ""
+                        tresc += "\n\n" + t("poliglota.obraz_plik_nic_nie_wczytano")
+                        wx.MessageBox(tresc, t("poliglota.obrazy_pominiete_tytul"),
+                                      wx.OK | wx.ICON_WARNING, self)
+                        return
                     wx.MessageBox(tresc, t("poliglota.obrazy_pominiete_tytul"),
                                   wx.OK | wx.ICON_WARNING, self)
             else:
@@ -1159,11 +1175,21 @@ class PoliglotaPanel(wx.Panel):
                       wx.OK | wx.ICON_WARNING, self)
 
     def _zgoda_na_odczyt_obrazow(self, file_name: str, liczba_obrazow: int,
-                                 klucz_tresci: str = "poliglota.obrazy_zgoda_tresc") -> bool:
-        """Jawna zgoda PER PLIK, domyślnie NIE — jak przy stronach-skanach."""
+                                 klucz_tresci: str = "poliglota.obrazy_zgoda_tresc",
+                                 elementy: list | None = None) -> bool:
+        """Jawna zgoda PER PLIK, domyślnie NIE — jak przy stronach-skanach.
+
+        Koszt liczony od PŁATNYCH odczytów (`core_skany.liczba_odczytow`: bez
+        powtórek tej samej części, wykresów i obrazów bez danych). Gdy żaden
+        obraz nie wyjdzie do usługi, zgoda jest zbędna — odczyt da same powody.
+        """
         if not core_skany.odczyt_dostepny(self._client):
             return False
-        koszt = core_skany.szacuj_koszt(self._client, liczba_obrazow, [], 0)
+        platne = (core_skany.liczba_odczytow(elementy) if elementy is not None
+                  else liczba_obrazow)
+        if platne == 0:
+            return True
+        koszt = core_skany.szacuj_koszt(self._client, platne, [], 0)
         tresc = t(klucz_tresci,
                   nazwa_pliku=os.path.basename(file_name), liczba_obrazow=liczba_obrazow,
                   model=core_skany.model_odczytu(self._client),
@@ -1251,9 +1277,10 @@ class PoliglotaPanel(wx.Panel):
         self._zamknij_postep_skanow()
         podsumowanie = self._tekst_podsumowania_obrazow(wyniki, blad)
         if core_skany.podsumuj(wyniki).odczytane == 0:
-            if not self._file_content:
-                # Plik-obraz (19.21): poza odczytem nie ma treści — nie wczytujemy pustki.
-                self._file_ext = ""
+            if not self._file_content.strip():
+                # Plik-obraz albo .docx z samych obrazów (19.21, audyt F5:
+                # `tekst_docx` daje tam same znaki nowej linii) — nie wczytujemy pustki.
+                self._file_content, self._file_ext = "", ""
                 gd.pokaz_tekst(self, t("poliglota.obrazy_podsumowanie_tytul"),
                                podsumowanie + "\n\n" + t("poliglota.obraz_plik_nic_nie_wczytano"))
                 return
@@ -1271,9 +1298,9 @@ class PoliglotaPanel(wx.Panel):
         if not self:
             return
         self._zamknij_postep_skanow()
-        if not self._file_content:
-            # Plik-obraz (19.21): bez odczytu nie ma czego wczytać.
-            self._file_ext = ""
+        if not self._file_content.strip():
+            # Plik-obraz albo .docx z samych obrazów (audyt F5): nie ma czego wczytać.
+            self._file_content, self._file_ext = "", ""
             gd.pokaz_tekst(self, t("poliglota.obrazy_blad_tytul"),
                            t("poliglota.obraz_plik_blad_tresc", tresc_bledu=tresc_bledu))
             return

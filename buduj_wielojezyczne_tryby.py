@@ -396,6 +396,39 @@ detokenizuj = tlumacz_rdzen.detokenizuj
 odcisk_struktury = tlumacz_bramki.odcisk_struktury
 
 
+#: Najkrótszy rdzeń słowa wyzwalającego: dopasowanie to PODCIĄG, więc rdzeń
+#: z 1–2 liter („a”) blokowałby w trybie zapisu KAŻDĄ instrukcję (audyt F6).
+MIN_DLUGOSC_RDZENIA = 3
+_RE_ZNACZNIK_LISTY = re.compile(r"^\s*(?:[-*•–]|\d+[.)])\s+")
+
+
+def ksztalt_listy_slow(tgt: str) -> list[str]:
+    """Zarzuty wobec kształtu listy rdzeni oddanej przez model (19.21, audyt F6).
+
+    Lista trafia do silnika bez dalszej obróbki, więc każdy kształt, który
+    psuje regułę po cichu, jest tu zarzutem i powodem powtórki: lista pusta
+    (reguła wyłączona), znacznik wypunktowania („- summar” nigdy nie trafi),
+    cudzysłów, rdzeń krótszy niż :data:`MIN_DLUGOSC_RDZENIA` liter, duplikat.
+    """
+    linie = [l.strip() for l in tgt.splitlines() if l.strip()]
+    if not linie:
+        return ["trigger list is empty — the rule would never fire"]
+    problemy: list[str] = []
+    widziane: set[str] = set()
+    for linia in linie:
+        if _RE_ZNACZNIK_LISTY.match(linia):
+            problemy.append(f"list marker in {linia!r} — return bare stems, one per line")
+        elif linia[0] in "\"'`„“«":
+            problemy.append(f"quotes around {linia!r} — return bare stems")
+        elif sum(z.isalpha() for z in linia) < MIN_DLUGOSC_RDZENIA:
+            problemy.append(f"stem {linia!r} is shorter than {MIN_DLUGOSC_RDZENIA} letters — "
+                            f"as a substring it would block every instruction")
+        if linia.lower() in widziane:
+            problemy.append(f"duplicate stem {linia!r}")
+        widziane.add(linia.lower())
+    return problemy
+
+
 def waliduj_jednostke(
     src_tok: str, tgt: str, klasa: str,
 ) -> tuple[bool, list[str]]:
@@ -408,6 +441,9 @@ def waliduj_jednostke(
     # 19.8: niewidoczny znak w jednostce = powtórka z zarzutem, a nie plik,
     # który przejdzie walidację silnika i zepsuje dopasowanie literału po cichu.
     problemy += tlumacz_bramki.znaki_niewidoczne(tgt)
+
+    if klasa == KLASA_MAPA_SLOW:
+        problemy += ksztalt_listy_slow(tgt)
 
     if klasa in (KLASA_PROMPT, KLASA_MAPA_TEKSTOW):
         # Przepis jest materiałem sztywnym: TU naruszenia miękkie (pogrubienia,

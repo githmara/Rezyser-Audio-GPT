@@ -121,6 +121,20 @@ def test_brakujaca_lista_idzie_jako_jedna_jednostka_o_wolnej_dlugosci():
     assert zrodla == ["\n".join(pl)], "jedna jednostka z całą listą PL"
 
 
+@pytest.mark.parametrize("cel, oczekiwany_zarzut", [
+    ("- summar\n- recap", "list marker"),       # wypunktowanie: reguła nigdy nie trafi
+    ("", "empty"),                              # pusta: reguła wyłączona
+    ("a\nsummar", "shorter than"),              # „a” blokowałoby każdą instrukcję
+    ('"summar"', "quotes"),
+    ("summar\nSummar", "duplicate"),
+])
+def test_bramka_ksztaltu_listy_rdzeni(cel, oczekiwany_zarzut):
+    """Audyt 19.21 F6: kształt psujący regułę po cichu = zarzut i powtórka."""
+    ok, problemy = bt.waliduj_jednostke(cel, cel, bt.KLASA_MAPA_SLOW)
+    assert not ok and any(oczekiwany_zarzut in p for p in problemy), problemy
+    assert bt.waliduj_jednostke("summar\nrecap", "summar\nrecap", bt.KLASA_MAPA_SLOW)[0]
+
+
 def test_pole_json_przezywa_i_tylko_na_granicy_slowa():
     kotwice = bt._kotwice_z_silnika()
     assert {"mowca=", '"mowca"', "`tekst`"} <= set(kotwice)

@@ -43,6 +43,7 @@ from __future__ import annotations
 import html
 import io
 import re
+import dataclasses
 from dataclasses import dataclass, field
 from typing import Callable
 
@@ -726,6 +727,9 @@ def odczytaj_obraz(klient: cl.KlientLLM, obraz, kontekst: str = "") -> WynikStro
     Obraz bez bajtów w pliku albo w formacie, którego model nie przyjmuje
     (EMF/WMF z Worda), dostaje powód BEZ wywołania — nigdy ciszę.
     """
+    if getattr(obraz, "rodzaj", "obraz") == "wykres":
+        return WynikStrony(obraz.numer, STATUS_BLAD,
+                           powod=t("poliglota.obraz_powod_wykres"))
     if not obraz.dane:
         return WynikStrony(obraz.numer, STATUS_BLAD,
                            powod=t("poliglota.obraz_powod_brak_danych"))
@@ -782,10 +786,20 @@ def odczytaj_obrazy(
     obrazy = _obrazy(elementy)
     wyniki: list[WynikStrony] = []
     kontekst = ""
+    # 19.21 (audyt F10 ATA, wspólna polityka bliźniaków): ta sama część pakietu
+    # wstawiona kilka razy (logo na każdym slajdzie) to JEDEN płatny odczyt —
+    # kolejne wystąpienia dostają ten sam wynik pod własnym numerem.
+    przeczytane: dict[str, WynikStrony] = {}
     for el in elementy:
         if isinstance(el, str):
             if el.strip():
                 kontekst = (kontekst + "\n\n" + el)[-KONTEKST_ZNAKI:]
+            continue
+        klucz = getattr(el, "klucz", "")
+        if klucz and klucz in przeczytane:
+            wynik = dataclasses.replace(przeczytane[klucz], numer=el.numer)
+            wyniki.append(wynik)
+            kontekst = wynik.markdown if wynik.status in (STATUS_OK, STATUS_UCIETA) else ""
             continue
         k = len(wyniki)
         if przerwij is not None and przerwij():
@@ -802,8 +816,29 @@ def odczytaj_obrazy(
             wyniki.extend(_blad_strony(o.numer, exc) for o in obrazy[k:])
             return wyniki, exc
         wyniki.append(wynik)
+        if klucz:
+            przeczytane[klucz] = wynik
         kontekst = wynik.markdown if wynik.status in (STATUS_OK, STATUS_UCIETA) else ""
     return wyniki, None
+
+
+def liczba_odczytow(elementy: list) -> int:
+    """Ile PŁATNYCH odczytów zrobi :func:`odczytaj_obrazy` — do szacunku kosztu.
+
+    Bez powtórek tej samej części pakietu, bez wykresów i obrazów bez danych
+    (te dostają powód bez wywołania)."""
+    klucze: set[str] = set()
+    liczba = 0
+    for el in _obrazy(elementy):
+        if getattr(el, "rodzaj", "obraz") != "obraz" or not el.dane:
+            continue
+        klucz = getattr(el, "klucz", "")
+        if klucz:
+            if klucz in klucze:
+                continue
+            klucze.add(klucz)
+        liczba += 1
+    return liczba
 
 
 def scal_docx(elementy: list, wyniki: list[WynikStrony], jezyk: str, tytul: str) -> str:

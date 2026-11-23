@@ -983,6 +983,9 @@ poliglota:
   obraz_plik_niewczytany_tresc: "Le fichier {nazwa_pliku} est une image. Seul un modèle d'IA peut en lire le texte, mais la lecture n'a pas eu lieu : rien n'a donc été chargé."
   obraz_plik_nic_nie_wczytano: "Impossible de lire le texte de l'image : rien n'a donc été chargé."
   obraz_plik_blad_tresc: "La lecture de l'image a été interrompue par une erreur inattendue :\n{tresc_bledu}\n\nRien n'a été chargé."
+  obraz_powod_wykres: il s'agit d'un graphique ou d'un graphisme SmartArt que le programme n'envoie pas au modèle — ajoutez-lui un texte de remplacement dans Word, et il sera repris dans le résultat
+  docx_naglowki_tytul: Les en-têtes et pieds de page ne sont pas chargés
+  docx_naglowki_tresc: 'Le document contient des en-têtes ou des pieds de page avec du texte ou des images (nombre : {liczba}). Le programme ne les charge pas, car ils se répètent sur chaque page — le résultat ne contient que le contenu du document.'
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)

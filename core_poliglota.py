@@ -338,6 +338,10 @@ def _zastosuj_zamiany(tekst: str, zamiany: list[dict]) -> str:
         wzor    = para.get("wzor", "")
         zamiana = para.get("zamiana", "")
         regex   = bool(para.get("regex"))
+        # 19.21 (audyt F7): wzorca nie ma w tekście → `replace` i tak nic nie
+        # zmieni, a sprawdzenie wersalików kosztowało 1,7 mln wywołań na książkę.
+        if not regex and (not wzor or wzor not in tekst):
+            continue
         if not _moze_podniesc_wersaliki(wzor, zamiana, regex=regex):
             tekst = re.sub(wzor, zamiana, tekst) if regex else tekst.replace(wzor, zamiana)
             continue
@@ -656,6 +660,7 @@ def wyczysc_cache() -> None:
     _LINGUA_DETEKTOR = None
     _LINGUA_DETEKTOR_BLD_FAILED = False
     _CACHE_ALFABETOW_PACZEK.clear()
+    _CACHE_OBECNYCH.clear()
 
 
 # {tuple(kody) | None: {kod: alfabet}} — audyt N5: listdir + isfile przy każdym
@@ -1226,6 +1231,13 @@ def _jezyki_obecne_w_dictionaries() -> list[str]:
     się dopiero w dyspozytorach (``_przetworz_rezyser`` / ``_przetworz_szyfrant``)
     przy pomocy :class:`BrakRegulyDlaJezykaError`.
     """
+    # 19.21 (audyt F7): listdir + isfile przy KAŻDYM wyniku detekcji lingua
+    # kosztowały 5,3 s z 14 s profilu (10 502 wywołania na 1500 akapitów) —
+    # ta sama klasa co N5. Cache per katalog słowników, zerowany przez
+    # `wyczysc_cache` („Odśwież” w Managerze Reguł).
+    zapamietane = _CACHE_OBECNYCH.get(DICTIONARIES_DIR)
+    if zapamietane is not None:
+        return list(zapamietane)
     if not os.path.isdir(DICTIONARIES_DIR):
         return []
     wynik: list[str] = []
@@ -1235,7 +1247,12 @@ def _jezyki_obecne_w_dictionaries() -> list[str]:
             continue
         if os.path.isfile(os.path.join(folder, "podstawy.yaml")):
             wynik.append(nazwa)
+    _CACHE_OBECNYCH[DICTIONARIES_DIR] = tuple(wynik)
     return wynik
+
+
+#: {katalog słowników: kody z `podstawy.yaml`} — patrz `_jezyki_obecne_w_dictionaries`.
+_CACHE_OBECNYCH: dict[str, tuple[str, ...]] = {}
 
 
 _LINGUA_DETEKTOR: Any = None       # cache singletona; budowa leniwa
@@ -1372,9 +1389,25 @@ _RE_SLOWO_DETEKCJI = re.compile(r"[^\W\d_]{2,}")
 
 
 def _liczba_slow_detekcji(tekst: str) -> int:
-    """Słowa, które coś mówią o języku: >= 2 litery, nie wersaliki, nie adres."""
-    return sum(1 for s in _RE_SLOWO_DETEKCJI.findall(_RE_ADRES.sub(" ", tekst))
-               if not s.isupper())
+    """Słowa, które coś mówią o języku: >= 2 litery, nie skrótowiec, nie adres.
+
+    Skrótowiec = słowo WERSALIKAMI do :data:`MAX_DLUGOSC_SKROTOWCA` liter
+    (`ICC`, `UE`, `PDF`). Do audytu 19.21 (F8) każde słowo wersalikami było
+    skrótowcem, więc nagłówek „ŁÓDŹ JEST PIĘKNYM MIASTEM” w rosyjskim akapicie
+    nie miał ani jednego słowa i dziedziczył rosyjski — a nagłówki wersalikami
+    to codzienność skanów, które czyta ten cykl. Słowa wersalikami liczą się
+    jednak dopiero RAZEM, gdy jest ich co najmniej :data:`PROG_SLOW_ZMIANY_JEZYKA`:
+    pojedyncza nazwa („ICC RUSSIA” w rosyjskim akapicie) zostaje neutralnym
+    szumem i nie dostaje głosu języka łacinki dokumentu.
+    """
+    slowa = _RE_SLOWO_DETEKCJI.findall(_RE_ADRES.sub(" ", tekst))
+    zwykle = sum(1 for s in slowa if not s.isupper())
+    wersaliki = sum(1 for s in slowa if s.isupper() and len(s) > MAX_DLUGOSC_SKROTOWCA)
+    return zwykle + (wersaliki if wersaliki >= PROG_SLOW_ZMIANY_JEZYKA else 0)
+
+
+#: Słowo wersalikami do tylu liter to skrótowiec, a nie słowo języka.
+MAX_DLUGOSC_SKROTOWCA = 3
 
 
 def _iso_wyniku_lingua(jezyk: Any) -> str | None:
@@ -1543,6 +1576,7 @@ def _owin_span(linia: str, kod: str) -> str:
 
 
 _RE_SPAN_LANG = re.compile(r'<span lang="([\w-]+)">(.*?)</span>')
+_RE_SPAN_OTWARCIE = re.compile(r'<span\s+lang="([\w-]+)"', re.IGNORECASE)
 
 
 def _kawalki_spanow(linia: str) -> list[tuple[str | None, str]] | None:
@@ -1760,8 +1794,16 @@ def _segmentuj_z_ochrona_tagow(
     tekst: str,
     fallback_jezyk: str,
     wymus_jezyk: str | None = None,
+    w_akapicie: bool = True,
 ) -> list[Segment]:
     """Dzieli tekst na segmenty z wykrytym językiem; chroni tagi HTML i separatory.
+
+    ``w_akapicie=False`` (Szyfrant, audyt 19.21 F4): jeden język na akapit,
+    jak do 19.20. Szyfr przekształca CAŁY akapit — Odwracacz obracał osobno
+    każdy kawałek mieszanego akapitu, a Cezar bez wymuszenia języka przestał
+    się odwracać, bo szyfrogram dzielił się przy deszyfracji na inne kawałki
+    niż tekst jawny (0/3 wobec 3/3 w 19.20). Podział w akapicie służy
+    GŁOSOWI (oczyszczenia, akcenty), a szyfrogram nie ma głosu.
 
     Algorytm dwuwarstwowy:
       1. ``re.split(r"(<[^>]+>)", tekst)`` → naprzemienne pozycje tekst/tag.
@@ -1798,13 +1840,23 @@ def _segmentuj_z_ochrona_tagow(
     wynik: list[Segment] = []
     poprzedni_jezyk = fallback_jezyk
     # 19.21: języki wewnątrz akapitu (patrz `_kawalki_jezykow`).
-    stan = {} if wymus_jezyk else {
+    stan = {} if wymus_jezyk or not w_akapicie else {
         "lacinka": _jezyk_lacinki_dokumentu(czesci[::2], fallback_jezyk)}
 
+    jezyk_spanu: str | None = None
+    obecne = _jezyki_obecne_w_dictionaries()
     for i, czesc in enumerate(czesci):
         if i % 2 == 1:
             # Tag HTML – zachowaj 1:1, nie analizuj.
             wynik.append((poprzedni_jezyk, czesc, False))
+            # 19.21 (audyt F9): wstawka `<span lang>` (np. z naszego wyniku
+            # przetwarzanego drugi raz) już ZNA swój język — bez ponownej
+            # detekcji i podziału, które zagnieżdżały wstawki.
+            m_span = _RE_SPAN_OTWARCIE.match(czesc)
+            if m_span:
+                jezyk_spanu = m_span.group(1) if m_span.group(1) in obecne else None
+            elif czesc.lower().startswith("</span"):
+                jezyk_spanu = None
             continue
         if not czesc:
             continue
@@ -1817,43 +1869,72 @@ def _segmentuj_z_ochrona_tagow(
                 continue
             if not akapit:
                 continue
-            if not wymus_jezyk:
-                kawalki = _kawalki_jezykow(akapit, stan)
-                if len(kawalki) > 1:
-                    # Akapit wielojęzyczny: każdy kawałek dostaje reguły
-                    # własnego języka; dyspozytory scalają je z powrotem
-                    # (`_scal_kawalki_akapitow`). Język „lepki" = kawałek
-                    # z największą liczbą słów.
-                    # Białe znaki na brzegach kawałka idą osobno, NIEPRZETWARZANE:
-                    # oczyszczenie przycina brzegi, więc ginęła spacja między
-                    # językami („определение<span>ochrona prawna</span>существенно").
-                    for k, t in kawalki:
-                        rdzen = t.strip()
-                        lewy, prawy = t[:len(t) - len(t.lstrip())], t[len(t.rstrip()):]
-                        if lewy:
-                            wynik.append((k, lewy, False))
-                        if rdzen:
-                            wynik.append((k, rdzen, True))
-                        if prawy and rdzen:
-                            wynik.append((k, prawy, False))
-                    poprzedni_jezyk = max(
-                        kawalki, key=lambda kt: _liczba_slow_detekcji(kt[1]))[0]
-                    continue
-            jez = wymus_jezyk or _wykryj_jezyk_fragmentu(
-                akapit, fallback=poprzedni_jezyk)
-            wynik.append((jez, akapit, True))
-            # v19.17 (audyt W1): krótki akapit cyrylicy dostaje język z alfabetu
-            # paczki BEZ progu długości, ale NIE przestawia języka „lepkiego" —
-            # inaczej krótkie polskie akapity po cytacie „Да." dziedziczyły `ru`
-            # (pre-pass, akcent i pierścień Cezara paczki ru na polskim tekście).
-            # Do v19.16 krótki akapit cyrylicy sam dziedziczył i niczego nie
-            # przestawiał; długi przestawia jak dawniej (wtedy robiła to lingua).
-            if wymus_jezyk or not (
-                    len(akapit.strip()) < _MIN_TEKST_DLA_DETEKCJI
-                    and detektor_pism.dominujace_pismo(akapit) == detektor_pism.CYRYLICA):
-                poprzedni_jezyk = jez
+            # 19.21 (audyt F9): kawałek tekstu stykający się ze znacznikiem w linii
+            # (`<b>`, `<span>`) traci przy przetwarzaniu brzegi — transformacje
+            # przycinają akapit — więc spacja przy znaczniku idzie osobno,
+            # NIEPRZETWARZANA („jest<b>bardzo</b>ważny” po drugim przebiegu).
+            lewy = prawy = ""
+            if j == 0 and i > 0:
+                lewy = akapit[:len(akapit) - len(akapit.lstrip())]
+            if j == len(akapity) - 1 and i < len(czesci) - 1:
+                prawy = akapit[len(akapit.rstrip()):]
+            if not akapit.strip():
+                lewy = prawy = ""
+            if lewy:
+                wynik.append((poprzedni_jezyk, lewy, False))
+            akapit = akapit[len(lewy):len(akapit) - len(prawy)]
+            poprzedni_jezyk = _segment_akapitu(akapit, wynik, wymus_jezyk, w_akapicie,
+                                               jezyk_spanu, stan, poprzedni_jezyk)
+            if prawy:
+                wynik.append((poprzedni_jezyk, prawy, False))
 
     return wynik
+
+
+def _segment_akapitu(akapit: str, wynik: list, wymus_jezyk: str | None, w_akapicie: bool,
+                     jezyk_spanu: str | None, stan: dict, poprzedni_jezyk: str) -> str:
+    """Segmenty jednego akapitu (bez separatorów) dopisane do ``wynik``.
+
+    Zwraca nowy język „lepki”. Wydzielone z :func:`_segmentuj_z_ochrona_tagow`
+    przy audycie 19.21 (F9), gdy brzegi kawałka przy znaczniku zaczęły iść
+    osobno — sama logika akapitu się nie zmieniła.
+    """
+    if jezyk_spanu and not wymus_jezyk:
+        wynik.append((jezyk_spanu, akapit, True))
+        return poprzedni_jezyk
+    if not wymus_jezyk and w_akapicie:
+        kawalki = _kawalki_jezykow(akapit, stan)
+        if len(kawalki) > 1:
+            # Akapit wielojęzyczny: każdy kawałek dostaje reguły
+            # własnego języka; dyspozytory scalają je z powrotem
+            # (`_scal_kawalki_akapitow`). Język „lepki" = kawałek
+            # z największą liczbą słów.
+            # Białe znaki na brzegach kawałka idą osobno, NIEPRZETWARZANE:
+            # oczyszczenie przycina brzegi, więc ginęła spacja między
+            # językami („определение<span>ochrona prawna</span>существенно").
+            for k, t in kawalki:
+                rdzen = t.strip()
+                lewy, prawy = t[:len(t) - len(t.lstrip())], t[len(t.rstrip()):]
+                if lewy:
+                    wynik.append((k, lewy, False))
+                if rdzen:
+                    wynik.append((k, rdzen, True))
+                if prawy and rdzen:
+                    wynik.append((k, prawy, False))
+            return max(kawalki, key=lambda kt: _liczba_slow_detekcji(kt[1]))[0]
+    jez = wymus_jezyk or _wykryj_jezyk_fragmentu(akapit, fallback=poprzedni_jezyk)
+    wynik.append((jez, akapit, True))
+    # v19.17 (audyt W1): krótki akapit cyrylicy dostaje język z alfabetu
+    # paczki BEZ progu długości, ale NIE przestawia języka „lepkiego" —
+    # inaczej krótkie polskie akapity po cytacie „Да." dziedziczyły `ru`
+    # (pre-pass, akcent i pierścień Cezara paczki ru na polskim tekście).
+    # Do v19.16 krótki akapit cyrylicy sam dziedziczył i niczego nie
+    # przestawiał; długi przestawia jak dawniej (wtedy robiła to lingua).
+    if wymus_jezyk or not (
+            len(akapit.strip()) < _MIN_TEKST_DLA_DETEKCJI
+            and detektor_pism.dominujace_pismo(akapit) == detektor_pism.CYRYLICA):
+        return jez
+    return poprzedni_jezyk
 
 
 def wykryj_jezyk_zrodlowy(
@@ -2352,7 +2433,7 @@ def _przetworz_szyfrant(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
 
     segmenty_in = _segmentuj_z_ochrona_tagow(
         tekst, fallback_jezyk=jezyk,
-        wymus_jezyk=opcje.get("wymus_jezyk"))
+        wymus_jezyk=opcje.get("wymus_jezyk"), w_akapicie=False)
     wyniki: list[str] = []
     zapisane: list[Segment] = []
     iso_sticky = str(cfg.get("iso") or jezyk).strip() or jezyk
@@ -2951,7 +3032,7 @@ def _podziel_biegi_po_pismach(para: Any, kod_akapitu: str | None = None) -> None
     treści — zostaje tylko w pierwszej kopii.
     """
     znacznik_strony = qn("w:lastRenderedPageBreak")
-    baza = _pismo_bazowe(kod_akapitu, para.text)
+    baza = _pismo_bazowe(kod_akapitu, _tekst_akapitu(para))
     for r_el in list(para._p.iter(qn("w:r"))):
         dzieci = [c for c in r_el if c.tag not in (qn("w:rPr"), znacznik_strony)]
         if len(dzieci) != 1 or dzieci[0].tag != qn("w:t"):
@@ -3105,14 +3186,105 @@ def _iteruj_akapity_xml(rodzic: Any, kontener: Any) -> Any:
     for dziecko in rodzic.iterchildren():
         if dziecko.tag == qn("w:p"):
             yield Paragraph(dziecko, kontener)
+            # 19.21 (audyt ATA F3, wspólna polityka bliźniaków): pole tekstowe
+            # czytane W MIEJSCU, zaraz po akapicie, w którym jest zakotwiczone.
+            # python-docx go nie widzi, a jego treść ginęła bez słowa.
+            for pole in _pola_tekstowe(dziecko):
+                yield from _iteruj_akapity_xml(pole, kontener)
         elif dziecko.tag == qn("w:tbl"):
             tabela = Table(dziecko, kontener)
-            for wiersz in dziecko.tr_lst:
-                for komorka_xml in wiersz.tc_lst:
-                    yield from _iteruj_akapity_docx(_Cell(komorka_xml, tabela))
-        elif dziecko.tag == qn("w:sdt"):
-            for wnetrze in dziecko.iterchildren(qn("w:sdtContent")):
+            for komorka_xml in _komorki_tabeli(dziecko):
+                yield from _iteruj_akapity_docx(_Cell(komorka_xml, tabela))
+        elif dziecko.tag in (qn("w:sdt"), qn("w:customXml")):
+            # `w:customXml` (audyt ATA F4) to taki sam przezroczysty kontener.
+            for wnetrze in _wnetrza(dziecko):
                 yield from _iteruj_akapity_xml(wnetrze, kontener)
+
+
+def _wnetrza(el: Any) -> list[Any]:
+    """Treść kontenera przezroczystego: `w:sdt` → `w:sdtContent`, `w:customXml` → on sam."""
+    if el.tag == qn("w:sdt"):
+        return list(el.iterchildren(qn("w:sdtContent")))
+    return [el]
+
+
+def _komorki_tabeli(tbl: Any) -> Any:
+    """Komórki tabeli w kolejności, także w wierszach i komórkach owiniętych
+    kontrolką zawartości albo `w:customXml` (audyt ATA F4: `tr_lst` widzi tylko
+    bezpośrednie `w:tr`, więc taki wiersz ginął). Wiersz usunięty przy
+    śledzeniu zmian (`w:trPr/w:del`) pomijamy — jak każdą treść usuniętą."""
+    def _wiersze(rodzic: Any) -> Any:
+        for el in rodzic.iterchildren():
+            if el.tag == qn("w:tr"):
+                trpr = el.find(qn("w:trPr"))
+                if trpr is not None and trpr.find(qn("w:del")) is not None:
+                    continue
+                yield el
+            elif el.tag in (qn("w:sdt"), qn("w:customXml")):
+                for wnetrze in _wnetrza(el):
+                    yield from _wiersze(wnetrze)
+
+    def _komorki(rodzic: Any) -> Any:
+        for el in rodzic.iterchildren():
+            if el.tag == qn("w:tc"):
+                yield el
+            elif el.tag in (qn("w:sdt"), qn("w:customXml")):
+                for wnetrze in _wnetrza(el):
+                    yield from _komorki(wnetrze)
+
+    for wiersz in _wiersze(tbl):
+        yield from _komorki(wiersz)
+
+
+#: Poddrzewa akapitu, których treść NIE należy do jego tekstu: usunięte przy
+#: śledzeniu zmian, wariant zastępczy (`mc:Fallback` powtarza `mc:Choice`) i pole
+#: tekstowe (czytane jako osobne akapity, patrz :func:`_pola_tekstowe`).
+_MC = "{http://schemas.openxmlformats.org/markup-compatibility/2006}"
+_POMIJANE_W_AKAPICIE = (qn("w:del"), qn("w:moveFrom"), _MC + "Fallback", qn("w:txbxContent"))
+
+
+def _pola_tekstowe(p_el: Any) -> list[Any]:
+    """`w:txbxContent` zakotwiczone BEZPOŚREDNIO w akapicie, raz (bez `mc:Fallback`).
+
+    Pole w polu tekstowym należy do akapitu wewnątrz tamtego pola — dojdzie
+    do niego rekurencja, więc tu go pomijamy (inaczej pojawiłoby się dwa razy).
+    """
+    wynik = []
+    for pole in p_el.iter(qn("w:txbxContent")):
+        przodek, dobre = pole.getparent(), True
+        while przodek is not None and przodek is not p_el:
+            if przodek.tag in _POMIJANE_W_AKAPICIE:
+                dobre = False
+                break
+            przodek = przodek.getparent()
+        if dobre:
+            wynik.append(pole)
+    return wynik
+
+
+def _tekst_akapitu(para: Any) -> str:
+    """Tekst akapitu `.docx` tak, jak go widzi czytelnik (19.21, audyt ATA F5).
+
+    `Paragraph.text` z python-docx czyta wyłącznie bezpośrednie `w:r`
+    i `w:hyperlink`, więc gubił tekst wstawiony przy śledzeniu zmian (`w:ins`,
+    `w:moveTo`), kontrolki zawartości w linii, `w:fldSimple` i `w:smartTag`.
+    Tu schodzimy do każdego kontenera, a bieg mapujemy TĄ SAMĄ funkcją
+    python-docx (`CT_R.text`: tabulator, łamanie, twardy dywiz). Pomijamy
+    treść usuniętą, `mc:Fallback` i pola tekstowe (osobne akapity).
+    """
+    czesci: list[str] = []
+
+    def _zejdz(el: Any) -> None:
+        for dziecko in el.iterchildren():
+            if not isinstance(dziecko.tag, str) or dziecko.tag in _POMIJANE_W_AKAPICIE:
+                continue
+            if dziecko.tag == qn("w:r"):
+                czesci.append(dziecko.text)
+            elif dziecko.tag not in (qn("w:pPr"), qn("w:sdtPr")):
+                _zejdz(dziecko)
+
+    _zejdz(para._p)
+    return "".join(czesci)
 
 
 def tekst_docx(sciezka: str) -> str:
@@ -3132,12 +3304,85 @@ _VML = "{urn:schemas-microsoft-com:vml}"
 _R_ID = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
 
 
+_O_RELID = "{urn:schemas-microsoft-com:office:office}relid"
+_R_EMBED = qn("r:embed")
+_GRAFIKI_BEZ_OBRAZU = ("chart", "diagram")   # `a:graphicData uri` wykresu i SmartArt
+
+
 @dataclass
 class ObrazDocx:
-    """Obraz wstawiony w `.docx` (19.21): bajty, tekst alternatywny, numer od 1."""
+    """Obraz wstawiony w `.docx` (19.21): bajty, tekst alternatywny, numer od 1.
+
+    ``klucz`` — nazwa części pakietu (ten sam obraz wstawiony kilka razy ma
+    ten sam klucz i jest czytany raz). ``rodzaj`` — ``"obraz"`` albo
+    ``"wykres"`` (wykres lub SmartArt: model go nie dostaje, zostaje tekst
+    alternatywny albo powód).
+    """
     numer: int
     dane: bytes
     opis: str = ""
+    klucz: str = ""
+    rodzaj: str = "obraz"
+
+
+def _w_poddrzewie_pomijanym(el: Any, granica: Any) -> bool:
+    """Czy ``el`` leży (między sobą a ``granica``) w poddrzewie z `_POMIJANE_W_AKAPICIE`."""
+    przodek = el.getparent()
+    while przodek is not None and przodek is not granica:
+        if przodek.tag in _POMIJANE_W_AKAPICIE:
+            return True
+        przodek = przodek.getparent()
+    return False
+
+
+def _opis_kontenera(el: Any) -> str:
+    docpr = el.find(qn("wp:docPr"))
+    if docpr is None:
+        return ""
+    return (docpr.get("descr") or docpr.get("title") or "").strip()
+
+
+def _obrazy_akapitu(para: Any) -> list[tuple[str | None, str, str]]:
+    """Obrazy akapitu jako ``(rid, opis, rodzaj)`` w kolejności dokumentu.
+
+    Audyt 19.21 (F1, F2, F12 ATA): wariant `mc:Fallback` (VML powtarzający
+    DrawingML) dawał drugi odczyt tego samego obrazu, a z grupy obrazów
+    (`wpg:wgp`) brany był tylko pierwszy. Teraz: każdy `a:blip` osobno,
+    tekst alternatywny = własny `pic:cNvPr` obrazu, a przy jego braku —
+    kontenera (`wp:docPr`, czyli grupy); poddrzewa pomijane jak w tekście
+    akapitu (usunięte przy śledzeniu zmian, `mc:Fallback`, pola tekstowe —
+    ich obrazy należą do akapitów pola).
+    """
+    p_el = para._p
+    wynik: list[tuple[str | None, str, str]] = []
+    for el in p_el.iter():
+        if not isinstance(el.tag, str) or _w_poddrzewie_pomijanym(el, p_el):
+            continue
+        if el.tag in (qn("wp:inline"), qn("wp:anchor")):
+            opis_kontenera = _opis_kontenera(el)
+            bloby = [b for b in el.iter(qn("a:blip"))
+                     if not _w_poddrzewie_pomijanym(b, el)]
+            if not bloby:
+                dane_graf = el.find(".//" + qn("a:graphicData"))
+                uri = (dane_graf.get("uri") or "") if dane_graf is not None else ""
+                if any(k in uri for k in _GRAFIKI_BEZ_OBRAZU):
+                    wynik.append((None, opis_kontenera, "wykres"))
+                continue
+            for blip in bloby:
+                pic = blip.getparent()
+                while pic is not None and pic.tag != qn("pic:pic") and pic is not el:
+                    pic = pic.getparent()
+                opis = ""
+                if pic is not None and pic.tag == qn("pic:pic"):
+                    cnv = pic.find(".//" + qn("pic:cNvPr"))
+                    if cnv is not None:
+                        opis = (cnv.get("descr") or cnv.get("title") or "").strip()
+                wynik.append((blip.get(_R_EMBED), opis or opis_kontenera, "obraz"))
+        elif el.tag == _VML + "imagedata":
+            ksztalt = el.getparent()
+            opis = (ksztalt.get("alt") or "").strip() if ksztalt is not None else ""
+            wynik.append((el.get(_R_ID) or el.get(_O_RELID), opis, "obraz"))
+    return wynik
 
 
 def elementy_docx(sciezka: str) -> list[str | ObrazDocx]:
@@ -3154,38 +3399,52 @@ def elementy_docx(sciezka: str) -> list[str | ObrazDocx]:
     """
     doc = docx.Document(sciezka)
     elementy: list[str | ObrazDocx] = []
+    numer = 0
     for para in _iteruj_akapity_docx(doc):
-        elementy.append(para.text)
-        for el in para._p.iter():
-            rid, opis = None, ""
-            if el.tag in (qn("wp:inline"), qn("wp:anchor")):
-                blip = next(el.iter(qn("a:blip")), None)
-                if blip is None:
-                    continue
-                rid = blip.get(qn("r:embed"))
-                docpr = el.find(qn("wp:docPr"))
-                if docpr is not None:
-                    opis = (docpr.get("descr") or docpr.get("title") or "").strip()
-            elif el.tag == _VML + "imagedata":
-                rid = el.get(_R_ID)
-                ksztalt = el.getparent()
-                opis = (ksztalt.get("alt") or "").strip() if ksztalt is not None else ""
-            else:
-                continue
-            try:
-                dane = para.part.related_parts[rid].blob if rid else b""
-            except (KeyError, AttributeError):
-                dane = b""
-            elementy.append(ObrazDocx(sum(isinstance(e, ObrazDocx) for e in elementy) + 1,
-                                      dane, opis))
+        elementy.append(_tekst_akapitu(para))
+        for rid, opis, rodzaj in _obrazy_akapitu(para):
+            dane, klucz = b"", ""
+            if rid:
+                try:
+                    czesc = para.part.related_parts[rid]
+                    dane, klucz = czesc.blob, str(czesc.partname)
+                except (KeyError, AttributeError):
+                    pass                     # link zewnętrzny albo zepsuta relacja
+            numer += 1
+            elementy.append(ObrazDocx(numer, dane, opis, klucz, rodzaj))
     return elementy
+
+
+def czesci_pominiete_docx(sciezka: str) -> int:
+    """Liczba nagłówków i stopek z tekstem albo obrazem (19.21, wspólna polityka
+    bliźniaków): nie wchodzą do treści — powtarzają się na każdej stronie — ale
+    użytkownik ma wiedzieć, że są. Część dzielona przez sekcje liczy się raz."""
+    doc = docx.Document(sciezka)
+    widziane: set[str] = set()
+    liczba = 0
+    for sekcja in doc.sections:
+        for nazwa in ("header", "footer", "first_page_header", "first_page_footer",
+                      "even_page_header", "even_page_footer"):
+            czesc_hf = getattr(sekcja, nazwa)
+            if czesc_hf.is_linked_to_previous:
+                continue
+            el = czesc_hf._element
+            klucz = str(czesc_hf.part.partname)
+            if klucz in widziane:
+                continue
+            widziane.add(klucz)
+            tekst = "".join(t.text or "" for t in el.iter(qn("w:t"))).strip()
+            if tekst or next(el.iter(qn("a:blip")), None) is not None \
+                    or next(el.iter(_VML + "imagedata"), None) is not None:
+                liczba += 1
+    return liczba
 
 
 def tekst_docx_z_licznikami(sciezka: str) -> tuple[str, dict[str, int]]:
     """`tekst_docx` + liczniki czyszczenia (`oczysc_akapity_docx`) dla GUI:
     przepisany tekst to przetworzenie, o którym użytkownik ma wiedzieć (M2)."""
     doc = docx.Document(sciezka)
-    akapity = [para.text for para in _iteruj_akapity_docx(doc)]
+    akapity = [_tekst_akapitu(para) for para in _iteruj_akapity_docx(doc)]
     wynik, liczniki = oczysc_akapity_docx(akapity)
     return "\n".join(wynik), liczniki
 
@@ -3338,8 +3597,8 @@ def jednostki_jezykowe(tresc: str, ext: str,
     if ext == ".docx":
         if sciezka_oryginalu and os.path.exists(sciezka_oryginalu):
             doc = docx.Document(sciezka_oryginalu)
-            return [p.text.strip() for p in _iteruj_akapity_docx(doc)
-                    if p.text.strip()]
+            return [_tekst_akapitu(p).strip() for p in _iteruj_akapity_docx(doc)
+                    if _tekst_akapitu(p).strip()]
         return [linia.strip() for linia in tresc.split("\n") if linia.strip()]
 
     if ext in (".html", ".htm") and "<html" in tresc.lower():
@@ -3470,7 +3729,7 @@ def zapisz_wynik(
             # je co do jednej.
             doc = docx.Document(sciezka_oryginalu)
             for para in _iteruj_akapity_docx(doc):
-                if not para.text.strip():
+                if not _tekst_akapitu(para).strip():
                     continue
                 kod = kody.nastepny() if kody is not None else iso_code
                 _ustaw_lang_akapitu(para, kod)
@@ -3570,8 +3829,11 @@ def zapisz_wynik(
     if kody is not None:
         kody.zamknij()
     out_path = os.path.join(katalog_wyjscia, f"{base_name}{ext if ext else '.txt'}")
+    # 19.21 (audyt F3): wstawki języka w akapicie dyspozytory owijają w
+    # `<span lang>`, który format surowy (`.srt`, `.csv`…) przeczytałby na głos
+    # jako treść. Zostaje sam tekst wstawki — jak do 19.20.
     with open(out_path, "w", encoding="utf-8") as fh:
-        fh.write(tresc_wynikowa)
+        fh.write(_RE_SPAN_LANG.sub(r"\2", tresc_wynikowa))
     return out_path
 
 
