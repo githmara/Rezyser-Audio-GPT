@@ -89,9 +89,9 @@ przypomnienie_uzytkownika: |
 
 slowa_wyzwalajace:
   streszczenie:
-    - riassumi
-    - riassunto
-    - sintetizza
+    - riassum
+    - riassunt
+    - sintetizz
     - sommario
 
 # Nota sul rilevamento del rifiuto dell'IA:

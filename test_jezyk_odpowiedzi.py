@@ -64,6 +64,34 @@ def test_fi_kertaa_nie_blokuje_zwyklej_instrukcji(tryb):
     assert not pr.prosi_o_streszczenie(przepis, "Hän koputtaa oveen kaksi kertaa.")
 
 
+# v19.21: dopasowanie to PODCIĄG, więc lista musi łapać ODMIANĘ, nie tylko
+# formę słownikową. Każda forma poniżej przechodziła przez stare listy.
+_ODMIANY = [
+    ("pl", "możesz to streścić?"), ("pl", "bez podsumowania"), ("pl", "podsumować całość"),
+    ("fi", "kirjoita tiivistelmä"), ("fi", "tiivistelmän"), ("fi", "yhteenvedon"),
+    ("en", "summarizing the plot"), ("en", "chapter summaries"),
+    ("es", "resúmelo"), ("es", "resumid esto"),
+    ("it", "riassumere il capitolo"), ("it", "riassunti"),
+    ("de", "fass zusammen"), ("is", "draga saman kaflann"), ("ru", "подытожить главу"),
+]
+_OPISY_SCENY = [
+    ("pl", "bohater podsumowuje rozmowę cichym głosem"),
+    ("fi", "tiivistunnelmainen kohtaus"),
+]
+
+
+@pytest.mark.parametrize("tryb", ["skrypt", "audiobook"])
+@pytest.mark.parametrize("kod, tekst", _ODMIANY)
+def test_wyzwalacz_lapie_odmiane(tryb, kod, tekst):
+    assert pr.prosi_o_streszczenie(pr.zaladuj_przepis(tryb, kod), tekst), (kod, tekst)
+
+
+@pytest.mark.parametrize("tryb", ["skrypt", "audiobook"])
+@pytest.mark.parametrize("kod, tekst", _OPISY_SCENY)
+def test_rdzen_nie_lapie_opisu_sceny(tryb, kod, tekst):
+    assert not pr.prosi_o_streszczenie(pr.zaladuj_przepis(tryb, kod), tekst), (kod, tekst)
+
+
 def test_kazdy_wyzwalacz_kazdej_paczki_trafia_w_samego_siebie():
     """Slowo z paczki wpisane dokladnie tak, jak stoi w pliku, MUSI blokowac."""
     for kod, przepis in _wszystkie_przepisy():

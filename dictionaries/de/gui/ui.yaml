@@ -731,7 +731,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Wählen Sie die Quelldatei"
   file_dlg_wildcard: |-
-    Unterstützte Dateien (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Textdateien (*.txt)|*.txt|Markdown-Dateien (*.md)|*.md|HTML-Dateien (*.html;*.htm)|*.html;*.htm|Word-Dokumente (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Alle Dateien (*.*)|*.*
+    Unterstützte Dateien (*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png|Textdateien (*.txt)|*.txt|Markdown-Dateien (*.md)|*.md|HTML-Dateien (*.html;*.htm)|*.html;*.htm|Word-Dokumente (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Bilder (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png|Alle Dateien (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Geben Sie den Namen oder Pfad der Datei vor dem Laden an."
   plik_nie_istnieje_tresc: "Datei nicht gefunden:\n{sciezka_pliku}"
@@ -980,6 +980,11 @@ poliglota:
   obrazy_blad_tresc: "Das Auslesen der Bilder wurde durch einen unerwarteten Fehler unterbrochen:\n{tresc_bledu}\n\nEs wurde nur der Text des Dokuments geladen, ohne den Inhalt der Bilder."
   obraz_powod_rozmiar: 'das Bild ist zu groß: {rozmiar_mb} MB nach der Kodierung, das Modell akzeptiert aber höchstens {limit_mb} MB – komprimieren Sie die Bilder im Dokument und laden Sie die Datei erneut'
   obraz_powod_wymiary: das Bild hat {szerokosc}×{wysokosc} Pixel, das Modell akzeptiert aber höchstens {limit_px} Pixel pro Seite – verkleinern Sie das Bild im Dokument und laden Sie die Datei erneut
+  obraz_plik_zgoda_tresc: "Die Datei {nazwa_pliku} ist ein Bild, zum Beispiel ein Foto eines Dokuments oder ein Screenshot. Sie enthält keinen Text, der sich einfach einlesen ließe.\n\nIch kann den Text aus diesem Bild mit einem KI-Modell ({model}) auslesen. Das Bild wird dazu an einen externen Dienst gesendet: {usluga}.\nFotos von Dokumenten enthalten oft personenbezogene Daten. Senden Sie sie nur, wenn Sie dazu berechtigt sind.\n\nGeschätzte Kosten: {koszt}. Dauer: etwa 5 Sekunden.\n\nWenn Sie „Überspringen“ wählen, wird die Datei nicht eingelesen."
+  obraz_plik_niewczytany_tytul: Bild wurde nicht eingelesen
+  obraz_plik_niewczytany_tresc: Die Datei {nazwa_pliku} ist ein Bild. Ihr Text kann nur von einem KI-Modell ausgelesen werden, der Vorgang hat jedoch nicht stattgefunden, daher wurde nichts eingelesen.
+  obraz_plik_nic_nie_wczytano: Aus dem Bild konnte kein Text ausgelesen werden, daher wurde nichts eingelesen.
+  obraz_plik_blad_tresc: "Das Auslesen des Bildes wurde durch einen unerwarteten Fehler abgebrochen:\n{tresc_bledu}\n\nEs wurde nichts eingelesen."
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)

@@ -815,7 +815,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Select source file"
   file_dlg_wildcard: |-
-    Supported files (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Text files (*.txt)|*.txt|Markdown files (*.md)|*.md|HTML files (*.html;*.htm)|*.html;*.htm|Word documents (*.docx)|*.docx|PDF (*.pdf)|*.pdf|All files (*.*)|*.*
+    Supported files (*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png|Text files (*.txt)|*.txt|Markdown files (*.md)|*.md|HTML files (*.html;*.htm)|*.html;*.htm|Word documents (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Images (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png|All files (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Provide the file name or path before loading."
   plik_nie_istnieje_tresc: "File not found:\n{sciezka_pliku}"
@@ -1064,6 +1064,11 @@ poliglota:
   obrazy_blad_tresc: "Image reading was interrupted by an unexpected error:\n{tresc_bledu}\n\nOnly the document text was loaded, without the image content."
   obraz_powod_rozmiar: 'the image is too large: {rozmiar_mb} MB after encoding, and the model accepts at most {limit_mb} MB — compress the images in the document and reload the file'
   obraz_powod_wymiary: the image is {szerokosc}×{wysokosc} pixels, and the model accepts at most {limit_px} pixels per side — reduce the image size in the document and reload the file
+  obraz_plik_zgoda_tresc: "The file {nazwa_pliku} is an image, for example a photo of a document or a screenshot. It contains no text that can simply be loaded.\n\nI can read the text from this image using an AI model ({model}). The image will be sent to an external service: {usluga}.\nPhotos of documents often contain personal data. Only send them if you have the right to do so.\n\nEstimated cost: {koszt}. Time: about 5 seconds.\n\nIf you choose \"Skip\", the file will not be loaded."
+  obraz_plik_niewczytany_tytul: Image not loaded
+  obraz_plik_niewczytany_tresc: The file {nazwa_pliku} is an image. Only an AI model can read its text, and the reading did not take place, so nothing was loaded.
+  obraz_plik_nic_nie_wczytano: No text could be read from the image, so nothing was loaded.
+  obraz_plik_blad_tresc: "Reading the image was interrupted by an unexpected error:\n{tresc_bledu}\n\nNothing was loaded."
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)

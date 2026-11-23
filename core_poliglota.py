@@ -2614,7 +2614,12 @@ EXT_OBSLUGIWANE: tuple[str, ...] = (".txt", ".md", ".html", ".htm", ".docx")
 # `.pdf`, którego warstwa tekstu (`core_pdf`) wchodzi do pipeline'u jako `.txt`
 # — wynik jest `.html`, bo PDF-a nie zapisujemy. Źródło wildcardu w `ui.yaml`
 # i listy w ostrzeżeniu o nieobsługiwanym rozszerzeniu.
-EXT_WEJSCIA: tuple[str, ...] = EXT_OBSLUGIWANE + (".pdf",)
+# 19.21: plik-obraz (zdjęcie dokumentu, zrzut). Jego jedyną treścią jest
+# odczyt modelem AI (`core_skany.odczytaj_obrazy`, ta sama ścieżka co obrazy
+# z `.docx`); wynik jest `.html`, obrazu nie zapisujemy — jak PDF-a.
+EXT_OBRAZOW: tuple[str, ...] = (".jpg", ".jpeg", ".png")
+
+EXT_WEJSCIA: tuple[str, ...] = EXT_OBSLUGIWANE + (".pdf",) + EXT_OBRAZOW
 
 # Lista tagów blokowych, dla których ma sens lokalny atrybut ``lang``.
 # Wybrane spośród elementów HTML5, które typowo zawierają samodzielną

@@ -41,9 +41,8 @@ przypomnienie_uzytkownika: |
 
 slowa_wyzwalajace:
   streszczenie:
-    - resume
-    - resumen
-    - resumir
+    - resum
+    - resúm
     - sinopsis
 
 stosuj_akcenty_fonetyczne: false

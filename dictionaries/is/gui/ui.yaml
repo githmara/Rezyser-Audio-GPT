@@ -731,7 +731,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Veldu upprunaskrá"
   file_dlg_wildcard: |-
-    Studdir skrár (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Textaskrár (*.txt)|*.txt|Markdown-skrár (*.md)|*.md|HTML-skrár (*.html;*.htm)|*.html;*.htm|Word-skjöl (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Allar skrár (*.*)|*.*
+    Studdir skrár (*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png|Textaskrár (*.txt)|*.txt|Markdown-skrár (*.md)|*.md|HTML-skrár (*.html;*.htm)|*.html;*.htm|Word-skjöl (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Myndir (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png|Allar skrár (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Gefðu nafn eða slóð skráar áður en þú hleður inn."
   plik_nie_istnieje_tresc: "Skrá fannst ekki:\n{sciezka_pliku}"
@@ -980,6 +980,11 @@ poliglota:
   obrazy_blad_tresc: "Óvænt villa stöðvaði lestur mynda:\n{tresc_bledu}\n\nAðeins texti skjalsins var lesinn inn, án efnis myndanna."
   obraz_powod_rozmiar: 'myndin er of stór: {rozmiar_mb} MB eftir kóðun, en líkanið tekur við að hámarki {limit_mb} MB — þjappaðu myndunum í skjalinu og hladdu skrána aftur inn'
   obraz_powod_wymiary: myndin er {szerokosc}×{wysokosc} díplar, en líkanið tekur við að hámarki {limit_px} díplum á hverja hlið — minnkaðu myndina í skjalinu og hladdu skrána aftur inn
+  obraz_plik_zgoda_tresc: "Skráin {nazwa_pliku} er mynd, til dæmis ljósmynd af skjali eða skjámynd. Í henni er enginn texti sem hægt er að lesa beint inn.\n\nÉg get lesið textann úr þessari mynd með gervigreindarlíkani ({model}). Myndin verður send til ytri þjónustu: {usluga}.\nMyndir af skjölum innihalda oft persónuupplýsingar. Sendu þær aðeins ef þú hefur heimild til þess.\n\nÁætlaður kostnaður: {koszt}. Tími: um það bil 5 sekúndur.\n\nEf þú velur „Sleppa“ verður skráin ekki lesin inn."
+  obraz_plik_niewczytany_tytul: Myndin var ekki lesin inn
+  obraz_plik_niewczytany_tresc: Skráin {nazwa_pliku} er mynd. Aðeins gervigreindarlíkan getur lesið textann í henni, en sá lestur fór ekki fram og því var ekkert lesið inn.
+  obraz_plik_nic_nie_wczytano: Ekki tókst að lesa texta úr myndinni og því var ekkert lesið inn.
+  obraz_plik_blad_tresc: "Óvænt villa stöðvaði lestur myndarinnar:\n{tresc_bledu}\n\nEkkert var lesið inn."
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)

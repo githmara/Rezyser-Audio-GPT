@@ -49,8 +49,9 @@ slowa_wyzwalajace:
   streszczenie:
     - streszcz
     - streść
+    - streści
     - podsumuj
-    - podsumowanie
+    - podsumowa
 
 # --- Post-processing ---
 stosuj_akcenty_fonetyczne: false

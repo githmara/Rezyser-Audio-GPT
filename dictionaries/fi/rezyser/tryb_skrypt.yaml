@@ -88,8 +88,8 @@ przypomnienie_uzytkownika: |
 slowa_wyzwalajace:
   streszczenie:
     - tiivistä
-    - tee yhteenveto
-    - yhteenveto
+    - tiivistelm
+    - yhteenve
 
 # Huomio tekoälyn hylkäystunnistuksesta:
 # Versiosta 13.0 moottori pakottaa universaalin `[ODRZUCENIE_AI]`-tagin

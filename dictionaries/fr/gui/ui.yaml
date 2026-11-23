@@ -729,7 +729,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Sélectionner un fichier source"
   file_dlg_wildcard: |-
-    Fichiers pris en charge (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Fichiers texte (*.txt)|*.txt|Fichiers Markdown (*.md)|*.md|Fichiers HTML (*.html;*.htm)|*.html;*.htm|Documents Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Tous les fichiers (*.*)|*.*
+    Fichiers pris en charge (*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png|Fichiers texte (*.txt)|*.txt|Fichiers Markdown (*.md)|*.md|Fichiers HTML (*.html;*.htm)|*.html;*.htm|Documents Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Images (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png|Tous les fichiers (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Indiquez un nom ou un chemin pour le fichier avant de le charger."
   plik_nie_istnieje_tresc: "Fichier introuvable :\n{sciezka_pliku}"
@@ -978,6 +978,11 @@ poliglota:
   obrazy_blad_tresc: "La lecture des images a été interrompue par une erreur inattendue :\n{tresc_bledu}\n\nSeul le texte du document a été chargé, sans le contenu des images."
   obraz_powod_rozmiar: "l'image est trop volumineuse : {rozmiar_mb} Mo après encodage, alors que le modèle accepte au maximum {limit_mb} Mo — compressez les images du document, puis rechargez le fichier"
   obraz_powod_wymiary: l'image mesure {szerokosc}×{wysokosc} pixels, alors que le modèle accepte au maximum {limit_px} pixels par côté — réduisez les dimensions de l'image dans le document, puis rechargez le fichier
+  obraz_plik_zgoda_tresc: "Le fichier {nazwa_pliku} est une image, par exemple la photo d'un document ou une capture d'écran. Il ne contient aucun texte pouvant être simplement chargé.\n\nJe peux lire le texte de cette image avec un modèle d'IA ({model}). L'image sera envoyée à un service externe : {usluga}.\nLes photos de documents contiennent souvent des données personnelles. Ne les envoyez que si vous y êtes autorisé.\n\nCoût estimé : {koszt}. Durée : environ 5 secondes.\n\nSi vous choisissez « Ignorer », le fichier ne sera pas chargé."
+  obraz_plik_niewczytany_tytul: L'image n'a pas été chargée
+  obraz_plik_niewczytany_tresc: "Le fichier {nazwa_pliku} est une image. Seul un modèle d'IA peut en lire le texte, mais la lecture n'a pas eu lieu : rien n'a donc été chargé."
+  obraz_plik_nic_nie_wczytano: "Impossible de lire le texte de l'image : rien n'a donc été chargé."
+  obraz_plik_blad_tresc: "La lecture de l'image a été interrompue par une erreur inattendue :\n{tresc_bledu}\n\nRien n'a été chargé."
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)

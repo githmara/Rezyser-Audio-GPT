@@ -731,7 +731,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Seleccionar archivo fuente"
   file_dlg_wildcard: |-
-    Archivos admitidos (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Archivos de texto (*.txt)|*.txt|Archivos Markdown (*.md)|*.md|Archivos HTML (*.html;*.htm)|*.html;*.htm|Documentos Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Todos los archivos (*.*)|*.*
+    Archivos admitidos (*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png|Archivos de texto (*.txt)|*.txt|Archivos Markdown (*.md)|*.md|Archivos HTML (*.html;*.htm)|*.html;*.htm|Documentos Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Imágenes (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png|Todos los archivos (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Proporciona un nombre o ruta de archivo antes de cargar."
   plik_nie_istnieje_tresc: "Archivo no encontrado:\n{sciezka_pliku}"
@@ -980,6 +980,11 @@ poliglota:
   obrazy_blad_tresc: "Un error inesperado interrumpió la lectura de las imágenes:\n{tresc_bledu}\n\nSe cargó solo el texto del documento, sin el contenido de las imágenes."
   obraz_powod_rozmiar: 'la imagen es demasiado grande: {rozmiar_mb} MB tras la codificación, y el modelo admite como máximo {limit_mb} MB — comprime las imágenes del documento y vuelve a cargar el archivo'
   obraz_powod_wymiary: la imagen mide {szerokosc}×{wysokosc} píxeles, y el modelo admite como máximo {limit_px} píxeles por lado — reduce el tamaño de la imagen en el documento y vuelve a cargar el archivo
+  obraz_plik_zgoda_tresc: "El archivo {nazwa_pliku} es una imagen, por ejemplo la foto de un documento o una captura de pantalla. No contiene texto que se pueda cargar directamente.\n\nPuedo leer el texto de esta imagen con un modelo de IA ({model}). La imagen se enviará a un servicio externo: {usluga}.\nLas fotos de documentos suelen contener datos personales. Envíalas solo si tienes derecho a hacerlo.\n\nCoste estimado: {koszt}. Tiempo: unos 5 segundos.\n\nSi eliges «Omitir», el archivo no se cargará."
+  obraz_plik_niewczytany_tytul: La imagen no se ha cargado
+  obraz_plik_niewczytany_tresc: El archivo {nazwa_pliku} es una imagen. Solo un modelo de IA puede leer su texto, y la lectura no se realizó, por lo que no se cargó nada.
+  obraz_plik_nic_nie_wczytano: No se pudo leer ningún texto de la imagen, por lo que no se cargó nada.
+  obraz_plik_blad_tresc: "La lectura de la imagen se interrumpió por un error inesperado:\n{tresc_bledu}\n\nNo se cargó nada."
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)

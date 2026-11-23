@@ -53,8 +53,8 @@ slowa_wyzwalajace:
   # Estetään yhteenvedon kirjoittaminen historiatiedostoon.
   streszczenie:
     - tiivistä
-    - tee yhteenveto
-    - yhteenveto
+    - tiivistelm
+    - yhteenve
 
 # Huomio tekoälyn hylkäystunnistuksesta:
 # Versiosta 13.0 lähtien tunnistus tapahtuu universaalin `[ODRZUCENIE_AI]`-tagin

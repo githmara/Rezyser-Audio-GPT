@@ -96,11 +96,15 @@ przypomnienie_uzytkownika: |
 slowa_wyzwalajace:
   # Jeśli użytkownik użyje tych słów w trybie zapisu do pliku, GUI odrzuca
   # wysłanie (chroni historię przed nadpisaniem streszczeniem).
+  # Dopasowanie to PODCIĄG małymi literami, więc wpisujemy RDZENIE łapiące
+  # odmianę: `podsumowa` → podsumowanie / podsumowania / podsumować, ale nie
+  # „podsumowuje” z opisu sceny (v19.21).
   streszczenie:
     - streszcz
     - streść
+    - streści
     - podsumuj
-    - podsumowanie
+    - podsumowa
 
 # Uwaga o detekcji odrzucenia przez AI:
 # Silnik wymusza na modelu zwrócenie UNIWERSALNEGO tagu `[ODRZUCENIE_AI]`

@@ -87,9 +87,8 @@ przypomnienie_uzytkownika: |
 
 slowa_wyzwalajace:
   streszczenie:
-    - resume
-    - resumen
-    - resumir
+    - resum
+    - resúm
     - sinopsis
 
 # Nota sobre la detección de rechazo de la IA:

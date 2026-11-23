@@ -40,9 +40,9 @@ przypomnienie_uzytkownika: |
 
 slowa_wyzwalajace:
   streszczenie:
-    - riassumi
-    - riassunto
-    - sintetizza
+    - riassum
+    - riassunt
+    - sintetizz
     - sommario
 
 stosuj_akcenty_fonetyczne: false

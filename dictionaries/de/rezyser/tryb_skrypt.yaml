@@ -87,9 +87,9 @@ przypomnienie_uzytkownika: |
 
 slowa_wyzwalajace:
   streszczenie:
+    - zusammenfass
     - fasse zusammen
-    - Zusammenfassung
-    - zusammenfassen
+    - fass zusammen
 
 # Hinweis zur KI-Ablehnungserkennung:
 # Seit 13.0 erzwingt der Motor den universellen `[ODRZUCENIE_AI]`-Tag via

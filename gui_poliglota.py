@@ -830,6 +830,9 @@ class PoliglotaPanel(wx.Panel):
                 self, file_name, lambda wynik, exc: self._pdf_wczytany(file_name, wynik, exc))
             self._worker_thread = self._wczytanie_pdf.start()
             return
+        if ext in core_poliglota.EXT_OBRAZOW:
+            self._wczytaj_plik_obrazu(file_name)
+            return
         try:
             if self._file_ext == ".docx":
                 # v19.2: przez `core_poliglota.tekst_docx`, bo `doc.paragraphs`
@@ -1129,12 +1132,39 @@ class PoliglotaPanel(wx.Panel):
             return t("poliglota.obrazy_niedostepny_compat")
         return t("poliglota.obrazy_niedostepny_brak_api")
 
-    def _zgoda_na_odczyt_obrazow(self, file_name: str, liczba_obrazow: int) -> bool:
+    def _wczytaj_plik_obrazu(self, file_name: str) -> None:
+        """Plik `.jpg`/`.png` (19.21): jeden obraz przez ścieżkę obrazów `.docx`.
+
+        Bez odczytu nie ma czego wczytać — odmowa zgody albo brak dostępu do
+        modelu kończy się komunikatem i pustym stanem, nigdy pustym wynikiem.
+        """
+        try:
+            with open(file_name, "rb") as fh:
+                dane = fh.read()
+        except Exception as exc:  # noqa: BLE001 — błąd odczytu dysku idzie do dialogu
+            self._blad_wczytania(file_name, exc)
+            return
+        self._file_content = ""
+        elementy = [core_poliglota.ObrazDocx(1, dane)]
+        if self._zgoda_na_odczyt_obrazow(file_name, 1, "poliglota.obraz_plik_zgoda_tresc"):
+            self._start_odczytu_obrazow(file_name, elementy)
+            return
+        self._file_ext = ""
+        tresc = t("poliglota.obraz_plik_niewczytany_tresc",
+                  nazwa_pliku=os.path.basename(file_name))
+        dopisek = self._powod_braku_odczytu_obrazow()
+        if dopisek:
+            tresc += "\n\n" + dopisek
+        wx.MessageBox(tresc, t("poliglota.obraz_plik_niewczytany_tytul"),
+                      wx.OK | wx.ICON_WARNING, self)
+
+    def _zgoda_na_odczyt_obrazow(self, file_name: str, liczba_obrazow: int,
+                                 klucz_tresci: str = "poliglota.obrazy_zgoda_tresc") -> bool:
         """Jawna zgoda PER PLIK, domyślnie NIE — jak przy stronach-skanach."""
         if not core_skany.odczyt_dostepny(self._client):
             return False
         koszt = core_skany.szacuj_koszt(self._client, liczba_obrazow, [], 0)
-        tresc = t("poliglota.obrazy_zgoda_tresc",
+        tresc = t(klucz_tresci,
                   nazwa_pliku=os.path.basename(file_name), liczba_obrazow=liczba_obrazow,
                   model=core_skany.model_odczytu(self._client),
                   usluga=core_skany.opis_uslugi(self._client),
@@ -1221,6 +1251,12 @@ class PoliglotaPanel(wx.Panel):
         self._zamknij_postep_skanow()
         podsumowanie = self._tekst_podsumowania_obrazow(wyniki, blad)
         if core_skany.podsumuj(wyniki).odczytane == 0:
+            if not self._file_content:
+                # Plik-obraz (19.21): poza odczytem nie ma treści — nie wczytujemy pustki.
+                self._file_ext = ""
+                gd.pokaz_tekst(self, t("poliglota.obrazy_podsumowanie_tytul"),
+                               podsumowanie + "\n\n" + t("poliglota.obraz_plik_nic_nie_wczytano"))
+                return
             # Nic nie odczytano: zostaje sam tekst dokumentu (już w `_file_content`).
             gd.pokaz_tekst(self, t("poliglota.obrazy_podsumowanie_tytul"), podsumowanie)
             self._dokoncz_wczytanie(file_name, None)
@@ -1235,6 +1271,12 @@ class PoliglotaPanel(wx.Panel):
         if not self:
             return
         self._zamknij_postep_skanow()
+        if not self._file_content:
+            # Plik-obraz (19.21): bez odczytu nie ma czego wczytać.
+            self._file_ext = ""
+            gd.pokaz_tekst(self, t("poliglota.obrazy_blad_tytul"),
+                           t("poliglota.obraz_plik_blad_tresc", tresc_bledu=tresc_bledu))
+            return
         gd.pokaz_tekst(self, t("poliglota.obrazy_blad_tytul"),
                        t("poliglota.obrazy_blad_tresc", tresc_bledu=tresc_bledu))
         self._dokoncz_wczytanie(file_name, None)

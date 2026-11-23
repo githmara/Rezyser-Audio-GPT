@@ -912,7 +912,7 @@ poliglota:
   # Plik dialog
   file_dlg_title:        "Wybierz plik źródłowy"
   file_dlg_wildcard: |-
-    Obsługiwane pliki (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Pliki tekstowe (*.txt)|*.txt|Pliki Markdown (*.md)|*.md|Pliki HTML (*.html;*.htm)|*.html;*.htm|Dokumenty Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Wszystkie pliki (*.*)|*.*
+    Obsługiwane pliki (*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png|Pliki tekstowe (*.txt)|*.txt|Pliki Markdown (*.md)|*.md|Pliki HTML (*.html;*.htm)|*.html;*.htm|Dokumenty Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Obrazy (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png|Wszystkie pliki (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc:      "Podaj nazwę lub ścieżkę pliku przed wczytaniem."
   ext_brak:              "brak rozszerzenia"
@@ -1074,6 +1074,23 @@ poliglota:
     {tresc_bledu}
 
     Wczytano sam tekst dokumentu, bez treści obrazów.
+  obraz_plik_zgoda_tresc: |-
+    Plik {nazwa_pliku} to obraz, na przykład zdjęcie dokumentu albo zrzut ekranu. Nie ma w nim tekstu, który dałoby się po prostu wczytać.
+
+    Mogę odczytać tekst z tego obrazu modelem AI ({model}). Obraz zostanie wysłany do zewnętrznej usługi: {usluga}.
+    Zdjęcia dokumentów często zawierają dane osobowe. Wysyłaj je tylko wtedy, gdy masz do tego prawo.
+
+    Szacowany koszt: {koszt}. Czas: około 5 sekund.
+
+    Jeśli wybierzesz „Pomiń”, plik nie zostanie wczytany.
+  obraz_plik_niewczytany_tytul: "Obraz nie został wczytany"
+  obraz_plik_niewczytany_tresc: "Plik {nazwa_pliku} to obraz. Jego tekst może odczytać tylko model AI, a odczyt się nie odbył, więc nic nie wczytano."
+  obraz_plik_nic_nie_wczytano: "Z obrazu nie udało się odczytać tekstu, więc nic nie wczytano."
+  obraz_plik_blad_tresc: |-
+    Odczyt obrazu przerwał nieoczekiwany błąd:
+    {tresc_bledu}
+
+    Nic nie wczytano.
   md_render_blad_tytul:  "Nie udało się przetworzyć Markdownu"
   md_render_blad_tresc: |-
     Nie udało się zamienić Markdownu na HTML:

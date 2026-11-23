@@ -729,7 +729,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Valitse lähdetiedosto"
   file_dlg_wildcard: |-
-    Tuetut tiedostot (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|Tekstitiedostot (*.txt)|*.txt|Markdown-tiedostot (*.md)|*.md|HTML-tiedostot (*.html;*.htm)|*.html;*.htm|Word-asiakirjat (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Kaikki tiedostot (*.*)|*.*
+    Tuetut tiedostot (*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png|Tekstitiedostot (*.txt)|*.txt|Markdown-tiedostot (*.md)|*.md|HTML-tiedostot (*.html;*.htm)|*.html;*.htm|Word-asiakirjat (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Kuvat (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png|Kaikki tiedostot (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Anna tiedoston nimi tai polku ennen lataamista."
   plik_nie_istnieje_tresc: "Tiedostoa ei löytynyt:\n{sciezka_pliku}"
@@ -978,6 +978,11 @@ poliglota:
   obrazy_blad_tresc: "Kuvien lukemisen keskeytti odottamaton virhe:\n{tresc_bledu}\n\nAvattiin pelkkä asiakirjan teksti ilman kuvien sisältöä."
   obraz_powod_rozmiar: 'kuva on liian suuri: {rozmiar_mb} Mt koodauksen jälkeen, ja malli hyväksyy enintään {limit_mb} Mt — pakkaa asiakirjan kuvat ja lataa tiedosto uudelleen'
   obraz_powod_wymiary: kuvan koko on {szerokosc}×{wysokosc} pikseliä, ja malli hyväksyy kuvan pidemmälle sivulle enintään {limit_px} pikseliä — pienennä asiakirjan kuvaa ja lataa tiedosto uudelleen
+  obraz_plik_zgoda_tresc: "Tiedosto {nazwa_pliku} on kuva, esimerkiksi valokuva asiakirjasta tai kuvakaappaus. Siinä ei ole tekstiä, joka voitaisiin yksinkertaisesti ladata.\n\nVoin lukea kuvan tekstin tekoälymallilla ({model}). Kuva lähetetään ulkoiseen palveluun: {usluga}.\nAsiakirjojen valokuvat sisältävät usein henkilötietoja. Lähetä ne vain, jos sinulla on siihen oikeus.\n\nArvioitu hinta: {koszt}. Aika: noin 5 sekuntia.\n\nJos valitset \"Ohita\", tiedostoa ei ladata."
+  obraz_plik_niewczytany_tytul: Kuvaa ei ladattu
+  obraz_plik_niewczytany_tresc: Tiedosto {nazwa_pliku} on kuva. Sen tekstin voi lukea vain tekoälymalli, eikä lukemista suoritettu, joten mitään ei ladattu.
+  obraz_plik_nic_nie_wczytano: Kuvasta ei onnistuttu lukemaan tekstiä, joten mitään ei ladattu.
+  obraz_plik_blad_tresc: "Kuvan lukeminen keskeytyi odottamattomaan virheeseen:\n{tresc_bledu}\n\nMitään ei ladattu."
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)

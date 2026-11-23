@@ -551,6 +551,11 @@ more than style here.
   words a native speaker would actually type ("summarize"/"recap"), not a gloss
   of the Polish ones. Watch bilingual regions: a Swedish-speaking Finn typing in
   Finnish still types Finnish here — do not mix languages in one list.
+  The match is a lowercase SUBSTRING (`przepisy_rezysera.prosi_o_streszczenie`),
+  so write STEMS that cover inflection, not one dictionary form: `fi`
+  `yhteenveto` missed `yhteenvedon` (t→d gradation) and `tiivistä` missed
+  `tiivistelmä` until 19.21. Check each stem against a few inflected forms AND
+  a scene description it must not catch (`tiivistunnelmainen`, „podsumowuje”).
 - `sufiks_pliku_wyniku` becomes part of a FILE NAME on disk: one lowercase word
   with a leading underscore, no spaces, Latin diacritics folded
   (`_veroffentlichung`, `_utgafa`), non-Latin scripts kept (`_пересказ`). It must

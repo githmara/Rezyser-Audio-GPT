@@ -731,7 +731,7 @@ poliglota:
   # Plik dialog
   file_dlg_title: "Seleziona file sorgente"
   file_dlg_wildcard: |-
-    File supportati (*.txt;*.md;*.html;*.htm;*.docx;*.pdf)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf|File di testo (*.txt)|*.txt|File Markdown (*.md)|*.md|File HTML (*.html;*.htm)|*.html;*.htm|Documenti Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Tutti i file (*.*)|*.*
+    File supportati (*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png)|*.txt;*.md;*.html;*.htm;*.docx;*.pdf;*.jpg;*.jpeg;*.png|File di testo (*.txt)|*.txt|File Markdown (*.md)|*.md|File HTML (*.html;*.htm)|*.html;*.htm|Documenti Word (*.docx)|*.docx|PDF (*.pdf)|*.pdf|Immagini (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png|Tutti i file (*.*)|*.*
   # Komunikaty wczytywania
   brak_pliku_tresc: "Fornisci un nome o un percorso per il file prima di caricarlo."
   plik_nie_istnieje_tresc: "File non trovato:\n{sciezka_pliku}"
@@ -980,6 +980,11 @@ poliglota:
   obrazy_blad_tresc: "La lettura delle immagini è stata interrotta da un errore imprevisto:\n{tresc_bledu}\n\nÈ stato caricato solo il testo del documento, senza il contenuto delle immagini."
   obraz_powod_rozmiar: "l'immagine è troppo grande: {rozmiar_mb} MB dopo la codifica, mentre il modello accetta al massimo {limit_mb} MB — comprimi le immagini nel documento e carica di nuovo il file"
   obraz_powod_wymiary: l'immagine misura {szerokosc}×{wysokosc} pixel, mentre il modello accetta al massimo {limit_px} pixel per lato — riduci le dimensioni dell'immagine nel documento e carica di nuovo il file
+  obraz_plik_zgoda_tresc: "Il file {nazwa_pliku} è un'immagine, ad esempio la foto di un documento o uno screenshot. Non contiene testo che si possa semplicemente caricare.\n\nPosso leggere il testo di questa immagine con un modello AI ({model}). L'immagine verrà inviata a un servizio esterno: {usluga}.\nLe foto di documenti contengono spesso dati personali. Inviale solo se ne hai il diritto.\n\nCosto stimato: {koszt}. Tempo: circa 5 secondi.\n\nSe scegli \"Salta\", il file non verrà caricato."
+  obraz_plik_niewczytany_tytul: Immagine non caricata
+  obraz_plik_niewczytany_tresc: Il file {nazwa_pliku} è un'immagine. Il suo testo può essere letto solo da un modello AI, ma la lettura non è stata eseguita, quindi non è stato caricato nulla.
+  obraz_plik_nic_nie_wczytano: Non è stato possibile leggere il testo dall'immagine, quindi non è stato caricato nulla.
+  obraz_plik_blad_tresc: "La lettura dell'immagine è stata interrotta da un errore imprevisto:\n{tresc_bledu}\n\nNon è stato caricato nulla."
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   # 18.8: segmento localizzato del nome del file di output (una parola, senza spazi)

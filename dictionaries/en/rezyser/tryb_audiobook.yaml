@@ -52,9 +52,7 @@ przypomnienie_uzytkownika: |
 slowa_wyzwalajace:
   # Block writing a summary into the history file.
   streszczenie:
-    - summarize
-    - summarise
-    - summary
+    - summar
     - recap
 
 # Note about AI-rejection detection:

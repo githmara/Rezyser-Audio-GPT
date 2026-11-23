@@ -39,9 +39,9 @@ przypomnienie_uzytkownika: |
 
 slowa_wyzwalajace:
   streszczenie:
+    - zusammenfass
     - fasse zusammen
-    - Zusammenfassung
-    - zusammenfassen
+    - fass zusammen
 
 stosuj_akcenty_fonetyczne: false
 

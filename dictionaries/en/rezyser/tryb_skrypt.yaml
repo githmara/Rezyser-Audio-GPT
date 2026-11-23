@@ -95,9 +95,7 @@ slowa_wyzwalajace:
   # If the user uses these words in write-to-file mode, the GUI rejects
   # the request (protects history from being overwritten by a summary).
   streszczenie:
-    - summarize
-    - summarise
-    - summary
+    - summar
     - recap
 
 # Note about AI-rejection detection:
