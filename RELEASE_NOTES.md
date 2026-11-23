@@ -4,6 +4,68 @@ Release entries in reverse-chronological order. The section of a version is copi
 
 ---
 
+## 19.21.0 — minor release
+
+### What's new
+
+**Languages inside a paragraph.** Until now a paragraph had one language, so
+a foreign quote in the middle of it was read with the voice of the rest. Now
+a paragraph is split where the script changes (Latin, Cyrillic, Greek…)
+and, within the Latin script, where at least three words in a row belong to
+another language. The Director and the Polyglot mark such quotes with their
+language, and a saved `.docx` keeps it on the text runs. Short insertions
+and capitalised abbreviations do not switch the language. Ciphers keep one
+language per paragraph, so that they stay reversible.
+
+**Images in Word documents.** The Polyglot reads images inserted into a
+`.docx`, such as slides pasted as pictures, through the AI model, in the
+order of the document. An image with alt text in Word gives that text. The
+program asks for consent before the first paid read and says how many
+images will be read. The same image repeated in the document, such as a
+logo on every slide, is read and paid for once. Text boxes, content
+controls and the version after tracked changes are read; charts and
+SmartArt give their alt text, and headers and footers are not loaded, with
+a message saying how many there are. A presentation of 46 slide images was
+read in about three minutes for about 0.55 USD. Images over the API limits
+(8000 px a side; 10 MB on Anthropic, 5 MB through OpenRouter) get a reason
+with the values instead of a server error. Reżyser Audio GPT and its twin
+project, accessible text analyst, now read the structure of `.docx` files
+by the same rules.
+
+**Image files.** The Polyglot also opens `.jpg`, `.jpeg` and `.png` files
+and reads them the same way, with the same consent. The image converter is
+unchanged.
+
+**Old Russian spelling.** The Russian pack reads texts written before the
+1918 reform and Church Slavonic: letters such as ѣ, ѳ, ѵ and the yuses are
+read as the norm prescribes, and the word-final hard sign is dropped. A
+single old letter quoted in a text is read by its name.
+
+**Summary requests.** The words that make the Director treat an instruction
+as a request for a summary now match inflected forms in every language.
+Before, a Finnish request written in a case other than the base form was
+not recognised.
+
+**Environment.** anthropic 2.12.0, openai 3.57.0 and pyyaml 6.0.4, checked
+with the called signatures and live calls through Anthropic and OpenRouter.
+
+**For contributors.**
+- The modes translation tool translates the trigger-word list as one unit:
+  the model returns as many word stems as the language needs, and a list a
+  pack already has is kept. A shape gate rejects empty lists, list markers,
+  quotes, duplicates and stems shorter than three letters.
+- The translation review checklist covers quoted examples, tool names in
+  new manual sections and substring stems in trigger words.
+
+### Planned or deferred
+
+- The image converter does not read images with the AI model yet.
+- Language detection inside paragraphs adds a little time to long books,
+  and processing still runs on the interface thread; moving it to a
+  background worker is planned.
+
+---
+
 ## 19.20.0 — minor release
 
 ### What's new
