@@ -5,6 +5,9 @@
   "de/manual.yaml/changelog_13": [
     "znak-PL:źż"
   ],
+  "de/manual.yaml/krok_5_jezyki_w_akapicie": [
+    "znak-PL:ćś"
+  ],
   "de/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
   ],
@@ -40,6 +43,9 @@
   ],
   "en/manual.yaml/changelog_13": [
     "znak-PL:źż"
+  ],
+  "en/manual.yaml/krok_5_jezyki_w_akapicie": [
+    "znak-PL:ćś"
   ],
   "en/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
@@ -81,6 +87,9 @@
   "es/manual.yaml/changelog_13": [
     "znak-PL:źż"
   ],
+  "es/manual.yaml/krok_5_jezyki_w_akapicie": [
+    "znak-PL:ćś"
+  ],
   "es/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
   ],
@@ -114,6 +123,9 @@
   ],
   "fi/manual.yaml/changelog_13": [
     "znak-PL:źż"
+  ],
+  "fi/manual.yaml/krok_5_jezyki_w_akapicie": [
+    "znak-PL:ćś"
   ],
   "fi/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
@@ -152,6 +164,9 @@
   "fr/manual.yaml/changelog_13": [
     "znak-PL:źż"
   ],
+  "fr/manual.yaml/krok_5_jezyki_w_akapicie": [
+    "znak-PL:ćś"
+  ],
   "fr/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
   ],
@@ -185,6 +200,9 @@
   ],
   "is/manual.yaml/changelog_13": [
     "znak-PL:źż"
+  ],
+  "is/manual.yaml/krok_5_jezyki_w_akapicie": [
+    "znak-PL:ćś"
   ],
   "is/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
@@ -223,6 +241,9 @@
   ],
   "it/manual.yaml/changelog_13": [
     "znak-PL:źż"
+  ],
+  "it/manual.yaml/krok_5_jezyki_w_akapicie": [
+    "znak-PL:ćś"
   ],
   "it/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
@@ -272,6 +293,9 @@
     "znak-PL:ćŻż",
     "znak-PL:źż"
   ],
+  "ru/manual.yaml/krok_5_jezyki_w_akapicie": [
+    "znak-PL:ćś"
+  ],
   "ru/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
   ],
@@ -283,9 +307,6 @@
   ],
   "ru/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
-  ],
-  "ru/ui.yaml/poliglota.file_dlg_wildcard": [
-    "lingua:PL"
   ],
   "ru/ui.yaml/rezyser.txt_nazwa_pliku_hint": [
     "lingua:PL"
