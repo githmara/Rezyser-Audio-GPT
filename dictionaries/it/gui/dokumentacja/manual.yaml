@@ -420,6 +420,8 @@ tresc:
     Poliglotta accetta anche file immagine veri e propri: .jpg, .jpeg e .png — per esempio la foto di un documento scattata con il telefono o una schermata. Un file di questo tipo viene letto con lo stesso procedimento come un'unica immagine, e la foto e la schermata ricevono per il modello indicazioni diverse. Un file immagine, al di fuori della lettura, non contiene alcun testo, quindi se rifiuti o la lettura non riesce, il programma non carica nulla e ne spiega il motivo.
 
     Il convertitore non legge le immagini. Ogni immagine viene inviata a un servizio esterno, quindi rifletti prima di inviare foto di documenti contenenti dati personali.
+
+    La lettura comprende anche le caselle di testo — il loro testo segue subito il paragrafo a cui sono ancorate — e il contenuto dei controlli contenuto. Con le revisioni attive conta la versione dopo le modifiche: il testo e le immagini eliminati vengono saltati, quelli inseriti vengono letti. Un'immagine inserita più volte nel documento, per esempio un logo su ogni diapositiva, viene letta e pagata una volta sola. Il programma non invia al modello i grafici né gli elementi grafici SmartArt: nel risultato compare il loro testo alternativo di Word oppure il motivo. Il programma non carica intestazioni e piè di pagina, perché si ripetono su ogni pagina; dopo il caricamento indica quanti sono.
   krok_5_naprawiacz_per_akapit: |
     ## Riparatore di Tag: codice lingua separato per ogni paragrafo (NOVITÀ nella versione 19.2)
 
@@ -549,6 +551,8 @@ tresc:
     Ora il programma divide il paragrafo in porzioni. Prima in base alla scrittura: un frammento in cirillico, in greco e in latino sono sempre porzioni distinte. Poi, all'interno dell'alfabeto latino, il cambio di lingua richiede almeno tre parole che il rilevatore attribuisce chiaramente a una lingua diversa da quella del resto del paragrafo. Contano le parole di almeno due lettere, senza le sigle scritte in maiuscolo e senza gli indirizzi. I numeri e la punteggiatura assumono la lingua del testo adiacente. Ogni porzione riceve le regole della propria lingua, come se fosse un paragrafo a sé stante. Il paragrafo riceve il marcatore della lingua che ha in maggioranza, mentre le altre porzioni ricevono un marcatore proprio all'interno del paragrafo: in un file HTML come frammento con l'attributo lang, in un file Word come frammento di testo con una propria lingua. Il lettore di schermo cambia la voce esattamente al confine dell'inserto.
 
     Perché proprio tre parole: gli inserti più brevi il rilevatore li confonde troppo spesso. La scritta di un programma di videoconferenza «opuść (alt+q) przycisk» può essere scambiata per finlandese quando il rilevamento cambia lingua già dopo due parole. Allo stesso modo funziona il componente aggiuntivo Enhanced Language Detection per NVDA, la cui soglia predefinita è anch'essa di tre parole. Una singola parola straniera o un nome proprio restano quindi nella lingua del paragrafo, mentre un'intera frase in un'altra lingua riceve la propria voce.
+
+    I cifrari fanno eccezione: mantengono una sola lingua per paragrafo. Un cifrario trasforma l'intero paragrafo in una volta, quindi dividerlo in frammenti ne romperebbe la reversibilità: un cifrario che inverte l'ordine invertirebbe ogni frammento separatamente, e un cifrario che sposta le lettere non si potrebbe decifrare senza forzare la lingua.
   krok_5_dawna_cyrylica: |
     ## Ortografia russa prima della riforma e testi in slavo ecclesiastico (NOVITÀ nella versione 19.21)
 

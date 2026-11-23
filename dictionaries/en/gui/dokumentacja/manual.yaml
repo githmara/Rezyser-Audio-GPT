@@ -418,6 +418,8 @@ tresc:
     Polyglot also accepts image files on their own: .jpg, .jpeg and .png — for example a photo of a document taken with a phone or a screenshot. Such a file is read the same way as a single image, and a photo and a screenshot receive different hints for the model. Apart from the reading, an image file has no text at all, so if you decline or the reading fails, the program loads nothing and tells you why.
 
     The Converter does not read images. Every image goes to an external service, so think carefully before you send photos of documents containing personal data.
+
+    Reading also covers text boxes — their text comes right after the paragraph they are anchored in — and the content of content controls. With tracked changes, the version after the changes counts: deleted text and images are skipped, inserted ones are read. An image inserted into the document several times, for example a logo on every slide, is read and paid for once. The program does not send charts and SmartArt graphics to the model: the result shows their alt text from Word or the reason. The program does not load headers and footers, because they repeat on every page — after loading it tells you how many there are.
   krok_5_naprawiacz_per_akapit: |
     ## Tag Repair: separate language code for each paragraph (NEW in version 19.2)
 
@@ -547,6 +549,8 @@ tresc:
     Now the program splits a paragraph into chunks. First by script: a passage in Cyrillic, Greek, and Latin are always separate chunks. Then, within the Latin script, a change of language requires at least three words that the detector clearly assigns to a different language than the rest of the paragraph. Words of at least two letters count, excluding abbreviations written in capital letters and excluding addresses. Numbers and punctuation take on the language of the adjacent text. Each chunk gets the rules of its own language, as if it were a separate paragraph. The paragraph gets the tag of the language it has the most of, and the remaining chunks get their own tag inside the paragraph: in an HTML file as a fragment with a lang attribute, in a Word file as a text run with its own language. The screen reader switches voice exactly at the boundary of the inserted passage.
 
     Why exactly three words: the detector mistakes shorter insertions too often. A label from a videoconferencing program, "opuść (alt+q) przycisk", can be judged to be Finnish when detection switches after just two words. The Enhanced Language Detection add-on for NVDA works the same way, and its default threshold is also three words. A single foreign word or proper name therefore stays in the paragraph's language, while a whole sentence in another language gets its own voice.
+
+    Ciphers are the exception: they keep one language per paragraph. A cipher transforms the whole paragraph at once, so splitting it into chunks would break reversibility — a cipher that reverses the order would reverse each chunk separately, and a cipher that shifts letters could not be decrypted without forcing the language.
   krok_5_dawna_cyrylica: |
     ## Pre-reform Russian orthography and Church Slavonic texts (NEW in version 19.21)
 

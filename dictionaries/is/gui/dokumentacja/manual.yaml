@@ -418,6 +418,8 @@ tresc:
     Fjöltyngur tekur einnig við sjálfstæðum myndaskrám: .jpg, .jpeg og .png — til dæmis ljósmynd af skjali úr síma eða skjámynd. Slík skrá er lesin sömu leið sem ein mynd, og ljósmynd og skjámynd fá þá mismunandi ábendingar fyrir líkanið. Myndaskrá hefur utan lestursins engan texta, þannig að ef þú hafnar eða lesturinn mistekst les forritið ekkert inn og segir hvers vegna.
 
     Breytingartækið les ekki myndir. Hver mynd fer til utanaðkomandi þjónustu, svo íhugaðu það vel áður en þú sendir ljósmyndir af skjölum sem innihalda persónuupplýsingar.
+
+    Lesturinn nær einnig til textareita — texti þeirra kemur strax á eftir málsgreininni sem þeir eru festir við — og efnis efnisstýringa. Við rakningu breytinga gildir útgáfan eftir breytingarnar: eyddum texta og myndum er sleppt, innsettar eru lesnar. Mynd sem sett er oft inn í skjalið, til dæmis merki á hverri glæru, er lesin og greitt fyrir hana einu sinni. Gröf og SmartArt-myndir sendir forritið ekki til líkansins: í niðurstöðunni stendur annar texti þeirra úr Word eða ástæðan. Haus og fót les forritið ekki inn, því að þau endurtaka sig á hverri síðu — eftir innlesturinn segir það hve mörg þau eru.
   krok_5_naprawiacz_per_akapit: |
     ## Merkjaviðgerð: tungumálakóði fyrir hverja efnisgrein sér (NÝTT í útgáfu 19.2)
 
@@ -547,6 +549,8 @@ tresc:
     Nú skiptir forritið málsgreininni í búta. Fyrst eftir letri: kafli með kýrillísku, grísku og latnesku letri eru alltaf aðskildir bútar. Síðan, innan latneska letursins, krefst tungumálaskipti að minnsta kosti þriggja orða sem greinirinn eignar greinilega öðru tungumáli en restinni af málsgreininni. Orð með að minnsta kosti tveimur bókstöfum teljast með, en ekki skammstafanir skrifaðar með hástöfum og ekki vistföng. Tölur og greinarmerki taka upp tungumál nálægs texta. Hver bútur fær reglur síns eigin tungumáls, rétt eins og hann væri sérstök málsgrein. Málsgreinin fær merki þess tungumáls sem er mest áberandi í henni, en hinir bútarnir — sitt eigið merki inni í málsgreininni: í HTML-skrá sem hluti með eigindinu lang, í Word-skrá sem textabútur með sínu eigin tungumáli. Skjálesarinn skiptir um rödd nákvæmlega við mörk innskotsins.
 
     Hvers vegna einmitt þrjú orð: styttri innskot ruglar greinirinn of oft. Texti úr myndfundaforriti „opuść (alt+q) przycisk“ getur verið talinn finnskur ef greining skiptir um tungumál þegar eftir tvö orð. Eins virkar viðbótin Enhanced Language Detection fyrir NVDA, en sjálfgefinn þröskuldur hennar er einnig þrjú orð. Stakt erlent orð eða sérnafn helst því í tungumáli málsgreinarinnar, en heil setning á öðru tungumáli fær sína eigin rödd.
+
+    Dulmál eru undantekningin: þau halda einu tungumáli fyrir hverja málsgrein. Dulmál umbreytir allri málsgreininni í einu, svo að skipting í búta myndi eyðileggja afturkræfnina — dulmál sem snýr röðinni við myndi snúa hverjum búti fyrir sig, og dulmál sem hliðrar stöfum væri ekki hægt að afkóða án þess að þvinga tungumálið.
   krok_5_dawna_cyrylica: |
     ## Rússnesk stafsetning fyrir umbæturnar og kirkjuslavneskir textar (NÝTT í útgáfu 19.21)
 

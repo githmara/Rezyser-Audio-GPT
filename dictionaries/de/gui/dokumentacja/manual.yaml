@@ -418,6 +418,8 @@ tresc:
     Polyglott akzeptiert auch reine Bilddateien: .jpg, .jpeg und .png – zum Beispiel ein Foto eines Dokuments vom Handy oder einen Screenshot. Eine solche Datei wird auf demselben Weg als ein einzelnes Bild gelesen, wobei Foto und Screenshot dabei unterschiedliche Hinweise für das Modell erhalten. Eine Bilddatei enthält außer dem Auslesen keinerlei Text; wenn Sie also ablehnen oder das Auslesen fehlschlägt, lädt das Programm nichts und nennt den Grund.
 
     Der Konverter liest keine Bilder. Jedes Bild wird an einen externen Dienst gesendet, überlegen Sie es sich also gut, bevor Sie Fotos von Dokumenten mit personenbezogenen Daten senden.
+
+    Das Auslesen umfasst auch Textfelder — ihr Text steht direkt nach dem Absatz, in dem sie verankert sind — und den Inhalt von Inhaltssteuerelementen. Bei nachverfolgten Änderungen zählt die Fassung nach den Änderungen: gelöschter Text und gelöschte Bilder werden übersprungen, eingefügte werden gelesen. Ein Bild, das mehrfach im Dokument steht, etwa ein Logo auf jeder Folie, wird einmal gelesen und einmal bezahlt. Diagramme und SmartArt-Grafiken sendet das Programm nicht an das Modell: Im Ergebnis steht ihr Alternativtext aus Word oder der Grund. Kopf- und Fußzeilen liest das Programm nicht ein, weil sie sich auf jeder Seite wiederholen — nach dem Einlesen sagt es, wie viele es gibt.
   krok_5_naprawiacz_per_akapit: |
     ## Tag-Reparateur: Sprachcode separat für jeden Absatz (NEU in Version 19.2)
 
@@ -547,6 +549,8 @@ tresc:
     Jetzt teilt das Programm den Absatz in Abschnitte auf. Zuerst nach Schrift: Ein kyrillischer, ein griechischer und ein lateinischer Abschnitt sind immer getrennte Abschnitte. Danach erfordert innerhalb der lateinischen Schrift ein Sprachwechsel mindestens drei Wörter, die der Detektor eindeutig einer anderen Sprache zuordnet als dem Rest des Absatzes. Es zählen Wörter mit mindestens zwei Buchstaben, ohne in Großbuchstaben geschriebene Abkürzungen und ohne Adressen. Zahlen und Satzzeichen übernehmen die Sprache des benachbarten Textes. Jeder Abschnitt erhält die Regeln seiner eigenen Sprache, so als wäre er ein eigener Absatz. Der Absatz erhält die Sprachmarkierung der Sprache, die in ihm am häufigsten vorkommt, die übrigen Abschnitte bekommen mitten im Absatz eine eigene Markierung: in einer HTML-Datei als Fragment mit dem Attribut lang, in einer Word-Datei als Textabschnitt mit eigener Sprache. Der Screenreader wechselt die Stimme genau an der Grenze des eingeschobenen Teils.
 
     Warum gerade drei Wörter: Kürzere Einschübe verwechselt der Detektor zu oft. Die Beschriftung aus einem Videokonferenzprogramm „opuść (alt+q) przycisk“ kann als Finnisch eingestuft werden, wenn die Erkennung bereits nach zwei Wörtern umschaltet. Genauso arbeitet das Add-on Enhanced Language Detection für NVDA, dessen Standardschwelle ebenfalls drei Wörter beträgt. Ein einzelnes fremdes Wort oder ein Eigenname bleibt also in der Sprache des Absatzes, während ein ganzer Satz in einer anderen Sprache seine eigene Stimme erhält.
+
+    Eine Ausnahme bilden die Chiffren: Sie bleiben bei einer Sprache pro Absatz. Eine Chiffre verwandelt den ganzen Absatz auf einmal, daher würde eine Aufteilung in Stücke die Umkehrbarkeit zerstören — eine Chiffre, die die Reihenfolge umkehrt, würde jedes Stück einzeln umkehren, und eine Chiffre, die Buchstaben verschiebt, ließe sich ohne erzwungene Sprache nicht entschlüsseln.
   krok_5_dawna_cyrylica: |
     ## Russische Orthographie vor der Reform und kirchenslawische Texte (NEU in Version 19.21)
 

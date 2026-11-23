@@ -418,6 +418,8 @@ tresc:
     Políglota también admite archivos de imagen sueltos: .jpg, .jpeg y .png, por ejemplo una foto de un documento hecha con el móvil o una captura de pantalla. Un archivo así se lee por la misma vía como una sola imagen, y la foto y la captura de pantalla reciben para ello indicaciones distintas para el modelo. Un archivo de imagen no tiene más texto que el de la lectura, por lo que, si rechazas o la lectura falla, el programa no carga nada y explica por qué.
 
     El Convertidor no lee imágenes. Cada imagen se envía a un servicio externo, así que reflexiona antes de enviar fotos de documentos con datos personales.
+
+    La lectura incluye también los cuadros de texto —su texto aparece justo después del párrafo en el que están anclados— y el contenido de los controles de contenido. Con el control de cambios cuenta la versión posterior a los cambios: el texto y las imágenes eliminados se omiten y los insertados se leen. Una imagen insertada varias veces en el documento, por ejemplo un logotipo en cada diapositiva, se lee y se paga una sola vez. El programa no envía al modelo los gráficos ni los gráficos SmartArt: en el resultado aparece su texto alternativo de Word o el motivo. El programa no carga los encabezados ni los pies de página, porque se repiten en cada página; tras la carga indica cuántos hay.
   krok_5_naprawiacz_per_akapit: |
     ## Reparador de etiquetas: código de idioma independiente para cada párrafo (NOVEDAD en la versión 19.2)
 
@@ -547,6 +549,8 @@ tresc:
     Ahora el programa divide el párrafo en fragmentos. Primero según la escritura: un fragmento en cirílico, en griego y en latino son siempre fragmentos distintos. Después, dentro del alfabeto latino, el cambio de idioma exige al menos tres palabras que el detector asigne claramente a un idioma distinto del resto del párrafo. Cuentan las palabras de al menos dos letras, sin siglas escritas en mayúsculas y sin direcciones. Los números y la puntuación adoptan el idioma del texto contiguo. Cada fragmento recibe las reglas de su propio idioma, como si fuera un párrafo independiente. El párrafo recibe la etiqueta del idioma que más abunda en él, y los demás fragmentos, su propia etiqueta en medio del párrafo: en un archivo HTML, como un fragmento con el atributo lang; en un archivo Word, como un fragmento de texto con su propio idioma. El lector de pantalla cambia de voz exactamente en el límite de la inserción.
 
     Por qué precisamente tres palabras: las inserciones más cortas el detector las confunde con demasiada frecuencia. Un rótulo de un programa de videoconferencias, «opuść (alt+q) przycisk», puede ser tomado por finés cuando la detección cambia ya a partir de dos palabras. Del mismo modo funciona el complemento Enhanced Language Detection de NVDA, cuyo umbral predeterminado también es de tres palabras. Así, una palabra extranjera suelta o un nombre propio se quedan en el idioma del párrafo, mientras que una frase entera en otro idioma recibe su propia voz.
+
+    Los cifrados son la excepción: mantienen un solo idioma por párrafo. Un cifrado transforma todo el párrafo a la vez, así que dividirlo en fragmentos rompería la reversibilidad: un cifrado que invierte el orden invertiría cada fragmento por separado, y un cifrado que desplaza letras no podría descifrarse sin forzar el idioma.
   krok_5_dawna_cyrylica: |
     ## Ortografía rusa prerreforma y textos en eslavo eclesiástico (NOVEDAD en la versión 19.21)
 

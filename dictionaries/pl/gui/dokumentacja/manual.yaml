@@ -470,6 +470,8 @@ tresc:
     Poliglota przyjmuje też same pliki-obrazy: .jpg, .jpeg i .png — na przykład zdjęcie dokumentu z telefonu albo zrzut ekranu. Taki plik jest czytany tą samą drogą jako jeden obraz, a zdjęcie i zrzut ekranu dostają przy tym inne wskazówki dla modelu. Plik-obraz poza odczytem nie ma żadnego tekstu, więc gdy odmówisz albo odczyt się nie uda, program nic nie wczytuje i mówi dlaczego.
 
     Konwerter nie czyta obrazów. Każdy obraz trafia do zewnętrznej usługi, więc zastanów się, zanim wyślesz zdjęcia dokumentów z danymi osobowymi.
+
+    Odczyt obejmuje też pola tekstowe — ich tekst stoi zaraz po akapicie, w którym są osadzone — i treść kontrolek zawartości. Przy śledzonych zmianach liczy się wersja po zmianach: tekst i obrazy usunięte są pomijane, wstawione są czytane. Obraz wstawiony w dokument kilka razy, na przykład logo na każdym slajdzie, jest czytany i opłacany raz. Wykresów i grafik SmartArt program nie wysyła do modelu: w wyniku stoi ich tekst alternatywny z Worda albo powód. Nagłówków i stopek program nie wczytuje, bo powtarzają się na każdej stronie — po wczytaniu mówi, ile ich jest.
   krok_5_naprawiacz_per_akapit: |
     ## Naprawiacz Tagów: kod języka osobno dla każdego akapitu (NOWOŚĆ w wersji 19.2)
 
@@ -600,6 +602,8 @@ tresc:
     Teraz program dzieli akapit na kawałki. Najpierw według pisma: fragment cyrylicą, grecki i łaciński to zawsze osobne kawałki. Potem, w obrębie łacinki, zmiana języka wymaga co najmniej trzech słów, które detektor wyraźnie przypisuje innemu językowi niż reszcie akapitu. Liczą się słowa z co najmniej dwóch liter, bez skrótów pisanych wielkimi literami i bez adresów. Liczby i interpunkcja przejmują język sąsiedniego tekstu. Każdy kawałek dostaje reguły własnego języka, tak jakby był osobnym akapitem. Akapit dostaje znacznik języka, którego ma najwięcej, a pozostałe kawałki — własny znacznik w środku akapitu: w pliku HTML jako fragment z atrybutem lang, w pliku Word jako fragment tekstu z własnym językiem. Czytnik ekranu przełącza głos dokładnie na granicy wstawki.
 
     Dlaczego akurat trzy słowa: krótsze wstawki detektor myli zbyt często. Napis z programu do wideokonferencji „opuść (alt+q) przycisk” potrafi zostać uznany za fiński, gdy detekcja przełącza się już po dwóch słowach. Tak samo działa dodatek Enhanced Language Detection do NVDA, którego domyślny próg to również trzy słowa. Pojedyncze obce słowo albo nazwa własna zostają więc w języku akapitu, a całe zdanie w innym języku dostaje swój głos.
+
+    Wyjątkiem są szyfry: zostają przy jednym języku na akapit. Szyfr przekształca cały akapit naraz, więc podział na kawałki psułby odwracalność — szyfr odwracający kolejność obracałby każdy kawałek osobno, a szyfr przesuwający litery nie dałby się odszyfrować bez wymuszenia języka.
   krok_5_dawna_cyrylica: |
     ## Rosyjska ortografia sprzed reformy i teksty cerkiewnosłowiańskie (NOWOŚĆ w wersji 19.21)
 

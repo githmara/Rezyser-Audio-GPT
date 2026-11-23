@@ -418,6 +418,8 @@ tresc:
     Polyglootti hyväksyy myös pelkät kuvatiedostot: .jpg, .jpeg ja .png – esimerkiksi puhelimella otetun kuvan asiakirjasta tai kuvakaappauksen. Tällainen tiedosto luetaan samaa reittiä yhtenä kuvana, ja valokuva ja kuvakaappaus saavat tällöin mallille erilaiset ohjeet. Kuvatiedostossa ei ole lukemisen lisäksi mitään tekstiä, joten jos kieltäydyt tai lukeminen epäonnistuu, ohjelma ei lataa mitään ja kertoo syyn.
 
     Muunnin ei lue kuvia. Jokainen kuva lähetetään ulkoiseen palveluun, joten mieti tarkkaan, ennen kuin lähetät kuvia asiakirjoista, jotka sisältävät henkilötietoja.
+
+    Lukeminen kattaa myös tekstiruudut — niiden teksti tulee heti sen kappaleen jälkeen, johon ne on ankkuroitu — sekä sisällönhallintaobjektien sisällön. Jäljitettyjen muutosten kohdalla ratkaisee muutosten jälkeinen versio: poistettu teksti ja poistetut kuvat ohitetaan, lisätyt luetaan. Asiakirjaan useaan kertaan lisätty kuva, esimerkiksi logo jokaisella dialla, luetaan ja maksetaan kerran. Kaavioita ja SmartArt-grafiikoita ohjelma ei lähetä mallille: tuloksessa on niiden Wordissa määritetty vaihtoehtoinen teksti tai syy. Ylä- ja alatunnisteita ohjelma ei lataa, koska ne toistuvat jokaisella sivulla — latauksen jälkeen se kertoo, kuinka monta niitä on.
   krok_5_naprawiacz_per_akapit: |
     ## Tunnistekorjain: kielikoodi erikseen jokaiselle kappaleelle (UUTTA versiossa 19.2)
 
@@ -547,6 +549,8 @@ tresc:
     Nyt ohjelma jakaa kappaleen osiin. Ensin kirjoitusjärjestelmän mukaan: kyrillinen, kreikkalainen ja latinalainen jakso ovat aina omia osiaan. Sen jälkeen latinalaisten kirjainten sisällä kielenvaihdos vaatii vähintään kolme sanaa, jotka tunnistin selvästi liittää eri kieleen kuin muu kappale. Mukaan lasketaan vähintään kaksikirjaimiset sanat, ilman isoilla kirjaimilla kirjoitettuja lyhenteitä ja ilman osoitteita. Numerot ja välimerkit omaksuvat viereisen tekstin kielen. Jokainen osa saa oman kielensä säännöt, aivan kuin se olisi erillinen kappale. Kappale saa sen kielen merkinnän, jota siinä on eniten, ja muut osat saavat oman merkintänsä kappaleen sisälle: HTML-tiedostossa lang-attribuutilla varustettuna katkelmana, Word-tiedostossa omakielisenä tekstikatkelmana. Ruudunlukuohjelma vaihtaa äänen täsmälleen lisäyksen rajalla.
 
     Miksi juuri kolme sanaa: lyhyemmät lisäykset tunnistin sekoittaa liian usein. Videoneuvotteluohjelman teksti ”opuść (alt+q) przycisk” voidaan tulkita suomeksi, jos tunnistus vaihtuu jo kahden sanan jälkeen. Samoin toimii NVDA:n Enhanced Language Detection -lisäosa, jonka oletuskynnys on myös kolme sanaa. Yksittäinen vieras sana tai erisnimi jää siis kappaleen kieleen, ja kokonainen toisenkielinen lause saa oman äänensä.
+
+    Poikkeuksena ovat salakirjoitukset: ne pitävät yhden kielen kappaletta kohden. Salakirjoitus muuntaa koko kappaleen kerralla, joten jakaminen osiin rikkoisi palautettavuuden — järjestyksen kääntävä salakirjoitus kääntäisi jokaisen osan erikseen, eikä kirjaimia siirtävää salakirjoitusta voisi purkaa ilman kielen pakottamista.
   krok_5_dawna_cyrylica: |
     ## Venäjän uudistusta edeltävä oikeinkirjoitus ja kirkkoslaavilaiset tekstit (UUTTA versiossa 19.21)
 
