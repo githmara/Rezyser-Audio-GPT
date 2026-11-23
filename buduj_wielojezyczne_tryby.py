@@ -643,9 +643,22 @@ _RODZAJE_OPIS = (
     "output-format block at the end. As a rule of thumb: one source line = one "
     "target line.\n"
     "- `label` — a short GUI label or a one-line status/error message.\n"
-    "- `words` — a single trigger word or short phrase that a HUMAN USER types "
-    "into the app. Give the word native speakers would actually type, not a "
-    "literal gloss of the Polish one.\n"
+    "- `words` — a LIST of trigger stems, one per line, that the engine looks "
+    "for in what a HUMAN USER types into the app (\"summarize this chapter\"). "
+    "The match is a lowercase SUBSTRING, so return STEMS of the target "
+    "language that cover its inflected forms — not a line-by-line gloss of "
+    "the Polish stems, and not necessarily the same number of lines (English "
+    "`summar` covers summarize, summarising, summary, summaries). Mind "
+    "consonant gradation and stem changes (Finnish `yhteenveto` / `yhteenvedon` "
+    "→ `yhteenve`). A match BLOCKS the user's instruction, so a stem must "
+    "NOT also match ordinary scene directions: leave out words for "
+    "\"briefly\", \"in the end\", \"shorten\", \"times\" (Russian `кратк`, "
+    "`итог`, `сократ`; Finnish `kertaa` as in \"kaksi kertaa\"), stems "
+    "that are the start of an unrelated word (Finnish `tiivist` would catch "
+    "`tiivistunnelmainen`, \"intensely atmospheric\"), and a verb with a "
+    "generic object (German `fass das` also catches \"fass das Glas an\"). "
+    "Fewer precise stems beat many broad ones. Return one stem or short "
+    "phrase per line, nothing else.\n"
     "- `comment` — YAML developer documentation (a comment block for the person "
     "maintaining this language pack). Translate it as documentation. Lines made "
     "up only of `=`, `-` or `*` are decoration: copy them unchanged, same "
@@ -838,16 +851,45 @@ def zbierz_jednostki_pol(drzewo: Any, sciezka_opisowa: str) -> list[Jednostka]:
                     ("mapa", str(klucz), podklucz), tekst))
                 licznik += 1
         elif klasa == KLASA_MAPA_SLOW:
+            # v19.21: CAŁA lista = jedna jednostka. Dopasowanie w silniku to
+            # podciąg (`przepisy_rezysera.prosi_o_streszczenie`), więc paczka
+            # potrzebuje rdzeni własnego języka w liczbie, jakiej wymaga jego
+            # odmiana — tłumaczenie słowo w słowo dawało tyle pozycji, ile ma
+            # polski, i glosę polskiego rdzenia zamiast rdzenia celu.
             for podklucz in list((wartosc or {}).keys()):
-                lista = wartosc[podklucz] or []
-                for idx, slowo in enumerate(lista):
-                    if not isinstance(slowo, str) or not slowo.strip():
-                        continue
-                    jednostki.append(Jednostka(
-                        licznik, RODZAJ_PER_KLASA[klasa], klasa,
-                        ("slowo", str(klucz), podklucz, idx), slowo))
-                    licznik += 1
+                lista = [s for s in (wartosc[podklucz] or [])
+                         if isinstance(s, str) and s.strip()]
+                if not lista:
+                    continue
+                jednostki.append(Jednostka(
+                    licznik, RODZAJ_PER_KLASA[klasa], klasa,
+                    ("slowa_lista", str(klucz), podklucz), "\n".join(lista)))
+                licznik += 1
     return jednostki
+
+
+def listy_slow_celu(sciezka: Path) -> dict[tuple[str, str], list[str]]:
+    """Istniejące listy `mapa_slow` paczki docelowej: (pole, podklucz) → słowa.
+
+    v19.21: lista słów wyzwalających w paczce to dane DOBRANE do odmiany
+    języka (rdzenie, nie tłumaczenia), jak `sufiks_pliku_wyniku` — ponowne
+    tłumaczenie przepisu ich nie rusza. Model pyta się tylko o listę, której
+    paczka jeszcze nie ma (nowy język, nowy przepis, nowy podklucz).
+    """
+    if not sciezka.exists():
+        return {}   # nowy przepis w paczce: list jeszcze nie ma, model je zbuduje
+    # Zepsuty plik celu = FATAL, nie „tłumaczymy od zera”: po cichu
+    # zgubilibyśmy ręcznie dobrane rdzenie (bramka `audyt_ciszy`).
+    drzewo = dev_yaml.wczytaj_lub_padnij(sciezka, narzedzie=NARZEDZIE, parser=_yaml_io().load)
+    wynik: dict[tuple[str, str], list[str]] = {}
+    for klucz in drzewo.keys():
+        if KLASY_POL.get(str(klucz)) != KLASA_MAPA_SLOW or not isinstance(drzewo[klucz], dict):
+            continue
+        for podklucz, lista in drzewo[klucz].items():
+            slowa = [str(s) for s in (lista or []) if isinstance(s, str) and s.strip()]
+            if slowa:
+                wynik[(str(klucz), str(podklucz))] = slowa
+    return wynik
 
 
 _zachowaj_styl = tlumacz_rdzen.zachowaj_styl
@@ -868,10 +910,28 @@ def wstaw_jednostke(drzewo: Any, jednostka: Jednostka) -> None:
     elif typ == "mapa":
         _, klucz, podklucz = jednostka.adres
         drzewo[klucz][podklucz] = _zachowaj_styl(drzewo[klucz][podklucz], jednostka.cel)
-    elif typ == "slowo":
-        _, klucz, podklucz, idx = jednostka.adres
-        lista = drzewo[klucz][podklucz]
-        lista[idx] = _zachowaj_styl(lista[idx], jednostka.cel)
+    elif typ == "slowa_lista":
+        _, klucz, podklucz = jednostka.adres
+        ustaw_liste_slow(drzewo, klucz, podklucz, jednostka.cel.splitlines())
+
+
+def ustaw_liste_slow(drzewo: Any, klucz: str, podklucz: str, slowa: list[str]) -> None:
+    """Podmienia listę słów W MIEJSCU (zostaje styl blokowy i komentarze nad nią).
+
+    ruamel przyczepia blok komentarza stojący POD listą do jej ostatniego
+    elementu — usunięcie elementów gubiło go i rozjeżdżało układ komentarzy
+    (bramka „comment layout drifted”). Przepinamy go na nowy ostatni element.
+    """
+    lista = drzewo[klucz][podklucz]
+    czyste = [s.strip() for s in slowa if s.strip()]
+    ca = getattr(lista, "ca", None)
+    pod_lista = ca.items.get(len(lista) - 1) if ca is not None and len(lista) else None
+    del lista[:]
+    lista.extend(czyste)
+    if ca is not None:
+        ca.items.clear()
+        if pod_lista is not None and czyste:
+            ca.items[len(czyste) - 1] = pod_lista
 
 
 # ---------------------------------------------------------------------------
@@ -1310,6 +1370,15 @@ def tlumacz_plik(
 
     # --- Jednostki -----------------------------------------------------------
     jednostki = zbierz_jednostki_pol(drzewo_pl, f"{KOD_ZRODLOWY}/{nazwa_pliku}")
+    # v19.21: listy słów, które paczka już ma, zostają (patrz `listy_slow_celu`).
+    zachowane_listy = listy_slow_celu(cel)
+    jednostki = [j for j in jednostki
+                 if not (j.adres[0] == "slowa_lista" and j.adres[1:] in zachowane_listy)]
+    for (pole, podklucz) in zachowane_listy:
+        print(f"ℹ️  {kod}/{nazwa_pliku}: `{pole}.{podklucz}` zostaje z paczki "
+              f"(rdzenie dobrane do odmiany — nie tłumaczymy ich na nowo).")
+    jednostki = [Jednostka(n, j.rodzaj, j.klasa, j.adres, j.zrodlo)
+                 for n, j in enumerate(jednostki)]
     licznik = len(jednostki)
     for idx, blok in enumerate(bloki_pl):
         if not blok["tresc"].strip() or _RE_DEKORACJA.match(blok["tresc"]):
@@ -1484,8 +1553,11 @@ def tlumacz_plik(
 
     drzewo_cel = yaml_io.load(dump_pl)
     for j in jednostki:
-        if j.adres[0] in ("pole", "mapa", "slowo"):
+        if j.adres[0] in ("pole", "mapa", "slowa_lista"):
             wstaw_jednostke(drzewo_cel, j)
+    for (pole, podklucz), slowa in zachowane_listy.items():
+        if pole in drzewo_cel and podklucz in (drzewo_cel[pole] or {}):
+            ustaw_liste_slow(drzewo_cel, pole, podklucz, slowa)
 
     # Pola pochodne (bez LLM). Klucza BRAKUJĄCEGO w źródle NIE pomijamy — obie
     # deklaracje języka mają defaulty celujące w polski (`jezyk_odpowiedzi:

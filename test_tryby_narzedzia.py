@@ -75,6 +75,52 @@ def test_naglowek_cytowany_bez_orakula_dostaje_slowo_paczki(plik):
     assert "Atriði" in tekst, "cytat `Scena` musi dostać słowo z is/ui.yaml"
 
 
+def _wyzwalacze(dicts, kod, plik):
+    dane = yaml.safe_load((dicts / kod / "rezyser" / plik).read_text(encoding="utf-8"))
+    return dane["slowa_wyzwalajace"]["streszczenie"]
+
+
+@pytest.mark.parametrize("plik", ["tryb_audiobook.yaml", "tryb_skrypt.yaml"])
+def test_istniejace_rdzenie_paczki_przezywaja_przeklad(plik):
+    """v19.21: lista paczki to rdzenie dobrane do odmiany — brat ich nie rusza."""
+    przed = _wyzwalacze(REPO / "dictionaries", "fi", plik)
+    wyslane: list[str] = []
+
+    def _stub(klient, model, nazwa, kod, pozycje):
+        wyslane.extend(r for _i, r, _s in pozycje)
+        return {i: s for i, _r, s in pozycje}
+
+    with _paczki(_stub) as dicts:
+        ok, log = _tlumacz("fi", plik)
+        assert ok, log
+        assert _wyzwalacze(dicts, "fi", plik) == przed
+    assert "words" not in wyslane, "lista, którą paczka ma, nie idzie do modelu"
+
+
+def test_brakujaca_lista_idzie_jako_jedna_jednostka_o_wolnej_dlugosci():
+    """Nowa paczka/przepis: model dostaje CAŁĄ listę i oddaje tyle rdzeni, ile trzeba."""
+    zrodla: list[str] = []
+
+    def _stub(klient, model, nazwa, kod, pozycje):
+        wynik = {}
+        for i, rodzaj, src in pozycje:
+            if rodzaj == "words":
+                zrodla.append(src)
+                wynik[i] = "tiivistä\ntiivistelm\nyhteenve"
+            else:
+                wynik[i] = src
+        return wynik
+
+    with _paczki(_stub) as dicts:
+        (dicts / "fi" / "rezyser" / "tryb_skrypt.yaml").unlink()
+        ok, log = _tlumacz("fi", "tryb_skrypt.yaml")
+        assert ok, log
+        assert _wyzwalacze(dicts, "fi", "tryb_skrypt.yaml") == [
+            "tiivistä", "tiivistelm", "yhteenve"]
+    pl = _wyzwalacze(REPO / "dictionaries", "pl", "tryb_skrypt.yaml")
+    assert zrodla == ["\n".join(pl)], "jedna jednostka z całą listą PL"
+
+
 def test_pole_json_przezywa_i_tylko_na_granicy_slowa():
     kotwice = bt._kotwice_z_silnika()
     assert {"mowca=", '"mowca"', "`tekst`"} <= set(kotwice)
