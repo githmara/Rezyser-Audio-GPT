@@ -115,5 +115,26 @@ def test_bramka_lapie_wycieta_litere_lacinki_pogranicza():
     assert "ș" in trafienia[0][1]
 
 
+# v19.21: cyrylica sprzed reformy 1918 i cerkiewnoslowianska (skany PDF).
+@pytest.mark.parametrize("zrodlo, oczekiwane", [
+    ("Хлѣбъ и миръ въ Еѵангеліи", "Хлеб и мир в Евангелии"),   # i, jat, konc. twardy, izyca po e
+    ("Сѵнодъ", "Синод"),                                      # izyca poza a/e = и
+    ("ДОМЪ ВѢРЫ", "ДОМ ВЕРЫ"),                                # wersaliki
+    ("объём, буква Ъ", "объём, буква Ъ"),                     # rozdzielajacy i samotny zostaja
+    ("ѿ ѻтца", "от отца"),
+])
+def test_dawna_ortografia_w_pre_passie_ru(zrodlo, oczekiwane):
+    podstawy = cp._zaladuj_podstawy("ru")
+    assert cp._usun_polskie_znaki(zrodlo, podstawy) == oczekiwane
+
+
+def test_samotna_dawna_litera_dostaje_nazwe_u_glosu_nie_w_szyfrze():
+    """Cytat w tekscie o ortografii: glos slyszy nazwe, szyfr dostaje litere."""
+    podstawy = cp._zaladuj_podstawy("ru")
+    zrodlo = "Прежде писали ѣ вместо е."
+    assert cp._prepass_dla_glosu(zrodlo, podstawy) == "Прежде писали ять вместо е."
+    assert cp._usun_polskie_znaki(zrodlo, podstawy) == "Прежде писали е вместо е."
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))

@@ -315,6 +315,11 @@ ZNAKI_POGRANICZA_CYRYLICY: tuple[str, ...] = (
     "ђ", "ћ", "ј", "љ", "њ", "џ", "ѓ", "ќ", "ѕ",
     "ә", "ө", "ү", "ұ", "ң", "ғ", "қ", "һ", "җ", "ӣ", "ӯ", "ҳ", "ҷ",
     "ҡ", "ҙ", "ҫ", "ӑ", "ӗ", "ӳ", "ҕ", "ҥ", "ӕ",
+    # v19.21: cyrylica sprzed reformy 1918 i cerkiewnosłowiańska — skany PDF
+    # zrobiły z niej zwykłe wejście. Kryterium w `ru/podstawy.yaml`: litera
+    # z czytaniem ustalonym normą (dekret 1918, tradycja czytania ksiąg).
+    "ѣ", "ѳ", "ѵ", "ѿ", "ѡ", "ѻ", "ѯ", "ѱ", "ꙋ", "ѹ", "ѫ", "ѧ", "ѩ",
+    "ꙗ", "ѭ", "ѥ", "ꙑ",
 )
 
 # Wersaliki, których derywacja z małej litery nie wyprodukuje.

@@ -584,10 +584,13 @@ def _sprawdz_greke(kod: str, dane: dict, dodaj) -> None:
     for poz, wpis in enumerate(nazwy, 1):
         wzor = str(wpis.get("wzor", "")) if isinstance(wpis, dict) else ""
         nazwa = str(wpis.get("nazwa", "")) if isinstance(wpis, dict) else ""
-        if wzor not in cp.GRECKIE_MALE or len(wzor) != 1 or not nazwa.strip():
+        # v19.21: oprocz greki wolno nazwac litere pogranicza cyrylicy
+        # (dawne jat/fita/izyca cytowane w tekscie o ortografii).
+        if (wzor not in cp.GRECKIE_MALE and wzor not in mrs.ZNAKI_POGRANICZA_CYRYLICY
+                or len(wzor) != 1 or not nazwa.strip()):
             dodaj("nazwy-ksztalt",
                   f"`nazwy_liter` entry #{poz} ({wpis!r}) must be "
-                  f"`{{ wzor: <one lowercase Greek letter>, nazwa: <non-empty name> }}`"
+                  f"`{{ wzor: <one lowercase Greek letter, or a border Cyrillic letter from `manager_regul_szablony.ZNAKI_POGRANICZA_CYRYLICY`>, nazwa: <non-empty name> }}`"
                   f" — the capital letter gets the same name automatically")
             continue
         obecne.add(wzor)
